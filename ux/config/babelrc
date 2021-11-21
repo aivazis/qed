@@ -1,0 +1,19 @@
+// -*- javascript -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2021 all rights reserved
+
+{
+    "presets": [
+        "@babel/preset-env",
+        "@babel/preset-react"
+    ],
+
+
+    "plugins": [
+        "relay",
+        "@babel/plugin-proposal-export-default-from",
+    ],
+}
+
+// end of file

@@ -1,0 +1,13 @@
+# -*- makefile -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2021 all rights reserved
+
+
+# the testsuite for the qed package
+qed.pkg.tests.stem := qed.pkg
+# depends on
+qed.pkg.tests.prerequisites := qed.pkg
+
+
+# end of file

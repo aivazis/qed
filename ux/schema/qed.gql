@@ -1,0 +1,28 @@
+# -*- graphql -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2021 all rights reserved
+
+
+schema {
+  query: Query
+}
+
+
+# the top level query
+type Query {
+  # server version information
+  version: Version
+}
+
+
+# server version
+type Version {
+  major: Int!
+  minor: Int!
+  micro: Int!
+  revid: String!
+}
+
+
+# end of file
