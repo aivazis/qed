@@ -41,25 +41,24 @@ const QEDApp = () => {
     // render
     return (
         <Routes >
-            {/* the app */ }
+            {/* the app */}
             <Route path="/" element={<Main />} >
-                {/* specific activities */ }
-                <Route path="experiment" element={<NYI />} />
-                <Route path="help" element={<NYI />} />
+                {/* specific activities */}
                 <Route path="about" element={<NYI />} />
+                <Route path="help" element={<NYI />} />
 
-                {/* the default page */ }
+                {/* the default page */}
                 <Route index element={<NYI />} />
             </Route>
 
-            {/* meta navigation */ }
-            {/* the closing page */ }
+            {/* meta navigation */}
+            {/* the closing page */}
             <Route path="/stop" element={<Stop />} />
-            {/* the page to render while waiting for data to arrive */ }
+            {/* the page to render while waiting for data to arrive */}
             <Route path="/loading" element={<Loading />} />
 
 
-            {/* the graphiql sandbox */ }
+            {/* the graphiql sandbox */}
             <Route path="/graphiql" element={<GiQL />} />
         </Routes>
     )
@@ -69,12 +68,12 @@ const QEDApp = () => {
 // the outer component that sets up access to the {relay}, {suspense},
 // and {router} environments
 const Root = () => (
-    <RelayEnvironmentProvider environment={ environment }>
+    <RelayEnvironmentProvider environment={environment}>
         <Suspense fallback={< Loading />}>
             <Router>
                 <QEDApp />
             </Router>
-    </Suspense>
+        </Suspense>
     </RelayEnvironmentProvider >
 )
 
