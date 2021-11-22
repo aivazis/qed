@@ -13,6 +13,7 @@ export Activity from './activity'
 
 // activities
 export About from './about'
+export Data from './data'
 export Debug from './debug'
 export Help from './help'
 export Kill from './kill'
