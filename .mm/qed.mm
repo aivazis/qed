@@ -7,7 +7,7 @@
 # qed consists of a python package
 qed.packages := qed.pkg
 # libraries
-qed.libraries := 
+qed.libraries := qed.lib
 # python extensions
 qed.extensions :=
 # a ux bundle
