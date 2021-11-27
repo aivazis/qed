@@ -9,13 +9,16 @@
 // namespace setup
 #include "forward.h"
 
+// the qed library
+#include <qed/version.h>
+
 
 // access to the version tags of the library and the bindings
 void
 qed::py::version(py::module & m)
 {
     // the version of the library
-    m.attr("libraryVersion") = qed::version::version();
+    m.attr("libVersion") = qed::version::version();
 
     // the version of the bindings
     m.attr("extVersion") = qed::version::version_t { qed::version::major, qed::version::minor,
