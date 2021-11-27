@@ -21,6 +21,9 @@
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
+// the qed library
+#include <qed/version.h>
+
 
 // type aliases
 namespace qed::py {

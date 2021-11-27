@@ -18,6 +18,9 @@ namespace qed::py {
     void opaque(py::module &);
     // exceptions
     void exceptions(py::module &);
+
+    // version info
+    void version(py::module &);
 }
 
 
