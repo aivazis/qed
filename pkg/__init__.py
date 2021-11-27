@@ -31,6 +31,8 @@ home, prefix, defaults = package.layout()
 # basic functionality
 from . import meta           # package meta-data
 from . import exceptions     # the exception hierarchy
+# the bindings
+from .ext import libqed, libqed_cuda
 # user interfaces
 from . import shells         # the supported application shells
 from . import cli            # the command line interface
