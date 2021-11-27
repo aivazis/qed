@@ -1,0 +1,19 @@
+# -*- Makefile -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2021 all rights reserved
+
+
+# naming seed
+qed.ext.stem := qed
+# these are bindings for
+qed.ext.wraps := qed.lib
+# built with pybind11
+qed.ext.capsule :=
+# dependencies on external packages
+qed.ext.extern := qed.lib pyre pybind11 python
+# compiler control
+qed.ext.lib.c++.flags += $($(compiler.c++).std.c++20)
+
+
+# end of file

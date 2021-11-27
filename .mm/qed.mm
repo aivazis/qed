@@ -9,7 +9,7 @@ qed.packages := qed.pkg
 # libraries
 qed.libraries := qed.lib
 # python extensions
-qed.extensions :=
+qed.extensions := qed.ext
 # a ux bundle
 qed.webpack := qed.ux
 # and some tests
