@@ -4,7 +4,7 @@
 # (c) 1998-2021 all rights reserved
 
 
-# the testsuite for the qed package
+# the test suite for the qed package
 qed.pkg.tests.stem := qed.pkg
 # depends on
 qed.pkg.tests.prerequisites := qed.pkg
