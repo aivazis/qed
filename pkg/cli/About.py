@@ -5,6 +5,7 @@
 
 
 # externals
+import journal
 import qed
 
 
@@ -31,7 +32,7 @@ class About(qed.shells.command, family='qed.cli.about'):
         """
         Print out the license and terms of use of the qed package
         """
-        # make some space
+        # show the package header
         plexus.info.log(qed.meta.header)
         # all done
         return
@@ -42,7 +43,7 @@ class About(qed.shells.command, family='qed.cli.about'):
         """
         Print out the license and terms of use of the qed package
         """
-        # make some space
+        # show the package license
         plexus.info.log(qed.meta.license)
         # all done
         return
@@ -53,8 +54,47 @@ class About(qed.shells.command, family='qed.cli.about'):
         """
         Print the version of the qed package
         """
-        # make some space
-        plexus.info.log(qed.meta.header)
+        # make a channel
+        channel = journal.help("qed.about.version")
+
+        # get the package version
+        major, minor, micro, revision = qed.version()
+        # show it
+        channel.line(f"package: {major}.{minor}.{micro} rev {revision}")
+
+        # get the bindings
+        libqed = qed.libqed
+        # if there are bindings
+        if libqed:
+            channel.line()
+            channel.line(f"libqed:")
+            # get the library version
+            major, minor, micro, revision = libqed.libVersion
+            # show it
+            channel.line(f"  library: {major}.{minor}.{micro} rev {revision}")
+            # get the version of the bindings
+            major, minor, micro, revision = libqed.extVersion
+            # show it
+            channel.line(f"  bindings: {major}.{minor}.{micro} rev {revision}")
+
+        # get the CUDA bindings
+        libqed_cuda = qed.libqed_cuda
+        # if there are bindings
+        if libqed_cuda:
+            channel.line()
+            channel.line(f"libqed_cuda:")
+            # get the library version
+            major, minor, micro, revision = libqed_cuda.libVersion
+            # show it
+            channel.line(f"  library: {major}.{minor}.{micro} rev {revision}")
+            # get the version of the bindings
+            major, minor, micro, revision = libqed_cuda.extVersion
+            # show it
+            channel.line(f"  bindings: {major}.{minor}.{micro} rev {revision}")
+
+        # flush
+        channel.log()
+
         # all done
         return
 
