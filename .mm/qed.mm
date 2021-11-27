@@ -13,7 +13,7 @@ qed.extensions := qed.ext
 # a ux bundle
 qed.webpack := qed.ux
 # and some tests
-qed.tests := qed.pkg.tests
+qed.tests := qed.pkg.tests qed.ext.tests
 
 
 # load the packages
