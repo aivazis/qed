@@ -14,6 +14,8 @@ from pyre import (
     executive,
     # support for concurrency
     nexus,
+    # support for workflows, products, and factories
+    flow,
     # shells
     application, plexus,
     # miscellaneous
@@ -33,6 +35,8 @@ from . import meta           # package meta-data
 from . import exceptions     # the exception hierarchy
 # the bindings
 from .ext import libqed, libqed_cuda
+# protocols
+from . import protocols
 # user interfaces
 from . import shells         # the supported application shells
 from . import cli            # the command line interface
