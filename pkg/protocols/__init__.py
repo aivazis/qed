@@ -8,5 +8,9 @@
 from .Producer import Producer as producer
 from .Specification import Specification as specification
 
+# datasets and their readers
+from .Dataset import Dataset as dataset
+from .Reader import Reader as reader
+
 
 # end of file
