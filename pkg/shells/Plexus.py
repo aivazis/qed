@@ -21,6 +21,28 @@ class Plexus(pyre.plexus, family='qed.shells.plexus'):
     # types
     from .Action import Action as pyre_action
 
+    # the pile of known datasets
+    datasets = qed.properties.list(schema=qed.protocols.reader())
+    datasets.doc = "the list of datasets to display"
+
+    # individual metadata, used to assemble a default layout
+    cell = qed.properties.str()
+    cell.default = None
+    cell.doc = "the format string that specifies the type of the dataset payload"
+
+    origin = qed.properties.tuple(schema=qed.properties.int())
+    origin.default = None
+    origin.doc = "the smallest possible index"
+
+    shape = qed.properties.tuple(schema=qed.properties.int())
+    shape.default = None
+    shape.doc = "the shape of the dataset"
+
+    # the reader to use for all datasets that don't specify one
+    reader = qed.protocols.reader()
+    reader.default = None
+    reader.doc = "the component that understands the data encoding of a dataset"
+
 
     # pyre framework hooks
     # support for the help system
