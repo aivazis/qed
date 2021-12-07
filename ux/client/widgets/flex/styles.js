@@ -49,6 +49,20 @@ export default {
         },
     },
 
+    extent: {
+        // fonts
+        fontFamily: "inconsolata",
+        fontSize: "60%",
+
+        // take up all available space
+        width: "100%",
+        height: "100%",
+
+        // make it stand out
+        color: theme.banner.name,
+        backgroundColor: "hsl(0, 20%, 7%)",
+    },
+
 }
 
 
