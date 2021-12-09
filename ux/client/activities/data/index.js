@@ -20,7 +20,7 @@ import styles from './styles'
 const activity = ({ size, style }) => {
     // paint me
     return (
-        <Activity size={size} url="/data" barStyle={style} style={styles} >
+        <Activity size={size} url="/" barStyle={style} style={styles} >
             <Data />
         </Activity >
     )
