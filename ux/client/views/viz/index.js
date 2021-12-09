@@ -6,15 +6,20 @@
 
 // externals
 import React from 'react'
-// locals
+
+// project
 // widgets
 import { Flex } from '~/widgets'
+
+// locals
+// context
+import { Provider } from './context'
 // styles
 import styles from './styles'
 
 
 // the area
-export const Viz = () => {
+const Panel = () => {
 
     // render
     return (
@@ -37,6 +42,17 @@ export const Viz = () => {
             </Flex.Panel >
 
         </Flex.Box >
+    )
+}
+
+
+// turn the view into a context provider and publish
+export const Viz = ({ }) => {
+    // set up the context provider
+    return (
+        <Provider >
+            <Panel />
+        </Provider>
     )
 }
 
