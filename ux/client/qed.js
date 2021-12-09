@@ -22,6 +22,8 @@ import styles from './styles'
 import { environment } from '~/context'
 // views
 import {
+    // the data view
+    Viz,
     // graphiql
     GiQL,
     // the main page
@@ -45,11 +47,10 @@ const QEDApp = () => {
             <Route path="/" element={<Main />} >
                 {/* specific activities */}
                 <Route path="about" element={<NYI />} />
-                <Route path="data" element={<NYI />} />
                 <Route path="help" element={<NYI />} />
 
                 {/* the default page */}
-                <Route index element={<NYI />} />
+                <Route index element={<Viz />} />
             </Route>
 
             {/* meta navigation */}
