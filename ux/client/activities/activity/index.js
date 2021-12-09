@@ -26,7 +26,7 @@ const activity = ({ size, url, children, barStyle, style }) => {
     // get the current location
     const location = useLocation().pathname
     // check whether this is the current activity
-    const state = location.startsWith(url) ? "engaged" : "available"
+    const state = location === url ? "engaged" : "available"
 
     // mix my paint
     const activityStyle = {
@@ -63,9 +63,9 @@ const activity = ({ size, url, children, barStyle, style }) => {
             // for the badge
             badge: {
                 ...styles.engaged.badge,
-                 ...barStyle?.engaged?.badge,
-                 ...style?.engaged?.badge,
-                 },
+                ...barStyle?.engaged?.badge,
+                ...style?.engaged?.badge,
+            },
             // for the shape
             shape: {
                 ...styles.engaged.shape,
