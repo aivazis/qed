@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { graphql, useLazyLoadQuery } from 'react-relay/hooks'
 
 //project
 // widgets
@@ -16,7 +17,10 @@ import styles from './styles'
 
 // the dataset explorer
 export const Datasets = () => {
-    // mix the style
+    // ask the serer for the set of known data sets
+    const { datasets } = useLazyLoadQuery(datasetsQuery)
+
+    // mix the panel style
     const panelStyle = {
         panel: {
             // pull the generic opinions
@@ -35,6 +39,15 @@ export const Datasets = () => {
         </Flex.Panel >
     )
 }
+
+
+// the dataset query
+const datasetsQuery = graphql`query datasetsQuery {
+    datasets {
+        # the dataset id
+        id
+    }
+}`
 
 
 // end of file
