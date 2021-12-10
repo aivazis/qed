@@ -23,7 +23,7 @@ export default {
 
         // make it stand out
         // margin: "1.0em",
-        color: theme.banner.name,
+        color: theme.page.name,
         backgroundColor: "hsl(0, 0%, 7%)",
     },
 

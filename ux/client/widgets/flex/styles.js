@@ -61,7 +61,7 @@ export default {
         height: "100%",
 
         // make it stand out
-        color: theme.banner.name,
+        color: theme.page.name,
         backgroundColor: "hsl(0, 20%, 7%)",
     },
 

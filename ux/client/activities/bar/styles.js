@@ -34,7 +34,7 @@ export default {
     engaged: {
         // for the badge
         badge: {
-            borderLeft: `2px solid ${theme.banner.name}`,
+            borderLeft: `2px solid ${theme.page.name}`,
         },
         // for the shape
         shape: {

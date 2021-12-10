@@ -29,7 +29,7 @@ export default {
     },
 
     location: {
-        color: theme.banner.name,
+        color: theme.page.name,
     },
 
     icon: {
@@ -47,7 +47,7 @@ export default {
     shape: {
         icon: {
             // stroke
-            stroke: theme.banner.name,
+            stroke: theme.page.name,
             strokeWidth: 3,
             // fill
             fill: "none",
