@@ -96,6 +96,16 @@ a:active {
    src: url("/fonts/inconsolata-regular.ttf");
 }
 
+@font-face {
+   font-family: "rubik-medium";
+   src: url("/fonts/rubik-medium.ttf");
+}
+
+@font-face {
+   font-family: "rubik-light";
+   src: url("/fonts/rubik-light.ttf");
+}
+
 
 /* animations */
 @keyframes fadeIn {
