@@ -13,23 +13,14 @@ import styles from './styles'
 
 
 // display the server state
-const server = ({style, ...props}) => {
+const server = ({ style, ...props }) => {
     // the query fragment i care about
-    const { version: {major, minor, micro, revid} } = useLazyLoadQuery(
-        graphql`query serverQuery {
-            version {
-                major
-                minor
-                micro
-                revid
-            }
-        }`
-    )
+    const { version: { major, minor, micro, revid } } = useLazyLoadQuery(query)
 
     // merge the overall styles
-    const base = {...style.box, ...styles.box, ...style.text, ...styles.text}
+    const base = { ...style.box, ...styles.box, ...style.text, ...styles.text }
     // and the state colorization
-    const good = {...style.status.good, ...styles.status.good}
+    const good = { ...style.status.good, ...styles.status.good }
 
     // get the time
     const now = new Date()
@@ -39,13 +30,24 @@ const server = ({style, ...props}) => {
     // mark
     console.log(`server: ${title}`)
 
-    // build the componnent and return it
+    // build the component and return it
     return (
-        <div style={{...base, ...good}} title={title}>
+        <div style={{ ...base, ...good }} title={title}>
             qed server {major}.{minor}.{micro} rev {revid}
         </div>
     )
 }
+
+
+// the query
+const query = graphql`query serverQuery {
+    version {
+        major
+        minor
+        micro
+        revid
+    }
+}`
 
 
 // publish
