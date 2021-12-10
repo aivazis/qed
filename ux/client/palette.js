@@ -43,23 +43,9 @@ const dark = {
     // the page
     page: {
         background: "hsl(0deg, 0%, 5%)",
-        appversion: "hsl(0deg, 0%, 25%)",
-    },
-
-    // the header
-    banner: {
-        // overall styling
-        background: "hsl(0deg, 0%, 7%)",
-        separator: "hsl(0deg, 0%, 15%)",
         // contents
         name: "hsl(28deg, 90%, 55%)",
-        // menu
-        nav: {
-            link: "hsl(28deg, 20%, 50%)",
-            current: "hsl(28deg, 20%, 70%)",
-            inactive: "hsl(28deg, 20%, 20%)",
-            separator: "hsl(0deg, 0%, 35%)",
-        },
+        appversion: "hsl(0deg, 0%, 25%)",
     },
 
     statusbar: {
