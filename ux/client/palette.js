@@ -48,6 +48,11 @@ const dark = {
         appversion: "hsl(0deg, 0%, 25%)",
     },
 
+    header: {
+        color: "hsl(0deg, 0%, 65%)",
+        background: "hsl(0deg, 0%, 7%)",
+    },
+
     statusbar: {
         // overall styling
         background: "hsl(0deg, 0%, 31%)",
