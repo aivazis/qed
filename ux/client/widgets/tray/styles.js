@@ -39,7 +39,7 @@ export default {
     // the tray title
     title: {
         // style
-        fontFamily: "rubik",
+        fontFamily: "rubik-medium",
         textTransform: "uppercase",
         padding: "0.0rem 0.0rem 0.0rem 0.5rem",
         // disable text selection
