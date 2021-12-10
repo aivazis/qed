@@ -11,8 +11,17 @@ schema {
 
 # the top level query
 type Query {
+  # information about the known data sets
+  datasets: Datasets
   # server version information
   version: Version
+}
+
+
+# datasets
+type Datasets {
+  # the id
+  id: String!
 }
 
 
