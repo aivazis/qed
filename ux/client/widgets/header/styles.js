@@ -17,7 +17,8 @@ export default {
     color: theme.header.color,
     backgroundColor: theme.header.background,
 
-    fontSize: "75%",
+    // text
+    fontSize: "60%",
     fontFamily: "rubik-medium",
     textTransform: "uppercase",
 

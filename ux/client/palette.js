@@ -49,8 +49,8 @@ const dark = {
     },
 
     header: {
-        color: "hsl(0deg, 0%, 65%)",
-        background: "hsl(0deg, 0%, 7%)",
+        color: "hsl(0deg, 0%, 50%)",
+        background: "hsl(0deg, 0%, 5%)",
     },
 
     statusbar: {
