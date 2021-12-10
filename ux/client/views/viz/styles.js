@@ -36,6 +36,19 @@ export default {
             },
         },
     },
+
+    // the panel with the known datasets
+    datasets: {
+        // the panel
+        panel: {
+            // set up the preferred initial width
+            width: "300px",
+            flex: "0 0 auto",
+            // for my children
+            display: "flex",
+            flexDirection: "column",
+        },
+    },
 }
 
 

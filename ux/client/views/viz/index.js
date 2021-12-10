@@ -14,6 +14,8 @@ import { Flex } from '~/widgets'
 // locals
 // context
 import { Provider } from './context'
+// panels
+import { Datasets } from './datasets'
 // styles
 import styles from './styles'
 
@@ -23,22 +25,17 @@ const Panel = () => {
 
     // render
     return (
-        < Flex.Box direction="row" style={styles.flex} >
+        <Flex.Box direction="row" style={styles.flex} >
 
-            {/* the activity specific workarea */}
-            < Flex.Panel min={200} max={400} style={styles.flex} debug={true} >
-            </Flex.Panel >
+            {/* the explorer of datasets */}
+            <Datasets />
 
-            {/* the visualization area */}
-            < Flex.Panel style={styles.flex} auto={true} debug={true} >
-            </Flex.Panel >
-
-            {/* and another one area */}
-            < Flex.Panel style={styles.flex} auto={true} debug={true} >
+            {/* a visualization area */}
+            <Flex.Panel style={styles.flex} auto={true} >
             </Flex.Panel >
 
             {/* the processing controls */}
-            < Flex.Panel min={200} max={400} style={styles.flex} debug={true} >
+            <Flex.Panel min={200} max={400} style={styles.flex} >
             </Flex.Panel >
 
         </Flex.Box >
