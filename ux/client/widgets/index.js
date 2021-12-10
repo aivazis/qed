@@ -13,6 +13,7 @@ export * as Flex from './flex'
 export Kill from './kill'
 export Server from './server'
 export Spacer from './spacer'
+export { Tray } from './tray'
 export Toolbar from './toolbar'
 
 
