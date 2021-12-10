@@ -9,7 +9,7 @@ import React from 'react'
 
 //project
 // widgets
-import { Flex, Tray } from '~/widgets'
+import { Flex, Header, Tray } from '~/widgets'
 // locals
 // styles
 import styles from './styles'
@@ -29,6 +29,9 @@ export const Datasets = () => {
     // render
     return (
         < Flex.Panel min={200} max={400} style={panelStyle} >
+            {/* the title of the panel */}
+            <Header title="datasets" />
+
         </Flex.Panel >
     )
 }
