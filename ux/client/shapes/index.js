@@ -5,6 +5,7 @@
 
 
 // publish
+export { Chevron } from './chevron'
 export Data from './data'
 export Flame from './flame'
 export Hammer from './hammer'
