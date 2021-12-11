@@ -23,6 +23,7 @@ export default {
         ...style.icon,
         // stroke
         stroke: ink,
+        strokeWidth: 1.5,
         // fill
         fill: "none",
     },
