@@ -15,13 +15,17 @@ import { Flex } from '~/widgets'
 
 // locals
 // context
-import { Provider } from './context'
+import { Context, Provider } from './context'
+// the blank view
+import { Blank } from './blank'
 // styles
 import styles from './styles'
 
 
 // the area
 const Panel = () => {
+    // grab the views
+    const { views } = React.useContext(Context)
 
     // render
     return (
@@ -32,9 +36,15 @@ const Panel = () => {
                 <Outlet />
             </Flex.Panel >
 
-            {/* a visualization area */}
-            <Flex.Panel style={styles.flex} auto={true} >
-            </Flex.Panel >
+            {views.length == 0 &&
+                <Flex.Panel style={styles.flex} auto={true} >
+                    <Blank />
+                </Flex.Panel >
+            }
+            {views.map(idx =>
+                <Flex.Panel style={styles.flex} auto={true} >
+                </Flex.Panel >
+            )}
 
         </Flex.Box >
     )

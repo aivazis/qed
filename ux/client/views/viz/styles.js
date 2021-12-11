@@ -77,8 +77,51 @@ const controls = {
 }
 
 
+// the blank view
+const blank = {
+    // the container
+    nyi: {
+        // inherit
+        ...base.panel,
+    },
+
+    placeholder: {
+        position: "relative",
+        top: "50%",
+        left: "50%",
+        width: "100%",
+        height: "400px",
+        textAlign: "center",
+        transform: "translate(-50%, -50%)",
+    },
+
+    icon: {
+        // placement
+        margin: "1.0em auto",
+        width: "300px",
+        height: "300px",
+    },
+
+    shape: {
+        icon: {
+            // stroke
+            stroke: theme.page.name,
+            strokeWidth: 3,
+            // fill
+            fill: "none",
+        },
+    },
+
+    message: {
+        fontFamily: "inconsolata",
+        fontSize: "120%",
+        textAlign: "center",
+    },
+
+}
+
 // publish
-export default { flex, datasets }
+export default { flex, datasets, controls, blank }
 
 
 // end of file
