@@ -17,7 +17,7 @@ import styles from './styles'
 
 // the dataset explorer
 export const Datasets = () => {
-    // ask the serer for the set of known data sets
+    // ask the server for the collection of known data sets
     const { datasets } = useLazyLoadQuery(datasetsQuery)
 
     // render
