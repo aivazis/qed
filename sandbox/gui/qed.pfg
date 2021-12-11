@@ -12,7 +12,7 @@ qed.plexus:
     ; the {web} shell
     pyre.shells.web # shell:
         ; spawn a new browser tab every time the server starts?
-        auto = yes
+        auto = no
 
     ; the web server
     nexus.services.web:
