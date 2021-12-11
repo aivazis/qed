@@ -15,7 +15,7 @@ import styles from './styles'
 // display the server state
 const server = ({ style, ...props }) => {
     // the query fragment i care about
-    const { version: { major, minor, micro, revid } } = useLazyLoadQuery(query)
+    const { major, minor, micro, revision } = useLazyLoadQuery(query).version
 
     // merge the overall styles
     const base = { ...style.box, ...styles.box, ...style.text, ...styles.text }
@@ -33,7 +33,7 @@ const server = ({ style, ...props }) => {
     // build the component and return it
     return (
         <div style={{ ...base, ...good }} title={title}>
-            qed server {major}.{minor}.{micro} rev {revid}
+            qed server {major}.{minor}.{micro} rev {revision}
         </div>
     )
 }
@@ -45,7 +45,7 @@ const query = graphql`query serverQuery {
         major
         minor
         micro
-        revid
+        revision
     }
 }`
 
