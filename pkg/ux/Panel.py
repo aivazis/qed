@@ -4,8 +4,6 @@
 # (c) 1998-2021 all rights reserved
 
 
-# externals
-import re
 # support
 import qed
 
