@@ -10,7 +10,7 @@ import { graphql, useLazyLoadQuery } from 'react-relay/hooks'
 
 //project
 // widgets
-import { Flex, Header, Tray } from '~/widgets'
+import { Header, Tray } from '~/widgets'
 // locals
 // styles
 import styles from './styles'
