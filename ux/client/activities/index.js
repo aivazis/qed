@@ -13,6 +13,7 @@ export Activity from './activity'
 
 // activities
 export About from './about'
+export Controls from './controls'
 export Data from './data'
 export Debug from './debug'
 export Help from './help'
