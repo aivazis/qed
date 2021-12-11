@@ -15,7 +15,7 @@ export Main from './main'
 
 // sandboxes
 export { GiQL } from './graphiql'
-export { Viz } from './viz'
+export { Viz, Controls, Datasets } from './viz'
 
 // a blank panel with size information
 export Blank from './blank'
