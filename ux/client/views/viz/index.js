@@ -28,7 +28,9 @@ const Panel = () => {
         <Flex.Box direction="row" style={styles.flex} >
 
             {/* the explorer of datasets */}
-            <Datasets />
+            <Flex.Panel min={200} max={400} style={styles.datasets} >
+                <Datasets />
+            </Flex.Panel >
 
             {/* a visualization area */}
             <Flex.Panel style={styles.flex} auto={true} >
