@@ -6,6 +6,8 @@
 
 # externals
 import graphene
+# support
+import qed
 # server version tag
 from .Version import Version
 
@@ -25,8 +27,8 @@ class Query(graphene.ObjectType):
         """
         Build and return the server version
         """
-        # prep an empty context for the {version} resolution
-        return {}
+        # supply the context for the {version} resolution
+        return qed.meta
 
 
 # end of file
