@@ -23,7 +23,7 @@ import { environment } from '~/context'
 // views
 import {
     // the data view
-    Viz,
+    Viz, Controls, Datasets,
     // graphiql
     GiQL,
     // the main page
@@ -50,7 +50,10 @@ const QEDApp = () => {
                 <Route path="help" element={<NYI />} />
 
                 {/* the default page */}
-                <Route index element={<Viz />} />
+                <Route element={<Viz />} >
+                    <Route path="controls" element={<Controls />} />
+                    <Route index element={<Datasets />} />
+                </Route>
             </Route>
 
             {/* meta navigation */}
