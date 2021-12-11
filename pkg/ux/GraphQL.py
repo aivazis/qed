@@ -5,7 +5,7 @@
 
 
 # externals
-import graphene
+import journal
 import json
 # support
 import qed
@@ -20,16 +20,31 @@ class GraphQL:
         """
         Resolve the {query} and generate a response for the client
         """
+        # assemble the raw payload
+        raw = b'\n'.join(request.payload)
+        # if there's nothing there
+        if not raw:
+            # respond with an empty document; should never happen
+            return server.documents.OK(server=server)
+
         # parse the {request} payload
-        payload = json.loads(b'\n'.join(request.payload))
+        payload = json.loads(raw)
         # get the query
         query = payload.get("query")
-        # there are also other fields that we don't care about just yet
-        # operation = payload.get("operation")
-        # variables = payload.get("variables")
+        # extract the variables
+        variables = payload.get("variables")
+        # and the operation
+        operation = payload.get("operation")
+
+        # make a fresh copy of my context
+        context = dict(self.context)
+        # decorate with the info for this request
+        context["plexus"] = plexus
+        context["server"] = server
+        context["request"] = request
 
         # execute the query
-        result = self.schema.execute(query, context=self.context)
+        result = self.schema.execute(query, context=context)
 
         # assemble the resulting document
         doc = { "data": result.data }
@@ -37,6 +52,15 @@ class GraphQL:
         if result.errors:
             # inform the client
             doc["errors"] = [ {"message": error.message} for error in result.errors ]
+
+            # make a channel
+            channel = journal.error("qed.ux.graphql")
+            # go through the errors
+            for error in result.errors:
+                # report each one
+                channel.line(error)
+            # flush
+            channel.log()
 
         # encode it using JSON and serve it
         return server.documents.JSON(server=server, value=doc)
@@ -47,26 +71,16 @@ class GraphQL:
         # chain up
         super().__init__(**kwds)
 
-        # load my schema
-        from .schema import schema
-        # and attach it
-        self.schema = schema
+        # load my schema and attach it
+        self.schema = qed.gql.schema
 
-        # get the package metadata
-        meta = qed.meta
-        # build the version info
-        version = {
-            "major": meta.major,
-            "minor": meta.minor,
-            "micro": meta.micro,
-            "revid": meta.revision,
-        }
-
-        # set up the execution context
+        # initialize the execution context
         self.context = {
             "nameserver": panel.pyre_nameserver,
-            "version": version
         }
+
+        # make sure my error channel is not fatal
+        journal.error("qed.ux.graphql").fatal = False
 
         # all done
         return
