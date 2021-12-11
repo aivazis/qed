@@ -37,6 +37,8 @@ from . import exceptions     # the exception hierarchy
 from .ext import libqed, libqed_cuda
 # protocols
 from . import protocols
+# schema
+from . import gql
 # user interfaces
 from . import shells         # the supported application shells
 from . import cli            # the command line interface
