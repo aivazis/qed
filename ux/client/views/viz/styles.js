@@ -20,7 +20,11 @@ const flex = {
 
     // individual panels
     panel: {
+        // styling
         backgroundColor: "hsl(0deg, 0%, 5%, 1)",
+        // for my children
+        display: "flex",
+        flexDirection: "column",
     },
 
     // the inter-panel separator
@@ -41,14 +45,28 @@ const datasets = {
     panel: {
         // inherit
         ...flex.panel,
-        // colors
-        backgroundColor: "hsl(0deg, 0%, 5%, 1)",
         // set up the preferred initial width
         width: "300px",
         flex: "0 0 auto",
-        // for my children
-        display: "flex",
-        flexDirection: "column",
+    },
+
+    // the separator
+    separator: {
+        // inherit
+        ...flex.separator,
+    }
+}
+
+
+// the panel with the rendering controls
+const controls = {
+    // the panel
+    panel: {
+        // inherit
+        ...flex.panel,
+        // set up the preferred initial width
+        width: "300px",
+        flex: "0 0 auto",
     },
 
     // the separator

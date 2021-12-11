@@ -6,6 +6,8 @@
 
 // externals
 import React from 'react'
+// routing
+import { Outlet } from 'react-router-dom'
 
 // project
 // widgets
@@ -14,8 +16,6 @@ import { Flex } from '~/widgets'
 // locals
 // context
 import { Provider } from './context'
-// panels
-import { Datasets } from './datasets'
 // styles
 import styles from './styles'
 
@@ -29,15 +29,11 @@ const Panel = () => {
 
             {/* the explorer of datasets */}
             <Flex.Panel min={200} max={400} style={styles.datasets} >
-                <Datasets />
+                <Outlet />
             </Flex.Panel >
 
             {/* a visualization area */}
             <Flex.Panel style={styles.flex} auto={true} >
-            </Flex.Panel >
-
-            {/* the processing controls */}
-            <Flex.Panel min={200} max={400} style={styles.flex} >
             </Flex.Panel >
 
         </Flex.Box >
@@ -54,6 +50,11 @@ export const Viz = ({ }) => {
         </Provider>
     )
 }
+
+
+// export the panels
+export { Controls } from './controls'
+export { Datasets } from './datasets'
 
 
 // end of file
