@@ -10,46 +10,57 @@ import { wheel, theme } from '~/palette'
 import base from '~/views/styles'
 
 
-// publish
-export default {
-    // the container
-    flex: {
-        // the overall flex container
-        box: {
-            flex: "1 1 auto",
-            backgroundColor: "hsl(0deg, 0%, 10%)",
-        },
-
-        // individual panels
-        panel: {
-            backgroundColor: "hsl(0deg, 0%, 5%, 1)",
-        },
-
-        // the inter-panel separator
-        separator: {
-            // the line
-            rule: {
-                backgroundColor: "hsl(0deg, 0%, 15%, 0.5)",
-            },
-            // the handle
-            handle: {
-            },
-        },
+// the container
+const flex = {
+    // the overall flex container
+    box: {
+        flex: "1 1 auto",
+        backgroundColor: "hsl(0deg, 0%, 10%)",
     },
 
-    // the panel with the known datasets
-    datasets: {
-        // the panel
-        panel: {
-            // set up the preferred initial width
-            width: "300px",
-            flex: "0 0 auto",
-            // for my children
-            display: "flex",
-            flexDirection: "column",
+    // individual panels
+    panel: {
+        backgroundColor: "hsl(0deg, 0%, 5%, 1)",
+    },
+
+    // the inter-panel separator
+    separator: {
+        // the line
+        rule: {
+            backgroundColor: "hsl(0deg, 0%, 15%, 0.5)",
+        },
+        // the handle
+        handle: {
         },
     },
 }
+
+// the panel with the known datasets
+const datasets = {
+    // the panel
+    panel: {
+        // inherit
+        ...flex.panel,
+        // colors
+        backgroundColor: "hsl(0deg, 0%, 5%, 1)",
+        // set up the preferred initial width
+        width: "300px",
+        flex: "0 0 auto",
+        // for my children
+        display: "flex",
+        flexDirection: "column",
+    },
+
+    // the separator
+    separator: {
+        // inherit
+        ...flex.separator,
+    }
+}
+
+
+// publish
+export default { flex, datasets }
 
 
 // end of file
