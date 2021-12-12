@@ -11,7 +11,7 @@ import { FRAGMENT_PROP_NAME_KEY } from 'relay-runtime/lib/store/RelayStoreUtils'
 export Status from './status'
 
 // the main page
-export Main from './main'
+export { Main, useActivityPanel } from './main'
 
 // sandboxes
 export { GiQL } from './graphiql'
