@@ -30,17 +30,19 @@ const Panel = () => {
     // render
     return (
         <Flex.Box direction="row" style={styles.flex} >
-
-            {/* the explorer of datasets */}
+            {/* panel with activity specific content, determined by the current route */}
             <Flex.Panel min={200} max={400} style={styles.datasets} >
                 <Outlet />
             </Flex.Panel >
 
+            { /* a blank panel when there are no datasets to render */}
             {views.length == 0 &&
                 <Flex.Panel style={styles.flex} auto={true} >
                     <Blank />
                 </Flex.Panel >
             }
+
+            {/* otherwise, make a panel for each active view */}
             {views.map(idx =>
                 <Flex.Panel style={styles.flex} auto={true} >
                 </Flex.Panel >
@@ -62,7 +64,7 @@ export const Viz = ({ }) => {
 }
 
 
-// export the panels
+// export the activity specific panels so the main page can use them as outlets
 export { Controls } from './controls'
 export { Datasets } from './datasets'
 
