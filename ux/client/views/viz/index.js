@@ -10,6 +10,8 @@ import React from 'react'
 import { Outlet } from 'react-router-dom'
 
 // project
+// hooks
+import { useActivityPanel } from '~/views'
 // widgets
 import { Flex } from '~/widgets'
 
@@ -24,6 +26,8 @@ import styles from './styles'
 
 // the area
 const Panel = () => {
+    // get the state of the activity panel
+    const { activityPanel } = useActivityPanel()
     // grab the views
     const { views } = React.useContext(Context)
 
@@ -31,9 +35,11 @@ const Panel = () => {
     return (
         <Flex.Box direction="row" style={styles.flex} >
             {/* panel with activity specific content, determined by the current route */}
-            <Flex.Panel min={200} max={400} style={styles.datasets} >
-                <Outlet />
-            </Flex.Panel >
+            {activityPanel &&
+                <Flex.Panel min={200} max={400} style={styles.datasets} >
+                    <Outlet />
+                </Flex.Panel >
+            }
 
             { /* a blank panel when there are no datasets to render */}
             {views.length == 0 &&
