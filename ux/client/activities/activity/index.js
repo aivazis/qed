@@ -8,6 +8,10 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
+// project
+// hooks
+import { useActivityPanel } from '~/views'
+
 // locals
 // widgets
 import { Badge } from '~/widgets'
@@ -23,10 +27,17 @@ import styles from './styles'
 // currently, there is no use case for a disabled activity, so the logic may need to change
 
 const activity = ({ size, url, children, barStyle, style }) => {
+    // grab the activity panel state mutators
+    const { showActivityPanel, toggleActivityPanel } = useActivityPanel()
     // get the current location
     const location = useLocation().pathname
+
     // check whether this is the current activity
-    const state = location === url ? "engaged" : "available"
+    const current = location === url
+    // which determines its state
+    const state = current ? "engaged" : "available"
+    // and the action on click
+    const onClick = current ? toggleActivityPanel : showActivityPanel
 
     // mix my paint
     const activityStyle = {
@@ -90,10 +101,14 @@ const activity = ({ size, url, children, barStyle, style }) => {
         },
     }
 
+    // assemble my behaviors
+    const behaviors = { onClick }
+
     // paint me
     return (
         <Link to={url} >
-            <Badge name={url} size={size} state={state} style={activityStyle} >
+            <Badge name={url} size={size} state={state} behaviors={behaviors}
+                style={activityStyle} >
                 {children}
             </Badge >
         </Link >

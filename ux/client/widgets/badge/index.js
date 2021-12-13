@@ -11,7 +11,7 @@ import styles from './styles'
 
 
 // a button with an SVG image as content
-const badge = ({ name, size, state, style, children }) => {
+const badge = ({ name, size, state, behaviors = {}, style, children }) => {
     // make local state for the extra styling of the badge and the shape necessary when
     // questioning whether the activity is available
     const [extraBadgeStyle, setBadgeStyle] = React.useState(null)
@@ -73,8 +73,11 @@ const badge = ({ name, size, state, style, children }) => {
 
         // install them
         controls = {
+            // control the styling
             onMouseEnter: highlight,
             onMouseLeave: reset,
+            // plus whatever the client asked for
+            ...behaviors,
         }
     }
 
