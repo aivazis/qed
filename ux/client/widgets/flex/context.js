@@ -70,9 +70,30 @@ export const Provider = ({
 
     // higher level functions
     // registering a new panel
-    const addPanel = ({ ref, min, max, auto }) => {
+    const addPanel = ({ panel, min, max, auto }) => {
         // update the panel pile
-        setPanels(old => new Map([...old, [ref, { min, max, auto }]]))
+        setPanels(old => {
+            // make a copy of the old state
+            const clone = new Map(old)
+            // add the new panel info
+            clone.set(panel, { min, max, auto })
+            // and return the new map
+            return clone
+        })
+        // all done
+        return
+    }
+
+    const removePanel = ({ panel }) => {
+        // update the panel pile
+        setPanels(old => {
+            // clone the current pile
+            const clone = new Map(old)
+            // remove the panel that's going away
+            clone.delete(panel)
+            // and return the new pile
+            return clone
+        })
         // all done
         return
     }
@@ -88,7 +109,7 @@ export const Provider = ({
         // the transform that centers the separator handle within the rule
         transform,
         // panel management
-        panels, addPanel,
+        panels, addPanel, removePanel,
         // managed panels have extents under our control after the first resize
         isManaged, setIsManaged,
         // support for flexing
