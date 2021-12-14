@@ -18,8 +18,10 @@ import styles from './styles'
 
 // the activity bar
 const bar = () => {
-    // decide on a size
-    const size = 32
+    // pick an icon size based in the screen resolution
+    const rem = window.screen.width > 2048 ? 1.2 : 1.0
+    // convert to pixels
+    const size = rem * parseFloat(getComputedStyle(document.documentElement).fontSize)
 
     // paint me
     return (
