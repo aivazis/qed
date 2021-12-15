@@ -31,15 +31,18 @@ const Panel = () => {
     // grab the views
     const { views } = React.useContext(Context)
 
+    // paint mixing
+    const datasetPaint = { ...styles.datasets }
+    // if the activity panel is not visible hide it
+    datasetPaint.panel.display = activityPanel ? "flex" : "none"
+
     // render
     return (
         <Flex.Box direction="row" style={styles.flex} >
             {/* panel with activity specific content, determined by the current route */}
-            {activityPanel &&
-                <Flex.Panel min={200} max={400} style={styles.datasets} >
-                    <Outlet />
-                </Flex.Panel >
-            }
+            <Flex.Panel min={200} max={400} style={datasetPaint} >
+                <Outlet />
+            </Flex.Panel >
 
             { /* a blank panel when there are no datasets to render */}
             {views.length == 0 &&
