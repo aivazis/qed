@@ -17,6 +17,8 @@ export const Context = React.createContext(
         isRow: true,
         parity: 1,
         // direction dependent attributes
+        mainPos: "left",
+        crossPos: "top",
         mainExtent: "width",
         crossExtent: "height",
         minExtent: "minWidth",
@@ -25,9 +27,13 @@ export const Context = React.createContext(
         cursor: "col-resize",
         // the transform that centers the separator handle in its parent space
         transform: "translate(-50%, 0%)",
+        // indicator that the box has flexed before
+        hasFlexed: false,
+        setHasFlexed: () => { throw new Error('no context provider') },
         // panel management
         panels: null,
         addPanel: () => { throw new Error('no context provider') },
+        removePanel: () => { throw new Error('no context provider') },
         // the flexing panel when a separator gets activated
         flexingPanel: null,
         setFlexingPanel: () => { throw new Error('no context provider') },
@@ -50,18 +56,21 @@ export const Provider = ({
     // and the order, which affects the correlation between mouse movement and extent update
     const parity = direction.endsWith("-reverse") ? -1 : 1
 
-    // direction dependent styling attributes
+    // flex direction dependent attributes so we can access without checking every time
+    const [mainPos, crossPos] = isRow ? ["left", "top"] : ["top", "left"]
     const [mainExtent, crossExtent] = isRow ? ["width", "height"] : ["height", "width"]
     const [minExtent, maxExtent] = isRow ? ["minWidth", "maxWidth"] : ["minHeight", "maxHeight"]
+    // the cursor we show is also flex direction dependent
     const cursor = isRow ? "col-resize" : "row-resize"
+    // and so is the transformation that places the draggable handle over the separator
     const transform = isRow ? "translate(-50%, 0)" : "translate(0, -50%)"
 
-    // the registered panels
+    // the set of known panels
     const [panels, setPanels] = React.useState(new Map())
 
     // indicator of whether we have taken control of the panel extents
-    const [isManaged, setIsManaged] = React.useState(false)
-    // the location of the mouse as a separator is being dragged
+    const [hasFlexed, setHasFlexed] = React.useState(false)
+    // the location of the mouse while a separator is being dragged
     const [separatorLocation, setSeparatorLocation] = React.useState(null)
     // the panel being flexed when a separator is activated
     const [flexingPanel, setFlexingPanel] = React.useState(null)
@@ -102,8 +111,8 @@ export const Provider = ({
     const context = {
         // direction flags
         direction, isRow, parity,
-        // direction dependent styling attribute names
-        mainExtent, crossExtent, minExtent, maxExtent,
+        // direction dependent attribute names
+        mainPos, crossPos, mainExtent, crossExtent, minExtent, maxExtent,
         // cursors
         cursor,
         // the transform that centers the separator handle within the rule
@@ -111,7 +120,7 @@ export const Provider = ({
         // panel management
         panels, addPanel, removePanel,
         // managed panels have extents under our control after the first resize
-        isManaged, setIsManaged,
+        hasFlexed, setHasFlexed,
         // support for flexing
         flexingPanel, setFlexingPanel,
         separatorLocation, setSeparatorLocation,
