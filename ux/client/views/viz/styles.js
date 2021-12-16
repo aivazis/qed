@@ -40,7 +40,6 @@ const flex = {
 }
 
 // the activity panels
-// the panel with the known datasets
 const activityPanels = {
     // the panel
     panel: {
