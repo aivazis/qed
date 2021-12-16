@@ -24,7 +24,7 @@ export const Datasets = () => {
     return (
         <>
             {/* the title of the panel */}
-            <Header title="datasets" />
+            <Header title="datasets" style={styles.datasets.header} />
         </>
     )
 }

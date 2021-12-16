@@ -39,12 +39,15 @@ const flex = {
     },
 }
 
+// the activity panels
 // the panel with the known datasets
-const datasets = {
+const activityPanels = {
     // the panel
     panel: {
         // inherit
         ...flex.panel,
+        // make it stand out a bit
+        backgroundColor: "hsl(0deg, 0%, 7%, 1)",
         // set up the preferred initial width
         width: "300px",
         flex: "0 0 auto",
@@ -54,26 +57,26 @@ const datasets = {
     separator: {
         // inherit
         ...flex.separator,
-    }
+    },
+
+    header: {
+        // make it stand out a bit
+        backgroundColor: "hsl(0deg, 0%, 7%, 1)",
+    },
+}
+
+
+// the panel with the known datasets
+const datasets = {
+    // inherit
+    ...activityPanels,
 }
 
 
 // the panel with the rendering controls
 const controls = {
-    // the panel
-    panel: {
-        // inherit
-        ...flex.panel,
-        // set up the preferred initial width
-        width: "300px",
-        flex: "0 0 auto",
-    },
-
-    // the separator
-    separator: {
-        // inherit
-        ...flex.separator,
-    }
+    // inherit
+    ...activityPanels,
 }
 
 

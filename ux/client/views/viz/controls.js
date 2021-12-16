@@ -21,7 +21,7 @@ export const Controls = () => {
     return (
         <>
             {/* the title of the panel */}
-            <Header title="controls" />
+            <Header title="controls" style={styles.controls.header} />
         </>
     )
 }
