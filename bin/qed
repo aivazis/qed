@@ -9,7 +9,7 @@
 import qed
 
 # build an instance of the plexus
-app = qed.shells.qed(name='qed.plexus')
+app = qed.shells.qed(name='qed.app')
 # and run it
 status = app.run()
 # pass the status on to the shell
