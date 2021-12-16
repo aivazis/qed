@@ -1,0 +1,23 @@
+# -*- pyre -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2021 all rights reserved
+
+
+# overall application configuration
+qed.app:
+    # run as a web app
+    shell: web
+    # the web server
+    nexus.services.web:
+        # pin the port for serving web content to some number in user space
+        address: ip4:0.0.0.0:8005
+
+
+# configure the {web} shell
+pyre.shells.web#qed.app.shell:
+    # spawn a new browser tab every time the server starts?
+    auto: no
+
+
+# end of file
