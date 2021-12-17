@@ -61,6 +61,14 @@ class Datatype(Specification, family="qed.datatypes"):
     # implementation details
     # the type alias table
     aliases = {
+        # single precision numbers
+        "r4": "qed.datatypes.real4",
+        "real4": "qed.datatypes.real4",
+
+        # double precision numbers
+        "r8": "qed.datatypes.real8",
+        "real8": "qed.datatypes.real8",
+
         # single precision complex numbers
         "c4": "qed.datatypes.complex4",
         "complex4": "qed.datatypes.complex4",
