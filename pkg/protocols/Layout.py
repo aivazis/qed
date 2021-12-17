@@ -8,27 +8,26 @@
 import qed
 # my superclass
 from .Specification import Specification
+# my parts
+from .Datatype import Datatype
 
 
 # the dataset layout
 class Layout(Specification, family="qed.products.layouts"):
     """
-    The dataset metadat
+    The dataset metadata
     """
 
 
     # public data
     # individual metadata, used to assemble a default layout
-    cell = qed.properties.str()
-    cell.default = None
-    cell.doc = "the format string that specifies the type of the dataset payload"
+    cell = Datatype()
+    cell.doc = "the type of the dataset payload"
 
     origin = qed.properties.tuple(schema=qed.properties.int())
-    origin.default = None
     origin.doc = "the smallest possible index"
 
     shape = qed.properties.tuple(schema=qed.properties.int())
-    shape.default = None
     shape.doc = "the shape of the dataset"
 
 
