@@ -26,7 +26,7 @@ class Plexus(pyre.plexus, family='qed.shells.plexus'):
     datasets.doc = "the list of datasets to display"
 
     # individual metadata, used to assemble a default layout
-    cell = qed.properties.str()
+    cell = qed.protocols.datatype()
     cell.default = None
     cell.doc = "the format string that specifies the type of the dataset payload"
 
