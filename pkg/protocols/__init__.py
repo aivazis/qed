@@ -11,7 +11,6 @@ from .Specification import Specification as specification
 # datasets and their readers
 from .Datatype import Datatype as datatype
 from .Dataset import Dataset as dataset
-from .Layout import Layout as layout
 from .Reader import Reader as reader
 
 
