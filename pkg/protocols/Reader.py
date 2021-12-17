@@ -12,7 +12,7 @@ from .Layout import Layout
 
 
 # the product payload
-class Reader(Producer, family="qed.factories.readers"):
+class Reader(Producer, family="qed.readers"):
     """
     A dataset factory
     """
