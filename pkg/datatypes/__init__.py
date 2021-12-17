@@ -5,6 +5,11 @@
 
 
 # publish
+# real numbers
+from .Float import Float as real4
+from .Double import Double as real8
+
+# complex numbers
 from .ComplexFloat import ComplexFloat as complex4
 from .ComplexDouble import ComplexDouble as complex8
 
