@@ -6,6 +6,7 @@
 
 # publish
 from .ComplexFloat import ComplexFloat as complex4
+from .ComplexDouble import ComplexDouble as complex8
 
 
 # end of file
