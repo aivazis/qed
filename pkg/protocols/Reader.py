@@ -4,11 +4,12 @@
 # (c) 1998-2021 all rights reserved
 
 
+# support
+import qed
 # my superclass
 from .Producer import Producer
 # my product specs
 from .Dataset import Dataset
-from .Layout import Layout
 
 
 # the product payload
@@ -19,14 +20,11 @@ class Reader(Producer, family="qed.readers"):
 
 
     # public data
-    # the payload
-    data = Dataset.output()
-    data.doc = "the memory payload"
+    uri = qed.properties.path()
+    uri.doc = "the uri of the data source"
 
-    # its metadata; more specialized classes can decide whether this is input or output
-    # depending on how self describing the data source is
-    layout = Layout()
-    layout.doc = "the dataset layout"
+    datasets = qed.properties.list(schema=Dataset())
+    datasets.doc = "the list of data sets provided by the reader"
 
 
 # end of file
