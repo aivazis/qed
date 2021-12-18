@@ -3,6 +3,20 @@
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # (c) 1998-2021 all rights reserved
 
+# datasets
+20061231:
+    uri: ../../../data/alos/20061231.slc
+    shape: 36864, 10344
+
+20070215:
+    uri: ../../../data/alos/20070215.slc
+    shape: 36864, 10344
+
+# attach them to the application
+qed.app.datasets:
+    - isce2.rslc#20061231
+    - isce2.rslc#20070215
+
 
 # overall application configuration
 qed.app:
