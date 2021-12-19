@@ -10,6 +10,8 @@ import qed
 from .Producer import Producer
 # my product specs
 from .Dataset import Dataset
+# local traits
+from . import properties
 
 
 # the product payload
@@ -22,6 +24,9 @@ class Reader(Producer, family="qed.readers"):
     # public data
     uri = qed.properties.path()
     uri.doc = "the uri of the data source"
+
+    selectors = properties.selectors()
+    selectors.doc = "a map of selector names to their allowed values"
 
     datasets = qed.properties.list(schema=Dataset())
     datasets.doc = "the list of data sets provided by the reader"
