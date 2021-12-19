@@ -4,9 +4,14 @@
 # (c) 1998-2021 all rights reserved
 
 
+# custom properties
+from .properties import selectors
+
+
 # export the local wrappers over the flow protocols
 from .Producer import Producer as producer
 from .Specification import Specification as specification
+
 
 # datasets and their readers
 from .Datatype import Datatype as datatype
