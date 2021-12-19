@@ -34,7 +34,7 @@ class Dataset(Specification, family="qed.datasets"):
     shape = qed.properties.tuple(schema=qed.properties.int())
     shape.doc = "the shape of the dataset"
 
-    selector = qed.properties.catalog()
+    selector = qed.properties.kv()
     selector.doc = "a key/value map that identifies the datatset to a reader"
 
 
