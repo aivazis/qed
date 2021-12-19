@@ -5,6 +5,11 @@
 # (c) 2020-2021 all rights reserved
 
 
+# turn some debug channels on
+import journal
+journal.debug("qed.ux.graphql").activate()
+
+
 # get the package
 import qed
 
