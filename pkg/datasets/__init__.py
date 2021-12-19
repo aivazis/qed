@@ -4,5 +4,8 @@
 # (c) 1998-2021 all rights reserved
 
 
+# raw datasets
+from .Raw import Raw as raw
+
 
 # end of file
