@@ -43,8 +43,29 @@ class GraphQL:
         context["server"] = server
         context["request"] = request
 
+        # display the {query} details, if the user cares to see
+        channel = journal.debug("qed.ux.graphql")
+        # if the channel is active
+        if channel:
+            # mark
+            channel.line(f"query:")
+            # go through the query representation
+            for line in query.strip().splitlines():
+                # and print each line
+                channel.line(f"    {line}")
+            # if there are variable bidings
+            if variables:
+                # mark
+                channel.line(f"  variables:")
+                # go through them
+                for key, value in variables:
+                    # and print each binding
+                    channel.line(f"    {key}: {value}")
+            # flush
+            channel.log()
+
         # execute the query
-        result = self.schema.execute(query, context=context)
+        result = self.schema.execute(query, context=context, variables=variables)
 
         # assemble the resulting document
         doc = { "data": result.data }
