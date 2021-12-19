@@ -22,6 +22,10 @@ class RSLC(qed.flow.factory, family="qed.readers.isce2.rslc", implements=qed.pro
     shape = qed.properties.tuple(schema=qed.properties.int())
     shape.doc = "the size of the dataset in (lines, samples)"
 
+    selectors = qed.protocols.selectors()
+    selectors.default = {}
+    selectors.doc = "a map of selector names to their allowed values"
+
     datasets = qed.properties.list(schema=qed.protocols.dataset.output())
     datasets.doc = "the list of data sets provided by the reader"
 
