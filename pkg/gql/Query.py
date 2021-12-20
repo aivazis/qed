@@ -10,7 +10,8 @@ import graphene
 import qed
 # server version tag
 from .Version import Version
-# the known dataset
+# the known datasets
+from .ReaderConnection import ReaderConnection
 from .Datasets import Datasets
 
 
@@ -22,11 +23,22 @@ class Query(graphene.ObjectType):
 
     # known datasets
     datasets = graphene.Field(Datasets, required=True)
+    readers = graphene.relay.ConnectionField(ReaderConnection)
     # server version info
     version = graphene.Field(Version, required=True)
 
 
     # datasets
+    def resolve_readers(root, info, **kwds):
+        """
+        Generate a list of all known readers
+        """
+        # grab the plexus
+        plexus = info.context["plexus"]
+        # get a list of the dataset readers and pass them on
+        return list(plexus.datasets)
+
+
     def resolve_datasets(root, info, **kwds):
         """
         Generate a list of all known datasets
