@@ -9,7 +9,8 @@ import graphene
 # my interface
 from .Node import Node
 # my parts
-from .SelectorDecl import SelectorDecl
+from .Dataset import Dataset
+from .Selectors import Selectors
 
 
 # my node type
@@ -27,7 +28,8 @@ class Reader(graphene.ObjectType):
     id = graphene.ID()
     uuid = graphene.ID()
     uri = graphene.String()
-    selectors = graphene.List(SelectorDecl)
+    selectors = graphene.List(Selectors)
+    dataset = graphene.List(Dataset)
 
 
     # the resolvers
@@ -60,6 +62,13 @@ class Reader(graphene.ObjectType):
         Build a list of the selector names and their allowed values
         """
         return []
+
+
+    def resolve_datasets(reader, *_):
+        """
+        Build a list of the available datasets
+        """
+        return reader.datasets
 
 
 # end of file

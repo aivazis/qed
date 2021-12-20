@@ -9,7 +9,7 @@ import graphene
 
 
 # my node type
-class SelectorDecl(graphene.ObjectType):
+class Selectors(graphene.ObjectType):
     """
     A dataset reader
     """
