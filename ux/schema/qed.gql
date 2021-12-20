@@ -18,19 +18,69 @@ type Query {
 }
 
 
-# datasets
-type Datasets {
-  # the id
-  id: String!
-}
-
-
 # server version
 type Version {
   major: Int!
   minor: Int!
   micro: Int!
   revision: String!
+}
+
+
+# readers
+type Reader implements Node {
+  # ids
+  id: ID!
+  uuid: ID!
+  # the full path to the supporting file
+  uri: String!
+  selectors: [SelectorDef]!
+}
+
+
+# selectors
+type SelectorDef {
+  # name
+  name: String
+  values: [String]
+}
+
+
+# datasets
+type Datasets {
+  # the id
+  id: ID!
+}
+
+
+# connections
+type ReaderConnection {
+  edges: [ReaderEdge]
+  pageInfo: PageInfo!
+}
+
+type ReaderEdge {
+  node: Reader
+  cursor: String!
+}
+
+
+# interfaces
+# the node interface
+interface Node {
+  # the node relay id
+  id: ID!
+  # and the uuid of the pyre object
+  uuid: ID!
+}
+
+
+# boilerplate for connections
+type PageInfo {
+  startCursor: String
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
 }
 
 
