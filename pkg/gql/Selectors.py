@@ -25,7 +25,7 @@ class Selectors(graphene.ObjectType):
         Get the {selector} name
         """
         # ask relay
-        return ""
+        return selector[0]
 
 
     def resolve_values(selector, *_):
@@ -33,7 +33,7 @@ class Selectors(graphene.ObjectType):
         Get the allowed {selector} values
         """
         # ask
-        return []
+        return selector[1]
 
 
 # end of file
