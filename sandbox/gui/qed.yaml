@@ -12,10 +12,15 @@
     uri: ../../../data/alos/20070215.slc
     shape: 36864, 10344
 
+20211221:
+    uri: ../../../data/nisar/20211221.h5
+
+
 # attach them to the application
 qed.app.datasets:
     - isce2.rslc#20061231
     - isce2.rslc#20070215
+    - nisar.rslc#20211221
 
 
 # overall application configuration
