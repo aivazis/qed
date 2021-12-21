@@ -49,19 +49,11 @@ class Reader(graphene.ObjectType):
         return reader.pyre_id
 
 
-    def resolve_uri(reader, *_):
-        """
-        Get the {uri} of the file with the datasets
-        """
-        # ask relay
-        return reader.uri.resolve()
-
-
     def resolve_selectors(reader, *_):
         """
         Build a list of the selector names and their allowed values
         """
-        return []
+        return reader.selectors.items()
 
 
     def resolve_datasets(reader, *_):
