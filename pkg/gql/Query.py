@@ -20,12 +20,15 @@ class Query(graphene.ObjectType):
     The top level query
     """
 
+
+    # the fields
     # known datasets
     readers = graphene.relay.ConnectionField(ReaderConnection)
     # server version info
     version = graphene.Field(Version, required=True)
 
 
+    # the resolvers
     # datasets
     def resolve_readers(root, info,
                         first=1, last=None, after=None, before=None,
