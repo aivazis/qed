@@ -32,9 +32,20 @@ export const Datasets = () => {
 
 // the dataset query
 const datasetsQuery = graphql`query datasetsQuery {
-    datasets {
-        # the dataset id
-        id
+    readers(first: 100) @connection(key: "datasets_readers") {
+        count
+        edges {
+            node {
+                id
+                uuid
+                uri
+                selectors {
+                    name
+                    values
+                }
+            }
+            cursor
+        }
     }
 }`
 
