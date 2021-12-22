@@ -12,7 +12,7 @@ schema {
 # the top level query
 type Query {
   # information about the known data sets
-  datasets: Datasets
+  readers(after: String, first: Int, before: String, last: Int, order: String): ReaderConnection!
   # server version information
   version: Version
 }
@@ -34,27 +34,21 @@ type Reader implements Node {
   uuid: ID!
   # the full path to the supporting file
   uri: String!
-  selectors: [SelectorDef]!
+  selectors: [Selectors]!
 }
 
 
 # selectors
-type SelectorDef {
+type Selectors {
   # name
-  name: String
-  values: [String]
-}
-
-
-# datasets
-type Datasets {
-  # the id
-  id: ID!
+  name: String!
+  values: [String!]!
 }
 
 
 # connections
 type ReaderConnection {
+  count: Int
   edges: [ReaderEdge]
   pageInfo: PageInfo!
 }
