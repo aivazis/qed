@@ -14,7 +14,7 @@ type Query {
   # information about the known data sets
   readers(after: String, first: Int, before: String, last: Int, order: String): ReaderConnection!
   # server version information
-  version: Version
+  version: Version!
 }
 
 
@@ -35,6 +35,20 @@ type Reader implements Node {
   # the full path to the supporting file
   uri: String!
   selectors: [Selectors]!
+  datasets: [Dataset]!
+}
+
+
+# datasets
+type Dataset implements Node {
+  # ids
+  id: ID!
+  uuid: ID!
+  # metadata
+  selector: [Selector]!
+  datatype: String!
+  shape: [Int!]!
+  channels: [String!]!
 }
 
 
@@ -43,6 +57,13 @@ type Selectors {
   # name
   name: String!
   values: [String!]!
+}
+
+
+type Selector {
+  # name
+  name: String!
+  value: String!
 }
 
 
