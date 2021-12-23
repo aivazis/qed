@@ -29,7 +29,7 @@ class Reader(graphene.ObjectType):
     uuid = graphene.ID()
     uri = graphene.String()
     selectors = graphene.List(Selectors)
-    dataset = graphene.List(Dataset)
+    datasets = graphene.List(Dataset)
 
 
     # the resolvers
