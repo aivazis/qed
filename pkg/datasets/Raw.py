@@ -9,7 +9,7 @@ import qed
 
 
 # raw dataset, i.e. a dataset in binary file with no metadata
-class Raw(qed.flow.product, family="qed.datastes.raw", implements=qed.protocols.dataset):
+class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.dataset):
     """
     A raw dataset
     """
