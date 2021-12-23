@@ -24,7 +24,7 @@ class Selectors(graphene.ObjectType):
         """
         Get the {selector} name
         """
-        # ask relay
+        # the name if the first element of the pair
         return selector[0]
 
 
@@ -32,7 +32,7 @@ class Selectors(graphene.ObjectType):
         """
         Get the allowed {selector} values
         """
-        # ask
+        # the value if the second element of the pair
         return selector[1]
 
 
