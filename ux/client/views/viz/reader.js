@@ -24,8 +24,8 @@ export const Reader = ({ reader }) => {
     // render
     return (
         <Tray title={name} style={styles.reader.tray} >
-            <Info name="family" value={family} style={styles.reader.attributes} />
             <Info name="uri" value={uri} style={styles.reader.attributes} />
+            <Info name="reader" value={family} style={styles.reader.attributes} />
         </Tray>
     )
 }
