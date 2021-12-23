@@ -122,8 +122,30 @@ const blank = {
 
 }
 
+const reader = {
+    // for the tray
+    tray: {
+        box: {},
+        header: {},
+        title: {},
+        items: {},
+    },
+
+    // attributes
+    attributes: {
+        info: {},
+        name: {
+            display: "inline-block",
+            width: "5em",
+            textAlign: "right",
+        },
+        value: {},
+    },
+}
+
+
 // publish
-export default { flex, datasets, controls, blank }
+export default { flex, datasets, controls, blank, reader }
 
 
 // end of file

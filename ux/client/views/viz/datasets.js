@@ -10,21 +10,27 @@ import { graphql, useLazyLoadQuery } from 'react-relay/hooks'
 
 //project
 // widgets
-import { Header, Tray } from '~/widgets'
+import { Header } from '~/widgets'
 // locals
+// readers
+import { Reader } from './reader'
 // styles
 import styles from './styles'
 
 // the dataset explorer
 export const Datasets = () => {
     // ask the server for the collection of known data sets
-    const { datasets } = useLazyLoadQuery(datasetsQuery)
+    const { readers } = useLazyLoadQuery(datasetsQuery)
 
     // render
     return (
         <>
             {/* the title of the panel */}
             <Header title="datasets" style={styles.datasets.header} />
+            {/* go through the readers and render each one */}
+            {readers.edges.map(edge => (
+                <Reader key={edge.node.uuid} reader={edge.node} />
+            ))}
         </>
     )
 }
