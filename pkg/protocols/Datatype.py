@@ -33,12 +33,14 @@ class Datatype(Specification, family="qed.datatypes"):
     # choice is applied after {pyre_instantiate} realizes the {datatype}
     @classmethod
     def pyre_convert(cls, value, **kwds):
-        # check whether there is a byte order specifier
-        if value[0] in cls.markers:
-            # and strip it; we'll get a chance to handle this later
-            value = value[1:]
-        # run it through the table of aliases
-        value = cls.aliases.get(value, value)
+        # if {value} is a tring
+        if isinstance(value, str):
+            # check whether there is a byte order specifier
+            if value[0] in cls.markers:
+                # and strip it; we'll get a chance to handle this later
+                value = value[1:]
+            # run it through the table of aliases
+            value = cls.aliases.get(value, value)
         # chain up
         return super().pyre_convert(value=value, **kwds)
 
