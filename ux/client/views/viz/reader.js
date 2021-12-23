@@ -13,6 +13,7 @@ import { graphql } from 'relay-runtime'
 // widgets
 import { Info, Tray } from '~/widgets'
 // locals
+import { Dataset } from './dataset'
 // styles
 import styles from './styles'
 
@@ -29,6 +30,10 @@ export const Reader = (props) => {
                 name
                 values
             }
+            datasets {
+                uuid
+                ...dataset_dataset
+            }
         }`,
         props.reader)
     // unpack
@@ -41,6 +46,9 @@ export const Reader = (props) => {
         <Tray title={name} style={styles.reader.tray} >
             <Info name="uri" value={uri} style={styles.reader.attributes} />
             <Info name="reader" value={family} style={styles.reader.attributes} />
+            {reader.datasets.map((dataset) => (
+                <Dataset key={dataset.uuid} dataset={dataset} />
+            ))}
         </Tray>
     )
 }
