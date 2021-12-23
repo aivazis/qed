@@ -37,7 +37,7 @@ class Reader(graphene.ObjectType):
         """
         Get the {reader} id
         """
-        # ask relay
+        # splice together the {family} and {name} of the {reader}
         return f"{reader.pyre_family()}:{reader.pyre_name}"
 
 
@@ -45,8 +45,16 @@ class Reader(graphene.ObjectType):
         """
         Get the {reader} uuid
         """
-        # ask relay
+        # return the {pyre_id} of the {reader}
         return reader.pyre_id
+
+
+    def resolve_uri(reader, *_):
+        """
+        Get the path to the file
+        """
+        # turn the {uri} into an absolute path and send it off
+        return reader.uri.resolve()
 
 
     def resolve_selectors(reader, *_):
