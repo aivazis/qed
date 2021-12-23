@@ -43,12 +43,7 @@ const datasetsQuery = graphql`query datasetsQuery {
         edges {
             node {
                 id
-                uuid
-                uri
-                selectors {
-                    name
-                    values
-                }
+                ...reader_reader
             }
             cursor
         }

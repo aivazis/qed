@@ -6,16 +6,31 @@
 
 // externals
 import React from 'react'
+import { useFragment } from 'react-relay/hooks'
+import { graphql } from 'relay-runtime'
 
-//project
+// project
 // widgets
 import { Info, Tray } from '~/widgets'
 // locals
 // styles
 import styles from './styles'
 
+
 // display the datasets associated with this reader
-export const Reader = ({ reader }) => {
+export const Reader = (props) => {
+    // pull the data
+    const reader = useFragment(graphql`
+        fragment reader_reader on Reader {
+            id
+            uuid
+            uri
+            selectors {
+                name
+                values
+            }
+        }`,
+        props.reader)
     // unpack
     const { id, uri } = reader
     // parse the reader id
