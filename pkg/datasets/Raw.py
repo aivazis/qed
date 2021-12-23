@@ -22,7 +22,7 @@ class Raw(qed.flow.product, family="qed.datastes.raw", implements=qed.protocols.
     data.doc = "the memory payload"
 
     # the data layout
-    cell = Datatype()
+    cell = qed.protocols.datatype()
     cell.default = None
     cell.doc = "the type of the dataset payload"
 
