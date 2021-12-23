@@ -14,16 +14,16 @@ export default {
     info: {
         // positioning
         padding: "0.125rem 1.0em",
-
         // colors
         color: theme.header.color,
-
         // text
         fontSize: "50%",
         fontFamily: "rubik-light",
-
         // disable text selection
         userSelect: "none",
+        // don't wrap
+        overflow: "clip",
+        whiteSpace: "nowrap",
     },
 
     name: {
