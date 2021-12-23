@@ -13,7 +13,7 @@ export default {
     // for my toolbar
     box: {
         // paint
-        backgroundColor: "hsl(0deg, 0%, 21%, 1)",
+        backgroundColor: "hsl(0deg, 0%, 15%, 1)",
     },
 
     // my opinions on badges
