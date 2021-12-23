@@ -42,7 +42,9 @@ const datasetsQuery = graphql`query datasetsQuery {
         count
         edges {
             node {
-                id
+                # i need the {uuid} to make the child key
+                uuid
+                # plus whatever the {reader} needs to render itself
                 ...reader_reader
             }
             cursor
