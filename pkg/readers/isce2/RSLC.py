@@ -36,7 +36,12 @@ class RSLC(qed.flow.factory, family="qed.readers.isce2.rslc", implements=qed.pro
         super().__init__(**kwds)
 
         # there is only one dataset in the file
-        # so build it and attach it
+        dataset = qed.datasets.raw()
+        # decorate it
+        dataset.shape = self.shape
+        dataset.cell = qed.datatypes.complex4()
+        # and attach it
+        self.datasets.append(dataset)
 
         # all done
         return
