@@ -50,6 +50,8 @@ export default {
     items: {
         // i stretch
         flex: "1",
+        // gimme some room
+        padding: "0.25rem 0.0rem",
         // for my children
         display: "flex",
         flexDirection: "column",

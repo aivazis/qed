@@ -36,9 +36,11 @@ export const Tray = ({ title, style, children }) => {
                     {title}
                 </span>
             </div>
-            <div style={itemsStyle} >
-                {expanded && children}
-            </div>
+            {expanded &&
+                <div style={itemsStyle} >
+                    {children}
+                </div>
+            }
         </section>
     )
 }
