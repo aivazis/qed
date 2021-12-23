@@ -39,6 +39,8 @@ from .ext import libqed, libqed_cuda
 from . import protocols
 # readers and data types
 from . import datatypes
+from . import datasets
+from . import readers
 # schema
 from . import gql
 # user interfaces
