@@ -32,6 +32,7 @@ export default {
 
     value: {
         color: wheel.gray.aluminum,
+        fontFamily: "inconsolata",
     },
 
     separator: {
