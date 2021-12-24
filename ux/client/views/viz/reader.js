@@ -44,8 +44,8 @@ export const Reader = (props) => {
     // render
     return (
         <Tray title={name} style={styles.reader.tray} >
-            <Info name="uri" value={uri} style={styles.reader.attributes} />
-            <Info name="reader" value={family} style={styles.reader.attributes} />
+            <Info name="uri" value={uri} style={styles.attributes} />
+            <Info name="reader" value={family} style={styles.attributes} />
             {reader.datasets.map((dataset) => (
                 <Dataset key={dataset.uuid} dataset={dataset} />
             ))}

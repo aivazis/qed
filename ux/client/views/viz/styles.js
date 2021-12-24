@@ -130,22 +130,21 @@ const reader = {
         title: {},
         items: {},
     },
-
-    // attributes
-    attributes: {
-        info: {},
-        name: {
-            display: "inline-block",
-            width: "5em",
-            textAlign: "right",
-        },
-        value: {},
-    },
 }
 
+// attributes
+const attributes = {
+    info: {},
+    name: {
+        display: "inline-block",
+        width: "5em",
+        textAlign: "right",
+    },
+    value: {},
+}
 
 // publish
-export default { flex, datasets, controls, blank, reader }
+export default { flex, datasets, controls, blank, reader, attributes }
 
 
 // end of file
