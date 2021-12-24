@@ -10,6 +10,8 @@ import { useFragment } from 'react-relay/hooks'
 import { graphql } from 'relay-runtime'
 
 // locals
+// widgets
+import { Info } from '~/widgets'
 // styles
 import styles from './styles'
 
@@ -19,22 +21,19 @@ export const Dataset = (props) => {
     // pull the data
     const dataset = useFragment(graphql`
         fragment dataset_dataset on Dataset {
-            id
-            uuid
-            selector {
-                name
-                value
-            }
+            shape
+            datatype
         }`,
         props.dataset)
     // unpack
-    const { id, uuid } = dataset
-    // parse the reader id
-    const [family, name] = id.split(":")
+    const { shape, datatype } = dataset
 
     // render
     return (
-        <div>{uuid}</div>
+        <>
+            <Info name="shape" value={shape.join("x")} style={styles.attributes} />
+            <Info name="type" value={datatype} style={styles.attributes} />
+        </>
     )
 }
 
