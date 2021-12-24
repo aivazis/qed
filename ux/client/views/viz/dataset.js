@@ -9,9 +9,11 @@ import React from 'react'
 import { useFragment } from 'react-relay/hooks'
 import { graphql } from 'relay-runtime'
 
-// locals
+// project
 // widgets
 import { Info } from '~/widgets'
+// locals
+import { Channels } from './channels'
 // styles
 import styles from './styles'
 
@@ -21,18 +23,21 @@ export const Dataset = (props) => {
     // pull the data
     const dataset = useFragment(graphql`
         fragment dataset_dataset on Dataset {
+            uuid
             shape
             datatype
+            channels
         }`,
         props.dataset)
     // unpack
-    const { shape, datatype } = dataset
+    const { uuid, shape, datatype, channels } = dataset
 
     // render
     return (
         <>
             <Info name="shape" value={shape.join("x")} style={styles.attributes} />
             <Info name="type" value={datatype} style={styles.attributes} />
+            <Channels dataset={uuid} channels={channels} />
         </>
     )
 }
