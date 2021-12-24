@@ -8,6 +8,7 @@
 export { Chevron } from './chevron'
 export { Controls } from './controls'
 export Data from './data'
+export { Eye } from './eye'
 export Flame from './flame'
 export Hammer from './hammer'
 export Help from './help'
