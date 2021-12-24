@@ -122,6 +122,7 @@ const blank = {
 
 }
 
+
 const reader = {
     // for the tray
     tray: {
@@ -131,6 +132,7 @@ const reader = {
         items: {},
     },
 }
+
 
 // attributes
 const attributes = {
@@ -143,8 +145,33 @@ const attributes = {
     value: {},
 }
 
+
+// channels
+const channel = {
+    box: {
+        fontSize: "50%",
+        fontFamily: "inconsolata",
+        display: "flex",
+        flexDirection: "row",
+    },
+
+    name: {
+        flex: 1,
+        padding: "0.125em 0.0em 0.125em 4.0em",
+        color: wheel.gray.aluminum,
+    },
+
+    marker: {
+        badge: {
+            flex: 0,
+            padding: "0.125em 1.0em 0.125em 0.0em",
+        },
+    },
+}
+
+
 // publish
-export default { flex, datasets, controls, blank, reader, attributes }
+export default { flex, datasets, controls, blank, reader, attributes, channel }
 
 
 // end of file
