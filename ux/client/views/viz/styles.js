@@ -143,6 +143,9 @@ const attributes = {
         textAlign: "right",
     },
     value: {},
+    separator: {
+        width: "1.5em",
+    }
 }
 
 
@@ -157,7 +160,7 @@ const channel = {
 
     name: {
         flex: 1,
-        padding: "0.125em 0.0em 0.125em 4.0em",
+        padding: "0.125em 0.0em 0.125em 7.5em",
         color: wheel.gray.aluminum,
     },
 
