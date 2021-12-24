@@ -10,8 +10,6 @@ import React from 'react'
 // project
 // widgets
 import { Badge } from '~/widgets'
-// shapes
-import { Eye } from '~/shapes'
 // locals
 // styles
 import styles from './styles'
@@ -23,15 +21,11 @@ export const Channel = ({ dataset, channel }) => {
     // mix the styles
     const boxStyle = styles.channel.box
     const nameStyle = styles.channel.name
-    const markerStyle = styles.channel.marker
 
     // render
     return (
         <div style={boxStyle}>
             <div style={nameStyle}>{channel}</div>
-            <Badge size={8} style={markerStyle}>
-                <Eye />
-            </Badge>
         </div>
     )
 }
