@@ -35,7 +35,7 @@ export const Dataset = (props) => {
     // render
     return (
         <>
-            <Info name="shape" value={shape.join("x")} style={styles.attributes} />
+            <Info name="shape" value={shape.join(" x ")} style={styles.attributes} />
             <Info name="type" value={datatype} style={styles.attributes} />
             <Channels dataset={uuid} channels={channels} />
         </>
