@@ -25,6 +25,7 @@ export default {
         // style
         fontSize: "60%",
         padding: "0.25rem 0.0rem 0.25rem 0.6rem",
+        cursor: "pointer",
         // colors
         color: "hsl(0deg, 0%, 60%, 1)",
         backgroundColor: "hsl(0deg, 0%, 25%, 1)",
