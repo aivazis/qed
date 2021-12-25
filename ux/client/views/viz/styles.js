@@ -159,15 +159,19 @@ const channel = {
     },
 
     name: {
-        flex: 1,
-        padding: "0.125em 0.0em 0.125em 7.5em",
-        color: wheel.gray.aluminum,
-    },
-
-    marker: {
-        badge: {
-            flex: 0,
-            padding: "0.125em 1.0em 0.125em 0.0em",
+        base: {
+            flex: 1,
+            padding: "0.125em 0.0em 0.125em 7.5em",
+            cursor: "pointer",
+        },
+        enabled: {
+            color: wheel.gray.aluminum,
+        },
+        available: {
+            color: theme.page.name,
+        },
+        active: {
+            color: theme.page.name,
         },
     },
 }
