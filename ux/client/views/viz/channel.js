@@ -7,10 +7,9 @@
 // externals
 import React from 'react'
 
-// project
-// widgets
-import { Badge } from '~/widgets'
 // locals
+// context
+import { Context } from './context'
 // styles
 import styles from './styles'
 
@@ -19,6 +18,8 @@ import styles from './styles'
 export const Channel = ({ reader, dataset, channel, state = "enabled", behaviors }) => {
     // local state for the state dependent paint
     const [polish, setPolish] = React.useState(null)
+    // access to the active view
+    const { viewChannel } = React.useContext(Context)
 
     // get the channel style
     const channelStyle = styles.channel
@@ -56,8 +57,10 @@ export const Channel = ({ reader, dataset, channel, state = "enabled", behaviors
         }
 
         const select = () => {
-            // show me
-            console.log(`reader: ${reader}, dataset: ${dataset}, channel: ${channel}`)
+            // assemble the channel spec
+            const spec = { reader, dataset, channel }
+            // and adjust the contexts of the active view
+            viewChannel(spec)
             // all done
             return
         }
