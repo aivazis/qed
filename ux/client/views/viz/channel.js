@@ -16,7 +16,7 @@ import styles from './styles'
 
 
 // display the datasets associated with this reader
-export const Channel = ({ dataset, channel, state = "enabled", behaviors }) => {
+export const Channel = ({ reader, dataset, channel, state = "enabled", behaviors }) => {
     // local state for the state dependent paint
     const [polish, setPolish] = React.useState(null)
 
@@ -55,8 +55,17 @@ export const Channel = ({ dataset, channel, state = "enabled", behaviors }) => {
             return
         }
 
+        const select = () => {
+            // show me
+            console.log(`reader: ${reader}, dataset: ${dataset}, channel: ${channel}`)
+            // all done
+            return
+        }
+
         // gather all the handlers in a single object
         controls = {
+            // selection
+            onClick: select,
             // styling
             onMouseEnter: highlight,
             onMouseLeave: reset,

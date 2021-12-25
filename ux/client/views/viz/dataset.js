@@ -20,6 +20,8 @@ import styles from './styles'
 
 // display the datasets associated with this reader
 export const Dataset = (props) => {
+    // get the reader
+    const { reader } = props
     // pull the data
     const dataset = useFragment(graphql`
         fragment dataset_dataset on Dataset {
@@ -37,7 +39,7 @@ export const Dataset = (props) => {
         <>
             <Info name="shape" value={shape.join(" x ")} style={styles.attributes} />
             <Info name="type" value={datatype} style={styles.attributes} />
-            <Channels dataset={uuid} channels={channels} />
+            <Channels reader={reader} dataset={uuid} channels={channels} />
         </>
     )
 }

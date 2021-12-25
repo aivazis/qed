@@ -17,13 +17,13 @@ import styles from './styles'
 
 
 // display the datasets associated with this reader
-export const Channels = ({ dataset, channels }) => {
+export const Channels = ({ reader, dataset, channels }) => {
     // render
     return (
         <>
             <Info name="channels" value="" style={styles.attributes} />
             {channels.map((channel) => (
-                <Channel key={channel} dataset={dataset} channel={channel} />
+                <Channel key={channel} reader={reader} dataset={dataset} channel={channel} />
             ))}
         </>
     )

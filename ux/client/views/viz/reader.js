@@ -37,7 +37,7 @@ export const Reader = (props) => {
         }`,
         props.reader)
     // unpack
-    const { id, uri } = reader
+    const { id, uuid, uri } = reader
     // parse the reader id
     const [family, name] = id.split(":")
 
@@ -47,7 +47,7 @@ export const Reader = (props) => {
             <Info name="uri" value={uri} style={styles.attributes} />
             <Info name="reader" value={family} style={styles.attributes} />
             {reader.datasets.map((dataset) => (
-                <Dataset key={dataset.uuid} dataset={dataset} />
+                <Dataset key={dataset.uuid} reader={uuid} dataset={dataset} />
             ))}
         </Tray>
     )
