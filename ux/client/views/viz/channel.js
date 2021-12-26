@@ -15,11 +15,15 @@ import styles from './styles'
 
 
 // display the datasets associated with this reader
-export const Channel = ({ reader, dataset, channel, state = "enabled", behaviors }) => {
+export const Channel = ({ reader, dataset, channel, behaviors }) => {
     // local state for the state dependent paint
     const [polish, setPolish] = React.useState(null)
     // access to the active view
-    const { viewChannel } = React.useContext(Context)
+    const { activeView, views, viewChannel } = React.useContext(Context)
+    // unpack the active view spec
+    const { dataset: activeDataset, channel: activeChannel } = { ...views[activeView] }
+    // deduce my state
+    const state = (activeDataset === dataset && activeChannel === channel) ? "active" : "enabled"
 
     // get the channel style
     const channelStyle = styles.channel
@@ -40,23 +44,24 @@ export const Channel = ({ reader, dataset, channel, state = "enabled", behaviors
     if (state === "enabled") {
         // make a handler for highlighting a channel
         const highlight = () => {
-            // mix the highlight style
-            const nameStyle = { ...channelStyle.name.available }
-            // and apply it
-            setPolish(nameStyle)
+            // mix the highlight style and apply it
+            setPolish(channelStyle.name.available)
             // all done
             return
         }
 
         // and one for removing the highlight
         const reset = () => {
-            // reset the polish
+            // reset my polish
+            // setPolish(channelStyle.name.enabled)
             setPolish(null)
             // all done
             return
         }
 
         const select = () => {
+            // reset my polish
+            setPolish(null)
             // assemble the channel spec
             const spec = { reader, dataset, channel }
             // and adjust the contexts of the active view
