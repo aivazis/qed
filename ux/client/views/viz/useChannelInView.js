@@ -17,7 +17,7 @@ export const useChannelInView = () => {
     // grab the {views} and the index of the {activeView}
     const { activeView, views } = React.useContext(Context)
     // make an accessor
-    const getChannelInView = (view = activeView) => views[view]
+    const getChannelInView = (view = activeView) => ({ ...views[view] })
     // and return it
     return getChannelInView
 }
