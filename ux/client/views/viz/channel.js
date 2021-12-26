@@ -10,6 +10,8 @@ import React from 'react'
 // locals
 // context
 import { Context } from './context'
+// hooks
+import { useVisualizeChannel } from './useVisualizeChannel'
 // styles
 import styles from './styles'
 
@@ -19,7 +21,9 @@ export const Channel = ({ reader, dataset, channel, behaviors }) => {
     // local state for the state dependent paint
     const [polish, setPolish] = React.useState(null)
     // access to the active view
-    const { activeView, views, viewChannel } = React.useContext(Context)
+    const { activeView, views } = React.useContext(Context)
+    // handler that places a channel in a view
+    const visualizeChannel = useVisualizeChannel()
     // unpack the active view spec
     const { dataset: activeDataset, channel: activeChannel } = { ...views[activeView] }
     // deduce my state
@@ -53,7 +57,6 @@ export const Channel = ({ reader, dataset, channel, behaviors }) => {
         // and one for removing the highlight
         const reset = () => {
             // reset my polish
-            // setPolish(channelStyle.name.enabled)
             setPolish(null)
             // all done
             return
@@ -64,8 +67,8 @@ export const Channel = ({ reader, dataset, channel, behaviors }) => {
             setPolish(null)
             // assemble the channel spec
             const spec = { reader, dataset, channel }
-            // and adjust the contexts of the active view
-            viewChannel(spec)
+            // and adjust the contents of the active view
+            visualizeChannel(spec)
             // all done
             return
         }
