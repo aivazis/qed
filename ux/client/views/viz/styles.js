@@ -131,6 +131,15 @@ const reader = {
         title: {},
         items: {},
     },
+
+    activeTray: {
+        box: {},
+        header: {},
+        title: {
+            color: theme.page.name,
+        },
+        items: {},
+    },
 }
 
 

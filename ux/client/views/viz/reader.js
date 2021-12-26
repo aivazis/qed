@@ -13,6 +13,9 @@ import { graphql } from 'relay-runtime'
 // widgets
 import { Info, Tray } from '~/widgets'
 // locals
+// context
+import { Context } from './context'
+// components
 import { Dataset } from './dataset'
 // styles
 import styles from './styles'
@@ -20,6 +23,10 @@ import styles from './styles'
 
 // display the datasets associated with this reader
 export const Reader = (props) => {
+    // access to the active view
+    const { activeView, views } = React.useContext(Context)
+    // unpack the active view spec
+    const { reader: activeReader } = { ...views[activeView] }
     // pull the data
     const reader = useFragment(graphql`
         fragment reader_reader on Reader {
@@ -41,9 +48,12 @@ export const Reader = (props) => {
     // parse the reader id
     const [family, name] = id.split(":")
 
+    // mix the styles
+    const trayStyle = (uuid === activeReader) ? styles.reader.activeTray : styles.reader.tray
+
     // render
     return (
-        <Tray title={name} style={styles.reader.tray} >
+        <Tray title={name} style={trayStyle} >
             <Info name="uri" value={uri} style={styles.attributes} />
             <Info name="reader" value={family} style={styles.attributes} />
             {reader.datasets.map((dataset) => (
