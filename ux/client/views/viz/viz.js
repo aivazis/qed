@@ -16,9 +16,9 @@ import { useActivityPanel } from '~/views'
 import { Flex } from '~/widgets'
 
 // locals
-// context
-import { Context, Provider } from './context'
-// the blank view
+// hooks
+import { useViews } from './useViews'
+// components
 import { Blank } from './blank'
 // styles
 import styles from './styles'
@@ -28,8 +28,8 @@ import styles from './styles'
 const Panel = () => {
     // get the state of the activity panel
     const { activityPanel } = useActivityPanel()
-    // grab the views
-    const { views } = React.useContext(Context)
+    // grab the registered views
+    const views = useViews()
 
     // paint mixing
     const datasetPaint = { ...styles.datasets }
@@ -63,6 +63,8 @@ const Panel = () => {
 }
 
 
+// context
+import { Provider } from './context'
 // turn the view into a context provider and publish
 export const Viz = ({ }) => {
     // set up the context provider
