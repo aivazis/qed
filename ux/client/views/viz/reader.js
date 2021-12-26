@@ -48,12 +48,14 @@ export const Reader = (props) => {
     // parse the reader id
     const [family, name] = id.split(":")
 
+    // check whether i'm the tray with the active {dataset,channel}
+    const amActive = uuid === activeReader
     // mix the styles
-    const trayStyle = (uuid === activeReader) ? styles.reader.activeTray : styles.reader.tray
+    const trayStyle = amActive ? styles.reader.activeTray : styles.reader.tray
 
     // render
     return (
-        <Tray title={name} style={trayStyle} >
+        <Tray title={name} initially={amActive} style={trayStyle} >
             <Info name="uri" value={uri} style={styles.attributes} />
             <Info name="reader" value={family} style={styles.attributes} />
             {reader.datasets.map((dataset) => (
