@@ -6,22 +6,22 @@
 
 // externals
 import React from 'react'
-import { graphql, useLazyLoadQuery } from 'react-relay/hooks'
 
 //project
 // widgets
 import { Header } from '~/widgets'
 // locals
-// readers
+// hooks
+import { useReaders } from './useReaders'
+// components
 import { Reader } from './reader'
 // styles
 import styles from './styles'
 
 // the dataset explorer
 export const Datasets = () => {
-    // ask the server for the collection of known data sets
-    const { readers } = useLazyLoadQuery(datasetsQuery)
-
+   // get the readers
+   const readers = useReaders()
     // render
     return (
         <>
@@ -34,23 +34,6 @@ export const Datasets = () => {
         </>
     )
 }
-
-
-// the dataset query
-const datasetsQuery = graphql`query datasetsQuery {
-    readers(first: 100) @connection(key: "datasets_readers") {
-        count
-        edges {
-            node {
-                # i need the {uuid} to make the child key
-                uuid
-                # plus whatever the {reader} needs to render itself
-                ...reader_reader
-            }
-            cursor
-        }
-    }
-}`
 
 
 // end of file
