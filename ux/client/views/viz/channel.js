@@ -8,9 +8,8 @@
 import React from 'react'
 
 // locals
-// context
-import { Context } from './context'
 // hooks
+import { useChannelInView } from './useChannelInView'
 import { useVisualizeChannel } from './useVisualizeChannel'
 // styles
 import styles from './styles'
@@ -21,11 +20,11 @@ export const Channel = ({ reader, dataset, channel, behaviors }) => {
     // local state for the state dependent paint
     const [polish, setPolish] = React.useState(null)
     // access to the active view
-    const { activeView, views } = React.useContext(Context)
+    const getChannelInView = useChannelInView()
     // handler that places a channel in a view
     const visualizeChannel = useVisualizeChannel()
     // unpack the active view spec
-    const { dataset: activeDataset, channel: activeChannel } = { ...views[activeView] }
+    const { dataset: activeDataset, channel: activeChannel } = { ...getChannelInView() }
     // deduce my state
     const state = (activeDataset === dataset && activeChannel === channel) ? "active" : "enabled"
 
