@@ -13,8 +13,8 @@ import { graphql } from 'relay-runtime'
 // widgets
 import { Info, Tray } from '~/widgets'
 // locals
-// context
-import { Context } from './context'
+// hooks
+import { useChannelInView } from './useChannelInView'
 // components
 import { Dataset } from './dataset'
 // styles
@@ -24,9 +24,9 @@ import styles from './styles'
 // display the datasets associated with this reader
 export const Reader = (props) => {
     // access to the active view
-    const { activeView, views } = React.useContext(Context)
+    const getChannelInView = useChannelInView()
     // unpack the active view spec
-    const { reader: activeReader } = { ...views[activeView] }
+    const { reader: activeReader } = getChannelInView()
     // pull the data
     const reader = useFragment(graphql`
         fragment reader_reader on Reader {

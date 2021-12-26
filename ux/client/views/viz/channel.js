@@ -24,7 +24,7 @@ export const Channel = ({ reader, dataset, channel, behaviors }) => {
     // handler that places a channel in a view
     const visualizeChannel = useVisualizeChannel()
     // unpack the active view spec
-    const { dataset: activeDataset, channel: activeChannel } = { ...getChannelInView() }
+    const { dataset: activeDataset, channel: activeChannel } = getChannelInView()
     // deduce my state
     const state = (activeDataset === dataset && activeChannel === channel) ? "active" : "enabled"
 
