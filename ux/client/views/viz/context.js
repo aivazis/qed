@@ -6,6 +6,8 @@
 
 // externals
 import React from 'react'
+// graphql
+import { graphql, useLazyLoadQuery } from 'react-relay/hooks'
 
 // the error message to show consumers that are not nested within a provider
 const complaint = "while accessing the 'viz' context: no provider"
@@ -23,6 +25,9 @@ export const Context = React.createContext(
         setActiveView: () => { throw new Error(complaint) },
         // update the contents of the active view
         viewChannel: () => { throw new Error(complaint) },
+
+        // the readers
+        readers: null,
     }
 )
 
@@ -34,8 +39,13 @@ export const Provider = ({
 }) => {
     // setup the views
     const [views, setViews] = React.useState(new Array())
-    // the active is an index into the {views}
+    // the active view is an index into the {views}
     const [activeView, setActiveView] = React.useState(0)
+
+    // ask the server for the collection of known datasets
+    const { readers: knownReaders } = useLazyLoadQuery(contextQuery)
+    // set up the readers
+    const [readers] = React.useState(knownReaders)
 
     // split a view
     const splitView = (view) => { }
@@ -65,6 +75,8 @@ export const Provider = ({
         activeView, setActiveView,
         // modify the contents of the active view
         viewChannel,
+        // readers
+        readers,
     }
 
     // provide for my children
@@ -75,6 +87,23 @@ export const Provider = ({
 
     )
 }
+
+
+// the dataset query
+const contextQuery = graphql`query contextQuery {
+    readers(first: 100) @connection(key: "datasets_readers") {
+        count
+        edges {
+            node {
+                # {datasets} needs the {uuid} to make the keys for its children
+                uuid
+                # plus whatever the {reader} needs to render itself
+                ...reader_reader
+            }
+            cursor
+        }
+    }
+}`
 
 
 // end of file
