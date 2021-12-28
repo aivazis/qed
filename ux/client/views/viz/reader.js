@@ -55,7 +55,7 @@ export const Reader = (props) => {
     const trayStyle = amActive ? styles.reader.activeTray : styles.reader.tray
 
     // build the reader spec that gets installed in a view when a channel is chosen
-    const readerSpec = { uuid, uri }
+    const readerSpec = { uuid, uri, name }
 
     // render
     return (
