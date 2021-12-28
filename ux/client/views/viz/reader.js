@@ -25,8 +25,9 @@ import styles from './styles'
 export const Reader = (props) => {
     // access to the active view
     const getChannelInView = useChannelInView()
-    // unpack the active view spec
-    const { reader: activeReader } = getChannelInView()
+    // extract the id of the active reader, if any
+    const { reader: { uuid: activeReader = null } = {} } = getChannelInView()
+
     // pull the data
     const reader = useFragment(graphql`
         fragment reader_reader on Reader {
@@ -53,13 +54,16 @@ export const Reader = (props) => {
     // mix the styles
     const trayStyle = amActive ? styles.reader.activeTray : styles.reader.tray
 
+    // build the reader spec that gets installed in a view when a channel is chosen
+    const readerSpec = { uuid, uri }
+
     // render
     return (
         <Tray title={name} initially={amActive} style={trayStyle} >
             <Info name="uri" value={uri} style={styles.attributes} />
             <Info name="reader" value={family} style={styles.attributes} />
             {reader.datasets.map((dataset) => (
-                <Dataset key={dataset.uuid} reader={uuid} dataset={dataset} />
+                <Dataset key={dataset.uuid} reader={readerSpec} dataset={dataset} />
             ))}
         </Tray>
     )
