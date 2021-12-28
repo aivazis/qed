@@ -24,9 +24,15 @@ export const Channel = ({ reader, dataset, channel, behaviors }) => {
     // handler that places a channel in a view
     const visualizeChannel = useVisualizeChannel()
     // unpack the active view spec
-    const { dataset: activeDataset, channel: activeChannel } = getChannelInView()
+    const {
+        dataset: { uuid: activeDataset = null } = {},
+        channel: activeChannel = null
+    } = getChannelInView()
+
+    // am i the active channel
+    const amActive = (activeDataset === dataset.uuid && activeChannel === channel)
     // deduce my state
-    const state = (activeDataset === dataset && activeChannel === channel) ? "active" : "enabled"
+    const state = amActive ? "active" : "enabled"
 
     // get the channel style
     const channelStyle = styles.channel

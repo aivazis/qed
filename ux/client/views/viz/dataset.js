@@ -20,7 +20,7 @@ import styles from './styles'
 
 // display the datasets associated with this reader
 export const Dataset = (props) => {
-    // get the reader
+    // extract the reader spec
     const { reader } = props
     // pull the data
     const dataset = useFragment(graphql`
@@ -28,18 +28,25 @@ export const Dataset = (props) => {
             uuid
             shape
             datatype
+            selector {
+                name
+                value
+            }
             channels
         }`,
         props.dataset)
     // unpack
-    const { uuid, shape, datatype, channels } = dataset
+    const { uuid, shape, datatype, channels, selector } = dataset
+
+    // build the dataset spec that get installed in the {views}
+    const datasetSpec = { uuid, shape, datatype, selector }
 
     // render
     return (
         <>
             <Info name="shape" value={shape.join(" x ")} style={styles.attributes} />
             <Info name="type" value={datatype} style={styles.attributes} />
-            <Channels reader={reader} dataset={uuid} channels={channels} />
+            <Channels reader={reader} dataset={datasetSpec} channels={channels} />
         </>
     )
 }
