@@ -20,16 +20,17 @@ import { Flex } from '~/widgets'
 import { useViews } from './useViews'
 // components
 import { Blank } from './blank'
+import { Viewer } from './viewer'
 // styles
 import styles from './styles'
 
 
 // the area
 const Panel = () => {
-    // get the state of the activity panel
-    const { activityPanel } = useActivityPanel()
     // grab the registered views
     const views = useViews()
+    // get the state of the activity panel
+    const { activityPanel } = useActivityPanel()
 
     // paint mixing
     const datasetPaint = { ...styles.datasets }
@@ -40,7 +41,7 @@ const Panel = () => {
     return (
         <Flex.Box direction="row" style={styles.flex} >
             {/* panel with activity specific content, determined by the current route */}
-            <Flex.Panel min={200} max={400} style={datasetPaint} >
+            <Flex.Panel min={250} max={450} style={datasetPaint} >
                 <Outlet />
             </Flex.Panel >
 
@@ -54,7 +55,7 @@ const Panel = () => {
             {/* otherwise, make a panel for each active view */}
             {views.map(({ dataset, channel }, idx) =>
                 <Flex.Panel key={`${dataset}:${channel}`} style={styles.flex} auto={true} >
-                    <Blank idx={idx} />
+                    <Viewer />
                 </Flex.Panel >
             )}
 

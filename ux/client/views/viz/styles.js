@@ -48,7 +48,7 @@ const activityPanels = {
         // make it stand out a bit
         backgroundColor: "hsl(0deg, 0%, 7%, 1)",
         // set up the preferred initial width
-        width: "300px",
+        width: "350px",
         flex: "0 0 auto",
     },
 
@@ -145,7 +145,10 @@ const reader = {
 
 // attributes
 const attributes = {
-    info: {},
+    info: {
+        fontSize: "60%",
+        fontFamily: "rubik-light",
+    },
     name: {
         display: "inline-block",
         width: "5em",
@@ -161,7 +164,7 @@ const attributes = {
 // channels
 const channel = {
     box: {
-        fontSize: "50%",
+        fontSize: "60%",
         fontFamily: "inconsolata",
         display: "flex",
         flexDirection: "row",
