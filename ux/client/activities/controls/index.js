@@ -11,7 +11,7 @@ import React from 'react'
 // widgets
 import { Activity } from '~/activities'
 // my shape
-import { Controls } from '~/shapes'
+import { Gear } from '~/shapes'
 // styles
 import styles from './styles'
 
@@ -21,7 +21,7 @@ const activity = ({ size, style }) => {
     // paint me
     return (
         <Activity size={size} url="/controls" barStyle={style} style={styles} >
-            <Controls />
+            <Gear />
         </Activity >
     )
 }
