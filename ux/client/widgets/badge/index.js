@@ -24,10 +24,10 @@ const badge = ({ size, state, behaviors = {}, style, children }) => {
         ...styles.badge, ...style?.badge,
         // if i'm disabled
         ...(state === "disabled" ? styles.disabled.badge : {}),
-        ...(state === "disabled" ? style?.disabled.badge : {}),
+        ...(state === "disabled" ? style?.disabled?.badge : {}),
         // if i'm engaged
         ...(state === "engaged" ? styles.engaged.badge : {}),
-        ...(state === "engaged" ? style?.engaged.badge : {}),
+        ...(state === "engaged" ? style?.engaged?.badge : {}),
         // and whatever the extra styling says
         ...extraBadgeStyle,
     }
@@ -38,10 +38,10 @@ const badge = ({ size, state, behaviors = {}, style, children }) => {
         ...styles.shape, ...style?.shape,
         // if i'm disabled
         ...(state === "disabled" ? styles.disabled.shape : {}),
-        ...(state === "disabled" ? style?.disabled.shape : {}),
+        ...(state === "disabled" ? style?.disabled?.shape : {}),
         // if i'm engaged
         ...(state === "engaged" ? styles.engaged.shape : {}),
-        ...(state === "engaged" ? style?.engaged.shape : {}),
+        ...(state === "engaged" ? style?.engaged?.shape : {}),
         // and whatever the extra styling says
         ...extraShapeStyle,
     }
@@ -53,8 +53,8 @@ const badge = ({ size, state, behaviors = {}, style, children }) => {
         // make a function that can highlight the badge and the shape
         const highlight = () => {
             // mix the highlight styles
-            const badgeStyle = { ...styles.available.badge, ...style?.available.badge }
-            const shapeStyle = { ...styles.available.shape, ...style?.available.shape }
+            const badgeStyle = { ...styles.available.badge, ...style?.available?.badge }
+            const shapeStyle = { ...styles.available.shape, ...style?.available?.shape }
             // and apply them
             setBadgeStyle(badgeStyle)
             setShapeStyle(shapeStyle)
