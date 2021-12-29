@@ -15,9 +15,9 @@ import { Context } from './context'
 // access to the registered views
 export const useViews = () => {
     // grab the list of {views} from context
-    const { views } = React.useContext(Context)
+    const { views, activeView } = React.useContext(Context)
     // and return it
-    return views
+    return { views, activeView }
 }
 
 
