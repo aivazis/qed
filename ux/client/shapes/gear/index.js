@@ -80,7 +80,7 @@ Z`
 
 
 // render the shape
-export const Controls = ({ style }) => {
+export const Gear = ({ style }) => {
     // mix my paint
     const ico = { ...styles.icon, ...style?.icon }
 
