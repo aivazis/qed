@@ -12,7 +12,7 @@ import style from '~/shapes/styles'
 
 
 // the shape color
-const ink = "hsl(0deg, 100%, 90%)"
+const ink = "hsl(0deg, 100%, 50%)"
 
 // publish
 export default {
@@ -22,7 +22,7 @@ export default {
         ...style.icon,
         // stroke
         stroke: ink,
-        strokeWidth: 1,
+        strokeWidth: 2,
         // fill
         fill: "none",
     },
