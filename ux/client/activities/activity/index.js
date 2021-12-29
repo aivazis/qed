@@ -107,7 +107,7 @@ const activity = ({ size, url, children, barStyle, style }) => {
     // paint me
     return (
         <Link to={url} >
-            <Badge name={url} size={size} state={state} behaviors={behaviors}
+            <Badge size={size} state={state} behaviors={behaviors}
                 style={activityStyle} >
                 {children}
             </Badge >
