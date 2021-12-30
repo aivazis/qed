@@ -19,8 +19,6 @@ export const Context = React.createContext(
         // the views
         views: [],
         setView: () => { throw new Error(complaint) },
-        splitView: () => { throw new Error(complaint) },
-        collapseView: () => { throw new Error(complaint) },
         // the active view
         activeView: null,
         setActiveView: () => { throw new Error(complaint) },
@@ -46,15 +44,10 @@ export const Provider = ({
     // set up the readers
     const [readers] = React.useState(knownReaders)
 
-    // split a view
-    const splitView = (view) => { }
-    // collapse a view
-    const collapseView = (view) => { }
-
     // build the current value of the context
     const context = {
         // the views
-        views, setViews, collapseView, splitView,
+        views, setViews,
         // active view
         activeView, setActiveView,
         // readers
