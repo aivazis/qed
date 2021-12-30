@@ -11,7 +11,7 @@ import React from 'react'
 import { useEvent } from '~/hooks'
 // locals
 // context
-import { Provider } from './context'
+import { Context, Provider } from './context'
 // hooks
 import useFlex from './useFlex'
 import useEndFlex from './useEndFlex'
@@ -21,6 +21,8 @@ import styles from './styles'
 
 
 const Container = ({ style, children }) => {
+    // get the panels
+    const { panels } = React.useContext(Context)
     // get the flexbox direction
     const { direction } = useDirection()
     // get the flex support
@@ -29,9 +31,20 @@ const Container = ({ style, children }) => {
 
     // make a ref for my container
     const ref = React.useRef(null)
+
     // install my event listeners
-    useEvent({ name: "mouseup", listener: endFlex, client: ref })
-    useEvent({ name: "mouseleave", listener: endFlex, client: ref })
+    // end the flex when the user let's go of the mouse
+    useEvent({
+        name: "mouseup", listener: endFlex, client: ref,
+        triggers: [panels]
+    })
+    // end the flex when the cursor leaves my client area
+    useEvent({
+        name: "mouseleave", listener: endFlex, client: ref,
+        triggers: [panels]
+    })
+    // flex when the mouse moves; the handler does something non-trivial only when there is
+    // a flexing panel
     useEvent({
         name: "mousemove", listener: doFlex, client: ref,
         triggers: [flexingPanel, separatorLocation]
