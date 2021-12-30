@@ -14,12 +14,12 @@ import styles from './styles'
 
 
 // the area
-export const Blank = () => {
+export const Blank = ({ behaviors }) => {
     // grab the style
     const { blank } = styles
     // render
     return (
-        <section style={blank.nyi}>
+        <section style={blank.nyi} {...behaviors} >
             <div style={blank.placeholder}>
                 <svg style={blank.icon} version="1.1" xmlns="http://www.w3.org/2000/svg">
                     <g transform="scale(0.3)" fill="#f37f19" stroke="none">
