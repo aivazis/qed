@@ -12,8 +12,11 @@ export Flame from './flame'
 export { Gear } from './gear'
 export Hammer from './hammer'
 export Help from './help'
+export { Locked } from './locked'
 export Play from './play'
 export Skull from './skull'
+export { Split } from './split'
+export { Unlocked } from './unlocked'
 export { X } from './x'
 
 
