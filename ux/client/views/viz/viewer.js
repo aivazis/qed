@@ -10,15 +10,19 @@ import React from 'react'
 // locals
 // components
 import { Blank } from './blank'
+import { Tab } from './tab'
 // styles
 import styles from './styles'
 
 
 // display the datasets associated with this reader
-export const Viewer = () => {
+export const Viewer = ({ idx }) => {
     // render
     return (
-        <Blank />
+        <>
+            <Tab idx={idx} />
+            <Blank />
+        </>
     )
 }
 
