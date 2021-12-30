@@ -23,9 +23,7 @@ export const X = ({ style }) => {
 
     // paint me
     return (
-        <>
-            <path style={ico} d={x} />
-        </>
+        <path style={ico} d={x} />
     )
 }
 
