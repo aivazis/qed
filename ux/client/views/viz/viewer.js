@@ -11,17 +11,24 @@ import React from 'react'
 // components
 import { Blank } from './blank'
 import { Tab } from './tab'
+// hooks
+import { useSetActiveView } from './useSetActiveView'
 // styles
 import styles from './styles'
 
 
 // display the datasets associated with this reader
 export const Viewer = ({ idx }) => {
+    // make a handler that makes me the active view
+    const behaviors = {
+        onClick: useSetActiveView(idx)
+    }
+
     // render
     return (
         <>
             <Tab idx={idx} />
-            <Blank />
+            <Blank behaviors={behaviors} />
         </>
     )
 }
