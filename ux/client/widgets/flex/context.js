@@ -27,9 +27,6 @@ export const Context = React.createContext(
         cursor: "col-resize",
         // the transform that centers the separator handle in its parent space
         transform: "translate(-50%, 0%)",
-        // indicator that the box has flexed before
-        hasFlexed: false,
-        setHasFlexed: () => { throw new Error('no context provider') },
         // panel management
         panels: null,
         addPanel: () => { throw new Error('no context provider') },
@@ -68,8 +65,6 @@ export const Provider = ({
     // the set of known panels
     const [panels, setPanels] = React.useState(new Map())
 
-    // indicator of whether we have taken control of the panel extents
-    const [hasFlexed, setHasFlexed] = React.useState(false)
     // the location of the mouse while a separator is being dragged
     const [separatorLocation, setSeparatorLocation] = React.useState(null)
     // the panel being flexed when a separator is activated
@@ -119,8 +114,6 @@ export const Provider = ({
         transform,
         // panel management
         panels, addPanel, removePanel,
-        // managed panels have extents under our control after the first resize
-        hasFlexed, setHasFlexed,
         // support for flexing
         flexingPanel, setFlexingPanel,
         separatorLocation, setSeparatorLocation,
