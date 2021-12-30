@@ -200,9 +200,30 @@ const tab = {
         backgroundColor: "hsl(0deg, 0%, 10%, 1)",
     },
 
-    // the dismiss button
+    // the name of the dataset
+    dataset: {
+        fontFamily: "rubik-light",
+        fontSize: "80%",
+        textTransform: "uppercase",
+        paddingTop: "0.1rem",
+    },
+
+    // styling for selector and channel names
+    selector: {
+        fontFamily: "inconsolata",
+        fontSize: "80%",
+    },
+
+    // separator for the selector and channel names
+    separator: {
+        fontFamily: "inconsolata",
+        fontSize: "80%",
+        padding: "0.0rem 0.25rem",
+    },
+
+    // the icon of the button that dismisses a view
     dismiss: {
-        // the container
+        // the icon container
         badge: {
             flex: 0,
             padding: "0.0rem 0.5rem",
@@ -210,22 +231,16 @@ const tab = {
         },
     },
 
-    // the name of the dataset
-    dataset: {
-        fontFamily: "rubik-medium",
-        fontSize: "80%",
-        textTransform: "uppercase",
-        paddingTop: "0.1rem",
-    },
-
-    selector: {
-        fontFamily: "inconsolata",
-        // padding: "0.125rem 0.0rem",
-    },
-
-    separator: {
-        fontFamily: "inconsolata",
-        padding: "0.0rem 0.25rem",
+    // the icon of the button that splits a view
+    split: {
+        // the icon container
+        badge: {
+            flex: 0,
+            justifySelf: "end",
+            margin: "0.0rem 0.0rem 0.0rem auto",
+            padding: "0.0rem 0.5rem",
+            cursor: "pointer",
+        },
     },
 }
 
