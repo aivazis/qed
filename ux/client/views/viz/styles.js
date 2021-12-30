@@ -221,7 +221,7 @@ const tab = {
         padding: "0.0rem 0.25rem",
     },
 
-    // the icon of the button that dismisses a view
+    // the button that dismisses a view
     dismiss: {
         // the icon container
         badge: {
@@ -231,7 +231,7 @@ const tab = {
         },
     },
 
-    // the icon of the button that splits a view
+    // the button that splits a view
     split: {
         // the icon container
         badge: {
