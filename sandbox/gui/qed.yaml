@@ -14,6 +14,7 @@
 
 20211221:
     uri: ../../../data/nisar/20211221.h5
+    shape: 36864, 10344
 
 
 # attach them to the application
