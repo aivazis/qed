@@ -54,7 +54,7 @@ const Panel = () => {
 
             {/* otherwise, make a panel for each active view */}
             {views.map(({ dataset, channel }, idx) =>
-                <Flex.Panel key={`${dataset}:${channel}`} style={styles.flex} auto={true} >
+                <Flex.Panel key={`${dataset}:${channel}:${idx}`} style={styles.flex} auto={true} >
                     <Viewer idx={idx} />
                 </Flex.Panel >
             )}
