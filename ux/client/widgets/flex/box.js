@@ -36,12 +36,12 @@ const Container = ({ style, children }) => {
     // end the flex when the user let's go of the mouse
     useEvent({
         name: "mouseup", listener: endFlex, client: ref,
-        triggers: [panels]
+        triggers: [flexingPanel]
     })
     // end the flex when the cursor leaves my client area
     useEvent({
         name: "mouseleave", listener: endFlex, client: ref,
-        triggers: [panels]
+        triggers: [flexingPanel]
     })
     // flex when the mouse moves; the handler does something non-trivial only when there is
     // a flexing panel
