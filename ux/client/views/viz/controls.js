@@ -8,9 +8,10 @@
 import React from 'react'
 import { graphql, useLazyLoadQuery } from 'react-relay/hooks'
 
-//project
+// project
 // widgets
 import { Header, Tray } from '~/widgets'
+
 // locals
 // styles
 import styles from './styles'

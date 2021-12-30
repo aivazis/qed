@@ -7,9 +7,10 @@
 // externals
 import React from 'react'
 
-//project
+// project
 // widgets
 import { Header } from '~/widgets'
+
 // locals
 // hooks
 import { useReaders } from './useReaders'
@@ -20,8 +21,8 @@ import styles from './styles'
 
 // the dataset explorer
 export const Datasets = () => {
-   // get the readers
-   const readers = useReaders()
+    // get the readers
+    const readers = useReaders()
     // render
     return (
         <>
