@@ -189,8 +189,58 @@ const channel = {
 }
 
 
+// the viewer tab
+const tab = {
+    // the container
+    box: {
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        height: "1.6rem",
+        backgroundColor: "hsl(0deg, 0%, 10%, 1)",
+    },
+
+    // the dismiss button
+    dismiss: {
+        // the container
+        badge: {
+            flex: 0,
+            padding: "0.0rem 0.5rem",
+            cursor: "pointer",
+        },
+    },
+
+    // the name of the dataset
+    dataset: {
+        fontFamily: "rubik-medium",
+        fontSize: "80%",
+        textTransform: "uppercase",
+        paddingTop: "0.1rem",
+    },
+
+    selector: {
+        fontFamily: "inconsolata",
+        // padding: "0.125rem 0.0rem",
+    },
+
+    separator: {
+        fontFamily: "inconsolata",
+        padding: "0.0rem 0.25rem",
+    },
+}
+
+
 // publish
-export default { flex, datasets, controls, blank, reader, attributes, channel }
+export default {
+    attributes,
+    blank,
+    channel,
+    controls,
+    datasets,
+    flex,
+    reader,
+    tab,
+}
 
 
 // end of file
