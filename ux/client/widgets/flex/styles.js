@@ -5,9 +5,7 @@
 
 
 // get colors
-import { wheel, theme } from '~/palette'
-// get the base styles
-import base from '~/views/styles'
+import { theme } from '~/palette'
 
 
 // publish
@@ -24,7 +22,7 @@ export default {
     // the individual panels
     panel: {
         // for me
-        flex: "1 1 100%",
+        flex: "1 1 auto",
         // for my children
         overflow: "hidden",
         display: "flex",
@@ -51,6 +49,7 @@ export default {
         },
     },
 
+    // when debugging, we show the panel size instead of its actual children; style the info
     extent: {
         // fonts
         fontFamily: "inconsolata",
