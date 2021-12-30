@@ -7,9 +7,11 @@
 // externals
 import React from 'react'
 
-// locals
+// project
 // hooks
 import { useResizeObserver } from '~/hooks'
+
+// locals
 // hooks
 import useBeginFlex from './useBeginFlex'
 import useRegisterPanel from './useRegisterPanel'
