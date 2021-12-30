@@ -28,7 +28,7 @@ import styles from './styles'
 // the area
 const Panel = () => {
     // grab the registered views
-    const views = useViews()
+    const { views } = useViews()
     // get the state of the activity panel
     const { activityPanel } = useActivityPanel()
 
@@ -55,7 +55,7 @@ const Panel = () => {
             {/* otherwise, make a panel for each active view */}
             {views.map(({ dataset, channel }, idx) =>
                 <Flex.Panel key={`${dataset}:${channel}`} style={styles.flex} auto={true} >
-                    <Viewer />
+                    <Viewer idx={idx} />
                 </Flex.Panel >
             )}
 
