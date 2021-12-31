@@ -37,6 +37,9 @@ export const Context = React.createContext(
         // the set of panels downstream from the flexing one
         downstreamPanels: null,
         setDownstreamPanels: () => { throw new Error('no context provider') },
+        // the location of the moving panel separator
+        separatorLocation: null,
+        setSeparatorLocation: () => { throw new Error('no context provider') },
     }
 )
 
@@ -108,10 +111,10 @@ export const Provider = ({
         direction, isRow, parity,
         // direction dependent attribute names
         mainPos, crossPos, mainExtent, crossExtent, minExtent, maxExtent,
-        // cursors
-        cursor,
         // the transform that centers the separator handle within the rule
         transform,
+        // cursors
+        cursor,
         // panel management
         panels, addPanel, removePanel,
         // support for flexing
