@@ -151,7 +151,26 @@ const attributes = {
     },
     name: {
         display: "inline-block",
-        width: "5em",
+        width: "7em",
+        textAlign: "right",
+    },
+    value: {},
+    separator: {
+        width: "1.5em",
+    }
+}
+
+
+// selectors
+const selectors = {
+    info: {
+        fontSize: "60%",
+        fontFamily: "rubik-light",
+        backgroundColor: "hsl(0deg, 0%, 10%)",
+    },
+    name: {
+        display: "inline-block",
+        width: "7em",
         textAlign: "right",
     },
     value: {},
@@ -173,7 +192,7 @@ const channel = {
     name: {
         base: {
             flex: 1,
-            padding: "0.125em 0.0em 0.125em 7.5em",
+            padding: "0.125em 0.0em 0.125em 9.5em",
             cursor: "pointer",
         },
         enabled: {
@@ -305,6 +324,7 @@ export default {
     datasets,
     flex,
     reader,
+    selectors,
     tab,
 }
 

@@ -12,8 +12,10 @@ import { graphql } from 'relay-runtime'
 // project
 // widgets
 import { Info } from '~/widgets'
+
 // locals
 import { Channels } from './channels'
+import { Selectors } from './selectors'
 // styles
 import styles from './styles'
 
@@ -44,6 +46,7 @@ export const Dataset = (props) => {
     // render
     return (
         <>
+            <Selectors selector={selector} />
             <Info name="shape" value={shape.join(" x ")} style={styles.attributes} />
             <Info name="type" value={datatype} style={styles.attributes} />
             <Channels reader={reader} dataset={datasetSpec} channels={channels} />
