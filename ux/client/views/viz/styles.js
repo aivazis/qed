@@ -228,12 +228,34 @@ const tab = {
     },
 
     // the button that dismisses a view
-    dismiss: {
+    collapse: {
         // the icon container
         badge: {
+            // for me
             flex: 0,
             padding: "0.0rem 0.5rem",
             cursor: "pointer",
+            // for my children
+            display: "flex",
+            alignItems: "center",
+        },
+        // for the shape container
+        shape: {
+            // dim it a bit
+            strokeOpacity: 0.5,
+        },
+
+        // for the shape
+        icon: {
+            strokeWidth: 2,
+        },
+
+        // highlight when the cursor hovers over it
+        available: {
+            shape: {
+                // full intensity
+                strokeOpacity: 1.0,
+            },
         },
     },
 
@@ -241,17 +263,20 @@ const tab = {
     split: {
         // the icon container
         badge: {
+            // for me
             flex: 0,
             justifySelf: "end",
             margin: "0.0rem 0.0rem 0.0rem auto",
             padding: "0.0rem 0.5rem",
             cursor: "pointer",
+            // for my children
+            display: "flex",
+            alignItems: "center",
         },
 
         // for the shape container
         shape: {
             // dim it a bit
-            fillOpacity: 0.5,
             strokeOpacity: 0.5,
         },
 
@@ -264,7 +289,6 @@ const tab = {
         available: {
             shape: {
                 // full intensity
-                fillOpacity: 1.0,
                 strokeOpacity: 1.0,
             },
         },

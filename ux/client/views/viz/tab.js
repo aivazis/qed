@@ -54,8 +54,8 @@ export const Tab = ({ idx }) => {
     // render
     return (
         <div style={tabStyle.box}>
-            <Badge size={12} state="available" behaviors={collapse} style={tabStyle.dismiss} >
-                <X />
+            <Badge size={8} state="available" behaviors={collapse} style={tabStyle.collapse} >
+                <X style={tabStyle.collapse} />
             </Badge>
             <div style={datasetStyle}>{reader?.name}</div>
             {reader && <div style={tabStyle.separator}>:</div>}
