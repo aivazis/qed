@@ -200,6 +200,12 @@ const tab = {
         backgroundColor: "hsl(0deg, 0%, 10%, 1)",
     },
 
+    active: {
+        // color: theme.page.name,
+        color: wheel.gray.concrete,
+        // opacity: 0.5,
+    },
+
     // the name of the dataset
     dataset: {
         fontFamily: "rubik-light",
@@ -242,13 +248,14 @@ const tab = {
             cursor: "pointer",
         },
 
-        // for the shape
+        // for the shape container
         shape: {
             // dim it a bit
             fillOpacity: 0.5,
             strokeOpacity: 0.5,
         },
 
+        // for the shape
         icon: {
             stroke: wheel.gray.flour,
         },
