@@ -17,7 +17,11 @@ export const useCollapseView = view => {
     // grab the list of {views} from context
     const { setViews, setActiveView } = React.useContext(Context)
     // make a handler that adds a new blank view after a given on
-    const collapseView = () => {
+    const collapseView = (evt) => {
+        // stop this event from bubbling up
+        evt.stopPropagation()
+        // and quash any side effects
+        evt.preventDefault()
         // adjust the view
         setViews(old => {
             // make a copy of the old state
