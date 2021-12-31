@@ -17,9 +17,7 @@ export default ({ panel }) => {
     const {
         panels,
         mainExtent, mainPos,
-        setSeparatorLocation,
-        setFlexingPanel,
-        setDownstreamPanels,
+        setSeparatorLocation, setFlexingPanel, setDownstreamPanels,
     } = React.useContext(Context)
 
     // when a panel starts flexing
