@@ -16,7 +16,7 @@ import { Channel } from './channel'
 import styles from './styles'
 
 
-// display the datasets associated with this reader
+// display the channels associated with this dataset
 export const Channels = ({ reader, dataset, channels }) => {
     // render
     return (

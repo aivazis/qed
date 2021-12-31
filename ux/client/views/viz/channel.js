@@ -15,7 +15,7 @@ import { useVisualizeChannel } from './useVisualizeChannel'
 import styles from './styles'
 
 
-// display the datasets associated with this reader
+// render a channel and make it a control
 export const Channel = ({ reader, dataset, channel, behaviors }) => {
     // local state for the state dependent paint
     const [polish, setPolish] = React.useState(null)
