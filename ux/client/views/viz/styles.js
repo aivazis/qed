@@ -241,6 +241,26 @@ const tab = {
             padding: "0.0rem 0.5rem",
             cursor: "pointer",
         },
+
+        // for the shape
+        shape: {
+            // dim it a bit
+            fillOpacity: 0.5,
+            strokeOpacity: 0.5,
+        },
+
+        icon: {
+            stroke: wheel.gray.flour,
+        },
+
+        // highlight when the cursor hovers over it
+        available: {
+            shape: {
+                // full intensity
+                fillOpacity: 1.0,
+                strokeOpacity: 1.0,
+            },
+        },
     },
 }
 
