@@ -27,7 +27,7 @@ export const Viewer = ({ idx }) => {
     // render
     return (
         <>
-            <Tab idx={idx} />
+            <Tab idx={idx} behaviors={behaviors} />
             <Blank behaviors={behaviors} />
         </>
     )

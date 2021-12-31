@@ -24,7 +24,7 @@ import styles from './styles'
 
 
 // display the datasets associated with this reader
-export const Tab = ({ idx }) => {
+export const Tab = ({ idx, behaviors }) => {
     // get the views
     const { activeView, views } = useViews()
     // make a handler that splits this view
@@ -53,7 +53,7 @@ export const Tab = ({ idx }) => {
 
     // render
     return (
-        <div style={tabStyle.box}>
+        <div style={tabStyle.box} {...behaviors} >
             <Badge size={8} state="available" behaviors={collapse} style={tabStyle.collapse} >
                 <X style={tabStyle.collapse} />
             </Badge>
