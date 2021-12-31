@@ -59,12 +59,6 @@ export default ({ panel }) => {
             (op1, op2) => extents.get(op1)[mainPos] - extents.get(op2)[mainPos]
         )
 
-        // currently, disallow activity on the last separator
-        if (downstream.length === 0) {
-            // so skip the state update if there are no downstream panels
-            return
-        }
-
         // record the panel that is flexing
         setFlexingPanel(panel)
         // and the downstream ones
