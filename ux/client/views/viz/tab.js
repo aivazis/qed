@@ -39,7 +39,7 @@ export const Tab = ({ idx, behaviors }) => {
 
     // grab my style
     const tabStyle = styles.tab
-    // mix my piant
+    // mix my paint
     // for the dataset name
     const datasetStyle = {
         ...tabStyle.dataset,
@@ -54,7 +54,7 @@ export const Tab = ({ idx, behaviors }) => {
     // render
     return (
         <div style={tabStyle.box} {...behaviors} >
-            <Badge size={12} state="available" behaviors={collapse} style={tabStyle.collapse} >
+            <Badge size={10} state="available" behaviors={collapse} style={tabStyle.collapse} >
                 <X style={tabStyle.collapse} />
             </Badge>
             <div style={datasetStyle}>{reader?.name}</div>
