@@ -8,6 +8,7 @@
 export Badge from './badge'
 export Colophon from './colophon'
 export Compass from './compass'
+export { Extent } from './extent'
 export Flame from './flame'
 export * as Flex from './flex'
 export { Header } from './header'
