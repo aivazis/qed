@@ -10,7 +10,7 @@ import { wheel, theme } from '~/palette'
 import base from '~/views/styles'
 
 
-// the container
+// the flex container
 const flex = {
     // the overall flex container
     box: {
@@ -34,8 +34,7 @@ const flex = {
             backgroundColor: "hsl(0deg, 0%, 15%, 0.5)",
         },
         // the handle
-        handle: {
-        },
+        handle: {},
     },
 }
 
@@ -123,6 +122,7 @@ const blank = {
 }
 
 
+// the tray with the data sources
 const reader = {
     // for the tray
     tray: {
@@ -132,6 +132,7 @@ const reader = {
         items: {},
     },
 
+    // for the tray that corresponds to the active view
     activeTray: {
         box: {},
         header: {},
@@ -143,7 +144,7 @@ const reader = {
 }
 
 
-// attributes
+// for the various dataset attributes
 const attributes = {
     info: {
         fontSize: "60%",
@@ -161,7 +162,7 @@ const attributes = {
 }
 
 
-// selectors
+// dataset selectors
 const selectors = {
     info: {
         fontSize: "60%",
@@ -180,7 +181,7 @@ const selectors = {
 }
 
 
-// channels
+// dataset channels
 const channel = {
     box: {
         fontSize: "60%",
@@ -208,15 +209,35 @@ const channel = {
 }
 
 
+// the viewer panel
+const viewer = {
+    // the overall box
+    box: {
+        // for me
+        width: "100%",
+        height: "100%",
+        // styling
+        backgroundColor: "hsl(0deg, 0%, 5%, 1)",
+        // for my children
+        display: "flex",
+        flexDirection: "column",
+    },
+}
+
+
 // the viewer tab
 const tab = {
     // the container
     box: {
+        // for me
+        width: "100%",
+        height: "1.6rem",
+        // styling
+        backgroundColor: "hsl(0deg, 0%, 10%, 1)",
+        // for my children
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
-        height: "1.6rem",
-        backgroundColor: "hsl(0deg, 0%, 10%, 1)",
     },
 
     active: {
@@ -326,6 +347,7 @@ export default {
     reader,
     selectors,
     tab,
+    viewer,
 }
 
 
