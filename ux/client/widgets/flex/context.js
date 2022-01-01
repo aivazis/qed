@@ -91,6 +91,7 @@ export const Provider = ({
         return
     }
 
+    // removing a panel
     const removePanel = ({ panel }) => {
         // update the panel pile
         setPanels(old => {
