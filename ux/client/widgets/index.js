@@ -16,6 +16,7 @@ export { Info } from './info'
 export Kill from './kill'
 export Server from './server'
 export Spacer from './spacer'
+export { Tile } from './tile'
 export { Tray } from './tray'
 export Toolbar from './toolbar'
 
