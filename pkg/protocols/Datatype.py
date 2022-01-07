@@ -26,6 +26,9 @@ class Datatype(Specification, family="qed.datatypes"):
     channels = qed.properties.strings()
     channels.doc = "the names of the channels provided by this datatype"
 
+    tile = qed.properties.tuple(schema=qed.properties.int())
+    tile.doc = "the preferred shape of dataset subsets"
+
 
     # value processing hooks
     # the byte order is indicated by a single character prefix that must be stripped before
