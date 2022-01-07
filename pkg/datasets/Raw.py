@@ -38,5 +38,9 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
     selector.default = {}
     selector.doc = "a key/value map that identifies the dataset to a reader"
 
+    tile = qed.properties.tuple(schema=qed.properties.int())
+    tile.default = 512,512
+    tile.doc = "the preferred shape of dataset subsets"
+
 
 # end of file
