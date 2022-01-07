@@ -21,5 +21,9 @@ class Datatype(qed.flow.product, implements=qed.protocols.datatype):
     channels = qed.properties.strings()
     channels.doc = "the names of channels provided by this datatype"
 
+    tile = qed.properties.tuple(schema=qed.properties.int())
+    tile.default = 512,512
+    tile.doc = "the preferred shape of dataset subsets"
+
 
 # end of file
