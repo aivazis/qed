@@ -45,10 +45,11 @@ type Dataset implements Node {
   id: ID!
   uuid: ID!
   # metadata
-  selector: [Selector]!
-  datatype: String!
-  shape: [Int!]!
   channels: [String!]!
+  datatype: String!
+  selector: [Selector]!
+  shape: [Int!]!
+  tile: [Int!]!
 }
 
 
