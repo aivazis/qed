@@ -18,6 +18,7 @@ import { Flex } from '~/widgets'
 // locals
 // hooks
 import { useViews } from './useViews'
+import { useSetActiveView } from './useSetActiveView'
 // components
 import { Blank } from './blank'
 import { Viewer } from './viewer'
@@ -54,7 +55,10 @@ const Panel = () => {
 
             {/* otherwise, make a panel for each active view */}
             {views.map(({ dataset, channel }, idx) =>
-                <Flex.Panel key={`${dataset}:${channel}:${idx}`} style={styles.flex} auto={true} >
+                <Flex.Panel
+                    key={`${dataset}:${channel}:${idx}`}
+                    style={styles.flex} auto={true} onClick={useSetActiveView(idx)}
+                >
                     <Viewer idx={idx} />
                 </Flex.Panel >
             )}

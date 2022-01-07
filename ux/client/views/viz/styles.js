@@ -209,22 +209,6 @@ const channel = {
 }
 
 
-// the viewer panel
-const viewer = {
-    // the overall box
-    box: {
-        // for me
-        width: "100%",
-        height: "100%",
-        // styling
-        backgroundColor: "hsl(0deg, 0%, 5%, 1)",
-        // for my children
-        display: "flex",
-        flexDirection: "column",
-    },
-}
-
-
 // the viewer tab
 const tab = {
     // the container
@@ -347,7 +331,6 @@ export default {
     reader,
     selectors,
     tab,
-    viewer,
 }
 
 

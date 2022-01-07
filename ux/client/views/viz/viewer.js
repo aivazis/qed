@@ -16,7 +16,6 @@ import { Info } from '~/widgets'
 import { Tab } from './tab'
 // hooks
 import { useViews } from './useViews'
-import { useSetActiveView } from './useSetActiveView'
 // styles
 import styles from './styles'
 
@@ -29,25 +28,17 @@ export const Viewer = ({ idx }) => {
     const { reader, dataset } = views[idx]
     // unpack
     const { uri } = reader
-    const { datatype, shape, tile} = dataset
-
-    // make a handler that makes me the active view
-    const behaviors = {
-        onClick: useSetActiveView(idx)
-    }
-
-    // mix my paint
-    const boxStyle = styles.viewer.box
+    const { datatype, shape, tile } = dataset
 
     // render
     return (
-        <div style={boxStyle} {...behaviors} >
+        <>
             <Tab idx={idx} />
             <Info name="uri" value={uri} style={styles.attributes} />
             <Info name="type" value={datatype} style={styles.attributes} />
             <Info name="shape" value={shape.join(" x ")} style={styles.attributes} />
             <Info name="tile" value={tile.join(" x ")} style={styles.attributes} />
-        </div>
+        </>
     )
 }
 
