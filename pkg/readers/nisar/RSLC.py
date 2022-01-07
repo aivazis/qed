@@ -55,6 +55,7 @@ class RSLC(qed.flow.factory, family="qed.readers.nisar.rslc", implements=qed.pro
             dataset.shape = self.shape
             dataset.cell = qed.datatypes.complex4()
             dataset.selector = selector
+            dataset.tile = dataset.cell.tile
             # and attach it
             self.datasets.append(dataset)
 
