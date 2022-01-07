@@ -35,7 +35,10 @@ class Dataset(Specification, family="qed.datasets"):
     shape.doc = "the shape of the dataset"
 
     selector = qed.properties.kv()
-    selector.doc = "a key/value map that identifies the datatset to a reader"
+    selector.doc = "a key/value map that identifies the dataset to a reader"
+
+    tile = qed.properties.tuple(schema=qed.properties.int())
+    tile.doc = "the preferred shape of dataset subsets"
 
 
 # end of file
