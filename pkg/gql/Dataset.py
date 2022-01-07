@@ -19,10 +19,12 @@ class Dataset(graphene.ObjectType):
     # my fields
     id = graphene.ID()
     uuid = graphene.ID()
-    selector = graphene.List(Selector)
-    datatype = graphene.String()
-    shape = graphene.List(graphene.Int)
+
     channels = graphene.List(graphene.String)
+    datatype = graphene.String()
+    selector = graphene.List(Selector)
+    shape = graphene.List(graphene.Int)
+    tile = graphene.List(graphene.Int)
 
 
     # resolvers
@@ -42,11 +44,12 @@ class Dataset(graphene.ObjectType):
         return dataset.pyre_id
 
 
-    def resolve_selector(dataset, *_):
+    def resolve_channels(dataset, *_):
         """
-        Flatten the selector
+        Extract the payload data type identifier
         """
-        return dataset.selector.items()
+        # return the {family} name of the datatype marker
+        return dataset.cell.channels
 
 
     def resolve_datatype(dataset, *_):
@@ -57,12 +60,11 @@ class Dataset(graphene.ObjectType):
         return dataset.cell.pyre_family()
 
 
-    def resolve_channels(dataset, *_):
+    def resolve_selector(dataset, *_):
         """
-        Extract the payload data type identifier
+        Flatten the selector
         """
-        # return the {family} name of the datatype marker
-        return dataset.cell.channels
+        return dataset.selector.items()
 
 
 # end of file
