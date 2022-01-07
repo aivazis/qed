@@ -12,7 +12,7 @@ import React from 'react'
 // shapes
 import { Split, X } from '~/shapes'
 // widgets
-import { Badge } from '~/widgets'
+import { Badge, Spacer } from '~/widgets'
 
 // locals
 // hooks
@@ -66,7 +66,8 @@ export const Tab = ({ idx, behaviors }) => {
                 </React.Fragment>
             ))}
             <div style={selectorStyle}>{channel}</div>
-            <Badge size={12} state="available" behaviors={split} style={tabStyle.split} >
+            <Spacer />
+            <Badge size={10} state="available" behaviors={split} style={tabStyle.split} >
                 <Split style={tabStyle.split} />
             </Badge>
         </div>
