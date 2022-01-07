@@ -30,6 +30,8 @@ import styles from './styles'
 const Panel = () => {
     // grab the registered views
     const { views } = useViews()
+    // the view activator
+    const activate = useSetActiveView()
     // get the state of the activity panel
     const { activityPanel } = useActivityPanel()
 
@@ -57,7 +59,7 @@ const Panel = () => {
             {views.map(({ dataset, channel }, idx) =>
                 <Flex.Panel
                     key={`${dataset}:${channel}:${idx}`}
-                    style={styles.flex} auto={true} onClick={useSetActiveView(idx)}
+                    style={styles.flex} auto={true} onClick={activate(idx)}
                 >
                     <Viewer idx={idx} />
                 </Flex.Panel >

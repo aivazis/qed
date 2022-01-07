@@ -13,15 +13,13 @@ import { Context } from './context'
 
 
 // access to the registered views
-export const useSetActiveView = view => {
+export const useSetActiveView = () => {
     // grab the list of {views} from context
     const { setActiveView } = React.useContext(Context)
-    // make a handler that makes {view} the acive one
-    const activate = () => {
-        // easy enough
-        setActiveView(view)
+    // build a handler that makes {view} the active one
+    const activate = (view) => {
         // all done
-        return
+        return () => setActiveView(view)
     }
     // and return it
     return activate
