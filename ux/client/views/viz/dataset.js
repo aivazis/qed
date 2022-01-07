@@ -28,20 +28,21 @@ export const Dataset = (props) => {
     const dataset = useFragment(graphql`
         fragment dataset_dataset on Dataset {
             uuid
-            shape
             datatype
             selector {
                 name
                 value
             }
+            shape
+            tile
             channels
         }`,
         props.dataset)
     // unpack
-    const { uuid, shape, datatype, channels, selector } = dataset
+    const { uuid, datatype, selector, shape, tile, channels } = dataset
 
     // build the dataset spec that get installed in the {views}
-    const datasetSpec = { uuid, shape, datatype, selector }
+    const datasetSpec = { uuid, datatype, selector, shape, tile }
 
     // render
     return (
