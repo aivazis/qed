@@ -14,7 +14,8 @@ import base from '~/views/styles'
 const flex = {
     // the overall flex container
     box: {
-        flex: "1 1 auto",
+        flex: "1 1 100%",
+        minWidth: "800px", // DO NOT REMOVE THIS; IT FORCES flex TO LOOK AT THE WIDTH OF THE PANEL
         backgroundColor: "hsl(0deg, 0%, 10%)",
     },
 
@@ -90,7 +91,6 @@ const blank = {
         position: "relative",
         top: "50%",
         left: "50%",
-        width: "100%",
         height: "400px",
         textAlign: "center",
         transform: "translate(-50%, -50%)",
@@ -254,7 +254,7 @@ const tab = {
         // the icon container
         badge: {
             // for me
-            flex: 0,
+            flex: "0 0 auto",
             padding: "0.0rem 0.5rem",
             cursor: "pointer",
             // for my children
@@ -286,9 +286,8 @@ const tab = {
         // the icon container
         badge: {
             // for me
-            flex: 0,
+            flex: "0 0 auto",
             justifySelf: "end",
-            margin: "0.0rem 0.0rem 0.0rem auto",
             padding: "0.0rem 0.5rem",
             cursor: "pointer",
             // for my children
@@ -318,6 +317,28 @@ const tab = {
 }
 
 
+// the dataset mosaic styling
+const mosaic = {
+    // the overall box
+    box: {
+        // minWidth: "300px",
+        // minHeight: "300px",
+        margin: "0.25rem 0.5rem 0.5rem 0.5rem",
+        border: "1px solid hsl(28deg, 30%, 15%)",
+    },
+
+    // the tile container
+    mosaic: {
+        backgroundColor: "hsl(0deg, 5%, 7%)",
+    },
+
+    // individual tiles
+    tile: {
+        backgroundColor: "hsl(240deg, 25%, 7%)",
+    },
+}
+
+
 // publish
 export default {
     attributes,
@@ -326,6 +347,7 @@ export default {
     controls,
     datasets,
     flex,
+    mosaic,
     reader,
     selectors,
     tab,

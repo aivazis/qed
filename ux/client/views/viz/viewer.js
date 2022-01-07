@@ -9,7 +9,7 @@ import React from 'react'
 
 // project
 // widgets
-import { Info } from '~/widgets'
+import { Info, Mosaic } from '~/widgets'
 
 // locals
 // components
@@ -30,6 +30,28 @@ export const Viewer = ({ idx }) => {
     const { uri } = reader
     const { datatype, shape, tile } = dataset
 
+    // mix my paint
+    const mosaicStyle = {
+        // for the overall box
+        box: {
+            // base
+            ...styles.mosaic.box,
+        },
+        // for the mat
+        mat: {
+            // base
+            ...styles.mosaic.mat,
+        },
+        // for the data viewport
+        mosaic: {
+            // base
+            ...styles.mosaic.mosaic,
+            // resize to the dataset shape
+            width: `${shape[1]}px`,
+            height: `${shape[0]}px`,
+        },
+    }
+
     // render
     return (
         <>
@@ -38,6 +60,7 @@ export const Viewer = ({ idx }) => {
             <Info name="type" value={datatype} style={styles.attributes} />
             <Info name="shape" value={shape.join(" x ")} style={styles.attributes} />
             <Info name="tile" value={tile.join(" x ")} style={styles.attributes} />
+            <Mosaic raster={shape} tile={tile} style={mosaicStyle} />
         </>
     )
 }
