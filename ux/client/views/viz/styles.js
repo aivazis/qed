@@ -329,6 +329,8 @@ const mosaic = {
 
     // the tile container
     mosaic: {
+        minWidth: "300px",
+        minHeight: "300px",
         backgroundColor: "hsl(0deg, 5%, 7%)",
     },
 
