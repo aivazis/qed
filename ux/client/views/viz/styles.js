@@ -214,7 +214,7 @@ const tab = {
     // the container
     box: {
         // for me
-        width: "100%",
+        flex: "0 0 auto",
         height: "1.6rem",
         // styling
         backgroundColor: "hsl(0deg, 0%, 10%, 1)",
@@ -225,9 +225,7 @@ const tab = {
     },
 
     active: {
-        // color: theme.page.name,
         color: wheel.gray.concrete,
-        // opacity: 0.5,
     },
 
     // the name of the dataset
