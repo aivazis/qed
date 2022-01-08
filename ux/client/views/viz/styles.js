@@ -317,6 +317,41 @@ const tab = {
 }
 
 
+// the button that toggles the sync status of a data viewport
+const sync = {
+    // the icon container
+    badge: {
+        // for me
+        flex: "0 0 auto",
+        justifySelf: "end",
+        padding: "0.0rem 0.5rem",
+        cursor: "pointer",
+        // for my children
+        display: "flex",
+        alignItems: "center",
+    },
+
+    // for the shape container
+    shape: {
+        // dim it a bit
+        strokeOpacity: 0.5,
+    },
+
+    // for the shape
+    icon: {
+        stroke: wheel.gray.flour,
+    },
+
+    // highlight when the cursor hovers over it
+    available: {
+        shape: {
+            // full intensity
+            strokeOpacity: 1.0,
+        },
+    },
+}
+
+
 // the dataset mosaic styling
 const mosaic = {
     // the overall box
@@ -355,6 +390,7 @@ export default {
     mosaic,
     reader,
     selectors,
+    sync,
     tab,
 }
 
