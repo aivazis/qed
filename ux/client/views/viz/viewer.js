@@ -55,12 +55,18 @@ export const Viewer = ({ idx }) => {
     // render
     return (
         <>
+            {/* the title bar with the dataset description and the controls */}
             <Tab idx={idx} />
+            {/* identifying metadata */}
             <Info name="uri" value={uri} style={styles.attributes} />
             <Info name="type" value={datatype} style={styles.attributes} />
             <Info name="shape" value={shape.join(" x ")} style={styles.attributes} />
             <Info name="tile" value={tile.join(" x ")} style={styles.attributes} />
-            <Mosaic raster={shape} tile={tile} style={mosaicStyle} />
+            {/* the data viewport */}
+            <div style={mosaicStyle.box} >
+                {/* the tile mosaic */}
+                <Mosaic raster={shape} tile={tile} style={mosaicStyle} />
+            </div>
         </>
     )
 }

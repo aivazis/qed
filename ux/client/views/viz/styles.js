@@ -321,6 +321,9 @@ const tab = {
 const mosaic = {
     // the overall box
     box: {
+        // layout
+        flex: "1 1 100%",
+        overflow: "auto",
         // minWidth: "300px",
         // minHeight: "300px",
         margin: "0.25rem 0.5rem 0.5rem 0.5rem",
