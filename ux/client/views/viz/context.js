@@ -16,9 +16,12 @@ const complaint = "while accessing the 'viz' context: no provider"
 export const Context = React.createContext(
     // the default value that consumers see when accessing the context outside a provider
     {
-        // the views
+        // the known views
         views: [],
         setView: () => { throw new Error(complaint) },
+        // the synced views
+        synced: null,
+        setSynced: () => { throw new Error(complaint) },
         // the active view
         activeView: null,
         setActiveView: () => { throw new Error(complaint) },
@@ -34,8 +37,10 @@ export const Provider = ({
     // children
     children
 }) => {
-    // setup the views
+    // setup the views; a views is an object with a fully resolved dataset selector
     const [views, setViews] = React.useState(new Array())
+    // a table with the sync status of the known views
+    const [synced, setSynced] = React.useState(new Map())
     // the active view is an index into the {views}
     const [activeView, setActiveView] = React.useState(0)
 
@@ -48,6 +53,8 @@ export const Provider = ({
     const context = {
         // the views
         views, setViews,
+        // synced views
+        synced, setSynced,
         // active view
         activeView, setActiveView,
         // readers
