@@ -9,33 +9,28 @@ import React from 'react'
 
 
 // project
-// shapes
-import { Split, X } from '~/shapes'
 // widgets
-import { Badge, Spacer } from '~/widgets'
+import { Spacer } from '~/widgets'
 
 // locals
+// components
+import { Collapse } from './collapse'
+import { Split } from './split'
+import { Sync } from './sync'
 // hooks
 import { useViews } from './useViews'
-import { useCollapseView } from './useCollapseView'
-import { useSplitView } from './useSplitView'
 // styles
 import styles from './styles'
 
 
 // display the datasets associated with this reader
-export const Tab = ({ idx, behaviors }) => {
+export const Tab = ({ view, viewport, behaviors }) => {
     // get the views
     const { activeView, views } = useViews()
-    // make a handler that splits this view
-    const split = { onClick: useSplitView(idx) }
-    // and one that collapses this view
-    const collapse = { onClick: useCollapseView(idx) }
-
     // am i the active view?
-    const amActive = idx === activeView
+    const amActive = view === activeView
     // get my view info
-    const { reader, dataset, channel } = views[idx]
+    const { reader, dataset, channel } = views[view]
 
     // grab my style
     const tabStyle = styles.tab
@@ -54,9 +49,10 @@ export const Tab = ({ idx, behaviors }) => {
     // render
     return (
         <div style={tabStyle.box} {...behaviors} >
-            <Badge size={10} state="available" behaviors={collapse} style={tabStyle.collapse} >
-                <X style={tabStyle.collapse} />
-            </Badge>
+            {/* the button that removes this view from the panel */}
+            <Collapse view={view} />
+
+            {/* the fully resolved selector */}
             <div style={datasetStyle}>{reader?.name}</div>
             {reader && <div style={tabStyle.separator}>:</div>}
             {dataset?.selector.map(binding => (
@@ -66,10 +62,13 @@ export const Tab = ({ idx, behaviors }) => {
                 </React.Fragment>
             ))}
             <div style={selectorStyle}>{channel}</div>
+
+            {/* some blank space */}
             <Spacer />
-            <Badge size={10} state="available" behaviors={split} style={tabStyle.split} >
-                <Split style={tabStyle.split} />
-            </Badge>
+            {/* the button that adds a new view to the {viz} panel */}
+            <Split view={view} />
+            {/* the button that toggles the sync status of the data viewport */}
+            <Sync viewport={viewport} />
         </div>
     )
 }
