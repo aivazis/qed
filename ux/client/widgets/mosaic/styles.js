@@ -10,13 +10,6 @@ import { wheel, theme } from '~/palette'
 
 // publish
 export default {
-    // the top container
-    box: {
-        // layout
-        flex: "1 1 100%",
-        overflow: "auto",
-    },
-
     // the tile container
     mosaic: {
         // this must be sized by the client based on the raster shape
