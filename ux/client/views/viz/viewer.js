@@ -16,17 +16,21 @@ import { Info, Mosaic } from '~/widgets'
 import { Tab } from './tab'
 // hooks
 import { useViews } from './useViews'
+import { useRegisterViewport } from './useRegisterViewport'
 // styles
 import styles from './styles'
 
 
 // display the datasets associated with this reader
-export const Viewer = ({ idx }) => {
-    // get the views
+export const Viewer = ({ view }) => {
+    // get the list of views
     const { views } = useViews()
+    // register my viewport
+    const viewport = useRegisterViewport()
+
     // get my view info
-    const { reader, dataset } = views[idx]
-    // unpack
+    const { reader, dataset } = views[view]
+    // and unpack what i need
     const { uri } = reader
     const { datatype, shape, tile } = dataset
 
@@ -56,14 +60,15 @@ export const Viewer = ({ idx }) => {
     return (
         <>
             {/* the title bar with the dataset description and the controls */}
-            <Tab idx={idx} />
+            <Tab view={view} viewport={viewport} />
             {/* identifying metadata */}
             <Info name="uri" value={uri} style={styles.attributes} />
             <Info name="type" value={datatype} style={styles.attributes} />
             <Info name="shape" value={shape.join(" x ")} style={styles.attributes} />
             <Info name="tile" value={tile.join(" x ")} style={styles.attributes} />
+
             {/* the data viewport */}
-            <div style={mosaicStyle.box} >
+            <div ref={viewport} style={mosaicStyle.box} >
                 {/* the tile mosaic */}
                 <Mosaic raster={shape} tile={tile} style={mosaicStyle} />
             </div>
