@@ -15,6 +15,7 @@ import { Badge } from '~/widgets'
 
 // locals
 // hooks
+import { useGetViewportSync } from './useGetViewportSync'
 import { useToggleViewportSync } from './useToggleViewportSync'
 // styles
 import styles from './styles'
@@ -22,20 +23,46 @@ import styles from './styles'
 
 // display the datasets associated with this reader
 export const Sync = ({ viewport }) => {
+    // look up the current sync state of the {viewport}
+    const isSynced = useGetViewportSync(viewport)
+    // build the sync toggle
+    const toggle = useToggleViewportSync(viewport)
+
     // my event handlers
     const behaviors = {
         // make a handler one that toggles the sync state
-        onClick: useToggleViewportSync(viewport)
+        onClick: (evt) => {
+            // stop this event from bubbling up
+            evt.stopPropagation()
+            // quash the default behavior
+            evt.preventDefault()
+            // flip the state
+            toggle()
+            // all done
+            return
+        },
     }
 
+    // set my state
+    const state = isSynced ? "engaged" : "available"
     // grab my style
     const syncStyle = styles.sync
+    // mix the shape paint
+    const shapeStyle = {
+        // for the icon
+        icon: {
+            // the base style
+            ...syncStyle.icon,
+            // and the state dependent enhancements
+            ...syncStyle[state]?.icon,
+        },
+    }
 
     // render
     return (
-        <Badge size={10} state="available" behaviors={behaviors} style={syncStyle} >
-            <Locked style={syncStyle} />
-        </Badge>
+        <Badge size={10} state={state} behaviors={behaviors} style={syncStyle} >
+            <Locked style={shapeStyle} />
+        </Badge >
     )
 }
 

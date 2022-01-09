@@ -351,6 +351,18 @@ const sync = {
             strokeOpacity: 1.0,
         },
     },
+
+    // restyle when turned on
+    engaged: {
+        shape: {
+            // full intensity
+            strokeOpacity: 1.0,
+        },
+        // for the shape
+        icon: {
+            stroke: theme.page.name,
+        },
+    },
 }
 
 
