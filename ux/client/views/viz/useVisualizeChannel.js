@@ -9,13 +9,13 @@ import React from 'react'
 
 // local
 // context
-import { Context } from './context'
+import { VizContext } from './context'
 
 
 // hook to pull the dataset readers out the outlet context
 export const useVisualizeChannel = () => {
     // grab the readers
-    const { activeView, setViews } = React.useContext(Context)
+    const { activeView, setViews } = React.useContext(VizContext)
 
     // make the handler
     const visualizeChannel = (channel, view = activeView) => {

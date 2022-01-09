@@ -9,13 +9,13 @@ import React from 'react'
 
 // local
 // context
-import { Context } from './context'
+import { VizContext } from './context'
 
 
 // hook to pull the dataset readers out the outlet context
 export const useReaders = () => {
     // grab the readers
-    const { readers } = React.useContext(Context)
+    const { readers } = React.useContext(VizContext)
     // and return them
     return readers
 }

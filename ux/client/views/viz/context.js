@@ -13,7 +13,7 @@ import { graphql, useLazyLoadQuery } from 'react-relay/hooks'
 const complaint = "while accessing the 'viz' context: no provider"
 
 // setup the flex context
-export const Context = React.createContext(
+export const VizContext = React.createContext(
     // the default value that consumers see when accessing the context outside a provider
     {
         // the known views
@@ -33,7 +33,7 @@ export const Context = React.createContext(
 
 
 // the provider factory
-export const Provider = ({
+export const VizProvider = ({
     // children
     children
 }) => {
@@ -63,9 +63,9 @@ export const Provider = ({
 
     // provide for my children
     return (
-        <Context.Provider value={context} >
+        <VizContext.Provider value={context} >
             {children}
-        </Context.Provider >
+        </VizContext.Provider >
 
     )
 }

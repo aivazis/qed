@@ -71,14 +71,14 @@ const Panel = () => {
 
 
 // context
-import { Provider } from './context'
+import { VizProvider } from './context'
 // turn the view into a context provider and publish
 export const Viz = ({ }) => {
     // set up the context provider
     return (
-        <Provider >
+        <VizProvider >
             <Panel />
-        </Provider>
+        </VizProvider>
     )
 }
 

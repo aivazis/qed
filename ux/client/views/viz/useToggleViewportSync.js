@@ -9,13 +9,13 @@ import React from 'react'
 
 // local
 // context
-import { Context } from './context'
+import { VizContext } from './context'
 
 
 // viewport registration
 export const useToggleViewportSync = (viewport) => {
     // grab the sync table mutator from the context
-    const { setSynced } = React.useContext(Context)
+    const { setSynced } = React.useContext(VizContext)
 
     // a handler that toggles whether this {viewport} is synced to the global camera
     const toggle = () => {

@@ -9,13 +9,13 @@ import React from 'react'
 
 // local
 // context
-import { Context } from './context'
+import { VizContext } from './context'
 
 
 // access to the registered views
 export const useSplitView = view => {
     // grab the list of {views} from context
-    const { setViews, setActiveView } = React.useContext(Context)
+    const { setViews, setActiveView } = React.useContext(VizContext)
     // make a handler that adds a new blank view after a given on
     const splitView = (evt) => {
         // stop this event from bubbling up

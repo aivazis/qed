@@ -9,13 +9,13 @@ import React from 'react'
 
 // local
 // context
-import { Context } from './context'
+import { VizContext } from './context'
 
 
 // access to the registered views
 export const useViews = () => {
     // grab the list of {views} from context
-    const { views, activeView } = React.useContext(Context)
+    const { views, activeView } = React.useContext(VizContext)
     // and return it
     return { views, activeView }
 }

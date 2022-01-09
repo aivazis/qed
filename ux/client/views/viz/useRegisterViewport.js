@@ -9,7 +9,7 @@ import React from 'react'
 
 // local
 // context
-import { Context } from './context'
+import { VizContext } from './context'
 
 
 // viewport registration
@@ -17,7 +17,7 @@ export const useRegisterViewport = (inSync = false) => {
     // make a reference for this viewport
     const viewport = React.useRef()
     // grab the sync table mutator from the context
-    const { setSynced } = React.useContext(Context)
+    const { setSynced } = React.useContext(VizContext)
 
     // a handler that registers this viewport when the component that manages it mounts
     const register = () => {
