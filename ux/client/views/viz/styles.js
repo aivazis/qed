@@ -373,16 +373,14 @@ const viewport = {
         // layout
         flex: "1 1 100%",
         overflow: "auto",
-        // minWidth: "300px",
-        // minHeight: "300px",
+        minWidth: "300px",
+        minHeight: "300px",
         margin: "0.25rem 0.5rem 0.5rem 0.5rem",
         border: "1px solid hsl(28deg, 30%, 15%)",
     },
 
     // the tile container
     mosaic: {
-        minWidth: "300px",
-        minHeight: "300px",
         backgroundColor: "hsl(0deg, 5%, 7%)",
     },
 

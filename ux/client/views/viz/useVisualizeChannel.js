@@ -9,7 +9,7 @@ import React from 'react'
 
 // local
 // context
-import { VizContext } from './context'
+import { VizContext } from './vizContext'
 
 
 // hook to pull the dataset readers out the outlet context

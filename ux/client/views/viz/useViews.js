@@ -9,7 +9,7 @@ import React from 'react'
 
 // local
 // context
-import { VizContext } from './context'
+import { VizContext } from './vizContext'
 
 
 // access to the registered views
