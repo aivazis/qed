@@ -5,6 +5,7 @@
 
 
 # externals
+import journal
 import re
 # support
 import qed
@@ -29,6 +30,12 @@ class Dispatcher:
         command = request.command
         # get the request uri
         url = request.url
+
+        # make a channel
+        channel = journal.debug("qed.ux.dispatch")
+        # and show me
+        channel.log(f"{command}: {url}")
+
         # take a look
         match = self.regex.match(url)
         # if there is no match
