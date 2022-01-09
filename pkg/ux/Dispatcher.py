@@ -103,6 +103,16 @@ class Dispatcher:
         return server.documents.File(uri=uri, server=server, application=plexus)
 
 
+    def css(self, plexus, server, request, **kwds):
+        """
+        The client requested a document from the {plexus} pfs
+        """
+        # form the uri
+        uri = "/ux" + request.url
+        # open the document and serve it
+        return server.documents.CSS(uri=uri, server=server, application=plexus)
+
+
     def jscript(self, plexus, server, request, **kwds):
         """
         The client requested a document from the {plexus} pfs
@@ -135,8 +145,9 @@ class Dispatcher:
     regex = re.compile("|".join([
         r"/(?P<graphql>graphql)",
         r"/(?P<stop>stop)",
+        r"/(?P<css>.+\.css)",
         r"/(?P<jscript>.+\.js)",
-        r"/(?P<document>(graphics/.+)|(styles/.+)|(fonts/.+))",
+        r"/(?P<document>(graphics/.+)|(fonts/.+))",
         r"/(?P<favicon>favicon.ico)",
         r"/(?P<root>.*)",
         ]))
