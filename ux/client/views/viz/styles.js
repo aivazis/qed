@@ -366,8 +366,8 @@ const sync = {
 }
 
 
-// the dataset mosaic styling
-const mosaic = {
+// the dataset viewport styling
+const viewport = {
     // the overall box
     box: {
         // layout
@@ -402,12 +402,12 @@ export default {
     controls,
     datasets,
     flex,
-    mosaic,
     reader,
     selectors,
     split,
     sync,
     tab,
+    viewport,
 }
 
 
