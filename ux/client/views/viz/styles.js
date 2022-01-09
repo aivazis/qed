@@ -343,9 +343,14 @@ const sync = {
     icon: {
         stroke: wheel.gray.flour,
     },
+    // and its detailing
+    decoration: {
+        stroke: wheel.gray.flour,
+    },
 
     // highlight when the cursor hovers over it
     available: {
+        // for the shape
         shape: {
             // full intensity
             strokeOpacity: 1.0,
@@ -354,12 +359,18 @@ const sync = {
 
     // restyle when turned on
     engaged: {
+        // for the container
         shape: {
             // full intensity
             strokeOpacity: 1.0,
         },
         // for the shape
         icon: {
+            stroke: theme.page.name,
+        },
+        // and its detailing
+        decoration: {
+            fill: theme.page.name,
             stroke: theme.page.name,
         },
     },

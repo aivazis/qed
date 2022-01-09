@@ -9,7 +9,7 @@ import React from 'react'
 
 // project
 // shapes
-import { Locked } from '~/shapes'
+import { Eye as Shape } from '~/shapes'
 // widgets
 import { Badge } from '~/widgets'
 
@@ -56,12 +56,19 @@ export const Sync = ({ viewport }) => {
             // and the state dependent enhancements
             ...syncStyle[state]?.icon,
         },
+        // and its details
+        decoration: {
+            // the base style
+            ...syncStyle.decoration,
+            // and the state dependent enhancements
+            ...syncStyle[state]?.decoration,
+        },
     }
 
     // render
     return (
-        <Badge size={10} state={state} behaviors={behaviors} style={syncStyle} >
-            <Locked style={shapeStyle} />
+        <Badge size={16} state={state} behaviors={behaviors} style={syncStyle} >
+            <Shape style={shapeStyle} />
         </Badge >
     )
 }
