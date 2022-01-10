@@ -17,7 +17,7 @@ import styles from './styles'
 
 
 // display the datasets associated with this reader
-export const Viewport = React.forwardRef(({ view, uri }, ref) => {
+const Panel = React.forwardRef(({ view, uri }, ref) => {
     // get my view info
     const { dataset } = view
     // and unpack what i need
@@ -43,6 +43,19 @@ export const Viewport = React.forwardRef(({ view, uri }, ref) => {
         < div ref={ref} style={viewportStyle.box} >
             <Mosaic uri={uri} raster={shape} tile={tile} style={mosaicStyle} />
         </div >
+    )
+})
+
+
+// context
+import { ViewportProvider } from './viewportContext'
+// turn the panel into a context provider and publish
+export const Viewport = React.forwardRef((props, ref) => {
+    // set up the context provider
+    return (
+        <ViewportProvider>
+            <Panel ref={ref} {...props} />
+        </ViewportProvider>
     )
 })
 
