@@ -16,21 +16,18 @@ import { Info } from '~/widgets'
 import { Tab } from './tab'
 import { Viewport } from './viewport'
 // hooks
-import { useViews } from './useViews'
 import { useRegisterViewport } from './useRegisterViewport'
 // styles
 import styles from './styles'
 
 
 // display the datasets associated with this reader
-export const Viewer = ({ view }) => {
-    // get the list of views
-    const { views } = useViews()
+export const Viewer = ({ idx, view }) => {
     // register my viewport
     const viewport = useRegisterViewport()
 
     // get my view info
-    const { reader, dataset, channel } = views[view]
+    const { reader, dataset, channel } = view
     // and unpack what i need
     const { uuid: readerUUID, uri } = reader
     const { uuid: datasetUUID, datatype, selector, shape, tile } = dataset
@@ -47,7 +44,7 @@ export const Viewer = ({ view }) => {
     return (
         <>
             {/* the title bar with the dataset description and the controls */}
-            <Tab view={view} viewport={viewport} />
+            <Tab idx={idx} view={view} viewport={viewport} />
             {/* identifying metadata */}
             <Info name="uri" value={uri} style={styles.attributes} />
             <Info name="type" value={datatype} style={styles.attributes} />

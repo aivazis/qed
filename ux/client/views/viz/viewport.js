@@ -13,7 +13,6 @@ import { Mosaic } from '~/widgets'
 
 // locals
 // hooks
-import { useViews } from './useViews'
 import { useRegisterViewport } from './useRegisterViewport'
 // styles
 import styles from './styles'
@@ -21,23 +20,19 @@ import styles from './styles'
 
 // display the datasets associated with this reader
 export const Viewport = ({ view, uri }) => {
-    // get the list of views
-    const { views } = useViews()
     // register my viewport
     const viewport = useRegisterViewport()
 
     // get my view info
-    const { dataset } = views[view]
+    const { dataset } = view
     // and unpack what i need
     const { shape, tile } = dataset
 
     // mix my paint
-    const viewportStyle = {
-        // for the overall box
-        box: {
-            // base
-            ...styles.viewport.box,
-        },
+    // for the viewport
+    const viewportStyle = styles.viewport
+    // and the mosaic
+    const mosaicStyle = {
         // for the data viewport
         mosaic: {
             // base
@@ -51,7 +46,7 @@ export const Viewport = ({ view, uri }) => {
     // render
     return (
         < div ref={viewport} style={viewportStyle.box} >
-            <Mosaic uri={uri} raster={shape} tile={tile} style={viewportStyle} />
+            <Mosaic uri={uri} raster={shape} tile={tile} style={mosaicStyle} />
         </div >
     )
 }

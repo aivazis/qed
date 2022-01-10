@@ -24,13 +24,13 @@ import styles from './styles'
 
 
 // display the datasets associated with this reader
-export const Tab = ({ view, viewport, behaviors }) => {
-    // get the views
-    const { activeView, views } = useViews()
+export const Tab = ({ idx, view, viewport, behaviors }) => {
+    // get the active view
+    const { activeView } = useViews()
     // am i the active view?
-    const amActive = view === activeView
+    const amActive = idx === activeView
     // get my view info
-    const { reader, dataset, channel } = views[view]
+    const { reader, dataset, channel } = view
 
     // grab my style
     const tabStyle = styles.tab
@@ -50,7 +50,7 @@ export const Tab = ({ view, viewport, behaviors }) => {
     return (
         <div style={tabStyle.box} {...behaviors} >
             {/* the button that removes this view from the panel */}
-            <Collapse view={view} />
+            <Collapse view={idx} />
 
             {/* the fully resolved selector */}
             <div style={datasetStyle}>{reader?.name}</div>
@@ -66,7 +66,7 @@ export const Tab = ({ view, viewport, behaviors }) => {
             {/* some blank space */}
             <Spacer />
             {/* the button that adds a new view to the {viz} panel */}
-            <Split view={view} />
+            <Split view={idx} />
             {/* the button that toggles the sync status of the data viewport */}
             <Sync viewport={viewport} />
         </div>
