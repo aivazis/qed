@@ -12,16 +12,26 @@ import React from 'react'
 import { Mosaic } from '~/widgets'
 
 // locals
+// hooks
+import { useGetViewportPostion } from './useGetViewportPosition'
 // styles
 import styles from './styles'
 
 
 // display the datasets associated with this reader
 const Panel = React.forwardRef(({ view, uri }, ref) => {
+    // get my camera position
+    const { z } = useGetViewportPostion()
     // get my view info
     const { dataset } = view
     // and unpack what i need
     const { shape, tile } = dataset
+
+    // compute the dimensions of the mosaic
+    const width = Math.trunc(shape[1] / z)
+    const height = Math.trunc(shape[0] / z)
+    // and fold my zoom level into the data request uri
+    const withZoom = [uri, z].join("/")
 
     // mix my paint
     // for the viewport
@@ -32,16 +42,16 @@ const Panel = React.forwardRef(({ view, uri }, ref) => {
         mosaic: {
             // base
             ...styles.viewport.mosaic,
-            // resize to the dataset shape
-            width: `${shape[1]}px`,
-            height: `${shape[0]}px`,
+            // resize to the dataset shape, taking the zoom factor into account
+            width: `${width}px`,
+            height: `${height}px`,
         },
     }
 
-    // render
+    // render; don't forget to use the zoomed raster shape
     return (
         < div ref={ref} style={viewportStyle.box} >
-            <Mosaic uri={uri} raster={shape} tile={tile} style={mosaicStyle} />
+            <Mosaic uri={withZoom} raster={[height, width]} tile={tile} style={mosaicStyle} />
         </div >
     )
 })
