@@ -24,7 +24,7 @@ export const ViewportProvider = ({
     children
 }) => {
     // set up the camera position
-    const [position, setPosition] = React.useState({ x: 0, y: 0, z: 0 })
+    const [position, setPosition] = React.useState({ x: 0, y: 0, z: 1 })
 
     // assemble the context value
     const context = {
