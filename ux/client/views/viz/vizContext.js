@@ -72,7 +72,7 @@ export const VizProvider = ({
 
 
 // the dataset query
-const contextQuery = graphql`query contextQuery {
+const contextQuery = graphql`query vizContextQuery {
     readers(first: 100) @connection(key: "datasets_readers") {
         count
         edges {
