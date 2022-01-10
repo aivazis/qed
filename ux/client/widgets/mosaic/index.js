@@ -17,7 +17,7 @@ import styles from './styles'
 
 
 // a large raster represented as a rectangular grid of tiles
-export const Mosaic = ({ raster, tile, style }) => {
+export const Mosaic = ({ uri, raster, tile, style }) => {
     // mix my paint
     const mosaicStyle = { ...styles.mosaic, ...style.mosaic }
 
@@ -28,7 +28,7 @@ export const Mosaic = ({ raster, tile, style }) => {
                 // unpack
                 const [origin, extent] = spec
                 // form the uri
-                const uri = `${origin.join("x")}+${extent.join("x")}`
+                const tileURI = `${uri}/${origin.join("x")}+${extent.join("x")}`
                 // mix the paint
                 const tileStyle = {
                     // the local settings
@@ -41,7 +41,7 @@ export const Mosaic = ({ raster, tile, style }) => {
                 }
                 // render
                 return (
-                    <Tile key={uri} uri={uri} style={tileStyle} />
+                    <Tile key={origin} uri={tileURI} style={tileStyle} />
                 )
             })}
         </div>
