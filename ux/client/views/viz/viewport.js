@@ -13,6 +13,7 @@ import { Mosaic } from '~/widgets'
 
 // locals
 // hooks
+import { usePanViewport } from './usePanViewport'
 import { useGetViewportPostion } from './useGetViewportPosition'
 // styles
 import styles from './styles'
@@ -22,6 +23,9 @@ import styles from './styles'
 const Panel = React.forwardRef(({ view, uri }, ref) => {
     // get my camera position
     const { z } = useGetViewportPostion()
+    // and the scroll handler
+    const pan = usePanViewport(ref)
+
     // get my view info
     const { dataset } = view
     // and unpack what i need
@@ -50,9 +54,9 @@ const Panel = React.forwardRef(({ view, uri }, ref) => {
 
     // render; don't forget to use the zoomed raster shape
     return (
-        < div ref={ref} style={viewportStyle.box} >
+        <div ref={ref} style={viewportStyle.box} onScroll={pan}>
             <Mosaic uri={withZoom} raster={[height, width]} tile={tile} style={mosaicStyle} />
-        </div >
+        </div>
     )
 })
 
