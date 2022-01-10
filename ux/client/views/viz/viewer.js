@@ -30,10 +30,18 @@ export const Viewer = ({ view }) => {
     const viewport = useRegisterViewport()
 
     // get my view info
-    const { reader, dataset } = views[view]
+    const { reader, dataset, channel } = views[view]
     // and unpack what i need
-    const { uri } = reader
-    const { datatype, shape, tile } = dataset
+    const { uuid: readerUUID, uri } = reader
+    const { uuid: datasetUUID, datatype, selector, shape, tile } = dataset
+
+    // put together the dataset URI
+    // N.B.: it is important to do it here so the {viewport} props change when a new dataset
+    //       channel is selected; the {view} index by itself is not enough to trigger a refresh
+    // first, assemble the resolved selector+channel tag
+    const tag = [...selector.map(b => b.value), channel].join(":")
+    // put together the dataset uri
+    const datasetURI = ["data", readerUUID, datasetUUID, tag].join("/")
 
     // render
     return (
@@ -47,7 +55,7 @@ export const Viewer = ({ view }) => {
             <Info name="tile" value={tile.join(" x ")} style={styles.attributes} />
 
             {/* the data viewport */}
-            <Viewport view={view} />
+            <Viewport view={view} uri={datasetURI} />
         </>
     )
 }
