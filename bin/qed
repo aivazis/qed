@@ -8,7 +8,7 @@
 # turn some debug channels on
 import journal
 # journal.debug("qed.ux.graphql").activate()
-journal.debug("qed.ux.dispatch").activate()
+# journal.debug("qed.ux.dispatch").activate()
 
 
 # get the package
