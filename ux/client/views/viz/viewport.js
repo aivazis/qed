@@ -12,8 +12,6 @@ import React from 'react'
 import { Mosaic } from '~/widgets'
 
 // locals
-// hooks
-import { useRegisterViewport } from './useRegisterViewport'
 // styles
 import styles from './styles'
 
