@@ -19,10 +19,7 @@ import styles from './styles'
 
 
 // display the datasets associated with this reader
-export const Viewport = ({ view, uri }) => {
-    // register my viewport
-    const viewport = useRegisterViewport()
-
+export const Viewport = React.forwardRef(({ view, uri }, ref) => {
     // get my view info
     const { dataset } = view
     // and unpack what i need
@@ -45,11 +42,11 @@ export const Viewport = ({ view, uri }) => {
 
     // render
     return (
-        < div ref={viewport} style={viewportStyle.box} >
+        < div ref={ref} style={viewportStyle.box} >
             <Mosaic uri={uri} raster={shape} tile={tile} style={mosaicStyle} />
         </div >
     )
-}
+})
 
 
 // end of file

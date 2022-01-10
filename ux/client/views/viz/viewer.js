@@ -24,6 +24,8 @@ import styles from './styles'
 // display the datasets associated with this reader
 export const Viewer = ({ idx, view }) => {
     // register my viewport
+    // N.B: the ref has to be obtained here and handed to the {viewport} because
+    // {tab} needs it to power up the {sync} button
     const viewport = useRegisterViewport()
 
     // get my view info
@@ -52,7 +54,7 @@ export const Viewer = ({ idx, view }) => {
             <Info name="tile" value={tile.join(" x ")} style={styles.attributes} />
 
             {/* the data viewport */}
-            <Viewport view={view} uri={datasetURI} />
+            <Viewport ref={viewport} view={view} uri={datasetURI} />
         </>
     )
 }
