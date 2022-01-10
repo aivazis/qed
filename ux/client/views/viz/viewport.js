@@ -20,7 +20,7 @@ import styles from './styles'
 
 
 // display the datasets associated with this reader
-export const Viewport = ({ view }) => {
+export const Viewport = ({ view, uri }) => {
     // get the list of views
     const { views } = useViews()
     // register my viewport
@@ -51,7 +51,7 @@ export const Viewport = ({ view }) => {
     // render
     return (
         < div ref={viewport} style={viewportStyle.box} >
-            < Mosaic raster={shape} tile={tile} style={viewportStyle} />
+            <Mosaic uri={uri} raster={shape} tile={tile} style={viewportStyle} />
         </div >
     )
 }
