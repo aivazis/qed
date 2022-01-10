@@ -39,8 +39,8 @@ export const Viewer = ({ idx, view }) => {
     //       channel is selected; the {view} index by itself is not enough to trigger a refresh
     // first, assemble the resolved selector+channel tag
     const tag = [...selector.map(b => b.value), channel].join(":")
-    // put together the dataset uri
-    const datasetURI = ["data", readerUUID, datasetUUID, tag].join("/")
+    // assemble the base uri for the data request
+    const base = ["data", readerUUID, datasetUUID, tag].join("/")
 
     // render
     return (
@@ -54,7 +54,7 @@ export const Viewer = ({ idx, view }) => {
             <Info name="tile" value={tile.join(" x ")} style={styles.attributes} />
 
             {/* the data viewport */}
-            <Viewport ref={viewport} view={view} uri={datasetURI} />
+            <Viewport ref={viewport} view={view} uri={base} />
         </>
     )
 }
