@@ -13,7 +13,7 @@ import { ViewportContext } from './viewportContext'
 
 
 // get the viewport position
-export const useGetViewportPostion = () => {
+export const useGetViewportCameraPostion = () => {
     // grab the value
     const { position } = React.useContext(ViewportContext)
     // and return it

@@ -13,8 +13,8 @@ import { Mosaic } from '~/widgets'
 
 // locals
 // hooks
-import { usePanViewport } from './usePanViewport'
-import { useGetViewportPostion } from './useGetViewportPosition'
+import { usePanViewportCamera } from './usePanViewportCamera'
+import { useGetViewportCameraPostion } from './useGetViewportCameraPosition'
 // styles
 import styles from './styles'
 
@@ -22,9 +22,9 @@ import styles from './styles'
 // display the datasets associated with this reader
 const Panel = React.forwardRef(({ view, uri }, ref) => {
     // get my camera position
-    const { z } = useGetViewportPostion()
-    // and the scroll handler
-    const pan = usePanViewport(ref)
+    const { z } = useGetViewportCameraPostion()
+    // and its panning controller
+    const pan = usePanViewportCamera(ref)
 
     // get my view info
     const { dataset } = view
