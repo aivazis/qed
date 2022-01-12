@@ -17,7 +17,7 @@ export const useGetViewportSync = (viewport) => {
     // grab the sync table
     const { synced } = React.useContext(VizContext)
     // and return the state of the {viewport}
-    return synced.get(viewport)
+    return synced[viewport]
 }
 
 
