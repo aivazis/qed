@@ -35,7 +35,6 @@ export const useVisualizeChannel = () => {
             const table = [...old]
             // add the new viewport at {idx} with a default state
             table[view] = false
-            console.log(`visualizing in ${view}; new table:`, table)
             // return the new table
             return table
         })
