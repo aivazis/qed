@@ -15,24 +15,34 @@ import { VizContext } from './vizContext'
 // access to the registered views
 export const useSplitView = view => {
     // grab the list of {views} from context
-    const { setViews, setActiveView } = React.useContext(VizContext)
+    const { setViews, setSynced, setActiveView } = React.useContext(VizContext)
     // make a handler that adds a new blank view after a given on
     const splitView = (evt) => {
         // stop this event from bubbling up
         evt.stopPropagation()
         // and quash any side effects
         evt.preventDefault()
-        // adjust the view
+        // add a new view to the pile
         setViews(old => {
             // make a copy of the old state
             const clone = [...old]
-            // make a copy of the current view
+            // the new view is a copy of the view being split
             clone.splice(view + 1, 0, old[view])
-            // and make it the active one
-            setActiveView(view + 1)
-            // and hand off the new state
+            // all done
             return clone
         })
+        // initialize its sync status
+        setSynced(old => {
+            // make a copy of the old table
+            const table = [...old]
+            // add the new viewport at {idx} with a default state
+            table.splice(view + 1, 0, false)
+            // return the new table
+            return table
+        })
+        // activate the new view
+        setActiveView(view + 1)
+
         // all done
         return
     }

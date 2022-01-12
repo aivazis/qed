@@ -15,7 +15,7 @@ import { VizContext } from './vizContext'
 // access to the registered views
 export const useCollapseView = view => {
     // grab the list of {views} from context
-    const { setViews, setActiveView } = React.useContext(VizContext)
+    const { setViews, setSynced, setActiveView } = React.useContext(VizContext)
     // make a handler that adds a new blank view after a given on
     const collapseView = (evt) => {
         // stop this event from bubbling up
@@ -28,11 +28,20 @@ export const useCollapseView = view => {
             const clone = [...old]
             // adjust the entry specified by the caller
             clone.splice(view, 1)
-            // and make it the active one
-            setActiveView(Math.max(view - 1, 0))
             // and hand off the new state
             return clone
         })
+        // remove from the sync table
+        setSynced(old => {
+            // make a copy of the old table
+            const table = [...old]
+            // remove the status of the current view
+            table.splice(view, 1)
+            // return the new table
+            return table
+        })
+        // activate the previous view
+        setActiveView(Math.max(view - 1, 0))
         // all done
         return
     }
