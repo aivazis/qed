@@ -22,9 +22,9 @@ export const useToggleViewportSync = (viewport) => {
         // update the sync table
         setSynced(old => {
             // make a copy of the old table
-            const table = new Map(old)
-            // add the new viewport with a default state
-            table.set(viewport, !old.get(viewport))
+            const table = [...old]
+            // add flip the viewport status
+            table[viewport] = !old[viewport]
             // return the new table
             return table
         })
