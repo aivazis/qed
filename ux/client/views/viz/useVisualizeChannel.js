@@ -15,7 +15,7 @@ import { VizContext } from './vizContext'
 // hook to pull the dataset readers out the outlet context
 export const useVisualizeChannel = () => {
     // grab the readers
-    const { activeView, setViews } = React.useContext(VizContext)
+    const { activeView, setViews, setSynced } = React.useContext(VizContext)
 
     // make the handler
     const visualizeChannel = (channel, view = activeView) => {
@@ -28,6 +28,18 @@ export const useVisualizeChannel = () => {
             // and hand off the new state
             return clone
         })
+
+        // initialize its sync status
+        setSynced(old => {
+            // make a copy of the old table
+            const table = [...old]
+            // add the new viewport at {idx} with a default state
+            table[view] = false
+            console.log(`visualizing in ${view}; new table:`, table)
+            // return the new table
+            return table
+        })
+
         // all done
         return
     }
