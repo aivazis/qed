@@ -12,13 +12,14 @@ import { graphql, useLazyLoadQuery } from 'react-relay/hooks'
 // the error message to show consumers that are not nested within a provider
 const complaint = "while accessing the 'viz' context: no provider"
 
+
 // setup the flex context
 export const VizContext = React.createContext(
     // the default value that consumers see when accessing the context outside a provider
     {
         // the known views
         views: [],
-        setView: () => { throw new Error(complaint) },
+        setViews: () => { throw new Error(complaint) },
         // the synced views
         synced: null,
         setSynced: () => { throw new Error(complaint) },
@@ -41,9 +42,9 @@ export const VizProvider = ({
     children
 }) => {
     // setup the views; a views is an object with a fully resolved dataset selector
-    const [views, setViews] = React.useState(new Array())
+    const [views, setViews] = React.useState([])
     // a table with the sync status of the known views
-    const [synced, setSynced] = React.useState(new Map())
+    const [synced, setSynced] = React.useState([])
     // the active view is an index into the {views}
     const [activeView, setActiveView] = React.useState(0)
     // the camera holds an (x,y,z) triplet
@@ -73,7 +74,6 @@ export const VizProvider = ({
         <VizContext.Provider value={context} >
             {children}
         </VizContext.Provider >
-
     )
 }
 
