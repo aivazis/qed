@@ -34,7 +34,11 @@ type Reader implements Node {
   uuid: ID!
   # the full path to the supporting file
   uri: String!
+  # the prefix of the data request url
+  api: String!
+  # the set of dataset selectors and their legal values
   selectors: [Selectors]!
+  # the actual dataset contained in the source
   datasets: [Dataset]!
 }
 
