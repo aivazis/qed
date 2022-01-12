@@ -34,6 +34,7 @@ export const Reader = (props) => {
             id
             uuid
             uri
+            api
             selectors {
                 name
                 values
@@ -45,7 +46,7 @@ export const Reader = (props) => {
         }`,
         props.reader)
     // unpack
-    const { id, uuid, uri } = reader
+    const { id, uuid, uri, api } = reader
     // parse the reader id
     const [family, name] = id.split(":")
 
@@ -55,7 +56,7 @@ export const Reader = (props) => {
     const trayStyle = amActive ? styles.reader.activeTray : styles.reader.tray
 
     // build the reader spec that gets installed in a view when a channel is chosen
-    const readerSpec = { uuid, uri, name }
+    const readerSpec = { uuid, uri, name, api }
 
     // render
     return (
