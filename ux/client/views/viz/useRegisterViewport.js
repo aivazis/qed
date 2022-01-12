@@ -13,7 +13,7 @@ import { VizContext } from './vizContext'
 
 
 // viewport registration
-export const useRegisterViewport = (inSync = false) => {
+export const useRegisterViewport = (idx, inSync = false) => {
     // make a reference for this viewport
     const viewport = React.useRef()
     // grab the sync table mutator from the context
