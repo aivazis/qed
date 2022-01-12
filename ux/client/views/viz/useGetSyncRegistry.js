@@ -13,7 +13,7 @@ import { VizContext } from './vizContext'
 
 
 // access to the viewport sync registry
-export const useGetSyncRegistry = (viewport) => {
+export const useGetSyncRegistry = () => {
     // grab the sync table
     const { synced } = React.useContext(VizContext)
     // and return it
