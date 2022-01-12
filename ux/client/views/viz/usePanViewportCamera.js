@@ -14,30 +14,21 @@ import { ViewportContext } from './viewportContext'
 
 // get the viewport position
 export const usePanViewportCamera = (viewport) => {
-    // grab the position mutator
+    // grab the position mutator of the viewport camera
     const { setPosition } = React.useContext(ViewportContext)
 
-    // make handler for the scroll event
-    const pan = (evt) => {
-        // get the scrolling viewport
-        const target = evt.target
-        // interpret the scroll info as the coordinates of the viewport camera
-        const x = Math.max(target.scrollLeft, 0)
-        const y = Math.max(target.scrollTop, 0)
-        // update the viewport camera
+    // build a function that updates both the viewport and the shared cameras
+    const pan = (position) => {
+        // and the viewport camera
         setPosition((old) => {
             // if this is not a substantive update
-            if (old.x === x && old.y === y) {
+            if (old.x === position.x && old.y === position.y) {
                 // bail
                 return old
             }
-
-            // otherwise, build the new camera position
-            const position = { ...old, x, y }
-            // and return it
-            return position
+            // otherwise, build the new camera position and return it
+            return { ...old, ...position }
         })
-
         // all done
         return
     }
