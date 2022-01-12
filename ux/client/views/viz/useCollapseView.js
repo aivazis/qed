@@ -17,11 +17,7 @@ export const useCollapseView = view => {
     // grab the list of {views} from context
     const { setViews, setSynced, setActiveView } = React.useContext(VizContext)
     // make a handler that adds a new blank view after a given on
-    const collapseView = (evt) => {
-        // stop this event from bubbling up
-        evt.stopPropagation()
-        // and quash any side effects
-        evt.preventDefault()
+    const collapseView = () => {
         // adjust the view
         setViews(old => {
             // make a copy of the old state
@@ -31,7 +27,7 @@ export const useCollapseView = view => {
             // and hand off the new state
             return clone
         })
-        // remove from the sync table
+        // remove its flag from the sync table
         setSynced(old => {
             // make a copy of the old table
             const table = [...old]

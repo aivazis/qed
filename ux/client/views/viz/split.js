@@ -20,17 +20,33 @@ import { useSplitView } from './useSplitView'
 import styles from './styles'
 
 
-// display the datasets associated with this reader
+// split a {view} into two
 export const Split = ({ view }) => {
-    // make a handler that splits this view
-    const split = { onClick: useSplitView(view) }
+    // grab the hook that splits a {view}
+    const splitView = useSplitView(view)
+    // turn it into a handler that splits this {view}
+    const split = (evt) => {
+        // stop this event from bubbling up
+        evt.stopPropagation()
+        // and quash any side effects
+        evt.preventDefault()
+        // manage the {view} state
+        splitView()
+        // all done
+        return
+    }
 
-    // grab my style
+    // assemble the controllers to hand my {badge}
+    const behaviors = {
+        onClick: split,
+    }
+
+    // mix my paint
     const splitStyle = styles.split
 
     // render
     return (
-        <Badge size={10} state="available" behaviors={split} style={splitStyle} >
+        <Badge size={10} state="available" behaviors={behaviors} style={splitStyle} >
             <Icon style={splitStyle} />
         </Badge>
     )

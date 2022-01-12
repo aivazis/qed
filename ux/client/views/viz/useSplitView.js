@@ -17,11 +17,7 @@ export const useSplitView = view => {
     // grab the list of {views} from context
     const { setViews, setSynced, setActiveView } = React.useContext(VizContext)
     // make a handler that adds a new blank view after a given on
-    const splitView = (evt) => {
-        // stop this event from bubbling up
-        evt.stopPropagation()
-        // and quash any side effects
-        evt.preventDefault()
+    const splitView = () => {
         // add a new view to the pile
         setViews(old => {
             // make a copy of the old state

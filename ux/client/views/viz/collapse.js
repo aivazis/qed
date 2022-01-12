@@ -9,7 +9,7 @@ import React from 'react'
 
 // project
 // shapes
-import { X } from '~/shapes'
+import { X as Icon } from '~/shapes'
 // widgets
 import { Badge } from '~/widgets'
 
@@ -22,16 +22,32 @@ import styles from './styles'
 
 // remove a {view} from the {viz} panel
 export const Collapse = ({ view }) => {
-    // make a handler that that collapses this view
-    const collapse = { onClick: useCollapseView(view) }
+    // grab the hook that collapses a {view}
+    const collapseView = useCollapseView(view)
+    // turn it into a handler that collapses this {view}
+    const collapse = (evt) => {
+        // stop this event from bubbling up
+        evt.stopPropagation()
+        // and quash any side effects
+        evt.preventDefault()
+        // manage the {view} state
+        collapseView()
+        // all done
+        return
+    }
 
-    // grab my style
+    // assemble the controllers to hand my {badge}
+    const behaviors = {
+        onClick: collapse,
+    }
+
+    // mix my paint
     const collapseStyle = styles.collapse
 
     // render
     return (
-        <Badge size={10} state="available" behaviors={collapse} style={collapseStyle} >
-            <X style={collapseStyle} />
+        <Badge size={10} state="available" behaviors={behaviors} style={collapseStyle} >
+            <Icon style={collapseStyle} />
         </Badge>
     )
 }
