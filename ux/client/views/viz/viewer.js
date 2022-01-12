@@ -23,10 +23,10 @@ import styles from './styles'
 
 // display the datasets associated with this reader
 export const Viewer = ({ idx, view }) => {
-    // register my viewport
+    // register my viewport and get a {ref} for it
     // N.B: the ref has to be obtained here and handed to the {viewport} because
-    // {tab} needs it to power up the {sync} button
-    const viewport = useRegisterViewport()
+    //      {tab} needs it to power up the {sync} button
+    const viewport = useRegisterViewport(idx)
 
     // get my view info
     const { reader, dataset, channel } = view
