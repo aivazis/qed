@@ -35,10 +35,8 @@ export const Viewer = ({ idx, view }) => {
     // put together the dataset URI
     // N.B.: it is important to do it here so the {viewport} props change when a new dataset
     //       channel is selected; the {view} index by itself is not enough to trigger a refresh
-    // first, assemble the resolved selector+channel tag
-    const tag = [...selector.map(b => b.value), channel].join(":")
     // assemble the base uri for the data request
-    const base = ["data", readerUUID, datasetUUID, tag].join("/")
+    const base = ["data", readerUUID, datasetUUID, channel].join("/")
 
     // render
     return (
