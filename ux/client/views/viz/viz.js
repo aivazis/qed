@@ -55,15 +55,19 @@ const Panel = () => {
                 </Flex.Panel >
             }
 
-            {/* otherwise, make a panel for each active view */}
-            {views.map(({ dataset, channel }, idx) =>
-                <Flex.Panel
-                    key={`${dataset}:${channel}:${idx}`}
-                    style={styles.flex} auto={true} onClick={activate(idx)}
-                >
-                    <Viewer idx={idx} view={views[idx]} />
-                </Flex.Panel >
-            )}
+            {/* otherwise, make a flex panel with a viewer for each registered view */}
+            {views.map((view, idx) => {
+                // the handler for activating the view is attached to the flex panel because
+                // the {viewer} is just a react fragment
+                return (
+                    <Flex.Panel
+                        key={`panel:${idx}`}
+                        style={styles.flex} auto={true} onClick={activate(idx)}
+                    >
+                        <Viewer idx={idx} view={view} />
+                    </Flex.Panel >
+                )
+            })}
 
         </Flex.Box >
     )
