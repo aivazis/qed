@@ -15,8 +15,6 @@ import { Info } from '~/widgets'
 // components
 import { Tab } from './tab'
 import { Viewport } from './viewport'
-// hooks
-import { useRegisterViewport } from './useRegisterViewport'
 // styles
 import styles from './styles'
 
@@ -26,7 +24,7 @@ export const Viewer = ({ idx, view }) => {
     // register my viewport and get a {ref} for it
     // N.B: the ref has to be obtained here and handed to the {viewport} because
     //      {tab} needs it to power up the {sync} button
-    const viewport = useRegisterViewport(idx)
+    const viewport = React.useRef()
 
     // get my view info
     const { reader, dataset, channel } = view
