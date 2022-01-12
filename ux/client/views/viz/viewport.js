@@ -20,11 +20,11 @@ import styles from './styles'
 
 
 // display the datasets associated with this reader
-const Panel = React.forwardRef(({ view, uri }, ref) => {
+const Panel = React.forwardRef(({ view, uri, ...rest }, ref) => {
     // get my camera position
     const { z } = useGetViewportCameraPostion()
     // and its panning controller
-    const pan = usePanViewportCamera(ref)
+    const panViewportCamera = usePanViewportCamera(ref)
 
     // get my view info
     const { dataset } = view
@@ -36,6 +36,19 @@ const Panel = React.forwardRef(({ view, uri }, ref) => {
     const height = Math.trunc(shape[0] / z)
     // and fold my zoom level into the data request uri
     const withZoom = [uri, z].join("/")
+
+    // build my scroll handler
+    const pan = (evt) => {
+        // get the scrolling element
+        const element = evt.target
+        // get the scroll coordinates
+        const y = Math.max(element.scrollTop, 0)
+        const x = Math.max(element.scrollLeft, 0)
+        // update the shared camera
+        panViewportCamera({ x, y })
+        // done
+        return
+    }
 
     // mix my paint
     // for the viewport
@@ -54,7 +67,7 @@ const Panel = React.forwardRef(({ view, uri }, ref) => {
 
     // render; don't forget to use the zoomed raster shape
     return (
-        <div ref={ref} style={viewportStyle.box} onScroll={pan}>
+        <div ref={ref} style={viewportStyle.box} onScroll={pan} {...rest} >
             <Mosaic uri={withZoom} raster={[height, width]} tile={tile} style={mosaicStyle} />
         </div>
     )
