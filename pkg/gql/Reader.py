@@ -28,6 +28,7 @@ class Reader(graphene.ObjectType):
     id = graphene.ID()
     uuid = graphene.ID()
     uri = graphene.String()
+    api = graphene.String()
     selectors = graphene.List(Selectors)
     datasets = graphene.List(Dataset)
 
@@ -55,6 +56,14 @@ class Reader(graphene.ObjectType):
         """
         # turn the {uri} into an absolute path and send it off
         return reader.uri.resolve()
+
+
+    def resolve_api(reader, *_):
+        """
+        Get the entry point for data requests
+        """
+        # turn the {uri} into an absolute path and send it off
+        return "/data"
 
 
     def resolve_selectors(reader, *_):
