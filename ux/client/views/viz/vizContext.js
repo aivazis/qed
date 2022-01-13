@@ -26,10 +26,9 @@ export const VizContext = React.createContext(
         // the active view
         activeView: null,
         setActiveView: () => { throw new Error(complaint) },
+
         // the shared camera
         camera: null,
-        setCamera: () => { throw new Error(complaint) },
-
         // the readers
         readers: null,
     }
@@ -48,7 +47,7 @@ export const VizProvider = ({
     // the active view is an index into the {views}
     const [activeView, setActiveView] = React.useState(0)
     // the camera holds an (x,y,z) triplet
-    const [camera, setCamera] = React.useState({ x: 0, y: 0, z: 1 })
+    const camera = React.useRef({ x: 0, y: 0, z: 1 })
 
     // ask the server for the collection of known datasets
     const { readers: knownReaders } = useLazyLoadQuery(contextQuery)
@@ -64,7 +63,7 @@ export const VizProvider = ({
         // active view
         activeView, setActiveView,
         // camera
-        camera, setCamera,
+        camera,
         // readers
         readers,
     }

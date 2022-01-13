@@ -15,23 +15,16 @@ import { VizContext } from './vizContext'
 // get the viewport position
 export const usePanSharedCamera = () => {
     // grab the sync table and the camera position mutator
-    const { setCamera } = React.useContext(VizContext)
+    const { camera } = React.useContext(VizContext)
 
     // build a controller that updates the shared camera
     const pan = position => {
-        // otherwise, update the shared camera position
-        setCamera((old) => {
-            // if this is not a substantive update
-            if (old.x === position.x && old.y === position.y) {
-                // bail
-                return old
-            }
-            // otherwise, return the new position
-            return { ...old, ...position }
-        })
-        // all done
+        // update the shared camera position
+        camera.current = { ...camera.current, ...position }
+        //  all done
         return
     }
+
     // and return it
     return pan
 }
