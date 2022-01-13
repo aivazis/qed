@@ -19,6 +19,7 @@ import { Flex } from '~/widgets'
 // hooks
 import { useViews } from './useViews'
 import { useSetActiveView } from './useSetActiveView'
+import { useMakePanDispatcher } from './useMakePanDispatcher'
 // components
 import { Blank } from './blank'
 import { Viewer } from './viewer'
@@ -28,12 +29,24 @@ import styles from './styles'
 
 // the area
 const Panel = () => {
+    console.log("viz rendering")
     // grab the registered views
     const { views } = useViews()
-    // the view activator
+    // get the view activator
     const activate = useSetActiveView()
-    // get the state of the activity panel
+    // the state of the activity panel
     const { activityPanel } = useActivityPanel()
+
+    // make a pile of viewports
+    const viewports = views.map(_ => null)
+    // and build a registrar
+    const register = idx => {
+        // that lets me capture the refs of my viewports once they are mounted
+        return ref => viewports[idx] = ref
+    }
+
+    // build the scroll handler dispatch for my viewports
+    const dispatch = useMakePanDispatcher(viewports)
 
     // paint mixing
     const datasetPaint = { ...styles.datasets }
@@ -60,11 +73,13 @@ const Panel = () => {
                 // the handler for activating the view is attached to the flex panel because
                 // the {viewer} is just a react fragment
                 return (
-                    <Flex.Panel
-                        key={`panel:${idx}`}
-                        style={styles.flex} auto={true} onClick={activate(idx)}
+                    <Flex.Panel key={`panel:${idx}`}
+                        auto={true}
+                        style={styles.flex}
+                        onClick={activate(idx)}
+                        onScrollCapture={dispatch(idx)}
                     >
-                        <Viewer idx={idx} view={view} />
+                        <Viewer idx={idx} view={view} registrar={register(idx)} />
                     </Flex.Panel >
                 )
             })}
