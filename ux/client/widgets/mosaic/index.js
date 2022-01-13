@@ -17,14 +17,14 @@ import styles from './styles'
 
 
 // a large raster represented as a rectangular grid of tiles
-export const Mosaic = ({ uri, raster, tile, style }) => {
+export const Mosaic = ({ uri, raster, origin, tile, style }) => {
     // mix my paint
     const mosaicStyle = { ...styles.mosaic, ...style.mosaic }
 
     // render
     return (
         <div style={mosaicStyle} >
-            {mosaic(raster, tile).map(spec => {
+            {mosaic(raster, origin, tile).map(spec => {
                 // unpack
                 const [origin, extent] = spec
                 // form the uri
@@ -51,10 +51,10 @@ export const Mosaic = ({ uri, raster, tile, style }) => {
 
 // helpers
 // form a grid of mostly {tile} chunks that cover {shape}
-function mosaic(shape, tile) {
+function mosaic(shape, origin, tile) {
     // form (origin, tile) pairs
     const specs = cartesian(
-        ...zip(shape, tile).map(pair => Array.from(partition(...pair)))
+        ...zip(origin, shape, tile).map(pair => Array.from(partition(...pair)))
     ).map(p => zip(...p))
 
     // and return them
@@ -77,7 +77,7 @@ const cartesian = (first, ...rest) => rest.reduce(
 
 // given a {shape} and a {tile}, generate an array of pairs of (starting index, chunk) that
 // partition {shape} into chunks
-function* partition(shape, tile) {
+function* partition(origin, shape, tile) {
     // figure out how many times {tile} fits in {shape}
     const div = Math.trunc(shape / tile)
     // and what's left behind
@@ -86,12 +86,12 @@ function* partition(shape, tile) {
     // so, the first {div} entries are
     for (let i = 0; i < div; ++i) {
         // chunks of length {tile} at a multiple of {tile}
-        yield [i * tile, tile]
+        yield [origin + i * tile, tile]
     }
     // and if there is anything left over
     if (mod > 0) {
         // it must be of length {mod} from the last multiple of {tile} that fits in {shape}
-        yield [div * tile, mod]
+        yield [origin + div * tile, mod]
     }
 
     // all done
