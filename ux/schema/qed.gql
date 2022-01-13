@@ -53,6 +53,7 @@ type Dataset implements Node {
   datatype: String!
   selector: [Selector]!
   shape: [Int!]!
+  origin: [Int!]!
   tile: [Int!]!
 }
 
