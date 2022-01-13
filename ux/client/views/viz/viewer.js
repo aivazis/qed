@@ -25,7 +25,7 @@ export const Viewer = ({ idx, view, registrar }) => {
     const { reader, dataset, channel } = view
     // and unpack what i need
     const { uuid: readerUUID, uri, api } = reader
-    const { uuid: datasetUUID, datatype, selector, shape, tile } = dataset
+    const { uuid: datasetUUID, datatype, shape, tile } = dataset
 
     // put together the dataset URI
     // N.B.: it is important to do it here so the {viewport} props change when a new dataset
