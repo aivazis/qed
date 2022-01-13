@@ -29,7 +29,7 @@ const Panel = React.forwardRef(({ view, uri, ...rest }, ref) => {
     // get my view info
     const { dataset } = view
     // and unpack what i need
-    const { shape, tile } = dataset
+    const { shape, origin, tile } = dataset
 
     // compute the dimensions of the mosaic
     const width = Math.trunc(shape[1] / z)
@@ -68,7 +68,10 @@ const Panel = React.forwardRef(({ view, uri, ...rest }, ref) => {
     // render; don't forget to use the zoomed raster shape
     return (
         <div ref={ref} style={viewportStyle.box} onScroll={pan} {...rest} >
-            <Mosaic uri={withZoom} raster={[height, width]} tile={tile} style={mosaicStyle} />
+            <Mosaic uri={withZoom}
+                raster={[height, width]} origin={origin} tile={tile}
+                style={mosaicStyle}
+            />
         </div>
     )
 })

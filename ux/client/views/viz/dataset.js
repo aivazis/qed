@@ -34,21 +34,23 @@ export const Dataset = (props) => {
                 value
             }
             shape
+            origin
             tile
             channels
         }`,
         props.dataset)
     // unpack
-    const { uuid, datatype, selector, shape, tile, channels } = dataset
+    const { uuid, datatype, selector, shape, origin, tile, channels } = dataset
 
     // build the dataset spec that get installed in the {views}
-    const datasetSpec = { uuid, datatype, selector, shape, tile }
+    const datasetSpec = { uuid, datatype, selector, shape, origin, tile }
 
     // render
     return (
         <>
             <Selectors selector={selector} />
             <Info name="shape" value={shape.join(" x ")} style={styles.attributes} />
+            <Info name="origin" value={origin.join(", ")} style={styles.attributes} />
             <Info name="type" value={datatype} style={styles.attributes} />
             <Channels reader={reader} dataset={datasetSpec} channels={channels} />
         </>
