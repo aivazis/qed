@@ -12,14 +12,13 @@ import React from 'react'
 import { ViewportContext } from './viewportContext'
 
 
-// get the viewport position
-export const usePanViewportCamera = (viewport) => {
+// pan the viewport camera
+export const usePanViewportCamera = () => {
     // grab the position mutator of the viewport camera
     const { setPosition } = React.useContext(ViewportContext)
-
-    // build a function that updates both the viewport and the shared cameras
-    const pan = (position) => {
-        // and the viewport camera
+    // build a controller that updates the viewport cameras
+    const pan = position => {
+        // adjust the viewport camera position
         setPosition((old) => {
             // if this is not a substantive update
             if (old.x === position.x && old.y === position.y) {
@@ -32,7 +31,6 @@ export const usePanViewportCamera = (viewport) => {
         // all done
         return
     }
-
     // and return it
     return pan
 }
