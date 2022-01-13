@@ -24,7 +24,7 @@ export const useToggleViewportSync = (idx, viewport) => {
             // make a copy of the old table
             const table = [...old]
             // add flip the viewport status
-            table[idx] = old[idx] ? null : viewport
+            table[idx] = !old[idx]
             // return the new table
             return table
         })

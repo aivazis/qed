@@ -32,7 +32,7 @@ export const useSplitView = view => {
             // make a copy of the old table
             const table = [...old]
             // add the new viewport at {idx} with a default state
-            table.splice(view + 1, 0, null)
+            table.splice(view + 1, 0, false)
             // return the new table
             return table
         })
