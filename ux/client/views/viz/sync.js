@@ -22,11 +22,11 @@ import styles from './styles'
 
 
 // display the datasets associated with this reader
-export const Sync = ({ idx, viewport }) => {
+export const Sync = ({ idx }) => {
     // look up the current sync state of the {viewport}
     const isSynced = useGetViewportSync(idx)
     // build the sync toggle
-    const toggle = useToggleViewportSync(idx, viewport)
+    const toggle = useToggleViewportSync(idx)
 
     // my event handlers
     const behaviors = {
