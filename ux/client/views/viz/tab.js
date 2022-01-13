@@ -24,7 +24,7 @@ import styles from './styles'
 
 
 // display the datasets associated with this reader
-export const Tab = ({ idx, view, behaviors }) => {
+export const Tab = ({ idx, viewport, view, behaviors }) => {
     // get the active view
     const { activeView } = useViews()
     // am i the active view?
@@ -68,7 +68,7 @@ export const Tab = ({ idx, view, behaviors }) => {
             {/* the button that adds a new view to the {viz} panel */}
             <Split view={idx} />
             {/* the button that toggles the sync status of the data viewport */}
-            <Sync viewport={idx} />
+            <Sync idx={idx} viewport={viewport} />
         </div>
     )
 }

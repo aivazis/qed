@@ -34,7 +34,7 @@ export const useVisualizeChannel = () => {
             // make a copy of the old table
             const table = [...old]
             // add the new viewport at {idx} with a default state
-            table[view] = false
+            table[view] = null
             // return the new table
             return table
         })

@@ -13,7 +13,7 @@ import { VizContext } from './vizContext'
 
 
 // viewport registration
-export const useToggleViewportSync = (viewport) => {
+export const useToggleViewportSync = (idx, viewport) => {
     // grab the sync table mutator from the context
     const { setSynced } = React.useContext(VizContext)
 
@@ -24,7 +24,7 @@ export const useToggleViewportSync = (viewport) => {
             // make a copy of the old table
             const table = [...old]
             // add flip the viewport status
-            table[viewport] = !old[viewport]
+            table[idx] = old[idx] ? null : viewport
             // return the new table
             return table
         })
