@@ -20,20 +20,20 @@ export const useMakePanDispatcher = (viewports) => {
     // and the shared camera controller
     const panSharedCamera = usePanSharedCamera()
 
-    // make a handler that swallows events until a semaphore is raised
-    const debounce = (_, idx) => {
-        // decrement the semaphore
-        --semaphores[idx]
-        // if the flag is cleared
-        if (semaphores[idx] == 0) {
-            // reset back to normal behaviors
-            scrollers[idx] = pan
-        }
-        // all done
-        return
-    }
-    // and one that pans the shared camera and scrolls the synced viewports
+    // make a handler that pans the shared camera and scrolls the synced viewports
     const pan = (evt, idx) => {
+        // if i have a raised flag
+        if (semaphores[idx] > 0) {
+            // decrement the semaphore
+            --semaphores[idx]
+            // and bail
+            return
+        }
+        // if i am not synced
+        if (!synced[idx]) {
+            // nothing to do
+            return
+        }
         // get the scrolling element
         const element = evt.target
         // get the scroll coordinates
@@ -48,9 +48,7 @@ export const useMakePanDispatcher = (viewports) => {
                 // move on
                 return
             }
-            // everybody else gets the {debounce} handler installed
-            scrollers[i] = debounce
-            // a bump on its semaphore
+            // everybody else gets a bump on its semaphore
             ++semaphores[i]
             // and scrolls to my location
             port.scroll(x, y)
@@ -61,10 +59,8 @@ export const useMakePanDispatcher = (viewports) => {
 
     // make a pile of semaphores
     const semaphores = Array(viewports.length).fill(0)
-    // a table of of event handlers
-    const scrollers = semaphores.map((_, idx) => synced[idx] ? pan : noop)
     // and a handler wrapper
-    const dispatch = idx => evt => scrollers[idx](evt, idx)
+    const dispatch = idx => evt => pan(evt, idx)
 
     // and return it
     return dispatch
