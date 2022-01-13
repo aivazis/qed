@@ -50,7 +50,7 @@ export const Viewer = ({ idx, view }) => {
             <Info name="tile" value={tile.join(" x ")} style={styles.attributes} />
 
             {/* the data viewport */}
-            <Viewport ref={viewport} view={view} uri={base} />
+            <Viewport ref={viewport} idx={idx} view={view} uri={base} />
         </>
     )
 }
