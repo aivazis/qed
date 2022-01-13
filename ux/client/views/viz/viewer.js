@@ -20,12 +20,7 @@ import styles from './styles'
 
 
 // display the datasets associated with this reader
-export const Viewer = ({ idx, view }) => {
-    // register my viewport and get a {ref} for it
-    // N.B: the ref has to be obtained here and handed to the {viewport} because
-    //      {tab} needs it to power up the {sync} button
-    const viewport = React.useRef()
-
+export const Viewer = ({ idx, view, registrar }) => {
     // get my view info
     const { reader, dataset, channel } = view
     // and unpack what i need
@@ -42,7 +37,7 @@ export const Viewer = ({ idx, view }) => {
     return (
         <>
             {/* the title bar with the dataset description and the controls */}
-            <Tab idx={idx} view={view} viewport={viewport} />
+            <Tab idx={idx} view={view} />
             {/* identifying metadata */}
             <Info name="uri" value={uri} style={styles.attributes} />
             <Info name="type" value={datatype} style={styles.attributes} />
@@ -50,7 +45,7 @@ export const Viewer = ({ idx, view }) => {
             <Info name="tile" value={tile.join(" x ")} style={styles.attributes} />
 
             {/* the data viewport */}
-            <Viewport ref={viewport} idx={idx} view={view} uri={base} />
+            <Viewport idx={idx} view={view} uri={base} registrar={registrar} />
         </>
     )
 }
