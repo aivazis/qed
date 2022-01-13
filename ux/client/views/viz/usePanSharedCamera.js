@@ -13,37 +13,25 @@ import { VizContext } from './vizContext'
 
 
 // get the viewport position
-export const usePanSharedCamera = (viewport) => {
+export const usePanSharedCamera = () => {
     // grab the sync table and the camera position mutator
-    const { synced, setCamera } = React.useContext(VizContext)
+    const { setCamera } = React.useContext(VizContext)
 
-    // make handler for the scroll event
-    const pan = (position) => {
-        // if the viewport requesting the change is not currently synced to the shared camera
-        if (!synced.get(viewport)) {
-            // show me
-            // console.log("not panning shared camera", viewport)
-            // leave everything alone
-            return
-        }
-
-        // otherwise, update the shared camera
+    // build a controller that updates the shared camera
+    const pan = position => {
+        // otherwise, update the shared camera position
         setCamera((old) => {
             // if this is not a substantive update
             if (old.x === position.x && old.y === position.y) {
                 // bail
                 return old
             }
-            // show me
-            console.log("panning shared camera to", position)
             // otherwise, return the new position
             return { ...old, ...position }
         })
-
         // all done
         return
     }
-
     // and return it
     return pan
 }
