@@ -29,7 +29,6 @@ import styles from './styles'
 
 // the area
 const Panel = () => {
-    console.log("viz rendering")
     // grab the registered views
     const { views } = useViews()
     // get the view activator
