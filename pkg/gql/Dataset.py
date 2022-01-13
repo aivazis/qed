@@ -24,6 +24,7 @@ class Dataset(graphene.ObjectType):
     datatype = graphene.String()
     selector = graphene.List(Selector)
     shape = graphene.List(graphene.Int)
+    origin = graphene.List(graphene.Int)
     tile = graphene.List(graphene.Int)
 
 
