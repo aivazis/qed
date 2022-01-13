@@ -20,11 +20,11 @@ import styles from './styles'
 
 
 // display the datasets associated with this reader
-const Panel = React.forwardRef(({ view, uri, ...rest }, ref) => {
+const Panel = ({ idx, view, uri, registrar, ...rest }) => {
     // get my camera position
     const { z } = useGetViewportCameraPostion()
     // and its panning controller
-    const panViewportCamera = usePanViewportCamera(ref)
+    const panViewportCamera = usePanViewportCamera()
 
     // get my view info
     const { dataset } = view
@@ -38,7 +38,7 @@ const Panel = React.forwardRef(({ view, uri, ...rest }, ref) => {
     const withZoom = [uri, z].join("/")
 
     // build my scroll handler
-    const pan = (evt) => {
+    const scroll = evt => {
         // get the scrolling element
         const element = evt.target
         // get the scroll coordinates
@@ -67,27 +67,24 @@ const Panel = React.forwardRef(({ view, uri, ...rest }, ref) => {
 
     // render; don't forget to use the zoomed raster shape
     return (
-        <div ref={ref} style={viewportStyle.box} onScroll={pan} {...rest} >
+        <div ref={registrar} style={viewportStyle.box} onScroll={scroll} {...rest} >
             <Mosaic uri={withZoom}
                 raster={[height, width]} origin={origin} tile={tile}
                 style={mosaicStyle}
             />
         </div>
     )
-})
+}
 
 
 // context
 import { ViewportProvider } from './viewportContext'
 // turn the panel into a context provider and publish
-export const Viewport = React.forwardRef((props, ref) => {
-    // set up the context provider
-    return (
-        <ViewportProvider>
-            <Panel ref={ref} {...props} />
-        </ViewportProvider>
-    )
-})
+export const Viewport = props => (
+    <ViewportProvider>
+        <Panel {...props} />
+    </ViewportProvider>
+)
 
 
 // end of file
