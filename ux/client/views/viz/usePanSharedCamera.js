@@ -21,7 +21,7 @@ export const usePanSharedCamera = () => {
     const pan = position => {
         // update the shared camera position
         camera.current = { ...camera.current, ...position }
-        //  all done
+        // all done
         return
     }
 
