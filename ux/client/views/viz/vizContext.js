@@ -17,20 +17,22 @@ const complaint = "while accessing the 'viz' context: no provider"
 export const VizContext = React.createContext(
     // the default value that consumers see when accessing the context outside a provider
     {
-        // the known views
+        // the known views, i.e. fully resolved dataset selectors
         views: [],
         setViews: () => { throw new Error(complaint) },
-        // the synced views
+        // indicators of whether views are synced to the shared camera
         synced: null,
         setSynced: () => { throw new Error(complaint) },
-        // the active view
+        // the index of the active view
         activeView: null,
         setActiveView: () => { throw new Error(complaint) },
 
-        // the shared camera
+        // the shared camera state
         camera: null,
-        // the readers
+        // the set of readers retrieved from the server
         readers: null,
+        // the set of active viewports (actually, the {mosaic} placemats)
+        viewports: null,
     }
 )
 
@@ -46,13 +48,15 @@ export const VizProvider = ({
     const [synced, setSynced] = React.useState([])
     // the active view is an index into the {views}
     const [activeView, setActiveView] = React.useState(0)
-    // the camera holds an (x,y,z) triplet
+    // the camera currently holds an (x,y,z) triplet
     const camera = React.useRef({ x: 0, y: 0, z: 1 })
 
     // ask the server for the collection of known datasets
     const { readers: knownReaders } = useLazyLoadQuery(contextQuery)
     // set up the readers
     const [readers] = React.useState(knownReaders)
+    // initialized the viewport
+    const viewports = React.useRef([])
 
     // build the current value of the context
     const context = {
@@ -62,10 +66,12 @@ export const VizProvider = ({
         synced, setSynced,
         // active view
         activeView, setActiveView,
-        // camera
+        // the shared camera state
         camera,
-        // readers
+        // the set of readers retrieved from the server
         readers,
+        // the set of active viewports (actually, the {mosaic} placemats)
+        viewports,
     }
 
     // provide for my children
@@ -79,7 +85,7 @@ export const VizProvider = ({
 
 // the dataset query
 const contextQuery = graphql`query vizContextQuery {
-    readers(first: 100) @connection(key: "datasets_readers") {
+    readers(first: 100) @connection(key: "viz_readers") {
         count
         edges {
             node {
