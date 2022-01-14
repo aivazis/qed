@@ -15,7 +15,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import 'regenerator-runtime'
 
 // support for image lazy loading
-import lazysizes from 'lazysizes'
+import 'lazysizes'
 // detect attribute changes in transformed elements
 import 'lazysizes/plugins/attrchange/ls.attrchange'
 // use native lazy loading whenever possible
