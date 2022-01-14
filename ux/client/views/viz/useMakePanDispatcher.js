@@ -19,7 +19,7 @@ export const useMakePanDispatcher = () => {
     // get the sync registry
     const synced = useSynced()
     // the pile of viewports
-    const { viewports } = useViewports()
+    const viewports = useViewports()
     // and the shared camera controller
     const panSharedCamera = usePanSharedCamera()
 
