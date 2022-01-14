@@ -67,8 +67,4 @@ export const useMakePanDispatcher = (viewports) => {
 }
 
 
-// a noop event handler
-const noop = () => { }
-
-
 // end of file
