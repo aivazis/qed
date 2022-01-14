@@ -37,9 +37,9 @@ const Panel = () => {
     // the state of the activity panel
     const { activityPanel } = useActivityPanel()
     // get my pile of viewports and the ref registrar
-    const { viewports, registrar } = useViewports()
+    const { registrar } = useViewports()
     // build the scroll handler dispatch for my viewports
-    const dispatch = useMakePanDispatcher(viewports)
+    const dispatch = useMakePanDispatcher()
 
     // paint mixing
     const datasetPaint = { ...styles.datasets }
