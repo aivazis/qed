@@ -17,6 +17,7 @@ import { Badge } from '~/widgets'
 // hooks
 import { useGetViewportSync } from './useGetViewportSync'
 import { useToggleViewportSync } from './useToggleViewportSync'
+import { useSyncAllViewports } from './useSyncAllViewports'
 // styles
 import styles from './styles'
 
@@ -27,6 +28,8 @@ export const Sync = ({ idx }) => {
     const isSynced = useGetViewportSync(idx)
     // build the sync toggle
     const toggle = useToggleViewportSync(idx)
+    // and the one that syncs all them
+    const syncAll = useSyncAllViewports(idx)
 
     // my event handlers
     const behaviors = {
@@ -38,6 +41,17 @@ export const Sync = ({ idx }) => {
             evt.preventDefault()
             // flip the state
             toggle()
+            // all done
+            return
+        },
+        // and another one that toggles all them to be like me
+        onDoubleClick: (evt) => {
+            // stop this event from bubbling up
+            evt.stopPropagation()
+            // quash the default behavior
+            evt.preventDefault()
+            // flip the state
+            syncAll()
             // all done
             return
         },
