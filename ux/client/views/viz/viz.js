@@ -18,8 +18,8 @@ import { Flex } from '~/widgets'
 // locals
 // hooks
 import { useViews } from './useViews'
-import { useViewports } from './useViewports'
 import { useSetActiveView } from './useSetActiveView'
+import { useInitializeViewports } from './useInitializeViewports'
 import { useMakePanDispatcher } from './useMakePanDispatcher'
 // components
 import { Blank } from './blank'
@@ -32,14 +32,14 @@ import styles from './styles'
 const Panel = () => {
     // grab the registered views
     const { views } = useViews()
+    // initialize my pile of viewports and get the ref registrar
+    const { registrar } = useInitializeViewports()
+    // build the scroll handler dispatch for my viewports
+    const dispatch = useMakePanDispatcher()
     // get the view activator
     const activate = useSetActiveView()
     // the state of the activity panel
     const { activityPanel } = useActivityPanel()
-    // get my pile of viewports and the ref registrar
-    const { registrar } = useViewports()
-    // build the scroll handler dispatch for my viewports
-    const dispatch = useMakePanDispatcher()
 
     // paint mixing
     const datasetPaint = { ...styles.datasets }
