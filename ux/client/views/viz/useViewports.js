@@ -18,12 +18,12 @@ export const useViewports = () => {
     const { views, viewports } = React.useContext(VizContext)
 
     // initialize the array
-    viewports.current = new Array(views.lenth).fill(null)
+    viewports.current = new Array(views.length).fill(null)
     // build the ref registrar
-    const registrar = idx => ref => viewports[idx] = ref
+    const registrar = idx => ref => viewports.current[idx] = ref
 
     // and return them
-    return { viewports, registrar }
+    return { viewports: viewports.current, registrar }
 }
 
 
