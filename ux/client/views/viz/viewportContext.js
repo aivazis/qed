@@ -12,8 +12,9 @@ export const ViewportContext = React.createContext(
     // the default value that consumers see when accessing the context outside a provider
     {
         // the camera position
+        zoom: null,
+        setSoom: () => { throw new Error(complaint) },
         position: null,
-        setPosition: () => { throw new Error(complaint) }
     }
 )
 
@@ -24,12 +25,18 @@ export const ViewportProvider = ({
     children
 }) => {
     // set up the camera position
-    const [position, setPosition] = React.useState({ x: 0, y: 0, z: 1 })
+    // N.B.: the separation of {zoom} in a state variable vs {position} in a ref is a performance
+    //       enhancement; modifying {position} does not cause the {viewport} to rerender, but
+    //       modifying {zoom} must; i have to remember to update the {z} component of {position}
+    //       whenever {zoon} is updated
+    const [zoom, setZoom] = React.useState(1)
+    const position = React.useRef({ x: 0, y: 0, z: zoom })
 
     // assemble the context value
     const context = {
         // camera position
-        position, setPosition,
+        zoom, setZoom,
+        position,
     }
 
     // provide for my children

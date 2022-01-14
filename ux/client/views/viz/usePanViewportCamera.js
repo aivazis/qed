@@ -15,19 +15,12 @@ import { ViewportContext } from './viewportContext'
 // pan the viewport camera
 export const usePanViewportCamera = () => {
     // grab the position mutator of the viewport camera
-    const { setPosition } = React.useContext(ViewportContext)
-    // build a controller that updates the viewport cameras
-    const pan = position => {
-        // adjust the viewport camera position
-        setPosition((old) => {
-            // if this is not a substantive update
-            if (old.x === position.x && old.y === position.y) {
-                // bail
-                return old
-            }
-            // otherwise, build the new camera position and return it
-            return { ...old, ...position }
-        })
+    const { position } = React.useContext(ViewportContext)
+
+    // build a controller that updates the viewport camera
+    const pan = pos => {
+        // update the camera position
+        position.current = { ...position.current, ...pos }
         // all done
         return
     }

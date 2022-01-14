@@ -14,15 +14,15 @@ import { Mosaic } from '~/widgets'
 // locals
 // hooks
 import { usePanViewportCamera } from './usePanViewportCamera'
-import { useGetViewportCameraPostion } from './useGetViewportCameraPosition'
+import { useGetViewportCameraZoom } from './useGetViewportCameraZoom'
 // styles
 import styles from './styles'
 
 
 // display the datasets associated with this reader
 const Panel = ({ idx, view, uri, registrar, ...rest }) => {
-    // get my camera position
-    const { z } = useGetViewportCameraPostion()
+    // get the current zoom level
+    const zoom = useGetViewportCameraZoom()
     // and its panning controller
     const panViewportCamera = usePanViewportCamera()
 
@@ -32,10 +32,10 @@ const Panel = ({ idx, view, uri, registrar, ...rest }) => {
     const { shape, origin, tile } = dataset
 
     // compute the dimensions of the mosaic
-    const width = Math.trunc(shape[1] / z)
-    const height = Math.trunc(shape[0] / z)
+    const width = Math.trunc(shape[1] / zoom)
+    const height = Math.trunc(shape[0] / zoom)
     // and fold my zoom level into the data request uri
-    const withZoom = [uri, z].join("/")
+    const withZoom = [uri, zoom].join("/")
 
     // build my scroll handler
     const scroll = evt => {
