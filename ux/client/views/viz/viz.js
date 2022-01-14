@@ -18,6 +18,7 @@ import { Flex } from '~/widgets'
 // locals
 // hooks
 import { useViews } from './useViews'
+import { useViewports } from './useViewports'
 import { useSetActiveView } from './useSetActiveView'
 import { useMakePanDispatcher } from './useMakePanDispatcher'
 // components
@@ -35,15 +36,8 @@ const Panel = () => {
     const activate = useSetActiveView()
     // the state of the activity panel
     const { activityPanel } = useActivityPanel()
-
-    // make a pile of viewports
-    const viewports = views.map(_ => null)
-    // and build a registrar
-    const register = idx => {
-        // that lets me capture the refs of my viewports once they are mounted
-        return ref => viewports[idx] = ref
-    }
-
+    // get my pile of viewports and the ref registrar
+    const { viewports, registrar } = useViewports()
     // build the scroll handler dispatch for my viewports
     const dispatch = useMakePanDispatcher(viewports)
 
@@ -78,7 +72,7 @@ const Panel = () => {
                         onClick={activate(idx)}
                         onScrollCapture={dispatch(idx)}
                     >
-                        <Viewer idx={idx} view={view} registrar={register(idx)} />
+                        <Viewer idx={idx} view={view} registrar={registrar(idx)} />
                     </Flex.Panel >
                 )
             })}
