@@ -75,6 +75,24 @@ class Dispatcher:
 
 
     # handlers
+    def data(self, plexus, server, match, **kwds):
+        """
+        Handle a data request
+        """
+        # make a channel
+        channel = journal.info("qed.ux.data")
+        # show me
+        channel.line(f"reader: {match.group('datasrc')}")
+        channel.line(f"dataset: {match.group('dataset')}")
+        channel.line(f"channel: {match.group('datachannel')}")
+        channel.line(f"zoom: {match.group('zoom')}")
+        channel.line(f"tile: {match.group('tile')}")
+        # flush
+        channel.log()
+        # and punt
+        return server.documents.OK(server=server)
+
+
     def graphql(self, **kwds):
         """
         Handle a {graphql} request
@@ -143,12 +161,21 @@ class Dispatcher:
 
     # private data
     regex = re.compile("|".join([
+        # the data request recognizer; resist the temptation to add commas at the end of
+        # these lines...
+        r"/(?P<data>data/"
+        r"(?P<datasrc>[a-z0-9-]+)/(?P<dataset>[a-z0-9-]+)/(?P<datachannel>[a-z]+)/"
+        r"(?P<zoom>[0-9-]+)/(?P<tile>[0-9x+-]+))",
+        # graphql requests
         r"/(?P<graphql>graphql)",
+        # the kill command
         r"/(?P<stop>stop)",
+        # document requests
         r"/(?P<css>.+\.css)",
         r"/(?P<jscript>.+\.js)",
         r"/(?P<document>(graphics/.+)|(fonts/.+))",
         r"/(?P<favicon>favicon.ico)",
+        # everything else gets the app page; see the {root} resolver above
         r"/(?P<root>.*)",
         ]))
 
