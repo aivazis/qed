@@ -25,7 +25,7 @@ export const Viewer = ({ idx, view, registrar }) => {
     const { reader, dataset, channel } = view
     // and unpack what i need
     const { uuid: readerUUID, uri, api } = reader
-    const { uuid: datasetUUID, datatype, shape, tile } = dataset
+    const { uuid: datasetUUID, datatype, shape, origin, tile } = dataset
 
     // put together the dataset URI
     // N.B.: it is important to do it here so the {viewport} props change when a new dataset
@@ -40,7 +40,11 @@ export const Viewer = ({ idx, view, registrar }) => {
             <Tab idx={idx} view={view} />
             {/* identifying metadata */}
             <Info name="uri" value={uri} style={styles.attributes} />
+            <Info name="reader" value={readerUUID} style={styles.attributes} />
+            <Info name="dataset" value={datasetUUID} style={styles.attributes} />
+            <Info name="data" value={base} style={styles.attributes} />
             <Info name="type" value={datatype} style={styles.attributes} />
+            <Info name="origin" value={origin.join(", ")} style={styles.attributes} />
             <Info name="shape" value={shape.join(" x ")} style={styles.attributes} />
             <Info name="tile" value={tile.join(" x ")} style={styles.attributes} />
 
