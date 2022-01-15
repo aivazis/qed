@@ -17,7 +17,7 @@ import styles from './styles'
 
 
 // a large raster represented as a rectangular grid of tiles
-export const Mosaic = ({ uri, raster, origin, tile, style }) => {
+export const Mosaic = ({ uri, raster, origin, tile, style, ...rest }) => {
     // mix my paint
     const mosaicStyle = { ...styles.mosaic, ...style.mosaic }
 
@@ -41,7 +41,7 @@ export const Mosaic = ({ uri, raster, origin, tile, style }) => {
                 }
                 // render
                 return (
-                    <Tile key={origin} uri={tileURI} style={tileStyle} />
+                    <Tile key={origin} uri={tileURI} style={tileStyle} {...rest} />
                 )
             })}
         </div>
