@@ -42,6 +42,7 @@ export default {
         // layout
         padding: "0.0em 0.5em 0.0em 0.0em",
         // for my children
+        lineHeight: "150%",
         textAlign: "left",
         textOverflow: "ellipsis",
         display: "flex",
