@@ -49,6 +49,10 @@ class RSLC(qed.flow.factory, family="qed.readers.nisar.rslc", implements=qed.pro
         )
         # NISAR RSLC files contain up to eight datasets; autogenerate them, for now
         for selector in bindings:
+            # disable some of the matrix so we can debug the selector logic
+            if selector["frequency"] == "B" and selector["polarization"] in ["HV", "VH"]:
+                # by skipping them
+                continue
             # make a dataset
             dataset = qed.datasets.raw()
             # decorate it
