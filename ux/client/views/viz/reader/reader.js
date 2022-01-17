@@ -15,7 +15,9 @@ import { Meta, Tray } from '~/widgets'
 // hooks
 import { useReader } from './useReader'
 import { useDataset } from './useDataset'
+import { useChannel } from './useChannel'
 import { useGetView } from '../viz/useGetView'
+import { useVisualize } from '../viz/useVisualize'
 // components
 import { Axis } from './axis'
 import { Channels } from './channels'
@@ -29,8 +31,12 @@ const Panel = () => {
     const reader = useReader()
     // the selected dataset, if any
     const dataset = useDataset()
-    // and the active view
+    // the selected channel
+    const channel = useChannel()
+    // the active view
     const view = useGetView()
+    // and its mutator
+    const visualize = useVisualize()
 
     // unpack the reader
     const { id, uuid, uri, selectors } = reader
@@ -45,13 +51,35 @@ const Panel = () => {
     // - no one asks me questions, so i'm never {available}
     // - {selected} iff in {view}
     const state = (uuid === view?.reader?.uuid) ? "selected" : "enabled"
+
+    // handler that make me the active reader
+    const select = evt => {
+        // stop this event from bubbling up
+        evt.stopPropagation()
+        // quash the default behavior
+        evt.preventDefault()
+        // if i'm already the current viewer
+        if (state === "selected") {
+            // bail
+            return
+        }
+        // otherwise, make me the active view
+        visualize({ reader, dataset, channel })
+        // all done
+        return
+    }
+    // assemble my controllers
+    const behaviors = {
+        // click to select
+        onClick: select,
+    }
+
     // mix my paint
     const paint = styles.reader(state)
-
-    // render
+    // and render
     return (
-        <Tray title={name} initially={state === "selected"} style={paint.tray} >
-            <Meta.Table style={paint.meta}>
+        <Tray title={name} initially={state === "selected"} style={paint.tray}>
+            <Meta.Table style={paint.meta} {...behaviors}>
                 <Meta.Entry attribute="uri" style={paint.meta}>{uri}</Meta.Entry>
                 <Meta.Entry attribute="reader" style={paint.meta}>{family}</Meta.Entry>
                 {selectors.map(selector => {
