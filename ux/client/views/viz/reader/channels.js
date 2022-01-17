@@ -27,12 +27,14 @@ export const Channels = ({ children }) => {
     const reader = useReader()
     // and the current view
     const view = useGetView()
-    // determine if the channel setting in the view is mine
-    const hasChannel = view?.channel && view?.reader?.uuid === reader.uuid
+
+    // a mark is required if the channel setting in the view is mine and there is no
+    // channel selection
+    const required = view?.reader?.uuid === reader.uuid && !view.channel
     // make a label that is marked as required when when there is no selected channel
     const label = (
         <span>
-            {hasChannel ? null : <span style={styles.required}>*</span>}
+            {required ? <span style={styles.required}>*</span> : null}
             channels
         </span>
     )

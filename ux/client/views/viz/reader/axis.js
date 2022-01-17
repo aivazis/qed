@@ -15,22 +15,28 @@ import { Meta } from '~/widgets'
 // components
 import { Coordinate } from './coordinate'
 // hooks
+import { useReader } from './useReader'
 import { useSelector } from './useSelector'
+import { useGetView } from '../viz/useGetView'
 // styles
 import styles from './styles'
 
 
 // display the bindings associated with this selector
 export const Axis = ({ axis, children }) => {
-    // get the current selector
+    // get my reader
+    const reader = useReader()
+    // the current selector
     const selector = useSelector()
+    // and the current view
+    const view = useGetView()
+
+    // a mark is required if my reader is the current one and the selector has no value for me
+    const required = view?.reader?.uuid === reader.uuid && !selector.has(axis)
     // make a label that is marked as required when when there is no selection for this {axis}
     const label = (
         <span>
-            {selector.has(axis)
-                ? null
-                : <span style={styles.required}>*</span>
-            }
+            {required ? <span style={styles.required}>*</span> : null}
             {axis}
         </span>
     )
