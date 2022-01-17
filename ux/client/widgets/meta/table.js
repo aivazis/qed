@@ -13,17 +13,17 @@ import styles from './styles'
 
 
 // setup a container for displaying metadata
-export const Table = ({ style, children }) => {
+export const Table = ({ style, children, ...rest }) => {
     // mix my pain
     const tableStyle = { ...styles.box, ...style?.box }
 
     // render
     return (
-        <table style={tableStyle}>
+        <table style={tableStyle} {...rest}>
             <tbody>
                 {children}
             </tbody>
-        </table>
+        </table >
     )
 }
 
