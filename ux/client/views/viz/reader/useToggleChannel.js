@@ -8,12 +8,12 @@
 import React from 'react'
 
 // local
-// hooks
-import { useVisualize } from '../viz/useVisualize'
 // context
 import { Context } from './context'
+// hooks
 import { useReader } from './useReader'
 import { useDataset } from './useDataset'
+import { useVisualize } from '../viz/useVisualize'
 
 
 // toggle the {coordinate} as the value for {axis}
@@ -31,7 +31,7 @@ export const useToggleChannel = (value) => {
     const toggle = () => {
         // make room
         let channel = null
-        // adjust the selector
+        // adjust the channel
         setChannel(old => {
             // flip the state
             channel = old === value ? null : value

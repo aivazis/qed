@@ -26,8 +26,6 @@ export const Channel = ({ channel }) => {
     const reader = useReader()
     // the current dataset
     const dataset = useDataset()
-    // and the current channel
-    const current = useChannel()
     // make a toggle
     const toggleChannel = useToggleChannel(channel)
     // park extra state dependent styling here
