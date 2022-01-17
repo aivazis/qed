@@ -10,11 +10,7 @@ import { wheel, theme } from '~/palette'
 
 // publish
 export default {
-    box: {
-        fontSize: "60%",
-        // colors
-        color: theme.header.color,
-    },
+    box: {},
 
     entry: {
         cursor: "default",
@@ -23,7 +19,6 @@ export default {
     },
 
     attribute: {
-        fontFamily: "rubik-light",
         textTransform: "uppercase",
         textAlign: "right",
         padding: "0.0em 0.0em 0.0em 0.5em",
@@ -37,9 +32,6 @@ export default {
     },
 
     value: {
-        // style
-        fontFamily: "inconsolata",
-        color: wheel.gray.aluminum,
         // layout
         padding: "0.0em 0.5em 0.0em 0.0em",
         // for my children
