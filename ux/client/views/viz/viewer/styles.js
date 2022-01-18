@@ -6,9 +6,35 @@
 
 // get colors
 import { theme } from '~/palette'
+// and the base styles
+import styles from '../styles'
+
+
+// the mixers
+// the {viewer} shows some metadata with structure from {~/widgets/meta}
+// the mixer
+const viewer = {
+    box: {
+        ...styles.meta.box,
+    },
+    entry: {
+        ...styles.meta.entry,
+    },
+    attribute: {
+        ...styles.meta.attribute,
+        width: "10em",
+    },
+    separator: {
+        ...styles.meta.separator,
+    },
+    value: {
+        ...styles.meta.value,
+    },
+}
 
 
 // the blank view
+// structure from {~/widgets/badge}
 const blank = {
     // the container
     placeholder: {
@@ -50,6 +76,7 @@ const blank = {
 // publish
 export default {
     blank,
+    viewer,
 }
 
 
