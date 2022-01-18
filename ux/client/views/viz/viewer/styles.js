@@ -35,42 +35,78 @@ const viewer = {
 
 // the viewer tab
 const tab = {
+    // for me
+    flex: "0 0 auto",
+    height: "1.6rem",
+    // styling
+    backgroundColor: "hsl(0deg, 0%, 10%, 1)",
+    // for my children
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+}
+
+
+// for the {selector} in the {tab}
+const selector = state => ({
     // the container
     box: {
-        // for me
-        flex: "0 0 auto",
-        height: "1.6rem",
-        // styling
-        backgroundColor: "hsl(0deg, 0%, 10%, 1)",
-        // for my children
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
+        ...selectorPaint.base.box, ...selectorPaint[state].box
     },
-
-    active: {
-        color: wheel.gray.concrete,
+    // the reader name
+    name: {
+        ...selectorPaint.base.name, ...selectorPaint[state].name
     },
-
-    // the name of the dataset
-    dataset: {
-        fontFamily: "rubik-light",
-        fontSize: "80%",
-        textTransform: "uppercase",
-        paddingTop: "0.1rem",
-    },
-
-    // styling for selector and channel names
+    // the dataset selector
     selector: {
-        fontFamily: "inconsolata",
-        fontSize: "80%",
+        ...selectorPaint.base.selector, ...selectorPaint[state].selector
+    },
+    // the separator
+    separator: {
+        ...selectorPaint.base.separator, ...selectorPaint[state].separator
+    },
+})
+// its paint
+const selectorPaint = {
+    base: {
+        box: {
+            vertcalAlign: "center",
+            paddingBottom: "0.25rem",
+        },
+        name: {
+            fontFamily: "rubik-light",
+            fontSize: "80%",
+            textTransform: "uppercase",
+        },
+        selector: {
+            fontFamily: "inconsolata",
+            fontSize: "80%",
+        },
+        separator: {
+            fontFamily: "inconsolata",
+            fontSize: "80%",
+            padding: "0.0rem 0.25rem",
+        },
     },
 
-    // separator for the selector and channel names
-    separator: {
-        fontFamily: "inconsolata",
-        fontSize: "80%",
-        padding: "0.0rem 0.25rem",
+    enabled: {
+        box: {},
+        name: {},
+        selector: {},
+        separator: {},
+    },
+
+    selected: {
+        box: {},
+        name: {
+            color: theme.page.name,
+        },
+        selector: {
+            color: theme.page.name,
+        },
+        separator: {
+            color: wheel.gray.concrete,
+        },
     },
 }
 
@@ -262,7 +298,6 @@ const blank = {
         fontSize: "120%",
         textAlign: "center",
     },
-
 }
 
 
@@ -270,6 +305,7 @@ const blank = {
 export default {
     blank,
     collapse,
+    selector,
     split,
     sync,
     tab,

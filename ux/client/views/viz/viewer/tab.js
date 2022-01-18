@@ -15,6 +15,7 @@ import { Spacer } from '~/widgets'
 // locals
 // components
 import { Collapse } from './collapse'
+import { Selector } from './selector'
 import { Split } from './split'
 import { Sync } from './sync'
 // styles
@@ -27,9 +28,10 @@ export const Tab = ({ viewport, view, behaviors }) => {
     const paint = styles.tab
     // render
     return (
-        <div style={paint.box} {...behaviors} >
+        <div style={paint} {...behaviors} >
             {/* the button that removes this view from the panel */}
             <Collapse viewport={viewport} />
+            <Selector viewport={viewport} view={view} />
 
             {/* some blank space */}
             <Spacer />
@@ -37,22 +39,6 @@ export const Tab = ({ viewport, view, behaviors }) => {
             <Split viewport={viewport} />
             {/* the button that toggles the sync status of the data viewport */}
             <Sync viewport={viewport} />
-        </div>
-    )
-
-    // render
-    return (
-        <div style={tabStyle.box} {...behaviors} >
-            {/* the fully resolved selector */}
-            <div style={datasetStyle}>{reader?.name}</div>
-            {reader && <div style={tabStyle.separator}>:</div>}
-            {dataset?.selector.map(binding => (
-                <React.Fragment key={`${binding.name}.name`} >
-                    <div style={selectorStyle}>{binding.value}</div>
-                    <div style={tabStyle.separator}>:</div>
-                </React.Fragment>
-            ))}
-            <div style={selectorStyle}>{channel}</div>
         </div>
     )
 }
