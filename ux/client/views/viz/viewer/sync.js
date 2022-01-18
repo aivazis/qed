@@ -22,7 +22,7 @@ import { useSyncAllViewports } from '../viz/useSyncAllViewports'
 import styles from './styles'
 
 
-// display the datasets associated with this reader
+// control viewport synchronization with a shared camera
 export const Sync = ({ viewport }) => {
     // look up the current sync state of the {viewport}
     const isSynced = useGetViewportSync(viewport)
