@@ -68,16 +68,22 @@ const Panel = () => {
             </Flex.Panel >
 
             {/* a panel for each registered view */}
-            {views.map((view, idx) => {
+            {views.map((view, viewport) => {
+                // make a registrar for this {viewport}
+                const regview = registrar(viewport)
+                // assemble the behaviors
+                const behaviors = {
+                    onClick: activate(viewport),
+                    onScrollCapture: dispatch(viewport),
+                }
                 // the handler for activating the view is attached to the flex panel because
                 // {viewer} is not a real container, just a react fragment
                 return (
-                    <Flex.Panel key={`panel:${idx}`}
-                        auto={true} style={styles.flex}
-                        onClick={activate(idx)}
-                        onScrollCapture={dispatch(idx)}
+                    <Flex.Panel key={`panel:${viewport}`}
+                        auto={true}
+                        style={styles.flex} {...behaviors}
                     >
-                        <Viewer idx={idx} view={view} registrar={registrar(idx)} />
+                        <Viewer viewport={viewport} view={view} registrar={regview} />
                     </Flex.Panel >
                 )
             })}
