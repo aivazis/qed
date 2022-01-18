@@ -31,14 +31,18 @@ export const Tab = ({ viewport, view, behaviors }) => {
         <div style={paint} {...behaviors} >
             {/* the button that removes this view from the panel */}
             <Collapse viewport={viewport} />
-            <Selector viewport={viewport} view={view} />
 
-            {/* some blank space */}
-            <Spacer />
-            {/* the button that adds a new view to the {viz} panel */}
-            <Split viewport={viewport} />
-            {/* the button that toggles the sync status of the data viewport */}
-            <Sync viewport={viewport} />
+            {view && (
+                <>
+                    <Selector viewport={viewport} view={view} />
+                    {/* some blank space */}
+                    <Spacer />
+                    {/* the button that adds a new view to the {viz} panel */}
+                    <Split viewport={viewport} />
+                    {/* the button that toggles the sync status of the data viewport */}
+                    <Sync viewport={viewport} />
+                </>
+            )}
         </div>
     )
 }
