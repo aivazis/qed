@@ -22,18 +22,19 @@ import styles from './styles'
 
 // export the data viewer
 export const Viewer = ({ viewport, view, registrar }) => {
-    // if my view is trivial
-    if (!view) {
-        // show a blank panel
-        return <Blank />
-    }
-    // unpack it
+    // unpack the view
     const { reader, dataset, channel } = view
-    // and check again for the trivial cases
+    // and check for the trivial cases
     if (!reader || !dataset || !channel) {
-        // to show a blank panel
-        return <Blank />
+        // and show a blank panel
+        return (
+            <>
+                <Tab viewport={viewport} view={null} />
+                <Blank />
+            </>
+        )
     }
+
     // extract some metadata
     const { uuid: readerUUID, uri, api } = reader
     const { uuid: datasetUUID, datatype, shape, origin, tile } = dataset
