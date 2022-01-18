@@ -25,14 +25,15 @@ export const Provider = (props) => {
             }
             datasets {
                 uuid
-                shape
-                origin
                 datatype
                 selector {
                     name
                     value
                 }
                 channels
+                shape
+                origin
+                tile
             }
         }`,
         props.reader
