@@ -15,7 +15,7 @@ export { Main, useActivityPanel } from './main'
 
 // sandboxes
 export { GiQL } from './graphiql'
-export { Viz, Controls, Datasets } from './oldviz'
+export { Viz, Controls, Datasets } from './viz'
 
 // a blank panel with size information
 export Blank from './blank'
