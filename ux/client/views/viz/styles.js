@@ -1,0 +1,41 @@
+// -*- web -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2022 all rights reserved
+
+
+// get colors
+import { wheel, theme } from '~/palette'
+
+
+// base styling for all uses of {meta} here
+// entity meta data: structure from {~/widgets/meta}
+// the base layer
+const meta = {
+    // the overall table: three columns: {attribute}, {separator}, {value}
+    box: {
+        fontFamily: "rubik-light",
+        fontSize: "60%",
+        color: theme.header.color,
+    },
+    // for each row
+    entry: {},
+    // the name of the attribute
+    attribute: {},
+    // the separator
+    separator: {},
+    // the value of the attribute
+    value: {
+        fontFamily: "inconsolata",
+        color: wheel.gray.aluminum,
+    },
+}
+
+
+// publish
+export default {
+    meta
+}
+
+
+// end of file
