@@ -96,13 +96,24 @@ const badge = {
 
     // for the shape
     icon: {},
+    // and its detailing
+    decoration: {},
 
     // available
     available: {
         badge: {},
         shape: {},
         icon: {},
-    }
+        decoration: {},
+    },
+
+    // engaged
+    engaged: {
+        badge: {},
+        shape: {},
+        icon: {},
+        decoration: {},
+    },
 }
 
 
@@ -160,6 +171,61 @@ const split = {
 }
 
 
+// the button that toggles the sync status of a data viewport
+const sync = {
+    // the icon container
+    badge: {
+        ...badge.badge,
+        // for me
+        justifySelf: "end",
+    },
+
+    // for the shape container
+    shape: { ...badge.shape, },
+
+    // for the shape
+    icon: {
+        ...badge.icon,
+        stroke: wheel.gray.flour,
+    },
+    // and its detailing
+    decoration: {
+        stroke: wheel.gray.flour,
+    },
+
+    // highlight when the cursor hovers over it
+    available: {
+        // for the shape
+        shape: {
+            ...badge.available.shape,
+            // full intensity
+            strokeOpacity: 1.0,
+        },
+    },
+
+    // restyle when turned on
+    engaged: {
+        // for the container
+        shape: {
+            ...badge.engaged.shape,
+            // full intensity
+            strokeOpacity: 1.0,
+        },
+        // for the shape
+        icon: {
+            ...badge.engaged.icon,
+            stroke: theme.page.name,
+        },
+        // and its detailing
+        decoration: {
+            ...badge.engaged.decoration,
+            fill: theme.page.name,
+            stroke: theme.page.name,
+        },
+    },
+}
+
+
 // the blank view
 // structure from {~/widgets/badge}
 const blank = {
@@ -205,6 +271,7 @@ export default {
     blank,
     collapse,
     split,
+    sync,
     tab,
     viewer,
 }
