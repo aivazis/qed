@@ -75,8 +75,8 @@ const tab = {
 }
 
 
-// the button that dismisses a view
-const collapse = {
+// common paint for my badges
+const badge = {
     // the icon container
     badge: {
         // for me
@@ -87,6 +87,7 @@ const collapse = {
         display: "flex",
         alignItems: "center",
     },
+
     // for the shape container
     shape: {
         // dim it a bit
@@ -94,13 +95,64 @@ const collapse = {
     },
 
     // for the shape
+    icon: {},
+
+    // available
+    available: {
+        badge: {},
+        shape: {},
+        icon: {},
+    }
+}
+
+
+// the button that dismisses a view
+const collapse = {
+    // the icon container
+    badge: { ...badge.badge, },
+
+    // for the shape container
+    shape: { ...badge.shape, },
+
+    // for the shape
     icon: {
+        ...badge.icon,
         strokeWidth: 2,
     },
 
     // highlight when the cursor hovers over it
     available: {
         shape: {
+            ...badge.available.shape,
+            // full intensity
+            strokeOpacity: 1.0,
+        },
+    },
+}
+
+
+// the button that splits a view
+const split = {
+    // the icon container
+    badge: {
+        ...badge.badge,
+        // for me
+        justifySelf: "end",
+    },
+
+    // for the shape container
+    shape: { ...badge.shape, },
+
+    // for the shape
+    icon: {
+        ...badge.icon,
+        stroke: wheel.gray.flour,
+    },
+
+    // highlight when the cursor hovers over it
+    available: {
+        shape: {
+            ...badge.available.shape,
             // full intensity
             strokeOpacity: 1.0,
         },
@@ -152,6 +204,7 @@ const blank = {
 export default {
     blank,
     collapse,
+    split,
     tab,
     viewer,
 }

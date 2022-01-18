@@ -15,7 +15,7 @@ import { Spacer } from '~/widgets'
 // locals
 // components
 import { Collapse } from './collapse'
-// import { Split } from './split'
+import { Split } from './split'
 // import { Sync } from './sync'
 // styles
 import styles from './styles'
@@ -30,6 +30,11 @@ export const Tab = ({ viewport, view, behaviors }) => {
         <div style={paint.box} {...behaviors} >
             {/* the button that removes this view from the panel */}
             <Collapse viewport={viewport} />
+
+            {/* some blank space */}
+            <Spacer />
+            {/* the button that adds a new view to the {viz} panel */}
+            <Split viewport={viewport} />
         </div>
     )
 
