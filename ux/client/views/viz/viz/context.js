@@ -81,7 +81,7 @@ export const Provider = ({ children }) => {
 
 
 // the empty view template
-export const emptyView = () => null // ({ reader: null, dataset: null, channel: null })
+export const emptyView = () => ({ reader: null, dataset: null, channel: null })
 
 // the default synced state
 export const syncedDefault = false
