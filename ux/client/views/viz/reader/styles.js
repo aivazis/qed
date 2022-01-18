@@ -6,6 +6,8 @@
 
 // get colors
 import { wheel, theme } from '~/palette'
+// and my base styles
+import styles from '../styles'
 
 
 // the mixers
@@ -24,27 +26,27 @@ const reader = state => ({
     // for the metadata
     meta: {
         box: {
-            ...metaPaint.box,
+            ...styles.meta.box,
             ...readerPaint.base.meta.box,
             ...readerPaint[state].meta.box
         },
         entry: {
-            ...metaPaint.entry,
+            ...styles.meta.entry,
             ...readerPaint.base.meta.entry,
             ...readerPaint[state].meta.entry
         },
         attribute: {
-            ...metaPaint.attribute,
+            ...styles.meta.attribute,
             ...readerPaint.base.meta.entry,
             ...readerPaint[state].meta.entryibute
         },
         separator: {
-            ...metaPaint.separator,
+            ...styles.meta.separator,
             ...readerPaint.base.meta.entry,
             ...readerPaint[state].meta.entryrator
         },
         value: {
-            ...metaPaint.value,
+            ...styles.meta.value,
             ...readerPaint.base.meta.entry,
             ...readerPaint[state].meta.entry
         },
@@ -53,11 +55,11 @@ const reader = state => ({
 
 // {axis} entries: structure from {~/widgets/meta}
 const axis = () => ({
-    box: { ...metaPaint.box, ...axisPaint.box },
-    entry: { ...metaPaint.entry, ...axisPaint.entry },
-    attribute: { ...metaPaint.attribute, ...axisPaint.attribute },
-    separator: { ...metaPaint.separator, ...axisPaint.separator },
-    value: { ...metaPaint.value, ...axisPaint.info },
+    box: { ...styles.meta.box, ...axisPaint.box },
+    entry: { ...styles.meta.entry, ...axisPaint.entry },
+    attribute: { ...styles.meta.attribute, ...axisPaint.attribute },
+    separator: { ...styles.meta.separator, ...axisPaint.separator },
+    value: { ...styles.meta.value, ...axisPaint.info },
 })
 
 // {coordinate} entries; {state} x structure from {~/widgets/meta}
@@ -69,11 +71,11 @@ const coordinate = state => ({
 
 // {channels} entries: structure from {~/widgets/meta}
 const channels = () => ({
-    box: { ...metaPaint.box, ...channelsPaint.box },
-    entry: { ...metaPaint.entry, ...channelsPaint.entry },
-    attribute: { ...metaPaint.attribute, ...channelsPaint.attribute },
-    separator: { ...metaPaint.separator, ...channelsPaint.separator },
-    value: { ...metaPaint.value, ...channelsPaint.info },
+    box: { ...styles.meta.box, ...channelsPaint.box },
+    entry: { ...styles.meta.entry, ...channelsPaint.entry },
+    attribute: { ...styles.meta.attribute, ...channelsPaint.attribute },
+    separator: { ...styles.meta.separator, ...channelsPaint.separator },
+    value: { ...styles.meta.value, ...channelsPaint.info },
 })
 
 // {channel} entries; {state} x structure from {~/widgets/meta}
@@ -216,29 +218,6 @@ const channelPaint = {
 
     selected: {
         color: theme.page.name,
-    },
-}
-
-// base styling for all uses of {meta} here
-// entity meta data: structure from {~/widgets/meta}
-// the base layer
-const metaPaint = {
-    // the overall table: three columns: {attribute}, {separator}, {value}
-    box: {
-        fontFamily: "rubik-light",
-        fontSize: "60%",
-        color: theme.header.color,
-    },
-    // for each row
-    entry: {},
-    // the name of the attribute
-    attribute: {},
-    // the separator
-    separator: {},
-    // the value of the attribute
-    value: {
-        fontFamily: "inconsolata",
-        color: wheel.gray.aluminum,
     },
 }
 
