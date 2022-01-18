@@ -14,7 +14,7 @@ import { Meta } from '~/widgets'
 // locals
 // components
 import { Blank } from './blank'
-// import { Tab } from './tab'
+import { Tab } from './tab'
 // styles
 import styles from './styles'
 
@@ -46,7 +46,7 @@ export const Viewer = ({ viewport, view, registrar }) => {
     return (
         <>
             {/* the title bar with the dataset description and the controls */}
-            {/* <Tab viewport={viewport} view={view} /> */}
+            <Tab viewport={viewport} view={view} />
 
             {/* identifying metadata */}
             <Meta.Table style={paint}>
