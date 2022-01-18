@@ -15,6 +15,7 @@ import { Meta } from '~/widgets'
 // components
 import { Blank } from './blank'
 import { Tab } from './tab'
+import { Viewport } from '../viewport'
 // styles
 import styles from './styles'
 
@@ -48,7 +49,7 @@ export const Viewer = ({ viewport, view, registrar }) => {
             {/* the title bar with the dataset description and the controls */}
             <Tab viewport={viewport} view={view} />
 
-            {/* identifying metadata */}
+            {/* identifying metadata; most of it is debugging information */}
             <Meta.Table style={paint}>
                 <Meta.Entry attribute="uri" style={paint}>
                     {uri}
@@ -75,6 +76,9 @@ export const Viewer = ({ viewport, view, registrar }) => {
                     {tile.join(" x ")}
                 </Meta.Entry>
             </Meta.Table>
+
+            {/* the viewport */}
+            <Viewport viewport={viewport} view={view} uri={base} registrar={registrar} />
         </>
     )
 
