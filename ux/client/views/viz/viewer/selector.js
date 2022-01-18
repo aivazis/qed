@@ -20,12 +20,6 @@ export const Selector = ({ viewport, view }) => {
     // get the active view
     const { activeViewport } = useViews()
 
-    // if this is a trivial view
-    if (!view) {
-        // bail
-        return null
-    }
-
     // unpack the view
     const { reader, dataset, channel } = view
     // get the name of the reader
