@@ -53,7 +53,7 @@ export const Badge = ({ size, state, behaviors, style, children }) => {
         <div style={paint.badge} {...controls}>
             <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width={size} height={size} >
                 <g transform={shrink} style={paint.shape} >
-                    {children}
+                    {React.cloneElement(React.Children.only(children), { style: paint })}
                 </g>
             </svg>
         </div>

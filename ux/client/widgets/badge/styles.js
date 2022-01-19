@@ -30,6 +30,26 @@ const badge = ({ state, client, polish }) => ({
         ...(polish ? paint.shape.available : null),
         ...(polish ? client.shape?.available : null),
     },
+    // the main icon features
+    icon: {
+        // the base coat
+        ...paint.icon.base, ...client.icon?.base,
+        // the state dependent layer
+        ...paint.icon[state], ...client.icon?.[state],
+        // extra polish from the highlight, if necessary
+        ...(polish ? paint.icon.available : null),
+        ...(polish ? client.icon?.available : null),
+    },
+    // icon decoration
+    decoration: {
+        // the base coat
+        ...paint.decoration.base, ...client.decoration?.base,
+        // the state dependent layer
+        ...paint.decoration[state], ...client.decoration?.[state],
+        // extra polish from the highlight, if necessary
+        ...(polish ? paint.decoration.available : null),
+        ...(polish ? client.decoration?.available : null),
+    },
 })
 
 
@@ -52,6 +72,24 @@ const paint = {
 
     // the svg transform that renders the icon
     shape: {
+        base: {},
+        disabled: {},
+        enabled: {},
+        selected: {},
+        available: {},
+    },
+
+    // rendering of the main featured of the icon
+    icon: {
+        base: {},
+        disabled: {},
+        enabled: {},
+        selected: {},
+        available: {},
+    },
+
+    // rendering of the details
+    decoration: {
         base: {},
         disabled: {},
         enabled: {},
