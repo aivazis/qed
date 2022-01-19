@@ -54,6 +54,7 @@ const QEDApp = () => {
             <Route path="/" element={<Main />} >
                 {/* specific activities */}
                 <Route path="about" element={<NYI />} />
+                <Route path="explore" element={<NYI />} />
                 <Route path="help" element={<NYI />} />
 
                 {/* the default page */}
