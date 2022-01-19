@@ -8,19 +8,19 @@
 import { theme } from '~/palette'
 
 
-// styling for the page container
-export default {
-    // the container
-    box: {},
-    // the message
-    text: {},
-    // state specific decorations
-    status: {
-        good: {},
-        unknown: {},
-        error: {},
-    }
-}
+// server info styling
+const server = (client, status) => ({
+    // whatever the client said
+    ...client?.box,
+    ...client?.text,
+    // with status specific overrides
+    ...client.status?.[status],
+})
 
+
+// publish
+export default {
+    server,
+}
 
 // end of file
