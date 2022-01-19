@@ -5,7 +5,7 @@
 
 
 // publish
-export Badge from './badge'
+export { Badge } from './badge'
 export Colophon from './colophon'
 export Compass from './compass'
 export { Extent } from './extent'
@@ -20,7 +20,7 @@ export Server from './server'
 export Spacer from './spacer'
 export { Tile } from './tile'
 export { Tray } from './tray'
-export Toolbar from './toolbar'
+export { Toolbar } from './toolbar'
 
 
 // end of file
