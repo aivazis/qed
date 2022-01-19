@@ -23,10 +23,8 @@ import 'lazysizes/plugins/native-loading/ls.native-loading'
 
 
 // locals
-// styles
-import styles from './styles'
 // context
-import { environment } from '~/context'
+import { environment, Provider } from '~/context'
 // views
 import {
     // the data view
@@ -84,7 +82,9 @@ const Root = () => (
     <RelayEnvironmentProvider environment={environment}>
         <Suspense fallback={< Loading />}>
             <Router>
-                <QEDApp />
+                <Provider>
+                    <QEDApp />
+                </Provider>
             </Router>
         </Suspense>
     </RelayEnvironmentProvider >
