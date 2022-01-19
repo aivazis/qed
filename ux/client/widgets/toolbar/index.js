@@ -11,21 +11,16 @@ import styles from './styles'
 
 
 // a container with author and copyright notes
-const toolbar = ({ direction, style, children }) => {
-    // mix my styles
-    const boxStyle = { ...styles.box, ...style?.box, flexDirection: direction }
-
-    // paint me
+export const Toolbar = ({ direction, style, children }) => {
+    // mix my paint
+    const paint = styles.toolbar({ client: style, direction })
+    // and render
     return (
-        <nav style={boxStyle} >
+        <nav style={paint} >
             {children}
         </nav>
     )
 }
-
-
-// publish
-export default toolbar
 
 
 // end of file
