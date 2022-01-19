@@ -8,46 +8,55 @@
 import { theme } from '~/palette'
 
 
-// publish
-export default {
+// mixer of badge paint
+const badge = ({ state, client, polish }) => ({
     // the container
     badge: {
+        // the base coat
+        ...paint.badge.base, ...client.badge?.base,
+        // the state dependent layer
+        ...paint.badge[state], ...client.badge?.[state],
+        // extra polish from the highlight, if necessary
+        ...(polish ? paint.badge.available : null),
+        ...(polish ? client.badge?.available : null),
     },
-
-    // the shape
+    // the svg container
     shape: {
+        // the base coat
+        ...paint.shape.base, ...client.shape?.base,
+        // the state dependent layer
+        ...paint.shape[state], ...client.shape?.[state],
+        // extra polish from the highlight, if necessary
+        ...(polish ? paint.shape.available : null),
+        ...(polish ? client.shape?.available : null),
+    },
+})
+
+
+// publish
+export default {
+    badge,
+}
+
+
+// the default paint
+const paint = {
+    // the container
+    badge: {
+        base: {},
+        disabled: {},
+        enabled: {},
+        selected: {},
+        available: {},
     },
 
-    // state dependent overrides
-    // when this is the current activity
-    engaged: {
-        // for the badge
-        badge: {
-        },
-        // for the shape
-        shape: {
-        },
-    },
-
-    // when exploring whether this activity is available
-    // e.g. when the cursor hovers over its badge
-    available: {
-        // for the badge
-        badge: {
-        },
-        // for the shape
-        shape: {
-        },
-    },
-
-    // when the activity is not available
-    disabled: {
-        // for the badge
-        badge: {
-        },
-        // for the shape
-        shape: {
-        },
+    // the svg transform that renders the icon
+    shape: {
+        base: {},
+        disabled: {},
+        enabled: {},
+        selected: {},
+        available: {},
     },
 }
 
