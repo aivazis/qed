@@ -28,7 +28,7 @@ export const Coordinate = ({ axis, coordinate }) => {
     // make a toggle
     const toggleCoordinate = useToggleCoordinate(axis, coordinate)
     // park extra state dependent styling here
-    const [polish, setPolish] = React.useState(null)
+    const [polish, setPolish] = React.useState(false)
 
     // get the current value of my axis
     const current = selector.get(axis)
@@ -76,6 +76,8 @@ export const Coordinate = ({ axis, coordinate }) => {
         evt.preventDefault()
         // toggle me as the value of my {axis}
         toggleCoordinate()
+        // reset the extra polish
+        setPolish(false)
         // all done
         return
     }
@@ -88,7 +90,7 @@ export const Coordinate = ({ axis, coordinate }) => {
         // if i am available
         if (state === "enabled") {
             // highlight
-            setPolish(styles.coordinate("available"))
+            setPolish(true)
         }
         // all done
         return
@@ -100,7 +102,7 @@ export const Coordinate = ({ axis, coordinate }) => {
         // and quash any side effects
         evt.preventDefault()
         // reset the extra polish
-        setPolish(null)
+        setPolish(false)
         // all done
         return
     }
@@ -116,7 +118,7 @@ export const Coordinate = ({ axis, coordinate }) => {
     }
 
     // mix my paint
-    const paint = { ...styles.coordinate(state), ...polish }
+    const paint = styles.coordinate(state, polish)
     // and render
     return (
         <span style={paint} {...behaviors} >

@@ -29,7 +29,7 @@ export const Channel = ({ channel }) => {
     // make a toggle
     const toggleChannel = useToggleChannel(channel)
     // park extra state dependent styling here
-    const [polish, setPolish] = React.useState(null)
+    const [polish, setPolish] = React.useState(false)
 
     // i'm selected when my info matches the active view and i'm the current channel
     const selected = (
@@ -48,6 +48,8 @@ export const Channel = ({ channel }) => {
         evt.preventDefault()
         // toggle me as the value of my {axis}
         toggleChannel()
+        // reset the extra polish
+        setPolish(false)
         // all done
         return
     }
@@ -60,7 +62,7 @@ export const Channel = ({ channel }) => {
         // if i am available
         if (state === "enabled") {
             // highlight
-            setPolish(styles.channel("available"))
+            setPolish(true)
         }
         // all done
         return
@@ -72,7 +74,7 @@ export const Channel = ({ channel }) => {
         // and quash any side effects
         evt.preventDefault()
         // reset the extra polish
-        setPolish(null)
+        setPolish(false)
         // all done
         return
     }
@@ -88,7 +90,7 @@ export const Channel = ({ channel }) => {
     }
 
     // mix my paint
-    const paint = { ...styles.channel(state), ...polish }
+    const paint = styles.channel(state, polish)
     // and render
     return (
         <div style={paint} {...behaviors} >

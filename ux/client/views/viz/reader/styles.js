@@ -64,9 +64,10 @@ const axis = () => ({
 
 // {coordinate} entries; {state} x structure from {~/widgets/meta}
 // valid {coordinate} states: {disabled}, {enabled}, {available}, {selected}
-const coordinate = state => ({
+const coordinate = (state, polish) => ({
     ...coordinatePaint.base,
-    ...coordinatePaint[state]
+    ...coordinatePaint[state],
+    ...(polish ? coordinatePaint.available : null),
 })
 
 // {channels} entries: structure from {~/widgets/meta}
@@ -80,9 +81,10 @@ const channels = () => ({
 
 // {channel} entries; {state} x structure from {~/widgets/meta}
 // valid {channel} states: {enabled}, {available}, {selected}
-const channel = state => ({
+const channel = (state, polish) => ({
     ...channelPaint.base,
-    ...channelPaint[state]
+    ...channelPaint[state],
+    ...(polish ? channelPaint.available : null),
 })
 
 
