@@ -42,12 +42,11 @@ export const Collapse = ({ view }) => {
     }
 
     // mix my paint
-    const collapseStyle = styles.collapse
-
+    const paint = styles.collapse
     // render
     return (
-        <Badge size={10} state="available" behaviors={behaviors} style={collapseStyle} >
-            <Icon style={collapseStyle} />
+        <Badge size={10} state="enabled" behaviors={behaviors} style={paint} >
+            <Icon style={paint} />
         </Badge>
     )
 }

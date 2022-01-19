@@ -42,12 +42,11 @@ export const Split = ({ view }) => {
     }
 
     // mix my paint
-    const splitStyle = styles.split
-
+    const paint = styles.split
     // render
     return (
-        <Badge size={10} state="available" behaviors={behaviors} style={splitStyle} >
-            <Icon style={splitStyle} />
+        <Badge size={10} state="enabled" behaviors={behaviors} style={paint} >
+            <Icon />
         </Badge>
     )
 }
