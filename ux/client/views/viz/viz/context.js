@@ -12,30 +12,6 @@ import React from 'react'
 import { useFetchAllReaders } from './useFetchAllReaders'
 
 
-// set up the viz context
-export const Context = React.createContext(
-    // the default value clients see when accessing the context outside a provider
-    {
-        // the set of known data sources
-        readers: [],
-        // the shared camera,
-        camera: null,
-        // the set of active viewports (actually, the {mosaic} placemats)
-        viewports: null,
-
-        // the known views
-        views: null,
-        setViews: () => { throw new Error(complaint) },
-        // the active view
-        activeViewport: null,
-        setActiveViewport: () => { throw new Error(complaint) },
-        // indicators of whether views are synced to the shared camera
-        synced: null,
-        setSynced: () => { throw new Error(complaint) },
-    }
-)
-
-
 // the provider factory
 export const Provider = ({ children }) => {
     // ask the server for the known data sources
@@ -78,6 +54,30 @@ export const Provider = ({ children }) => {
         </Context.Provider>
     )
 }
+
+
+// set up the viz context
+export const Context = React.createContext(
+    // the default value clients see when accessing the context outside a provider
+    {
+        // the set of known data sources
+        readers: [],
+        // the shared camera,
+        camera: null,
+        // the set of active viewports (actually, the {mosaic} placemats)
+        viewports: null,
+
+        // the known views
+        views: null,
+        setViews: () => { throw new Error(complaint) },
+        // the active view
+        activeViewport: null,
+        setActiveViewport: () => { throw new Error(complaint) },
+        // indicators of whether views are synced to the shared camera
+        synced: null,
+        setSynced: () => { throw new Error(complaint) },
+    }
+)
 
 
 // the empty view template
