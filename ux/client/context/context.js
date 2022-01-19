@@ -7,16 +7,15 @@
 // externals
 import React from 'react'
 
-// local
 // hooks
 import { useFetchServerVersion } from './useFetchServerVersion'
 
 
 // the provider factory
 export const Provider = ({ children }) => {
-    // ask the server its version
+    // ask the server for its version
     const info = useFetchServerVersion()
-    // attach them as read-only state
+    // and attach it as read-only state
     const [serverVersion] = React.useState(info)
 
     // build the initial context value
@@ -34,7 +33,7 @@ export const Provider = ({ children }) => {
 }
 
 
-// set up the viz context
+// set up the application context
 export const Context = React.createContext(
     // the default value clients see when accessing the context outside a provider
     {
