@@ -23,10 +23,10 @@ import styles from './styles'
 // an activity is a {Link} that presents a {shape} inside a {Badge}
 // {shape} is typically an SVG fragment
 
-// activities can be { "engaged", "available", "disabled" }
+// activities can be { "disabled", "enabled", "selected", "available" }
 // currently, there is no use case for a disabled activity, so the logic may need to change
 
-const activity = ({ size, url, children, barStyle, style }) => {
+export const Activity = ({ size, url, children, style }) => {
     // grab the activity panel state mutators
     const { showActivityPanel, toggleActivityPanel } = useActivityPanel()
     // get the current location
@@ -35,89 +35,23 @@ const activity = ({ size, url, children, barStyle, style }) => {
     // check whether this is the current activity
     const current = location === url
     // which determines its state
-    const state = current ? "engaged" : "available"
+    const state = current ? "selected" : "enabled"
     // and the action on click
     const onClick = current ? toggleActivityPanel : showActivityPanel
-
-    // mix my paint
-    const activityStyle = {
-        // for the badge
-        badge: {
-            ...styles.badge,
-            ...barStyle?.badge,
-            ...style?.badge,
-        },
-        // for the shape
-        shape: {
-            ...styles.shape,
-            ...barStyle?.shape,
-            ...style?.shape,
-        },
-
-        // for disabled activities
-        disabled: {
-            // for the badge
-            badge: {
-                ...styles.disabled.badge,
-                ...barStyle?.disabled?.badge,
-                ...style?.disabled?.badge,
-            },
-            // for the shape
-            shape: {
-                ...styles.disabled.shape,
-                ...barStyle?.disabled?.shape,
-                ...style?.disabled?.shape,
-            },
-        },
-        // for engaged activities
-        engaged: {
-            // for the badge
-            badge: {
-                ...styles.engaged.badge,
-                ...barStyle?.engaged?.badge,
-                ...style?.engaged?.badge,
-            },
-            // for the shape
-            shape: {
-                ...styles.engaged.shape,
-                ...barStyle?.engaged?.shape,
-                ...style?.engaged?.shape,
-            },
-        },
-        // when answering the question whether an activity is available
-        available: {
-            // for the badge
-            badge: {
-                ...styles.available.badge,
-                ...barStyle?.available?.badge,
-                ...style?.available?.badge,
-            },
-            // for the shape
-            shape: {
-                ...styles.available.shape,
-                ...barStyle?.available?.shape,
-                ...style?.available?.shape,
-            },
-        },
-    }
-
     // assemble my behaviors
     const behaviors = { onClick }
 
+    // mix my paint
+    const paint = styles.activity(style)
     // paint me
     return (
         <Link to={url} >
-            <Badge size={size} state={state} behaviors={behaviors}
-                style={activityStyle} >
+            <Badge size={size} state={state} behaviors={behaviors} style={paint} >
                 {children}
             </Badge >
         </Link >
     )
 }
-
-
-// publish
-export default activity
 
 
 // end of file

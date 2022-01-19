@@ -4,63 +4,69 @@
 // (c) 1998-2022 all rights reserved
 
 
-// get colors
-import { theme } from '~/palette'
+// grab the base paint mixer
+import paint from '../styles'
+
+
+// mix my paint
+const activity = (client) => {
+    // my badge overrides
+    const badge = {
+        // get the base layer
+        ...client.badge,
+        // enhance selected badges
+        selected: {
+            // styling
+            borderLeft: "2px solid white",
+            // plus whatever the client said
+            ...client.badge.selected,
+        },
+    }
+
+    // my shape overrides
+    const shape = {
+        // for all shapes
+        base: {
+            // styling
+            fillOpacity: 0.5,
+            strokeOpacity: 0.5,
+            // plus whatever the client wants
+            ...client.shape.base,
+        },
+        // for disabled shapes
+        disabled: {
+            // styling
+            fillOpacity: 0.2,
+            strokeOpacity: 0.2,
+            // plus whatever the client wants
+            ...client.shape.disabled,
+        },
+        // for selected shapes
+        selected: {
+            // styling
+            fillOpacity: 1.0,
+            strokeOpacity: 1.0,
+            // plus whatever the client wants
+            ...client.shape.selected,
+        },
+        // for available shapes
+        available: {
+            // styling
+            fillOpacity: 1.0,
+            strokeOpacity: 1.0,
+            // plus whatever the client wants
+            ...client.shape.available,
+        },
+    }
+
+    // all done
+    return { ...client, badge, shape }
+}
 
 
 // publish
 export default {
-    // for the badge
-    badge: {
-    },
-
-    // for the shape
-    shape: {
-        // dim it a bit
-        fillOpacity: 0.5,
-        strokeOpacity: 0.5,
-    },
-
-    // state dependent overrides
-    // when this is the current activity
-    engaged: {
-        // for the badge
-        badge: {
-            borderLeft: "2px solid white",
-        },
-        // for the shape
-        shape: {
-            // full intensity
-            fillOpacity: 1.0,
-            strokeOpacity: 1.0,
-        },
-    },
-
-    // when exploring whether this activity is available; e.g. when the cursor hovers over its badge
-    available: {
-        // for the badge
-        badge: {
-        },
-        // for the shape
-        shape: {
-            // full intensity
-            fillOpacity: 1.0,
-            strokeOpacity: 1.0,
-        },
-    },
-
-    // when the activity is not available
-    disabled: {
-        // for the badge
-        badge: {
-        },
-        // for the shape
-        shape: {
-            // dim it a lot
-            fillOpacity: 0.2,
-            strokeOpacity: 0.2,
-        },
-    },
+    activity,
 }
 
 
