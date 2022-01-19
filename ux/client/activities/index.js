@@ -16,6 +16,7 @@ export { About } from './about'
 export { Controls } from './controls'
 export { Data } from './data'
 export { Debug } from './debug'
+export { Explore } from './explore'
 export { Help } from './help'
 export { Kill } from './kill'
 
