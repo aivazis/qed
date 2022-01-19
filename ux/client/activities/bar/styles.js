@@ -6,61 +6,58 @@
 
 // get colors
 import { theme } from '~/palette'
+// grab the base paint mixer
+import paint from '../styles'
+
+
+// paint mixer
+// the toolbar
+const bar = (client) => {
+    // my toolbar
+    const toolbar = {
+        // the base layer
+        backgroundColor: "hsl(0deg, 0%, 15%, 1)",
+        // plus whatever the client specified
+        ...paint.toolbar(client)
+    }
+
+    // primer
+    const primer = paint.activity(client)
+    // my badge overrides
+    const badge = {
+        // the base layer
+        ...primer.badge,
+        // enhance the base
+        base: {
+            //  styling
+            padding: "0.375rem 0.5rem",
+            // make a transparent border of the correct width so the badges don't move around
+            // when the corresponding activity is engaged
+            borderLeft: `2px solid hsl(0deg, 0%, 0%, 0)`,
+            // plus whatever the client asked for
+            ...primer.badge.base,
+        },
+        selected: {
+            // styling
+            borderLeft: `2px solid ${theme.page.name}`,
+            // plus whatever the client asked for
+            ...primer.badge.selected,
+        },
+    }
+
+    const shape = {
+        // the base layer
+        ...primer.shape,
+    }
+
+    // all done
+    return { toolbar, badge, shape }
+}
 
 
 // publish
 export default {
-    // for my toolbar
-    box: {
-        // paint
-        backgroundColor: "hsl(0deg, 0%, 15%, 1)",
-    },
-
-    // my opinions on badges
-    badge: {
-        //  styling
-        padding: "0.375rem 0.5rem",
-        // make a transparent border of the correctwidth so the badges don't move around
-        // when the corresponding activity is engaged
-        borderLeft: `2px solid hsl(0deg, 0%, 0%, 0)`,
-    },
-
-    // and shapes
-    shape: {
-    },
-
-    // state dependent overrides
-    // when this is the current activity
-    engaged: {
-        // for the badge
-        badge: {
-            borderLeft: `2px solid ${theme.page.name}`,
-        },
-        // for the shape
-        shape: {
-        },
-    },
-
-    // when exploring whether this activity is available
-    // e.g. when the cursor hovers over its badge
-    available: {
-        // for the badge
-        badge: {
-        },
-        // for the shape
-        shape: {
-        },
-    },
-
-    // when the activity is not available
-    disabled: {
-        // for the badge
-        badge: {
-        },
-        // for the shape
-        shape: {
-        },
-    },
+    bar,
 }
 
 

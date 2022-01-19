@@ -17,31 +17,29 @@ import styles from './styles'
 
 
 // the activity bar
-const bar = () => {
+export const Bar = ({ style }) => {
     // pick an icon size based in the screen resolution
     const rem = window.screen.width > 2048 ? 1.2 : 1.0
     // convert to pixels
     const size = rem * parseFloat(getComputedStyle(document.documentElement).fontSize)
 
+    // mix my paint
+    const paint = styles.bar(style)
     // paint me
     return (
-        <Toolbar direction="column" style={styles} >
-            <Data size={size} style={styles} />
-            <Controls size={size} style={styles} />
-            <Help size={size} style={styles} />
-            <Debug size={size} style={styles} />
+        <Toolbar direction="column" style={paint} >
+            <Data size={size} style={paint} />
+            <Controls size={size} style={paint} />
+            <Help size={size} style={paint} />
+            <Debug size={size} style={paint} />
 
             <Spacer />
 
-            <Kill size={size} style={styles} />
-            <About size={size} style={styles} />
+            <Kill size={size} style={paint} />
+            <About size={size} style={paint} />
         </Toolbar>
     )
 }
-
-
-// publish
-export default bar
 
 
 // end of file
