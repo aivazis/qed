@@ -58,31 +58,13 @@ export const Sync = ({ viewport }) => {
     }
 
     // set my state
-    const state = isSynced ? "engaged" : "available"
-    // grab my style
+    const state = isSynced ? "selected" : "enabled"
+    // mix my paint
     const paint = styles.sync
-    // mix the shape paint
-    const shapePaint = {
-        // for the icon
-        icon: {
-            // the base style
-            ...paint.icon,
-            // and the state dependent enhancements
-            ...paint[state]?.icon,
-        },
-        // and its details
-        decoration: {
-            // the base style
-            ...paint.decoration,
-            // and the state dependent enhancements
-            ...paint[state]?.decoration,
-        },
-    }
-
     // render
     return (
         <Badge size={16} state={state} behaviors={behaviors} style={paint} >
-            <Shape style={shapePaint} />
+            <Shape />
         </Badge >
     )
 }

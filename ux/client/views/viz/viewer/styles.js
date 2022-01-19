@@ -111,97 +111,78 @@ const selectorPaint = {
 }
 
 
-// common paint for my badges
+// common paint for my badges, in normal form
 const badge = {
     // the icon container
     badge: {
-        // for me
-        flex: "0 0 auto",
-        padding: "0.0rem 0.5rem",
-        cursor: "pointer",
-        // for my children
-        display: "flex",
-        alignItems: "center",
+        base: {
+            // for me
+            flex: "0 0 auto",
+            padding: "0.0rem 0.5rem",
+            cursor: "pointer",
+            // for my children
+            display: "flex",
+            alignItems: "center",
+        },
+        disabled: {},
+        enabled: {},
+        selected: {},
+        available: {},
     },
 
     // for the shape container
     shape: {
-        // dim it a bit
-        strokeOpacity: 0.5,
+        base: {},
+        disabled: {},
+        enabled: {
+            // dim it a bit
+            strokeOpacity: 0.5,
+        },
+        selected: {},
+        available: {
+            // full intensity
+            strokeOpacity: 1.0,
+        },
     },
 
-    // for the shape
-    icon: {},
-    // and its detailing
-    decoration: {},
-
-    // available
-    available: {
-        badge: {},
-        shape: {},
-        icon: {},
-        decoration: {},
+    // for the icon main features
+    icon: {
+        base: {},
+        disabled: {},
+        enabled: {},
+        selected: {},
+        available: {},
     },
 
-    // engaged
-    engaged: {
-        badge: {},
-        shape: {},
-        icon: {},
-        decoration: {},
+    // for the icon decoration
+    decoration: {
+        base: {},
+        disabled: {},
+        enabled: {},
+        selected: {},
+        available: {},
     },
 }
 
 
 // the button that dismisses a view
 const collapse = {
-    // the icon container
-    badge: { ...badge.badge, },
-
-    // for the shape container
-    shape: { ...badge.shape, },
-
-    // for the shape
-    icon: {
-        ...badge.icon,
-        strokeWidth: 2,
-    },
-
-    // highlight when the cursor hovers over it
-    available: {
-        shape: {
-            ...badge.available.shape,
-            // full intensity
-            strokeOpacity: 1.0,
-        },
-    },
+    // inherit
+    ...badge,
 }
 
 
 // the button that splits a view
 const split = {
-    // the icon container
+    // inherit
+    ...badge,
+
     badge: {
         ...badge.badge,
-        // for me
-        justifySelf: "end",
-    },
-
-    // for the shape container
-    shape: { ...badge.shape, },
-
-    // for the shape
-    icon: {
-        ...badge.icon,
-        stroke: wheel.gray.flour,
-    },
-
-    // highlight when the cursor hovers over it
-    available: {
-        shape: {
-            ...badge.available.shape,
-            // full intensity
-            strokeOpacity: 1.0,
+        base: {
+            ...badge.badge.base,
+            // for me
+            justifySelf: "end",
         },
     },
 }
@@ -209,56 +190,44 @@ const split = {
 
 // the button that toggles the sync status of a data viewport
 const sync = {
+    // inherit
+    ...badge,
+
     // the icon container
     badge: {
         ...badge.badge,
-        // for me
-        justifySelf: "end",
+        base: {
+            ...badge.badge.base,
+            // for me
+            justifySelf: "end",
+        },
     },
 
-    // for the shape container
-    shape: { ...badge.shape, },
-
-    // for the shape
     icon: {
         ...badge.icon,
-        stroke: wheel.gray.flour,
-    },
-    // and its detailing
-    decoration: {
-        stroke: wheel.gray.flour,
-    },
-
-    // highlight when the cursor hovers over it
-    available: {
-        // for the shape
-        shape: {
-            ...badge.available.shape,
-            // full intensity
-            strokeOpacity: 1.0,
-        },
-    },
-
-    // restyle when turned on
-    engaged: {
-        // for the container
-        shape: {
-            ...badge.engaged.shape,
-            // full intensity
-            strokeOpacity: 1.0,
-        },
-        // for the shape
-        icon: {
-            ...badge.engaged.icon,
+        selected: {
+            ...badge.icon.selected,
             stroke: theme.page.name,
         },
-        // and its detailing
-        decoration: {
-            ...badge.engaged.decoration,
+        available: {
+            ...badge.icon.available,
+            stroke: theme.page.name,
+        },
+    },
+
+    decoration: {
+        ...badge.decoration,
+
+        selected: {
+            ...badge.decoration.selected,
             fill: theme.page.name,
             stroke: theme.page.name,
         },
-    },
+        available: {
+            ...badge.decoration.available,
+            stroke: theme.page.name,
+        },
+    }
 }
 
 

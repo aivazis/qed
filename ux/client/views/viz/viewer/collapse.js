@@ -45,8 +45,8 @@ export const Collapse = ({ viewport }) => {
     const paint = styles.collapse
     // and render
     return (
-        <Badge size={10} state="available" behaviors={behaviors} style={paint} >
-            <Icon style={paint} />
+        <Badge size={10} state="enabled" behaviors={behaviors} style={paint} >
+            <Icon />
         </Badge>
     )
 }
