@@ -6,18 +6,18 @@
 
 // publish
 // the activity bar
-export ActivityBar from './bar'
+export { Bar as ActivityBar } from './bar'
 
 // the base component
-export Activity from './activity'
+export { Activity } from './activity'
 
 // activities
-export About from './about'
-export Controls from './controls'
-export Data from './data'
-export Debug from './debug'
-export Help from './help'
-export Kill from './kill'
+export { About } from './about'
+export { Controls } from './controls'
+export { Data } from './data'
+export { Debug } from './debug'
+export { Help } from './help'
+export { Kill } from './kill'
 
 
 // end of file
