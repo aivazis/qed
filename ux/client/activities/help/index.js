@@ -11,24 +11,22 @@ import React from 'react'
 // widgets
 import { Activity } from '~/activities'
 // my shape
-import { Help } from '~/shapes'
+import { Help as Icon } from '~/shapes'
 // styles
 import styles from './styles'
 
 
 // show the embedded documentation
-const activity = ({ size, style }) => {
-    // paint me
+export const Help = ({ size, style }) => {
+    // mix my paint
+    const paint = styles.activity(style)
+    // and render
     return (
-        <Activity size={size} url="/help" barStyle={style} style={styles} >
-            <Help />
+        <Activity size={size} url="/help" style={paint} >
+            <Icon />
         </Activity >
     )
 }
-
-
-// publish
-export default activity
 
 
 // end of file

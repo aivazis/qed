@@ -11,24 +11,22 @@ import React from 'react'
 // widgets
 import { Activity } from '~/activities'
 // my shape
-import { Hammer } from '~/shapes'
+import { Hammer as Icon } from '~/shapes'
 // styles
 import styles from './styles'
 
 
 // sandbox for experimenting with new features
-const activity = ({ size, style }) => {
-    // paint me
+export const Debug = ({ size, style }) => {
+    // mix my paint
+    const paint = styles.activity(style)
+    // and render
     return (
-        <Activity size={size} url="/graphiql" barStyle={style} style={styles} >
-            <Hammer />
+        <Activity size={size} url="/graphiql" style={paint} >
+            <Icon />
         </Activity >
     )
 }
-
-
-// publish
-export default activity
 
 
 // end of file

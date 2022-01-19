@@ -11,24 +11,22 @@ import React from 'react'
 // widgets
 import { Activity } from '~/activities'
 // my shape
-import { Skull } from '~/shapes'
+import { Skull as Icon } from '~/shapes'
 // styles
 import styles from './styles'
 
 
 // kill the server
-const activity = ({ size, style }) => {
-    // paint me
+export const Kill = ({ size, style }) => {
+    // mix my paint
+    const paint = styles.activity(style)
+    // and render
     return (
-        <Activity size={size} url="/stop" barStyle={style} style={styles} >
-            <Skull />
+        <Activity size={size} url="/stop" style={paint} >
+            <Icon />
         </Activity >
     )
 }
-
-
-// publish
-export default activity
 
 
 // end of file
