@@ -139,8 +139,24 @@ class Dispatcher:
             # let the client know
             return server.responses.NotFound(server=server)
 
-        # if all went well, we have a {tile} in memory; dress it up and return it
-        return server.documents.BMP(server, bmp=memoryview(tile))
+        # if all went well, we have a {tile} in memory; attempt to
+        try:
+            # dress it up and return it
+            return server.documents.BMP(server, bmp=memoryview(tile))
+        # if anything goes wrong
+        except Exception as error:
+            # we have a problem
+            chnl = journal.error("qed.ux.dispatch")
+            # show me
+            chnl.line(str(error))
+            chnl.line(f"while generating a '{channel}' tile of '{data}'")
+            chnl.line(f"with shape {shape} at {origin}")
+            chnl.line(f"at zoom level {zoom}")
+            chnl.line(f"from '{src}'")
+            # and flush
+            chnl.log()
+        # let the client know
+        return server.responses.NotFound(server=server)
 
 
     def graphql(self, **kwds):
