@@ -5,20 +5,24 @@
 # (c) 1998-2022 all rights reserved
 
 
-# turn some debug channels on
+# journal channel management
 import journal
-# journal.debug("qed.ux.graphql").activate()
-# journal.debug("qed.ux.dispatch").activate()
-
+# errors
+journal.error("qed.ux.dispatch").fatal = False
+# debug
+journal.debug("qed.ux.dispatch").active = False
+journal.debug("qed.ux.graphql").active = False
+journal.debug("qed.ux.panel").active = True
+# firewalls
+journal.firewall("qed.ux.dispatch").fatal = False
 
 # get the package
 import qed
-
-# build an instance of the plexus
+# build an app instance
 app = qed.shells.qed(name='qed.app')
 # and run it
 status = app.run()
-# pass the status on to the shell
+# pass its exit status on to the shell
 raise SystemExit(status)
 
 
