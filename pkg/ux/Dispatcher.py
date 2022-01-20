@@ -32,15 +32,22 @@ class Dispatcher:
         url = request.url
 
         # make a channel
-        channel = journal.debug("qed.ux.dispatch")
-        # and show me
+        channel = journal.debug("qed.ux.dispatch.url")
+        # and show me the {url}
         channel.log(f"{command}: {url}")
 
         # take a look
         match = self.regex.match(url)
         # if there is no match
         if not match:
-            # something terrible has happened
+            # we have a bug
+            channel = journal.firewall("qed.ux.dispatch")
+            # complain
+            channel.line(f"could not find handler")
+            channel.line(f"while resolving ${url}")
+            # flush
+            channel.log()
+            # and return an error to the client
             return server.responses.NotFound(server=server)
 
         # find who matched
@@ -75,22 +82,65 @@ class Dispatcher:
 
 
     # handlers
-    def data(self, plexus, server, match, **kwds):
+    def data(self, server, match, **kwds):
         """
         Handle a data request
         """
+        # unpack
+        src = match.group('data_src')
+        data = match.group('data_set')
+        channel = match.group('data_channel')
+        zoom = int(match.group('data_zoom'))
+        tile = match.group('data_tile')
+        origin = tuple(map(int, match.group('data_origin').split("x")))
+        shape = tuple(map(int, match.group('data_shape').split("x")))
+
         # make a channel
-        channel = journal.info("qed.ux.data")
+        chnl = journal.debug("qed.ux.dispatch.data")
         # show me
-        channel.line(f"reader: {match.group('datasrc')}")
-        channel.line(f"dataset: {match.group('dataset')}")
-        channel.line(f"channel: {match.group('datachannel')}")
-        channel.line(f"zoom: {match.group('zoom')}")
-        channel.line(f"tile: {match.group('tile')}")
+        chnl.line(f"    src: {src}")
+        chnl.line(f"   data: {data}")
+        chnl.line(f"channel: {channel}")
+        chnl.line(f"   zoom: {zoom}")
+        chnl.line(f"   tile: {tile}")
+        chnl.line(f" origin: {origin}")
+        chnl.line(f"  shape: {shape}")
         # flush
-        channel.log()
-        # and punt
-        return server.documents.OK(server=server)
+        chnl.log()
+
+        # attempt to
+        try:
+            # process the request
+            tile = self.panel.tile(src=src, data=data,
+                channel=channel, zoom=zoom, origin=origin, shape=shape)
+        # if anything goes wrong while looking up the data sources
+        except KeyError:
+            # we have a bug
+            chnl = journal.firewall("qed.ux.dispatch")
+            # complain
+            chnl.line(f"could not find data source {data}")
+            chnl.line(f"while looking up reader {src}")
+            # flush
+            chnl.log()
+            # let the client know
+            return server.responses.NotFound(server=server)
+        # if anything else goes wrong
+        except Exception as error:
+            # we have a problem
+            chnl = journal.error("qed.ux.dispatch")
+            # show me
+            chnl.line(str(error))
+            chnl.line(f"while fetching a '{channel}' tile of '{data}'")
+            chnl.line(f"with shape {shape} at {origin}")
+            chnl.line(f"at zoom level {zoom}")
+            chnl.line(f"from '{src}'")
+            # and flush
+            chnl.log()
+            # let the client know
+            return server.responses.NotFound(server=server)
+
+        # if all went well, we have a {tile} in memory; dress it up and return it
+        return server.documents.BMP(server, bmp=memoryview(tile))
 
 
     def graphql(self, **kwds):
@@ -160,21 +210,35 @@ class Dispatcher:
 
 
     # private data
+    # recognizers for part of the {data} url
+    uuid = r"\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"
+    zoom = r"-?\d+"
+    origin = r"-?\d+x-?\d+"
+    shape = r"\d+x\d+"
+
+    # the app api
     regex = re.compile("|".join([
-        # the data request recognizer; resist the temptation to add commas at the end of
-        # these lines...
-        r"/(?P<data>data/"
-        r"(?P<datasrc>[a-z0-9-]+)/(?P<dataset>[a-z0-9-]+)/(?P<datachannel>[a-z]+)/"
-        r"(?P<zoom>[0-9-]+)/(?P<tile>[0-9x+-]+))",
+        # the data request recognizer
+        r"/(?P<data>data/" + "/".join([
+            rf"(?P<data_src>{uuid})",
+            rf"(?P<data_set>{uuid})",
+            r"(?P<data_channel>\w+)",
+            rf"(?P<data_zoom>{zoom})",
+            rf"(?P<data_tile>(?P<data_origin>{origin})\+(?P<data_shape>{shape}))"
+        ]) + ")",
+
         # graphql requests
         r"/(?P<graphql>graphql)",
+
         # the kill command
         r"/(?P<stop>stop)",
+
         # document requests
         r"/(?P<css>.+\.css)",
         r"/(?P<jscript>.+\.js)",
         r"/(?P<document>(graphics/.+)|(fonts/.+))",
         r"/(?P<favicon>favicon.ico)",
+
         # everything else gets the app page; see the {root} resolver above
         r"/(?P<root>.*)",
         ]))
