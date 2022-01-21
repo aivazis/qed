@@ -38,6 +38,7 @@ class RSLC(qed.flow.factory, family="qed.readers.isce2.rslc", implements=qed.pro
         # there is only one dataset in the file
         dataset = qed.datasets.raw()
         # decorate it
+        dataset.uri = self.uri
         dataset.shape = self.shape
         dataset.cell = qed.datatypes.complex4()
         dataset.tile = dataset.cell.tile
