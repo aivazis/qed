@@ -11,7 +11,7 @@ import qed
 
 
 # the RSLC reader
-class RSLC(qed.flow.factory, family="qed.readers.nisar.rslc", implements=qed.protocols.reader):
+class RSLC(qed.flow.factory, family="qed.nisar.readers.rslc", implements=qed.protocols.reader):
     """
     The reader of RSLC files
     """
