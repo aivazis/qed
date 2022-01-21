@@ -21,6 +21,11 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
     data.default = None
     data.doc = "the memory payload"
 
+    # the source
+    uri = qed.properties.path()
+    uri.default = None
+    uri.doc = "the path to the data source"
+
     # the data layout
     cell = qed.protocols.datatype()
     cell.default = None
@@ -41,6 +46,32 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
     tile = qed.properties.tuple(schema=qed.properties.int())
     tile.default = 512,512
     tile.doc = "the preferred shape of dataset subsets"
+
+
+    # interface
+    def open(self):
+        """
+        Initialize my data source
+        """
+        # if i'm already attached to a data source
+        if self.data is not None:
+            # do nothing
+            return
+
+        # otherwise
+
+        # all done
+        return
+
+
+    def close(self):
+        """
+        Shutdown my data source
+        """
+        # deallocate the data buffer
+        self.data = None
+        # all done
+        return
 
 
 # end of file
