@@ -8,6 +8,8 @@
 qed.ext.tests.stem := qed.ext
 # depends on
 qed.ext.tests.prerequisites := qed.ext
+# external dependencies
+qed.ext.tests.extern := $(qed.ext.extern)
 
 
 # end of file
