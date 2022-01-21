@@ -16,13 +16,11 @@
     uri: ../../../data/nisar/20211221.h5
     shape: 36864, 10344
 
-
 # attach them to the application
 qed.app.datasets:
-    - isce2.rslc#20061231
-    - isce2.rslc#20070215
-    - nisar.rslc#20211221
-
+    - qed.isce2.readers.rslc#20061231
+    - qed.isce2.readers.rslc#20070215
+    - qed.nisar.readers.rslc#20211221
 
 # overall application configuration
 qed.app:
@@ -33,11 +31,9 @@ qed.app:
         # pin the port for serving web content to some number in user space
         address: ip4:0.0.0.0:8005
 
-
 # configure the {web} shell
 pyre.shells.web#qed.app.shell:
     # spawn a new browser tab every time the server starts?
     auto: no
-
-
+#
 # end of file
