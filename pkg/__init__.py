@@ -37,7 +37,7 @@ from . import exceptions     # the exception hierarchy
 from .ext import libqed, libqed_cuda
 # protocols
 from . import protocols
-# readers and data types
+# support for readers, datasets, and data types
 from . import datatypes
 from . import datasets
 from . import readers
@@ -47,6 +47,10 @@ from . import gql
 from . import shells         # the supported application shells
 from . import cli            # the command line interface
 from . import ux             # support for the web client
+
+# specializations
+from . import isce2
+from . import nisar
 
 
 # administrivia
