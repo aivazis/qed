@@ -1,0 +1,17 @@
+# -*- makefile -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2022 all rights reserved
+
+
+# sample data generation
+qed.data.stem := qed.data
+# its location
+qed.data.root := data/
+# external dependencies
+qed.data.extern := pyre
+
+# clean up
+data.raw.c8.clean += c8.dat
+
+# end of file
