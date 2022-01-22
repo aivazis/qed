@@ -12,6 +12,7 @@ qed.data.root := data/
 qed.data.extern := pyre
 
 # clean up
+data.raw.c4.clean += c4.dat
 data.raw.c8.clean += c8.dat
 
 # end of file
