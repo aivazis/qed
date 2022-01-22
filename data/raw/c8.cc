@@ -53,28 +53,21 @@ main(int argc, char * argv [])
 
     // here is the transform that converts an index into a complex number
     auto project = [delta](grid_t::index_type idx) -> data_t {
-        // unpack
-        auto [i, j] = idx;
         // transform
-        return data_t { delta * i, delta * j };
+        auto scaled = delta * idx;
+        // convert into a {data_t}
+        return data_t { scaled [0], scaled [1] };
     };
 
-    // make a channel
-    pyre::journal::debug_t channel("tile");
     // fill the grid
     for (auto idx : data.layout()) {
         // convert the indices into a complex number in our space
         auto z = project(idx);
         // compute f(z)
         auto f = (z - 1.0) / (z * z + z + 1.0);
-
-        // show me
-        channel << idx << " -> " << z << " -> " << f << pyre::journal::newline;
         // place into the data set
         data [idx] = f;
     }
-    // flush
-    channel << pyre::journal::endl(__HERE__);
 
     // all done
     return 0;
