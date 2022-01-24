@@ -21,6 +21,12 @@ namespace qed::py {
 
     // version info
     void version(py::module &);
+
+    // isce2 subpackage
+    namespace isce2 {
+        // the initializer; everything else is private to the subpackage
+        void isce2(py::module &);
+    }
 }
 
 
