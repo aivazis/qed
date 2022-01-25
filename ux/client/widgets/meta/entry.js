@@ -6,12 +6,22 @@
 
 // externals
 import React from 'react'
+// hooks
+import { useDetail } from './useDetail'
 // locals
 import styles from './styles'
 
 
 // an individual entry
-export const Entry = ({ attribute, style, children }) => {
+export const Entry = ({ threshold = 0, attribute, style, children }) => {
+    // get the current detail level
+    const { detail } = useDetail()
+    // if my threshold is higher
+    if (threshold > detail) {
+        // show nothing
+        return null
+    }
+
     // mix my paint
     const entryStyle = { ...styles.entry, ...style?.entry }
     const attributeStyle = { ...styles.attribute, ...style?.attribute }
