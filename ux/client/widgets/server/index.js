@@ -19,6 +19,10 @@ export const Server = ({ style, ...rest }) => {
     // the query fragment i care about
     const { major, minor, micro, revision } = useServerVersion()
 
+    // urls
+    const repo = `https://github.com/aivazis/qed`
+    const release = `${repo}/releases/tag/v${major}.${minor}.${micro}`
+
     // get the time
     const now = new Date()
     // use it to make a timestamp
@@ -28,9 +32,12 @@ export const Server = ({ style, ...rest }) => {
     const paint = styles.server(style, "good")
     // build the component and return it
     return (
-        <div style={paint} title={title} {...rest}>
-            qed server {major}.{minor}.{micro} rev {revision}
-        </div>
+        <div style={paint.box} title={title} {...rest}>
+            <a href={repo} style={paint.link}>qed</a>
+            server
+            <a href={release} style={paint.link}>{major}.{minor}.{micro}</a>
+            rev {revision}
+        </div >
     )
 }
 

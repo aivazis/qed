@@ -10,11 +10,24 @@ import { theme } from '~/palette'
 
 // server info styling
 const server = (client, status) => ({
-    // whatever the client said
-    ...client?.box,
-    ...client?.text,
-    // with status specific overrides
-    ...client.status?.[status],
+    // the container
+    box: {
+        // my opinions
+        cursor: "default",
+        // plus whatever the client said for the container
+        ...client?.box,
+        // and the text
+        ...client?.text,
+        // with status specific overrides
+        ...client.status?.[status],
+    },
+
+    // links
+    link: {
+        margin: "0.0em 0.5em",
+        // with status specific overrides
+        ...client.status?.[status],
+    },
 })
 
 
