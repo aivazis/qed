@@ -17,6 +17,7 @@ const meta = {
         fontFamily: "rubik-light",
         fontSize: "60%",
         color: theme.header.color,
+        margin: "0.0rem 0.25rem",
     },
     // for each row
     entry: {},
