@@ -8,42 +8,6 @@
 import React from 'react'
 
 
-// setup the flex context
-export const Context = React.createContext(
-    // the default value that consumers see when accessing the context outside a provider
-    {
-        // directional flags
-        direction: "row",
-        isRow: true,
-        parity: 1,
-        // direction dependent attributes
-        mainPos: "left",
-        crossPos: "top",
-        mainExtent: "width",
-        crossExtent: "height",
-        minExtent: "minWidth",
-        maxExtent: "maxWidth",
-        // cursors
-        cursor: "col-resize",
-        // the transform that centers the separator handle in its parent space
-        transform: "translate(-50%, 0%)",
-        // panel management
-        panels: null,
-        addPanel: () => { throw new Error('no context provider') },
-        removePanel: () => { throw new Error('no context provider') },
-        // the flexing panel when a separator gets activated
-        flexingPanel: null,
-        setFlexingPanel: () => { throw new Error('no context provider') },
-        // the set of panels downstream from the flexing one
-        downstreamPanels: null,
-        setDownstreamPanels: () => { throw new Error('no context provider') },
-        // the location of the moving panel separator
-        separatorLocation: null,
-        setSeparatorLocation: () => { throw new Error('no context provider') },
-    }
-)
-
-
 // the provider factory
 export const Provider = ({
     // the box orientation
@@ -132,6 +96,46 @@ export const Provider = ({
 
     )
 }
+
+
+// setup the flex context
+export const Context = React.createContext(
+    // the default value that consumers see when accessing the context outside a provider
+    {
+        // directional flags
+        direction: "row",
+        isRow: true,
+        parity: 1,
+        // direction dependent attributes
+        mainPos: "left",
+        crossPos: "top",
+        mainExtent: "width",
+        crossExtent: "height",
+        minExtent: "minWidth",
+        maxExtent: "maxWidth",
+        // cursors
+        cursor: "col-resize",
+        // the transform that centers the separator handle in its parent space
+        transform: "translate(-50%, 0%)",
+        // panel management
+        panels: null,
+        addPanel: () => { throw new Error(complaint) },
+        removePanel: () => { throw new Error(complaint) },
+        // the flexing panel when a separator gets activated
+        flexingPanel: null,
+        setFlexingPanel: () => { throw new Error(complaint) },
+        // the set of panels downstream from the flexing one
+        downstreamPanels: null,
+        setDownstreamPanels: () => { throw new Error(complaint) },
+        // the location of the moving panel separator
+        separatorLocation: null,
+        setSeparatorLocation: () => { throw new Error(complaint) },
+    }
+)
+
+
+// the error message to show consumers that are not nested within a provider
+const complaint = "while accessing the 'flex' context: no provider"
 
 
 // end of file
