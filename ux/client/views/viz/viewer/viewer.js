@@ -51,29 +51,29 @@ export const Viewer = ({ viewport, view, registrar }) => {
             <Tab viewport={viewport} view={view} />
 
             {/* identifying metadata; most of it is debugging information */}
-            <Meta.Table style={paint}>
-                <Meta.Entry attribute="uri" style={paint}>
+            <Meta.Table min={0} initial={1} max={3} style={paint}>
+                <Meta.Entry threshold={0} attribute="uri" style={paint}>
                     {uri}
                 </Meta.Entry>
-                <Meta.Entry attribute="reader" style={paint}>
+                <Meta.Entry threshold={3} attribute="reader" style={paint}>
                     {readerUUID}
                 </Meta.Entry>
-                <Meta.Entry attribute="dataset" style={paint}>
+                <Meta.Entry threshold={3} attribute="dataset" style={paint}>
                     {datasetUUID}
                 </Meta.Entry>
-                <Meta.Entry attribute="data" style={paint}>
+                <Meta.Entry threshold={2} attribute="data" style={paint}>
                     {base}
                 </Meta.Entry>
-                <Meta.Entry attribute="type" style={paint}>
+                <Meta.Entry threshold={1} attribute="type" style={paint}>
                     {datatype}
                 </Meta.Entry>
-                <Meta.Entry attribute="origin" style={paint}>
-                    {origin.join(", ")}
-                </Meta.Entry>
-                <Meta.Entry attribute="shape" style={paint}>
+                <Meta.Entry threshold={0} attribute="shape" style={paint}>
                     {shape.join(" x ")}
                 </Meta.Entry>
-                <Meta.Entry attribute="tile" style={paint}>
+                <Meta.Entry threshold={1} attribute="origin" style={paint}>
+                    {origin.join(", ")}
+                </Meta.Entry>
+                <Meta.Entry threshold={2} attribute="tile" style={paint}>
                     {tile.join(" x ")}
                 </Meta.Entry>
             </Meta.Table>
