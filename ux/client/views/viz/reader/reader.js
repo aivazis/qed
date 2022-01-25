@@ -80,8 +80,9 @@ const Panel = () => {
     return (
         <Tray title={name} initially={state === "selected"} style={paint.tray}>
             <Meta.Table style={paint.meta} {...behaviors}>
-                <Meta.Entry attribute="uri" style={paint.meta}>{uri}</Meta.Entry>
-                <Meta.Entry attribute="reader" style={paint.meta}>{family}</Meta.Entry>
+                <Meta.Entry attribute="uri" style={paint.meta}>
+                    {uri}
+                </Meta.Entry>
                 {selectors.map(selector => {
                     // unpack
                     const { name: axis, values } = selector
