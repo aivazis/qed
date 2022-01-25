@@ -15,8 +15,8 @@
 void
 qed::py::isce2::isce2(py::module & m)
 {
-    // create a {memory} submodule
-    auto memory = m.def_submodule(
+    // create an {isce2} submodule
+    auto isce2 = m.def_submodule(
         // the name of the module
         "isce2",
         // its docstring
