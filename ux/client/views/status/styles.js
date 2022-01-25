@@ -49,7 +49,6 @@ export default {
             // when everything is ok
             good: {
                 color: wheel.pyre.green,
-                opacity: "0.75",
             },
             // when there is an error retrieving the state of the server
             error: {
