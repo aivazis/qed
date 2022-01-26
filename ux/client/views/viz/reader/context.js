@@ -62,8 +62,8 @@ export const Provider = (props) => {
             // it must be mine
             iDataset = view.dataset
         }
-        // if the active view has a selected channel
-        if (view.channel) {
+        // if the active view has a selected channel and i recognize it
+        if (view.channel && iDataset && iDataset.channels.includes(view.channel)) {
             // save it
             iChannel = view.channel
         }
