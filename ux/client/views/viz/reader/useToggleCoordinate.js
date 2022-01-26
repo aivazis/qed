@@ -19,8 +19,6 @@ export const useToggleCoordinate = (axis, coordinate) => {
 
     // make the toggle
     const toggle = () => {
-        // initialize the choice of dataset
-        let dataset = null
         // adjust the selector
         setSelector(old => {
             // make a copy of the selector
@@ -61,13 +59,13 @@ export const useToggleCoordinate = (axis, coordinate) => {
                     else if (candidates.length > 1) {
                         // if not, complain
                         console.error('FIREWALL: too many dataset matches', selector, candidates)
-                        // and pick the first
-                        dataset = candidates[0]
+                        // and pick the first and adjust the selected dataset
+                        setDataset(candidates[0])
                     }
                     // and if there is only one match
                     else {
-                        // we got it
-                        dataset = candidates[0]
+                        // we got it; adjust the selected dataset
+                        setDataset(candidates[0])
                     }
                 }
             }
@@ -75,10 +73,8 @@ export const useToggleCoordinate = (axis, coordinate) => {
             return selector
         })
 
-        // adjust the selected dataset
-        setDataset(dataset)
         // any interaction with the dataset selectors clears the channel
-        setChannel(null)
+        // setChannel(null)
         // all done
         return
     }
