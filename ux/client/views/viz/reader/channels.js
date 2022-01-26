@@ -13,8 +13,8 @@ import { Meta } from '~/widgets'
 
 // locals
 // hooks
-import { useReader } from './useReader'
-import { useGetView } from '../viz/useGetView'
+import { useIsActive } from './useIsActive'
+import { useChannel } from './useChannel'
 // components
 import { Channel } from './channel'
 // styles
@@ -23,14 +23,14 @@ import styles from './styles'
 
 // display the bindings associated with this selector
 export const Channels = ({ children }) => {
-    // get my reader
-    const reader = useReader()
-    // and the current view
-    const view = useGetView()
+    // get the selection status of my reader
+    const active = useIsActive()
+    // and the current channel
+    const channel = useChannel()
 
     // a mark is required if the channel setting in the view is mine and there is no
     // channel selection
-    const required = view?.reader?.uuid === reader.uuid && !view.channel
+    const required = active && !channel
     // make a label that is marked as required when when there is no selected channel
     const label = (
         <span>
