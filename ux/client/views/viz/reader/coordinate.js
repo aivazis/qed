@@ -10,19 +10,19 @@ import React from 'react'
 // locals
 // hooks
 import { useReader } from './useReader'
+import { useIsActive } from './useIsActive'
 import { useSelector } from './useSelector'
 import { useToggleCoordinate } from './useToggleCoordinate'
-import { useGetView } from '../viz/useGetView'
 // styles
 import styles from './styles'
 
 
 // display the bindings associated with this selector
 export const Coordinate = ({ axis, coordinate }) => {
-    // get the current view
-    const view = useGetView()
     // get the reader
     const reader = useReader()
+    // get the selection status of my reader
+    const active = useIsActive()
     // and the current selector
     const selector = useSelector()
     // make a toggle
@@ -35,8 +35,8 @@ export const Coordinate = ({ axis, coordinate }) => {
 
     // figure out my state
     let state = "disabled"
-    // if i'm the currently selected value of {axis} my reader is in the active view
-    if (view?.reader?.uuid === reader.uuid && current === coordinate) {
+    // if my reader is active and i'm the currently selected value of my {axis}
+    if (active && current === coordinate) {
         // mark me as selected
         state = "selected"
     }
@@ -69,11 +69,7 @@ export const Coordinate = ({ axis, coordinate }) => {
     }
 
     // make a handler that toggles me as the value of my {axis}
-    const toggle = (evt) => {
-        // stop this event from bubbling up
-        evt.stopPropagation()
-        // and quash any side effects
-        evt.preventDefault()
+    const toggle = () => {
         // toggle me as the value of my {axis}
         toggleCoordinate()
         // reset the extra polish
@@ -81,49 +77,57 @@ export const Coordinate = ({ axis, coordinate }) => {
         // all done
         return
     }
-    // make a handler that highlights enabled values
-    const highlight = (evt) => {
-        // stop this event from bubbling up
-        evt.stopPropagation()
-        // and quash any side effects
-        evt.preventDefault()
-        // if i am available
-        if (state === "enabled") {
-            // highlight
-            setPolish(true)
-        }
-        // all done
-        return
-    }
-    // and one that puts everything back
-    const reset = (evt) => {
-        // stop this event from bubbling up
-        evt.stopPropagation()
-        // and quash any side effects
-        evt.preventDefault()
-        // reset the extra polish
-        setPolish(false)
-        // all done
-        return
-    }
 
     // build my controllers
-    const behaviors = state === "disabled" ? {} : {
-        // select/unselect when clicked
-        onClick: toggle,
-        // when the cursor hovers
-        onMouseEnter: highlight,
-        // and when it leaves
-        onMouseLeave: reset,
+    let behaviors = {}
+    // if i'm enabled
+    if (state === "enabled") {
+        // make a handler that highlights enabled values
+        const highlight = (evt) => {
+            // stop this event from bubbling up
+            evt.stopPropagation()
+            // and quash any side effects
+            evt.preventDefault()
+            // highlight
+            setPolish(true)
+            // all done
+            return
+        }
+        // and one that puts everything back
+        const reset = (evt) => {
+            // stop this event from bubbling up
+            evt.stopPropagation()
+            // and quash any side effects
+            evt.preventDefault()
+            // reset the extra polish
+            setPolish(false)
+            // all done
+            return
+        }
+        // add the toggle and the highlighters
+        behaviors = {
+            ...behaviors,
+            onClick: toggle,
+            onMouseEnter: highlight,
+            onMouseLeave: reset,
+        }
+    }
+    // if i'm selected
+    else if (state == "selected") {
+        // add only the toggle
+        behaviors = {
+            ...behaviors,
+            onClick: toggle,
+        }
     }
 
     // mix my paint
     const paint = styles.coordinate(state, polish)
     // and render
     return (
-        <span style={paint} {...behaviors} >
+        <div style={paint} {...behaviors} >
             {coordinate}
-        </span>
+        </div>
     )
 }
 
