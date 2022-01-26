@@ -9,43 +9,29 @@ import React from 'react'
 
 // locals
 // hooks
-import { useReader } from './useReader'
-import { useDataset } from './useDataset'
+import { useIsActive } from './useIsActive'
 import { useChannel } from './useChannel'
 import { useToggleChannel } from './useToggleChannel'
-import { useGetView } from '../viz/useGetView'
 // styles
 import styles from './styles'
 
 
 // display the bindings associated with this selector
 export const Channel = ({ channel }) => {
-    // get the active view
-    const view = useGetView()
-    // the current reader
-    const reader = useReader()
-    // the current dataset
-    const dataset = useDataset()
+    // get the activation status of my reader
+    const active = useIsActive()
+    // get the active channel
+    const activeChannel = useChannel()
     // make a toggle
     const toggleChannel = useToggleChannel(channel)
     // park extra state dependent styling here
     const [polish, setPolish] = React.useState(false)
 
-    // i'm selected when my info matches the active view and i'm the current channel
-    const selected = (
-        view?.reader?.uuid === reader.uuid &&
-        view?.dataset?.uuid == dataset.uuid &&
-        view?.channel === channel
-    )
     // initialize my state
-    const state = selected ? "selected" : "enabled"
+    const state = active && activeChannel === channel ? "selected" : "enabled"
 
     // make a handler that toggles me as the value of my {axis}
-    const toggle = (evt) => {
-        // stop this event from bubbling up
-        evt.stopPropagation()
-        // and quash any side effects
-        evt.preventDefault()
+    const toggle = () => {
         // toggle me as the value of my {axis}
         toggleChannel()
         // reset the extra polish
@@ -53,40 +39,45 @@ export const Channel = ({ channel }) => {
         // all done
         return
     }
-    // make a handler that highlights enabled values
-    const highlight = (evt) => {
-        // stop this event from bubbling up
-        evt.stopPropagation()
-        // and quash any side effects
-        evt.preventDefault()
-        // if i am available
-        if (state === "enabled") {
-            // highlight
-            setPolish(true)
-        }
-        // all done
-        return
-    }
-    // and one that puts everything back
-    const reset = (evt) => {
-        // stop this event from bubbling up
-        evt.stopPropagation()
-        // and quash any side effects
-        evt.preventDefault()
-        // reset the extra polish
-        setPolish(false)
-        // all done
-        return
-    }
 
     // build my controllers
-    const behaviors = {
+    let behaviors = {
         // select/unselect when clicked
         onClick: toggle,
-        // when the cursor hovers
-        onMouseEnter: highlight,
-        // and when it leaves
-        onMouseLeave: reset,
+    }
+    // if i'm enabled
+    if (state === "enabled") {
+        // make a handler that highlights enabled values
+        const highlight = (evt) => {
+            // stop this event from bubbling up
+            evt.stopPropagation()
+            // and quash any side effects
+            evt.preventDefault()
+            // highlight
+            setPolish(true)
+            // all done
+            return
+        }
+        // and one that puts everything back
+        const reset = (evt) => {
+            // stop this event from bubbling up
+            evt.stopPropagation()
+            // and quash any side effects
+            evt.preventDefault()
+            // reset the extra polish
+            setPolish(false)
+            // all done
+            return
+        }
+        // form my controls
+        behaviors = {
+            // by adding to the default ones
+            ...behaviors,
+            // the highlighter, when the cursor hovers
+            onMouseEnter: highlight,
+            // and a reset for when it leaves my client area
+            onMouseLeave: reset,
+        }
     }
 
     // mix my paint
