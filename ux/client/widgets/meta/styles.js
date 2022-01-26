@@ -36,9 +36,6 @@ const value = {
     // for my children
     textAlign: "left",
     textOverflow: "ellipsis",
-    display: "flex",
-    flexDirection: "row",
-    flexWrap: "wrap",
 }
 
 const detail = {
@@ -62,7 +59,7 @@ const detail = {
         },
         // when disabled
         disabled: {
-            opacity: 0.25,
+            color: wheel.gray.gabro,
         },
         // when enabled
         enabled: {
