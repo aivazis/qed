@@ -10,36 +10,16 @@ import React from 'react'
 // local
 // context
 import { Context } from './context'
-// hooks
-import { useReader } from './useReader'
-import { useDataset } from './useDataset'
-import { useVisualize } from '../viz/useVisualize'
 
 
-// toggle the {coordinate} as the value for {axis}
+// toggle the specified {channel} as the selected one
 export const useToggleChannel = (value) => {
     // grab the selector mutator
     const { setChannel } = React.useContext(Context)
-    // the current reader
-    const reader = useReader()
-    // the current dataset
-    const dataset = useDataset()
-    // and the mutator of the current view
-    const visualize = useVisualize()
-
     // make the toggle
     const toggle = () => {
-        // make room
-        let channel = null
-        // adjust the channel
-        setChannel(old => {
-            // flip the state
-            channel = old === value ? null : value
-            // and return it
-            return channel
-        })
-        // update the active view
-        visualize({ reader, dataset, channel })
+        // flip the channel selection
+        setChannel(old => old === value ? null : value)
         // all done
         return
     }
