@@ -176,13 +176,21 @@ const axisPaint = {
 // for {coordinate}
 const coordinatePaint = {
     base: {
+        display: "inline-block",
         cursor: "pointer",
         margin: "0.0em 1.0em 0.0em 0.0em",
     },
 
     disabled: {
         cursor: "default",
-        opacity: 0.25,
+        color: wheel.gray.gabro,
+        // N.B.:
+        //   dimming disabled coordinates using opacity seems to trigger a table rendering bug
+        //   in safari where expanding/collapsing surrounding reader trays would leave the disabled
+        //   value at the same spot on the screen, even though the DOM is correct; to reproduce,
+        //   uncomment the line below and rebuild
+        //   last checked: safari Version 15.2 (15612.3.6.1.8, 15612)
+        // opacity: "0.25",
     },
 
     enabled: {},
@@ -208,6 +216,7 @@ const channelsPaint = {
 // for {channel}
 const channelPaint = {
     base: {
+        display: "inline-block",
         cursor: "pointer",
         margin: "0.0em 1.0em 0.0em 0.0em",
     },
