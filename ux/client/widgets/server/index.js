@@ -9,7 +9,7 @@ import React from 'react'
 
 // project
 // hooks
-import { useServerVersion } from '~/context'
+import { useServerVersion, useHeartbeat } from '~/context'
 // locals
 import styles from './styles'
 
@@ -24,9 +24,9 @@ export const Server = ({ style, ...rest }) => {
     const release = `${repo}/releases/tag/v${major}.${minor}.${micro}`
 
     // get the time
-    const now = new Date()
+    const heartbeat = useHeartbeat()
     // use it to make a timestamp
-    const title = `last checked on ${now.toString()}`
+    const title = `last checked on ${heartbeat.toString()}`
 
     // mix my paint
     const paint = styles.server(style, "good")
