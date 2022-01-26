@@ -18,10 +18,15 @@ export const Provider = ({ children }) => {
     // and attach it as read-only state
     const [serverVersion] = React.useState(info)
 
+    // make a slot for the time of the last response from the server
+    const [heartbeat, setHeartbeat] = React.useState(new Date())
+
     // build the initial context value
     const context = {
         // the server version
         serverVersion,
+        // the heartbeat
+        heartbeat, setHeartbeat,
     }
 
     // provide for my children
@@ -39,6 +44,9 @@ export const Context = React.createContext(
     {
         // the server version
         serverVersion: null,
+        // the timestamp of the last time we checked in with the server
+        heartbeat: null,
+        setHeartbeat: () => { throw new Error(complaint) },
     }
 )
 
