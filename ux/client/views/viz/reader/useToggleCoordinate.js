@@ -8,8 +8,6 @@
 import React from 'react'
 
 // local
-// hooks
-import { useVisualize } from '../viz/useVisualize'
 // context
 import { Context } from './context'
 
@@ -18,8 +16,6 @@ import { Context } from './context'
 export const useToggleCoordinate = (axis, coordinate) => {
     // grab my reader and the selector mutator
     const { reader, setSelector, setDataset, setChannel } = React.useContext(Context)
-    // and the mutator of the current view
-    const visualize = useVisualize()
 
     // make the toggle
     const toggle = () => {
@@ -83,8 +79,6 @@ export const useToggleCoordinate = (axis, coordinate) => {
         setDataset(dataset)
         // any interaction with the dataset selectors clears the channel
         setChannel(null)
-        // and update the active view
-        visualize({ reader, dataset, channel: null })
         // all done
         return
     }
