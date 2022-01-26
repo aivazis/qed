@@ -12,8 +12,11 @@ import React from 'react'
 import { Meta, Tray } from '~/widgets'
 
 // locals
+// context
+import { Provider } from './context'
 // hooks
 import { useReader } from './useReader'
+import { useIsActive } from './useIsActive'
 import { useDataset } from './useDataset'
 import { useChannel } from './useChannel'
 import { useGetView } from '../viz/useGetView'
@@ -25,23 +28,43 @@ import { Channels } from './channels'
 import styles from './styles'
 
 
+// turn the panel into a context provider and publish
+export const Reader = props => (
+    <Provider {...props}>
+        <Panel />
+    </Provider>
+)
+
+
 // display the datasets associated with this reader
 const Panel = () => {
-    // get my reader
+    // get my details
     const reader = useReader()
+    // my state marker
+    const active = useIsActive()
     // the selected dataset, if any
     const dataset = useDataset()
     // the selected channel
     const channel = useChannel()
-    // the active view
-    const view = useGetView()
     // and its mutator
     const visualize = useVisualize()
 
+    // schedule an update of the current view
+    React.useEffect(() => {
+        // if i'm the active reader
+        if (active) {
+            // with my accumulated state
+            visualize({ reader, dataset, channel })
+        }
+    },
+        // every time my potential contribution to the active view changes
+        [active, dataset, channel]
+    )
+
     // unpack the reader
-    const { id, uuid, uri, selectors } = reader
-    // parse the reader id
-    const [family, name] = id.split(":")
+    const { id, uri, selectors } = reader
+    // parse the reader id; ignore the {family} name that is not used here
+    const [, name] = id.split(":")
     // if i have a valid dataset selection, grab its channels
     const channels = dataset?.channels ?? []
 
@@ -49,21 +72,16 @@ const Panel = () => {
     // - i exist, so i can't be {disabled}
     // - therefore i'm always {enabled}
     // - no one asks me questions, so i'm never {available}
-    // - {selected} iff in {view}
-    const state = (uuid === view?.reader?.uuid) ? "selected" : "enabled"
+    // - {selected} iff in {view}, which is checked as part of my {context} initialization
+    const state = active ? "selected" : "enabled"
 
-    // handler that make me the active reader
+    // handler that makes me the active reader
     const select = evt => {
         // stop this event from bubbling up
         evt.stopPropagation()
         // quash the default behavior
         evt.preventDefault()
-        // if i'm already the current viewer
-        if (state === "selected") {
-            // bail
-            return
-        }
-        // otherwise, make me the active view
+        // make me the active reader
         visualize({ reader, dataset, channel })
         // all done
         return
@@ -94,16 +112,6 @@ const Panel = () => {
         </Tray>
     )
 }
-
-
-// context
-import { Provider } from './context'
-// turn the panel into a context provider and publish
-export const Reader = props => (
-    <Provider {...props}>
-        <Panel />
-    </Provider>
-)
 
 
 // end of file
