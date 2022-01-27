@@ -75,21 +75,28 @@ const Panel = () => {
     // - {selected} iff in {view}, which is checked as part of my {context} initialization
     const state = active ? "selected" : "enabled"
 
-    // handler that makes me the active reader
-    const select = evt => {
-        // stop this event from bubbling up
-        evt.stopPropagation()
-        // quash the default behavior
-        evt.preventDefault()
-        // make me the active reader
-        visualize({ reader, dataset, channel })
-        // all done
-        return
-    }
-    // assemble my controllers
-    const behaviors = {
-        // click to select
-        onClick: select,
+    // set up my controls
+    let behaviors = {}
+    // if am enabled
+    if (state == "enabled") {
+        // handler that makes me the active reader
+        const select = evt => {
+            // stop this event from bubbling up
+            evt.stopPropagation()
+            // quash the default behavior
+            evt.preventDefault()
+            // make me the active reader
+            visualize({ reader, dataset, channel })
+            // all done
+            return
+        }
+        // adjust my controllers
+        behaviors = {
+            // whatever i had before
+            ...behaviors,
+            // plus click to select
+            onClick: select,
+        }
     }
 
     // mix my paint
