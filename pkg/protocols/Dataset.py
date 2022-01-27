@@ -20,11 +20,6 @@ class Dataset(Specification, family="qed.datasets"):
 
 
     # public data
-    # the payload; leave untyped for now
-    data = qed.properties.object()
-    data.doc = "the memory payload"
-
-    # the data layout
     cell = Datatype()
     cell.doc = "the type of the dataset payload"
 
