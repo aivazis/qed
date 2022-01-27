@@ -16,9 +16,19 @@ export const Badge = ({ size, state, behaviors, style, children }) => {
     // questioning whether the activity is available
     const [polish, setPolish] = React.useState(false)
 
-    // support for questioning whether i'm available
-    let controls = {}
-    // if i'm not disabled
+    // make a function that resets the highlight
+    const reset = () => {
+        // by removing any extra styling
+        setPolish(false)
+        // all done
+        return
+    }
+    // make sure that my extra polish is removed any  time the cursor leaves my area
+    let controls = {
+        // install
+        onMouseLeave: reset,
+    }
+    // if i'm enabled
     if (state === "enabled") {
         // make a function that can highlight the badge and the shape
         const highlight = () => {
@@ -27,18 +37,12 @@ export const Badge = ({ size, state, behaviors, style, children }) => {
             // all done
             return
         }
-        // make a function that resets the highlight
-        const reset = () => {
-            // by removing any extra styling
-            setPolish(false)
-            // all done
-            return
-        }
         // install them
         controls = {
+            // the basic ones
+            ...controls,
             // control the styling
             onMouseEnter: highlight,
-            onMouseLeave: reset,
         }
     }
     // inject the client's choices
