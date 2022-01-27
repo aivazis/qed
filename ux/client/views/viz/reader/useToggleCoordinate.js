@@ -29,6 +29,8 @@ export const useToggleCoordinate = (axis, coordinate) => {
             if (current === coordinate) {
                 // clear it
                 selector.delete(axis)
+                // and reset the selected dataset
+                setDataset(null)
             }
             // otherwise
             else {
