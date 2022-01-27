@@ -35,7 +35,7 @@ class RSLC(qed.flow.factory, family="qed.isce2.readers.rslc", implements=qed.pro
         # chain up
         super().__init__(**kwds)
 
-        # there is only one dataset in the file
+        # there is only one dataset in the file and it is structurally trivial
         dataset = qed.datasets.raw()
         # decorate it
         dataset.uri = self.uri
