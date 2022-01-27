@@ -12,10 +12,11 @@ import React from 'react'
 import { Context } from './context'
 
 
-// hook to pull the dataset readers out the outlet context
+// hook that adjust the contents of a given viewport
+// currently, only called by {reader} instances when selected/updated
 export const useVisualize = () => {
-    // grab the readers
-    const { activeViewport, setViews, setSynced } = React.useContext(Context)
+    // grab the active viewport index and the {views} mutator
+    const { activeViewport, setViews } = React.useContext(Context)
 
     // make the handler
     const visualize = (view, viewport = activeViewport) => {
@@ -27,16 +28,6 @@ export const useVisualize = () => {
             clone[viewport] = { ...old[viewport], ...view }
             // and hand off the new state
             return clone
-        })
-
-        // initialize its sync status
-        setSynced(old => {
-            // make a copy of the old table
-            const table = [...old]
-            // add the new viewport at {idx} with a default state
-            table[viewport] = false
-            // return the new table
-            return table
         })
 
         // all done
