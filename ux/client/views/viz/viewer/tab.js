@@ -13,6 +13,8 @@ import React from 'react'
 import { Spacer } from '~/widgets'
 
 // locals
+// hooks
+import { useViews } from '../viz/useViews'
 // components
 import { Collapse } from './collapse'
 import { Selector } from './selector'
@@ -24,8 +26,12 @@ import styles from './styles'
 
 // display the datasets associated with this reader
 export const Tab = ({ viewport, view, behaviors }) => {
+    // get the active view
+    const { activeViewport } = useViews()
+    // deduce my state
+    const state = (viewport === activeViewport) ? "selected" : "enabled"
     // mix my paint
-    const paint = styles.tab
+    const paint = styles.tab(state)
     // render
     return (
         <div style={paint} {...behaviors} >
