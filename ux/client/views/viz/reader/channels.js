@@ -30,11 +30,11 @@ export const Channels = ({ children }) => {
 
     // a mark is required if the channel setting in the view is mine and there is no
     // channel selection
-    const required = active && !channel
-    // make a label that is marked as required when when there is no selected channel
+    const mark = active && !channel
+    // make a label that is marked as required when there is no selected channel
     const label = (
         <span>
-            {required ? <span style={styles.required}>*</span> : null}
+            {mark ? <span style={styles.mark}>*</span> : null}
             channels
         </span>
     )
