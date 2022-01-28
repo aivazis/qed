@@ -24,9 +24,9 @@ import styles from './styles'
 export const Viewer = ({ viewport, view, registrar }) => {
     // unpack the view
     const { reader, dataset, channel } = view
-    // and check for the trivial cases
+    // check for the trivial cases
     if (!reader || !dataset || !channel) {
-        // and show a blank panel
+        // to show a blank panel
         return (
             <>
                 <Tab viewport={viewport} view={null} />
@@ -35,13 +35,11 @@ export const Viewer = ({ viewport, view, registrar }) => {
         )
     }
 
-    // extract some metadata
-    const { uuid: readerUUID, uri, api } = reader
+    // otherwise, unpack the view
+    const { uuid: readerUUID, id, uri, api } = reader
     const { uuid: datasetUUID, datatype, shape, origin, tile } = dataset
-
     // assemble the data request URI
     const base = [api, readerUUID, datasetUUID, channel].join("/")
-
     // mix my paint
     const paint = styles.viewer
     // and render
@@ -57,6 +55,9 @@ export const Viewer = ({ viewport, view, registrar }) => {
                 </Meta.Entry>
                 <Meta.Entry threshold={1} attribute="shape" style={paint}>
                     {shape.join(" x ")}
+                </Meta.Entry>
+                <Meta.Entry threshold={2} attribute="reader" style={paint}>
+                    {id}
                 </Meta.Entry>
                 <Meta.Entry threshold={2} attribute="type" style={paint}>
                     {datatype}
