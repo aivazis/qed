@@ -18,8 +18,9 @@ export default {
 
     // the individual panels
     panel: {
-        // for me
-        flex: "1 1 auto",
+        // the initial flex
+        // for me; a flex basis of 100% seems to behave better than auto
+        flex: "1 1 100%",
         // for my children
         overflow: "hidden",
         display: "flex",
