@@ -16,7 +16,7 @@ import { Context } from './context'
 export const useReader = () => {
     // grab the reader metadata
     const { reader } = React.useContext(Context)
-    // and return it
+    // and make it available
     return reader
 }
 
