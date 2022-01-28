@@ -236,18 +236,20 @@ const sync = {
 const blank = {
     // the container
     placeholder: {
-        position: "relative",
-        top: "50%",
-        left: "50%",
-        textAlign: "center",
-        transform: "translate(-50%, -50%)",
+        flex: "1 1 auto",
+        minWidth: "300px",
     },
 
     // the icon container
     icon: {
         // placement
+        display: "block",
         width: "300px",
         height: "300px",
+        position: "relative",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
     },
 
     // the graphics
