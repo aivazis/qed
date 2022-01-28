@@ -14,74 +14,28 @@ import { Context } from './context'
 
 // toggle the {coordinate} as the value for {axis}
 export const useToggleCoordinate = (axis, coordinate) => {
-    // grab my reader and the selector mutator
-    const { reader, setSelector, setDataset, setChannel } = React.useContext(Context)
+    // get the selector ref
+    const { selector } = React.useContext(Context)
 
     // make the toggle
     const toggle = () => {
-        // adjust the selector
-        setSelector(old => {
-            // make a copy of the selector
-            const selector = new Map(old)
-            // get the current value of the axis
-            const current = old.get(axis)
-            // if {coordinate} is the current value of {axis}
-            if (current === coordinate) {
-                // clear it
-                selector.delete(axis)
-                // and reset the selected dataset
-                setDataset(null)
-            }
-            // otherwise
-            else {
-                // set it
-                selector.set(axis, coordinate)
-                // is this new selector enough to resolve the dataset? it has a fighting chance
-                // if it has as many values as the reader specifies
-                if (selector.size === reader.selectors.length) {
-                    // in which case, filter the datasets
-                    const candidates = reader.datasets.filter(dataset => {
-                        // based on whether their selector
-                        for (const { name, value } of dataset.selector) {
-                            // fails to match the value in mine
-                            if (selector.get(name) !== value) {
-                                // reject
-                                return false
-                            }
-                        }
-                        // if we get this far, we have a match
-                        return true
-                    })
-                    // there had better be a candidate
-                    if (candidates.length === 0) {
-                        // if not, complain
-                        console.error('FIREWALL: no dataset matches', selector)
-                    }
-                    // but also no more than one
-                    else if (candidates.length > 1) {
-                        // if not, complain
-                        console.error('FIREWALL: too many dataset matches', selector, candidates)
-                        // and pick the first and adjust the selected dataset
-                        setDataset(candidates[0])
-                    }
-                    // and if there is only one match
-                    else {
-                        // we got it; adjust the selected dataset
-                        setDataset(candidates[0])
-                    }
-                }
-            }
-            // and return the updated selector
-            return selector
-        })
-
-        // any interaction with the dataset selectors clears the channel
-        // setChannel(null)
+        // access the map
+        const coordinates = selector.current
+        // get the current value for this {axis}
+        const currentCoordinate = coordinates.get(axis)
+        // if i'm the current selection
+        if (currentCoordinate === coordinate) {
+            // remove this choice from the map
+            coordinates.delete(axis)
+        } else {
+            // otherwise, pick me
+            coordinates.set(axis, coordinate)
+        }
         // all done
         return
     }
 
-    // and return it
+    // all done
     return toggle
 }
 
