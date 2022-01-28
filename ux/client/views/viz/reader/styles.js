@@ -88,7 +88,7 @@ const channel = (state, polish) => ({
 })
 
 
-const required = {
+const mark = {
     fontFamily: "inconsolata",
     color: "hsl(0deg, 100%, 50%)",
     padding: "0.0em 0.25em 0.0em 0.0em",
@@ -101,8 +101,8 @@ export default {
     channel,
     channels,
     coordinate,
+    mark,
     reader,
-    required,
 }
 
 
