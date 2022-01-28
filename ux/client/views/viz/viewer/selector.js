@@ -6,7 +6,6 @@
 
 // externals
 import React from 'react'
-import { RelayConcreteNode } from 'relay-runtime'
 
 // locals
 // hooks
