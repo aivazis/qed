@@ -14,12 +14,13 @@ import { Context } from './context'
 
 // toggle the specified {channel} as the selected one
 export const useToggleChannel = (value) => {
-    // grab the selector mutator
-    const { setChannel } = React.useContext(Context)
+    // grab the channel ref
+    const { channel } = React.useContext(Context)
+
     // make the toggle
     const toggle = () => {
         // flip the channel selection
-        setChannel(old => old === value ? null : value)
+        channel.current = channel.current === value ? null : value
         // all done
         return
     }
