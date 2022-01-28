@@ -22,7 +22,7 @@ const stop = (props) => {
     return (
         <section style={styles.stop}>
             <div style={styles.placeholder}>
-                <a href="/">qed</a> has shut down; please close this window
+                <a href="/" style={styles.link}>qed</a> has shut down; please close this window
             </div>
         </section>
     )

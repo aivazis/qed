@@ -16,6 +16,8 @@ export default {
     stop: {
         // inherit
         ...base.panel,
+        // plus
+        fontFamily: "inconsolata",
     },
 
     placeholder: {
@@ -26,6 +28,10 @@ export default {
         textAlign: "center",
         transform: "translate(-50%, -50%)",
     },
+
+    link: {
+        color: theme.page.name,
+    }
 
 }
 
