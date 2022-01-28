@@ -41,9 +41,10 @@ const activityPanels = {
         ...flex.panel,
         // make it stand out a bit
         backgroundColor: "hsl(0deg, 0%, 7%, 1)",
-        // set up the preferred initial width
-        width: "350px",
+        // shut flex down for this panel
         flex: "0 0 auto",
+        // and set up the preferred initial width
+        width: "350px",
     },
 
     // the separator
