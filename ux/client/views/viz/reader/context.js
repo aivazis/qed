@@ -43,58 +43,57 @@ export const Provider = (props) => {
         props.reader
     )
 
-    // the active view
-    const view = useGetView()
-    // make some room for my default initial state
-    let active = false
-    // if there i have only one dataset, select it
-    let iDataset = null
-    // and if it only has one channel, prime my channel as well
-    let iChannel = null
+    // set up my state
+    // am i the active reader?
+    const active = React.useRef(false)
+    // my selected dataset
+    const dataset = React.useRef(null)
+    // the selector
+    const selector = React.useRef(new Map())
+    // and my channel selection
+    const channel = React.useRef(null)
 
-    // if i'm being rendered after a {view} has been selected, and i happen to be the reader
-    // in the active view
-    if (reader.uuid === view?.reader?.uuid) {
-        // mark me as the active reader
-        active = true
-        // if the active view has a selected dataset
+    // get the active view
+    const view = useGetView()
+    // if i'm the active reader
+    if (view?.reader?.uuid === reader.uuid) {
+        // mark me as active
+        active.current = true
+        // if the view has a dataset
         if (view.dataset) {
             // it must be mine
-            iDataset = view.dataset
+            dataset.current = view.dataset
         }
-        // if the active view has a selected channel and i recognize it
-        if (view.channel && iDataset && iDataset.channels.includes(view.channel)) {
-            // save it
-            iChannel = view.channel
+        // if the view has a channel
+        if (view.channel) {
+            // it's my channel
+            channel.current = view.channel
         }
+    } else {
+        // mark me as inactive
+        active.current = false
+        // if i only have one dataset, pick it
+        const myDataset = reader.datasets.length == 1 ? reader.datasets[0] : null
+        // and use it to initialize my dataset of choice
+        dataset.current = myDataset
+        // reset my selector
+        selector.current = new Map()
+        // and my channel
+        channel.current = null
     }
-    // if didn't get a dataset selection from the current view and i only have one
-    if (!iDataset && reader.datasets.length === 1) {
-        // select it automatically
-        iDataset = reader.datasets[0]
-    }
-    // if i didn't get a channel selection from the current view and the selected dataset only
-    // has a single channel
-    if (!iChannel && iDataset && iDataset.channels.length === 1) {
-        // select it
-        iChannel = iDataset.channels[0]
-    }
-    // initialize my selector
-    const iSelector = new Map(
-        // if i have a selected dataset
-        iDataset
-            // unpack its selector
-            ? iDataset.selector.map(({ name, value }) => [name, value])
-            // make an empty one
-            : []
-    )
 
-    // initialize the dataset choice
-    const [dataset, setDataset] = React.useState(iDataset)
-    // initialize the selector, a map { axis } -> { coordinate } that reflects the current choice
-    const [selector, setSelector] = React.useState(iSelector)
-    // initialize the channel
-    const [channel, setChannel] = React.useState(iChannel)
+    // if there is a dataset choice
+    if (dataset.current) {
+        // use it to initialize my selector
+        selector.current = new Map(
+            // by going through its coordinate settings and flattening them into key/value pairs
+            dataset.current.selector.map(({ name, value }) => [name, value])
+        )
+        // if it only has one channel
+        if (dataset.current.channels.length == 1) {
+            channel.current = dataset.current.channels[0]
+        }
+    }
 
     // assemble the context value
     const context = {
@@ -103,11 +102,11 @@ export const Provider = (props) => {
         // my state
         active,
         // the dataset
-        dataset, setDataset,
+        dataset,
         // the selector
-        selector, setSelector,
+        selector,
         // the channel
-        channel, setChannel,
+        channel,
     }
 
     // provide for my children
@@ -129,13 +128,10 @@ export const Context = React.createContext(
         active: null,
         // the selected dataset
         dataset: null,
-        setDataset: () => { throw new Error(complaint) },
         // the selector
         selector: null,
-        setSelector: () => { throw new Error(complaint) },
         // the channel
         channel: null,
-        setChannel: () => { throw new Error(complaint) },
     }
 )
 
