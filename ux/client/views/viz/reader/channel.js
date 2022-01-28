@@ -19,7 +19,7 @@ import styles from './styles'
 // display the bindings associated with this selector
 export const Channel = ({ channel }) => {
     // get the activation status of my reader
-    const active = useIsActive()
+    const activeReader = useIsActive()
     // get the active channel
     const activeChannel = useChannel()
     // make a toggle
@@ -28,7 +28,7 @@ export const Channel = ({ channel }) => {
     const [polish, setPolish] = React.useState(false)
 
     // initialize my state
-    const state = active && activeChannel === channel ? "selected" : "enabled"
+    const state = activeReader && (activeChannel === channel) ? "selected" : "enabled"
 
     // make a handler that toggles me as the value of my {axis}
     const toggle = () => {
@@ -39,33 +39,27 @@ export const Channel = ({ channel }) => {
         // all done
         return
     }
+    // and one that removes any extra polish
+    const reset = () => {
+        // reset the extra polish
+        setPolish(false)
+        // all done
+        return
+    }
 
     // build my controllers
     let behaviors = {
         // select/unselect when clicked
         onClick: toggle,
+        // and a reset for when it leaves my client area
+        onMouseLeave: reset,
     }
     // if i'm enabled
     if (state === "enabled") {
         // make a handler that highlights enabled values
-        const highlight = (evt) => {
-            // stop this event from bubbling up
-            evt.stopPropagation()
-            // and quash any side effects
-            evt.preventDefault()
+        const highlight = () => {
             // highlight
             setPolish(true)
-            // all done
-            return
-        }
-        // and one that puts everything back
-        const reset = (evt) => {
-            // stop this event from bubbling up
-            evt.stopPropagation()
-            // and quash any side effects
-            evt.preventDefault()
-            // reset the extra polish
-            setPolish(false)
             // all done
             return
         }
@@ -75,8 +69,6 @@ export const Channel = ({ channel }) => {
             ...behaviors,
             // the highlighter, when the cursor hovers
             onMouseEnter: highlight,
-            // and a reset for when it leaves my client area
-            onMouseLeave: reset,
         }
     }
 
