@@ -22,7 +22,7 @@ export const Coordinate = ({ axis, coordinate }) => {
     // get the reader
     const reader = useReader()
     // get the selection status of my reader
-    const active = useIsActive()
+    const activeReader = useIsActive()
     // and the current selector
     const selector = useSelector()
     // make a toggle
@@ -31,12 +31,12 @@ export const Coordinate = ({ axis, coordinate }) => {
     const [polish, setPolish] = React.useState(false)
 
     // get the current value of my axis
-    const current = selector.get(axis)
+    const currentCoordinate = selector.get(axis)
 
     // figure out my state
     let state = "disabled"
     // if my reader is active and i'm the currently selected value of my {axis}
-    if (active && current === coordinate) {
+    if (activeReader && currentCoordinate === coordinate) {
         // mark me as selected
         state = "selected"
     }
@@ -77,39 +77,32 @@ export const Coordinate = ({ axis, coordinate }) => {
         // all done
         return
     }
+    // and one that removes any extra polish
+    const reset = () => {
+        // reset the extra polish
+        setPolish(false)
+        // all done
+        return
+    }
 
     // build my controllers
-    let behaviors = {}
+    let behaviors = {
+        onMouseLeave: reset,
+    }
     // if i'm enabled
     if (state === "enabled") {
         // make a handler that highlights enabled values
-        const highlight = (evt) => {
-            // stop this event from bubbling up
-            evt.stopPropagation()
-            // and quash any side effects
-            evt.preventDefault()
+        const highlight = () => {
             // highlight
             setPolish(true)
             // all done
             return
         }
-        // and one that puts everything back
-        const reset = (evt) => {
-            // stop this event from bubbling up
-            evt.stopPropagation()
-            // and quash any side effects
-            evt.preventDefault()
-            // reset the extra polish
-            setPolish(false)
-            // all done
-            return
-        }
-        // add the toggle and the highlighters
+        // add the toggle and the highlighter
         behaviors = {
             ...behaviors,
             onClick: toggle,
             onMouseEnter: highlight,
-            onMouseLeave: reset,
         }
     }
     // if i'm selected
