@@ -70,6 +70,7 @@ const selector = state => ({
 const selectorPaint = {
     base: {
         box: {
+            cursor: "default",
             vertcalAlign: "center",
             paddingBottom: "0.25rem",
         },
