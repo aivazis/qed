@@ -55,15 +55,15 @@ const dark = {
 
     statusbar: {
         // overall styling
-        background: "hsl(0deg, 0%, 31%)",
+        background: "hsl(0deg, 0%, 17%)",
         separator: "hsl(0deg, 0%, 15%)",
     },
 
     // app metadata
     colophon: {
         // contents
-        copyright: "hsl(0deg, 0%, 40%)",
-        author: "hsl(0deg, 0%, 40%)",
+        copyright: "hsl(0deg, 0%, 23%)",
+        author: "hsl(0deg, 0%, 23%)",
     },
 
     // widgets
