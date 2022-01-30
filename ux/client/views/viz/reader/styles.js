@@ -130,7 +130,9 @@ const readerPaint = {
     enabled: {
         tray: {
             box: {},
-            header: {},
+            header: {
+                backgroundColor: "hsl(0deg, 0%, 12%)",
+            },
             title: {},
             items: {},
         },
@@ -147,7 +149,9 @@ const readerPaint = {
     selected: {
         tray: {
             box: {},
-            header: {},
+            header: {
+                backgroundColor: "hsl(0deg, 0%, 17%)",
+            },
             title: {
                 color: theme.page.name,
             },
