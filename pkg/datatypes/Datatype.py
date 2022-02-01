@@ -26,4 +26,15 @@ class Datatype(qed.flow.product, implements=qed.protocols.datatype):
     tile.doc = "the preferred shape of dataset subsets"
 
 
+    @property
+    def tag(self):
+        """
+        Generate my type tag
+        """
+        # use the class name as the tag; this is currently consistent with the {pyre.memory}
+        # bindings, so it can be interpolated into class names when requesting specific
+        # template instantiations
+        return self.__class__.__name__
+
+
 # end of file
