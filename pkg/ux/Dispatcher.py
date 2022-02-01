@@ -95,19 +95,6 @@ class Dispatcher:
         origin = tuple(map(int, match.group('data_origin').split("x")))
         shape = tuple(map(int, match.group('data_shape').split("x")))
 
-        # make a channel
-        chnl = journal.debug("qed.ux.dispatch.data")
-        # show me
-        chnl.line(f"    src: {src}")
-        chnl.line(f"   data: {data}")
-        chnl.line(f"channel: {channel}")
-        chnl.line(f"   zoom: {zoom}")
-        chnl.line(f"   tile: {tile}")
-        chnl.line(f" origin: {origin}")
-        chnl.line(f"  shape: {shape}")
-        # flush
-        chnl.log()
-
         # attempt to
         try:
             # process the request
