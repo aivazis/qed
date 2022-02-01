@@ -4,6 +4,8 @@
 # (c) 1998-2022 all rights reserved
 
 
+# externals
+import pyre
 # support
 import qed
 
@@ -71,9 +73,9 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
             buffer = bufferFactory(str(self.uri))
 
             # realize the shape
-            # shape = pyre.libpyre.grid.Shape2D(shape=self.shape)
+            shape = pyre.libpyre.grid.Shape2D(shape=self.shape)
             # build the packing
-            packing = pyre.libpyre.grid.Canonical2D(shape=self.shape)
+            packing = pyre.libpyre.grid.Canonical2D(shape=shape)
             # grab the grid factory
             gridFactory = getattr(pyre.libpyre.grid, f"{memoryType}Grid2D")
             # put it all together
