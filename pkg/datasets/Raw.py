@@ -16,11 +16,6 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
 
 
     # public data
-    # the payload; leave untyped for now
-    data = qed.properties.object()
-    data.default = None
-    data.doc = "the memory payload"
-
     # the source
     uri = qed.properties.path()
     uri.default = None
@@ -41,11 +36,21 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
 
     selector = qed.properties.kv()
     selector.default = {}
-    selector.doc = "a key/value map that identifies the dataset to a reader"
+    selector.doc = "a key/value map that identifies the dataset to its reader"
 
     tile = qed.properties.tuple(schema=qed.properties.int())
     tile.default = 512,512
     tile.doc = "the preferred shape of dataset subsets"
+
+
+    # public data
+    @property
+    def data(self):
+        """
+        Provide access to my data source
+        """
+        # delegate
+        return self.open()
 
 
     # interface
@@ -53,15 +58,32 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
         """
         Initialize my data source
         """
-        # if i'm already attached to a data source
-        if self.data is not None:
-            # do nothing
-            return
+        # get my data source
+        data = self._data
 
-        # otherwise
+        # if i'm not already attached to a data source
+        if data is None:
+            # build the name of the buffer factory
+            memoryType = f"{self.cell.tag}ConstMap"
+            # look up the factory in the {pyre::memory} bindings
+            bufferFactory = getattr(pyre.libpyre.memory, memoryType)
+            # make the memory buffer
+            buffer = bufferFactory(str(self.uri))
 
-        # all done
-        return
+            # realize the shape
+            # shape = pyre.libpyre.grid.Shape2D(shape=self.shape)
+            # build the packing
+            packing = pyre.libpyre.grid.Canonical2D(shape=self.shape)
+            # grab the grid factory
+            gridFactory = getattr(pyre.libpyre.grid, f"{memoryType}Grid2D")
+            # put it all together
+            grid = gridFactory(packing, buffer)
+
+            # attach it
+            self._data = grid
+
+        # return the data source
+        return data
 
 
     def close(self):
@@ -69,7 +91,17 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
         Shutdown my data source
         """
         # deallocate the data buffer
-        self.data = None
+        self._data = None
+        # all done
+        return
+
+
+    # metamethods
+    def __init__(self, **kwds):
+        # chain up
+        super().__init__(**kwds)
+        # make a placeholder for my data object
+        self._data = None
         # all done
         return
 
