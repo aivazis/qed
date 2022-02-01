@@ -36,7 +36,7 @@ class Datatype(Specification, family="qed.datatypes"):
     # choice is applied after {pyre_instantiate} realizes the {datatype}
     @classmethod
     def pyre_convert(cls, value, **kwds):
-        # if {value} is a tring
+        # if {value} is a string
         if isinstance(value, str):
             # check whether there is a byte order specifier
             if value[0] in cls.markers:
@@ -56,7 +56,7 @@ class Datatype(Specification, family="qed.datatypes"):
 
         # the byte order marker is at the beginning of the {spec}
         marker = spec[0]
-        # look it up and fall back to the default setting of the datatype
+        # look it up and, if not specified, fall back to the default setting from the datatype
         instance.byteswap = cls.byteorder.get(marker, instance.byteswap)
 
         # return
