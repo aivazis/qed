@@ -19,6 +19,8 @@
         "babel-plugin-relay": "latest",
         "html-webpack-plugin": "latest",
         "relay-compiler": "latest",
+        "ts-loader": "latest",
+        "typescript": "latest",
         "webpack": "latest",
         "webpack-cli": "latest"
     },

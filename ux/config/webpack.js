@@ -34,7 +34,12 @@ module.exports = {
             {   // jsx
                 test: /\.jsx?$/,
                 loader: 'babel-loader',
-                include: [ sourceDir ],
+                include: [sourceDir],
+            },
+            {   // ts
+                test: /\.tsx?$/,
+                loader: 'ts-loader',
+                include: [sourceDir],
             }
         ]
     },
@@ -42,7 +47,7 @@ module.exports = {
     // locations of files
     resolve: {
         modules: [sourceDir, "node_modules"],
-        extensions: ['.js', '.jsx'],
+        extensions: ['.js', '.jsx', '.ts'],
         alias: {
             '~': sourceDir,
         },
