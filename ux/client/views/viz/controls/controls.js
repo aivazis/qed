@@ -12,6 +12,8 @@ import React from 'react'
 import { Header } from '~/widgets'
 
 // locals
+// components
+import { Zoom } from '../zoom'
 // styles
 import styles from './styles'
 
@@ -23,6 +25,8 @@ export const Controls = () => {
         <>
             {/* the title of the panel */}
             <Header title="controls" style={styles.header} />
+            {/* the controls common to all datasets */}
+            <Zoom />
         </>
     )
 }
