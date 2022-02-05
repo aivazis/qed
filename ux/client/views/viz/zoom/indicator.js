@@ -18,6 +18,8 @@ export const Indicator = ({ width, height }) => {
     // my path
     const path = `M 0 0 l -${width / 2} -${height} l ${width} 0 z`
 
+    // deduce my state
+    const state = "enabled"
     // extra paint for the highlighter
     const [polish, setPolish] = React.useState(false)
 
@@ -28,7 +30,7 @@ export const Indicator = ({ width, height }) => {
     }
 
     // mix my paint
-    const paint = styles.controller.indicator(polish)
+    const paint = styles.indicator({ state, polish })
 
     // render
     return (
