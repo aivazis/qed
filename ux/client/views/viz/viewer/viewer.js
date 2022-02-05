@@ -83,9 +83,6 @@ export const Viewer = ({ viewport, view, registrar }) => {
             <Viewport viewport={viewport} view={view} uri={base} registrar={registrar} />
         </>
     )
-
-    // nothing yet
-    return null
 }
 
 
