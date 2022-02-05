@@ -53,8 +53,10 @@ const zoom = state => ({
 // styling for the controller
 // colors for the parts
 const ink = "hsl(0deg, 0%, 60%)"
-const detail = "hsl(0deg, 0%, 50%)"
 const paint = "hsl(0deg, 0%, 20%)"
+const detail = "hsl(0deg, 0%, 50%)"
+
+const highlight = theme.page.name
 
 
 const controller = {
@@ -75,20 +77,27 @@ const controller = {
         strokeWidth: 5,
     },
 
-    indicator: {
-        fill: paint,
-        stroke: ink,
+    indicator: (polish) => ({
+        cursor: "pointer",
+        fill: polish ? highlight : paint,
+        stroke: polish ? highlight : ink,
         strokeWidth: 3,
-    },
+    }),
 
     label: {
         fontFamily: "inconsolata",
-        fontSize: "65px",
+        fontSize: "75px",
         textAnchor: "middle",
         fill: ink,
         stroke: "none",
     },
 }
+
+
+const indicator = (state, polish) => {
+
+}
+
 
 // publish
 export default {
@@ -156,6 +165,16 @@ const zoomPaint = {
             value: {},
         },
     },
+}
+
+
+// for the indicator
+const indicatorPaint = {
+    base: {},
+    enabled: {},
+    disabled: {},
+    selected: {},
+    available: {},
 }
 
 

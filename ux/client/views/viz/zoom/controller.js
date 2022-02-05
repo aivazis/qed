@@ -8,34 +8,44 @@
 import React from "react"
 
 // locals
+// components
+import { Indicator } from "./indicator"
+import { Legend } from "./legend"
 // styles
 import styles from './styles'
 
 
 // the zoom controller
 export const Controller = () => {
+    // the zoom level
+    const zoom = 0
 
-    // mix my paint
-    const paint = styles.controller
+    // pick a number of ticks
+    const ticks = 5
 
-    const indicator = <path d="M 0 0 l -30 -50 l 60 0 z" style={paint.indicator} />
+    // set up a scale
+    const width = 1000
+    const height = width / 2
+
+    // set a margin
+    const margin = width / 10
+    // figure out the spacing among tick marks
+    const spacing = (width - 2 * margin) / (ticks - 1)
+
+    // the indicator {x} coordinate is tied to the {zoom} level
+    const x = margin + zoom * spacing
+    // the indicator {y} coordinate is fixed
+    const y = height / 2 - height / 8
 
     // render
     return (
         <>
-            <path d="M 100 225 l 0 50" style={paint.tick} />
-            <path d="M 300 225 l 0 50" style={paint.tick} />
-            <path d="M 500 225 l 0 50" style={paint.tick} />
-            <path d="M 700 225 l 0 50" style={paint.tick} />
-            <path d="M 900 225 l 0 50" style={paint.tick} />
-            <path d="M 0 250 L 1000 250" style={paint.axis} />
-            <text x="100" y="350" style={paint.label}>0</text>
-            <text x="300" y="350" style={paint.label}>1</text>
-            <text x="500" y="350" style={paint.label}>2</text>
-            <text x="700" y="350" style={paint.label}>3</text>
-            <text x="900" y="350" style={paint.label}>4</text>
-            <g transform="translate(500 185)">
-                {indicator}
+            {/* the static background */}
+            <Legend ticks={ticks}
+                width={width} height={height} margin={margin} spacing={spacing} />
+            {/* the movable value indicator */}
+            <g transform={`translate(${x} ${y})`}>
+                <Indicator width={75} height={60} />
             </g>
         </>
     )
