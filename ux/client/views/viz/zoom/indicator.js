@@ -13,13 +13,11 @@ import styles from './styles'
 
 
 // the zoom controller
-export const Indicator = ({ width, height }) => {
+export const Indicator = ({ state, width, height }) => {
 
     // my path
     const path = `M 0 0 l -${width / 2} -${height} l ${width} 0 z`
 
-    // deduce my state
-    const state = "enabled"
     // extra paint for the highlighter
     const [polish, setPolish] = React.useState(false)
 
