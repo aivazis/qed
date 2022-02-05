@@ -111,6 +111,24 @@ const zoomPaint = {
     base: {
         tray: {
             box: {},
+            header: {
+                backgroundColor: "hsl(0deg, 0%, 12%)",
+            },
+            title: {},
+            items: {},
+        },
+        meta: {
+            box: {},
+            entry: {},
+            attribute: {},
+            separator: {},
+            value: {},
+        },
+    },
+
+    disabled: {
+        tray: {
+            box: {},
             header: {},
             title: {},
             items: {},
@@ -128,9 +146,7 @@ const zoomPaint = {
     enabled: {
         tray: {
             box: {},
-            header: {
-                backgroundColor: "hsl(0deg, 0%, 12%)",
-            },
+            header: {},
             title: {},
             items: {},
         },
