@@ -49,8 +49,50 @@ const zoom = state => ({
     }
 })
 
+
+// styling for the controller
+// colors for the parts
+const ink = "hsl(0deg, 0%, 60%)"
+const detail = "hsl(0deg, 0%, 50%)"
+const paint = "hsl(0deg, 0%, 20%)"
+
+
+const controller = {
+    box: {
+        margin: "1.0rem auto",
+        border: "1px solid hsl(0deg, 0%, 15%)",
+    },
+
+    axis: {
+        fill: "none",
+        stroke: ink,
+        strokeWidth: 7,
+    },
+
+    tick: {
+        fill: "none",
+        stroke: detail,
+        strokeWidth: 5,
+    },
+
+    indicator: {
+        fill: paint,
+        stroke: ink,
+        strokeWidth: 3,
+    },
+
+    label: {
+        fontFamily: "inconsolata",
+        fontSize: "65px",
+        textAnchor: "middle",
+        fill: ink,
+        stroke: "none",
+    },
+}
+
 // publish
 export default {
+    controller,
     zoom,
 }
 
