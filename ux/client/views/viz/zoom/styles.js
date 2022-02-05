@@ -202,7 +202,6 @@ const labelPaint = {
         fontFamily: "inconsolata",
         fontSize: "75px",
         textAnchor: "middle",
-        cursor: "pointer",
         stroke: "none",
     },
 
@@ -212,10 +211,12 @@ const labelPaint = {
     },
 
     enabled: {
+        cursor: "pointer",
         fill: ink,
     },
 
     selected: {
+        cursor: "default",
         fill: highlight,
     },
 
