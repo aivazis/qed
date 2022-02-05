@@ -22,9 +22,19 @@ export const Indicator = ({ state, width, height }) => {
     const [polish, setPolish] = React.useState(false)
 
     // my controllers
-    const behaviors = {
-        onMouseEnter: () => setPolish(true),
+    let behaviors = {
+        // always remove the highlight
         onMouseLeave: () => setPolish(false),
+    }
+
+    // if i'm enabled
+    if (state === "enabled") {
+        // add the highlighter to my behaviors
+        behaviors = {
+            ...behaviors,
+            // when the mouse enters my area
+            onMouseEnter: () => setPolish(true),
+        }
     }
 
     // mix my paint
