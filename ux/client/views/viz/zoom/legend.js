@@ -8,13 +8,14 @@
 import React from "react"
 
 // locals
+import { Label } from "./label"
 // styles
 import styles from './styles'
 
 
 // the legend of the zoom controller
 // by default, it is drawn in a (1000, 500) box
-export const Legend = ({ ticks, width, height, margin, spacing }) => {
+export const Legend = ({ state, zoom, ticks, width, height, margin, spacing }) => {
     // the height of the tick marks
     const dy = height / 10
 
@@ -33,10 +34,10 @@ export const Legend = ({ ticks, width, height, margin, spacing }) => {
         <>
             {xTicks.map((x, value) => (
                 <g key={value}>
+                    {/* the tick mark */}
                     <path d={`M ${x} ${yTicks} l 0 ${dy}`} style={paint.tick} />
-                    <text x={`${x}`} y={`${yLabels}`} style={paint.label}>
-                        {value}
-                    </text>
+                    {/* the label */}
+                    <Label state={state} zoom={zoom} value={value} x={x} y={yLabels} />
                 </g>
             ))}
             <path key="axis" d={`M 0 ${height / 2} l ${width} 0`} style={paint.axis} />

@@ -76,18 +76,10 @@ const controller = {
         stroke: detail,
         strokeWidth: 5,
     },
-
-    label: {
-        fontFamily: "inconsolata",
-        fontSize: "75px",
-        cursor: "pointer",
-        textAnchor: "middle",
-        fill: ink,
-        stroke: "none",
-    },
 }
 
 
+// styling for the indicator
 const indicator = ({ state, polish }) => ({
     ...indicatorPaint.base,
     ...indicatorPaint[state],
@@ -95,10 +87,19 @@ const indicator = ({ state, polish }) => ({
 })
 
 
+// styling for the label
+const label = ({ state, polish }) => ({
+    ...labelPaint.base,
+    ...labelPaint[state],
+    ...(polish ? labelPaint["available"] : null)
+})
+
+
 // publish
 export default {
     controller,
     indicator,
+    label,
     zoom,
 }
 
@@ -174,8 +175,8 @@ const indicatorPaint = {
 
     disabled: {
         cursor: "default",
-        fill: "hsl(0deg, 0%, 20%)",
-        stroke: "hsl(0deg, 0%, 20%)",
+        fill: paint,
+        stroke: paint,
     },
 
     enabled: {
@@ -191,6 +192,35 @@ const indicatorPaint = {
     available: {
         fill: highlight,
         stroke: highlight,
+    },
+}
+
+
+// for the indicator
+const labelPaint = {
+    base: {
+        fontFamily: "inconsolata",
+        fontSize: "75px",
+        textAnchor: "middle",
+        cursor: "pointer",
+        stroke: "none",
+    },
+
+    disabled: {
+        cursor: "default",
+        fill: paint,
+    },
+
+    enabled: {
+        fill: ink,
+    },
+
+    selected: {
+        fill: highlight,
+    },
+
+    available: {
+        fill: highlight,
     },
 }
 
