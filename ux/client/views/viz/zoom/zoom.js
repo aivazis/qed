@@ -36,7 +36,7 @@ export const Zoom = () => {
             <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
                 width={width} height={height} style={controllerPaint.box}>
                 <g transform={place}>
-                    <Controller />
+                    <Controller state={state} />
                 </g>
             </svg>
         </Tray>

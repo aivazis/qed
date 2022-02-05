@@ -16,9 +16,9 @@ import styles from './styles'
 
 
 // the zoom controller
-export const Controller = () => {
+export const Controller = ({ state }) => {
     // the zoom level
-    const zoom = 0
+    const zoom = 3
 
     // pick a number of ticks
     const ticks = 5
@@ -41,11 +41,11 @@ export const Controller = () => {
     return (
         <>
             {/* the static background */}
-            <Legend ticks={ticks}
+            <Legend state={state} zoom={zoom} ticks={ticks}
                 width={width} height={height} margin={margin} spacing={spacing} />
             {/* the movable value indicator */}
             <g transform={`translate(${x} ${y})`}>
-                <Indicator width={75} height={60} />
+                <Indicator state={state} width={75} height={60} />
             </g>
         </>
     )
