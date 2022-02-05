@@ -12,6 +12,8 @@ import React from 'react'
 import { Tray } from '~/widgets'
 
 // locals
+// hooks
+import { useGetView } from '../viz/useGetView'
 // components
 import { Controller } from './controller'
 // styles
@@ -20,16 +22,26 @@ import styles from './styles'
 
 // display the zoom control
 export const Zoom = () => {
+    // get the active view and unpack it
+    const { reader, dataset, channel } = useGetView()
+
+    // check the view components and initialize my state
+    const state = (!reader || !dataset || !channel) ? "disabled" : "enabled"
+
+    // set a length scale
     const width = 200
-    const height = 100
+    // use it to derive the height of the control
+    const height = width / 2
+    // the control draws itself in a logical box of width {1000}
     const scale = width / 1000
+    // build the transform that sizes and positions te control
     const place = `scale(${scale}) translate(0 0)`
 
-    // set up my state
-    const state = "enabled"
+
     // mix my paint
     const zoomPaint = styles.zoom(state)
     const controllerPaint = styles.controller
+
     // and render
     return (
         <Tray title="zoom" initially={true} style={zoomPaint.tray}>
