@@ -22,6 +22,7 @@ import styles from './styles'
 
 // display the zoom control
 export const Zoom = () => {
+    console.log(`zoom`)
     // get the active view and unpack it
     const { reader, dataset, channel } = useGetView()
 
@@ -36,7 +37,6 @@ export const Zoom = () => {
     const scale = width / 1000
     // build the transform that sizes and positions te control
     const place = `scale(${scale}) translate(0 0)`
-
 
     // mix my paint
     const zoomPaint = styles.zoom(state)
