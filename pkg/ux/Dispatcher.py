@@ -72,7 +72,8 @@ class Dispatcher:
         # use the spec to build a name for my panel
         name = f"{plexus.pyre_name}.{spec}"
         # make an instance of the application engine
-        self.panel = qed.ux.panel(name=name, spec=spec, plexus=plexus, globalAliases=True)
+        self.panel = qed.ux.panel(name=name, spec=spec, plexus=plexus, docroot=docroot,
+            globalAliases=True)
 
         # instantiate the {GraphQL} handler
         self.gql = GraphQL(panel=self.panel)
@@ -129,7 +130,7 @@ class Dispatcher:
         # if all went well, we have a {tile} in memory; attempt to
         try:
             # dress it up and return it
-            return server.documents.BMP(server, bmp=memoryview(tile))
+            return server.documents.BMP(server=server, bmp=memoryview(tile))
         # if anything goes wrong
         except Exception as error:
             # we have a problem
