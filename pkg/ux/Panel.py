@@ -22,23 +22,33 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         """
         Generate a BMP encoded tile from the supplied specification
         """
-        # resolve the reader uuid
-        reader = self.readers[src]
-        # and the dataset
-        dataset = self.datasets[data]
+        # encode the tile
+        tile = "x".join(map(str, origin)) + "+" + "x".join(map(str, shape))
+        # make a channel
+        chnl = journal.debug("qed.ux.panel")
+        chnl.log(f"{data} {channel} {zoom} {tile}")
 
+        # look up the dataset
+        dataset = self.datasets[data]
+        # get the data source
+        source = dataset.data
+
+        return
+        # get the channel selector
+        # pick = xxx.channel(source=source, channel=channel)
         # make the bitmap
-        bmp = None
-        # and return it
-        return bmp
+        # bmp = xxx.viz(pick=pick, shape=shape)
+
+        # and return the bitmap
+        # return self.sample
 
 
     # metamethods
-    def __init__(self, plexus, **kwds):
+    def __init__(self, plexus, docroot, **kwds):
         # chain up
         super().__init__(plexus=plexus, **kwds)
 
-        # make a registry of datasources
+        # make a registry of data sources
         readers = {str(src.pyre_id): src for src in plexus.datasets}
         # and one of datasets
         datasets = {str(data.pyre_id): data for src in readers.values() for data in src.datasets}
@@ -62,6 +72,9 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
 
         # initialize the registry of visualization workflows
         self.vizflows =  {}
+
+        # MGA: set up a sample tile to send while debugging
+        # self.sample = docroot["graphics/tile.bmp"].open(mode="rb").read()
 
         # all done
         return
