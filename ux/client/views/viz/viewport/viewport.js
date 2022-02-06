@@ -14,23 +14,14 @@ import { Mosaic } from '~/widgets'
 // locals
 // hooks
 import { useViewports } from '../viz/useViewports'
-import { usePanViewportCamera } from './usePanViewportCamera'
-import { useGetViewportCameraZoom } from './useGetViewportCameraZoom'
-import { useGetViewportCameraPostion } from './useGetViewportCameraPosition'
 // styles
 import styles from './styles'
 
 
 // export the data viewport
-const Panel = ({ viewport, view, uri, registrar, ...rest }) => {
+export const Viewport = ({ viewport, view, uri, registrar, zoom = 1, ...rest }) => {
     // get the pile of registered {viewports}; i'm at {viewport}
     const viewports = useViewports()
-    // get the viewport camera position
-    const camera = useGetViewportCameraPostion()
-    // get the current zoom level
-    const zoom = useGetViewportCameraZoom()
-    // and its panning controller
-    const panViewportCamera = usePanViewportCamera()
 
     // get my view info
     const { dataset } = view
@@ -43,18 +34,6 @@ const Panel = ({ viewport, view, uri, registrar, ...rest }) => {
     // and fold my zoom level into the data request uri
     const withZoom = [uri, zoom].join("/")
 
-    // build my scroll handler
-    const scroll = evt => {
-        // get the scrolling element
-        const element = evt.target
-        // get the scroll coordinates
-        const y = Math.max(element.scrollTop, 0)
-        const x = Math.max(element.scrollLeft, 0)
-        // update the viewport camera
-        panViewportCamera({ x, y })
-        // done
-        return
-    }
     // center the viewport at the cursor position
     const center = ({ clientX, clientY }) => {
         // get my placemat
@@ -79,18 +58,12 @@ const Panel = ({ viewport, view, uri, registrar, ...rest }) => {
         // and scroll to the new location
         placemat.scroll({ left: newX, top: newY, behavior: "smooth" })
 
-        // get the current camera position and shift it
-        const newAt = { ...camera.current, x: newX, y: newY }
-        // and update
-        panViewportCamera(newAt)
-
         // all done
         return
     }
+
     // assemble my controllers
     const controllers = {
-        // panning the viewport camera
-        onScroll: scroll,
         // centering at a given location
         onDoubleClick: center,
     }
@@ -107,16 +80,6 @@ const Panel = ({ viewport, view, uri, registrar, ...rest }) => {
         </div>
     )
 }
-
-
-// context
-import { Provider } from './context'
-// turn the panel into a context provider and publish
-export const Viewport = props => (
-    <Provider>
-        <Panel {...props} />
-    </Provider>
-)
 
 
 // end of file
