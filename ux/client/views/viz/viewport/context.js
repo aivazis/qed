@@ -7,6 +7,7 @@
 // externals
 import React from 'react'
 
+
 // the provider factory
 export const Provider = ({
     // children
@@ -16,7 +17,7 @@ export const Provider = ({
     // N.B.: the separation of {zoom} in a state variable vs {position} in a ref is a performance
     //       enhancement; modifying {position} does not cause the {viewport} to re-render, but
     //       modifying {zoom} must; i have to remember to update the {z} component of {position}
-    //       whenever {zoon} is updated
+    //       whenever {zoom} is updated
     const [zoom, setZoom] = React.useState(1)
     const position = React.useRef({ x: 0, y: 0, z: zoom })
 
