@@ -19,7 +19,7 @@ import styles from './styles'
 
 
 // export the data viewport
-export const Viewport = ({ viewport, view, uri, registrar, zoom = 1, ...rest }) => {
+export const Viewport = ({ viewport, view, uri, registrar, zoom = 0, ...rest }) => {
     // get the pile of registered {viewports}; i'm at {viewport}
     const viewports = useViewports()
 
@@ -28,9 +28,12 @@ export const Viewport = ({ viewport, view, uri, registrar, zoom = 1, ...rest }) 
     // and unpack what i need
     const { shape, origin, tile } = dataset
 
+    // convert the zoom level into a scale
+    const scale = 2 ** zoom
+
     // compute the dimensions of the mosaic
-    const width = Math.trunc(shape[1] / zoom)
-    const height = Math.trunc(shape[0] / zoom)
+    const width = Math.trunc(shape[1] / scale)
+    const height = Math.trunc(shape[0] / scale)
     // and fold my zoom level into the data request uri
     const withZoom = [uri, zoom].join("/")
 
