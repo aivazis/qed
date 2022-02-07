@@ -19,8 +19,6 @@ export const Provider = ({ children }) => {
     // attach them as read-only state
     const [readers] = React.useState(sources)
 
-    // the shared camera is a ref so that its updates don't force render
-    const camera = React.useRef({ x: 0, y: 0, z: 1 })
     // initialize the set viewports; this is where the refs of the mosaic placemats live
     // which are needed for the implementation of the shared camera
     const viewports = React.useRef([])
@@ -40,8 +38,6 @@ export const Provider = ({ children }) => {
     const context = {
         // the data sources
         readers,
-        // the shared camera
-        camera,
         // the set of active viewports (actually, the {mosaic} placemats)
         viewports, viewportRegistrar,
         // the known views
@@ -67,8 +63,6 @@ export const Context = React.createContext(
     {
         // the set of known data sources
         readers: [],
-        // the shared camera,
-        camera: null,
         // the set of active viewports (actually, the {mosaic} placemats)
         viewports: null,
         // the registrar

@@ -11,7 +11,6 @@ import React from 'react'
 // hooks
 import { useSynced } from './useSynced'
 import { useViewports } from './useViewports'
-import { usePanSharedCamera } from './usePanSharedCamera'
 
 
 // get the viewport position
@@ -20,8 +19,6 @@ export const useMakePanDispatcher = () => {
     const synced = useSynced()
     // the pile of viewports
     const viewports = useViewports()
-    // and the shared camera controller
-    const panSharedCamera = usePanSharedCamera()
 
     // make a handler that pans the shared camera and scrolls the synced viewports
     const pan = (evt, idx) => {
@@ -42,8 +39,6 @@ export const useMakePanDispatcher = () => {
         // get the scroll coordinates
         const y = Math.max(element.scrollTop, 0)
         const x = Math.max(element.scrollLeft, 0)
-        // update the shared camera
-        panSharedCamera({ x, y })
         // go through the viewports
         viewports.forEach((port, i) => {
             // if i bumped into myself or a viewport that isn't synced
