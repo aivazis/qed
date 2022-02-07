@@ -9,7 +9,7 @@ import React from "react"
 
 // locals
 // hooks
-import { useZoom } from "../viz/uzeZoom"
+import { useGetZoomLevel } from "../viz/useGetZoomLevel"
 // components
 import { Indicator } from "./indicator"
 import { Legend } from "./legend"
@@ -19,10 +19,8 @@ import styles from './styles'
 
 // the zoom controller
 export const Controller = ({ state }) => {
-    // the zoom levels
-    const { activeViewport, zoom: zoomLevels, setZoom } = useZoom()
     // the zoom level of the active viewport
-    const zoom = zoomLevels[activeViewport]
+    const zoom = useGetZoomLevel()
 
     // pick a number of ticks
     const ticks = 5
