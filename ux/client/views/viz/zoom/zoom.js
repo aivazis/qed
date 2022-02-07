@@ -22,7 +22,6 @@ import styles from './styles'
 
 // display the zoom control
 export const Zoom = () => {
-    console.log(`zoom`)
     // get the active view and unpack it
     const { reader, dataset, channel } = useGetView()
 
