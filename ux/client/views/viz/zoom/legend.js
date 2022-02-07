@@ -15,7 +15,7 @@ import styles from './styles'
 
 // the legend of the zoom controller
 // by default, it is drawn in a (1000, 500) box
-export const Legend = ({ state, zoom, ticks, width, height, margin, spacing }) => {
+export const Legend = ({ state, ticks, width, height, margin, spacing }) => {
     // the height of the tick marks
     const dy = height / 10
 
@@ -37,7 +37,7 @@ export const Legend = ({ state, zoom, ticks, width, height, margin, spacing }) =
                     {/* the tick mark */}
                     <path d={`M ${x} ${yTicks} l 0 ${dy}`} style={paint.tick} />
                     {/* the label */}
-                    <Label state={state} zoom={zoom} value={value} x={x} y={yLabels} />
+                    <Label state={state} value={value} x={x} y={yLabels} />
                 </g>
             ))}
             <path key="axis" d={`M 0 ${height / 2} l ${width} 0`} style={paint.axis} />

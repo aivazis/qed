@@ -8,6 +8,8 @@
 import React from "react"
 
 // locals
+// hooks
+import { useZoom } from "../viz/uzeZoom"
 // components
 import { Indicator } from "./indicator"
 import { Legend } from "./legend"
@@ -17,8 +19,10 @@ import styles from './styles'
 
 // the zoom controller
 export const Controller = ({ state }) => {
-    // the zoom level
-    const zoom = 3
+    // the zoom levels
+    const { activeViewport, zoom: zoomLevels, setZoom } = useZoom()
+    // the zoom level of the active viewport
+    const zoom = zoomLevels[activeViewport]
 
     // pick a number of ticks
     const ticks = 5
@@ -41,7 +45,7 @@ export const Controller = ({ state }) => {
     return (
         <>
             {/* the static background */}
-            <Legend state={state} zoom={zoom} ticks={ticks}
+            <Legend state={state} ticks={ticks}
                 width={width} height={height} margin={margin} spacing={spacing} />
             {/* the movable value indicator */}
             <g transform={`translate(${x} ${y})`}>

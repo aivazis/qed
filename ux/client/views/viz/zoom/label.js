@@ -8,13 +8,20 @@
 import React from "react"
 
 // locals
+// hooks
+import { useZoom } from "../viz/uzeZoom"
 // styles
 import styles from './styles'
 
 
 // the legend of the zoom controller
 // by default, it is drawn in a (1000, 500) box
-export const Label = ({ state, zoom, value, x, y }) => {
+export const Label = ({ state, value, x, y }) => {
+    // get the zoom levels
+    const { activeViewport, zoom: zoomLevels, setZoom } = useZoom()
+    // look up the zoom level of the active viewport
+    const zoom = zoomLevels[activeViewport]
+
     // extra paint for the highlighter
     const [polish, setPolish] = React.useState(false)
 
