@@ -19,7 +19,8 @@ const viewport = ({ width, height }) => ({
         minWidth: "300px",
         minHeight: "300px",
         margin: "0.25rem 0.5rem 0.5rem 0.5rem",
-        border: "1px solid hsl(28deg, 30%, 15%)",
+        border: "1px solid hsl(28deg, 30%, 25%)",
+        backgroundColor: "hsl(28deg, 30%, 10%)",
     },
 
     // the tile container
