@@ -31,8 +31,10 @@ export const Provider = ({ children }) => {
     const [views, setViews] = React.useState([emptyView()])
     // the active view is an index into the set of {views}
     const [activeViewport, setActiveViewport] = React.useState(0)
-    // a table with the sync status of the known views
+    // a table with the sync status of the current viewports
     const [synced, setSynced] = React.useState([syncedDefault])
+    // a table with the zoom levels of the current viewports
+    const [zoom, setZoom] = React.useState([zoomDefault])
 
     // build the initial context value
     const context = {
@@ -46,6 +48,8 @@ export const Provider = ({ children }) => {
         activeViewport, setActiveViewport,
         // synced views
         synced, setSynced,
+        // zoom levels
+        zoom, setZoom,
     }
 
     // provide for my children
@@ -77,15 +81,19 @@ export const Context = React.createContext(
         // indicators of whether views are synced to the shared camera
         synced: null,
         setSynced: () => { throw new Error(complaint) },
+        // the zoom levels of the viewports
+        zoom: null,
+        setZoom: () => { throw new Error(complaint) },
     }
 )
 
 
 // the empty view template
 export const emptyView = () => ({ reader: null, dataset: null, channel: null })
-
 // the default synced state
 export const syncedDefault = false
+// the default zoom level
+export const zoomDefault = 0
 
 // the error message to show consumers that are not nested within a provider
 const complaint = "while accessing the 'viz' context: no provider"
