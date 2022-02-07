@@ -15,7 +15,7 @@ import { Context } from './context'
 // access to the registered views
 export const useSplitView = view => {
     // grab the list of {views} from context
-    const { setViews, setSynced, setActiveViewport } = React.useContext(Context)
+    const { setViews, setSynced, setZoom, setActiveViewport } = React.useContext(Context)
     // make a handler that adds a new blank view after a given on
     const splitView = () => {
         // add a new view to the pile
@@ -34,6 +34,15 @@ export const useSplitView = view => {
             // add the new viewport at {idx} with a default state
             table.splice(view + 1, 0, false)
             // return the new table
+            return table
+        })
+        // initialize its zoom level
+        setZoom(old => {
+            // make a copy of the old table
+            const table = [...old]
+            // add the new viewport at the same zoom level as the current one
+            table.splice(view + 1, 0, old[view])
+            // all done
             return table
         })
         // activate the new view

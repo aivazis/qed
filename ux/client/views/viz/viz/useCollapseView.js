@@ -9,13 +9,13 @@ import React from 'react'
 
 // local
 // context
-import { Context, emptyView, syncedDefault } from './context'
+import { Context, emptyView, syncedDefault, zoomDefault } from './context'
 
 
 // access to the registered views
 export const useCollapseView = view => {
     // grab the list of {views} from context
-    const { setViews, setSynced, setActiveViewport } = React.useContext(Context)
+    const { setViews, setSynced, setZoom, setActiveViewport } = React.useContext(Context)
     // make a handler that adds a new blank view after a given on
     const collapseView = () => {
         // adjust the view
@@ -44,6 +44,20 @@ export const useCollapseView = view => {
                 return [syncedDefault]
             }
             // return the new table
+            return table
+        })
+        // remove its zoom level from the table
+        setZoom(old => {
+            // make a copy of the old table
+            const table = [...old]
+            // remove the zoom level of the current view
+            table.splice(view, 1)
+            // if i'm left with an empty pile
+            if (table.length === 0) {
+                // reinitialize
+                return [zoomDefault]
+            }
+            // otherwise, return the new table
             return table
         })
         // activate the previous view
