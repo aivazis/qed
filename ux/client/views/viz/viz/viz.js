@@ -48,7 +48,7 @@ const Panel = () => {
     // the set of known views
     const { views } = useViews()
     // their current zoom levels
-    const zoomLevels = useZoom()
+    const { zoom: zoomLevels } = useZoom()
     // initialize my pile of viewports and get the ref registrar
     // viewport initialization happens on every render, but so does viewport registration
     const { viewportRegistrar } = useInitializeViewports()

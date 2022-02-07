@@ -15,9 +15,9 @@ import { Context } from './context'
 // access to the viewport sync registry
 export const useZoom = () => {
     // grab the sync table
-    const { zoom } = React.useContext(Context)
+    const { activeViewport, zoom, setZoom } = React.useContext(Context)
     // and return it
-    return zoom
+    return { activeViewport, zoom, setZoom }
 }
 
 
