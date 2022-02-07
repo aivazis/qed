@@ -77,8 +77,8 @@ const Panel = () => {
                     onClick: activate(viewport),
                     onScrollCapture: dispatch(viewport),
                 }
-                // the handler for activating the view is attached to the flex panel because
-                // {viewer} is not a real container, just a react fragment
+                // the view behaviors are attached to the flex panel because the {viewer} is not
+                // a real container, just a react fragment
                 return (
                     <Flex.Panel key={`panel:${viewport}`}
                         auto={true}
