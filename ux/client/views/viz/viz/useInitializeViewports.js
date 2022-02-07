@@ -15,15 +15,13 @@ import { Context } from './context'
 // storage for the refs to the {mosaic} placemats that frame the visible part of the data
 export const useInitializeViewports = () => {
     // grab the list of {views} and the array of refs from my context
-    const { views, viewports } = React.useContext(Context)
+    const { views, viewports, viewportRegistrar } = React.useContext(Context)
 
     // initialize the array
     viewports.current = new Array(views.length).fill(null)
-    // build the ref registrar
-    const registrar = idx => ref => viewports.current[idx] = ref
 
     // and return them
-    return { viewports: viewports.current, registrar }
+    return { viewports: viewports.current, viewportRegistrar }
 }
 
 

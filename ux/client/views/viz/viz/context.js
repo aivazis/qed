@@ -21,8 +21,13 @@ export const Provider = ({ children }) => {
 
     // the shared camera is a ref so that its updates don't force render
     const camera = React.useRef({ x: 0, y: 0, z: 1 })
-    // initialized the set viewports
+    // initialize the set viewports; this is where the refs of the mosaic placemats live
+    // which are needed for the implementation of the shared camera
     const viewports = React.useRef([])
+    // the ref registrar gets called by react when the placemat ref is created; ours just update
+    // the corresponding entry in the array of {viewports}; each panel gets its own registrar
+    // that knows its positioning in the flex container
+    const viewportRegistrar = idx => ref => viewports.current[idx] = ref
 
     // the set of known views; it starts out with one empty view
     const [views, setViews] = React.useState([emptyView()])
@@ -38,7 +43,7 @@ export const Provider = ({ children }) => {
         // the shared camera
         camera,
         // the set of active viewports (actually, the {mosaic} placemats)
-        viewports,
+        viewports, viewportRegistrar,
         // the known views
         views, setViews,
         // the active view
@@ -66,6 +71,8 @@ export const Context = React.createContext(
         camera: null,
         // the set of active viewports (actually, the {mosaic} placemats)
         viewports: null,
+        // the registrar
+        viewportRegistrar: () => { throw new Error(complaint) },
 
         // the known views
         views: null,

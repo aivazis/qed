@@ -47,7 +47,8 @@ const Panel = () => {
     // the set of known views
     const { views } = useViews()
     // initialize my pile of viewports and get the ref registrar
-    const { registrar } = useInitializeViewports()
+    // viewport initialization happens on every render, but so does viewport registration
+    const { viewportRegistrar } = useInitializeViewports()
     // build the scroll handler dispatch for my viewports
     const dispatch = useMakePanDispatcher()
     // get the view activator
@@ -70,7 +71,7 @@ const Panel = () => {
             {/* a panel for each registered view */}
             {views.map((view, viewport) => {
                 // make a registrar for this {viewport}
-                const regview = registrar(viewport)
+                const registrar = viewportRegistrar(viewport)
                 // assemble the behaviors
                 const behaviors = {
                     onClick: activate(viewport),
@@ -83,7 +84,7 @@ const Panel = () => {
                         auto={true}
                         style={styles.flex} {...behaviors}
                     >
-                        <Viewer viewport={viewport} view={view} registrar={regview} />
+                        <Viewer viewport={viewport} view={view} registrar={registrar} />
                     </Flex.Panel >
                 )
             })}
