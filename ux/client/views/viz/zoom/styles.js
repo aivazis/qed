@@ -62,7 +62,7 @@ const highlight = theme.page.name
 const controller = {
     box: {
         margin: "1.0rem auto",
-        // border: "1px solid hsl(0deg, 0%, 15%)",
+        backgroundColor: "hsl(0deg, 0%, 10%)",
     },
 
     axis: {
