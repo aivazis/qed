@@ -54,32 +54,36 @@ const zoom = state => ({
 // colors for the parts
 const ink = "hsl(0deg, 0%, 60%)"
 const paint = "hsl(0deg, 0%, 20%)"
-const detail = "hsl(0deg, 0%, 50%)"
-
+const detail = "hsl(0deg, 0%, 40%)"
 const highlight = theme.page.name
 
 
+// the svg box that houses the control
 const controller = {
-    box: {
-        margin: "1.0rem auto",
-        backgroundColor: "hsl(0deg, 0%, 10%)",
-    },
-
-    axis: {
-        fill: "none",
-        stroke: ink,
-        strokeWidth: 7,
-    },
-
-    tick: {
-        fill: "none",
-        stroke: detail,
-        strokeWidth: 5,
-    },
+    margin: "1.0rem auto",
+    backgroundColor: "hsl(0deg, 0%, 10%)",
 }
 
 
-// styling for the indicator
+// the axis
+const axis = {
+    fill: "none",
+    stroke: ink,
+    strokeWidth: 1,
+    vectorEffect: "non-scaling-stroke",
+}
+
+
+// tick marks
+const majorTickmark = {
+    fill: "none",
+    stroke: detail,
+    strokeWidth: 1,
+    vectorEffect: "non-scaling-stroke",
+}
+
+
+// the indicator has state dependent paint
 const indicator = ({ state, polish }) => ({
     ...indicatorPaint.base,
     ...indicatorPaint[state],
@@ -87,7 +91,7 @@ const indicator = ({ state, polish }) => ({
 })
 
 
-// styling for the label
+// so do the labels
 const label = ({ state, polish }) => ({
     ...labelPaint.base,
     ...labelPaint[state],
@@ -97,9 +101,11 @@ const label = ({ state, polish }) => ({
 
 // publish
 export default {
+    axis,
     controller,
     indicator,
     label,
+    majorTickmark,
     zoom,
 }
 
@@ -186,7 +192,8 @@ const zoomPaint = {
 const indicatorPaint = {
     base: {
         cursor: "pointer",
-        strokeWidth: 3,
+        strokeWidth: 2,
+        vectorEffect: "non-scaling-stroke",
     },
 
     disabled: {
@@ -216,7 +223,7 @@ const indicatorPaint = {
 const labelPaint = {
     base: {
         fontFamily: "inconsolata",
-        fontSize: "75px",
+        fontSize: "30px",
         textAnchor: "middle",
         stroke: "none",
     },
