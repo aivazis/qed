@@ -12,6 +12,8 @@ import React from 'react'
 import { Tray } from '~/widgets'
 
 // locals
+// support
+import { dimensions } from './dimensions'
 // hooks
 import { useGetView } from '../viz/useGetView'
 // components
@@ -22,20 +24,25 @@ import styles from './styles'
 
 // display the zoom control
 export const Zoom = () => {
+    // build a ref for my container
+    const ref = React.useRef()
     // get the active view and unpack it
     const { reader, dataset, channel } = useGetView()
 
-    // check the view components and initialize my state
+    // inspect the view components to initialize my state
     const state = (!reader || !dataset || !channel) ? "disabled" : "enabled"
 
-    // set a length scale
-    const width = 200
-    // use it to derive the height of the control
-    const height = width / 2
-    // the control draws itself in a logical box of width {1000}
-    const scale = width / 1000
-    // build the transform that sizes and positions te control
-    const place = `scale(${scale}) translate(0 0)`
+
+    // build the control geometry
+    const geometry = dimensions({
+        // the minimum zoom level
+        min: 0,
+        // the maximum zoom level
+        max: 4,
+        // dimensions
+        height: 50,
+        width: 200,
+    })
 
     // mix my paint
     const zoomPaint = styles.zoom(state)
@@ -44,13 +51,17 @@ export const Zoom = () => {
     // and render
     return (
         <Tray title="zoom" initially={true} style={zoomPaint.tray}>
-            <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
-                width={width} height={height} style={controllerPaint.box}>
-                <g transform={place}>
-                    <Controller state={state} />
-                </g>
+            {/* the control housing */}
+            <svg ref={ref} version="1.1" xmlns="http://www.w3.org/2000/svg"
+                width={geometry.width} height={geometry.height}
+                style={controllerPaint}>
+
+                {/* the controller engine */}
+                <Controller geometry={geometry} state={state} />
+
             </svg>
-        </Tray>
+
+        </Tray >
     )
 }
 
