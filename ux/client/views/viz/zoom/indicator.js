@@ -8,15 +8,21 @@
 import React from "react"
 
 // locals
+// hooks
+import { useGetZoomLevel } from "../viz/useGetZoomLevel"
 // styles
 import styles from './styles'
 
 
 // the zoom controller
-export const Indicator = ({ state, width, height }) => {
+export const Indicator = ({ geometry, state }) => {
+    // the zoom level of the active viewport
+    const zoom = useGetZoomLevel()
 
-    // my path
-    const path = `M 0 0 l -${width / 2} -${height} l ${width} 0 z`
+    // unpack my geometry
+    const { indicator, indicatorPosition } = geometry
+    // my position
+    const { x, y } = indicatorPosition(zoom)
 
     // extra paint for the highlighter
     const [polish, setPolish] = React.useState(false)
@@ -42,7 +48,9 @@ export const Indicator = ({ state, width, height }) => {
 
     // render
     return (
-        <path d={path} {...behaviors} style={paint} />
+        <g transform={`translate( ${x} ${y})`}>
+            <path d={indicator} {...behaviors} style={paint} />
+        </g>
     )
 }
 
