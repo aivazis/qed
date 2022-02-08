@@ -10,18 +10,21 @@ import { useGetZoomLevel } from "../viz/useGetZoomLevel"
 import { useSetZoomLevel } from "../viz/useSetZoomLevel"
 
 // locals
-// hooks
 // styles
 import styles from './styles'
 
 
-// the legend of the zoom controller
-// by default, it is drawn in a (1000, 500) box
-export const Label = ({ state, value, x, y }) => {
+// zoom level labels
+export const Label = ({ value, state, geometry }) => {
     // look up the zoom level of the active viewport
     const zoom = useGetZoomLevel()
     // and grab the zoom level mutator
     const setZoom = useSetZoomLevel()
+
+    // unpack my geometry
+    const { labelPosition } = geometry
+    // and compute my location
+    const { x, y } = labelPosition(value)
 
     // extra paint for the highlighter
     const [polish, setPolish] = React.useState(false)
