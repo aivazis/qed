@@ -30,6 +30,9 @@ export const dimensions = ({ min = 0, max = 4, ticks = max - min + 1, height, wi
         return margin + (value - min) * spacing
     }
 
+    // convert mouse coordinates to user values
+    const viewportToUser = x => Math.max(Math.min((x / ils - margin) / spacing, max), min)
+
     // position a tick at a given value
     const majorTickPosition = value => ({
         // the coordinates of its tip
@@ -72,6 +75,7 @@ export const dimensions = ({ min = 0, max = 4, ticks = max - min + 1, height, wi
         min,
         spacing,
         userToICS,
+        viewportToUser,
         width,
     }
 }
