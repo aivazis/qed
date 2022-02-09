@@ -9,6 +9,7 @@ import React from "react"
 
 // locals
 // hooks
+import { useStartZooming } from "./useStartZooming"
 import { useGetZoomLevel } from "../viz/useGetZoomLevel"
 // styles
 import styles from './styles'
@@ -18,6 +19,8 @@ import styles from './styles'
 export const Indicator = ({ geometry, state }) => {
     // the zoom level of the active viewport
     const zoom = useGetZoomLevel()
+    // make a handler that sets the {zooming} flag
+    const startZooming = useStartZooming()
 
     // unpack my geometry
     const { indicator, indicatorPosition } = geometry
@@ -40,6 +43,8 @@ export const Indicator = ({ geometry, state }) => {
             ...behaviors,
             // when the mouse enters my area
             onMouseEnter: () => setPolish(true),
+            // when the user presses on my
+            onMouseDown: () => startZooming(),
         }
     }
 
@@ -48,8 +53,8 @@ export const Indicator = ({ geometry, state }) => {
 
     // render
     return (
-        <g transform={`translate( ${x} ${y})`}>
-            <path d={indicator} {...behaviors} style={paint} />
+        <g transform={`translate( ${x} ${y})`} {...behaviors}>
+            <path d={indicator} style={paint} />
         </g>
     )
 }
