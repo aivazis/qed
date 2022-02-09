@@ -38,12 +38,12 @@ export const Indicator = ({ geometry, state }) => {
 
     // if i'm enabled
     if (state === "enabled") {
-        // add the highlighter to my behaviors
+        // add to my behaviors
         behaviors = {
             ...behaviors,
-            // when the mouse enters my area
+            // highlight, when the mouse enters my area
             onMouseEnter: () => setPolish(true),
-            // when the user presses on my
+            // tart zooming, when the user presses on my client area
             onMouseDown: () => startZooming(),
         }
     }
