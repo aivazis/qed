@@ -15,7 +15,7 @@ import { Context, emptyView, syncedDefault, zoomDefault } from './context'
 // access to the registered views
 export const useCollapseView = view => {
     // grab the list of {views} from context
-    const { setViews, setSynced, setZoom, setActiveViewport } = React.useContext(Context)
+    const { setActiveViewport, setViews, setSynced, setZoom, baseZoom } = React.useContext(Context)
     // make a handler that adds a new blank view after a given on
     const collapseView = () => {
         // adjust the view
@@ -32,6 +32,7 @@ export const useCollapseView = view => {
             // and hand off the new state
             return clone
         })
+
         // remove its flag from the sync table
         setSynced(old => {
             // make a copy of the old table
@@ -46,6 +47,7 @@ export const useCollapseView = view => {
             // return the new table
             return table
         })
+
         // remove its zoom level from the table
         setZoom(old => {
             // make a copy of the old table
@@ -60,8 +62,20 @@ export const useCollapseView = view => {
             // otherwise, return the new table
             return table
         })
+
+        // maintain the base zoom level table
+        const bz = baseZoom.current
+        // remove the entry for the current view
+        bz.splice(view, 1)
+        // if this leaves us with an empty table
+        if (bz.length == 0) {
+            // reinitialize
+            baseZoom.current = [zoomDefault]
+        }
+
         // activate the previous view
         setActiveViewport(Math.max(view - 1, 0))
+
         // all done
         return
     }
