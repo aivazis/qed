@@ -13,13 +13,16 @@ import { Mosaic } from '~/widgets'
 
 // locals
 // hooks
+import { useGetZoomLevel } from '../viz/useGetZoomLevel'
 import { useViewports } from '../viz/useViewports'
 // styles
 import styles from './styles'
 
 
 // export the data viewport
-export const Viewport = ({ viewport, view, uri, registrar, zoom = 0, ...rest }) => {
+export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
+    // get my zoom
+    const zoom = Math.trunc(useGetZoomLevel())
     // get the pile of registered {viewports}; i'm at {viewport}
     const viewports = useViewports()
 
