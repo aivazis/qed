@@ -24,7 +24,7 @@ export const useSetZoomLevel = () => {
             // make a copy of the old table
             const table = [...old]
             // adjust the entry that corresponds to the active view
-            table[activeViewport] = value
+            table[activeViewport] = Math.trunc(value)
             // return the new table
             return table
         })
