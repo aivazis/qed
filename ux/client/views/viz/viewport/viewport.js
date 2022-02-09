@@ -22,7 +22,7 @@ import styles from './styles'
 // export the data viewport
 export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
     // get my zoom
-    const zoom = Math.trunc(useGetZoomLevel())
+    const zoom = Math.trunc(useGetZoomLevel(viewport))
     // get the pile of registered {viewports}; i'm at {viewport}
     const viewports = useViewports()
 
