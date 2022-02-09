@@ -21,7 +21,7 @@ import styles from './styles'
 
 
 // export the data viewer
-export const Viewer = ({ viewport, view, zoom, registrar }) => {
+export const Viewer = ({ viewport, view, zoom, baseZoom, registrar }) => {
     // unpack the view
     const { reader, dataset, channel } = view
     // check for the trivial cases
@@ -80,7 +80,7 @@ export const Viewer = ({ viewport, view, zoom, registrar }) => {
             </Meta.Table>
 
             {/* the viewport */}
-            <Viewport viewport={viewport} view={view} zoom={zoom}
+            <Viewport viewport={viewport} view={view} zoom={zoom} baseZoom={baseZoom}
                 uri={base} registrar={registrar} />
         </>
     )
