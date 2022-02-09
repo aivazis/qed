@@ -38,7 +38,11 @@ export const Behaviors = ({ geometry, client }) => {
             return
         }
         // get the controller bounding box
-        const { left } = client.current.getBoundingClientRect()
+        // N.B.: MDN has a warning against spreading this result, so do it in two steps
+        //       even though it's my experience that this works
+        const box = client.current.getBoundingClientRect()
+        // grab the coordinates of its left edge
+        const left = box.left
         // transform the mouse coordinates into controller coordinates
         const zoom = viewportToUser(evt.clientX - left)
         // adjust the zoom level
