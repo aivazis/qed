@@ -20,7 +20,7 @@ import { Flex } from '~/widgets'
 import { Provider } from './context'
 // hooks
 import { useViews } from './useViews'
-import { useZoom } from './uzeZoom'
+import { useZoom } from './useZoom'
 import { useSetActiveViewport } from './useSetActiveViewport'
 import { useInitializeViewports } from './useInitializeViewports'
 import { useMakePanDispatcher } from './useMakePanDispatcher'
