@@ -21,6 +21,7 @@ import { Provider } from './context'
 // hooks
 import { useViews } from './useViews'
 import { useZoom } from './useZoom'
+import { useBaseZoom } from './useBaseZoom'
 import { useSetActiveViewport } from './useSetActiveViewport'
 import { useInitializeViewports } from './useInitializeViewports'
 import { useMakePanDispatcher } from './useMakePanDispatcher'
@@ -49,6 +50,8 @@ const Panel = () => {
     const { views } = useViews()
     // their current zoom levels
     const { zoom: zoomLevels } = useZoom()
+    // and their current base zoom levels
+    const { baseZoom: baseZoomLevels } = useBaseZoom()
     // initialize my pile of viewports and get the ref registrar
     // viewport initialization happens on every render, but so does viewport registration
     const { viewportRegistrar } = useInitializeViewports()
@@ -75,6 +78,8 @@ const Panel = () => {
             {views.map((view, viewport) => {
                 // get the zoom level
                 const zoom = zoomLevels[viewport]
+                // and the base zoom level
+                const baseZoom = baseZoomLevels[viewport]
                 // make a registrar for this {viewport}
                 const registrar = viewportRegistrar(viewport)
                 // assemble the behaviors
@@ -90,7 +95,7 @@ const Panel = () => {
                         style={styles.flex} {...behaviors}
                     >
                         <Viewer viewport={viewport} view={view}
-                            zoom={zoom}
+                            zoom={zoom} baseZoom={baseZoom}
                             registrar={registrar} />
                     </Flex.Panel >
                 )
