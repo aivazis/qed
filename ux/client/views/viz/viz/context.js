@@ -35,6 +35,8 @@ export const Provider = ({ children }) => {
     const [synced, setSynced] = React.useState([syncedDefault])
     // a table with the zoom levels of the current viewports
     const [zoom, setZoom] = React.useState([zoomDefault])
+    // the base zoom level is the zoom value of the last data request
+    const baseZoom = React.useRef([zoomDefault])
 
     // build the initial context value
     const context = {
@@ -50,6 +52,8 @@ export const Provider = ({ children }) => {
         synced, setSynced,
         // zoom levels
         zoom, setZoom,
+        // the base zoom levels
+        baseZoom,
     }
 
     // provide for my children
@@ -84,6 +88,8 @@ export const Context = React.createContext(
         // the zoom levels of the viewports
         zoom: null,
         setZoom: () => { throw new Error(complaint) },
+        // the base zoom levels
+        baseZoom: null,
     }
 )
 
