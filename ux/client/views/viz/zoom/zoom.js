@@ -14,16 +14,30 @@ import { Tray } from '~/widgets'
 // locals
 // support
 import { dimensions } from './dimensions'
+// context
+import { Provider } from './context'
 // hooks
 import { useGetView } from '../viz/useGetView'
 // components
+import { Behaviors } from './behaviors'
 import { Controller } from './controller'
 // styles
 import styles from './styles'
 
 
-// display the zoom control
+// export the tray
 export const Zoom = () => {
+    // set up my context and embed my panel
+    return (
+        <Provider>
+            <Panel />
+        </Provider>
+    )
+}
+
+
+//  display the zoom control
+const Panel = () => {
     // build a ref for my container
     const ref = React.useRef()
     // get the active view and unpack it
@@ -56,6 +70,8 @@ export const Zoom = () => {
                 width={geometry.width} height={geometry.height}
                 style={controllerPaint}>
 
+                {/* the behaviors */}
+                <Behaviors geometry={geometry} client={ref} />
                 {/* the controller engine */}
                 <Controller geometry={geometry} state={state} />
 
