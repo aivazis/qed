@@ -19,12 +19,12 @@ export const useSetZoomLevel = () => {
 
     // a handler that sets the zoom level of the active viewport
     const set = (value) => {
-        // update the sync table
+        // update the zoom table
         setZoom(old => {
             // make a copy of the old table
             const table = [...old]
             // adjust the entry that corresponds to the active view
-            table[activeViewport] = Math.trunc(value)
+            table[activeViewport] = value
             // return the new table
             return table
         })
