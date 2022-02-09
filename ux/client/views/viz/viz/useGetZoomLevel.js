@@ -13,12 +13,12 @@ import { Context } from './context'
 
 
 // toggle the sync status of this viewport
-export const useGetZoomLevel = () => {
+export const useGetZoomLevel = (viewport) => {
     // grab the active viewport and the zoom table
     const { activeViewport, zoom } = React.useContext(Context)
 
     // return the zoom level of the active viewport
-    return zoom[activeViewport]
+    return zoom[viewport ?? activeViewport]
 }
 
 
