@@ -44,7 +44,7 @@ const Panel = ({ style, children, ...rest }) => {
                 <thead>
                     <tr>
                         <th colSpan="3" style={detailStyle} >
-                            detail:
+                            info:
                             <Less />
                             |
                             <More />
