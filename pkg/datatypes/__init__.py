@@ -10,8 +10,8 @@ from .Float import Float as real4
 from .Double import Double as real8
 
 # complex numbers
-from .ComplexFloat import ComplexFloat as complex4
-from .ComplexDouble import ComplexDouble as complex8
+from .ComplexFloat import ComplexFloat as complex8
+from .ComplexDouble import ComplexDouble as complex16
 
 
 # end of file
