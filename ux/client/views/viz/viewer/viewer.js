@@ -12,6 +12,8 @@ import React from 'react'
 import { Meta } from '~/widgets'
 
 // locals
+// hooks
+import { useGetZoomLevel } from '../viz/useGetZoomLevel'
 // components
 import { Blank } from './blank'
 import { Tab } from './tab'
@@ -22,6 +24,9 @@ import styles from './styles'
 
 // export the data viewer
 export const Viewer = ({ viewport, view, registrar }) => {
+    // get the viewport zoom level
+    const zoom = Math.trunc(useGetZoomLevel(viewport))
+
     // unpack the view
     const { reader, dataset, channel } = view
     // check for the trivial cases
@@ -38,8 +43,12 @@ export const Viewer = ({ viewport, view, registrar }) => {
     // otherwise, unpack the view
     const { uuid: readerUUID, id, uri, api } = reader
     const { uuid: datasetUUID, datatype, shape, origin, tile } = dataset
+
+    // scale the shape to the current zoom level
+    const effectiveShape = shape.map(s => Math.trunc(s / (2 ** zoom)))
     // assemble the data request URI
     const base = [api, readerUUID, datasetUUID, channel].join("/")
+
     // mix my paint
     const paint = styles.viewer
     // and render
@@ -49,18 +58,18 @@ export const Viewer = ({ viewport, view, registrar }) => {
             <Tab viewport={viewport} view={view} />
 
             {/* identifying metadata; most of it is debugging information */}
-            <Meta.Table min={0} initial={1} max={4} style={paint}>
+            <Meta.Table min={0} initial={0} max={5} style={paint}>
                 <Meta.Entry threshold={1} attribute="uri" style={paint}>
                     {uri}
                 </Meta.Entry>
-                <Meta.Entry threshold={1} attribute="shape" style={paint}>
+                <Meta.Entry threshold={2} attribute="shape" style={paint}>
                     {shape.join(" x ")}
                 </Meta.Entry>
-                <Meta.Entry threshold={2} attribute="reader" style={paint}>
-                    {id}
+                <Meta.Entry threshold={2} attribute="zoom" style={paint}>
+                    {zoom}
                 </Meta.Entry>
-                <Meta.Entry threshold={2} attribute="type" style={paint}>
-                    {datatype}
+                <Meta.Entry threshold={2} attribute="effective shape" style={paint}>
+                    {effectiveShape.join(" x ")}
                 </Meta.Entry>
                 <Meta.Entry threshold={3} attribute="tile" style={paint}>
                     {tile.join(" x ")}
@@ -68,13 +77,19 @@ export const Viewer = ({ viewport, view, registrar }) => {
                 <Meta.Entry threshold={3} attribute="origin" style={paint}>
                     {origin.join(", ")}
                 </Meta.Entry>
+                <Meta.Entry threshold={3} attribute="reader" style={paint}>
+                    {id}
+                </Meta.Entry>
+                <Meta.Entry threshold={3} attribute="type" style={paint}>
+                    {datatype}
+                </Meta.Entry>
                 <Meta.Entry threshold={4} attribute="reader" style={paint}>
                     {readerUUID}
                 </Meta.Entry>
                 <Meta.Entry threshold={4} attribute="dataset" style={paint}>
                     {datasetUUID}
                 </Meta.Entry>
-                <Meta.Entry threshold={4} attribute="data" style={paint}>
+                <Meta.Entry threshold={5} attribute="data" style={paint}>
                     {base}
                 </Meta.Entry>
             </Meta.Table>
