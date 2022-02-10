@@ -75,12 +75,12 @@ class Datatype(Specification, family="qed.datatypes"):
         "real8": "qed.datatypes.real8",
 
         # single precision complex numbers
-        "c4": "qed.datatypes.complex4",
-        "complex4": "qed.datatypes.complex4",
-
-        # double precision complex numbers
         "c8": "qed.datatypes.complex8",
         "complex8": "qed.datatypes.complex8",
+
+        # double precision complex numbers
+        "c16": "qed.datatypes.complex16",
+        "complex16": "qed.datatypes.complex16",
     }
 
     # the byte order truth table
