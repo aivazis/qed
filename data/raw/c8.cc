@@ -18,7 +18,7 @@
 // we generate 2d canonically packed tiles
 using packing_t = pyre::grid::canonical_t<2>;
 // of complex numbers
-using data_t = std::complex<double>;
+using data_t = std::complex<float>;
 // in file backed memory
 using storage_t = pyre::memory::map_t<data_t>;
 // to form a grid
@@ -49,7 +49,7 @@ main(int argc, char * argv [])
     grid_t data { packing, map };
 
     // the pixel width is determined by the largest extent
-    auto delta = 4.0 / (shape.max() - 1);
+    auto delta = 4.0f / (shape.max() - 1);
 
     // here is the transform that converts an index into a complex number
     auto project = [delta](grid_t::index_type idx) -> data_t {
@@ -64,7 +64,7 @@ main(int argc, char * argv [])
         // convert the indices into a complex number in our space
         auto z = project(idx);
         // compute f(z)
-        auto f = (z - 1.0) / (z * z + z + 1.0);
+        auto f = (z - 1.0f) / (z * z + z + 1.0f);
         // place into the data set
         data [idx] = f;
     }
