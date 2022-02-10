@@ -28,27 +28,27 @@ const reader = state => ({
         box: {
             ...styles.meta.box,
             ...readerPaint.base.meta.box,
-            ...readerPaint[state].meta.box
+            ...readerPaint[state].meta.box,
         },
         entry: {
             ...styles.meta.entry,
             ...readerPaint.base.meta.entry,
-            ...readerPaint[state].meta.entry
+            ...readerPaint[state].meta.entry,
         },
         attribute: {
             ...styles.meta.attribute,
-            ...readerPaint.base.meta.entry,
-            ...readerPaint[state].meta.entryibute
+            ...readerPaint.base.meta.attribute,
+            ...readerPaint[state].meta.attribute,
         },
         separator: {
             ...styles.meta.separator,
-            ...readerPaint.base.meta.entry,
-            ...readerPaint[state].meta.entryrator
+            ...readerPaint.base.meta.separator,
+            ...readerPaint[state].meta.separator,
         },
         value: {
             ...styles.meta.value,
-            ...readerPaint.base.meta.entry,
-            ...readerPaint[state].meta.entry
+            ...readerPaint.base.meta.value,
+            ...readerPaint[state].meta.value,
         },
     }
 })
@@ -120,7 +120,9 @@ const readerPaint = {
         meta: {
             box: {},
             entry: {},
-            attribute: {},
+            attribute: {
+                width: "8.0em",
+            },
             separator: {},
             value: {},
         },
@@ -172,7 +174,9 @@ const readerPaint = {
 const axisPaint = {
     box: {},
     entry: {},
-    attribute: {},
+    attribute: {
+        width: "8.0em",
+    },
     separator: {},
     value: {},
 }
@@ -212,7 +216,9 @@ const coordinatePaint = {
 const channelsPaint = {
     box: {},
     entry: {},
-    attribute: {},
+    attribute: {
+        width: "8.0em",
+    },
     separator: {},
     value: {},
 }
