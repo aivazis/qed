@@ -40,7 +40,7 @@ class RSLC(qed.flow.factory, family="qed.isce2.readers.rslc", implements=qed.pro
         # decorate it
         dataset.uri = self.uri
         dataset.shape = self.shape
-        dataset.cell = qed.datatypes.complex4()
+        dataset.cell = qed.datatypes.complex8()
         dataset.tile = dataset.cell.tile
         # and attach it
         self.datasets.append(dataset)
