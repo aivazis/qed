@@ -22,7 +22,7 @@ const viewer = {
     },
     attribute: {
         ...styles.meta.attribute,
-        width: "7.0em",
+        width: "10.0em",
     },
     separator: {
         ...styles.meta.separator,
