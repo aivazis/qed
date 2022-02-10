@@ -69,7 +69,7 @@ const Panel = () => {
     const paint = styles.reader(state)
     // and render
     return (
-        <Tray title={name} initially={state === "selected"} style={paint.tray}>
+        <Tray title={name} initially={true} style={paint.tray}>
             <Meta.Table style={paint.meta} {...behaviors}>
                 <Meta.Entry attribute="uri" style={paint.meta}>
                     {uri}
