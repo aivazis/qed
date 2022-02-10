@@ -65,7 +65,7 @@ export const Viewer = ({ viewport, view, registrar }) => {
                 <Meta.Entry threshold={2} attribute="shape" style={paint}>
                     {shape.join(" x ")}
                 </Meta.Entry>
-                <Meta.Entry threshold={2} attribute="zoom" style={paint}>
+                <Meta.Entry threshold={2} attribute="zoom level" style={paint}>
                     {zoom}
                 </Meta.Entry>
                 <Meta.Entry threshold={2} attribute="effective shape" style={paint}>
