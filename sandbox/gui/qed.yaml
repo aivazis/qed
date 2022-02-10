@@ -35,5 +35,5 @@ qed.app:
 pyre.shells.web#qed.app.shell:
     # spawn a new browser tab every time the server starts?
     auto: no
-#
+
 # end of file
