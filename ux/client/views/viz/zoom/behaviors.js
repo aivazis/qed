@@ -30,13 +30,9 @@ export const Behaviors = ({ geometry, client }) => {
     // unpack the geometry
     const { viewportToUser } = geometry
 
-    // when the mouse moves
-    const move = (evt) => {
-        // if the indicator is not being dragged
-        if (!zooming) {
-            // bail
-            return
-        }
+    // unconditional zoom, given any event with mouse coordinates
+    // we use this for {click} to bypass the {zooming} check since it doesn't apply
+    const zoom = (evt) => {
         // get the controller bounding box
         // N.B.: MDN has a warning against spreading this result, so do it in two steps
         //       even though it's my experience that this works
@@ -51,7 +47,28 @@ export const Behaviors = ({ geometry, client }) => {
         return
     }
 
+    // zoom conditional on the {zooming} flag; used for dragging the indicator
+    // the flag is needed because the implementation of the drag uses a {mousemove} listener
+    // which fires any time the mouse is moving in the client area of the controller
+    const move = evt => {
+        // if the indicator is not being dragged
+        if (!zooming) {
+            // bail
+            return
+        }
+        // otherwise, zoom
+        zoom(evt)
+        // all done
+        return
+    }
+
     // install the listeners
+    // for the mouse
+    useEvent({
+        name: "click", listener: zoom, client,
+        triggers: [zooming]
+    })
+
     useEvent({
         name: "mouseup", listener: endZooming, client,
         triggers: []
@@ -59,7 +76,7 @@ export const Behaviors = ({ geometry, client }) => {
 
     useEvent({
         name: "mousemove", listener: move, client,
-        triggers: [zooming, setZoom],
+        triggers: [zooming],
     })
 
     useEvent({
