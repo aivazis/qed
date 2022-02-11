@@ -18,7 +18,15 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
 
 
     # interface
-    def tile(self, src, data, channel, zoom, origin, shape):
+    def dataset(self, name):
+        """
+        Get the named dataset
+        """
+        # look it up and return it
+        return self.datasets[name]
+
+
+    def tile(self, src, data, channel, zoom, origin, shape, **kwds):
         """
         Generate a BMP encoded tile from the supplied specification
         """
@@ -29,18 +37,11 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         chnl.log(f"{data} {channel} {zoom} {tile}")
 
         # look up the dataset
-        dataset = self.datasets[data]
-        # get the data source
-        source = dataset.data
-
-        return
-        # get the channel selector
-        # pick = xxx.channel(source=source, channel=channel)
-        # make the bitmap
-        # bmp = xxx.viz(pick=pick, shape=shape)
-
-        # and return the bitmap
-        # return self.sample
+        dataset = self.dataset(name=data)
+        # get the viz flow associated with the selected {channel}
+        viz = dataset.channel(name=channel)
+        # render a tile and return it
+        return viz.tile(source=dataset, zoom=zoom, origin=origin, shape=shape)
 
 
     # metamethods
@@ -74,7 +75,7 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         self.vizflows =  {}
 
         # MGA: set up a sample tile to send while debugging
-        # self.sample = docroot["graphics/tile.bmp"].open(mode="rb").read()
+        self.sample = docroot["graphics/tile.bmp"].open(mode="rb").read()
 
         # all done
         return
