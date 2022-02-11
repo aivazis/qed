@@ -58,6 +58,14 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
 
 
     # interface
+    def channel(self, name):
+        """
+        Get the visualization workflow for the given {channel}
+        """
+        # look up the channel and return it
+        return self.channels[name]
+
+
     def open(self):
         """
         Initialize my data source
