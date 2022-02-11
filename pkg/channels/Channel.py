@@ -15,4 +15,19 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
     """
 
 
+    # interface
+    def tile(self, source, zoom, origin, shape):
+        """
+        Generate a tile of the given characteristics
+        """
+        # get my name
+        name = type(self).__name__
+        # look for my bindings in {libqed}
+        factory = getattr(qed.libqed.channels, name)
+        # instantiate the workflow
+        channel = factory()
+        # ask it to make a tile and return it
+        return channel.tile(source=source, zoom=zoom, origin=origin, shape=shape)
+
+
 # end of file
