@@ -4,8 +4,6 @@
 # (c) 1998-2022 all rights reserved
 
 
-# externals
-import pyre
 # support
 import qed
 
@@ -27,6 +25,10 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
     cell = qed.protocols.datatype()
     cell.default = None
     cell.doc = "the type of the dataset payload"
+
+    channels = qed.properties.dict(schema=qed.protocols.channel())
+    channels.default = {}
+    channels.doc = "the table of channels supported by this dataset"
 
     origin = qed.properties.tuple(schema=qed.properties.int())
     origin.default = 0,0
@@ -68,16 +70,16 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
             # build the name of the buffer factory
             memoryType = f"{self.cell.tag}ConstMap"
             # look up the factory in the {pyre::memory} bindings
-            bufferFactory = getattr(pyre.libpyre.memory, memoryType)
+            bufferFactory = getattr(qed.libpyre.memory, memoryType)
             # make the memory buffer
             buffer = bufferFactory(str(self.uri))
 
             # realize the shape
-            shape = pyre.libpyre.grid.Shape2D(shape=self.shape)
+            shape = qed.libpyre.grid.Shape2D(shape=self.shape)
             # build the packing
-            packing = pyre.libpyre.grid.Canonical2D(shape=shape)
+            packing = qed.libpyre.grid.Canonical2D(shape=shape)
             # grab the grid factory
-            gridFactory = getattr(pyre.libpyre.grid, f"{memoryType}Grid2D")
+            gridFactory = getattr(qed.libpyre.grid, f"{memoryType}Grid2D")
             # put it all together
             grid = gridFactory(packing, buffer)
 
