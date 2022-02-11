@@ -9,6 +9,7 @@ import qed
 # my superclass
 from .Specification import Specification
 # my parts
+from .Channel import Channel
 from .Datatype import Datatype
 
 
@@ -22,6 +23,9 @@ class Dataset(Specification, family="qed.datasets"):
     # public data
     cell = Datatype()
     cell.doc = "the type of the dataset payload"
+
+    channels = qed.properties.dict(schema=Channel())
+    channels.doc = "the table of channels supported by this dataset"
 
     origin = qed.properties.tuple(schema=qed.properties.int())
     origin.doc = "the smallest possible index"
