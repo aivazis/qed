@@ -19,7 +19,9 @@ from pyre import (
     # shells
     application, plexus,
     # miscellaneous
-    primitives, tracking, units, weaver
+    primitives, tracking, units, weaver,
+    # bindings of things
+    libpyre,
     )
 
 
