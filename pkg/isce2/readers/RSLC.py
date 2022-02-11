@@ -37,12 +37,18 @@ class RSLC(qed.flow.factory, family="qed.isce2.readers.rslc", implements=qed.pro
 
         # there is only one dataset in the file and it is structurally trivial
         dataset = qed.datasets.raw()
+
         # decorate it
         dataset.uri = self.uri
         dataset.shape = self.shape
         dataset.cell = qed.datatypes.complex8()
         dataset.tile = dataset.cell.tile
-        # and attach it
+        # go through the default channels provided by the data type
+        for channel in dataset.cell.channels:
+            # and instantiate a workflow for each one
+            dataset.channels[channel] = channel
+
+        # finally, add it to the pile of dataset
         self.datasets.append(dataset)
 
         # all done
