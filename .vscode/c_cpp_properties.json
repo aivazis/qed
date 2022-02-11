@@ -11,6 +11,20 @@
             "cStandard": "c17",
             "cppStandard": "c++20",
             "intelliSenseMode": "linux-clang-x64"
+        },
+        {
+            "name": "macports",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${env:HOME}/tools/mm/${env:mm_abi}/include/**",
+                "/opt/local/include/**",
+                "/opt/local/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/pybind11/include/**"
+            ],
+            "defines": [],
+            "compilerPath": "/opt/local/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "linux-clang-x64"
         }
     ],
     "version": 4
