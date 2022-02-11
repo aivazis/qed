@@ -43,6 +43,8 @@ from . import protocols
 from . import datatypes
 from . import datasets
 from . import readers
+# visualization workflows
+from . import channels
 # schema
 from . import gql
 # user interfaces
