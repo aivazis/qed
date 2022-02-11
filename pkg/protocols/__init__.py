@@ -12,11 +12,13 @@ from .properties import selectors
 from .Producer import Producer as producer
 from .Specification import Specification as specification
 
-
 # datasets and their readers
 from .Datatype import Datatype as datatype
 from .Dataset import Dataset as dataset
 from .Reader import Reader as reader
+
+# visualization workflows
+from .Channel import Channel as channel
 
 
 # end of file
