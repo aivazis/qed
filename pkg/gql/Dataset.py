@@ -47,10 +47,10 @@ class Dataset(graphene.ObjectType):
 
     def resolve_channels(dataset, *_):
         """
-        Extract the payload data type identifier
+        Extract the names of supported channels
         """
-        # return the {family} name of the datatype marker
-        return dataset.cell.channels
+        # return the names of available channels
+        return dataset.channels.keys()
 
 
     def resolve_datatype(dataset, *_):
