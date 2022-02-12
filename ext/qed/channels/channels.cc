@@ -12,6 +12,7 @@
 
 // the channels
 #include "amplitude.h"
+#include "phase.h"
 
 
 // wrappers over {pyre::memory::map} template expansions
@@ -91,6 +92,28 @@ qed::py::channels::imaginary(py::module & m)
 void
 qed::py::channels::phase(py::module & m)
 {
+    // add the bindings for {c8}
+    m.def(
+        // the name of the function
+        "phaseComplexFloat",
+        // the handler
+        &phaseTile<source_t<std::complex<float>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "saturation"_a, "brightness"_a,
+        // the docstring
+        "render the phase of a complex float tile");
+
+    // and the bindings for {c16}
+    m.def(
+        // the name of the function
+        "phaseComplexDouble",
+        // the handler
+        &phaseTile<source_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "saturation"_a, "brightness"_a,
+        // the docstring
+        "render the phase of a complex double tile");
+
     // all done
     return;
 }

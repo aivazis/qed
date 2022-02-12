@@ -35,19 +35,28 @@ namespace qed::py::channels {
     using bmp_t = pyre::viz::bmp_t;
 
     // color maps
+    // grayscale
     template <typename sourceT>
     using gray_t = pyre::viz::colormaps::gray_t<sourceT>;
+    // hsb
+    template <typename hueSourceT, typename saturationSourceT, typename brightnessSourceT>
+    using hsb_t = pyre::viz::colormaps::hsb_t<hueSourceT, saturationSourceT, brightnessSourceT>;
 
     // filters
     // computing the amplitude of a complex source
     template <typename sourceT>
     using amplitude_t = pyre::viz::filters::amplitude_t<sourceT>;
+    // a supplier of a constant value
+    using constant_t = pyre::viz::filters::constant_t<double>;
     // support for zooming
     template <typename sourceT>
     using decimate_t = pyre::viz::filters::decimate_t<sourceT>;
     // mapping a range of values to the unit interval
     template <typename sourceT>
     using parametric_t = pyre::viz::filters::parametric_t<sourceT>;
+    // extracting the phase of a complex source
+    template <typename sourceT>
+    using phase_t = pyre::viz::filters::phase_t<sourceT>;
 }
 
 
