@@ -19,4 +19,13 @@ class Complex(Channel, family="qed.channels.complex"):
    tag = "complex"
 
 
+   # interface
+   def tile(self, **kwds):
+      """
+      Generate a tile of the given characteristics
+      """
+      # add my configuration and chain up
+      return super().tile(min=0, max=1000, saturation=1.0, **kwds)
+
+
 # end of file
