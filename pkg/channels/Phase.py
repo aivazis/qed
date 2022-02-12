@@ -19,4 +19,13 @@ class Phase(Channel, family="qed.channels.phase"):
    tag = "phase"
 
 
+   # interface
+   def tile(self, **kwds):
+      """
+      Generate a tile of the given characteristics
+      """
+      # add my configuration and chain up
+      return super().tile(saturation=1.0, brightness=0.75, **kwds)
+
+
 # end of file
