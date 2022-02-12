@@ -71,12 +71,6 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         self.readers = readers
         self.datasets = datasets
 
-        # initialize the registry of visualization workflows
-        self.vizflows =  {}
-
-        # MGA: set up a sample tile to send while debugging
-        self.sample = docroot["graphics/tile.bmp"].open(mode="rb").read()
-
         # all done
         return
 
