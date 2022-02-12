@@ -21,13 +21,22 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         Generate a tile of the given characteristics
         """
         # get my name
-        name = type(self).__name__
-        # look for my bindings in {libqed}
-        factory = getattr(qed.libqed.channels, name)
-        # instantiate the workflow
-        channel = factory()
+        channel = self.tag
+        # get the source data type
+        dtype = source.cell.tag
+        # splice them together
+        name = f"{channel}{dtype}"
+
+        # look for the tile maker in {libqed}
+        tileMaker = getattr(qed.libqed.channels, name)
+
+        # turn the shape into a {pyre::grid::shape_t}
+        shape = qed.libpyre.grid.Shape2D(shape=shape)
+        # and the origin into a {pyre::grid::index_t}
+        origin = qed.libpyre.grid.Index2D(index=origin)
+
         # ask it to make a tile and return it
-        return channel.tile(source=source, zoom=zoom, origin=origin, shape=shape)
+        return tileMaker(source=source.data, zoom=zoom, origin=origin, shape=shape)
 
 
 # end of file
