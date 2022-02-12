@@ -33,6 +33,21 @@ namespace qed::py::channels {
     // from {pyre::viz}
     // encodings
     using bmp_t = pyre::viz::bmp_t;
+
+    // color maps
+    template <typename sourceT>
+    using gray_t = pyre::viz::colormaps::gray_t<sourceT>;
+
+    // filters
+    // computing the amplitude of a complex source
+    template <typename sourceT>
+    using amplitude_t = pyre::viz::filters::amplitude_t<sourceT>;
+    // support for zooming
+    template <typename sourceT>
+    using decimate_t = pyre::viz::filters::decimate_t<sourceT>;
+    // mapping a range of values to the unit interval
+    template <typename sourceT>
+    using parametric_t = pyre::viz::filters::parametric_t<sourceT>;
 }
 
 
