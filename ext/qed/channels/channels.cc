@@ -10,6 +10,10 @@
 #include "forward.h"
 
 
+// the channels
+#include "amplitude.h"
+
+
 // wrappers over {pyre::memory::map} template expansions
 // build the submodule
 void
@@ -38,48 +42,27 @@ qed::py::channels::channels(py::module & m)
 void
 qed::py::channels::amplitude(py::module & m)
 {
-    // type aliases
-    using floats_t = source_t<std::complex<float>>;
-    using floats_const_reference = const floats_t &;
-
-
+    // add the bindings for {c8}
     m.def(
         // the name of the function
         "amplitudeComplexFloat",
         // the handler
-        [](floats_const_reference source, int zoom, floats_t::index_type origin,
-           floats_t::shape_type shape, double min, double max) -> bmp_t {
-            // my decimator
-            using zoom_t = pyre::viz::filters::decimate_t<floats_t>;
-            // a filter over a grid iterator
-            using amplitude_t = pyre::viz::filters::amplitude_t<zoom_t>;
-            // my normalizer
-            using norm_t = pyre::viz::filters::parametric_t<amplitude_t>;
-            // a gray color map over the amplitude
-            using graymap_t = pyre::viz::colormaps::gray_t<norm_t>;
-
-            // make a bitmap
-            bmp_t bmp(shape[0], shape[1]);
-
-            // the decimator
-            auto decimator = zoom_t(source, origin, shape, 1 << zoom);
-            // make an amplitude filter and wire it to the tile
-            auto filter = amplitude_t(decimator);
-            // the normalizer
-            auto norm = norm_t(filter, norm_t::interval_type(min, max));
-            // make a color map
-            graymap_t colormap(norm);
-            // encode
-            bmp.encode(colormap);
-
-            // and return it
-            return bmp;
-        },
+        &amplitudeTile<source_t<std::complex<float>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
         "render the amplitude of a complex float tile");
 
+    // and the bindings for {c16}
+    m.def(
+        // the name of the function
+        "amplitudeComplexDouble",
+        // the handler
+        &amplitudeTile<source_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the amplitude of a complex double tile");
 
     // all done
     return;
