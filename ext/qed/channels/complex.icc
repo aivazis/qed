@@ -1,0 +1,66 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2022 all rights reserved
+
+// code guard
+#if !defined(qed_py_channels_complex_icc)
+#error this file contains implementation details for qed::py::channels::complex
+#else
+
+
+// the tile generator
+template <typename sourceT>
+auto
+qed::py::channels::complexTile(
+    // the source
+    const sourceT & source,
+    // the zoom level
+    int zoom,
+    // the origin of the tile
+    typename sourceT::index_type origin,
+    // the tile shape
+    typename sourceT::shape_type shape,
+    // the range of values to render
+    double min, double max, double saturation) -> bmp_t
+{
+    // type aliases for the workflow nodes
+    // my decimator
+    using zoom_t = decimate_t<sourceT>;
+    // for the amplitude
+    using amplitudeSelector_t = amplitude_t<zoom_t>;
+    using norm_t = parametric_t<amplitudeSelector_t>;
+    // for the phase
+    using phaseSelector_t = phase_t<zoom_t>;
+    // the color map
+    using colormap_t = hsb_t<phaseSelector_t, constant_t, norm_t>;
+
+    // make a bitmap
+    bmp_t bmp(shape[0], shape[1]);
+
+    // zoom
+    auto decimator = zoom_t(source, origin, shape, 1 << zoom);
+    // extract the phase; it becomes the hue
+    auto h = phaseSelector_t(decimator);
+
+    // make a constant saturation
+    auto s = constant_t(saturation);
+
+    // extract the amplitude
+    auto amplitude = amplitudeSelector_t(decimator);
+    // map to the unit interval to make it the brightness
+    auto b = norm_t(amplitude, typename norm_t::interval_type(min, max));
+
+    // generate color
+    auto colormap = colormap_t(h, s, b);
+    // and encode
+    bmp.encode(colormap);
+
+    // all done
+    return bmp;
+}
+
+
+#endif
+
+// end of file

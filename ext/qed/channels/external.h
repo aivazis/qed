@@ -35,6 +35,9 @@ namespace qed::py::channels {
     using bmp_t = pyre::viz::bmp_t;
 
     // color maps
+    // complex values
+    template <typename sourceT>
+    using complex_t = pyre::viz::colormaps::complex_t<sourceT>;
     // grayscale
     template <typename sourceT>
     using gray_t = pyre::viz::colormaps::gray_t<sourceT>;
