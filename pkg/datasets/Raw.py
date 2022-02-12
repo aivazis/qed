@@ -89,10 +89,9 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
             # grab the grid factory
             gridFactory = getattr(qed.libpyre.grid, f"{memoryType}Grid2D")
             # put it all together
-            grid = gridFactory(packing, buffer)
-
-            # attach it
-            self._data = grid
+            data = gridFactory(packing, buffer)
+            # and attach it
+            self._data = data
 
         # return the data source
         return data
