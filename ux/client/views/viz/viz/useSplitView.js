@@ -14,8 +14,15 @@ import { Context } from './context'
 
 // access to the registered views
 export const useSplitView = view => {
-    // grab the list of {views} from context
-    const { setActiveViewport, setViews, setSynced, setZoom, baseZoom } = React.useContext(Context)
+    // grab what i need from the context
+    const {
+        // the list of synced views
+        synced,
+        // mutators
+        setActiveViewport, setViews, setSynced, setZoom,
+        // the ref with the base zoom levels
+        baseZoom } = React.useContext(Context)
+
     // make a handler that adds a new blank view after a given on
     const splitView = () => {
 
@@ -33,8 +40,8 @@ export const useSplitView = view => {
         setSynced(old => {
             // make a copy of the old table
             const table = [...old]
-            // add the new viewport at {idx} with a default state
-            table.splice(view + 1, 0, false)
+            // clone the sync status for the new viewport
+            table.splice(view + 1, 0, synced[view])
             // return the new table
             return table
         })
