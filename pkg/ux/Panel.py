@@ -49,27 +49,14 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         # chain up
         super().__init__(plexus=plexus, **kwds)
 
-        # make a registry of data sources
-        readers = {str(src.pyre_id): src for src in plexus.datasets}
-        # and one of datasets
-        datasets = {str(data.pyre_id): data for src in readers.values() for data in src.datasets}
-
-        # make a channel
-        channel = journal.debug("qed.ux.panel")
-        # go through the readers
-        for ruuid, reader in readers.items():
-            # sign on
-            channel.line(f"reader: {ruuid}")
-            # go through the datasets
-            for data in reader.datasets:
-                # show me the id
-                channel.line(f"    data: {data.pyre_id}")
-        # flush
-        channel.log()
-
-        # attach them
-        self.readers = readers
-        self.datasets = datasets
+        # get the known data sources and build a registry of available data sets
+        self.datasets = {
+            # map the pyre id to the dataset
+            str(data.pyre_id): data
+            # for all known readers
+            for src in plexus.datasets
+            # for all available datasets in each reader
+            for data in src.datasets}
 
         # all done
         return
