@@ -16,7 +16,7 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
 
 
     # interface
-    def tile(self, source, zoom, origin, shape):
+    def tile(self, source, zoom, origin, shape, **kwds):
         """
         Generate a tile of the given characteristics
         """
@@ -36,7 +36,7 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         origin = qed.libpyre.grid.Index2D(index=origin)
 
         # ask it to make a tile and return it
-        return tileMaker(source=source.data, zoom=zoom, origin=origin, shape=shape)
+        return tileMaker(source=source.data, zoom=zoom, origin=origin, shape=shape, **kwds)
 
 
 # end of file

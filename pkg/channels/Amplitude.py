@@ -19,4 +19,13 @@ class Amplitude(Channel, family="qed.channels.amplitude"):
    tag = "amplitude"
 
 
+   # interface
+   def tile(self, **kwds):
+      """
+      Generate a tile of the given characteristics
+      """
+      # add my configuration and chain up
+      return super().tile(min=0, max=1000, **kwds)
+
+
 # end of file
