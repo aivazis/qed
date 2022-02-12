@@ -15,4 +15,8 @@ class Phase(Channel, family="qed.channels.phase"):
    """
 
 
+   # constants
+   tag = "phase"
+
+
 # end of file

@@ -15,4 +15,8 @@ class Complex(Channel, family="qed.channels.complex"):
    """
 
 
+   # constants
+   tag = "complex"
+
+
 # end of file

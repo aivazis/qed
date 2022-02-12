@@ -15,4 +15,8 @@ class Real(Channel, family="qed.channels.real"):
    """
 
 
+   # constants
+   tag = "real"
+
+
 # end of file

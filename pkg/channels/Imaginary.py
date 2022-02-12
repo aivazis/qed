@@ -15,4 +15,9 @@ class Imaginary(Channel, family="qed.channels.imaginary"):
    """
 
 
+   # constants
+   tag = "imaginary"
+
+
+
 # end of file

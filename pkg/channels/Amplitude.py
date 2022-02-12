@@ -15,4 +15,8 @@ class Amplitude(Channel, family="qed.channels.amplitude"):
    """
 
 
+   # constants
+   tag = "amplitude"
+
+
 # end of file
