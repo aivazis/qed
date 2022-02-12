@@ -19,4 +19,13 @@ class Real(Channel, family="qed.channels.real"):
    tag = "real"
 
 
+   # interface
+   def tile(self, **kwds):
+      """
+      Generate a tile of the given characteristics
+      """
+      # add my configuration and chain up
+      return super().tile(min=-1000, max=1000, **kwds)
+
+
 # end of file
