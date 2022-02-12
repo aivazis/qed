@@ -48,7 +48,7 @@ qed::py::channels::amplitude(py::module & m)
         "amplitudeComplexFloat",
         // the handler
         [](floats_const_reference source, int zoom, floats_t::index_type origin,
-           floats_t::shape_type shape) -> bmp_t {
+           floats_t::shape_type shape, double min, double max) -> bmp_t {
             // my decimator
             using zoom_t = pyre::viz::filters::decimate_t<floats_t>;
             // a filter over a grid iterator
@@ -66,7 +66,7 @@ qed::py::channels::amplitude(py::module & m)
             // make an amplitude filter and wire it to the tile
             auto filter = amplitude_t(decimator);
             // the normalizer
-            auto norm = norm_t(filter, norm_t::interval_type(0, 1000));
+            auto norm = norm_t(filter, norm_t::interval_type(min, max));
             // make a color map
             graymap_t colormap(norm);
             // encode
@@ -76,7 +76,7 @@ qed::py::channels::amplitude(py::module & m)
             return bmp;
         },
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a,
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
         "render the amplitude of a complex float tile");
 
