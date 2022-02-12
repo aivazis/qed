@@ -11,6 +11,30 @@
 // inherit
 #include "../external.h"
 
+// pyre
+#include <pyre/viz.h>
+#include <pyre/grid.h>
+
+
+// type aliases
+namespace qed::py::channels {
+    // from {pyre::memory}
+    // storage strategies
+    template <typename cellT>
+    using map_t = pyre::memory::constmap_t<cellT>;
+
+    // from {pyre::grid}
+    // layouts
+    using layout_t = pyre::grid::canonical_t<2>;
+    // grids
+    template <typename cellT>
+    using source_t = pyre::grid::grid_t<layout_t, map_t<cellT>>;
+
+    // from {pyre::viz}
+    // encodings
+    using bmp_t = pyre::viz::bmp_t;
+}
+
 
 #endif
 
