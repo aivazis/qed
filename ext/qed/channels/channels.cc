@@ -13,7 +13,9 @@
 // the channels
 #include "amplitude.h"
 #include "complex.h"
+#include "imaginary.h"
 #include "phase.h"
+#include "real.h"
 
 
 // wrappers over {pyre::memory::map} template expansions
@@ -106,6 +108,28 @@ qed::py::channels::complex(py::module & m)
 void
 qed::py::channels::imaginary(py::module & m)
 {
+    // add the bindings for {c8}
+    m.def(
+        // the name of the function
+        "imaginaryComplexFloat",
+        // the handler
+        &imaginaryTile<source_t<std::complex<float>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the imaginary part a complex float tile");
+
+    // and the bindings for {c16}
+    m.def(
+        // the name of the function
+        "imaginaryComplexDouble",
+        // the handler
+        &imaginaryTile<source_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the imaginary part of a complex double tile");
+
     // all done
     return;
 }
@@ -146,6 +170,28 @@ qed::py::channels::phase(py::module & m)
 void
 qed::py::channels::real(py::module & m)
 {
+    // add the bindings for {c8}
+    m.def(
+        // the name of the function
+        "realComplexFloat",
+        // the handler
+        &realTile<source_t<std::complex<float>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the real part a complex float tile");
+
+    // and the bindings for {c16}
+    m.def(
+        // the name of the function
+        "realComplexDouble",
+        // the handler
+        &realTile<source_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the real part of a complex double tile");
+
     // all done
     return;
 }
