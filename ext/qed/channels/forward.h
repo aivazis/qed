@@ -4,8 +4,8 @@
 // (c) 1998-2022 all rights reserved
 
 // code guard
-#if !defined(qed_py_forward_h)
-#define qed_py_forward_h
+#if !defined(qed_py_channels_forward_h)
+#define qed_py_channels_forward_h
 
 
 // the {channels} namespace
