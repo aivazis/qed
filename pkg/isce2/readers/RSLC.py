@@ -48,7 +48,7 @@ class RSLC(qed.flow.factory, family="qed.isce2.readers.rslc", implements=qed.pro
             # and instantiate a workflow for each one
             dataset.channels[channel] = channel
 
-        # finally, add it to the pile of dataset
+        # finally, add it to the pile of datasets
         self.datasets.append(dataset)
 
         # all done
