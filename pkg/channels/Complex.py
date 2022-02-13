@@ -4,6 +4,8 @@
 # (c) 1998-2022 all rights reserved
 
 
+# support
+import qed
 # superclass
 from .Channel import Channel
 
@@ -19,13 +21,24 @@ class Complex(Channel, family="qed.channels.complex"):
    tag = "complex"
 
 
+   # user configurable state
+   min = qed.properties.float(default=0)
+   min.doc = "the minimum value; anything below is underflow"
+
+   max = qed.properties.float(default=1000)
+   max.doc = "the maximum value; anything above is overflow"
+
+   saturation = qed.properties.float(default=1.0)
+   saturation.doc = "the saturation"
+
+
    # interface
    def tile(self, **kwds):
       """
       Generate a tile of the given characteristics
       """
       # add my configuration and chain up
-      return super().tile(min=0, max=1000, saturation=1.0, **kwds)
+      return super().tile(min=self.min, max=self.max, saturation=self.saturation, **kwds)
 
 
 # end of file

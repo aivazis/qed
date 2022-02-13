@@ -4,6 +4,8 @@
 # (c) 1998-2022 all rights reserved
 
 
+# support
+import qed
 # superclass
 from .Channel import Channel
 
@@ -19,13 +21,21 @@ class Amplitude(Channel, family="qed.channels.amplitude"):
    tag = "amplitude"
 
 
+   # user configurable state
+   min = qed.properties.float(default=0)
+   min.doc = "the minimum value; anything below is underflow"
+
+   max = qed.properties.float(default=1000)
+   max.doc = "the maximum value; anything above is overflow"
+
+
    # interface
    def tile(self, **kwds):
       """
       Generate a tile of the given characteristics
       """
       # add my configuration and chain up
-      return super().tile(min=0, max=1000, **kwds)
+      return super().tile(min=self.min, max=self.max, **kwds)
 
 
 # end of file

@@ -4,6 +4,8 @@
 # (c) 1998-2022 all rights reserved
 
 
+# support
+import qed
 # superclass
 from .Channel import Channel
 
@@ -19,13 +21,21 @@ class Phase(Channel, family="qed.channels.phase"):
    tag = "phase"
 
 
+   # user configurable state
+   brightness = qed.properties.float(default=1.0)
+   brightness.doc = "the brightness"
+
+   saturation = qed.properties.float(default=1.0)
+   saturation.doc = "the saturation"
+
+
    # interface
    def tile(self, **kwds):
       """
       Generate a tile of the given characteristics
       """
       # add my configuration and chain up
-      return super().tile(saturation=1.0, brightness=0.75, **kwds)
+      return super().tile(saturation=self.saturation, brightness=self.brightness, **kwds)
 
 
 # end of file
