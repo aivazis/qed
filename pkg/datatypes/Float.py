@@ -9,7 +9,7 @@ from .Real import Real
 
 
 # a complex number implemented as a pair of floats
-class Float(Real, family="qed.datatypes.real4"):
+class Float(Real, family="qed.datatypes.real32"):
     """
     The specification for single precision floating point numbers
     """

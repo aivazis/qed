@@ -5,13 +5,13 @@
 
 
 # my base class
-from .Real import Real
+from .Integer import Integer
 
 
 # a complex number implemented as a pair of floats
-class Double(Real, family="qed.datatypes.real64"):
+class Char(Integer, family="qed.datatypes.Char"):
     """
-    The specification for double precision floating point numbers
+    The specification for one byte integers
     """
 
 

@@ -9,7 +9,7 @@ from .Complex import Complex
 
 
 # a complex number implemented as a pair of floats
-class ComplexFloat(Complex, family="qed.datatypes.complex8"):
+class ComplexFloat(Complex, family="qed.datatypes.complex64"):
     """
     The specification for complex numbers that are implemented as a pair of single precision
     floating point numbers
