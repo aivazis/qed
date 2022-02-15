@@ -66,7 +66,7 @@ export const Behaviors = ({ geometry, client }) => {
     // for the mouse
     useEvent({
         name: "click", listener: zoom, client,
-        triggers: [zooming]
+        triggers: [zooming, setZoom]
     })
 
     useEvent({
@@ -76,7 +76,7 @@ export const Behaviors = ({ geometry, client }) => {
 
     useEvent({
         name: "mousemove", listener: move, client,
-        triggers: [zooming],
+        triggers: [zooming, setZoom],
     })
 
     useEvent({
