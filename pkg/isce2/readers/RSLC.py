@@ -41,7 +41,7 @@ class RSLC(qed.flow.factory, family="qed.isce2.readers.rslc", implements=qed.pro
         # decorate it
         dataset.uri = self.uri
         dataset.shape = self.shape
-        dataset.cell = qed.datatypes.complex8()
+        dataset.cell = qed.datatypes.complex64()
         dataset.tile = dataset.cell.tile
         # go through the default channels provided by the data type
         for channel in dataset.cell.channels:
