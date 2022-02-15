@@ -66,21 +66,35 @@ class Datatype(Specification, family="qed.datatypes"):
     # implementation details
     # the type alias table
     aliases = {
+        # bytes
+        "c": "qed.datatypes.char",
+        "char": "qed.datatypes.char",
+
+        # integer types
+        "i2": "qed.datatypes.int16",
+        "int16": "qed.datatypes.int16",
+
+        "i4": "qed.datatypes.int32",
+        "int32": "qed.datatypes.int32",
+
+        "i8": "qed.datatypes.int64",
+        "int64": "qed.datatypes.int64",
+
         # single precision numbers
-        "r4": "qed.datatypes.real4",
-        "real4": "qed.datatypes.real4",
+        "r4": "qed.datatypes.real32",
+        "real32": "qed.datatypes.real32",
 
         # double precision numbers
-        "r8": "qed.datatypes.real8",
-        "real8": "qed.datatypes.real8",
+        "r8": "qed.datatypes.real64",
+        "real64": "qed.datatypes.real64",
 
         # single precision complex numbers
-        "c8": "qed.datatypes.complex8",
-        "complex8": "qed.datatypes.complex8",
+        "c8": "qed.datatypes.complex64",
+        "complex64": "qed.datatypes.complex64",
 
         # double precision complex numbers
-        "c16": "qed.datatypes.complex16",
-        "complex16": "qed.datatypes.complex16",
+        "c16": "qed.datatypes.complex128",
+        "complex128": "qed.datatypes.complex128",
     }
 
     # the byte order truth table
