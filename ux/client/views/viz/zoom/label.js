@@ -7,7 +7,6 @@
 // external
 import React from "react"
 import { useGetZoomLevel } from "../viz/useGetZoomLevel"
-import { useSetZoomLevel } from "../viz/useSetZoomLevel"
 
 // locals
 // styles
@@ -18,8 +17,6 @@ import styles from './styles'
 export const Label = ({ value, state, geometry }) => {
     // look up the zoom level of the active viewport
     const zoom = useGetZoomLevel()
-    // and grab the zoom level mutator
-    const setZoom = useSetZoomLevel()
 
     // unpack my geometry
     const { labelPosition } = geometry
@@ -48,8 +45,6 @@ export const Label = ({ value, state, geometry }) => {
             ...behaviors,
             // when the cursor enters my area
             onMouseEnter: () => setPolish(true),
-            // when the user clicks me
-            onClick: () => setZoom(value)
         }
     }
 
