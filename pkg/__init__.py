@@ -20,8 +20,10 @@ from pyre import (
     application, plexus,
     # miscellaneous
     primitives, tracking, units, weaver,
+    # hdf5
+    h5,
     # bindings of things
-    libpyre,
+    libpyre, libh5,
     )
 
 
