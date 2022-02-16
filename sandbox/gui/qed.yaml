@@ -3,28 +3,37 @@
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # (c) 1998-2022 all rights reserved
 
-# datasets
+
+# test data
+qed.data: ../../data
+
 c8:
-    uri: ../../data/raw/c8.dat
+    uri: "{qed.data}/raw/c8.dat"
     shape: 2*1964+1, 2*3024+1
     cell: c8
 
 c16:
-    uri: ../../data/raw/c16.dat
+    uri: "{qed.data}/raw/c16.dat"
     shape: 2*1964+1, 2*3024+1
     cell: c16
 
+# alos datasets
+alos.data: "{pyre.environ.HOME}/dv/data/alos"
+
 20061231:
-    uri: ../../../data/alos/20061231.slc
+    uri: "{alos.data}/20061231.slc"
     shape: 36864, 10344
 
 20070215:
-    uri: ../../../data/alos/20070215.slc
+    uri: "{alos.data}/20070215.slc"
     shape: 36864, 10344
 
-20211221:
-    uri: ../../../data/nisar/20211221.h5
-    shape: 36864, 10344
+# nisar datasets
+nisar.data: "{pyre.environ.HOME}/dv/data/nisar"
+
+hawaii:
+    uri: "{nisar.data}/hawaii.h5"
+
 
 # attach them to the application
 qed.app.datasets:
@@ -32,20 +41,21 @@ qed.app.datasets:
     - qed.readers.raw#c16
     - qed.isce2.readers.rslc#20061231
     - qed.isce2.readers.rslc#20070215
-    - qed.nisar.readers.rslc#20211221
+    - qed.nisar.readers.rslc#hawaii
+
 
 # overall application configuration
 qed.app:
     # run as a web app
     shell: web
-    # the web server
+    # for the web server
     nexus.services.web:
         # pin the port for serving web content to some number in user space
         address: ip4:0.0.0.0:8005
 
 # configure the {web} shell
 pyre.shells.web#qed.app.shell:
-    # spawn a new browser tab every time the server starts?
+    # spawn a new browser window/tab every time the server starts?
     auto: no
 
 # end of file
