@@ -25,7 +25,7 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         # get the source data type
         dtype = source.cell.tag
         # splice them together
-        name = f"{channel}{dtype}"
+        name = f"{channel}{dtype}Grid"
 
         # look for the tile maker in {libqed}
         tileMaker = getattr(qed.libqed.channels, name)
