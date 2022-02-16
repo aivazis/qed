@@ -20,11 +20,11 @@ c16:
 # alos datasets
 alos.data: "{pyre.environ.HOME}/dv/data/alos"
 
-20061231:
+LA-20061231:
     uri: "{alos.data}/20061231.slc"
     shape: 36864, 10344
 
-20070215:
+LA-20070215:
     uri: "{alos.data}/20070215.slc"
     shape: 36864, 10344
 
@@ -32,15 +32,15 @@ alos.data: "{pyre.environ.HOME}/dv/data/alos"
 nisar.data: "{pyre.environ.HOME}/dv/data/nisar"
 
 hawaii:
-    uri: "{nisar.data}/hawaii.h5"
+    uri: "{nisar.data}/BigIsl_32905_10003_012_100106_L090_CX_129_02.h5"
 
 
 # attach them to the application
 qed.app.datasets:
     - qed.readers.raw#c8
     - qed.readers.raw#c16
-    - qed.isce2.readers.rslc#20061231
-    - qed.isce2.readers.rslc#20070215
+    - qed.isce2.readers.rslc#LA-20061231
+    - qed.isce2.readers.rslc#LA-20070215
     - qed.nisar.readers.rslc#hawaii
 
 
