@@ -4,35 +4,28 @@
 # (c) 1998-2022 all rights reserved
 
 
-# external
-import itertools
 # support
 import qed
+# superclass
+from .H5 import H5
 
 
 # the RSLC reader
-class RSLC(qed.flow.factory, family="qed.nisar.readers.rslc", implements=qed.protocols.reader):
+class RSLC(H5, family="qed.nisar.readers.rslc"):
     """
     The reader of RSLC files
     """
 
 
     # public data
-    uri = qed.properties.path()
-    uri.doc = "the uri of the data source"
-
-    shape = qed.properties.tuple(schema=qed.properties.int())
-    shape.doc = "the size of the dataset in (lines, samples)"
-
+    # my selectors
     selectors = qed.protocols.selectors()
+    selectors.doc = "a map of selector names to their allowed values"
+    # the full set of allowed values
     selectors.default = {
         "frequency": ["A", "B"],
         "polarization": ["HH", "HV", "VH", "VV"],
     }
-    selectors.doc = "a map of selector names to their allowed values"
-
-    datasets = qed.properties.list(schema=qed.protocols.dataset.output())
-    datasets.doc = "the list of data sets provided by the reader"
 
 
     # metamethods
@@ -40,35 +33,38 @@ class RSLC(qed.flow.factory, family="qed.nisar.readers.rslc", implements=qed.pro
         # chain up
         super().__init__(**kwds)
 
-        # grab my selectors
-        selectors = self.selectors
-        # autogenerate all possible selector bindings
-        bindings = (
-            dict(zip(selectors.keys(), values))
-            for values in itertools.product(*selectors.values())
-        )
-        # NISAR RSLC files contain up to eight datasets; autogenerate them, for now
-        for selector in bindings:
-            # disable some of the matrix so we can debug the selector logic
-            if selector["frequency"] == "B" and selector["polarization"] in ["HV", "VH"]:
-                # by skipping them
-                continue
-            # make a dataset
-            dataset = qed.datasets.raw()
-            # decorate it
-            dataset.shape = self.shape
-            dataset.cell = qed.datatypes.complex64()
-            dataset.selector = selector
-            dataset.tile = dataset.cell.tile
-            # go through the default channels provided by the data type
-            for channel in dataset.cell.channels:
-                # and instantiate a workflow for each one
-                dataset.channels[channel] = channel
-            # finally, add it to the pile of datasets
-            self.datasets.append(dataset)
+        # grab my file
+        d = self.h5
+
+        # get the list of frequencies in this file
+        frequencies = d.dataset(self.FREQS).strings()
+        # go through them
+        for frequency in frequencies:
+            # get the list of polarizations
+            polarizations = d.dataset(self.POLS.format(freq=frequency)).strings()
+            # go through them
+            for polarization in polarizations:
+
+                # MGA: skip a couple for GUI debugging purposes
+                if frequency == "B" and polarization in ["HV", "VH"]:
+                    continue
+
+                # get the HDF5 dataset
+                data = d.dataset(self.DATASET.format(freq=frequency, pol=polarization))
+                # wrap it up
+                slc = qed.nisar.datasets.slc(uri=self.uri, data=data,
+                                             frequency=frequency, polarization=polarization)
+                # and add it to my dataset
+                self.datasets.append(slc)
 
         # all done
         return
+
+
+    # constants
+    DATASET = "/science/LSAR/SLC/swaths/frequency{freq}/{pol}"
+    FREQS = "/science/LSAR/identification/listOfFrequencies"
+    POLS = "/science/LSAR/SLC/swaths/frequency{freq}/listOfPolarizations"
 
 
 # end of file
