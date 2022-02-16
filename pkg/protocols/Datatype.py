@@ -36,6 +36,10 @@ class Datatype(Specification, family="qed.datatypes"):
     # choice is applied after {pyre_instantiate} realizes the {datatype}
     @classmethod
     def pyre_convert(cls, value, **kwds):
+        """
+        Translate the component specification in {value} into canonical form; invoked during value
+        processing
+        """
         # if {value} is a string
         if isinstance(value, str):
             # check whether there is a byte order specifier
@@ -50,14 +54,19 @@ class Datatype(Specification, family="qed.datatypes"):
 
     @classmethod
     def pyre_instantiate(cls, spec, component, name, locator):
+        """
+        Invoke the {component} constructor to build a new instance
+        """
         # chain up to build the {datatype} instance
         instance = super().pyre_instantiate(spec=spec,
                                            component=component, name=name, locator=locator)
 
-        # the byte order marker is at the beginning of the {spec}
-        marker = spec[0]
-        # look it up and, if not specified, fall back to the default setting from the datatype
-        instance.byteswap = cls.byteorder.get(marker, instance.byteswap)
+        # if the {spec} is a string
+        if isinstance(spec, str):
+            # the byte order marker is at the beginning of the {spec}
+            marker = spec[0]
+            # look it up and, if not specified, fall back to the default setting from the datatype
+            instance.byteswap = cls.byteorder.get(marker, instance.byteswap)
 
         # return
         return instance
