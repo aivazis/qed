@@ -117,4 +117,9 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
         return
 
 
+    # implementation details
+    # hint for the tile maker
+    storageClass = "Grid"
+
+
 # end of file
