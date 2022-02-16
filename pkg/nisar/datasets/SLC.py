@@ -76,10 +76,15 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
         # go through the default channels of my cell type
         for channel in self.cell.channels:
             # and instantiate a workflow for each one
-            self.channels[channel] = qed.nisar.channels.complex
+            self.channels[channel] = channel
 
         # all done
         return
+
+
+    # constants
+    # hint for the tile maker
+    storageClass = "HDF5"
 
 
 # end of file
