@@ -28,7 +28,7 @@ namespace qed::py::channels {
     using layout_t = pyre::grid::canonical_t<2>;
     // grids
     template <typename cellT>
-    using source_t = pyre::grid::grid_t<layout_t, map_t<cellT>>;
+    using grid_t = pyre::grid::grid_t<layout_t, map_t<cellT>>;
 
     // from {pyre::viz}
     // encodings

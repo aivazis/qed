@@ -49,9 +49,9 @@ qed::py::channels::amplitude(py::module & m)
     // add the bindings for {c8}
     m.def(
         // the name of the function
-        "amplitudeComplexFloat",
+        "amplitudeComplexFloatGrid",
         // the handler
-        &amplitudeTile<source_t<std::complex<float>>>,
+        &amplitudeTile<grid_t<std::complex<float>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
@@ -60,9 +60,9 @@ qed::py::channels::amplitude(py::module & m)
     // and the bindings for {c16}
     m.def(
         // the name of the function
-        "amplitudeComplexDouble",
+        "amplitudeComplexDoubleGrid",
         // the handler
-        &amplitudeTile<source_t<std::complex<double>>>,
+        &amplitudeTile<grid_t<std::complex<double>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
@@ -80,9 +80,9 @@ qed::py::channels::complex(py::module & m)
     // add the bindings for {c8}
     m.def(
         // the name of the function
-        "complexComplexFloat",
+        "complexComplexFloatGrid",
         // the handler
-        &complexTile<source_t<std::complex<float>>>,
+        &complexTile<grid_t<std::complex<float>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "saturation"_a,
         // the docstring
@@ -91,9 +91,9 @@ qed::py::channels::complex(py::module & m)
     // and the bindings for {c16}
     m.def(
         // the name of the function
-        "complexComplexDouble",
+        "complexComplexDoubleGrid",
         // the handler
-        &complexTile<source_t<std::complex<double>>>,
+        &complexTile<grid_t<std::complex<double>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "saturation"_a,
         // the docstring
@@ -111,9 +111,9 @@ qed::py::channels::imaginary(py::module & m)
     // add the bindings for {c8}
     m.def(
         // the name of the function
-        "imaginaryComplexFloat",
+        "imaginaryComplexFloatGrid",
         // the handler
-        &imaginaryTile<source_t<std::complex<float>>>,
+        &imaginaryTile<grid_t<std::complex<float>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
@@ -122,9 +122,9 @@ qed::py::channels::imaginary(py::module & m)
     // and the bindings for {c16}
     m.def(
         // the name of the function
-        "imaginaryComplexDouble",
+        "imaginaryComplexDoubleGrid",
         // the handler
-        &imaginaryTile<source_t<std::complex<double>>>,
+        &imaginaryTile<grid_t<std::complex<double>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
@@ -142,9 +142,9 @@ qed::py::channels::phase(py::module & m)
     // add the bindings for {c8}
     m.def(
         // the name of the function
-        "phaseComplexFloat",
+        "phaseComplexFloatGrid",
         // the handler
-        &phaseTile<source_t<std::complex<float>>>,
+        &phaseTile<grid_t<std::complex<float>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "saturation"_a, "brightness"_a,
         // the docstring
@@ -153,9 +153,9 @@ qed::py::channels::phase(py::module & m)
     // and the bindings for {c16}
     m.def(
         // the name of the function
-        "phaseComplexDouble",
+        "phaseComplexDoubleGrid",
         // the handler
-        &phaseTile<source_t<std::complex<double>>>,
+        &phaseTile<grid_t<std::complex<double>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "saturation"_a, "brightness"_a,
         // the docstring
@@ -173,9 +173,9 @@ qed::py::channels::real(py::module & m)
     // add the bindings for {c8}
     m.def(
         // the name of the function
-        "realComplexFloat",
+        "realComplexFloatGrid",
         // the handler
-        &realTile<source_t<std::complex<float>>>,
+        &realTile<grid_t<std::complex<float>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
@@ -184,9 +184,9 @@ qed::py::channels::real(py::module & m)
     // and the bindings for {c16}
     m.def(
         // the name of the function
-        "realComplexDouble",
+        "realComplexDoubleGrid",
         // the handler
-        &realTile<source_t<std::complex<double>>>,
+        &realTile<grid_t<std::complex<double>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
