@@ -5,6 +5,8 @@
 
 
 # publish
+from . import channels
+from . import datasets
 from . import readers
 
 
