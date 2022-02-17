@@ -9,10 +9,10 @@
 #else
 
 
-// the tile generator
+// the tile generators
 template <typename sourceT>
 auto
-qed::py::channels::imaginaryTile(
+qed::py::channels::imaginaryGridTile(
     // the source
     const sourceT & source,
     // the zoom level
@@ -20,7 +20,7 @@ qed::py::channels::imaginaryTile(
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
-    typename sourceT::shape_type shape,
+    typename sourceT::shape_type tile,
     // the range of values to render
     double min, double max) -> bmp_t
 {
@@ -35,14 +35,85 @@ qed::py::channels::imaginaryTile(
     using colormap_t = gray_t<norm_t>;
 
     // make a bitmap
-    bmp_t bmp(shape[0], shape[1]);
+    bmp_t bmp(tile[0], tile[1]);
 
     // zoom
-    auto decimator = zoom_t(source, origin, shape, 1 << zoom);
+    auto decimator = zoom_t(source, origin, tile, 1 << zoom);
     // extract the imaginary
     auto selection = selector_t(decimator);
     // map to the unit interval
     auto norm = norm_t(selection, typename norm_t::interval_type(min, max));
+    // generate color
+    auto colormap = colormap_t(norm);
+    // and encode
+    bmp.encode(colormap);
+
+    // all done
+    return bmp;
+}
+
+
+template <typename sourceT>
+auto
+qed::py::channels::imaginaryHDF5Tile(
+    // the source
+    const dataset_t & dataset,
+    // the zoom level
+    int zoom,
+    // the origin of the tile
+    typename sourceT::index_type origin,
+    // the tile shape
+    typename sourceT::shape_type tile,
+    // the range of values to render
+    double min, double max) -> bmp_t
+{
+    // type aliases for the workflow nodes
+    // my decimator
+    using zoom_t = decimate_t<sourceT>;
+    // the imaginary selector
+    using selector_t = imaginary_t<zoom_t>;
+    // the normalizer
+    using norm_t = parametric_t<selector_t>;
+    // the color map
+    using colormap_t = gray_t<norm_t>;
+
+    // compute the scale
+    auto scale = 1 << zoom;
+    // the shape of the data region is scaled by this
+    auto region = typename sourceT::shape_type(scale * tile);
+    // and so is the origin
+    auto from = typename sourceT::index_type(scale * origin);
+
+    // allocate my source
+    auto source = sourceT(typename sourceT::packing_type(region), region.cells());
+
+    // copy the HDF5 data
+    // we read from
+    hsize_t readFrom[2] = { static_cast<hsize_t>(from[0]), static_cast<hsize_t>(from[1]) };
+    // the amount of data we transfer
+    hsize_t count[2] = { static_cast<hsize_t>(region[0]), static_cast<hsize_t>(region[1]) };
+
+    // get the dataspace of the dataset
+    auto readSpace = dataset.getSpace();
+    // select the hyperslab that corresponds to the tile we want to extract
+    readSpace.selectHyperslab(H5S_SELECT_SET, count, readFrom);
+
+    // make a dataspace for the destination
+    auto writeSpace = dataspace_t(2, count);
+
+    // transfer
+    dataset.read(source.data()->data(), dataset.getCompType(), writeSpace, readSpace);
+
+    // make a bitmap
+    bmp_t bmp(tile[0], tile[1]);
+
+    // zoom; we only transfer one zoomed tile's worth of data, so the decimator
+    // should always start at {0,0}
+    auto decimator = zoom_t(source, { 0, 0 }, tile, scale);
+    // extract the imaginary
+    auto selection = selector_t(decimator);
+    // map to the unit interval
+    auto norm = norm_t(selection, typename norm_t::interval_type(-1, 1));
     // generate color
     auto colormap = colormap_t(norm);
     // and encode

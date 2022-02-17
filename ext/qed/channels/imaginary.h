@@ -10,9 +10,9 @@
 
 // decorators
 namespace qed::py::channels {
-    // the tile generator for the imaginary part of a complex source
+    // the tile generator for the imaginary part of a complex grid source
     template <typename sourceT>
-    auto imaginaryTile(
+    auto imaginaryGridTile(
         // the source
         const sourceT & source,
         // the zoom level
@@ -20,7 +20,21 @@ namespace qed::py::channels {
         // the origin of the tile
         typename sourceT::index_type origin,
         // the tile shape
-        typename sourceT::shape_type shape,
+        typename sourceT::shape_type tile,
+        // the range of values to render
+        double min, double max) -> bmp_t;
+
+    // the tile generator for the imaginary part of a complex HF5 source
+    template <typename sourceT>
+    auto imaginaryHDF5Tile(
+        // the source
+        const dataset_t & dataset,
+        // the zoom level
+        int zoom,
+        // the origin of the tile
+        typename sourceT::index_type origin,
+        // the tile shape
+        typename sourceT::shape_type tile,
         // the range of values to render
         double min, double max) -> bmp_t;
 }
