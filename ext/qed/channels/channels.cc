@@ -46,23 +46,45 @@ qed::py::channels::channels(py::module & m)
 void
 qed::py::channels::amplitude(py::module & m)
 {
+    // bindings for {mapgrid_t} sources
     // add the bindings for {c8}
     m.def(
         // the name of the function
         "amplitudeComplexFloatGrid",
         // the handler
-        &amplitudeTile<grid_t<std::complex<float>>>,
+        &amplitudeGridTile<mapgrid_t<std::complex<float>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
         "render the amplitude of a complex float tile");
-
     // and the bindings for {c16}
     m.def(
         // the name of the function
         "amplitudeComplexDoubleGrid",
         // the handler
-        &amplitudeTile<grid_t<std::complex<double>>>,
+        &amplitudeGridTile<mapgrid_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the amplitude of a complex double tile");
+
+    // bindings for HDF5 sources
+    // add the bindings for {c8}
+    m.def(
+        // the name of the function
+        "amplitudeComplexFloatHDF5",
+        // the handler
+        &amplitudeHDF5Tile<heapgrid_t<std::complex<float>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the amplitude of a complex float tile");
+    // and the bindings for {c16}
+    m.def(
+        // the name of the function
+        "amplitudeComplexDoubleHDF5",
+        // the handler
+        &amplitudeHDF5Tile<heapgrid_t<std::complex<double>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
@@ -77,23 +99,45 @@ qed::py::channels::amplitude(py::module & m)
 void
 qed::py::channels::complex(py::module & m)
 {
+    // bindings for {mapgrid_t} sources
     // add the bindings for {c8}
     m.def(
         // the name of the function
         "complexComplexFloatGrid",
         // the handler
-        &complexTile<grid_t<std::complex<float>>>,
+        &complexGridTile<mapgrid_t<std::complex<float>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "saturation"_a,
         // the docstring
         "render the value of a complex float tile");
-
     // and the bindings for {c16}
     m.def(
         // the name of the function
         "complexComplexDoubleGrid",
         // the handler
-        &complexTile<grid_t<std::complex<double>>>,
+        &complexGridTile<mapgrid_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "saturation"_a,
+        // the docstring
+        "render the value of a complex double tile");
+
+    // bindings for HDF5 sources
+    // add the bindings for {c8}
+    m.def(
+        // the name of the function
+        "complexComplexFloatHDF5",
+        // the handler
+        &complexHDF5Tile<heapgrid_t<std::complex<float>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "saturation"_a,
+        // the docstring
+        "render the value of a complex float tile");
+    // and the bindings for {c16}
+    m.def(
+        // the name of the function
+        "complexComplexDoubleHDF5",
+        // the handler
+        &complexHDF5Tile<heapgrid_t<std::complex<double>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "saturation"_a,
         // the docstring
@@ -108,23 +152,45 @@ qed::py::channels::complex(py::module & m)
 void
 qed::py::channels::imaginary(py::module & m)
 {
+    // bindings for {mapgrid_t} sources
     // add the bindings for {c8}
     m.def(
         // the name of the function
         "imaginaryComplexFloatGrid",
         // the handler
-        &imaginaryTile<grid_t<std::complex<float>>>,
+        &imaginaryGridTile<mapgrid_t<std::complex<float>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
         "render the imaginary part a complex float tile");
-
     // and the bindings for {c16}
     m.def(
         // the name of the function
         "imaginaryComplexDoubleGrid",
         // the handler
-        &imaginaryTile<grid_t<std::complex<double>>>,
+        &imaginaryGridTile<mapgrid_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the imaginary part of a complex double tile");
+
+    // bindings for HDF5 sources
+    // add the bindings for {c8}
+    m.def(
+        // the name of the function
+        "imaginaryComplexFloatHDF5",
+        // the handler
+        &imaginaryHDF5Tile<heapgrid_t<std::complex<float>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the imaginary part a complex float tile");
+    // and the bindings for {c16}
+    m.def(
+        // the name of the function
+        "imaginaryComplexDoubleHDF5",
+        // the handler
+        &imaginaryHDF5Tile<heapgrid_t<std::complex<double>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
@@ -139,23 +205,45 @@ qed::py::channels::imaginary(py::module & m)
 void
 qed::py::channels::phase(py::module & m)
 {
+    // bindings for {mapgrid_t} sources
     // add the bindings for {c8}
     m.def(
         // the name of the function
         "phaseComplexFloatGrid",
         // the handler
-        &phaseTile<grid_t<std::complex<float>>>,
+        &phaseGridTile<mapgrid_t<std::complex<float>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "saturation"_a, "brightness"_a,
         // the docstring
         "render the phase of a complex float tile");
-
     // and the bindings for {c16}
     m.def(
         // the name of the function
         "phaseComplexDoubleGrid",
         // the handler
-        &phaseTile<grid_t<std::complex<double>>>,
+        &phaseGridTile<mapgrid_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "saturation"_a, "brightness"_a,
+        // the docstring
+        "render the phase of a complex double tile");
+
+    // bindings for HDF5 sources
+    // add the bindings for {c8}
+    m.def(
+        // the name of the function
+        "phaseComplexFloatHDF5",
+        // the handler
+        &phaseHDF5Tile<heapgrid_t<std::complex<float>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "saturation"_a, "brightness"_a,
+        // the docstring
+        "render the phase of a complex float tile");
+    // and the bindings for {c16}
+    m.def(
+        // the name of the function
+        "phaseComplexDoubleHDF5",
+        // the handler
+        &phaseHDF5Tile<heapgrid_t<std::complex<double>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "saturation"_a, "brightness"_a,
         // the docstring
@@ -170,23 +258,45 @@ qed::py::channels::phase(py::module & m)
 void
 qed::py::channels::real(py::module & m)
 {
+    // bindings for {mapgrid_t} sources
     // add the bindings for {c8}
     m.def(
         // the name of the function
         "realComplexFloatGrid",
         // the handler
-        &realTile<grid_t<std::complex<float>>>,
+        &realGridTile<mapgrid_t<std::complex<float>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
         "render the real part a complex float tile");
-
     // and the bindings for {c16}
     m.def(
         // the name of the function
         "realComplexDoubleGrid",
         // the handler
-        &realTile<grid_t<std::complex<double>>>,
+        &realGridTile<mapgrid_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the real part of a complex double tile");
+
+    // bindings for HDF5 sources
+    // add the bindings for {c8}
+    m.def(
+        // the name of the function
+        "realComplexFloatHDF5",
+        // the handler
+        &realHDF5Tile<heapgrid_t<std::complex<float>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the real part a complex float tile");
+    // and the bindings for {c16}
+    m.def(
+        // the name of the function
+        "realComplexDoubleHDF5",
+        // the handler
+        &realHDF5Tile<heapgrid_t<std::complex<double>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
