@@ -15,20 +15,31 @@
 #include <pyre/viz.h>
 #include <pyre/grid.h>
 
+// hdf5
+#include <H5Cpp.h>
+
 
 // type aliases
 namespace qed::py::channels {
     // from {pyre::memory}
     // storage strategies
     template <typename cellT>
+    using heap_t = pyre::memory::heap_t<cellT>;
+    template <typename cellT>
     using map_t = pyre::memory::constmap_t<cellT>;
+
+    // aliases of hdf5 entities
+    using dataset_t = H5::DataSet;
+    using dataspace_t = H5::DataSpace;
 
     // from {pyre::grid}
     // layouts
     using layout_t = pyre::grid::canonical_t<2>;
     // grids
     template <typename cellT>
-    using grid_t = pyre::grid::grid_t<layout_t, map_t<cellT>>;
+    using heapgrid_t = pyre::grid::grid_t<layout_t, heap_t<cellT>>;
+    template <typename cellT>
+    using mapgrid_t = pyre::grid::grid_t<layout_t, map_t<cellT>>;
 
     // from {pyre::viz}
     // encodings
@@ -44,6 +55,9 @@ namespace qed::py::channels {
     // hsb
     template <typename hueSourceT, typename saturationSourceT, typename brightnessSourceT>
     using hsb_t = pyre::viz::colormaps::hsb_t<hueSourceT, saturationSourceT, brightnessSourceT>;
+    // hsl
+    template <typename hueSourceT, typename saturationSourceT, typename luminositySourceT>
+    using hsl_t = pyre::viz::colormaps::hsl_t<hueSourceT, saturationSourceT, luminositySourceT>;
 
     // filters
     // the amplitude of a complex source
