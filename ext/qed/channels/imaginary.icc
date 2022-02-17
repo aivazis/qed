@@ -67,16 +67,6 @@ qed::py::channels::imaginaryHDF5Tile(
     // the range of values to render
     double min, double max) -> bmp_t
 {
-    // type aliases for the workflow nodes
-    // my decimator
-    using zoom_t = decimate_t<sourceT>;
-    // the imaginary selector
-    using selector_t = imaginary_t<zoom_t>;
-    // the normalizer
-    using norm_t = parametric_t<selector_t>;
-    // the color map
-    using colormap_t = gray_t<norm_t>;
-
     // compute the scale
     auto scale = 1 << zoom;
     // the shape of the data region is scaled by this
@@ -104,23 +94,8 @@ qed::py::channels::imaginaryHDF5Tile(
     // transfer
     dataset.read(source.data()->data(), dataset.getCompType(), writeSpace, readSpace);
 
-    // make a bitmap
-    bmp_t bmp(tile[0], tile[1]);
-
-    // zoom; we only transfer one zoomed tile's worth of data, so the decimator
-    // should always start at {0,0}
-    auto decimator = zoom_t(source, { 0, 0 }, tile, scale);
-    // extract the imaginary
-    auto selection = selector_t(decimator);
-    // map to the unit interval
-    auto norm = norm_t(selection, typename norm_t::interval_type(-1, 1));
-    // generate color
-    auto colormap = colormap_t(norm);
-    // and encode
-    bmp.encode(colormap);
-
-    // all done
-    return bmp;
+    // render and return
+    return imaginaryGridTile(source, zoom, { 0, 0 }, tile, -1, 1);
 }
 
 
