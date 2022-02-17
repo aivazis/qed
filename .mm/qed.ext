@@ -11,7 +11,7 @@ qed.ext.wraps := qed.lib
 # built with pybind11
 qed.ext.capsule :=
 # dependencies on external packages
-qed.ext.extern := qed.lib pyre pybind11 python
+qed.ext.extern := qed.lib pyre hdf5 ${if ${findstring mpi,${hdf5.parallel}},mpi} pybind11 python
 # compiler control
 qed.ext.lib.c++.flags += $($(compiler.c++).std.c++20)
 
