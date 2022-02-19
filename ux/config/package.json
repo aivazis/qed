@@ -17,6 +17,7 @@
         "@babel/plugin-proposal-export-default-from": "latest",
         "babel-loader": "latest",
         "babel-plugin-relay": "latest",
+        "babel-plugin-styled-components": "latest",
         "html-webpack-plugin": "latest",
         "relay-compiler": "latest",
         "ts-loader": "latest",
