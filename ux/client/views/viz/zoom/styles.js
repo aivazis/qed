@@ -33,18 +33,18 @@ const zoom = state => ({
         },
         attribute: {
             ...styles.meta.attribute,
-            ...zoomPaint.base.meta.entry,
-            ...zoomPaint[state].meta.entryibute
+            ...zoomPaint.base.meta.attribute,
+            ...zoomPaint[state].meta.attribute,
         },
         separator: {
             ...styles.meta.separator,
-            ...zoomPaint.base.meta.entry,
-            ...zoomPaint[state].meta.entryrator
+            ...zoomPaint.base.meta.sparator,
+            ...zoomPaint[state].meta.sparator,
         },
         value: {
             ...styles.meta.value,
-            ...zoomPaint.base.meta.entry,
-            ...zoomPaint[state].meta.entry
+            ...zoomPaint.base.meta.value,
+            ...zoomPaint[state].meta.value,
         },
     }
 })
