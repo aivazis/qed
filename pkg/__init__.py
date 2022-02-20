@@ -57,6 +57,7 @@ from . import ux             # support for the web client
 # specializations
 from . import isce2
 from . import nisar
+from . import alos
 
 
 # administrivia
