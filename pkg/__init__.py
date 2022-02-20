@@ -58,6 +58,7 @@ from . import ux             # support for the web client
 from . import isce2
 from . import nisar
 from . import alos
+from . import asar
 
 
 # administrivia
