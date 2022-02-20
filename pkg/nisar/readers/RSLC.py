@@ -6,12 +6,10 @@
 
 # support
 import qed
-# superclass
-from .H5 import H5
 
 
 # the RSLC reader
-class RSLC(H5, family="qed.nisar.readers.rslc"):
+class RSLC(qed.readers.h5, family="qed.nisar.readers.rslc"):
     """
     The reader of RSLC files
     """
