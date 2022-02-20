@@ -8,4 +8,8 @@
 from . import readers
 
 
+# alias the readers, since this is expected to be the most common use case
+rslc = readers.rslc
+
+
 # end of file
