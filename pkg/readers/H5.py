@@ -8,8 +8,8 @@
 import qed
 
 
-# the basic reader for NISAR products in HDF5 format
-class H5(qed.flow.factory, family="qed.nisar.readers.h5", implements=qed.protocols.reader):
+# the basic reader for products in HDF5 format
+class H5(qed.flow.factory, family="qed.readers.h5", implements=qed.protocols.reader):
     """
     The reader of HDF5 files
     """

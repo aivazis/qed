@@ -4,6 +4,7 @@
 # (c) 1998-2022 all rights reserved
 
 
+from .H5 import H5 as h5
 from .Raw import Raw as raw
 
 
