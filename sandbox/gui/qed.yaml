@@ -42,13 +42,13 @@ asar.data: "{pyre.environ.HOME}/dv/data/asar"
 
 
 # attach them to the application
-qed.app.datasets:
-    - qed.readers.raw#c8
-    - qed.readers.raw#c16
-    - qed.isce2.readers.rslc#LA-20061231
-    - qed.isce2.readers.rslc#LA-20070215
-    - qed.nisar.readers.rslc#hawaii
-    - qed.asar.readers.rslc#300621
+datasets:
+    - raw#c8
+    - raw#c16
+    - isce2.rslc#LA-20061231
+    - isce2.rslc#LA-20070215
+    - nisar.rslc#hawaii
+    - asar.rslc#300621
 
 
 # overall application configuration
