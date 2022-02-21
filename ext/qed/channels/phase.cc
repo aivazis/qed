@@ -20,7 +20,7 @@ qed::py::channels::phase(py::module & m)
     // add the bindings for {c8}
     m.def(
         // the name of the function
-        "phaseComplexFloatGrid",
+        "phase",
         // the handler
         &phaseGridTile<mapgrid_t<std::complex<float>>>,
         // the signature
@@ -30,7 +30,7 @@ qed::py::channels::phase(py::module & m)
     // and the bindings for {c16}
     m.def(
         // the name of the function
-        "phaseComplexDoubleGrid",
+        "phase",
         // the handler
         &phaseGridTile<mapgrid_t<std::complex<double>>>,
         // the signature
@@ -42,7 +42,7 @@ qed::py::channels::phase(py::module & m)
     // add the bindings for {c8}
     m.def(
         // the name of the function
-        "phaseComplexFloatHDF5",
+        "phase",
         // the handler
         &phaseHDF5Tile<heapgrid_t<std::complex<float>>>,
         // the signature
@@ -52,7 +52,7 @@ qed::py::channels::phase(py::module & m)
     // and the bindings for {c16}
     m.def(
         // the name of the function
-        "phaseComplexDoubleHDF5",
+        "phase",
         // the handler
         &phaseHDF5Tile<heapgrid_t<std::complex<double>>>,
         // the signature

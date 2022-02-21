@@ -19,7 +19,7 @@ qed::py::channels::complex(py::module & m)
     // add the bindings for {c8}
     m.def(
         // the name of the function
-        "complexComplexFloatGrid",
+        "complex",
         // the handler
         &complexGridTile<mapgrid_t<std::complex<float>>>,
         // the signature
@@ -29,7 +29,7 @@ qed::py::channels::complex(py::module & m)
     // and the bindings for {c16}
     m.def(
         // the name of the function
-        "complexComplexDoubleGrid",
+        "complex",
         // the handler
         &complexGridTile<mapgrid_t<std::complex<double>>>,
         // the signature
@@ -41,7 +41,7 @@ qed::py::channels::complex(py::module & m)
     // add the bindings for {c8}
     m.def(
         // the name of the function
-        "complexComplexFloatHDF5",
+        "complex",
         // the handler
         &complexHDF5Tile<heapgrid_t<std::complex<float>>>,
         // the signature
@@ -51,7 +51,7 @@ qed::py::channels::complex(py::module & m)
     // and the bindings for {c16}
     m.def(
         // the name of the function
-        "complexComplexDoubleHDF5",
+        "complex",
         // the handler
         &complexHDF5Tile<heapgrid_t<std::complex<double>>>,
         // the signature

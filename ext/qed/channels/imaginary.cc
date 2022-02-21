@@ -20,7 +20,7 @@ qed::py::channels::imaginary(py::module & m)
     // add the bindings for {c8}
     m.def(
         // the name of the function
-        "imaginaryComplexFloatGrid",
+        "imaginary",
         // the handler
         &imaginaryGridTile<mapgrid_t<std::complex<float>>>,
         // the signature
@@ -30,7 +30,7 @@ qed::py::channels::imaginary(py::module & m)
     // and the bindings for {c16}
     m.def(
         // the name of the function
-        "imaginaryComplexDoubleGrid",
+        "imaginary",
         // the handler
         &imaginaryGridTile<mapgrid_t<std::complex<double>>>,
         // the signature
@@ -42,7 +42,7 @@ qed::py::channels::imaginary(py::module & m)
     // add the bindings for {c8}
     m.def(
         // the name of the function
-        "imaginaryComplexFloatHDF5",
+        "imaginary",
         // the handler
         &imaginaryHDF5Tile<heapgrid_t<std::complex<float>>>,
         // the signature
@@ -52,7 +52,7 @@ qed::py::channels::imaginary(py::module & m)
     // and the bindings for {c16}
     m.def(
         // the name of the function
-        "imaginaryComplexDoubleHDF5",
+        "imaginary",
         // the handler
         &imaginaryHDF5Tile<heapgrid_t<std::complex<double>>>,
         // the signature

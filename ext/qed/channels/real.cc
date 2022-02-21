@@ -20,7 +20,7 @@ qed::py::channels::real(py::module & m)
     // add the bindings for {c8}
     m.def(
         // the name of the function
-        "realComplexFloatGrid",
+        "real",
         // the handler
         &realGridTile<mapgrid_t<std::complex<float>>>,
         // the signature
@@ -30,7 +30,7 @@ qed::py::channels::real(py::module & m)
     // and the bindings for {c16}
     m.def(
         // the name of the function
-        "realComplexDoubleGrid",
+        "real",
         // the handler
         &realGridTile<mapgrid_t<std::complex<double>>>,
         // the signature
@@ -42,7 +42,7 @@ qed::py::channels::real(py::module & m)
     // add the bindings for {c8}
     m.def(
         // the name of the function
-        "realComplexFloatHDF5",
+        "real",
         // the handler
         &realHDF5Tile<heapgrid_t<std::complex<float>>>,
         // the signature
@@ -52,7 +52,7 @@ qed::py::channels::real(py::module & m)
     // and the bindings for {c16}
     m.def(
         // the name of the function
-        "realComplexDoubleHDF5",
+        "real",
         // the handler
         &realHDF5Tile<heapgrid_t<std::complex<double>>>,
         // the signature

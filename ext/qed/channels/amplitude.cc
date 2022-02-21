@@ -20,7 +20,7 @@ qed::py::channels::amplitude(py::module & m)
     // add the bindings for {c8}
     m.def(
         // the name of the function
-        "amplitudeComplexFloatGrid",
+        "amplitude",
         // the handler
         &amplitudeGridTile<mapgrid_t<std::complex<float>>>,
         // the signature
@@ -30,7 +30,7 @@ qed::py::channels::amplitude(py::module & m)
     // and the bindings for {c16}
     m.def(
         // the name of the function
-        "amplitudeComplexDoubleGrid",
+        "amplitude",
         // the handler
         &amplitudeGridTile<mapgrid_t<std::complex<double>>>,
         // the signature
@@ -42,7 +42,7 @@ qed::py::channels::amplitude(py::module & m)
     // add the bindings for {c8}
     m.def(
         // the name of the function
-        "amplitudeComplexFloatHDF5",
+        "amplitude",
         // the handler
         &amplitudeHDF5Tile<heapgrid_t<std::complex<float>>>,
         // the signature
@@ -52,7 +52,7 @@ qed::py::channels::amplitude(py::module & m)
     // and the bindings for {c16}
     m.def(
         // the name of the function
-        "amplitudeComplexDoubleHDF5",
+        "amplitude",
         // the handler
         &amplitudeHDF5Tile<heapgrid_t<std::complex<double>>>,
         // the signature
