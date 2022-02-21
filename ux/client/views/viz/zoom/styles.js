@@ -50,62 +50,8 @@ const zoom = state => ({
 })
 
 
-// styling for the controller
-// colors for the parts
-const ink = "hsl(0deg, 0%, 60%)"
-const paint = "hsl(0deg, 0%, 20%)"
-const detail = "hsl(0deg, 0%, 40%)"
-const highlight = theme.page.name
-
-
-// the svg box that houses the control
-const controller = {
-    margin: "1.0rem auto",
-    backgroundColor: "hsl(0deg, 0%, 10%)",
-}
-
-
-// the axis
-const axis = {
-    fill: "none",
-    stroke: ink,
-    strokeWidth: 1,
-    vectorEffect: "non-scaling-stroke",
-}
-
-
-// tick marks
-const majorTickmark = {
-    fill: "none",
-    stroke: detail,
-    strokeWidth: 1,
-    vectorEffect: "non-scaling-stroke",
-}
-
-
-// the indicator has state dependent paint
-const indicator = ({ state, polish }) => ({
-    ...indicatorPaint.base,
-    ...indicatorPaint[state],
-    ...(polish ? indicatorPaint["available"] : null)
-})
-
-
-// so do the labels
-const label = ({ state, polish }) => ({
-    ...labelPaint.base,
-    ...labelPaint[state],
-    ...(polish ? labelPaint["available"] : null)
-})
-
-
 // publish
 export default {
-    axis,
-    controller,
-    indicator,
-    label,
-    majorTickmark,
     zoom,
 }
 
@@ -184,67 +130,6 @@ const zoomPaint = {
             separator: {},
             value: {},
         },
-    },
-}
-
-
-// for the indicator
-const indicatorPaint = {
-    base: {
-        cursor: "pointer",
-        strokeWidth: 2,
-        vectorEffect: "non-scaling-stroke",
-    },
-
-    disabled: {
-        cursor: "default",
-        fill: paint,
-        stroke: paint,
-    },
-
-    enabled: {
-        fill: paint,
-        stroke: ink,
-    },
-
-    selected: {
-        fill: highlight,
-        stroke: highlight,
-    },
-
-    available: {
-        fill: highlight,
-        stroke: highlight,
-    },
-}
-
-
-// for the indicator
-const labelPaint = {
-    base: {
-        fontFamily: "inconsolata",
-        fontSize: "30px",
-        textAnchor: "middle",
-        stroke: "none",
-    },
-
-    disabled: {
-        cursor: "default",
-        fill: paint,
-    },
-
-    enabled: {
-        cursor: "pointer",
-        fill: ink,
-    },
-
-    selected: {
-        cursor: "default",
-        fill: highlight,
-    },
-
-    available: {
-        fill: highlight,
     },
 }
 
