@@ -32,13 +32,9 @@ export const Slider = (props) => {
 
 
 //  display the zoom control
-const Controller = ({ value, setValue, ...config }) => {
-    // state
-    const enabled = true
-
+const Controller = ({ value, setValue, enabled, ...config }) => {
     // construct the layout
     const geometry = layout(config)
-
     // render
     return (
         <Placemat setValue={setValue} geometry={geometry} enabled={enabled} >
