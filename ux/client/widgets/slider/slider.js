@@ -48,7 +48,7 @@ const Controller = ({ value, setValue, ...config }) => {
             <Placemat geometry={geometry} />
             <Major geometry={geometry} />
             <Axis geometry={geometry} />
-            <Labels value={value} geometry={geometry} enabled={enabled} />
+            <Labels value={value} setValue={setValue} geometry={geometry} enabled={enabled} />
             <Marker geometry={geometry} value={value} enabled={enabled} />
         </g>
     )

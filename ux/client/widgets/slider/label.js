@@ -10,7 +10,7 @@ import styled from 'styled-components'
 
 
 // render a single label
-export const Label = ({ tick, value, geometry, enabled }) => {
+export const Label = ({ tick, value, setValue, geometry, enabled }) => {
     // unpack the geometry
     const { arrow, labels, labelPosition } = geometry
 
@@ -25,9 +25,17 @@ export const Label = ({ tick, value, geometry, enabled }) => {
     // pick an implementation based on my state
     const Tick = enabled ? (selected ? Selected : Enabled) : Disabled
 
+    // set up my behaviors
+    const behaviors = {}
+    // when i'm enabled but not selected
+    if (enabled && !selected) {
+        // on click, set the value
+        behaviors["onClick"] = () => setValue(tick)
+    }
+
     // render
     return (
-        <Tick {...labelPosition(tick)} >
+        <Tick {...labelPosition(tick)} {...behaviors} >
             {tick}
         </Tick>
     )

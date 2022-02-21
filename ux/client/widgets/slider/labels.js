@@ -15,7 +15,7 @@ import { Label } from './label'
 
 
 // render the labels
-export const Labels = ({ value, geometry, enabled }) => {
+export const Labels = ({ value, setValue, geometry, enabled }) => {
     // get the major tick marks
     const { major } = geometry
 
@@ -23,7 +23,9 @@ export const Labels = ({ value, geometry, enabled }) => {
     return (
         <>
             {major.map(tick => (
-                <Label key={tick} tick={tick} value={value} geometry={geometry} enabled={enabled} />
+                <Label key={tick}
+                    tick={tick} value={value} setValue={setValue}
+                    geometry={geometry} enabled={enabled} />
             ))}
         </>
     )
