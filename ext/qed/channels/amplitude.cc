@@ -8,7 +8,7 @@
 #include "external.h"
 // namespace setup
 #include "forward.h"
-// tamplitude channels
+// amplitude channels
 #include "amplitude.h"
 
 
