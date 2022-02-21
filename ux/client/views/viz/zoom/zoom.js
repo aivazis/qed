@@ -52,18 +52,23 @@ export const Zoom = () => {
     return (
         <Tray title="zoom" initially={true} style={zoomPaint.tray}>
             {/* the control housing */}
-            <Housing height={slider.height} width={slider.width} style={controllerPaint}>
+            <Housing height={slider.height} width={slider.width}>
                 {/* the slider */}
-                <Slider enabled={enabled} {...slider} />
+                <Controller enabled={enabled} {...slider} />
             </Housing>
         </Tray>
     )
 }
 
 
-// the housing
+// the slider housing
 const Housing = styled(SVG)`
     margin: 1.0rem auto;
+`
+
+
+// the controller
+const Controller = styled(Slider)`
 `
 
 
