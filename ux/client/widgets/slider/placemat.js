@@ -20,7 +20,7 @@ import { useStopSliding } from './useStopSliding'
 
 // a workaround for capturing events in the controller client area
 // needed only because {pointer-events: bounding-box} doesn't work yet
-export const Placemat = ({ setValue, geometry, children, ...rest }) => {
+export const Placemat = ({ setValue, geometry, enabled, children, ...rest }) => {
     // make a ref to attach to the placemat so we can measure its extent
     const placemat = React.useRef(null)
     // get the {sliding} flag
@@ -31,57 +31,60 @@ export const Placemat = ({ setValue, geometry, children, ...rest }) => {
     // unpack the geometry
     const { boundingBox, mouseToUser, place } = geometry
 
-    // handler that converts mouse coordinates to user space and invokes {setValue} to inform
-    // the client
-    const pick = evt => {
-        // measure the placemat bounding box
-        const box = placemat.current.getBoundingClientRect()
-        // transform the mouse coordinates into a user value
-        const value = mouseToUser(box, evt)
-        // notify the client
-        setValue(value)
-        // and done
-        return
-    }
-
-    // handler that checks whether the marker is being dragged before converting
-    // mouse coordinates to user space
-    const drag = evt => {
-        // if the indicator is not being dragged
-        if (!sliding) {
-            // do nothing
+    // if the slider is {enabled}
+    if (enabled) {
+        // handler that converts mouse coordinates to user space and invokes {setValue} to inform
+        // the client
+        const pick = evt => {
+            // measure the placemat bounding box
+            const box = placemat.current.getBoundingClientRect()
+            // transform the mouse coordinates into a user value
+            const value = mouseToUser(box, evt)
+            // notify the client
+            setValue(value)
+            // and done
             return
         }
-        // otherwise, {pick} a value
-        pick(evt)
-        // all done
-        return
+
+        // handler that checks whether the marker is being dragged before converting
+        // mouse coordinates to user space
+        const drag = evt => {
+            // if the indicator is not being dragged
+            if (!sliding) {
+                // do nothing
+                return
+            }
+            // otherwise, {pick} a value
+            pick(evt)
+            // all done
+            return
+        }
+
+        // install the mouse event listeners
+        // when the use clicks anywhere inside the {placemat}
+        useEvent({
+            name: "click", listener: pick, client: placemat,
+            triggers: [setValue]
+        })
+
+        // the mouse down is attached to the indicator
+        // when the mouse drags
+        useEvent({
+            name: "mousemove", listener: drag, client: placemat,
+            triggers: [sliding, setValue]
+        })
+
+        // dragging ends when the user lets go of the mouse button
+        useEvent({
+            name: "mouseup", listener: stopSliding, client: placemat,
+            triggers: []
+        })
+        // or when the mouse leaves the placemat
+        useEvent({
+            name: "mouseleave", listener: stopSliding, client: placemat,
+            triggers: []
+        })
     }
-
-    // install the mouse event listeners
-    // when the use clicks anywhere inside the {placemat}
-    useEvent({
-        name: "click", listener: pick, client: placemat,
-        triggers: [setValue]
-    })
-
-    // the mouse down is attached to the indicator
-    // when the mouse drags
-    useEvent({
-        name: "mousemove", listener: drag, client: placemat,
-        triggers: [sliding, setValue]
-    })
-
-    // dragging ends when the user lets go of the mouse button
-    useEvent({
-        name: "mouseup", listener: stopSliding, client: placemat,
-        triggers: []
-    })
-    // or when the mouse leaves the placemat
-    useEvent({
-        name: "mouseleave", listener: stopSliding, client: placemat,
-        triggers: []
-    })
 
     // render
     // N.B.: attach the {ref} to the group and not the {rect} that fills the bounding box;
