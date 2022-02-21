@@ -25,6 +25,7 @@ PYBIND11_MODULE(qed, m)
 
     // plugins
     qed::py::channels::channels(m);
+    qed::py::datasets::datasets(m);
 }
 
 

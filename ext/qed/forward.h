@@ -27,6 +27,11 @@ namespace qed::py {
         // the initializer; everything else is private to the subpackage
         void channels(py::module &);
     }
+    // datasets subpackage
+    namespace datasets {
+        // the initializer; everything else is private to the subpackage
+        void datasets(py::module &);
+    }
 }
 
 
