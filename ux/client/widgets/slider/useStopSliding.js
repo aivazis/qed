@@ -14,7 +14,7 @@ import { Context } from "./context"
 
 
 // start choosing a new slider value
-export const useEndSliding = () => {
+export const useStopSliding = () => {
     // grab the mutator of the sliding indicator
     const { setSliding } = React.useContext(Context)
 
