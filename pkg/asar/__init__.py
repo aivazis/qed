@@ -5,7 +5,6 @@
 
 
 # publish
-from . import datasets
 from . import readers
 
 
