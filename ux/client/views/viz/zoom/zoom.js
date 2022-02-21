@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import styled from 'styled-components'
 
 // project
 // widgets
@@ -32,31 +33,38 @@ export const Zoom = () => {
     // inspect the view components to initialize my state
     const enabled = reader && dataset && channel
 
-    // level range
+    // set the zoom level range
     const [min, max] = [0, 4]
+    // set up the tick marks
+    const major = [...Array(max - min + 1).keys()].map((_, idx) => min + idx)
     // slider configuration
-    const slideConf = {
+    const slider = {
         value: zoom, setValue: setZoom,
+        min, max, major,
         direction: "row", labels: "bottom", arrow: "top",
         height: 50, width: 200,
-        min, max, major: [...Array(max - min + 1).keys()].map((_, idx) => min + idx)
     }
 
     // mix my paint
     const zoomPaint = styles.zoom(enabled ? "enabled" : "disabled")
-    const controllerPaint = styles.controller
 
     // and render
     return (
         <Tray title="zoom" initially={true} style={zoomPaint.tray}>
             {/* the control housing */}
-            <SVG height={50} width={200} style={controllerPaint}>
+            <Housing height={slider.height} width={slider.width} style={controllerPaint}>
                 {/* the slider */}
-                <Slider enabled={enabled} {...slideConf} />
-            </SVG>
+                <Slider enabled={enabled} {...slider} />
+            </Housing>
         </Tray>
     )
 }
+
+
+// the housing
+const Housing = styled(SVG)`
+    margin: 1.0rem auto;
+`
 
 
 // end of file
