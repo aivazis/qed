@@ -46,7 +46,7 @@ export const Label = ({ tick, value, setValue, geometry, enabled }) => {
 // the base
 const Base = styled.text`
     font-family: inconsolata;
-    font-size: 36px;
+    font-size: 32px;
     text-anchor: middle;
     cursor: default;
 `
