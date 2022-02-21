@@ -21,12 +21,7 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         Generate a tile of the given characteristics
         """
         # get my name
-        channel = self.tag
-        # get the source data type
-        dtype = source.cell.tag
-        # splice them together
-        name = f"{channel}{dtype}{source.storageClass}"
-
+        name = self.tag
         # look for the tile maker in {libqed}
         tileMaker = getattr(qed.libqed.channels, name)
 
