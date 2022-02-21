@@ -25,7 +25,6 @@ PYBIND11_MODULE(qed, m)
 
     // plugins
     qed::py::channels::channels(m);
-    qed::py::isce2::isce2(m);
 }
 
 
