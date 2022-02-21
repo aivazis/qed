@@ -6,7 +6,7 @@
 
 // construct the geometrical aspects of the controller
 export const layout = ({
-    // user coorsinate system
+    // user coordinate system
     min, max, major = [min, max],
     // viewport coordinates system
     width, height,
@@ -36,11 +36,11 @@ export const layout = ({
     // my main size is now determined by my aspect ratio
     const iMain = main / ils
 
-    // the transofrmation that scales the control
+    // the transformation that scales the control
     const scale = `scale(${ils})`
-    // the transofrmation that centers the control along the cross axis
+    // the transformation that centers the control along the cross axis
     const center = row ? `translate(0 ${5 * cell})` : `translate(${5 * cell} 0)`
-    // assemble the transofrm that places the control on the screen
+    // assemble the transform that places the control on the screen
     const place = `${scale} ${center}`
     // and express the bounding box in these coordinates
     const boundingBox = {
@@ -63,9 +63,15 @@ export const layout = ({
     // the scaling factor for projecting viewport coordinates to user values
     const viewportScale = (max - min) / (iMain - 2 * margin)
     // project mouse coordinates to user values
-    const mouseToUser = pixels => {
+    const mouseToUser = (box, evt) => {
+        // locate the leading edge
+        const edge = row ? box.left : box.top
+        // get the mouse coordinates
+        const mouse = row ? evt.clientX : evt.clientY
+        // get the offset within the area of the controller
+        const pixels = mouse - edge
         // project
-        const value = min + viewportScale * (pixels * ils - margin)
+        const value = min + viewportScale * (pixels / ils - margin)
         // clip and return
         return Math.min(Math.max(value, min), max)
     }
