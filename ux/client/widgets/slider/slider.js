@@ -6,7 +6,6 @@
 
 // externals
 import React from 'react'
-import styled from 'styled-components'
 
 // locals
 // geometry
@@ -39,18 +38,15 @@ const Controller = ({ value, setValue, ...config }) => {
 
     // construct the layout
     const geometry = layout(config)
-    // unpack
-    const { place } = geometry
 
     // render
     return (
-        <g transform={place} >
-            <Placemat geometry={geometry} />
+        <Placemat setValue={setValue} geometry={geometry} enabled={enabled} >
             <Major geometry={geometry} />
             <Axis geometry={geometry} />
             <Labels value={value} setValue={setValue} geometry={geometry} enabled={enabled} />
             <Marker geometry={geometry} value={value} enabled={enabled} />
-        </g>
+        </Placemat>
     )
 }
 
