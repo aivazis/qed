@@ -14,7 +14,7 @@ import { Context } from "./context"
 
 
 // provide access to the {sliding} flag
-export const useStartSliding = () => {
+export const useSliding = () => {
     // grab the sliding indicator
     const { sliding } = React.useContext(Context)
     // and return it
