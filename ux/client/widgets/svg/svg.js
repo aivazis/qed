@@ -6,25 +6,25 @@
 
 // externals
 import React from 'react'
-
-// locals
-// styles
-import styles from './styles'
+import styled from 'styled-components'
 
 
 // export the SVG wrapper
-export const SVG = ({ height, width, style, children, ...rest }) => {
-    // mix my paint
-    const paint = styles.svg(style)
+export const SVG = ({ height, width, children, ...rest }) => {
     // and render
     return (
-        <svg version="2.0" xmlns="http://www.w3.org/2000/svg"
-            height={height} width={width} style={paint} {...rest}
+        <Container
+            height={height} width={width} {...rest}
+            version="2.0" xmlns="http://www.w3.org/2000/svg"
         >
             {children}
-        </svg>
+        </Container>
     )
 }
+
+
+// styling
+const Container = styled.svg``
 
 
 // end of file
