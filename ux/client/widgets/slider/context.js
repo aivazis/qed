@@ -11,12 +11,12 @@ import React from "react"
 // the provider factory
 export const Provider = ({ children }) => {
     // make a flag that indicates that the user has started dragging the marker
-    const [picking, setPicking] = React.useState(false)
+    const [sliding, setSliding] = React.useState(false)
 
     // build the initial context value
     const context = {
-        // the picking flag and its mutator
-        picking, setPicking,
+        // the sliding flag and its mutator
+        sliding, setSliding,
 
     }
 
@@ -33,8 +33,8 @@ export const Provider = ({ children }) => {
 export const Context = React.createContext(
     // the default value clients see when accessing the context outside a provider
     {
-        picking: null,
-        setPicking: () => { throw new Error(complaint) },
+        sliding: null,
+        setSliding: () => { throw new Error(complaint) },
     }
 )
 

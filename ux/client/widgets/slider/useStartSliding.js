@@ -14,14 +14,14 @@ import { Context } from "./context"
 
 
 // start choosing a new slider value
-export const useStartPicking = () => {
-    // grab the mutator of the picking indicator
-    const { setPicking } = React.useContext(Context)
+export const useStartSliding = () => {
+    // grab the mutator of the sliding indicator
+    const { setSliding } = React.useContext(Context)
 
     // make a handler
     const start = () => {
         // that sets the flag
-        setPicking(true)
+        setSliding(true)
         // all done
         return
     }

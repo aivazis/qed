@@ -13,12 +13,12 @@ import React from "react"
 import { Context } from "./context"
 
 
-// provide access to the {picking} flag
-export const useStartPicking = () => {
-    // grab the picking indicator
-    const { picking } = React.useContext(Context)
+// provide access to the {sliding} flag
+export const useStartSliding = () => {
+    // grab the sliding indicator
+    const { sliding } = React.useContext(Context)
     // and return it
-    return picking
+    return sliding
 }
 
 

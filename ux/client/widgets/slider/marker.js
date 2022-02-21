@@ -10,15 +10,15 @@ import styled from 'styled-components'
 
 // local
 // hooks
-import { useStartPicking } from './useStartPicking'
+import { useStartSliding } from './useStartSliding'
 
 
 // render the value indicator
 export const Marker = ({ value, geometry, enabled, ...rest }) => {
     // make a handler that indicates the user is dragging the marker to pick a new value
-    const startPicking = useStartPicking()
+    const startSliding = useStartSliding()
 
-    // unpack the gometry
+    // unpack the geometry
     const { marker, markerPosition } = geometry
     // pick a styling based on my state
     const Indicator = enabled ? Enabled : Disabled
@@ -26,7 +26,7 @@ export const Marker = ({ value, geometry, enabled, ...rest }) => {
     // set up my event handlers
     const behaviors = enabled ? {
         // when the user clicks in my client area, start modifying the value
-        onMouseDown: () => startPicking()
+        onMouseDown: () => startSliding()
     } : {}
 
     // render
