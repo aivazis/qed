@@ -103,7 +103,7 @@ qed::py::channels::complexHDF5Tile(
     dataset.read(source.data()->data(), dataset.getCompType(), writeSpace, readSpace);
 
     // render and return
-    return complexGridTile(source, zoom, { 0, 0 }, tile, min, 1, saturation);
+    return complexGridTile(source, zoom, { 0, 0 }, tile, min, max, saturation);
 }
 
 

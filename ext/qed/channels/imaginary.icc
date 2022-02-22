@@ -95,7 +95,7 @@ qed::py::channels::imaginaryHDF5Tile(
     dataset.read(source.data()->data(), dataset.getCompType(), writeSpace, readSpace);
 
     // render and return
-    return imaginaryGridTile(source, zoom, { 0, 0 }, tile, -1, 1);
+    return imaginaryGridTile(source, zoom, { 0, 0 }, tile, min, max);
 }
 
 

@@ -95,7 +95,7 @@ qed::py::channels::amplitudeHDF5Tile(
     dataset.read(source.data()->data(), dataset.getCompType(), writeSpace, readSpace);
 
     // and render
-    return amplitudeGridTile(source, zoom, { 0, 0 }, tile, min, 1);
+    return amplitudeGridTile(source, zoom, { 0, 0 }, tile, min, max);
 }
 
 
