@@ -11,7 +11,7 @@ export const layout = ({
     // viewport coordinates system
     width, height,
     // controller configuration
-    direction = "row", labels = "bottom", arrow = "top",
+    direction = "row", labels = "bottom", arrows = "top",
 }) => {
     // my cell size
     const cell = 10
@@ -110,15 +110,15 @@ export const layout = ({
 
     // all done
     return {
-        arrow,
+        arrows,
         axis,
         boundingBox,
         cell,
         cross,
         crossName,
         direction,
-        marker: marker[arrow],
-        markerPosition: markerPosition[arrow],
+        marker: marker[arrows],
+        markerPosition: markerPosition[arrows],
         height,
         iCross,
         ils,

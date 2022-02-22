@@ -12,12 +12,12 @@ import styled from 'styled-components'
 // render a single label
 export const Label = ({ tick, value, setValue, geometry, enabled }) => {
     // unpack the geometry
-    const { arrow, labels, labelPosition } = geometry
+    const { arrows, labels, labelPosition } = geometry
 
     // check whether my value is the currently chosen one
     const selected = tick == value
     // if so, and the marker is on the same side of the axis as the labels
-    if (selected && arrow === labels) {
+    if (selected && arrows === labels) {
         // the marker gets drawn in my place; bail
         return null
     }
