@@ -97,6 +97,39 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
         return data
 
 
+    def stats(self):
+        """
+        Compute statistics on a sample of my data
+        """
+        # get my stats
+        stats = self._stats
+        # if already computed
+        if stats is not None:
+            # return whatever i have
+            return stats
+
+        # get my data
+        data = self.data
+        # and my shape
+        shape = self.shape
+
+        # make a tile that fits within my shape
+        tile = tuple(min(256, s) for s in shape)
+        # center it in my shape
+        center = tuple((s-t)//2 for s,t in zip(shape, tile))
+
+        # otherwise, we need a sample of my data; go to the center of the dataset
+        center = qed.libpyre.grid.Index2D(index=center)
+        # make a 256x256 tile
+        tile = qed.libpyre.grid.Shape2D(shape=tile)
+        # compute the stats
+        stats = qed.libqed.datasets.stats(source=data, zoom=0, origin=center, shape=tile)
+        # attach them
+        self._stats = stats
+        # and return them
+        return stats
+
+
     def close(self):
         """
         Shutdown my data source
@@ -113,13 +146,10 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
         super().__init__(**kwds)
         # make a placeholder for my data object
         self._data = None
+        # stats on some sample of my data
+        self._stats = None
         # all done
         return
-
-
-    # implementation details
-    # hint for the tile maker
-    storageClass = "Grid"
 
 
 # end of file
