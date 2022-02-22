@@ -41,7 +41,7 @@ export const Zoom = () => {
     const slider = {
         value: zoom, setValue: setZoom,
         min, max, major,
-        direction: "row", labels: "bottom", arrow: "top",
+        direction: "row", labels: "bottom", arrows: "top",
         height: 50, width: 200,
     }
 
