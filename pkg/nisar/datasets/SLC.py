@@ -56,6 +56,14 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
         return self.channels[name]
 
 
+    def stats(self):
+        """
+        Compute statistics on a sample of my data
+        """
+        # i did this at construction time
+        return self._stats
+
+
     # metamethods
     def __init__(self, uri, data, frequency, polarization, **kwds):
         # chain up
@@ -78,13 +86,37 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
             # and instantiate a workflow for each one
             self.channels[channel] = channel
 
+        # collect statistics from a sample of my data
+        self._stats = self._collectStatistics()
+
         # all done
         return
 
 
-    # constants
-    # hint for the tile maker
-    storageClass = "HDF5"
+    # implementation details
+    def _collectStatistics(self):
+        """
+        Collect statistics from a sample of my data
+        """
+        # get my shape
+        shape = self.shape
+        # and my data
+        data = self.data
+
+        # make a tile that fits within my shape
+        tile = tuple(min(256, s) for s in shape)
+        # center it in my shape
+        center = tuple((s-t)//2 for s,t in zip(shape, tile))
+
+        # convert to a grid index
+        center = qed.libpyre.grid.Index2D(index=center)
+        # and a shape
+        tile = qed.libpyre.grid.Shape2D(shape=tile)
+        # compute the stats
+        stats = qed.libqed.datasets.stats(source=data, zoom=0, origin=center, shape=tile)
+
+        # and return them
+        return stats
 
 
 # end of file
