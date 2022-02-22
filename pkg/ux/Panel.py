@@ -30,12 +30,6 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         """
         Generate a BMP encoded tile from the supplied specification
         """
-        # encode the tile
-        tile = "x".join(map(str, origin)) + "+" + "x".join(map(str, shape))
-        # make a channel
-        chnl = journal.debug("qed.ux.panel")
-        chnl.log(f"{data} {channel} {zoom} {tile}")
-
         # look up the dataset
         dataset = self.dataset(name=data)
         # get the viz flow associated with the selected {channel}
