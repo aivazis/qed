@@ -12,6 +12,9 @@
 namespace qed::py::datasets {
     // the subpackage intializaer
     void datasets(py::module &);
+
+    // interface
+    void stats(py::module &);
 }
 
 

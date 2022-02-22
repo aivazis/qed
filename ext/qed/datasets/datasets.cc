@@ -21,6 +21,9 @@ qed::py::datasets::datasets(py::module & m)
         // its docstring
         "support for dataset specific operations");
 
+    // add the interface
+    stats(datasets);
+
     // all done
     return;
 }

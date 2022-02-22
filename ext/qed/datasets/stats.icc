@@ -1,0 +1,113 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2022 all rights reserved
+
+// code guard
+#if !defined(qed_py_datasets_stats_icc)
+#error this file contains implementation details for qed::py::datasets::stats
+#else
+
+
+// collect statistics on a grid tile
+template <typename sourceT>
+auto
+qed::py::datasets::statsGrid(
+    // the source
+    const sourceT & source,
+    // the zoom level
+    int zoom,
+    // the origin of the tile
+    typename sourceT::index_type origin,
+    // the tile shape
+    typename sourceT::shape_type tile) -> stats_t
+{
+    // my stats
+    int samples = 0;
+    double sum = 0.0;
+    double min = 0, mean = 0, max = 0;
+
+    // get the sample
+    auto box = source.box(origin, tile);
+
+    // go through the data
+    for (auto z : box) {
+        // compute the magnitude
+        double r = std::abs(z);
+        // update the stats
+        min = std::min(min, r);
+        max = std::max(max, r);
+        // update the
+        sum += r;
+        ++samples;
+    }
+
+    // all done
+    return { min, sum / samples, max };
+}
+
+
+template <typename sourceT>
+auto
+qed::py::datasets::statsHDF5(
+    // the source
+    const dataset_t & dataset,
+    // the zoom level
+    int zoom,
+    // the origin of the tile
+    typename sourceT::index_type origin,
+    // the tile shape
+    typename sourceT::shape_type tile) -> stats_t
+{
+    // compute the scale
+    auto scale = 1 << zoom;
+    // the shape of the data region is scaled by this
+    auto region = typename sourceT::shape_type(scale * tile);
+    // and so is the origin
+    auto from = typename sourceT::index_type(scale * origin);
+
+    // allocate my source
+    auto source = sourceT(typename sourceT::packing_type(region), region.cells());
+
+    // copy the HDF5 data
+    // we read from
+    hsize_t readFrom[2] = { static_cast<hsize_t>(from[0]), static_cast<hsize_t>(from[1]) };
+    // the amount of data we transfer
+    hsize_t count[2] = { static_cast<hsize_t>(region[0]), static_cast<hsize_t>(region[1]) };
+
+    // get the dataspace of the dataset
+    auto readSpace = dataset.getSpace();
+    // select the hyperslab that corresponds to the tile we want to extract
+    readSpace.selectHyperslab(H5S_SELECT_SET, count, readFrom);
+
+    // make a dataspace for the destination
+    auto writeSpace = dataspace_t(2, count);
+
+    // transfer
+    dataset.read(source.data()->data(), dataset.getCompType(), writeSpace, readSpace);
+
+    // my stats
+    int samples = 0;
+    double sum = 0.0;
+    double min = 0, mean = 0, max = 0;
+
+    // go through the data
+    for (auto z : source) {
+        // compute the magnitude
+        double r = std::abs(z);
+        // update the stats
+        min = std::min(min, r);
+        max = std::max(max, r);
+        // update the count
+        sum += r;
+        ++samples;
+    }
+
+    // all done
+    return { min, sum / samples, max };
+}
+
+
+#endif
+
+// end of file
