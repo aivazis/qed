@@ -22,10 +22,10 @@ class Complex(Channel, family="qed.channels.complex"):
 
 
    # user configurable state
-   min = qed.properties.float(default=0)
+   min = qed.properties.float(default=None)
    min.doc = "the minimum value; anything below is underflow"
 
-   max = qed.properties.float(default=1000)
+   max = qed.properties.float(default=None)
    max.doc = "the maximum value; anything above is overflow"
 
    saturation = qed.properties.float(default=1.0)
@@ -33,12 +33,27 @@ class Complex(Channel, family="qed.channels.complex"):
 
 
    # interface
-   def tile(self, **kwds):
+   def tile(self, source, **kwds):
       """
       Generate a tile of the given characteristics
       """
+      # get my range
+      low = self.min
+      high = self.max
+      # if either is uninitialized
+      if low is None or high is None:
+         # extract from the dataset
+         low, mean, high = source.stats()
+         # adjust
+         high = min(high, 4*mean)
+         # and remember for next time
+         self.min = low
+         self.max = high
+
       # add my configuration and chain up
-      return super().tile(min=self.min, max=self.max, saturation=self.saturation, **kwds)
+      return super().tile(source=source,
+                          min=low, max=high, saturation=self.saturation,
+                         **kwds)
 
 
 # end of file
