@@ -64,7 +64,7 @@ const Enabled = styled(Base)`
     }
 
     &:hover {
-        fill: hsl(0deg, 0%, 75%);
+        fill: hsl(28deg, 90%, 55%);
     }
 
     &:active {

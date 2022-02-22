@@ -59,8 +59,8 @@ const Enabled = styled.path`
     }
 
     &:hover {
-        fill: hsl(0deg, 0%, 75%);
-        stroke: hsl(0deg, 0%, 75%);
+        fill: hsl(28deg, 90%, 55%);
+        stroke: hsl(28deg, 90%, 55%);
     }
 
     &:active {
