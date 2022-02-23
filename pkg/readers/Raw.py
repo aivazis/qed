@@ -40,7 +40,7 @@ class Raw(qed.flow.factory, family="qed.readers.raw", implements=qed.protocols.r
         super().__init__(**kwds)
 
         # there is only one dataset in the file and it is structurally trivial
-        dataset = qed.datasets.raw()
+        dataset = qed.datasets.raw(name=f"{self.pyre_name}.data")
 
         # decorate it
         dataset.uri = self.uri
@@ -49,8 +49,10 @@ class Raw(qed.flow.factory, family="qed.readers.raw", implements=qed.protocols.r
         dataset.tile = self.cell.tile
         # go through the default channels provided by the data type
         for channel in self.cell.channels:
+            # get their factories
+            cls = qed.protocols.channel.pyre_resolveSpecification(channel)
             # and instantiate a workflow for each one
-            dataset.channels[channel] = channel
+            dataset.channels[channel] = cls(name=f"{dataset.pyre_name}.{channel}")
 
         # finally, add it to the pile of datasets
         self.datasets.append(dataset)
