@@ -8,51 +8,17 @@
 import qed
 
 
-# the RSLC reader
-class RSLC(qed.flow.factory, family="qed.isce2.readers.rslc", implements=qed.protocols.reader):
+# the RSLC reader; RSLCs contain one {complex64} dataset
+class RSLC(qed.readers.raw, family="qed.isce2.readers.rslc"):
     """
     The reader of RSLC files
     """
 
 
     # public data
-    uri = qed.properties.path()
-    uri.doc = "the uri of the data source"
-
-    shape = qed.properties.tuple(schema=qed.properties.int())
-    shape.doc = "the size of the dataset in (lines, samples)"
-
-    selectors = qed.protocols.selectors()
-    selectors.default = {}
-    selectors.doc = "a map of selector names to their allowed values"
-
-    datasets = qed.properties.list(schema=qed.protocols.dataset.output())
-    datasets.doc = "the list of data sets provided by the reader"
-
-
-    # metamethods
-    def __init__(self, **kwds):
-        # chain up
-        super().__init__(**kwds)
-
-        # there is only one dataset in the file and it is structurally trivial
-        dataset = qed.datasets.raw()
-
-        # decorate it
-        dataset.uri = self.uri
-        dataset.shape = self.shape
-        dataset.cell = qed.datatypes.complex64()
-        dataset.tile = dataset.cell.tile
-        # go through the default channels provided by the data type
-        for channel in dataset.cell.channels:
-            # and instantiate a workflow for each one
-            dataset.channels[channel] = channel
-
-        # finally, add it to the pile of datasets
-        self.datasets.append(dataset)
-
-        # all done
-        return
+    cell = qed.protocols.datatype()
+    cell.default = "complex64"
+    cell.doc = "the type of the dataset payload"
 
 
 # end of file
