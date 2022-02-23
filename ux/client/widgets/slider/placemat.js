@@ -14,6 +14,9 @@ import { useEvent } from '~/hooks'
 
 // locals
 // hooks
+import { useClient } from './useClient'
+import { useMine } from './useMine'
+import { useUser } from './useUser'
 import { useSliding } from './useSliding'
 import { useStopSliding } from './useStopSliding'
 
@@ -29,7 +32,9 @@ export const Placemat = ({ setValue, geometry, enabled, children, ...rest }) => 
     const stopSliding = useStopSliding()
 
     // unpack the geometry
-    const { boundingBox, mouseToUser, place } = geometry
+    const { emplace } = useClient()
+    const { bboxMine } = useMine()
+    const { mouseToUser } = useUser()
 
     // if the slider is {enabled}
     if (enabled) {
@@ -91,8 +96,8 @@ export const Placemat = ({ setValue, geometry, enabled, children, ...rest }) => 
     // otherwise, the {mouseleave} will trigger when the mouse enters any of the other
     // {children} of the slider
     return (
-        <g ref={placemat} transform={place} >
-            <Rect {...boundingBox} {...rest} />
+        <g ref={placemat} transform={emplace} >
+            <Rect {...bboxMine} {...rest} />
             {children}
         </g>
     )
@@ -102,6 +107,7 @@ export const Placemat = ({ setValue, geometry, enabled, children, ...rest }) => 
 // styling
 const Rect = styled.rect`
     fill: hsl(0deg, 0%, 7%);
+    fill: hsl(0deg, 100%, 7%);
 
     &:active {
         stroke: hsl(0deg, 0%, 20%);
