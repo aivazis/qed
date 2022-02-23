@@ -17,6 +17,7 @@ c16:
     shape: 2*1964+1, 2*3024+1
     cell: c16
 
+
 # alos datasets
 alos.data: "{pyre.environ.HOME}/dv/data/alos"
 
@@ -28,17 +29,22 @@ LA-20070215:
     uri: "{alos.data}/20070215.slc"
     shape: 36864, 10344
 
+
 # nisar datasets
 nisar.data: "{pyre.environ.HOME}/dv/data/nisar"
 
 hawaii:
     uri: "{nisar.data}/BigIsl_32905_10003_012_100106_L090_CX_129_02.h5"
 
+
 # asar datasets
 asar.data: "{pyre.environ.HOME}/dv/data/asar"
 
-300621:
+L_300621:
     uri: "{asar.data}/ASAR_L_JOINT_FP_ID09123_LINE15_RUN01_300621_LEVEL1_RSLC_V1.3.h5"
+
+S_300621:
+    uri: "{asar.data}/ASAR_S_JOINT_FP_ID09123_LINE15_RUN01_300621_LEVEL1_RSLC_V1.3.h5"
 
 
 # attach them to the application
@@ -48,7 +54,8 @@ datasets:
     - isce2.rslc#LA-20061231
     - isce2.rslc#LA-20070215
     - nisar.rslc#hawaii
-    - asar.rslc#300621
+    - asar.rslc#L_300621
+    - asar.rslc#S_300621
 
 
 # overall application configuration
