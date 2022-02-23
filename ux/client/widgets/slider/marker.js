@@ -10,16 +10,17 @@ import styled from 'styled-components'
 
 // local
 // hooks
+import { useConfig } from "./useConfig"
 import { useStartSliding } from './useStartSliding'
 
 
 // render the value indicator
-export const Marker = ({ value, geometry, enabled, ...rest }) => {
+export const Marker = ({ value, enabled, ...rest }) => {
     // make a handler that indicates the user is dragging the marker to pick a new value
     const startSliding = useStartSliding()
 
     // unpack the geometry
-    const { marker, markerPosition } = geometry
+    const { marker, markerPosition } = useConfig()
     // pick a styling based on my state
     const Indicator = enabled ? Enabled : Disabled
 
