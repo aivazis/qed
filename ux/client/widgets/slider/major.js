@@ -8,12 +8,16 @@
 import React from "react"
 import styled from 'styled-components'
 
+// local
+// hooks
+import { useConfig } from "./useConfig"
+
 
 // render the major tick marks
-export const Major = ({ geometry, ...rest }) => {
+export const Major = ({ ...rest }) => {
 
-    // get the major tickmark values and the mark generator
-    const { major, majorPosition } = geometry
+    // get the major tick mark values and the mark generator
+    const { major, majorPosition } = useConfig()
     // generate them
     const ticks = major.map(value => majorPosition(value)).join(" ")
 
