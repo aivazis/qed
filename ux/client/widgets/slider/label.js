@@ -5,14 +5,18 @@
 
 
 // external
-import React from "react"
+import React from 'react'
 import styled from 'styled-components'
+
+// local
+// hooks
+import { useConfig } from './useConfig'
 
 
 // render a single label
-export const Label = ({ tick, value, setValue, geometry, enabled }) => {
+export const Label = ({ tick, value, setValue, enabled }) => {
     // unpack the geometry
-    const { arrows, labels, labelPosition } = geometry
+    const { arrows, labels, labelPosition } = useConfig()
 
     // check whether my value is the currently chosen one
     const selected = tick == value
@@ -30,7 +34,14 @@ export const Label = ({ tick, value, setValue, geometry, enabled }) => {
     // when i'm enabled but not selected
     if (enabled && !selected) {
         // on click, set the value
-        behaviors["onClick"] = () => setValue(tick)
+        behaviors["onClick"] = evt => {
+            // suppress the placemat listener
+            evt.stopPropagation()
+            // set the value
+            setValue(tick)
+            // all done
+            return
+        }
     }
 
     // render

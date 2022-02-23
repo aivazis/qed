@@ -6,26 +6,26 @@
 
 // external
 import React from "react"
-import styled from 'styled-components'
 
 
 // locals
+// hooks
+import { useConfig } from './useConfig'
 // components
 import { Label } from './label'
 
 
 // render the labels
-export const Labels = ({ value, setValue, geometry, enabled }) => {
+export const Labels = ({ value, setValue, enabled }) => {
     // get the major tick marks
-    const { major } = geometry
+    const { major } = useConfig()
 
     // render
     return (
         <>
             {major.map(tick => (
                 <Label key={tick}
-                    tick={tick} value={value} setValue={setValue}
-                    geometry={geometry} enabled={enabled} />
+                    tick={tick} value={value} setValue={setValue} enabled={enabled} />
             ))}
         </>
     )
