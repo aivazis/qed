@@ -8,42 +8,39 @@
 import React from 'react'
 
 // locals
-// geometry
-import { layout } from './layout'
+// context
+import { Provider } from './context'
 // components
 import { Axis } from './axis'
 import { Labels } from './labels'
 import { Major } from './major'
 import { Marker } from './marker'
 import { Placemat } from './placemat'
-// context
-import { Provider } from './context'
 
 
 // export the Slider
-export const Slider = (props) => {
+export const Slider = ({ value, setValue, enabled, ...config }) => {
     // set up my context and embed my panel
     return (
-        <Provider>
-            <Controller {...props} />
+        <Provider config={config}>
+            <Controller value={value} setValue={setValue} enabled={enabled} />
         </Provider>
     )
 }
 
 
-//  display the zoom control
-const Controller = ({ value, setValue, enabled, ...config }) => {
-    // construct the layout
-    const geometry = layout(config)
+// render the zoom control
+const Controller = ({ value, setValue, enabled }) => {
     // render
     return (
-        <Placemat setValue={setValue} geometry={geometry} enabled={enabled} >
-            <Major geometry={geometry} />
-            <Axis geometry={geometry} />
-            <Labels value={value} setValue={setValue} geometry={geometry} enabled={enabled} />
-            <Marker geometry={geometry} value={value} enabled={enabled} />
+        <Placemat setValue={setValue} enabled={enabled} >
+            <Major />
+            <Axis />
+            <Labels value={value} setValue={setValue} enabled={enabled} />
+            <Marker value={value} enabled={enabled} />
         </Placemat>
     )
 }
+
 
 // end of file
