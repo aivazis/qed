@@ -65,26 +65,20 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
 
 
     # metamethods
-    def __init__(self, uri, data, frequency, polarization, **kwds):
+    def __init__(self, data, **kwds):
         # chain up
         super().__init__(**kwds)
-
-        # save the path to my file
-        self.uri = uri
         # save the dataset
         self.data = data
-
-        # populate my selector
-        self.selector["frequency"] = frequency
-        self.selector["polarization"] = polarization
-
         # set my shape
         self.shape = data.shape
 
         # go through the default channels of my cell type
         for channel in self.cell.channels:
+            # get their factories
+            cls = qed.protocols.channel.pyre_resolveSpecification(channel)
             # and instantiate a workflow for each one
-            self.channels[channel] = channel
+            self.channels[channel] = cls(name=f"{self.pyre_name}.{channel}")
 
         # collect statistics from a sample of my data
         self._stats = self._collectStatistics()
@@ -98,10 +92,10 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
         """
         Collect statistics from a sample of my data
         """
-        # get my shape
-        shape = self.shape
-        # and my data
+        # get my data
         data = self.data
+        # and its shape
+        shape = data.shape
 
         # make a tile that fits within my shape
         tile = tuple(min(256, s) for s in shape)
