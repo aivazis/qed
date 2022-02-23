@@ -94,6 +94,25 @@ export const Provider = (props) => {
             channel.current = dataset.current.channels[0]
         }
     }
+    // otherwise
+    else {
+        // let's figure out the set of values for each selector among the available datasets
+        const hist = new Map(reader.selectors.map(selector => [selector.name, new Set()]))
+        // go through the datasets
+        reader.datasets.forEach(dataset => {
+            dataset.selector.forEach(({ name, value }) => {
+                hist.get(name).add(value)
+            })
+        })
+        // now, go through the histogram
+        hist.forEach((values, name) => {
+            // if we have a selector key that only shows up with one specific value
+            if (values.size == 1) {
+                // select it
+                selector.current.set(name, [...values][0])
+            }
+        })
+    }
 
     // assemble the context value
     const context = {
