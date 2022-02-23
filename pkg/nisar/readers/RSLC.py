@@ -56,9 +56,14 @@ class RSLC(qed.readers.h5, family="qed.nisar.readers.rslc"):
                 except Exception:
                     # move on
                     continue
+                # make a name for the dataset
+                name = f"{self.pyre_name}.{frequency}.{polarization}"
                 # wrap it up
-                slc = qed.nisar.datasets.slc(uri=self.uri, data=data,
-                                             frequency=frequency, polarization=polarization)
+                slc = qed.nisar.datasets.slc(name=name, data=data)
+                # decorate it
+                slc.uri = self.uri
+                slc.selector["frequency"] = frequency
+                slc.selector["polarization"] = polarization
                 # and add it to my dataset
                 self.datasets.append(slc)
 
