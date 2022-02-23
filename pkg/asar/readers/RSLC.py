@@ -16,9 +16,8 @@ class RSLC(qed.nisar.readers.rslc, family="qed.asar.readers.rslc"):
 
 
     # constants
-    # ASAR RSLC files are marked as such
-    DATASET = "/science/LSAR/RSLC/swaths/frequency{freq}/{pol}"
-    POLS = "/science/LSAR/RSLC/swaths/frequency{freq}/listOfPolarizations"
+    # ASAR RSLCs are tagged correctly
+    tag = "RSLC"
 
 
 # end of file
