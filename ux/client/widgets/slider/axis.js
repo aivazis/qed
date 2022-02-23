@@ -8,14 +8,27 @@
 import React from "react"
 import styled from 'styled-components'
 
+// local
+// hooks
+import { useMine } from "./useMine"
+
 
 // draw an axis in the controller native coordinate system
-export const Axis = ({ geometry, ...rest }) => {
-    // unpack
-    const { axis } = geometry
+export const Axis = ({ ...rest }) => {
+    // get the controller bounding box
+    const { mainMine, mainCoordinate, crossCoordinate } = useMine()
+
+    // orient me
+    const axis = {
+        [mainCoordinate]: mainMine,
+        [crossCoordinate]: 0,
+    }
+    // form my path
+    const path = `M 0 0 l ${axis.x} ${axis.y}`
+
     // render
     return (
-        <Path d={axis} {...rest} />
+        <Path d={path} {...rest} />
     )
 }
 
