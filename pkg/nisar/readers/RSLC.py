@@ -21,6 +21,7 @@ class RSLC(qed.readers.h5, family="qed.nisar.readers.rslc"):
     selectors.doc = "a map of selector names to their allowed values"
     # the full set of allowed values
     selectors.default = {
+        "band": ["L", "S"],
         "frequency": ["A", "B"],
         "polarization": ["HH", "HV", "VH", "VV"],
     }
@@ -33,48 +34,72 @@ class RSLC(qed.readers.h5, family="qed.nisar.readers.rslc"):
 
         # grab my file
         d = self.h5
+        # get my tag
+        tag = self.tag
+        # alias my constants
+        DATASET = self.DATASET
+        FREQS = self.FREQS
+        POLS = self.POLS
 
-        # get the list of frequencies in this file
-        frequencies = d.dataset(self.FREQS).strings()
-        # go through them
-        for frequency in frequencies:
-            # attempt
+        for band in self.selectors["band"]:
+            # attempt to
             try:
-                # get the list of polarizations
-                polarizations = d.dataset(self.POLS.format(freq=frequency)).strings()
+                # get the list of frequencies for this band
+                frequencies = d.dataset(FREQS.format(band=band)).strings()
             # if anything goes wrong
             except Exception:
                 # move on
                 continue
+
             # go through them
-            for polarization in polarizations:
+            for frequency in frequencies:
                 # attempt
                 try:
-                    # get the HDF5 dataset
-                    data = d.dataset(self.DATASET.format(freq=frequency, pol=polarization))
+                    # form the group name with the list polarizations
+                    polGrp = POLS.format(band=band, tag=tag, freq=frequency)
+                    # get the list of polarizations
+                    polarizations = d.dataset(polGrp).strings()
                 # if anything goes wrong
                 except Exception:
                     # move on
                     continue
-                # make a name for the dataset
-                name = f"{self.pyre_name}.{frequency}.{polarization}"
-                # wrap it up
-                slc = qed.nisar.datasets.slc(name=name, data=data)
-                # decorate it
-                slc.uri = self.uri
-                slc.selector["frequency"] = frequency
-                slc.selector["polarization"] = polarization
-                # and add it to my dataset
-                self.datasets.append(slc)
+                # go through them
+                for polarization in polarizations:
+                    # attempt
+                    try:
+                        # form the name of the dataset
+                        dName = DATASET.format(band=band, tag=tag, freq=frequency, pol=polarization)
+                        # get the HDF5 dataset
+                        data = d.dataset(dName)
+                    # if anything goes wrong
+                    except Exception:
+                        # move on
+                        continue
+                    # generate a {pyre} name for the dataset
+                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}"
+                    # instantiate it
+                    slc = qed.nisar.datasets.slc(name=name, data=data)
+                    # decorate it
+                    slc.uri = self.uri
+                    slc.selector["band"] = band
+                    slc.selector["frequency"] = frequency
+                    slc.selector["polarization"] = polarization
+                    # and add it to my dataset
+                    self.datasets.append(slc)
 
         # all done
         return
 
 
     # constants
-    DATASET = "/science/LSAR/SLC/swaths/frequency{freq}/{pol}"
-    FREQS = "/science/LSAR/identification/listOfFrequencies"
-    POLS = "/science/LSAR/SLC/swaths/frequency{freq}/listOfPolarizations"
+    # constants
+    # NISAR RSLCs are not tagged correctly
+    tag = "SLC"
+
+    # layout
+    DATASET = "/science/{band}SAR/{tag}/swaths/frequency{freq}/{pol}"
+    FREQS = "/science/{band}SAR/identification/listOfFrequencies"
+    POLS = "/science/{band}SAR/{tag}/swaths/frequency{freq}/listOfPolarizations"
 
 
 # end of file
