@@ -107,7 +107,6 @@ export const Placemat = ({ setValue, geometry, enabled, children, ...rest }) => 
 // styling
 const Rect = styled.rect`
     fill: hsl(0deg, 0%, 7%);
-    fill: hsl(0deg, 100%, 7%);
 
     &:active {
         stroke: hsl(0deg, 0%, 20%);
