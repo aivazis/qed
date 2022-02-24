@@ -36,12 +36,12 @@ export const Selector = ({ viewport, view }) => {
             {/* the name of the dataset source */}
             {name && <span style={paint.name}>{name}</span>}
             {/* a separator */}
-            {name && <span style={paint.separator}>:</span>}
+            {name && <span style={paint.separator}>&middot;</span>}
             {/* the dataset selector */}
             {selector.map(binding => (
                 <React.Fragment key={`${binding.name}`}>
                     <span style={paint.selector}>{binding.value}</span>
-                    <span style={paint.separator}>:</span>
+                    <span style={paint.separator}>&middot;</span>
                 </React.Fragment>
             ))}
             {/* the channel name */}
