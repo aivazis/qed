@@ -23,7 +23,7 @@ import { useStopSliding } from './useStopSliding'
 
 // a workaround for capturing events in the controller client area
 // needed only because {pointer-events: bounding-box} doesn't work yet
-export const Placemat = ({ setValue, geometry, enabled, children, ...rest }) => {
+export const Simplemat = ({ setValue, geometry, enabled, children, ...rest }) => {
     // make a ref to attach to the placemat so we can measure its extent
     const placemat = React.useRef(null)
     // get the {sliding} flag

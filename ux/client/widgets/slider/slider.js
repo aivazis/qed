@@ -15,10 +15,10 @@ import { Axis } from './axis'
 import { Labels } from './labels'
 import { Major } from './major'
 import { Marker } from './marker'
-import { Placemat } from './placemat'
+import { Simplemat } from './simplemat'
 
 
-// export the Slider
+// export the slider
 export const Slider = ({ value, setValue, enabled, ...config }) => {
     // set up my context and embed my panel
     return (
@@ -33,12 +33,12 @@ export const Slider = ({ value, setValue, enabled, ...config }) => {
 const Controller = ({ value, setValue, enabled }) => {
     // render
     return (
-        <Placemat setValue={setValue} enabled={enabled} >
+        <Simplemat setValue={setValue} enabled={enabled} >
             <Major />
             <Axis />
             <Labels value={value} setValue={setValue} enabled={enabled} />
             <Marker value={value} enabled={enabled} />
-        </Placemat>
+        </Simplemat>
     )
 }
 
