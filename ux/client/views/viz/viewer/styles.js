@@ -77,7 +77,6 @@ const selectorPaint = {
         name: {
             fontFamily: "rubik-light",
             fontSize: "80%",
-            textTransform: "uppercase",
         },
         selector: {
             fontFamily: "inconsolata",
