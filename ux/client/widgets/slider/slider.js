@@ -29,7 +29,7 @@ export const Slider = ({ value, setValue, enabled, ...config }) => {
 }
 
 
-// render the zoom control
+// lay out the control
 const Controller = ({ value, setValue, enabled }) => {
     // render
     return (
