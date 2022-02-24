@@ -41,7 +41,6 @@ export default {
     title: {
         // style
         fontFamily: "rubik-medium",
-        textTransform: "uppercase",
         padding: "0.0rem 0.0rem 0.0rem 0.5rem",
         // disable text selection
         userSelect: "none",
