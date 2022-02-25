@@ -21,7 +21,7 @@ export const useStopSliding = () => {
     // make a handler
     const end = () => {
         // that clears the flag
-        setSliding(false)
+        setSliding(null)
         // all done
         return
     }

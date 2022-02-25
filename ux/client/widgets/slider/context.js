@@ -10,8 +10,9 @@ import React from "react"
 
 // the provider factory
 export const Provider = ({ config, children }) => {
-    // make a flag that indicates that the user has started dragging the marker
-    const [sliding, setSliding] = React.useState(false)
+    // a flag that indicates that the user has started dragging the marker
+    // in order to support multiple movable markers, the state holds the marker id
+    const [sliding, setSliding] = React.useState(null)
 
     // directional configuration
     const { direction, arrows, labels } = config

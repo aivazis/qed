@@ -13,7 +13,7 @@ import React from "react"
 import { Context } from "./context"
 
 
-// provide access to the {sliding} flag
+// provide access to the {sliding} indicator id
 export const useSliding = () => {
     // grab the sliding indicator
     const { sliding } = React.useContext(Context)

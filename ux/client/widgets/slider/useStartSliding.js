@@ -19,9 +19,9 @@ export const useStartSliding = () => {
     const { setSliding } = React.useContext(Context)
 
     // make a handler
-    const start = () => {
+    const start = (id) => {
         // that sets the flag
-        setSliding(true)
+        setSliding(id)
         // all done
         return
     }
