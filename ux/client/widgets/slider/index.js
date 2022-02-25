@@ -5,6 +5,7 @@
 
 
 // export the zoom
+export { Range } from './range'
 export { Slider } from './slider'
 
 
