@@ -13,7 +13,7 @@ import React from "react"
 import { Context } from "./context"
 
 
-// provide access to the {sliding} flag
+// provide access to the converter from mouse coordinates to use values
 export const useUser = () => {
     // pull what i need from {context}
     const {
