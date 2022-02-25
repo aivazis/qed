@@ -35,8 +35,6 @@ export const Provider = ({ config, children }) => {
             mainName: "width",
             crossName: "height",
             // what to look up to form (x, y) pairs
-            xCoordinate: "main",
-            yCoordinate: "cross",
             mainCoordinate: "x",
             crossCoordinate: "y",
             // what to look up to extract dimensions from my client rectangle
@@ -53,8 +51,6 @@ export const Provider = ({ config, children }) => {
             mainName: "height",
             crossName: "width",
             // what to look up to form (x, y) pairs
-            xCoordinate: "cross",
-            yCoordinate: "main",
             mainCoordinate: "y",
             crossCoordinate: "x",
             // what to look up to extract dimensions from my client rectangle
@@ -66,7 +62,7 @@ export const Provider = ({ config, children }) => {
     // decode and unpack
     const {
         mainClient, crossClient, mainName, crossName,
-        xCoordinate, yCoordinate, mainCoordinate, crossCoordinate, mainNearEdge, mainPosition,
+        mainCoordinate, crossCoordinate, mainNearEdge, mainPosition,
     } = extents[direction]
 
     // my cross axis is an integer number of cells
