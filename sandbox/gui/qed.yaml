@@ -46,6 +46,18 @@ L_300621:
 S_300621:
     uri: "{asar.data}/ASAR_S_JOINT_FP_ID09123_LINE15_RUN01_300621_LEVEL1_RSLC_V1.3.h5"
 
+L_161219:
+    uri: "{asar.data}/ASAR_L_JOINT_FP_ID19107_LINE05_RUN01_161219_LEVEL1_RSLC_V1.3.h5"
+
+S_161219:
+    uri: "{asar.data}/ASAR_S_JOINT_FP_ID19107_LINE05_RUN01_161219_LEVEL1_RSLC_V1.3.h5"
+
+L_051219:
+    uri: "{asar.data}/ASAR_L_JOINT_FP_ID35506_LINE10_RUN02_051219_LEVEL1_RSLC_V1.3.h5"
+
+S_051219:
+    uri: "{asar.data}/ASAR_S_JOINT_FP_ID35506_LINE10_RUN02_051219_LEVEL1_RSLC_V1.3.h5"
+
 
 # attach them to the application
 datasets:
@@ -56,6 +68,10 @@ datasets:
     - nisar.rslc#hawaii
     - asar.rslc#L_300621
     - asar.rslc#S_300621
+    # - asar.rslc#L_161219
+    # - asar.rslc#S_161219
+    # - asar.rslc#L_051219
+    # - asar.rslc#S_051219
 
 
 # overall application configuration
