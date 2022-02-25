@@ -13,6 +13,7 @@ import { Header } from '~/widgets'
 
 // locals
 // components
+import { Demo } from '../demo'
 import { Zoom } from '../zoom'
 // styles
 import styles from './styles'
@@ -27,6 +28,8 @@ export const Controls = () => {
             <Header title="controls" style={styles.header} />
             {/* the controls common to all datasets */}
             <Zoom />
+            {/* my play area */}
+            <Demo />
         </>
     )
 }
