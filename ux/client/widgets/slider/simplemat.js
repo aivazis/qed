@@ -26,7 +26,7 @@ import { useStopSliding } from './useStopSliding'
 export const Simplemat = ({ setValue, geometry, enabled, children, ...rest }) => {
     // make a ref to attach to the placemat so we can measure its extent
     const placemat = React.useRef(null)
-    // get the {sliding} flag
+    // get the {sliding} indicator
     const sliding = useSliding()
     // make a handler that clears the {sliding} flag
     const stopSliding = useStopSliding()
@@ -55,7 +55,7 @@ export const Simplemat = ({ setValue, geometry, enabled, children, ...rest }) =>
         // mouse coordinates to user space
         const drag = evt => {
             // if the indicator is not being dragged
-            if (!sliding) {
+            if (sliding === null) {
                 // do nothing
                 return
             }
