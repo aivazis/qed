@@ -113,6 +113,12 @@ export const Provider = ({ config, children }) => {
         return Math.min(Math.max(value, min), max)
     }
 
+    // draw a line between two use values
+    const intervalPosition = {
+        row: interval => `M ${userToICS(interval[0])} 0 L ${userToICS(interval[1])} 0`,
+        column: interval => `M 0 ${userToICS(interval[0])} L 0 ${userToICS(interval[1])}`,
+    }
+
     // position a label at a given user value
     const labelPosition = {
         top: value => ({ x: userToICS(value), y: -2.5 * cell }),
@@ -123,8 +129,8 @@ export const Provider = ({ config, children }) => {
 
     // position a major tick mark
     const majorPosition = {
-        "row": value => `M ${userToICS(value)} ${-cell} l 0 ${2 * cell}`,
-        "column": value => `M ${-cell} ${userToICS(value)} l ${2 * cell} 0`,
+        row: value => `M ${userToICS(value)} ${-cell} l 0 ${2 * cell}`,
+        column: value => `M ${-cell} ${userToICS(value)} l ${2 * cell} 0`,
     }
 
     // generate the marker
@@ -167,6 +173,7 @@ export const Provider = ({ config, children }) => {
         mouseToUser,
 
         // layout
+        intervalPosition: intervalPosition[direction],
         labelPosition: labelPosition[labels],
         majorPosition: majorPosition[direction],
         marker: marker[arrows],
