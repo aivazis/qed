@@ -15,7 +15,7 @@ import { useStartSliding } from './useStartSliding'
 
 
 // render the value indicator
-export const Marker = ({ value, enabled, ...rest }) => {
+export const Marker = ({ value, enabled, id = 0, ...rest }) => {
     // make a handler that indicates the user is dragging the marker to pick a new value
     const startSliding = useStartSliding()
 
@@ -27,7 +27,7 @@ export const Marker = ({ value, enabled, ...rest }) => {
     // set up my event handlers
     const behaviors = enabled ? {
         // when the user clicks in my client area, start modifying the value
-        onMouseDown: () => startSliding()
+        onMouseDown: () => startSliding(id)
     } : {}
 
     // render
