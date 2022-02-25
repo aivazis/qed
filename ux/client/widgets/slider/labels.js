@@ -16,7 +16,7 @@ import { Label } from './label'
 
 
 // render the labels
-export const Labels = ({ value, setValue, enabled }) => {
+export const Labels = ({ value = null, setValue = null, enabled }) => {
     // get the major tick marks
     const { major } = useConfig()
 

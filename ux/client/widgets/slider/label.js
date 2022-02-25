@@ -14,12 +14,12 @@ import { useConfig } from './useConfig'
 
 
 // render a single label
-export const Label = ({ tick, value, setValue, enabled }) => {
+export const Label = ({ tick, value = null, setValue = null, enabled }) => {
     // unpack the geometry
     const { arrows, labels, labelPosition } = useConfig()
 
     // check whether my value is the currently chosen one
-    const selected = tick == value
+    const selected = tick === value
     // if so, and the marker is on the same side of the axis as the labels
     if (selected && arrows === labels) {
         // the marker gets drawn in my place; bail
@@ -31,8 +31,8 @@ export const Label = ({ tick, value, setValue, enabled }) => {
 
     // set up my behaviors
     const behaviors = {}
-    // when i'm enabled but not selected
-    if (enabled && !selected) {
+    // when have a way to notify the client, am enabled, but not selected
+    if (setValue != null && enabled && !selected) {
         // on click, set the value
         behaviors["onClick"] = evt => {
             // suppress the placemat listener
