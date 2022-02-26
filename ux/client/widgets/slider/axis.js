@@ -11,17 +11,20 @@ import styled from 'styled-components'
 // local
 // hooks
 import { useMine } from "./useMine"
+import { useNames } from "./useNames"
 
 
 // draw an axis in the controller native coordinate system
 export const Axis = ({ ...rest }) => {
     // get the controller bounding box
-    const { mainMine, mainCoordinate, crossCoordinate } = useMine()
+    const { mainMine } = useMine()
+    // and the names of things
+    const { mainCoordinateName, crossCoordinateName } = useNames()
 
     // orient me
     const axis = {
-        [mainCoordinate]: mainMine,
-        [crossCoordinate]: 0,
+        [mainCoordinateName]: mainMine,
+        [crossCoordinateName]: 0,
     }
     // form my path
     const path = `M 0 0 l ${axis.x} ${axis.y}`
