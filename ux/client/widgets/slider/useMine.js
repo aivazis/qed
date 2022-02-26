@@ -17,11 +17,11 @@ import { Context } from "./context"
 export const useMine = () => {
     // pull what i need from {context}
     const {
-        bboxMine, mainMine, crossMine, mainCoordinate, crossCoordinate,
+        bboxMine, mainMine, crossMine,
     } = React.useContext(Context)
 
     // and publish it
-    return { bboxMine, mainMine, crossMine, mainCoordinate, crossCoordinate, }
+    return { bboxMine, mainMine, crossMine, }
 }
 
 
