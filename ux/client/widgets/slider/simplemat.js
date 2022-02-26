@@ -16,9 +16,10 @@ import { useEvent } from '~/hooks'
 // hooks
 import { useClient } from './useClient'
 import { useMine } from './useMine'
-import { useUser } from './useUser'
+import { useNames } from './useNames'
 import { useSliding } from './useSliding'
 import { useStopSliding } from './useStopSliding'
+import { useUser } from './useUser'
 
 
 // a workaround for capturing events in the controller client area
@@ -30,6 +31,8 @@ export const Simplemat = ({ setValue, geometry, enabled, children, ...rest }) =>
     const sliding = useSliding()
     // make a handler that clears the {sliding} flag
     const stopSliding = useStopSliding()
+    // get names
+    const { mainMovementName, mainOffsetName } = useNames()
 
     // unpack the geometry
     const { emplace } = useClient()
@@ -41,10 +44,17 @@ export const Simplemat = ({ setValue, geometry, enabled, children, ...rest }) =>
         // handler that converts mouse coordinates to user space and invokes {setValue} to inform
         // the client
         const pick = evt => {
-            // measure the placemat bounding box
-            const box = placemat.current.getBoundingClientRect()
+            // get the mouse movement along my main axis
+            const dMain = evt[mainMovementName]
+            // if there is no change
+            if (Math.trunc(dMain) === 0) {
+                // bail
+                return
+            }
+            // get the position of the mouse relative to the main edge
+            const pixels = evt[mainOffsetName]
             // transform the mouse coordinates into a user value
-            const value = mouseToUser(box, evt)
+            const value = mouseToUser(pixels)
             // notify the client
             setValue(value)
             // and done
