@@ -11,10 +11,14 @@ import styled from 'styled-components'
 // local
 // hooks
 import { useConfig } from "./useConfig"
+import { useStartSliding } from './useStartSliding'
 
 
 // draw an axis in the controller native coordinate system
 export const Interval = ({ value, enabled, ...rest }) => {
+    // make a handler that indicates the user is dragging the interval to pick a new range
+    const startSliding = useStartSliding()
+
     // get the path generator
     const { intervalPosition } = useConfig()
 
@@ -23,9 +27,16 @@ export const Interval = ({ value, enabled, ...rest }) => {
     // pick a renderer
     const Path = enabled ? Enabled : Disabled
 
+    // set up my event handlers
+    const behaviors = enabled ? {
+        // when the user clicks in my client area, start modifying the value
+        onMouseDown: () => startSliding(-1)
+    } : {}
+
+
     // render
     return (
-        <Path d={path} {...rest} />
+        <Path d={path} {...rest} {...behaviors} />
     )
 }
 
