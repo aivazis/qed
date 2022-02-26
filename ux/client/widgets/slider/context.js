@@ -36,8 +36,13 @@ export const Provider = ({ config, children }) => {
             mainName: "width",
             crossName: "height",
             // what to look up to form (x, y) pairs
-            mainCoordinate: "x",
-            crossCoordinate: "y",
+            mainCoordinateName: "x",
+            crossCoordinateName: "y",
+            // mouse events
+            mainMovementName: "movementX",
+            crossMovementName: "movementY",
+            mainOffsetName: "offsetX",
+            crossOffsetName: "offsetY",
             // what to look up to extract dimensions from my client rectangle
             mainNearEdge: "left",
             // what to look to extract mouse coordinates from an event
@@ -52,8 +57,13 @@ export const Provider = ({ config, children }) => {
             mainName: "height",
             crossName: "width",
             // what to look up to form (x, y) pairs
-            mainCoordinate: "y",
-            crossCoordinate: "x",
+            mainCoordinateName: "y",
+            crossCoordinateName: "x",
+            // mouse events
+            mainMovementName: "movementY",
+            crossMovementName: "movementX",
+            mainOffsetName: "offsetY",
+            crossOffsetName: "offsetX",
             // what to look up to extract dimensions from my client rectangle
             mainNearEdge: "top",
             // what to look to extract mouse coordinates from an event
@@ -63,7 +73,8 @@ export const Provider = ({ config, children }) => {
     // decode and unpack
     const {
         mainClient, crossClient, mainName, crossName,
-        mainCoordinate, crossCoordinate, mainNearEdge, mainPosition,
+        mainCoordinateName, crossCoordinateName, mainNearEdge, mainPosition,
+        mainMovementName, crossMovementName, mainOffsetName, crossOffsetName,
     } = extents[direction]
 
     // my cross axis is an integer number of cells
@@ -78,8 +89,8 @@ export const Provider = ({ config, children }) => {
     const crossULMine = - crossMine / 2
     // and my boundingBox as a rectangle {x,y, width,height}
     const bboxMine = {
-        [mainCoordinate]: mainULMine,
-        [crossCoordinate]: crossULMine,
+        [mainCoordinateName]: mainULMine,
+        [crossCoordinateName]: crossULMine,
         [mainName]: mainMine,
         [crossName]: crossMine,
     }
@@ -100,13 +111,7 @@ export const Provider = ({ config, children }) => {
     // the scaling factor for projecting viewport coordinates to user values
     const viewportScale = (max - min) / (mainMine - 2 * margin)
     // build a transform to project mouse coordinates to user values
-    const mouseToUser = (box, evt) => {
-        // locate the leading edge
-        const edge = box[mainNearEdge]
-        // get the mouse coordinates
-        const mouse = evt[mainPosition]
-        // get the offset within the area of the controller
-        const pixels = mouse - edge
+    const mouseToUser = (pixels) => {
         // project
         const value = min + viewportScale * (pixels / ils - margin)
         // clip and return
@@ -180,7 +185,9 @@ export const Provider = ({ config, children }) => {
         markerPosition: markerPosition[arrows],
 
         // names
-        mainName, crossName, mainCoordinate, crossCoordinate,
+        mainName, crossName, mainCoordinateName, crossCoordinateName,
+        // mouse events
+        mainMovementName, crossMovementName, mainOffsetName, crossOffsetName,
     }
 
     // provide from my children
@@ -218,7 +225,10 @@ export const Context = React.createContext(
         // projection from mouse coordinates to user coordinates
         mouseToUser: () => { throw new Error(complaint) },
         // names
-        mainName: null, crossName: null, mainCoordinate: null, crossCoordinate: null,
+        mainName: null, crossName: null, mainCoordinateName: null, crossCoordinateName: null,
+        // mouse events
+        mainMovementName: null, crossMovementName: null,
+        mainOffsetName: null, crossOffsetName: null,
     }
 )
 
