@@ -32,12 +32,11 @@ export const Rangemat = ({ setValue, geometry, enabled, children, ...rest }) => 
     // make a handler that clears the {sliding} flag
     const stopSliding = useStopSliding()
     // get names
-    const { mainMovementName, mainOffsetName } = useNames()
-
+    const { mainMovementName } = useNames()
     // unpack the geometry
     const { emplace } = useClient()
     const { bboxMine } = useMine()
-    const { mouseToUser } = useUser()
+    const { mouseDeltaToUser } = useUser()
 
     // if the slider is {enabled}
     if (enabled) {
@@ -51,16 +50,20 @@ export const Rangemat = ({ setValue, geometry, enabled, children, ...rest }) => 
                 // bail
                 return
             }
-            // get the position of the mouse relative to the main edge
-            const pixels = evt[mainOffsetName]
             // transform the mouse coordinates into a user value
-            const value = mouseToUser(pixels)
+            const delta = mouseDeltaToUser(dMain)
             // notify the client
             setValue(old => {
                 // make a copy
                 const copy = [...old]
-                // use the selector id to modify to correct entry
-                copy[sliding] = value
+                // if both are sliding
+                if (sliding < 0) {
+                    copy[0] += delta
+                    copy[1] += delta
+                } else {
+                    // use the selector id to modify to correct entry
+                    copy[sliding] += delta
+                }
                 // validate and return the correct value
                 return copy[0] < copy[1] ? copy : old
             })
