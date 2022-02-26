@@ -17,11 +17,11 @@ import { Context } from "./context"
 export const useUser = () => {
     // pull what i need from {context}
     const {
-        mouseToUser,
+        mouseToUser, mouseDeltaToUser,
     } = React.useContext(Context)
 
     // and publish it
-    return { mouseToUser }
+    return { mouseToUser, mouseDeltaToUser }
 }
 
 

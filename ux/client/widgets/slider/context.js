@@ -111,12 +111,14 @@ export const Provider = ({ config, children }) => {
     // the scaling factor for projecting viewport coordinates to user values
     const viewportScale = (max - min) / (mainMine - 2 * margin)
     // build a transform to project mouse coordinates to user values
-    const mouseToUser = (pixels) => {
+    const mouseToUser = pixels => {
         // project
         const value = min + viewportScale * (pixels / ils - margin)
         // clip and return
         return Math.min(Math.max(value, min), max)
     }
+    // project mouse motion to user coordinates
+    const mouseDeltaToUser = delta => viewportScale * delta / ils
 
     // draw a line between two use values
     const intervalPosition = {
@@ -175,7 +177,7 @@ export const Provider = ({ config, children }) => {
         // the transform that lets placemat put me on the screen
         emplace,
         // projection from mouse coordinates to user coordinates
-        mouseToUser,
+        mouseToUser, mouseDeltaToUser,
 
         // layout
         intervalPosition: intervalPosition[direction],
