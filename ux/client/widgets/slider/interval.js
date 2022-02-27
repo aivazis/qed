@@ -44,6 +44,7 @@ export const Interval = ({ value, ...rest }) => {
 // styling
 const Base = styled.path`
     fill: none;
+    stroke-width: 5;
     vector-effect: non-scaling-stroke;
 `
 
@@ -55,7 +56,6 @@ const Disabled = styled(Base)`
 const Enabled = styled(Base)`
     & {
         stroke: hsl(0deg, 0%, 40%);
-        stroke-width: 5;
     }
 
     &:hover {
