@@ -19,11 +19,11 @@ import { Simplemat } from './simplemat'
 
 
 // export the slider
-export const Slider = ({ value, setValue, enabled, ...config }) => {
+export const Slider = ({ value, setValue, ...config }) => {
     // set up my context and embed my panel
     return (
         <Provider config={config}>
-            <Controller value={value} setValue={setValue} enabled={enabled} />
+            <Controller value={value} setValue={setValue} />
         </Provider>
     )
 }
@@ -33,11 +33,11 @@ export const Slider = ({ value, setValue, enabled, ...config }) => {
 const Controller = ({ value, setValue, enabled }) => {
     // render
     return (
-        <Simplemat setValue={setValue} enabled={enabled} >
+        <Simplemat setValue={setValue} >
             <Major />
             <Axis />
-            <Labels value={value} setValue={setValue} enabled={enabled} />
-            <Marker value={value} enabled={enabled} />
+            <Labels value={value} setValue={setValue} />
+            <Marker value={value} />
         </Simplemat>
     )
 }
