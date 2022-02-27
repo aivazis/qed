@@ -16,7 +16,7 @@ import { Label } from './label'
 
 
 // render the labels
-export const Labels = ({ value = null, setValue = null, enabled }) => {
+export const Labels = ({ value = null, setValue = null }) => {
     // get the major tick marks
     const { major } = useConfig()
 
@@ -25,7 +25,7 @@ export const Labels = ({ value = null, setValue = null, enabled }) => {
         <>
             {major.map(tick => (
                 <Label key={tick}
-                    tick={tick} value={value} setValue={setValue} enabled={enabled} />
+                    tick={tick} value={value} setValue={setValue} />
             ))}
         </>
     )
