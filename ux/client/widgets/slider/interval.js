@@ -15,12 +15,12 @@ import { useStartSliding } from './useStartSliding'
 
 
 // draw an axis in the controller native coordinate system
-export const Interval = ({ value, enabled, ...rest }) => {
+export const Interval = ({ value, ...rest }) => {
     // make a handler that indicates the user is dragging the interval to pick a new range
     const startSliding = useStartSliding()
 
     // get the path generator
-    const { intervalPosition } = useConfig()
+    const { enabled, intervalPosition } = useConfig()
 
     // form my path
     const path = intervalPosition(value)
@@ -48,13 +48,25 @@ const Base = styled.path`
 `
 
 const Disabled = styled(Base)`
-    stroke: none;
+    stroke: hsl(0deg, 0%, 20%);
 `
 
 
 const Enabled = styled(Base)`
-    stroke: hsl(28deg, 90%, 35%);
-    stroke-width: 5;
+    & {
+        stroke: hsl(0deg, 0%, 40%);
+        stroke-width: 5;
+    }
+
+    &:hover {
+        fill: hsl(28deg, 90%, 55%);
+        stroke: hsl(28deg, 90%, 35%);
+    }
+
+    &:active {
+        fill: hsl(28deg, 90%, 55%);
+        stroke: hsl(28deg, 90%, 35%);
+    }
 `
 
 
