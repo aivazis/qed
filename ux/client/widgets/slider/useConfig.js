@@ -17,6 +17,7 @@ import { Context } from "./context"
 export const useConfig = () => {
     // pull what i need from {context}
     const {
+        enabled,
         arrows, labels,
         min, max, major,
         intervalPosition,
@@ -25,6 +26,7 @@ export const useConfig = () => {
 
     // and publish
     return {
+        enabled,
         arrows, labels,
         min, max, major,
         intervalPosition, labelPosition, majorPosition,
