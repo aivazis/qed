@@ -16,31 +16,34 @@ import { Interval } from './interval'
 import { Labels } from './labels'
 import { Major } from './major'
 import { Marker } from './marker'
+import { MarkerLabel } from './markerLabel'
 import { Rangemat } from './rangemat'
 
 
 // export the slider
-export const Range = ({ value, setValue, enabled, ...config }) => {
+export const Range = ({ value, setValue, ...config }) => {
     // set up my context and embed my panel
     return (
         <Provider config={config}>
-            <Controller value={value} setValue={setValue} enabled={enabled} />
+            <Controller value={value} setValue={setValue} />
         </Provider>
     )
 }
 
 
 // render the zoom control
-const Controller = ({ value, setValue, enabled }) => {
+const Controller = ({ value, setValue }) => {
     // render
     return (
-        <Rangemat setValue={setValue} enabled={enabled} >
+        <Rangemat setValue={setValue} >
             <Major />
             <Axis />
-            <Labels enabled={enabled} />
-            <Interval value={value} enabled={enabled} />
-            <Marker id={0} value={value[0]} enabled={enabled} />
-            <Marker id={1} value={value[1]} enabled={enabled} />
+            <Labels />
+            <Interval value={value} />
+            <Marker id={0} value={value[0]} />
+            <MarkerLabel value={value[0]} />
+            <Marker id={1} value={value[1]} />
+            <MarkerLabel value={value[1]} />
         </Rangemat>
     )
 }
