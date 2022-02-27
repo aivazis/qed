@@ -27,7 +27,7 @@ export const Label = ({ tick, value = null, setValue = null, enabled }) => {
     }
 
     // pick an implementation based on my state
-    const Tick = enabled ? (selected ? Selected : Enabled) : Disabled
+    const Label = enabled ? (selected ? Selected : Enabled) : Disabled
 
     // set up my behaviors
     const behaviors = {}
@@ -46,9 +46,9 @@ export const Label = ({ tick, value = null, setValue = null, enabled }) => {
 
     // render
     return (
-        <Tick {...labelPosition(tick)} {...behaviors} >
+        <Label {...labelPosition(tick)} {...behaviors} >
             {tick}
-        </Tick>
+        </Label>
     )
 }
 
