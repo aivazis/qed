@@ -78,7 +78,7 @@ export const Provider = ({ config, children }) => {
     } = extents[direction]
 
     // my cross axis is an integer number of cells
-    const crossMine = 10 * cell
+    const crossMine = 20 * cell
     // which sets my intrinsic length scale
     const ils = crossClient / crossMine // in client pixels / per intrinsic pixel
     // and the aspect ratio determines my main size
@@ -144,15 +144,23 @@ export const Provider = ({ config, children }) => {
     const marker = {
         top: `M 0 0 l ${-cell} ${-2 * cell} l ${2 * cell} 0 z`,
         bottom: `M 0 0 l ${-cell} ${2 * cell} l ${2 * cell} 0 z`,
-        right: `M 0 0 l ${2 * cell} ${-cell} l 0 ${2 * cell} z`,
         left: `M 0 0 l ${-2 * cell} ${-cell} l 0 ${2 * cell} z`,
+        right: `M 0 0 l ${2 * cell} ${-cell} l 0 ${2 * cell} z`,
     }
     // and position it
     const markerPosition = {
         top: value => `translate(${userToICS(value)} ${-2.5 * cell})`,
         bottom: value => `translate(${userToICS(value)} ${2.5 * cell})`,
-        right: value => `translate(${2.5 * cell} ${userToICS(value)})`,
         left: value => `translate(${-2.5 * cell} ${userToICS(value)})`,
+        right: value => `translate(${2.5 * cell} ${userToICS(value)})`,
+    }
+
+    // position a label at a given user value
+    const markerLabelPosition = {
+        top: value => ({ x: userToICS(value), y: -6 * cell }),
+        bottom: value => ({ x: userToICS(value), y: 8.5 * cell }),
+        left: value => ({ x: -5 * cell, y: userToICS(value) + cell }),
+        right: value => ({ x: 5 * cell, y: userToICS(value) + cell }),
     }
 
     // build the initial context value
@@ -185,6 +193,7 @@ export const Provider = ({ config, children }) => {
         majorPosition: majorPosition[direction],
         marker: marker[arrows],
         markerPosition: markerPosition[arrows],
+        markerLabelPosition: markerLabelPosition[arrows],
 
         // names
         mainName, crossName, mainCoordinateName, crossCoordinateName,
