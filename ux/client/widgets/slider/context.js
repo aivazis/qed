@@ -77,7 +77,7 @@ export const Provider = ({ config, children }) => {
         mainMovementName, crossMovementName, mainOffsetName, crossOffsetName,
     } = extents[direction]
 
-    // my cross axis is an integer number of cells
+    // my cross extent is an integer number of cells
     const crossMine = 20 * cell
     // which sets my intrinsic length scale
     const ils = crossClient / crossMine // in client pixels / per intrinsic pixel
@@ -120,7 +120,7 @@ export const Provider = ({ config, children }) => {
     // project mouse motion to user coordinates
     const mouseDeltaToUser = delta => viewportScale * delta / ils
 
-    // draw a line between two use values
+    // draw a line between two user values
     const intervalPosition = {
         row: interval => `M ${userToICS(interval[0])} 0 L ${userToICS(interval[1])} 0`,
         column: interval => `M 0 ${userToICS(interval[0])} L 0 ${userToICS(interval[1])}`,
@@ -140,7 +140,7 @@ export const Provider = ({ config, children }) => {
         column: value => `M ${-cell} ${userToICS(value)} l ${2 * cell} 0`,
     }
 
-    // generate the marker
+    // generate a marker
     const marker = {
         top: `M 0 0 l ${-cell} ${-2 * cell} l ${2 * cell} 0 z`,
         bottom: `M 0 0 l ${-cell} ${2 * cell} l ${2 * cell} 0 z`,
@@ -155,7 +155,7 @@ export const Provider = ({ config, children }) => {
         right: value => `translate(${2.5 * cell} ${userToICS(value)})`,
     }
 
-    // position a label at a given user value
+    // position a marker label at a given user value
     const markerLabelPosition = {
         top: value => ({ x: userToICS(value), y: -6 * cell }),
         bottom: value => ({ x: userToICS(value), y: 8.5 * cell }),
@@ -210,7 +210,7 @@ export const Provider = ({ config, children }) => {
 }
 
 
-// set up the {zoom} context
+// set up the {slider} context
 export const Context = React.createContext(
     // the default value clients see when accessing the context outside a provider
     {
@@ -219,7 +219,7 @@ export const Context = React.createContext(
         setSliding: () => { throw new Error(complaint) },
 
         // directional configuration
-        direcion: null, arrows: null, labels: null,
+        direction: null, arrows: null, labels: null,
         // the layout of the controller in client coordinates
         height: null, width: null,
         // the limits and tick marks
@@ -235,11 +235,20 @@ export const Context = React.createContext(
         emplace: null,
         // projection from mouse coordinates to user coordinates
         mouseToUser: () => { throw new Error(complaint) },
+        mouseDeltaToUser: () => { throw new Error(complaint) },
         // names
         mainName: null, crossName: null, mainCoordinateName: null, crossCoordinateName: null,
         // mouse events
         mainMovementName: null, crossMovementName: null,
         mainOffsetName: null, crossOffsetName: null,
+
+        // layout
+        intervalPosition: () => { throw new Error(complaint) },
+        labelPosition: () => { throw new Error(complaint) },
+        majorPosition: () => { throw new Error(complaint) },
+        marker: () => { throw new Error(complaint) },
+        markerPosition: () => { throw new Error(complaint) },
+        markerLabelPosition: () => { throw new Error(complaint) },
     }
 )
 
