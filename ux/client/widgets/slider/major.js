@@ -17,10 +17,11 @@ import { useConfig } from "./useConfig"
 export const Major = ({ ...rest }) => {
 
     // get the major tick mark values and the mark generator
-    const { major, majorPosition } = useConfig()
+    const { enabled, major, majorPosition } = useConfig()
     // generate them
     const ticks = major.map(value => majorPosition(value)).join(" ")
-
+    // pick an implementation based on my state
+    const Path = enabled ? Enabled : Disabled
     // render
     return (
         <Path d={ticks} {...rest} />
@@ -29,12 +30,22 @@ export const Major = ({ ...rest }) => {
 
 
 // styling
-const Path = styled.path`
+const Base = styled.path`
     fill: none;
-    stroke: hsl(0deg, 0%, 40%);
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
 `
+
+
+const Disabled = styled(Base)`
+    stroke: hsl(0deg, 0%, 20%);
+`
+
+
+const Enabled = styled(Base)`
+    stroke: hsl(0deg, 0%, 60%);
+`
+
 
 
 // end of file
