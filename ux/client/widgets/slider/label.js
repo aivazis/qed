@@ -14,9 +14,9 @@ import { useConfig } from './useConfig'
 
 
 // render a single label
-export const Label = ({ tick, value = null, setValue = null, enabled }) => {
+export const Label = ({ tick, value = null, setValue = null }) => {
     // unpack the geometry
-    const { arrows, labels, labelPosition } = useConfig()
+    const { enabled, arrows, labels, labelPosition } = useConfig()
 
     // check whether my value is the currently chosen one
     const selected = tick === value
