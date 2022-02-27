@@ -35,7 +35,7 @@ export const Rangemat = ({ setValue, children, ...rest }) => {
     // get names
     const { mainMovementName } = useNames()
     // get my state
-    const { enabled } = useConfig()
+    const { enabled, min, max } = useConfig()
     // unpack the geometry
     const { emplace } = useClient()
     const { bboxMine } = useMine()
@@ -58,17 +58,21 @@ export const Rangemat = ({ setValue, children, ...rest }) => {
             // notify the client
             setValue(old => {
                 // make a copy
-                const copy = [...old]
+                const range = [...old]
                 // if both are sliding
                 if (sliding < 0) {
-                    copy[0] += delta
-                    copy[1] += delta
+                    range[0] += delta
+                    range[1] += delta
                 } else {
                     // use the selector id to modify to correct entry
-                    copy[sliding] += delta
+                    range[sliding] += delta
                 }
-                // validate and return the correct value
-                return copy[0] < copy[1] ? copy : old
+
+                // clip
+                range[0] = Math.max(range[0], min)
+                range[1] = Math.max(Math.min(range[1], max), range[0])
+                // and return the new range
+                return range
             })
             // and done
             return
