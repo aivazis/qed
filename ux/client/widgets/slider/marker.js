@@ -15,12 +15,12 @@ import { useStartSliding } from './useStartSliding'
 
 
 // render the value indicator
-export const Marker = ({ value, enabled, id = 0, ...rest }) => {
+export const Marker = ({ value, id = 0, ...rest }) => {
     // make a handler that indicates the user is dragging the marker to pick a new value
     const startSliding = useStartSliding()
 
     // unpack the geometry
-    const { marker, markerPosition } = useConfig()
+    const { enabled, marker, markerPosition } = useConfig()
     // pick a styling based on my state
     const Indicator = enabled ? Enabled : Disabled
 
