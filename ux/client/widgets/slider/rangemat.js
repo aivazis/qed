@@ -15,6 +15,7 @@ import { useEvent } from '~/hooks'
 // locals
 // hooks
 import { useClient } from './useClient'
+import { useConfig } from './useConfig'
 import { useMine } from './useMine'
 import { useNames } from './useNames'
 import { useSliding } from './useSliding'
@@ -24,7 +25,7 @@ import { useUser } from './useUser'
 
 // a workaround for capturing events in the controller client area
 // needed only because {pointer-events: bounding-box} doesn't work yet
-export const Rangemat = ({ setValue, geometry, enabled, children, ...rest }) => {
+export const Rangemat = ({ setValue, children, ...rest }) => {
     // make a ref to attach to the placemat so we can measure its extent
     const placemat = React.useRef(null)
     // get the {sliding} indicator
@@ -33,6 +34,8 @@ export const Rangemat = ({ setValue, geometry, enabled, children, ...rest }) => 
     const stopSliding = useStopSliding()
     // get names
     const { mainMovementName } = useNames()
+    // get my state
+    const { enabled } = useConfig()
     // unpack the geometry
     const { emplace } = useClient()
     const { bboxMine } = useMine()
