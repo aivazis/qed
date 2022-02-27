@@ -25,14 +25,15 @@ export const Demo = () => {
     const enabled = true
 
     // set the demo level range
-    const [min, max] = [0, 7]
+    const [min, max] = [0, 5]
     // set up the tick marks
     const major = [...Array(max - min + 1).keys()].map((_, idx) => min + idx)
+    // const major = [...Array(max - min + 1).keys()].map((_, idx) => min + idx)
     const range = {
         value: interval, setValue: setInterval,
         min, max, major,
-        direction: "column", labels: "left", arrows: "right",
-        height: 250, width: 50,
+        direction: "row", labels: "top", arrows: "bottom",
+        height: 100, width: 250,
     }
 
     // mix my paint
