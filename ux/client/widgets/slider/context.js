@@ -14,6 +14,8 @@ export const Provider = ({ config, children }) => {
     // in order to support multiple movable markers, the state holds the marker id
     const [sliding, setSliding] = React.useState(null)
 
+    // state
+    const { enabled } = config
     // directional configuration
     const { direction, arrows, labels } = config
     // the layout of the controller in client coordinates
@@ -168,6 +170,8 @@ export const Provider = ({ config, children }) => {
         // the sliding flag and its mutator
         sliding, setSliding,
 
+        // state
+        enabled,
         // directional configuration
         direction, arrows, labels,
         // the layout of the controller in client coordinates
@@ -218,6 +222,8 @@ export const Context = React.createContext(
         sliding: null,
         setSliding: () => { throw new Error(complaint) },
 
+        // state
+        enabled: null,
         // directional configuration
         direction: null, arrows: null, labels: null,
         // the layout of the controller in client coordinates
