@@ -42,7 +42,7 @@ export const Zoom = () => {
         value: zoom, setValue: setZoom,
         min, max, major,
         direction: "row", labels: "bottom", arrows: "top",
-        height: 50, width: 200,
+        height: 100, width: 200,
     }
 
     // mix my paint
