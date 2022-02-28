@@ -18,6 +18,7 @@ export { Pin } from './pin'
 export Play from './play'
 export Skull from './skull'
 export { Split } from './split'
+export { Target } from './target'
 export { Unlocked } from './unlocked'
 export { X } from './x'
 
