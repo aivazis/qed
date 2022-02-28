@@ -172,6 +172,22 @@ const collapse = {
 }
 
 
+// the button that turns on the measuring layer
+const measure = {
+    // inherit
+    ...badge,
+
+    badge: {
+        ...badge.badge,
+        base: {
+            ...badge.badge.base,
+            // for me
+            justifySelf: "end",
+        },
+    },
+}
+
+
 // the button that splits a view
 const split = {
     // inherit
