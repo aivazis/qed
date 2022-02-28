@@ -43,7 +43,7 @@ export const Measure = ({ viewport }) => {
     // deduce my state
     const state = selected ? "selected" : "enabled"
     // mix my paint
-    const paint = styles.split
+    const paint = styles.measure
     // and render
     return (
         <Badge size={14} state={state} behaviors={behaviors} style={paint} >
