@@ -185,6 +185,18 @@ const measure = {
             justifySelf: "end",
         },
     },
+
+    icon: {
+        ...badge.icon,
+        selected: {
+            ...badge.icon.selected,
+            stroke: theme.page.name,
+        },
+        available: {
+            ...badge.icon.available,
+            stroke: theme.page.name,
+        },
+    },
 }
 
 
