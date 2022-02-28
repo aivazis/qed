@@ -21,7 +21,6 @@ export const useToggleMeasureLayer = idx => {
     const toggle = () => {
         // toggle
         setMeasureLayer(old => !old)
-        console.log("click")
         // all done
         return
     }
