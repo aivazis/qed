@@ -12,7 +12,10 @@ import React from 'react'
 import { Meta } from '~/widgets'
 
 // locals
+// context
+import { Provider } from './context'
 // hooks
+import { useMeasureLayer } from './useMeasureLayer'
 import { useGetZoomLevel } from '../viz/useGetZoomLevel'
 // components
 import { Blank } from './blank'
@@ -23,7 +26,19 @@ import styles from './styles'
 
 
 // export the data viewer
-export const Viewer = ({ viewport, view, registrar }) => {
+export const Viewer = (props) => {
+    // set up the context provider and embed my panel
+    return (
+        <Provider>
+            <Panel {...props} />
+        </Provider>
+    )
+}
+
+
+const Panel = ({ viewport, view, registrar }) => {
+    // get the measure layer state
+    const measure = useMeasureLayer()
     // get the viewport zoom level
     const zoom = Math.trunc(useGetZoomLevel(viewport))
 
