@@ -13,6 +13,7 @@ import styles from '../styles'
 const viewport = ({ width, height }) => ({
     // the overall box
     box: {
+        position: "relative",
         // layout
         flex: "1 1 100%",
         overflow: "auto",

@@ -15,12 +15,17 @@ import { Mosaic } from '~/widgets'
 // hooks
 import { useGetZoomLevel } from '../viz/useGetZoomLevel'
 import { useViewports } from '../viz/useViewports'
+import { useMeasureLayer } from '../viewer/useMeasureLayer'
+// components
+import { Measure } from '../measure'
 // styles
 import styles from './styles'
 
 
 // export the data viewport
 export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
+    // get the state of the measuring layer
+    const measure = useMeasureLayer()
     // get my zoom
     const zoom = Math.trunc(useGetZoomLevel(viewport))
     // get the pile of registered {viewports}; i'm at {viewport}
@@ -83,6 +88,7 @@ export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
                 raster={[height, width]} origin={origin} tile={tile}
                 style={paint}
             />
+            {measure && <Measure raster={{ width, height }} />}
         </div>
     )
 }
