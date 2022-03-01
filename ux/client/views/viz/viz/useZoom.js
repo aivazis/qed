@@ -12,11 +12,11 @@ import React from 'react'
 import { Context } from './context'
 
 
-// access to the viewport sync registry
+// access to the zoom level and its mutator
 export const useZoom = () => {
-    // grab the sync table
+    // grab the zoom level and its mutator
     const { activeViewport, zoom, setZoom } = React.useContext(Context)
-    // and return it
+    // and publish
     return { activeViewport, zoom, setZoom }
 }
 
