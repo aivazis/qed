@@ -42,6 +42,8 @@ export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
     // compute the dimensions of the mosaic
     const width = Math.trunc(shape[1] / scale)
     const height = Math.trunc(shape[0] / scale)
+    // assemble in a single object
+    const raster = { height, width }
     // and fold my zoom level into the data request uri
     const withZoom = [uri, zoom].join("/")
 
@@ -88,7 +90,7 @@ export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
                 raster={[height, width]} origin={origin} tile={tile}
                 style={paint}
             />
-            {measure && <Measure raster={{ width, height }} />}
+            {measure && <Measure shape={shape} raster={raster} zoom={zoom} />}
         </div>
     )
 }
