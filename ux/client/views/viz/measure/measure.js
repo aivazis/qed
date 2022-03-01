@@ -12,6 +12,8 @@ import React from 'react'
 import { SVG } from '~/widgets'
 
 // locals
+// context
+import { Provider } from './context'
 // components
 import { Mark } from './mark'
 import { Path } from './path'
@@ -20,7 +22,18 @@ import styles from './styles'
 
 
 // the layer
-export const Measure = ({ shape, raster, zoom }) => {
+export const Measure = (props) => {
+    // set up my context and embed my panel
+    return (
+        <Provider>
+            <Panel {...props} />
+        </Provider>
+    )
+}
+
+
+// the panel renderer
+const Panel = ({ shape, raster, zoom }) => {
     // storage for my collection of points
     const [points, setPoints] = React.useState([])
 
@@ -30,7 +43,7 @@ export const Measure = ({ shape, raster, zoom }) => {
     const projected = points.map(point => point.map(coord => Math.trunc(coord / scale)))
 
 
-    //
+    // add a point to the pile
     const pick = evt => {
         // unpack the mouse coordinates relative to ULC of the client area
         const { offsetX, offsetY } = evt.nativeEvent
