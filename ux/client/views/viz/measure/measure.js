@@ -7,24 +7,66 @@
 // externals
 import React from 'react'
 
+// project
+// widgets
+import { SVG } from '~/widgets'
+
 // locals
+// components
+import { Mark } from './mark'
+import { Path } from './path'
 // styles
 import styles from './styles'
 
 
 // the layer
-export const Measure = ({ raster }) => {
-    // mix my paint
-    const paint = styles.measure(raster)
+export const Measure = ({ shape, raster, zoom }) => {
+    // storage for my collection of points
+    const [points, setPoints] = React.useState([])
+
+    // convert the zoom level to a scaling factor
+    const scale = 2 ** zoom
+    // and project the points back into screen coordinates
+    const projected = points.map(point => point.map(coord => Math.trunc(coord / scale)))
+
+
+    //
+    const pick = evt => {
+        // unpack the mouse coordinates relative to ULC of the client area
+        const { offsetX, offsetY } = evt.nativeEvent
+        // scale and pack
+        const p = [scale * offsetX, scale * offsetY]
+        // add to my pile
+        setPoints(old => {
+            // make a copy
+            const pile = [...old]
+            // add the new point to it
+            pile.push(p)
+            // and return the new pile
+            return pile
+        })
+        // all done
+        return
+    }
+
     // controllers
     const behaviors = {
-        onClick: () => console.log('click')
+        onClick: pick
     }
-    // render
+
+    // mix my paint
+    const paint = styles.measure(raster)
+    // and render
     return (
-        <div style={paint} {...behaviors} >
-            hello
-        </div>
+        <SVG style={paint} {...behaviors} >
+            {/* join the points with a line */}
+            <Path points={projected} />
+            {/* and highlight them */}
+            {projected.map((point, idx) => {
+                // render a circle
+                return <Mark key={idx} idx={idx} at={point} />
+            })}
+        </SVG>
     )
 }
 
