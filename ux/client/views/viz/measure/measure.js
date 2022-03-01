@@ -45,6 +45,13 @@ const Panel = ({ shape, raster, zoom }) => {
 
     // add a point to the pile
     const pick = evt => {
+        // check the status of the shift key
+        const { shiftKey } = evt
+        // if not pressed
+        if (!shiftKey) {
+            // bail
+            return
+        }
         // unpack the mouse coordinates relative to ULC of the client area
         const { offsetX, offsetY } = evt.nativeEvent
         // scale and pack
@@ -64,7 +71,7 @@ const Panel = ({ shape, raster, zoom }) => {
 
     // controllers
     const behaviors = {
-        onClick: pick
+        onClick: pick,
     }
 
     // mix my paint
