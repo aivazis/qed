@@ -32,7 +32,7 @@ export const Path = ({ points }) => {
 const Line = styled.path`
     fill: none;
     stroke: hsl(28deg, 90%, 55%);
-    stroke-width: 1;
+    stroke-width: 2;
     vector-effect: non-scaling-stroke;
 `
 
