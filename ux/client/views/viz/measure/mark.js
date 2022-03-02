@@ -8,13 +8,30 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// local
+// hooks
+import { useSelection } from './useSelection'
+import { useSetSelection } from './useSetSelection'
+
 
 // mark a point
 export const Mark = ({ idx, at }) => {
+    // grab the current selection
+    const selection = useSelection()
+    // get the selection handler factory
+    const setSelection = useSetSelection(idx)
+
+    // deduce my state
+    const selected = selection.has(idx)
+    // and use it to pick a capture
+    const Capture = selected ? SelectedCapture : EnabledCapture
+
     // make a handler that marks me as the selected one when i'm clicked
     const select = evt => {
         // don't let this bubble up; the parent's handler adds points...
         evt.stopPropagation()
+        // select me
+        setSelection()
         // all done
         return
     }
@@ -30,6 +47,7 @@ export const Mark = ({ idx, at }) => {
             <Mat cx={0} cy={0} r="15" />
             <Ring cx={0} cy={0} r="7" />
             <Crosshairs d={crosshairs} />
+            <Capture cx={0} cy={0} r="12" />
         </g>
     )
 }
@@ -41,6 +59,32 @@ const Mat = styled.circle`
     stroke: none;
 `
 
+
+// the event capture area
+const EnabledCapture = styled.circle`
+    & {
+        fill: hsl(0deg, 0%, 0%, 0);
+        stroke: none;
+        cursor: pointer;
+    }
+
+    &:hover {
+        stroke: hsl(28deg, 90%, 55%);
+        stroke-width: 1;
+    }
+
+    &:active {
+        stroke: hsl(28deg, 90%, 55%);
+        stroke-width: 1;
+    }
+`
+
+// a selected node has a special capture
+const SelectedCapture = styled.circle`
+    fill: hsl(0deg, 0%, 0%, 0);
+    stroke: hsl(28deg, 90%, 35%);
+    stroke-width: 2;
+`
 
 // node
 const Ring = styled.circle`
