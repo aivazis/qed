@@ -11,12 +11,12 @@ import React from 'react'
 // the provider factory
 export const Provider = ({ children }) => {
     // the set of selected nodes
-    const [selection, setSelection] = React.useState([])
+    const [selection, setSelection] = React.useState(new Set())
 
     // build the initial context value
     const context = {
         // selected nodes
-        selection, selection,
+        selection, setSelection,
     }
 
     // provide from my children
