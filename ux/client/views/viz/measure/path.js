@@ -23,9 +23,21 @@ export const Path = ({ points }) => {
     )
     // and render
     return (
-        <Line d={path} />
+        <g>
+            <Mat d={path} />
+            <Line d={path} />
+        </g>
     )
 }
+
+
+// the mat
+const Mat = styled.path`
+    fill: none;
+    stroke: hsl(0deg, 0%, 10%, 0.75);
+    stroke-width: 8;
+    vector-effect: non-scaling-stroke;
+`
 
 
 // the path
