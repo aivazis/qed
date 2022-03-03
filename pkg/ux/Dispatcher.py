@@ -118,7 +118,7 @@ class Dispatcher:
             chnl = journal.error("qed.ux.dispatch")
             # show me
             chnl.line(str(error))
-            chnl.line(f"while fetching a '{channel}' tile of '{data}'")
+            chnl.line(f"while fetching a tile of '{channel}' from '{data}'")
             chnl.line(f"with shape {shape} at {origin}")
             chnl.line(f"at zoom level {zoom}")
             chnl.line(f"from '{src}'")
