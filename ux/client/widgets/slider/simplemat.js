@@ -47,13 +47,6 @@ export const Simplemat = ({ setValue, children, ...rest }) => {
         // handler that converts mouse coordinates to user space and invokes {setValue} to inform
         // the client
         const pick = evt => {
-            // get the mouse movement along my main axis
-            const dMain = evt[mainMovementName]
-            // if there is no change
-            if (Math.trunc(dMain) === 0) {
-                // bail
-                return
-            }
             // get the position of the mouse relative to the main edge
             const pixels = evt[mainOffsetName]
             // transform the mouse coordinates into a user value
@@ -70,6 +63,13 @@ export const Simplemat = ({ setValue, children, ...rest }) => {
             // if the indicator is not being dragged
             if (sliding === null) {
                 // do nothing
+                return
+            }
+            // get the mouse movement along my main axis
+            const dMain = evt[mainMovementName]
+            // if there is no change
+            if (Math.trunc(dMain) === 0) {
+                // bail
                 return
             }
             // otherwise, {pick} a value
