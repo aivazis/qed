@@ -45,15 +45,10 @@ const Panel = ({ shape, raster, zoom }) => {
 
     // add a point to the pile
     const pick = evt => {
-        // don't let this bubble up
-        evt.stopPropagation()
-        // and disable the default behavior
-        evt.preventDefault()
-
-        // check the status of the shift key
-        const { shiftKey } = evt
+        // check the status of the <Alt> key
+        const { altKey } = evt
         // if not pressed
-        if (!shiftKey) {
+        if (!altKey) {
             // bail
             return
         }
