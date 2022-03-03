@@ -24,12 +24,14 @@ export const Mark = ({ idx, at }) => {
     // deduce my state
     const selected = selection.has(idx)
     // and use it to pick a capture
-    const Capture = selected ? SelectedCapture : EnabledCapture
+    const Highlight = selected ? SelectedHighlight : EnabledHighlight
 
     // make a handler that marks me as the selected one when i'm clicked
     const select = evt => {
         // don't let this bubble up; the parent's handler adds points...
         evt.stopPropagation()
+        // and disable the default behavior
+        evt.preventDefault()
         // select me
         setSelection()
         // all done
@@ -47,7 +49,7 @@ export const Mark = ({ idx, at }) => {
             <Mat cx={0} cy={0} r="15" />
             <Ring cx={0} cy={0} r="7" />
             <Crosshairs d={crosshairs} />
-            <Capture cx={0} cy={0} r="12" />
+            <Highlight cx={0} cy={0} r="12" />
         </g>
     )
 }
@@ -61,7 +63,7 @@ const Mat = styled.circle`
 
 
 // the event capture area
-const EnabledCapture = styled.circle`
+const EnabledHighlight = styled.circle`
     & {
         fill: hsl(0deg, 0%, 0%, 0);
         stroke: none;
@@ -80,7 +82,7 @@ const EnabledCapture = styled.circle`
 `
 
 // a selected node has a special capture
-const SelectedCapture = styled.circle`
+const SelectedHighlight = styled.circle`
     fill: hsl(0deg, 0%, 0%, 0);
     stroke: hsl(28deg, 90%, 35%);
     stroke-width: 2;
@@ -93,7 +95,6 @@ const Ring = styled.circle`
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
 `
-
 
 // the path data for the crosshairs
 const crosshairs = `
