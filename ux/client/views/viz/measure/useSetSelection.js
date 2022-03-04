@@ -64,8 +64,11 @@ export const useSetSelection = (idx) => {
             const copy = [...old]
             // sort it
             copy.sort((a, b) => a - b)
-            // get the anchor node
-            const anchor = copy.length > 0 ? copy[0] : 0
+            // compute the selection start
+            const start = copy.length > 0 ? copy[0] : 0
+            // this node could be downstream from mine, so adjust the anchor point to make sure
+            // we don't compute invalid selection lengths
+            const anchor = (idx < start) ? 0 : start
             // form an array big enough to hold all indices in the range [anchor...idx]
             // and fill it with consecutive integers
             const selection = Array(idx - anchor + 1).fill(0).map((_, i) => anchor + i)
