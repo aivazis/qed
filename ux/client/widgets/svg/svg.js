@@ -10,17 +10,17 @@ import styled from 'styled-components'
 
 
 // export the SVG wrapper
-export const SVG = ({ height, width, children, ...rest }) => {
+export const SVG = React.forwardRef(({ height, width, children, ...rest }, ref) => {
     // and render
     return (
-        <Container
+        <Container ref={ref}
             height={height} width={width} {...rest}
             version="2.0" xmlns="http://www.w3.org/2000/svg"
         >
             {children}
         </Container>
     )
-}
+})
 
 
 // styling
