@@ -12,42 +12,63 @@ import styled from 'styled-components'
 // hooks
 import { useSelection } from './useSelection'
 import { useSetSelection } from './useSetSelection'
+import { useStartMoving } from './useStartMoving'
+import { useStopMoving } from './useStopMoving'
 
 
 // mark a point
 export const Mark = ({ idx, at }) => {
+    // grab the moving flag mutators
+    const startMoving = useStartMoving(idx)
+    const stopMoving = useStopMoving()
     // grab the current selection
     const selection = useSelection()
     // get the selection handler factory
-    const { toggle, toggleMulti, selectContiguous } = useSetSelection(idx)
+    const { select, toggle, selectContiguous } = useSetSelection(idx)
 
     // deduce my state
     const selected = selection.has(idx)
     // and use it to pick a capture
     const Highlight = selected ? SelectedHighlight : EnabledHighlight
 
-    //
-    const select = evt => {
+
+    // movement
+    const move = () => {
+        // mark me as the initiator of the move
+        startMoving()
+        // all done
+        return
+    }
+
+    // mark selection
+    const pick = evt => {
         // check the status of the modifiers
         const { ctrlKey, shiftKey } = evt
 
+        // the mouse activity started and ended with me, so nobody is moving
+        stopMoving()
+
         // if there is no modifier present
         if (!ctrlKey && !shiftKey) {
-            // toggle me in single node mode
-            toggle()
-            // bail
+            // select me in single node mode
+            select()
+            // done
             return
         }
 
-        // if <ctrl> if present
+        // if <ctrl> is present
         if (ctrlKey) {
             // toggle me in multinode mode
-            toggleMulti()
+            toggle()
+            // done
+            return
         }
 
         // if <shift> is present
         if (shiftKey) {
             selectContiguous()
+            // done
+            return
         }
 
         // all done
@@ -56,7 +77,8 @@ export const Mark = ({ idx, at }) => {
 
     // build my controller
     const behaviors = {
-        onClick: select,
+        onClick: pick,
+        onMouseDown: move,
     }
 
     // render

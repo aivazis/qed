@@ -8,6 +8,8 @@
 import React from 'react'
 
 // project
+// hooks
+import { useEvent } from '~/hooks'
 // widgets
 import { SVG } from '~/widgets'
 
@@ -17,6 +19,9 @@ import { Provider } from './context'
 // hooks
 import { usePoints } from './usePoints'
 import { useSetPoints } from './useSetPoints'
+import { useMoving } from './useMoving'
+import { useSelection } from './useSelection'
+import { useStopMoving } from './useStopMoving'
 // components
 import { Mark } from './mark'
 import { Path } from './path'
@@ -37,10 +42,19 @@ export const Measure = (props) => {
 
 // the panel renderer
 const Panel = ({ shape, raster, zoom }) => {
+    // make a ref for my client area
+    const me = React.useRef(null)
     // get the list of points on the profile
     const points = usePoints()
     // and the handler that adds points to the profile
-    const addPoints = useSetPoints()
+    const { addPoint, movePoints } = useSetPoints()
+    // get the movement marker
+    const moving = useMoving()
+    // and its mutator
+    const stopMoving = useStopMoving()
+    // get the current selection
+    const selection = useSelection()
+
     // convert the zoom level to a scaling factor
     const scale = 2 ** zoom
     // and project the points back into screen coordinates
@@ -57,25 +71,72 @@ const Panel = ({ shape, raster, zoom }) => {
             return
         }
         // unpack the mouse coordinates relative to ULC of the client area
-        const { offsetX, offsetY } = evt.nativeEvent
+        const { offsetX, offsetY } = evt
         // scale and pack
         const p = [scale * offsetX, scale * offsetY]
         // add to my pile
-        addPoints(p)
+        addPoint(p)
         // all done
         return
     }
 
-    // controllers
-    const behaviors = {
-        onClick: pick,
+    // move
+    const drag = evt => {
+        // if the moving indicator is in its trivial state
+        if (moving === null) {
+            // bail
+            return
+        }
+
+        // compute the set of nodes we will displace
+        const nodes = selection.has(moving) ? [...selection] : [moving]
+        // unpack the displacement from the event info
+        const { movementX, movementY } = evt
+
+        // displace
+        movePoints({ nodes, delta: { x: scale * movementX, y: scale * movementY } })
+
+        // all done
+        return
     }
+
+    // stop moving
+    const stop = evt => {
+        // clear the movement indicator
+        stopMoving()
+        // all done
+        return
+    }
+
+    // mouse event listeners
+    // when the user clicks in my area
+    useEvent({
+        name: "click", listener: pick, client: me,
+        triggers: []
+    })
+
+    // dragging happens when mouse move events are delivered
+    useEvent({
+        name: "mousemove", listener: drag, client: me,
+        triggers: [moving, points, selection]
+    })
+
+    // dragging ends when the user lets go of the mouse button
+    useEvent({
+        name: "mouseup", listener: stop, client: me,
+        triggets: [selection]
+    })
+    // or when the mouse leaves my client area
+    useEvent({
+        name: "mouseleave", listener: stop, client: me,
+        triggers: [selection]
+    })
 
     // mix my paint
     const paint = styles.measure(raster)
     // and render
     return (
-        <SVG style={paint} {...behaviors} >
+        <SVG ref={me} style={paint}>
             {/* join the points with a line */}
             <Path points={projected} />
             {/* and highlight them */}
