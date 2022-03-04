@@ -12,7 +12,7 @@ import React from 'react'
 import { Context } from './context'
 
 
-// access to the current selection
+// clear the current selection
 export const useClearSelection = (idx) => {
     // get the selection mutator
     const { setSelection } = React.useContext(Context)

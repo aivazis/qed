@@ -12,7 +12,7 @@ import React from 'react'
 import { Context } from './context'
 
 
-// access to the current selection
+// set the selection to a single node
 export const useSetSelection = (idx) => {
     // get the selection mutator
     const { setSelection } = React.useContext(Context)
