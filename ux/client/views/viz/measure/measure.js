@@ -14,6 +14,9 @@ import { SVG } from '~/widgets'
 // locals
 // context
 import { Provider } from './context'
+// hooks
+import { usePoints } from './usePoints'
+import { useSetPoints } from './useSetPoints'
 // components
 import { Mark } from './mark'
 import { Path } from './path'
@@ -34,9 +37,10 @@ export const Measure = (props) => {
 
 // the panel renderer
 const Panel = ({ shape, raster, zoom }) => {
-    // storage for my collection of points
-    const [points, setPoints] = React.useState([])
-
+    // get the list of points on the profile
+    const points = usePoints()
+    // and the handler that adds points to the profile
+    const addPoints = useSetPoints()
     // convert the zoom level to a scaling factor
     const scale = 2 ** zoom
     // and project the points back into screen coordinates
@@ -52,20 +56,12 @@ const Panel = ({ shape, raster, zoom }) => {
             // bail
             return
         }
-
         // unpack the mouse coordinates relative to ULC of the client area
         const { offsetX, offsetY } = evt.nativeEvent
         // scale and pack
         const p = [scale * offsetX, scale * offsetY]
         // add to my pile
-        setPoints(old => {
-            // make a copy
-            const pile = [...old]
-            // add the new point to it
-            pile.push(p)
-            // and return the new pile
-            return pile
-        })
+        addPoints(p)
         // all done
         return
     }
