@@ -28,7 +28,6 @@ export const Mark = ({ idx, at }) => {
 
     //
     const select = evt => {
-        console.log('click')
         // check the status of the modifiers
         const { ctrlKey, shiftKey } = evt
 
