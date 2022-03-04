@@ -20,7 +20,7 @@ export const useSetMoving = (idx) => {
     // make a handler that sets the flag
     const select = () => {
         // set the flag
-        setMoving(true)
+        setMoving(idx)
     }
 
     // and return the handler

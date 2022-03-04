@@ -15,7 +15,7 @@ export const Provider = ({ children }) => {
     // the set of selected nodes
     const [selection, setSelection] = React.useState(new Set())
     // a flag that indicates that the user has started dragging a {mark}
-    const [moving, setMoving] = React.useState(false)
+    const [moving, setMoving] = React.useState(null)
 
     // build the initial context value
     const context = {
