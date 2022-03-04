@@ -13,14 +13,16 @@ import { Context } from './context'
 
 
 // clear the {moving} flag
-export const useStopMoving = (idx) => {
+export const useStopMoving = () => {
     // get the flag mutator
     const { setMoving } = React.useContext(Context)
 
-    // make a handler that clears the flag
+    // make a handler that clears the movement indicator
     const clear = () => {
         // clear the flag
         setMoving(null)
+        // all done
+        return
     }
 
     // and return the handler
