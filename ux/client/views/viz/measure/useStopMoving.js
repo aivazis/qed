@@ -20,7 +20,7 @@ export const useStopMoving = (idx) => {
     // make a handler that clears the flag
     const clear = () => {
         // clear the flag
-        setMoving(false)
+        setMoving(null)
     }
 
     // and return the handler
