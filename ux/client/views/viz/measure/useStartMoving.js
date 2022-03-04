@@ -12,19 +12,19 @@ import React from 'react'
 import { Context } from './context'
 
 
-// clear the {moving} flag
-export const useClearMoving = (idx) => {
+// set the {moving} flag
+export const useStartMoving = (idx) => {
     // get the flag mutator
     const { setMoving } = React.useContext(Context)
 
-    // make a handler that clears the flag
-    const clear = () => {
-        // clear the flag
-        setMoving(false)
+    // make a handler that sets the flag
+    const select = () => {
+        // set the flag
+        setMoving(idx)
     }
 
     // and return the handler
-    return clear
+    return select
 }
 
 
