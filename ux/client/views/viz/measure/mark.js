@@ -27,11 +27,7 @@ export const Mark = ({ idx, at }) => {
     const Highlight = selected ? SelectedHighlight : EnabledHighlight
 
     // make a handler that marks me as the selected one when i'm clicked
-    const select = evt => {
-        // don't let this bubble up; the parent's handler adds points...
-        evt.stopPropagation()
-        // and disable the default behavior
-        evt.preventDefault()
+    const select = () => {
         // select me
         setSelection()
         // all done
