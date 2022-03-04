@@ -10,11 +10,15 @@ import React from 'react'
 
 // the provider factory
 export const Provider = ({ children }) => {
+    // storage for my collection of points
+    const [points, setPoints] = React.useState([])
     // the set of selected nodes
     const [selection, setSelection] = React.useState(new Set())
 
     // build the initial context value
     const context = {
+        // the points that make up the profile
+        points, setPoints,
         // selected nodes
         selection, setSelection,
     }
@@ -32,6 +36,9 @@ export const Provider = ({ children }) => {
 export const Context = React.createContext(
     // the default value clients see when accessing the context outside a provider
     {
+        // the points that make up the profile
+        points: null,
+        setPoints: () => { throw new Error(complaint) },
         // selected nodes
         selection: null,
         setSelection: () => { throw new Error(complaint) },
