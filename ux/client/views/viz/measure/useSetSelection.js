@@ -18,23 +18,15 @@ export const useSetSelection = (idx) => {
     const { setSelection } = React.useContext(Context)
 
     // make a handler that manages the current selection in single node mode
-    const toggle = () => {
-        // reset the selection
-        setSelection(old => {
-            // if the current selection has my node as its only node
-            if (old.size === 1 && old.has(idx)) {
-                // clear it out
-                return new Set()
-            }
-            // otherwise, make a new selection with just my node in it
-            return new Set([idx])
-        })
+    const select = () => {
+        // reset the selection to contain my node
+        setSelection(new Set([idx]))
         // all done
         return
     }
 
     // make a handler that toggles my node in multinode mode
-    const toggleMulti = () => {
+    const toggle = () => {
         // reset the selection
         setSelection(old => {
             // make a copy of the old state
@@ -80,7 +72,7 @@ export const useSetSelection = (idx) => {
     }
 
     // and return the handlers
-    return { toggle, toggleMulti, selectContiguous }
+    return { select, toggle, selectContiguous }
 }
 
 
