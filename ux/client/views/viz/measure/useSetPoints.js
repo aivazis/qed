@@ -32,8 +32,36 @@ export const useSetPoints = () => {
         return
     }
 
+
+    // make a handler that displaces a collection of {nodes} by a given {delta}
+    const movePoints = ({ nodes, delta }) => {
+        // update the list
+        setPoints(old => {
+            // make a copy
+            const pile = [...old]
+
+            // go through the node ids
+            nodes.forEach(node => {
+                // get the coordinates of this node
+                let [x, y] = pile[node]
+                // displace them
+                x += delta.x
+                y += delta.y
+                // and reattach
+                pile[node] = [x, y]
+                // get the next one
+                return
+            })
+
+            // and return the updated pile
+            return pile
+        })
+        // all done
+        return
+    }
+
     // and return the handler
-    return addPoint
+    return { addPoint, movePoints }
 }
 
 
