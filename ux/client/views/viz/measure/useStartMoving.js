@@ -14,13 +14,15 @@ import { Context } from './context'
 
 // set the {moving} flag
 export const useStartMoving = (idx) => {
-    // get the flag mutator
+    // get the mutator of the movement indicator
     const { setMoving } = React.useContext(Context)
 
-    // make a handler that sets the flag
+    // make a handler that marks my node as the movement initiator
     const select = () => {
-        // set the flag
+        // mark
         setMoving(idx)
+        // all done
+        return
     }
 
     // and return the handler
