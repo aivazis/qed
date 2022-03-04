@@ -19,17 +19,38 @@ export const Mark = ({ idx, at }) => {
     // grab the current selection
     const selection = useSelection()
     // get the selection handler factory
-    const setSelection = useSetSelection(idx)
+    const { toggle, toggleMulti, selectContiguous } = useSetSelection(idx)
 
     // deduce my state
     const selected = selection.has(idx)
     // and use it to pick a capture
     const Highlight = selected ? SelectedHighlight : EnabledHighlight
 
-    // make a handler that marks me as the selected one when i'm clicked
-    const select = () => {
-        // select me
-        setSelection()
+    //
+    const select = evt => {
+        console.log('click')
+        // check the status of the modifiers
+        const { ctrlKey, shiftKey } = evt
+
+        // if there is no modifier present
+        if (!ctrlKey && !shiftKey) {
+            // toggle me in single node mode
+            toggle()
+            // bail
+            return
+        }
+
+        // if <ctrl> if present
+        if (ctrlKey) {
+            // toggle me in multinode mode
+            toggleMulti()
+        }
+
+        // if <shift> is present
+        if (shiftKey) {
+            selectContiguous()
+        }
+
         // all done
         return
     }
@@ -82,6 +103,7 @@ const SelectedHighlight = styled.circle`
     fill: hsl(0deg, 0%, 0%, 0);
     stroke: hsl(28deg, 90%, 35%);
     stroke-width: 2;
+    cursor: pointer;
 `
 
 // node
