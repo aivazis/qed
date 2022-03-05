@@ -10,26 +10,26 @@ import styled from 'styled-components'
 
 
 // mark a point
-export const Labels = ({ positions, values, selection }) => {
+export const Labels = ({ positions, values }) => {
     // check whether there are any labels to render
-    if (selection.length === 0) {
+    if (positions.length === 0) {
         // and if not, bail
         return null
     }
     // otherwise, go through the selection and put a label below each node
     return (
         <g>
-            {selection.map(idx => {
+            {positions.map((position, idx) => {
                 // get the position of the marker
-                const [x, y] = positions[idx]
+                const [sample, line] = position
                 // get the value
-                const [dataX, dataY] = values[idx]
+                const [dataSample, dataLine] = values[idx]
                 // use the value to make a key
-                const key = `${dataX} x ${dataY}`
+                const key = `${dataSample} x ${dataLine}`
                 // and render
                 return (
-                    <Value key={key} x={x} y={y + 30}>
-                        {x}&middot;{y}
+                    <Value key={key} x={sample} y={line + 35}>
+                        {dataLine} &#x2715; {dataSample}
                     </Value>
                 )
 
@@ -46,7 +46,7 @@ const Value = styled.text`
     text-anchor: middle;
     cursor: default;
     stroke: none;
-    fill: hsl(28deg, 90%, 55%);
+    fill: hsl(28deg, 90%, 35%);
 `
 
 

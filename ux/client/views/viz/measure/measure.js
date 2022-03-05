@@ -149,7 +149,7 @@ const Panel = ({ shape, raster, zoom }) => {
             {/* join the points with a line */}
             <Path points={projected} />
             {/* add their labels */}
-            <Labels positions={projected} values={points} selection={[...selection]} />
+            <Labels positions={projected} values={points} />
             {/* and draw markers for them */}
             {projected.map((point, idx) => {
                 // render a circle
