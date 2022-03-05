@@ -15,10 +15,10 @@ import { Context } from './context'
 // set the zoom level of the active viewport
 export const useSetZoomLevel = () => {
     // grab the active viewport, the table of synced views,  and the zoom level table mutator
-    const { activeViewport, synced, setZoom } = React.useContext(Context)
+    const { viewports, activeViewport, synced, setZoom } = React.useContext(Context)
 
     // a handler that sets the zoom level of the active viewport
-    const set = (value) => {
+    const set = value => {
         // update the zoom table
         setZoom(old => {
             // preprocess, until continuous zooming is supported
@@ -40,9 +40,29 @@ export const useSetZoomLevel = () => {
                 })
             }
 
+            // get the viewport
+            const viewport = viewports.current[activeViewport]
+            // measure it
+            const { scrollLeft, clientWidth, scrollTop, clientHeight } = viewport
+
+            // get the old zoom
+            const oldZoom = old[activeViewport]
+            // and the new one
+            const newZoom = table[activeViewport]
+            // compute the magnification factor
+            const m = 2 ** (oldZoom - newZoom)
+
+            // compute the new scroll location so the center pixel remains the same after zoom
+            const top = m * (scrollTop + clientHeight / 2) - clientHeight / 2
+            const left = m * (scrollLeft + clientWidth / 2) - clientWidth / 2
+
+            // scroll there
+            viewport.scroll(left, top)
+
             // return the new table
             return table
         })
+
         // all done
         return
     }
