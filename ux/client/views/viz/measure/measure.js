@@ -120,13 +120,13 @@ const Panel = ({ shape, raster, zoom }) => {
     // when the user clicks in my area
     useEvent({
         name: "click", listener: pick, client: me,
-        triggers: []
+        triggers: [zoom]
     })
 
     // dragging happens when mouse move events are delivered
     useEvent({
         name: "mousemove", listener: drag, client: me,
-        triggers: [moving, points, selection]
+        triggers: [zoom, moving, points, selection]
     })
 
     // dragging ends when the user lets go of the mouse button
