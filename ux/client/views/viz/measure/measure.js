@@ -66,7 +66,6 @@ const Panel = ({ shape, raster, zoom }) => {
 
     // add a point to the pile
     const pick = evt => {
-        console.log(`measure: click`)
         // check the status of the <Alt> key
         const { altKey } = evt
 
