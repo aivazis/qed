@@ -17,10 +17,11 @@ import { SVG } from '~/widgets'
 // context
 import { Provider } from './context'
 // hooks
-import { usePoints } from './usePoints'
-import { useSetPoints } from './useSetPoints'
+import { useClearSelection } from './useClearSelection'
 import { useMoving } from './useMoving'
+import { usePoints } from './usePoints'
 import { useSelection } from './useSelection'
+import { useSetPoints } from './useSetPoints'
 import { useStopMoving } from './useStopMoving'
 // components
 import { Mark } from './mark'
@@ -54,6 +55,8 @@ const Panel = ({ shape, raster, zoom }) => {
     const stopMoving = useStopMoving()
     // get the current selection
     const selection = useSelection()
+    // and the handler that clears it
+    const clearSelection = useClearSelection()
 
     // convert the zoom level to a scaling factor
     const scale = 2 ** zoom
@@ -63,19 +66,25 @@ const Panel = ({ shape, raster, zoom }) => {
 
     // add a point to the pile
     const pick = evt => {
+        console.log(`measure: click`)
         // check the status of the <Alt> key
         const { altKey } = evt
-        // if not pressed
-        if (!altKey) {
-            // bail
+
+        // if <alt> is pressed
+        if (altKey) {
+            // unpack the mouse coordinates relative to ULC of the client area
+            const { offsetX, offsetY } = evt
+            // scale and pack
+            const p = [scale * offsetX, scale * offsetY]
+            // add to my pile
+            addPoint(p)
+            // all done
             return
         }
-        // unpack the mouse coordinates relative to ULC of the client area
-        const { offsetX, offsetY } = evt
-        // scale and pack
-        const p = [scale * offsetX, scale * offsetY]
-        // add to my pile
-        addPoint(p)
+
+        // the default action is to clear the selection
+        clearSelection()
+
         // all done
         return
     }
