@@ -8,6 +8,10 @@
 import React from 'react'
 import styled from 'styled-components'
 
+//project
+// hooks
+import { useEvent } from '~/hooks'
+
 // local
 // hooks
 import { useSelection } from './useSelection'
@@ -18,6 +22,9 @@ import { useStopMoving } from './useStopMoving'
 
 // mark a point
 export const Mark = ({ idx, at }) => {
+    // make a ref for my client area
+    const me = React.useRef(null)
+
     // grab the moving flag mutators
     const startMoving = useStartMoving(idx)
     const stopMoving = useStopMoving()
@@ -42,6 +49,9 @@ export const Mark = ({ idx, at }) => {
 
     // mark selection
     const pick = evt => {
+        // don't let this bubble up
+        evt.stopPropagation()
+
         // check the status of the modifiers
         const { ctrlKey, shiftKey } = evt
 
@@ -66,6 +76,7 @@ export const Mark = ({ idx, at }) => {
 
         // if <shift> is present
         if (shiftKey) {
+            // pick a range of nodes
             selectContiguous()
             // done
             return
@@ -75,15 +86,22 @@ export const Mark = ({ idx, at }) => {
         return
     }
 
-    // build my controller
-    const behaviors = {
-        onClick: pick,
-        onMouseDown: move,
-    }
+    // mouse event listeners
+    // when the user clicks in my area
+    useEvent({
+        name: "click", listener: pick, client: me,
+        triggers: [select, toggle, selectContiguous]
+    })
+
+    // when the mouse button is pressed in my area
+    useEvent({
+        name: "mousedown", listener: move, client: me,
+        triggers: [startMoving]
+    })
 
     // render
     return (
-        <g transform={`translate(${at[0]} ${at[1]})`} {...behaviors}>
+        <g ref={me} transform={`translate(${at[0]} ${at[1]})`}>
             <Mat cx={0} cy={0} r="15" />
             <Ring cx={0} cy={0} r="7" />
             <Crosshairs d={crosshairs} />
