@@ -24,6 +24,7 @@ import { useSelection } from './useSelection'
 import { useSetPoints } from './useSetPoints'
 import { useStopMoving } from './useStopMoving'
 // components
+import { Labels } from './labels'
 import { Mark } from './mark'
 import { Path } from './path'
 // styles
@@ -147,7 +148,9 @@ const Panel = ({ shape, raster, zoom }) => {
         <SVG ref={me} style={paint}>
             {/* join the points with a line */}
             <Path points={projected} />
-            {/* and highlight them */}
+            {/* add their labels */}
+            <Labels positions={projected} values={points} selection={[...selection]} />
+            {/* and draw markers for them */}
             {projected.map((point, idx) => {
                 // render a circle
                 return <Mark key={idx} idx={idx} at={point} />
