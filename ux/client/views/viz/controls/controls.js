@@ -14,6 +14,7 @@ import { Header } from '~/widgets'
 // locals
 // components
 import { Demo } from './demo'
+import { Measure } from './measure'
 import { Zoom } from './zoom'
 // styles
 import styles from './styles'
@@ -26,6 +27,8 @@ export const Controls = () => {
         <>
             {/* the title of the panel */}
             <Header title="controls" style={styles.header} />
+            {/* controls for the measuring layer */}
+            <Measure />
             {/* the controls common to all datasets */}
             <Zoom />
             {/* my play area */}
