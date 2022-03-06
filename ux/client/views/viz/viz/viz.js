@@ -66,7 +66,7 @@ const Panel = () => {
             {/* the panel with activity specific content, as determined by the current route */}
             <Flex.Panel min={250} max={450} style={activityPaint} >
                 <Outlet />
-            </Flex.Panel >
+            </Flex.Panel>
 
             {/* a panel for each registered view */}
             {views.map((view, viewport) => {
@@ -85,7 +85,7 @@ const Panel = () => {
                         style={styles.flex} {...behaviors}
                     >
                         <Viewer viewport={viewport} view={view} registrar={registrar} />
-                    </Flex.Panel >
+                    </Flex.Panel>
                 )
             })}
 
