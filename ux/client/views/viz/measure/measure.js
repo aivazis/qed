@@ -19,9 +19,9 @@ import { Provider } from './context'
 // hooks
 import { useClearSelection } from './useClearSelection'
 import { useMoving } from './useMoving'
-import { usePixelPath } from './usePixelPath'
+import { usePixelPath } from '../viz/usePixelPath'
 import { useSelection } from './useSelection'
-import { useSetPixelPath } from './useSetPixelPath'
+import { useSetPixelPath } from '../viz/useSetPixelPath'
 import { useStopMoving } from './useStopMoving'
 // components
 import { Labels } from './labels'
@@ -43,7 +43,7 @@ export const Measure = (props) => {
 
 
 // the panel renderer
-const Panel = ({ shape, raster, zoom }) => {
+const Panel = ({ raster, zoom }) => {
     // make a ref for my client area
     const me = React.useRef(null)
     // get the list of points on the profile
@@ -63,7 +63,6 @@ const Panel = ({ shape, raster, zoom }) => {
     const scale = 2 ** zoom
     // and project the points back into screen coordinates
     const projected = points.map(point => point.map(coord => Math.trunc(coord / scale)))
-
 
     // add a point to the pile
     const pick = evt => {
@@ -96,15 +95,12 @@ const Panel = ({ shape, raster, zoom }) => {
             // bail
             return
         }
-
         // compute the set of nodes we will displace
         const nodes = selection.has(moving) ? [...selection] : [moving]
         // unpack the displacement from the event info
         const { movementX, movementY } = evt
-
         // displace
         displace({ nodes, delta: { x: scale * movementX, y: scale * movementY } })
-
         // all done
         return
     }
