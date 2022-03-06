@@ -16,13 +16,6 @@ import styles from '../styles'
 // valid {reader} states: {enabled}, {selected}
 // the mixer
 const reader = state => ({
-    // for the tray
-    tray: {
-        box: { ...readerPaint.base.tray.box, ...readerPaint[state].tray.box },
-        header: { ...readerPaint.base.tray.header, ...readerPaint[state].tray.header },
-        title: { ...readerPaint.base.tray.title, ...readerPaint[state].tray.title },
-        items: { ...readerPaint.base.tray.items, ...readerPaint[state].tray.items },
-    },
     // for the metadata
     meta: {
         box: {
@@ -111,12 +104,6 @@ export default {
 const readerPaint = {
     // base state
     base: {
-        tray: {
-            box: {},
-            header: {},
-            title: {},
-            items: {},
-        },
         meta: {
             box: {},
             entry: {},
@@ -130,14 +117,6 @@ const readerPaint = {
 
     // when enabled
     enabled: {
-        tray: {
-            box: {},
-            header: {
-                backgroundColor: "hsl(0deg, 0%, 12%)",
-            },
-            title: {},
-            items: {},
-        },
         meta: {
             box: {},
             entry: {},
@@ -149,16 +128,6 @@ const readerPaint = {
 
     // when selected
     selected: {
-        tray: {
-            box: {},
-            header: {
-                backgroundColor: "hsl(0deg, 0%, 17%)",
-            },
-            title: {
-                color: theme.page.name,
-            },
-            items: {},
-        },
         meta: {
             box: {},
             entry: {},
