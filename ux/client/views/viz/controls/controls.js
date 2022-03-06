@@ -14,7 +14,7 @@ import { Header } from '~/widgets'
 // locals
 // components
 import { Demo } from '../demo'
-import { Zoom } from '../zoom'
+import { Zoom } from './zoom'
 // styles
 import styles from './styles'
 

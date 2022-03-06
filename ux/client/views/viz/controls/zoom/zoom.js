@@ -14,9 +14,9 @@ import { SVG, Slider, Tray } from '~/widgets'
 
 // locals
 // hooks
-import { useGetView } from '../viz/useGetView'
-import { useGetZoomLevel } from '../viz/useGetZoomLevel'
-import { useSetZoomLevel } from '../viz/useSetZoomLevel'
+import { useGetView } from '../../viz/useGetView'
+import { useGetZoomLevel } from '../../viz/useGetZoomLevel'
+import { useSetZoomLevel } from '../../viz/useSetZoomLevel'
 
 
 //  display the zoom control
