@@ -15,7 +15,7 @@ import { Mosaic } from '~/widgets'
 // hooks
 import { useGetZoomLevel } from '../viz/useGetZoomLevel'
 import { useViewports } from '../viz/useViewports'
-import { useMeasureLayer } from '../viewer/useMeasureLayer'
+import { useMeasureLayer } from '../viz/useMeasureLayer'
 // components
 import { Measure } from '../measure'
 // styles
