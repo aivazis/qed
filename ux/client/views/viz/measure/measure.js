@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import styled from 'styled-components'
 
 // project
 // hooks
@@ -27,8 +28,6 @@ import { useStopMoving } from './useStopMoving'
 import { Labels } from './labels'
 import { Mark } from './mark'
 import { Path } from './path'
-// styles
-import styles from './styles'
 
 
 // the layer
@@ -43,7 +42,7 @@ export const Measure = (props) => {
 
 
 // the panel renderer
-const Panel = ({ raster, zoom }) => {
+const Panel = ({ shape, zoom }) => {
     // make a ref for my client area
     const me = React.useRef(null)
     // get the list of points on the profile
@@ -137,11 +136,9 @@ const Panel = ({ raster, zoom }) => {
         triggers: [selection]
     })
 
-    // mix my paint
-    const paint = styles.measure(raster)
     // and render
     return (
-        <SVG ref={me} style={paint}>
+        <Placemat ref={me} shape={shape}>
             {/* join the points with a line */}
             <Path points={projected} />
             {/* add their labels */}
@@ -151,9 +148,19 @@ const Panel = ({ raster, zoom }) => {
                 // render a circle
                 return <Mark key={idx} idx={idx} at={point} />
             })}
-        </SVG>
+        </Placemat>
     )
 }
+
+
+// my placemat
+const Placemat = styled(SVG)`
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: ${props => props.shape[1]}px;
+    height: ${props => props.shape[0]}px;
+`
 
 
 // end of file
