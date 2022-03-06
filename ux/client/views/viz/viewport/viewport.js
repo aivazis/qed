@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import styled from 'styled-components'
 
 // project
 // widgets
@@ -18,8 +19,6 @@ import { useViewports } from '../viz/useViewports'
 import { useMeasureLayer } from '../viz/useMeasureLayer'
 // components
 import { Measure } from '../measure'
-// styles
-import styles from './styles'
 
 
 // export the data viewport
@@ -43,7 +42,7 @@ export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
     const width = Math.trunc(shape[1] / scale)
     const height = Math.trunc(shape[0] / scale)
     // assemble in a single object
-    const raster = { height, width }
+    const zoomedShape = [height, width]
     // and fold my zoom level into the data request uri
     const withZoom = [uri, zoom].join("/")
 
@@ -81,19 +80,58 @@ export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
         onDoubleClick: center,
     }
 
-    // mix my paint
-    const paint = styles.viewport({ width, height })
     // and render; don't forget to use the zoomed raster shape
     return (
-        <div ref={registrar} style={paint.box} {...controllers} {...rest} >
-            <Mosaic uri={withZoom}
-                raster={[height, width]} origin={origin} tile={tile}
-                style={paint}
-            />
-            {measure && <Measure shape={shape} raster={raster} zoom={zoom} />}
-        </div>
+        <Box ref={registrar} {...controllers} {...rest} >
+            {/* the data tiles */}
+            <View uri={withZoom} shape={zoomedShape} origin={origin} tile={tile} />
+            {/* the measure layer */}
+            {measure && <Measure shape={zoomedShape} zoom={zoom} />}
+        </Box>
     )
 }
+
+
+// style my box
+const Box = styled.div`
+    position: relative;
+    /* layout */
+    flex: 1 1 100%;
+    overflow: auto;
+    min-width: 300px;
+    min-height: 300px;
+    margin: 0.25rem 0.5rem 0.5rem 0.5rem;
+    border: 2px solid hsl(28deg, 30%, 25%);
+    background-color: hsl(28deg, 30%, 5%);
+`
+
+
+// style {Mosaic}
+const DataTiles = styled(Mosaic)`
+    background-color: hsl(0deg, 5%, 7%);
+    width: ${props => props.shape[1]}px;
+    height: ${props => props.shape[0]}px;
+`
+
+// memoize it
+// we need a function that looks at {props} and decides whether the mosaic should render
+const shouldRender = (prev, next) => {
+    // if the {uri} has changed
+    if (prev.uri != next.uri) {
+        // render
+        return false
+    }
+    // if the raster {shape} has changed
+    if (prev.shape[0] != next.shape[0] || prev.shape[1] != next.shape[1]) {
+        // render
+        return false
+    }
+    // otherwise, skip the render phase
+    return true
+}
+
+// and a wrapper over the styled {Mosaic}
+const View = React.memo(DataTiles, shouldRender)
 
 
 // end of file
