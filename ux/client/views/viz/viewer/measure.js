@@ -15,8 +15,8 @@ import { Badge } from '~/widgets'
 
 // locals
 // hooks
-import { useMeasureLayer } from './useMeasureLayer'
-import { useToggleMeasureLayer } from './useToggleMeasureLayer'
+import { useMeasureLayer } from '../viz/useMeasureLayer'
+import { useToggleMeasureLayer } from '../viz/useToggleMeasureLayer'
 // styles
 import styles from './styles'
 
