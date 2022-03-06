@@ -6,45 +6,30 @@
 
 // externals
 import React from 'react'
+import styled from 'styled-components'
 import { zip } from 'lodash'
 
 // project
 // widgets
 import { Tile } from '~/widgets'
 
-// locals
-import styles from './styles'
-
 
 // a large raster represented as a rectangular grid of tiles
-export const Mosaic = ({ uri, raster, origin, tile, style, ...rest }) => {
-    // mix my paint
-    const mosaicStyle = { ...styles.mosaic, ...style.mosaic }
-
+export const Mosaic = ({ uri, shape, origin, tile }) => {
     // render
     return (
-        <div style={mosaicStyle} >
-            {mosaic(raster, origin, tile).map(spec => {
+        <Box shape={shape}>
+            {mosaic(shape, origin, tile).map(spec => {
                 // unpack
                 const [origin, extent] = spec
                 // form the uri
                 const tileURI = `${uri}/${origin.join("x")}+${extent.join("x")}`
-                // mix the paint
-                const tileStyle = {
-                    // the local settings
-                    ...styles.tile,
-                    // the client request
-                    ...style.tile,
-                    // the tile shape
-                    width: extent[1],
-                    height: extent[0],
-                }
                 // render
                 return (
-                    <Tile key={origin} uri={tileURI} style={tileStyle} {...rest} />
+                    <Tile key={origin} uri={tileURI} shape={extent} />
                 )
             })}
-        </div>
+        </Box>
     )
 }
 
@@ -97,6 +82,24 @@ function* partition(origin, shape, tile) {
     // all done
     return
 }
+
+
+// styles
+// the container
+const Box = styled.div`
+    /* this must be sized by the client based on the raster shape */
+    overflow: hidden;   /* hide anything that sticks out */
+
+    /* let {flex} position my children */
+    display: flex;
+    /* a list of tiles that get wrapped based on their size */
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    /* extent */
+    width: ${props => props.shape[1]}px;
+    height: ${props => props.shape[0]}px;
+`
 
 
 // end of file
