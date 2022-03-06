@@ -11,7 +11,7 @@ import React from 'react'
 // the provider factory
 export const Provider = ({ children }) => {
     // storage for my collection of points
-    const [points, setPoints] = React.useState([])
+    const [pixelPath, setPixelPath] = React.useState([])
     // the set of selected nodes
     const [selection, setSelection] = React.useState(new Set())
     // a flag that indicates that the user has started dragging a {mark}
@@ -20,7 +20,7 @@ export const Provider = ({ children }) => {
     // build the initial context value
     const context = {
         // the points that make up the profile
-        points, setPoints,
+        pixelPath, setPixelPath,
         // selected nodes
         selection, setSelection,
         // movement indicator
@@ -41,8 +41,8 @@ export const Context = React.createContext(
     // the default value clients see when accessing the context outside a provider
     {
         // the points that make up the profile
-        points: null,
-        setPoints: () => { throw new Error(complaint) },
+        pixelPath: null,
+        setPixelPath: () => { throw new Error(complaint) },
         // selected nodes
         selection: null,
         setSelection: () => { throw new Error(complaint) },

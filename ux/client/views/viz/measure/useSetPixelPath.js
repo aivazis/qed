@@ -13,18 +13,20 @@ import { Context } from './context'
 
 
 // access to the mutator of the list of profile points
-export const useSetPoints = () => {
+export const useSetPixelPath = () => {
     // get the flag mutator
-    const { setPoints } = React.useContext(Context)
+    const { setPixelPath } = React.useContext(Context)
 
     // make a handler that adds a point to the pile
-    const addPoint = p => {
+    // the optional {pos} adds the point {p} before the supplied position, otherwise the point is
+    // pushed to the end
+    const add = (p, pos = null) => {
         // update the list
-        setPoints(old => {
+        setPixelPath(old => {
             // make a copy
             const pile = [...old]
             // add the new point to it
-            pile.push(p)
+            pos === null ? pile.push(p) : pile.splice(pos, 0, p)
             // and return the new pile
             return pile
         })
@@ -34,9 +36,9 @@ export const useSetPoints = () => {
 
 
     // make a handler that displaces a collection of {nodes} by a given {delta}
-    const movePoints = ({ nodes, delta }) => {
+    const displace = ({ nodes, delta }) => {
         // update the list
-        setPoints(old => {
+        setPixelPath(old => {
             // make a copy
             const pile = [...old]
 
@@ -61,7 +63,7 @@ export const useSetPoints = () => {
     }
 
     // and return the handler
-    return { addPoint, movePoints }
+    return { add, displace }
 }
 
 

@@ -19,9 +19,9 @@ import { Provider } from './context'
 // hooks
 import { useClearSelection } from './useClearSelection'
 import { useMoving } from './useMoving'
-import { usePoints } from './usePoints'
+import { usePixelPath } from './usePixelPath'
 import { useSelection } from './useSelection'
-import { useSetPoints } from './useSetPoints'
+import { useSetPixelPath } from './useSetPixelPath'
 import { useStopMoving } from './useStopMoving'
 // components
 import { Labels } from './labels'
@@ -47,9 +47,9 @@ const Panel = ({ shape, raster, zoom }) => {
     // make a ref for my client area
     const me = React.useRef(null)
     // get the list of points on the profile
-    const points = usePoints()
+    const points = usePixelPath()
     // and the handler that adds points to the profile
-    const { addPoint, movePoints } = useSetPoints()
+    const { add: addPoint, displace } = useSetPixelPath()
     // get the movement marker
     const moving = useMoving()
     // and its mutator
@@ -103,7 +103,7 @@ const Panel = ({ shape, raster, zoom }) => {
         const { movementX, movementY } = evt
 
         // displace
-        movePoints({ nodes, delta: { x: scale * movementX, y: scale * movementY } })
+        displace({ nodes, delta: { x: scale * movementX, y: scale * movementY } })
 
         // all done
         return

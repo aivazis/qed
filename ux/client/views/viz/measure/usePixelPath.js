@@ -13,11 +13,11 @@ import { Context } from './context'
 
 
 // access to the list of points in the profile
-export const usePoints = () => {
+export const usePixelPath = () => {
     // get the list
-    const { points } = React.useContext(Context)
+    const { pixelPath } = React.useContext(Context)
     // and return it
-    return points
+    return pixelPath
 }
 
 
