@@ -37,6 +37,8 @@ export const Provider = ({ children }) => {
     const [zoom, setZoom] = React.useState([zoomDefault])
     // the base zoom level is the zoom value of the last data request
     const baseZoom = React.useRef([zoomDefault])
+    // storage for my collection of points
+    const [pixelPath, setPixelPath] = React.useState([])
 
     // build the initial context value
     const context = {
@@ -54,6 +56,8 @@ export const Provider = ({ children }) => {
         zoom, setZoom,
         // the base zoom levels
         baseZoom,
+        // the pixels that make up a measure profile
+        pixelPath, setPixelPath,
     }
 
     // provide for my children
@@ -90,6 +94,10 @@ export const Context = React.createContext(
         setZoom: () => { throw new Error(complaint) },
         // the base zoom levels
         baseZoom: null,
+
+        // the pixels that make up the measure profile
+        pixelPath: null,
+        setPixelPath: () => { throw new Error(complaint) },
     }
 )
 
