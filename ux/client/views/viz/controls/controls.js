@@ -13,7 +13,7 @@ import { Header } from '~/widgets'
 
 // locals
 // components
-import { Demo } from '../demo'
+import { Demo } from './demo'
 import { Zoom } from './zoom'
 // styles
 import styles from './styles'
