@@ -6,20 +6,26 @@
 
 // externals
 import React from 'react'
-// locals
-import styles from './styles'
+import styled from 'styled-components'
 
 
-// a widget that can act as a header or a title
-export const Tile = ({ uri, style, ...rest }) => {
-    // mix my paint
-    const tileStyle = { ...styles, ...style }
-
+// a widget that contains a lazily loaded image
+export const Tile = ({ uri, shape }) => {
     // render
     return (
-        <img loading="lazy" className="lazyload" data-src={uri} style={tileStyle} {...rest} />
+        <Image shape={shape} loading="lazy" className="lazyload" data-src={uri} />
     )
 }
+
+
+// the contents
+const Image = styled.img`
+    /* i'm not resizable; my parent uses flex to position me */
+    flex: none;
+    /* extent */
+    width: ${props => props.shape[1]}px;
+    height: ${props => props.shape[0]}px;
+`
 
 
 // end of file
