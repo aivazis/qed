@@ -12,8 +12,6 @@ import React from 'react'
 import { Meta } from '~/widgets'
 
 // locals
-// context
-import { Provider } from './context'
 // hooks
 import { useGetZoomLevel } from '../viz/useGetZoomLevel'
 // components
@@ -25,17 +23,7 @@ import styles from './styles'
 
 
 // export the data viewer
-export const Viewer = (props) => {
-    // set up the context provider and embed my panel
-    return (
-        <Provider>
-            <Panel {...props} />
-        </Provider>
-    )
-}
-
-
-const Panel = ({ viewport, view, registrar }) => {
+export const Viewer = ({ viewport, view, registrar }) => {
     // get the viewport zoom level
     const zoom = Math.trunc(useGetZoomLevel(viewport))
 
