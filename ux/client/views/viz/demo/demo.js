@@ -12,10 +12,6 @@ import styled from 'styled-components'
 // widgets
 import { Range, SVG, Tray } from '~/widgets'
 
-// locals
-// styles
-import styles from './styles'
-
 
 //  display the demo control
 export const Demo = () => {
@@ -36,12 +32,9 @@ export const Demo = () => {
         height: 100, width: 250,
     }
 
-    // mix my paint
-    const demoPaint = styles.demo(enabled ? "enabled" : "disabled")
-
     // and render
     return (
-        <Tray title="demo" initially={true} style={demoPaint.tray}>
+        <Tray title="demo" state="enabled" initially={true}>
             {/* the control housing */}
             <Housing height={range.height} width={range.width}>
                 {/* the range slider */}
