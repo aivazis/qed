@@ -17,8 +17,6 @@ import { SVG, Slider, Tray } from '~/widgets'
 import { useGetView } from '../viz/useGetView'
 import { useGetZoomLevel } from '../viz/useGetZoomLevel'
 import { useSetZoomLevel } from '../viz/useSetZoomLevel'
-// styles
-import styles from './styles'
 
 
 //  display the zoom control
@@ -46,11 +44,11 @@ export const Zoom = () => {
     }
 
     // mix my paint
-    const zoomPaint = styles.zoom(enabled ? "enabled" : "disabled")
+    const state = enabled ? "enabled" : "disabled"
 
     // and render
     return (
-        <Tray title="zoom" initially={true} style={zoomPaint.tray}>
+        <Tray title="zoom" initially={true} state={state}>
             {/* the control housing */}
             <Housing height={slider.height} width={slider.width}>
                 {/* the slider */}
