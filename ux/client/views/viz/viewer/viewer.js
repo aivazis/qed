@@ -15,7 +15,6 @@ import { Meta } from '~/widgets'
 // context
 import { Provider } from './context'
 // hooks
-import { useMeasureLayer } from './useMeasureLayer'
 import { useGetZoomLevel } from '../viz/useGetZoomLevel'
 // components
 import { Blank } from './blank'
@@ -37,8 +36,6 @@ export const Viewer = (props) => {
 
 
 const Panel = ({ viewport, view, registrar }) => {
-    // get the measure layer state
-    const measure = useMeasureLayer()
     // get the viewport zoom level
     const zoom = Math.trunc(useGetZoomLevel(viewport))
 
