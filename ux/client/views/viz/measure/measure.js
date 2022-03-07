@@ -116,13 +116,13 @@ const Layer = ({ viewport, shape, zoom }) => {
     // when the user clicks in my area
     useEvent({
         name: "click", listener: pick, client: me,
-        triggers: [zoom]
+        triggers: [viewport, zoom, addPoint]
     })
 
     // dragging happens when mouse move events are delivered
     useEvent({
         name: "mousemove", listener: drag, client: me,
-        triggers: [zoom, moving, points, selection]
+        triggers: [viewport, zoom, moving, points, selection, displace]
     })
 
     // dragging ends when the user lets go of the mouse button
