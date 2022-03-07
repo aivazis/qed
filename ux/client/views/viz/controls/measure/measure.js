@@ -17,13 +17,15 @@ import { Tray } from '~/widgets'
 // hooks
 import { useMeasureLayer } from '../../viz/useMeasureLayer'
 import { usePixelPath } from '../../viz/usePixelPath'
+// components
+import { Path } from './path'
 
 
 //  display the {measure} layers controls
 export const Measure = () => {
     // get the {measure} layer status of the active {viewport}
     const measureLayer = useMeasureLayer()
-    // and the set of pixels on the profile path
+    // and the set of pixels on its profile path
     const pixelPath = usePixelPath()
 
     // if the {measure} layer has not been activated
@@ -42,6 +44,8 @@ export const Measure = () => {
                     On a Mac, the key may be labeled "option", or &#8997;
                 </Help>
             }
+            {/* render the pixel path */}
+            <Path path={pixelPath} />
         </Tray>
     )
 }
@@ -51,8 +55,7 @@ export const Measure = () => {
 const Help = styled.p`
     font-family: rubik-light;
     font-size: 75%;
-    padding: 1rem;
-
+    padding: 1.0rem;
 `
 
 
