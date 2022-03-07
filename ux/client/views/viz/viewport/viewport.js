@@ -24,7 +24,7 @@ import { Measure } from '../measure'
 // export the data viewport
 export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
     // get the state of the measuring layer
-    const measure = useMeasureLayer()
+    const measure = useMeasureLayer(viewport)
     // get my zoom
     const zoom = Math.trunc(useGetZoomLevel(viewport))
     // get the pile of registered {viewports}; i'm at {viewport}
