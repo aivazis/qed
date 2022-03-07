@@ -38,6 +38,7 @@ export const Path = ({ path }) => {
 
 // the container
 const Box = styled.div`
+    color: hsl(0deg, 0%, 50%);
     padding: 1.0rem;
 `
 

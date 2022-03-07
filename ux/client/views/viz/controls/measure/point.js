@@ -26,7 +26,7 @@ export const Point = ({ idx, point }) => {
 // the container
 const Box = styled.div`
     font-family: inconsolata;
-    font-size: 80%;
+    font-size: 75%;
     padding: 0.2rem 0.0rem;
 `
 
