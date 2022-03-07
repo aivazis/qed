@@ -35,20 +35,20 @@ export const Measure = (props) => {
     // set up my context and embed my panel
     return (
         <Provider>
-            <Panel {...props} />
+            <Layer {...props} />
         </Provider>
     )
 }
 
 
-// the panel renderer
-const Panel = ({ shape, zoom }) => {
+// the layer implementation
+const Layer = ({ viewport, shape, zoom }) => {
     // make a ref for my client area
     const me = React.useRef(null)
     // get the list of points on the profile
-    const points = usePixelPath()
+    const points = usePixelPath(viewport)
     // and the handler that adds points to the profile
-    const { add: addPoint, displace } = useSetPixelPath()
+    const { add: addPoint, displace } = useSetPixelPath(viewport)
     // get the movement marker
     const moving = useMoving()
     // and its mutator
