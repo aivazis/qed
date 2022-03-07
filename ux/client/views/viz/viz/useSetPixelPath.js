@@ -49,7 +49,7 @@ export const useSetPixelPath = (viewport) => {
             // go through the node ids
             nodes.forEach(node => {
                 // get the coordinates of this node
-                let [x, y] = pile[node]
+                let [x, y] = mine[node]
                 // displace them
                 x += delta.x
                 y += delta.y
