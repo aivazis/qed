@@ -24,9 +24,9 @@ import styles from './styles'
 // split a {view} into two
 export const Measure = ({ viewport }) => {
     // get the current measure layer state
-    const selected = useMeasureLayer()
+    const selected = useMeasureLayer(viewport)
     // grab the measure layer toggle from context
-    const toggle = useToggleMeasureLayer()
+    const toggle = useToggleMeasureLayer(viewport)
     // turn it into a handler
     const measure = evt => {
         // stop this event from bubbling up
