@@ -9,7 +9,7 @@ import React from 'react'
 
 // local
 // context
-import { Context } from './context'
+import { Context, measureDefault } from './context'
 
 
 // access to the registered views
@@ -21,7 +21,9 @@ export const useSplitView = view => {
         // mutators
         setActiveViewport, setViews, setSynced, setZoom, setMeasureLayer, setPixelPath,
         // the ref with the base zoom levels
-        baseZoom } = React.useContext(Context)
+        baseZoom,
+        // the default state of the measure layer
+    } = React.useContext(Context)
 
     // make a handler that adds a new blank view after a given on
     const splitView = () => {
@@ -64,7 +66,7 @@ export const useSplitView = view => {
             // make a copy
             const table = [...old]
             // add a marker for the new viewport
-            table.splice(view + 1, 0, false)
+            table.splice(view + 1, 0, measureDefault)
             // and return the new table
             return table
         })
