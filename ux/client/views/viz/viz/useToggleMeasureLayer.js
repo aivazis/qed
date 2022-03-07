@@ -13,14 +13,21 @@ import { Context } from './context'
 
 
 // toggle the measure layer over this viewport
-export const useToggleMeasureLayer = idx => {
+export const useToggleMeasureLayer = viewport => {
     // grab the measure layer mutator from context
     const { setMeasureLayer } = React.useContext(Context)
 
     // a handler that toggles whether the measure layer is visible
     const toggle = () => {
         // toggle
-        setMeasureLayer(old => !old)
+        setMeasureLayer(old => {
+            // make a copy
+            const table = [...old]
+            // toggle the entry that corresponds to this viewport
+            table[viewport] = !table[viewport]
+            // and return the new table
+            return table
+        })
         // all done
         return
     }

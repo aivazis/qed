@@ -13,11 +13,11 @@ import { Context } from './context'
 
 
 // toggle the measure layer over this viewport
-export const useMeasureLayer = () => {
+export const useMeasureLayer = (viewport) => {
     // grab the measure layer flag from context
-    const { measureLayer } = React.useContext(Context)
+    const { activeViewport, measureLayer } = React.useContext(Context)
     // and publish it
-    return measureLayer
+    return measureLayer[viewport ?? activeViewport]
 }
 
 
