@@ -21,11 +21,9 @@ import { usePixelPath } from '../../viz/usePixelPath'
 
 //  display the {measure} layers controls
 export const Measure = () => {
-    // get the active viewport
-
-    // get the {measure} layer status
+    // get the {measure} layer status of the active {viewport}
     const measureLayer = useMeasureLayer()
-    // and the set of pixels on the path
+    // and the set of pixels on the profile path
     const pixelPath = usePixelPath()
 
     // if the {measure} layer has not been activated
@@ -37,6 +35,7 @@ export const Measure = () => {
     // render
     return (
         <Tray title="measure" state="enabled" initially={true}>
+            {/* if the pixel path is empty, show a brief help message */}
             {pixelPath.length === 0 &&
                 <Help>
                     Pick points using Alt+Click.
