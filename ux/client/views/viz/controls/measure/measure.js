@@ -21,9 +21,11 @@ import { usePixelPath } from '../../viz/usePixelPath'
 
 //  display the {measure} layers controls
 export const Measure = () => {
+    // get the active viewport
+
     // get the {measure} layer status
     const measureLayer = useMeasureLayer()
-    // and the set of pixels on te path
+    // and the set of pixels on the path
     const pixelPath = usePixelPath()
 
     // if the {measure} layer has not been activated
