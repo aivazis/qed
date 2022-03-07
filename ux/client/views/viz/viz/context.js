@@ -39,9 +39,9 @@ export const Provider = ({ children }) => {
     const baseZoom = React.useRef([zoomDefault])
 
     // the measuring layer state
-    const [measureLayer, setMeasureLayer] = React.useState(false)
+    const [measureLayer, setMeasureLayer] = React.useState([measureDefault])
     // storage for the collection of pixels in a {measure} layer profile
-    const [pixelPath, setPixelPath] = React.useState([])
+    const [pixelPath, setPixelPath] = React.useState([...pixelPathDefault])
 
     // build the initial context value
     const context = {
@@ -116,6 +116,10 @@ export const emptyView = () => ({ reader: null, dataset: null, channel: null })
 export const syncedDefault = false
 // the default zoom level
 export const zoomDefault = 0
+// the default state of the measure layer
+export const measureDefault = false
+// the default pixel path
+export const pixelPathDefault = []
 
 // the error message to show consumers that are not nested within a provider
 const complaint = "while accessing the 'viz' context: no provider"
