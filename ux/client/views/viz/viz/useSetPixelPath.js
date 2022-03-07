@@ -13,7 +13,7 @@ import { Context } from './context'
 
 
 // access to the mutator of the list of profile points
-export const useSetPixelPath = () => {
+export const useSetPixelPath = (viewport) => {
     // get the flag mutator
     const { setPixelPath } = React.useContext(Context)
 
@@ -23,10 +23,12 @@ export const useSetPixelPath = () => {
     const add = (p, pos = null) => {
         // update the list
         setPixelPath(old => {
-            // make a copy
+            // make a copy of the whole pile
             const pile = [...old]
+            // get the portion that corresponds to this {viewport}
+            const mine = pile[viewport]
             // add the new point to it
-            pos === null ? pile.push(p) : pile.splice(pos, 0, p)
+            pos === null ? mine.push(p) : mine.splice(pos, 0, p)
             // and return the new pile
             return pile
         })
@@ -41,6 +43,8 @@ export const useSetPixelPath = () => {
         setPixelPath(old => {
             // make a copy
             const pile = [...old]
+            // and find the portion that corresponds to this {viewport}
+            const mine = pile[viewport]
 
             // go through the node ids
             nodes.forEach(node => {
@@ -50,7 +54,7 @@ export const useSetPixelPath = () => {
                 x += delta.x
                 y += delta.y
                 // and reattach
-                pile[node] = [x, y]
+                mine[node] = [x, y]
                 // get the next one
                 return
             })

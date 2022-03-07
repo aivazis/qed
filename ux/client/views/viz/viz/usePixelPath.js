@@ -13,11 +13,11 @@ import { Context } from './context'
 
 
 // access to the list of points in the profile
-export const usePixelPath = () => {
-    // get the list
-    const { pixelPath } = React.useContext(Context)
+export const usePixelPath = (viewport) => {
+    // get the list and the active viewport
+    const { activeViewport, pixelPath } = React.useContext(Context)
     // and return it
-    return pixelPath
+    return pixelPath[viewport ?? activeViewport]
 }
 
 
