@@ -44,7 +44,7 @@ export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
     // assemble in a single object
     const zoomedShape = [height, width]
     // and fold my zoom level into the data request uri
-    const withZoom = [uri, zoom].join("/")
+    const src = [uri, zoom].join("/")
 
     // center the viewport at the cursor position
     const center = ({ clientX, clientY }) => {
@@ -84,9 +84,9 @@ export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
     return (
         <Box ref={registrar} {...controllers} {...rest} >
             {/* the data tiles */}
-            <View uri={withZoom} shape={zoomedShape} origin={origin} tile={tile} />
+            <View uri={src} shape={zoomedShape} origin={origin} tile={tile} />
             {/* the measure layer */}
-            {measure && <Measure shape={zoomedShape} zoom={zoom} />}
+            {measure && <Measure viewport={viewport} shape={zoomedShape} zoom={zoom} />}
         </Box>
     )
 }
