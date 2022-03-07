@@ -41,7 +41,7 @@ export const Provider = ({ children }) => {
     // the measuring layer state
     const [measureLayer, setMeasureLayer] = React.useState([measureDefault])
     // storage for the collection of pixels in a {measure} layer profile
-    const [pixelPath, setPixelPath] = React.useState([...pixelPathDefault])
+    const [pixelPath, setPixelPath] = React.useState([[...pixelPathDefault]])
 
     // build the initial context value
     const context = {
