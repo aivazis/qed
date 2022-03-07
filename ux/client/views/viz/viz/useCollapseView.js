@@ -9,13 +9,21 @@ import React from 'react'
 
 // local
 // context
-import { Context, emptyView, syncedDefault, zoomDefault } from './context'
+import {
+    Context,
+    emptyView, syncedDefault, zoomDefault, measureDefault, pixelPathDefault,
+} from './context'
 
 
 // access to the registered views
 export const useCollapseView = view => {
     // grab the list of {views} from context
-    const { setActiveViewport, setViews, setSynced, setZoom, baseZoom } = React.useContext(Context)
+    const {
+        // mutators
+        setActiveViewport, setViews, setSynced, setZoom, setMeasureLayer, setPixelPath,
+        // the ref with the base zoom levels
+        baseZoom,
+    } = React.useContext(Context)
     // make a handler that adds a new blank view after a given on
     const collapseView = () => {
         // adjust the view
@@ -75,6 +83,35 @@ export const useCollapseView = view => {
 
         // activate the previous view
         setActiveViewport(Math.max(view - 1, 0))
+
+        // remove the measure layer status of the collapsing viewport
+        setMeasureLayer(old => {
+            // make a copy
+            const table = [...old]
+            // remove the marker for the collapsing viewport
+            table.splice(view, 1)
+            // if this leaves us with nothing
+            if (table.length === 0) {
+                // reinitialize
+                return [measureDefault]
+            }
+            // and return the new table
+            return table
+        })
+        // and make an empty pixel path for it
+        setPixelPath(old => {
+            // make a copy of the current state
+            const table = [...old]
+            // remove the pixel path of the collapsing view
+            table.splice(view, 1)
+            // if this leaves us with nothing
+            if (table.length === 0) {
+                // reinitialize
+                return [...pixelPathDefault]
+            }
+            // and return the new table
+            return table
+        })
 
         // all done
         return

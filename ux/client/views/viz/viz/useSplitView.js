@@ -19,7 +19,7 @@ export const useSplitView = view => {
         // the list of synced views
         synced,
         // mutators
-        setActiveViewport, setViews, setSynced, setZoom,
+        setActiveViewport, setViews, setSynced, setZoom, setMeasureLayer, setPixelPath,
         // the ref with the base zoom levels
         baseZoom } = React.useContext(Context)
 
@@ -58,6 +58,25 @@ export const useSplitView = view => {
 
         // maintain the base zoom levels
         baseZoom.current.splice(view + 1, baseZoom.current[view])
+
+        // initialize its measure layer status
+        setMeasureLayer(old => {
+            // make a copy
+            const table = [...old]
+            // add a marker for the new viewport
+            table.splice(view + 1, 0, false)
+            // and return the new table
+            return table
+        })
+        // and make an empty pixel path for it
+        setPixelPath(old => {
+            // make a copy of the current state
+            const table = [...old]
+            // add an empty path at the right spot
+            table.splice(view + 1, 0, [])
+            // and return the new table
+            return table
+        })
 
         // activate the new view
         setActiveViewport(view + 1)
