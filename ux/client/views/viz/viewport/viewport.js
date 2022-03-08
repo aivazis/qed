@@ -14,6 +14,7 @@ import { Mosaic } from '~/widgets'
 
 // locals
 // hooks
+import { useCenterViewport } from '../viz/useCenterViewport'
 import { useGetZoomLevel } from '../viz/useGetZoomLevel'
 import { useViewports } from '../viz/useViewports'
 import { useMeasureLayer } from '../viz/useMeasureLayer'
@@ -29,6 +30,8 @@ export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
     const zoom = Math.trunc(useGetZoomLevel(viewport))
     // get the pile of registered {viewports}; i'm at {viewport}
     const viewports = useViewports()
+    // make a handler that centers my viewport
+    const centerViewport = useCenterViewport(viewport)
 
     // get my view info
     const { dataset } = view
@@ -56,19 +59,16 @@ export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
         const box = placemat.getBoundingClientRect()
 
         // compute the location of the click relative to the viewport
-        const x = clientX - box.left
-        const y = clientY - box.top
-        // get the size of the viewport
-        const width = box.width
-        const height = box.height
+        const clickX = clientX - box.left
+        const clickY = clientY - box.top
         // get the current scroll position
         const left = placemat.scrollLeft
         const top = placemat.scrollTop
-        // compute the new location
-        const newX = left + x - width / 2
-        const newY = top + y - height / 2
-        // and scroll to the new location
-        placemat.scroll({ left: newX, top: newY, behavior: "smooth" })
+        // compute the new center location
+        const x = left + clickX
+        const y = top + clickY
+        // and center there
+        centerViewport({ x, y })
 
         // all done
         return
