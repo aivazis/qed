@@ -4,7 +4,7 @@
 // (c) 1998-2022 all rights reserved
 
 
-// the flex container
+// the flex containe
 const flex = {
     // the overall flex container
     box: {
