@@ -4,9 +4,6 @@
 // (c) 1998-2022 all rights reserved
 
 
-// externals
-import React from 'react'
-
 // local
 // hooks
 import { useSynced } from './useSynced'
