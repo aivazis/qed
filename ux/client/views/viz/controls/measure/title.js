@@ -31,7 +31,7 @@ const Box = styled.div`
 
 const Name = styled.span`
     display: inline-block;
-    width: 4.75rem;
+    width: 1.75rem;
     text-align: start;
     vertical-align: bottom;
     padding: 0.0rem 0.0rem 0.25rem 0.25rem;
@@ -41,7 +41,7 @@ const Name = styled.span`
 
 const Header = styled.span`
     display: inline-block;
-    width: 3.75rem;
+    width: 2.75rem;
     text-align: end;
     vertical-align: bottom;
     padding: 0.0rem 0.25rem 0.25rem 0.0rem;
