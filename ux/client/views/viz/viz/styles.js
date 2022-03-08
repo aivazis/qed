@@ -44,7 +44,7 @@ const activityPanels = {
         // shut flex down for this panel
         flex: "0 0 auto",
         // and set up the preferred initial width
-        width: "350px",
+        width: "400px",
     },
 
     // the separator
