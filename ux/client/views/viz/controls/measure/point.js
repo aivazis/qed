@@ -8,6 +8,22 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// shapes
+import { Plus, Target, X } from '~/shapes'
+
+// local
+// components
+import { Button } from './button'
+
+
+// the point selector
+const Potato = styled(Button)`
+    background-color: blue;
+    border-bottom: 1px solid blue;
+`
+
+
 
 // a line in the table of the points on the {measure} layer of the active viewport
 export const Point = ({ idx, point }) => {
@@ -15,9 +31,22 @@ export const Point = ({ idx, point }) => {
     return (
         <Box>
             <Index>{idx}:</Index>
-            <Icon></Icon>
             <Coordinate>{point[1]}</Coordinate>
             <Coordinate>{point[0]}</Coordinate>
+
+            {/* select this point*/}
+            <Button>
+                <Target />
+            </Button>
+            {/* add a point after this one */}
+            <Button>
+                <Plus />
+            </Button>
+            {/* delete this point */}
+            <Button>
+                <X />
+            </Button>
+
         </Box>
     )
 }
@@ -30,12 +59,6 @@ const Box = styled.div`
     padding: 0.2rem 0.0rem;
 `
 
-const Icon = styled.span`
-    display: inline-block;
-    width: 3.0rem;
-    text-align: start;
-`
-
 const Index = styled.span`
     display: inline-block;
     width: 2.0rem;
@@ -44,10 +67,9 @@ const Index = styled.span`
 
 const Coordinate = styled.span`
     display: inline-block;
-    width: 3.75rem;
+    width: 2.75rem;
     text-align: end;
     padding: 0.0rem 0.25rem 0.0rem 0.0rem;
 `
-
 
 // end of file
