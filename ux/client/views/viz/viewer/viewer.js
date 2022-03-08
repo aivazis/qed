@@ -17,7 +17,7 @@ import { useGetZoomLevel } from '../viz/useGetZoomLevel'
 // components
 import { Blank } from './blank'
 import { Tab } from './tab'
-import { Viewport } from '../viewport'
+import { Viewport } from './viewport'
 // styles
 import styles from './styles'
 
