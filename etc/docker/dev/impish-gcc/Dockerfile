@@ -9,7 +9,7 @@ FROM ubuntu:impish
 # set up some build variables
 ARG instance=dev/impish-gcc
 # python version
-ARG python_version=3.9
+ARG python_version=3.10
 ARG python=python${python_version}
 # locations
 ARG prefix=/usr/local
@@ -37,6 +37,7 @@ RUN apt dist-upgrade -y
 RUN DEBIAN_FRONTEND=noninteractive \
         apt install -y \
         git vim unzip zip \
+        openssh-server \
         g++ gfortran make \
         npm \
         ${python} ${python}-dev python3-numpy python3-pip python3-pybind11 python3-yaml \
@@ -68,7 +69,7 @@ RUN sed \
 
 # make the pyre configuration directory
 WORKDIR /root/.pyre
-# ger the {mm} configuration file
+# get the {mm} configuration file
 COPY etc/docker/${instance}/mm.pfg mm.pfg.in
 # expand
 RUN sed \
