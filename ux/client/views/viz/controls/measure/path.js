@@ -23,13 +23,18 @@ export const Path = ({ path }) => {
         return null
     }
 
-    // otherwise, render the points
+    // otherwise, compute the id of the last point
+    const last = path.length - 1
+
+    // render the points
     return (
         <Box>
             {/* add a title to the table */}
             <Title />
             {/* render the points on the path */}
-            {path.map((point, idx) => <Point key={`p${idx}`} idx={idx} point={point} />)}
+            {path.map((point, idx) =>
+                <Point key={`p${idx}`} idx={idx} point={point} last={last} />)
+            }
         </Box>
 
     )
