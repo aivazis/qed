@@ -15,7 +15,9 @@ import { Context } from './context'
 // access to the mutator of the list of profile points
 export const useSetPixelPath = (viewport) => {
     // get the flag mutator
-    const { setPixelPath } = React.useContext(Context)
+    const { activeViewport, setPixelPath } = React.useContext(Context)
+    // normalize the viewport
+    viewport ??= activeViewport
 
     // make a handler that adds a point to the pile
     // the optional {pos} adds the point {p} before the supplied position, otherwise the point is
@@ -35,7 +37,6 @@ export const useSetPixelPath = (viewport) => {
         // all done
         return
     }
-
 
     // make a handler that displaces a collection of {nodes} by a given {delta}
     const displace = ({ nodes, delta }) => {
