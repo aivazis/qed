@@ -39,6 +39,7 @@ const Icon = styled(SVG)`
     width: 0.7rem;
     height: 0.7rem;
     vertical-align: bottom;
+    cursor: pointer;
 `
 
 
