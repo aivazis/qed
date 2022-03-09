@@ -18,8 +18,11 @@ c16:
     cell: c16
 
 
+# sample data
+samples: ../../../data
+
 # alos datasets
-alos.data: "{pyre.environ.HOME}/dv/data/alos"
+alos.data: "{samples}/alos"
 
 LA-20061231:
     uri: "{alos.data}/20061231.slc"
@@ -31,14 +34,14 @@ LA-20070215:
 
 
 # nisar datasets
-nisar.data: "{pyre.environ.HOME}/dv/data/nisar"
+nisar.data: "{samples}/nisar"
 
 hawaii:
     uri: "{nisar.data}/BigIsl_32905_10003_012_100106_L090_CX_129_02.h5"
 
 
 # asar datasets
-asar.data: "{pyre.environ.HOME}/dv/data/asar"
+asar.data: "{samples}/asar"
 
 L_300621:
     uri: "{asar.data}/ASAR_L_JOINT_FP_ID09123_LINE15_RUN01_300621_LEVEL1_RSLC_V1.3.h5"
