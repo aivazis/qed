@@ -17,7 +17,7 @@ import { Focus } from './focus'
 
 
 // a line in the table of the points on the {measure} layer of the active viewport
-export const Point = ({ idx, point }) => {
+export const Point = ({ idx, point, last }) => {
     // make a mark
     return (
         <Box>
@@ -27,10 +27,10 @@ export const Point = ({ idx, point }) => {
 
             {/* select this point*/}
             <Focus />
-            {/* add a point after this one */}
-            <Add />
             {/* delete this point */}
             <Delete />
+            {/* add a point after this one, unless its the last */}
+            {idx != last && <Add idx={idx} />}
 
         </Box>
     )
