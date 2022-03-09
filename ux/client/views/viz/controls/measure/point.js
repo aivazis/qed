@@ -26,7 +26,7 @@ export const Point = ({ idx, point, last }) => {
             <Coordinate>{point[0]}</Coordinate>
 
             {/* select this point*/}
-            <Focus />
+            <Focus idx={idx} point={point} />
             {/* delete this point */}
             <Delete idx={idx} />
             {/* add a point after this one, unless its the last */}
