@@ -38,6 +38,23 @@ export const useSetPixelPath = (viewport = null) => {
         return
     }
 
+    // make a handler that removes a point from the pile
+    const remove = (node) => {
+        // update the list
+        setPixelPath(old => {
+            // make a copy of the whole pile
+            const pile = [...old]
+            // get the portion that corresponds to this {viewport}
+            const mine = pile[viewport]
+            // remove the point at the given slot
+            mine.splice(node, 1)
+            // and return the new pile
+            return pile
+        })
+        // all done
+        return
+    }
+
     // make a handler that adds a point to the path by splitting an existing leg in two
     // don't call this before making sure that both {node} and {node+1} are in the path
     const split = (node) => {
@@ -89,8 +106,8 @@ export const useSetPixelPath = (viewport = null) => {
         return
     }
 
-    // and return the handler
-    return { add, split, displace }
+    // and return the handlers
+    return { add, remove, split, displace }
 }
 
 
