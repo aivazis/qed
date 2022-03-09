@@ -14,6 +14,8 @@ import styled from 'styled-components'
 import { Tray } from '~/widgets'
 
 // locals
+// context
+import { Provider } from './context'
 // hooks
 import { useMeasureLayer } from '../../viz/useMeasureLayer'
 import { usePixelPath } from '../../viz/usePixelPath'
@@ -21,8 +23,19 @@ import { usePixelPath } from '../../viz/usePixelPath'
 import { Path } from './path'
 
 
-//  display the {measure} layers controls
-export const Measure = () => {
+// set up the context
+export const Measure = (props) => {
+    // set up my context and embed my panel
+    return (
+        <Provider>
+            <Panel {...props} />
+        </Provider>
+    )
+}
+
+
+// display the {measure} layer controls
+const Panel = () => {
     // get the {measure} layer status of the active {viewport}
     const measureLayer = useMeasureLayer()
     // and the set of pixels on its profile path
@@ -30,11 +43,11 @@ export const Measure = () => {
 
     // if the {measure} layer has not been activated
     if (!measureLayer) {
-        // noting to show
+        // nothing to show
         return null
     }
 
-    // render
+    // otherwise, render
     return (
         <Tray title="measure" state="enabled" initially={true}>
             {/* if the pixel path is empty, show a brief help message */}
