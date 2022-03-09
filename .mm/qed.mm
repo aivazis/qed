@@ -12,8 +12,10 @@ qed.libraries := qed.lib
 qed.extensions := qed.ext
 # a ux bundle
 qed.webpack := qed.ux
-# and some tests
+# tests
 qed.tests := qed.pkg.tests qed.ext.tests qed.data
+# docker images
+qed.docker-images := qed.dev.impish-gcc
 
 
 # load the packages
@@ -24,8 +26,10 @@ include $(qed.libraries)
 include $(qed.extensions)
 # the ux
 include $(qed.webpack)
-# and the test suites
+# the test suites
 include $(qed.tests)
+# and the docker images
+include $(qed.docker-images)
 
 
 # end of file
