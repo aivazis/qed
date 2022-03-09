@@ -13,7 +13,7 @@ import { Context } from './context'
 
 
 // access to the mutator of the list of profile points
-export const useSetPixelPath = (viewport) => {
+export const useSetPixelPath = (viewport = null) => {
     // get the flag mutator
     const { activeViewport, setPixelPath } = React.useContext(Context)
     // normalize the viewport
@@ -38,6 +38,30 @@ export const useSetPixelPath = (viewport) => {
         return
     }
 
+    // make a handler that adds a point to the path by splitting an existing leg in two
+    // don't call this before making sure that both {node} and {node+1} are in the path
+    const split = (node) => {
+        // update the list
+        setPixelPath(old => {
+            // make a copy
+            const pile = [...old]
+            // and find the portion that corresponds to this {viewport}
+            const mine = pile[viewport]
+            // get the tail point
+            const tail = mine[node]
+            // and the head
+            const head = mine[node + 1]
+            // form their mid point
+            const mid = tail.map((t, idx) => Math.trunc((t + head[idx]) / 2))
+            // add it to the path
+            mine.splice(node + 1, 0, mid)
+            // return the new pile
+            return pile
+        })
+        // all done
+        return
+    }
+
     // make a handler that displaces a collection of {nodes} by a given {delta}
     const displace = ({ nodes, delta }) => {
         // update the list
@@ -49,14 +73,12 @@ export const useSetPixelPath = (viewport) => {
 
             // go through the node ids
             nodes.forEach(node => {
-                // get the coordinates of this node
-                let [x, y] = mine[node]
-                // displace them
-                x += delta.x
-                y += delta.y
-                // and reattach
-                mine[node] = [x, y]
-                // get the next one
+                // get each point
+                const point = mine[node]
+                // update it
+                point[0] += delta.x
+                point[1] += delta.y
+                // and get the next one
                 return
             })
 
@@ -68,7 +90,7 @@ export const useSetPixelPath = (viewport) => {
     }
 
     // and return the handler
-    return { add, displace }
+    return { add, split, displace }
 }
 
 
