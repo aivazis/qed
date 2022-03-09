@@ -12,15 +12,32 @@ import React from 'react'
 import { Plus } from '~/shapes'
 
 // local
+// hooks
+import { useSetPixelPath } from '../../viz/useSetPixelPath'
 // components
 import { Button } from './button'
 
 
 // insert a point to the path after the given one
-export const Add = ({ idx, point }) => {
+export const Add = ({ idx }) => {
+    // get the path mutator that can split a segment in two
+    const { split } = useSetPixelPath()
+
+    // build the handler
+    const add = () => {
+        // split my node
+        split(idx)
+        // and done
+        return
+    }
+    // assemble the behaviors
+    const behaviors = {
+        onClick: add,
+    }
+
     // render
     return (
-        <Button>
+        <Button {...behaviors}>
             <Plus />
         </Button>
     )
