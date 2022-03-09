@@ -15,6 +15,7 @@ import { Target } from '~/shapes'
 // hooks
 import { useCenterViewport } from '../../viz/useCenterViewport'
 import { useGetZoomLevel } from '../../viz/useGetZoomLevel'
+import { useSetFocus } from './useSetFocus'
 // components
 import { Button } from './button'
 
@@ -23,14 +24,18 @@ import { Button } from './button'
 export const Focus = ({ idx, point }) => {
     // get the zoom level of the active viewport
     const zoom = useGetZoomLevel()
-    // get the handler that centers the active viewport
+    // the handler that centers the active viewport
     const center = useCenterViewport()
+    // and the {focus} mutator
+    const { focus } = useSetFocus(idx)
 
     // turn the zoom level into a scale
     const scale = 2 ** zoom
 
     // wrap it in a control
-    const centerAt = () => {
+    const activate = () => {
+        // mark me as the focused one
+        focus()
         // center the viewport on my point
         center({ x: point[0] / scale, y: point[1] / scale })
         // and done
@@ -39,7 +44,7 @@ export const Focus = ({ idx, point }) => {
 
     // assemble my behaviors
     const behaviors = {
-        onClick: centerAt,
+        onClick: activate,
     }
 
     // render
