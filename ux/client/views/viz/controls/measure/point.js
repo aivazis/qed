@@ -28,7 +28,7 @@ export const Point = ({ idx, point, last }) => {
             {/* select this point*/}
             <Focus />
             {/* delete this point */}
-            <Delete />
+            <Delete idx={idx} />
             {/* add a point after this one, unless its the last */}
             {idx != last && <Add idx={idx} />}
 
