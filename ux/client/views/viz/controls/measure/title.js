@@ -25,7 +25,7 @@ export const Title = () => {
 
 // the container
 const Box = styled.div`
-    font-family: rubik-medium;
+    font-family: rubik-light;
     font-size: 65%;
 `
 
