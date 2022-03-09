@@ -8,21 +8,12 @@
 import React from 'react'
 import styled from 'styled-components'
 
-// project
-// shapes
-import { Plus, Target, X } from '~/shapes'
 
 // local
 // components
-import { Button } from './button'
-
-
-// the point selector
-const Potato = styled(Button)`
-    background-color: blue;
-    border-bottom: 1px solid blue;
-`
-
+import { Add } from './add'
+import { Delete } from './delete'
+import { Focus } from './focus'
 
 
 // a line in the table of the points on the {measure} layer of the active viewport
@@ -35,17 +26,11 @@ export const Point = ({ idx, point }) => {
             <Coordinate>{point[0]}</Coordinate>
 
             {/* select this point*/}
-            <Button>
-                <Target />
-            </Button>
+            <Focus />
             {/* add a point after this one */}
-            <Button>
-                <Plus />
-            </Button>
+            <Add />
             {/* delete this point */}
-            <Button>
-                <X />
-            </Button>
+            <Delete />
 
         </Box>
     )
