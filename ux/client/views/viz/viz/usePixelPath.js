@@ -16,10 +16,8 @@ import { Context } from './context'
 export const usePixelPath = (viewport = null) => {
     // get the list and the active viewport
     const { activeViewport, pixelPath } = React.useContext(Context)
-    // normalize the viewport
-    viewport ??= activeViewport
-    // and return it
-    return pixelPath[viewport]
+    // normalize the viewport and return its pixel path
+    return pixelPath[viewport ?? activeViewport]
 }
 
 
