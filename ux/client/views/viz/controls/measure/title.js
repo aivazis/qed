@@ -41,7 +41,7 @@ const Name = styled.span`
 
 const Header = styled.span`
     display: inline-block;
-    width: 2.75rem;
+    width: 3.0rem;
     text-align: end;
     vertical-align: bottom;
     padding: 0.0rem 0.25rem 0.25rem 0.0rem;
