@@ -39,7 +39,7 @@ export const useSetPixelPath = (viewport = null) => {
     }
 
     // make a handler that removes a point from the pile
-    const remove = (node) => {
+    const remove = node => {
         // update the list
         setPixelPath(old => {
             // make a copy of the whole pile
@@ -57,7 +57,7 @@ export const useSetPixelPath = (viewport = null) => {
 
     // make a handler that adds a point to the path by splitting an existing leg in two
     // don't call this before making sure that both {node} and {node+1} are in the path
-    const split = (node) => {
+    const split = node => {
         // update the list
         setPixelPath(old => {
             // make a copy
@@ -110,8 +110,8 @@ export const useSetPixelPath = (viewport = null) => {
                 // get each point
                 const point = mine[node]
                 // update it
-                point[0] += delta.x
-                point[1] += delta.y
+                point[0] += delta.y
+                point[1] += delta.x
                 // and get the next one
                 return
             })
