@@ -12,9 +12,9 @@ import React from 'react'
 import { Context } from './context'
 
 
-// access to the viewport sync registry
+// access to the base zoom level table
 export const useBaseZoom = () => {
-    // grab the sync table
+    // grab the base zoom level
     const { baseZoom } = React.useContext(Context)
     // and return it
     return { baseZoom }
