@@ -79,6 +79,23 @@ export const useSetPixelPath = (viewport = null) => {
         return
     }
 
+    // adjust a coordinate of a single point
+    const adjust = ({ node, axis, value }) => {
+        // update the list
+        setPixelPath(old => {
+            // make a copy
+            const pile = [...old]
+            // and find the portion that corresponds to this {viewport}
+            const mine = pile[viewport]
+            // make the adjustment
+            mine[node][axis] = value
+            // and return the updated points
+            return pile
+        })
+        // all done
+        return
+    }
+
     // make a handler that displaces a collection of {nodes} by a given {delta}
     const displace = ({ nodes, delta }) => {
         // update the list
@@ -107,7 +124,7 @@ export const useSetPixelPath = (viewport = null) => {
     }
 
     // and return the handlers
-    return { add, remove, split, displace }
+    return { add, adjust, displace, remove, split }
 }
 
 
