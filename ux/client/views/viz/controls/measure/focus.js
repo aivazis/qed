@@ -37,7 +37,7 @@ export const Focus = ({ idx, point }) => {
         // mark me as the focused one
         focus()
         // center the viewport on my point
-        center({ x: point[0] / scale, y: point[1] / scale })
+        center({ x: point[1] / scale, y: point[0] / scale })
         // and done
         return
     }

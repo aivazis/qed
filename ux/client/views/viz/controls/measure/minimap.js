@@ -35,7 +35,7 @@ export const Minimap = ({ path }) => {
         return null
     }
     // compute the origin of our tile
-    const [x, y] = path[focus].map(p => p - 64)
+    const [y, x] = path[focus].map(p => p - 64)
     // and derive the tile rep
     const rep = `${y}x${x}+128x128`
 

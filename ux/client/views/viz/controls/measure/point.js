@@ -8,22 +8,22 @@
 import React from 'react'
 import styled from 'styled-components'
 
-
 // local
 // components
 import { Add } from './add'
+import { Coordinate } from './coordinate'
 import { Delete } from './delete'
 import { Focus } from './focus'
 
 
 // a line in the table of the points on the {measure} layer of the active viewport
 export const Point = ({ idx, point, last }) => {
-    // make a mark
+    // draw a line of the {path} table
     return (
         <Box>
             <Index>{idx}:</Index>
-            <Coordinate>{point[1]}</Coordinate>
-            <Coordinate>{point[0]}</Coordinate>
+            <Coordinate node={idx} axis={0} point={point} />
+            <Coordinate node={idx} axis={1} point={point} />
 
             {/* select this point*/}
             <Focus idx={idx} point={point} />
@@ -50,11 +50,5 @@ const Index = styled.span`
     text-align: end;
 `
 
-const Coordinate = styled.span`
-    display: inline-block;
-    width: 2.75rem;
-    text-align: end;
-    padding: 0.0rem 0.25rem 0.0rem 0.0rem;
-`
 
 // end of file
