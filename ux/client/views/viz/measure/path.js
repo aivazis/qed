@@ -18,8 +18,8 @@ export const Path = ({ points }) => {
     }
     // otherwise, form the path
     const path = points.reduce(
-        (prev, current) => prev + ` L ${current[0]} ${current[1]}`,
-        `M ${points[0][0]} ${points[0][1]} `
+        (prev, current) => prev + ` L ${current[1]} ${current[0]}`,
+        `M ${points[0][1]} ${points[0][0]} `
     )
     // and render
     return (

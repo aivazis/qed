@@ -101,7 +101,7 @@ export const Mark = ({ idx, at }) => {
 
     // render
     return (
-        <g ref={me} transform={`translate(${at[0]} ${at[1]})`}>
+        <g ref={me} transform={`translate(${at[1]} ${at[0]})`}>
             <Mat cx={0} cy={0} r="15" />
             <Ring cx={0} cy={0} r="7" />
             <Crosshairs d={crosshairs} />

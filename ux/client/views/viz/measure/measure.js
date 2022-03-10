@@ -73,7 +73,7 @@ const Layer = ({ viewport, shape, zoom }) => {
             // unpack the mouse coordinates relative to ULC of the client area
             const { offsetX, offsetY } = evt
             // scale and pack
-            const p = [scale * offsetX, scale * offsetY]
+            const p = [scale * offsetY, scale * offsetX]
             // add to my pile
             addPoint(p)
             // all done
