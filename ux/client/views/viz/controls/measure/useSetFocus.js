@@ -20,13 +20,22 @@ export const useSetFocus = (idx) => {
     // make a handler that toggles the focus
     const focus = () => {
         // toggle the focus
-        setFocus(idx)
+        setFocus(old => old === idx ? null : idx)
         // all done
         return
     }
 
+    // make a handler that clears the focus iff the current node is focused
+    const clear = () => {
+        // if {idx} is the focus, clear it; otherwise, leave it alone
+        setFocus(old => old === idx ? null : old)
+        // all done
+        return
+    }
+
+
     // and return the handlers
-    return { focus }
+    return { clear, focus }
 }
 
 
