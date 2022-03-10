@@ -13,6 +13,8 @@ import styled from 'styled-components'
 import { Target } from '~/shapes'
 // widgets
 import { SVG } from '~/widgets'
+// colors
+import { theme } from '~/palette'
 
 // local
 // hooks
@@ -52,7 +54,7 @@ export const Minimap = ({ path }) => {
 
     const style = {
         icon: {
-            stroke: "hsl(0deg, 0%, 60%)",
+            stroke: "hsl(28deg, 90%, 45%)",
             strokeWidth: "3",
         }
     }
