@@ -20,6 +20,7 @@ import { Provider } from './context'
 import { useMeasureLayer } from '../../viz/useMeasureLayer'
 import { usePixelPath } from '../../viz/usePixelPath'
 // components
+import { Minimap } from './minimap'
 import { Path } from './path'
 
 
@@ -59,6 +60,8 @@ const Panel = () => {
             }
             {/* render the pixel path */}
             <Path path={pixelPath} />
+            {/* and the mini map */}
+            <Minimap path={pixelPath} />
         </Tray>
     )
 }
