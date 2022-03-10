@@ -13,6 +13,7 @@ import { X } from '~/shapes'
 
 // local
 // hooks
+import { useSetFocus } from './useSetFocus'
 import { useSetPixelPath } from '../../viz/useSetPixelPath'
 // components
 import { Button } from './button'
@@ -22,11 +23,15 @@ import { Button } from './button'
 export const Delete = ({ idx }) => {
     // get the path mutator that can delete a point
     const { remove } = useSetPixelPath()
+    // and make a handler that clears the focus if my client happens to be in focus
+    const { clear } = useSetFocus(idx)
 
     // build the handler
     const handler = () => {
-        // remove the points
+        // remove the node from the path
         remove(idx)
+        // clear the focus, iff necessary
+        clear()
         // all done
         return
     }
