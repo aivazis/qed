@@ -14,23 +14,18 @@ import { useEvent } from '~/hooks'
 
 // local
 // hooks
+import { useDatasetShape } from '../../viz/useDatasetShape'
 import { useSetPixelPath } from '../../viz/useSetPixelPath'
-import { useViews } from '../../viz/useViews'
 
 
 // a interactive entry with a coordinate of a point
 export const Coordinate = ({ node, axis, point }) => {
     // make a ref for my input field
     const input = React.useRef()
-    // get the {activeViewport} and the set of {views} from {viz}
-    const { views, activeViewport } = useViews()
     // make me handler that can update the {axis} coordinate of my {node}
     const { adjust } = useSetPixelPath()
-
-    // get the {dataset} in the active view
-    const { dataset } = views[activeViewport]
-    // and unpack its shape and it origin
-    const { origin, shape } = dataset
+    // and get the active dataset shape and origin
+    const { origin, shape } = useDatasetShape()
 
     // validate, clip and set the value
     const set = value => {
