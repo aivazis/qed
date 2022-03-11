@@ -15,10 +15,13 @@ import { Range, SVG, Tray } from '~/widgets'
 
 //  display the demo control
 export const Demo = () => {
+    // manage my state
+    const [enabled, setEnabled] = React.useState(true)
     // interval state
     const [interval, setInterval] = React.useState([1, 3])
-    // demos are always on
-    const enabled = true
+
+    // make a toggle
+    const toggle = () => setEnabled(old => !old)
 
     // set the demo level range
     const [min, max] = [0, 5]
@@ -35,6 +38,10 @@ export const Demo = () => {
     // and render
     return (
         <Tray title="demo" state="enabled" initially={true}>
+            {/* state control */}
+            <Button type="button" onClick={toggle}>
+                {enabled ? "disable" : "enable"}
+            </Button>
             {/* the control housing */}
             <Housing height={range.height} width={range.width}>
                 {/* the range slider */}
@@ -50,9 +57,31 @@ const Housing = styled(SVG)`
     margin: 1.0rem auto;
 `
 
-
-// the controllers
+// the controller
 const RangeController = styled(Range)`
+`
+
+// the state control
+const Button = styled.button`
+    & {
+        font-family: inconsolata;
+        font-size: 75%;
+        text-align: start;
+        color: hsl(0deg, 0%, 60%);
+        background-color: transparent;
+        border: 0 transparent;
+        margin: 0.0rem 0.0rem 0.0rem 0.25rem;
+    }
+
+    &:active {
+        color: hsl(28deg, 90%, 55%);
+        border: 1 solid hsl(0deg, 0%, 40%);
+    }
+
+    &:hover {
+        color: hsl(28deg, 90%, 55%);
+        border: 1 solid hsl(0deg, 0%, 40%);
+    }
 `
 
 
