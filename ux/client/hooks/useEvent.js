@@ -11,12 +11,17 @@ import { useEffect } from 'react'
 // register a {listener} with {client} for the given event {name} that gets updated
 // whenever {triggers} are modified
 export default ({
-    name = throwError(), listener = throwError(), client = null, triggers = []
+    name = throwError(), listener = null, client = null, triggers = null
 }) => {
     // create an effect
     useEffect(() => {
+        // if there is no listener or no client
+        if (listener == null || client == null) {
+            // bail
+            return
+        }
         // figure out the effect target
-        const target = client?.current || window
+        const target = client.current || window
         // add {listener} as an event listener
         target.addEventListener(name, listener)
         // make a controller; not sure whether this is required, useful, harmful...
