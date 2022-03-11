@@ -8,10 +8,6 @@
 import React from 'react'
 import styled from 'styled-components'
 
-// project
-// hooks
-import { useEvent } from '~/hooks'
-
 // local
 // hooks
 import { useDatasetShape } from '../../viz/useDatasetShape'
@@ -60,19 +56,18 @@ export const Coordinate = ({ node, axis, point }) => {
         return
     }
 
-    // install some event listeners
-    // when the input field changes values
-    useEvent({
-        name: "input", listener: update, client: input,
-    })
-    // when the input field loses focus
-    useEvent({
-        name: "change", listener: update, client: input,
-    })
+    // make a controller
+    const behaviors = {
+        // update on every keystroke; maybe disorienting
+        // turn it off for now to see the effect across browsers
+        // onInput: update,
+        // commit the change to the value
+        onChange: update,
+    }
 
     // make a mark
     return (
-        <Entry ref={input} type="text" value={point[axis]} />
+        <Entry ref={input} type="text" value={point[axis]} {...behaviors} />
     )
 }
 
