@@ -13,13 +13,17 @@ import styled from 'styled-components'
 import { Target } from '~/shapes'
 // widgets
 import { SVG } from '~/widgets'
-// colors
-import { theme } from '~/palette'
 
 // local
 // hooks
 import { useViews } from '../../viz/useViews'
 import { usePixelPathSelection } from '../../viz/usePixelPathSelection'
+// components
+import { Down } from './down'
+import { Left } from './left'
+import { Right } from './right'
+import { Up } from './up'
+
 
 
 // a table of the points on the {measure} layer of the active viewport
@@ -112,7 +116,13 @@ export const Minimap = ({ path }) => {
             <Data src={base} />
             <Map>
                 <g transform={`translate(${delta[1]} ${delta[0]}) scale(${256 / 1000})`}>
-                    < Target style={style} />
+                    {/* the marker */}
+                    <Target style={style} />
+                    {/* verniers */}
+                    <Up node={node} />
+                    <Right node={node} />
+                    <Down node={node} />
+                    <Left node={node} />
                 </g>
             </Map>
         </Box>
