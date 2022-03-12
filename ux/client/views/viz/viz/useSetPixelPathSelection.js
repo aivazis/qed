@@ -15,9 +15,9 @@ import { Context } from './context'
 // set the selection to a single node
 export const useSetPixelPathSelection = (viewport) => {
     // get the selection mutator
-    const { activeViewort, setPixelPathSelection } = React.useContext(Context)
+    const { activeViewport, setPixelPathSelection } = React.useContext(Context)
     // normalize the viewport
-    viewport ??= activeViewort
+    viewport ??= activeViewport
 
     // make a handler that manages the current selection in single node mode
     const select = idx => {
