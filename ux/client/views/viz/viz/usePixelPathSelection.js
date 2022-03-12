@@ -13,11 +13,11 @@ import { Context } from './context'
 
 
 // access to the current selection
-export const useSelection = () => {
-    // get the current selection
-    const { selection } = React.useContext(Context)
+export const usePixelPathSelection = (viewport) => {
+    // get the active viewport and the current selection
+    const { activeViewport, pixelPathSelection } = React.useContext(Context)
     // and return it
-    return selection
+    return pixelPathSelection[viewport ?? activeViewport]
 }
 
 

@@ -13,14 +13,23 @@ import { Context } from './context'
 
 
 // set the selection to a single node
-export const useSetSelection = (idx) => {
+export const useSetPixelPathSelection = ({ viewport, idx }) => {
     // get the selection mutator
-    const { setSelection } = React.useContext(Context)
+    const { activeViewort, setPixelPathSelection } = React.useContext(Context)
+    // normalize the viewport
+    viewport ??= activeViewort
 
     // make a handler that manages the current selection in single node mode
     const select = () => {
-        // reset the selection to contain my node
-        setSelection(new Set([idx]))
+        // reset the selection to contain just my node
+        setPixelPathSelection(old => {
+            // make a copy of the table
+            const table = [...old]
+            // reset my entry
+            table[viewport] = new Set([idx])
+            // and return the updated table
+            return table
+        })
         // all done
         return
     }
@@ -28,9 +37,11 @@ export const useSetSelection = (idx) => {
     // make a handler that toggles my node in multinode mode
     const toggle = () => {
         // reset the selection
-        setSelection(old => {
-            // make a copy of the old state
-            const clone = new Set([...old])
+        setPixelPathSelection(old => {
+            // make a copy of the old table
+            const table = [...old]
+            // make a copy of my old entry
+            const clone = new Set([...table[viewport]])
             // if my node is present in the selection
             if (clone.has(idx)) {
                 // remove it
@@ -41,8 +52,10 @@ export const useSetSelection = (idx) => {
                 // add it
                 clone.add(idx)
             }
-            // return the new selection
-            return clone
+            // attach the new entry
+            table[viewport] = clone
+            // return the updated table
+            return table
         })
         // all done
         return
@@ -51,9 +64,11 @@ export const useSetSelection = (idx) => {
     // make a handler that selects a contiguous list
     const selectContiguous = () => {
         // reset the selection
-        setSelection(old => {
-            // make a copy of the old selection
-            const copy = [...old]
+        setPixelPathSelection(old => {
+            // make a copy of the old table
+            const table = [...old]
+            // make a copy of my old entry
+            const copy = [...table[viewport]]
             // sort it
             copy.sort((a, b) => a - b)
             // compute the selection start
@@ -64,8 +79,10 @@ export const useSetSelection = (idx) => {
             // form an array big enough to hold all indices in the range [anchor...idx]
             // and fill it with consecutive integers
             const selection = Array(idx - anchor + 1).fill(0).map((_, i) => anchor + i)
-            // make a selection out of it and return it
-            return new Set(selection)
+            // make a selection out of it
+            table[viewport] = new Set(selection)
+            // and return the updated table
+            return table
         })
         // all done
         return
