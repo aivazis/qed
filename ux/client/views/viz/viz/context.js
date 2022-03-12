@@ -42,6 +42,9 @@ export const Provider = ({ children }) => {
     const [measureLayer, setMeasureLayer] = React.useState([measureDefault])
     // storage for the collection of pixels in a {measure} layer profile
     const [pixelPath, setPixelPath] = React.useState([...pixelPathDefault()])
+    // the set of selected nodes in a {measure} layer profile
+    const [pixelPathSelection, setPixelPathSelection] = React.useState(
+        [...pixelPathSelectionDefault()])
 
     // build the initial context value
     const context = {
@@ -63,6 +66,8 @@ export const Provider = ({ children }) => {
         measureLayer, setMeasureLayer,
         // the pixels that make up a measure profile
         pixelPath, setPixelPath,
+        // selected nodes
+        pixelPathSelection, setPixelPathSelection,
     }
 
     // provide for my children
@@ -106,6 +111,9 @@ export const Context = React.createContext(
         // the pixels that make up the measure profile
         pixelPath: null,
         setPixelPath: () => { throw new Error(complaint) },
+        // selected nodes
+        pixelPathSelection: null,
+        setPixelPathSelection: () => { throw new Error(complaint) },
     }
 )
 
@@ -120,6 +128,8 @@ export const zoomDefault = 0
 export const measureDefault = false
 // the default pixel path
 export const pixelPathDefault = () => [[]]
+// the default pixel path selection
+export const pixelPathSelectionDefault = () => [new Set()]
 
 // the error message to show consumers that are not nested within a provider
 const complaint = "while accessing the 'viz' context: no provider"
