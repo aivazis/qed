@@ -13,14 +13,14 @@ import { Context } from './context'
 
 
 // set the selection to a single node
-export const useSetPixelPathSelection = ({ viewport, idx }) => {
+export const useSetPixelPathSelection = (viewport) => {
     // get the selection mutator
     const { activeViewort, setPixelPathSelection } = React.useContext(Context)
     // normalize the viewport
     viewport ??= activeViewort
 
     // make a handler that manages the current selection in single node mode
-    const select = () => {
+    const select = idx => {
         // reset the selection to contain just my node
         setPixelPathSelection(old => {
             // make a copy of the table
@@ -35,7 +35,7 @@ export const useSetPixelPathSelection = ({ viewport, idx }) => {
     }
 
     // make a handler that toggles my node in multinode mode
-    const toggle = () => {
+    const toggle = idx => {
         // reset the selection
         setPixelPathSelection(old => {
             // make a copy of the old table
@@ -62,7 +62,7 @@ export const useSetPixelPathSelection = ({ viewport, idx }) => {
     }
 
     // make a handler that selects a contiguous list
-    const selectContiguous = () => {
+    const selectContiguous = idx => {
         // reset the selection
         setPixelPathSelection(old => {
             // make a copy of the old table
@@ -88,8 +88,35 @@ export const useSetPixelPathSelection = ({ viewport, idx }) => {
         return
     }
 
+    // make a handler that deselects a node unconditionally
+    const deselect = idx => {
+        // reset the selection to contain just my node
+        setPixelPathSelection(old => {
+            // find my entry
+            const mine = old[viewport]
+            // if my target node is not present in the selection
+            if (!mine.has(idx)) {
+                // we are done; return the {old} table untouched
+                return old
+            }
+
+            // otherwise, we have to make an adjustment; make a copy of the old table
+            const table = [...old]
+            // and a copy of my entry
+            const copy = new Set([...mine])
+            // remove the target node from the selection
+            copy.delete(idx)
+            // attach my new entry
+            table[viewport] = copy
+            // and return the updated table
+            return table
+        })
+        // all done
+        return
+    }
+
     // and return the handlers
-    return { select, toggle, selectContiguous }
+    return { deselect, select, selectContiguous, toggle }
 }
 
 
