@@ -10,6 +10,7 @@ import React from 'react'
 // local
 // context
 import { Context } from './context'
+import { useClearPixelPathSelection } from './useClearPixelPathSelection'
 
 
 // access to the mutator of the list of profile points
@@ -18,6 +19,9 @@ export const useSetPixelPath = (viewport = null) => {
     const { activeViewport, setPixelPath } = React.useContext(Context)
     // normalize the viewport
     viewport ??= activeViewport
+    // make a handler that clears the selection to use when removing a point from the path
+    const clear = useClearPixelPathSelection(viewport)
+
 
     // make a handler that adds a point to the pile
     // the optional {pos} adds the point {p} before the supplied position, otherwise the point is
@@ -42,6 +46,8 @@ export const useSetPixelPath = (viewport = null) => {
     const remove = node => {
         // update the list
         setPixelPath(old => {
+            // clear the selection; removing a point scrambles the node indices...
+            clear(node)
             // make a copy of the whole pile
             const pile = [...old]
             // get the portion that corresponds to this {viewport}
