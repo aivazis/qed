@@ -20,7 +20,8 @@ export const useCollapseView = view => {
     // grab the list of {views} from context
     const {
         // mutators
-        setActiveViewport, setViews, setSynced, setZoom, setMeasureLayer, setPixelPath,
+        setActiveViewport, setViews, setSynced, setZoom,
+        setMeasureLayer, setPixelPath, setPixelPathSelection,
         // the ref with the base zoom levels
         baseZoom,
     } = React.useContext(Context)
@@ -81,9 +82,6 @@ export const useCollapseView = view => {
             baseZoom.current = [zoomDefault]
         }
 
-        // activate the previous view
-        setActiveViewport(Math.max(view - 1, 0))
-
         // remove the measure layer status of the collapsing viewport
         setMeasureLayer(old => {
             // make a copy
@@ -98,7 +96,7 @@ export const useCollapseView = view => {
             // and return the new table
             return table
         })
-        // and make an empty pixel path for it
+        // make an empty pixel path for it
         setPixelPath(old => {
             // make a copy of the current state
             const table = [...old]
@@ -112,6 +110,23 @@ export const useCollapseView = view => {
             // and return the new table
             return table
         })
+        // and an empty path selection
+        setPixelPathSelection(old => {
+            // make a copy of the current state
+            const table = [...old]
+            // remove the pixel path of the collapsing view
+            table.splice(view, 1)
+            // if this leaves us with nothing
+            if (table.length === 0) {
+                // reinitialize
+                return [...pixelPathSelectionDefault()]
+            }
+            // and return the new table
+            return table
+        })
+
+        // activate the previous view
+        setActiveViewport(Math.max(view - 1, 0))
 
         // all done
         return
