@@ -18,22 +18,25 @@ import { theme } from '~/palette'
 
 // local
 // hooks
-import { useFocus } from './useFocus'
 import { useViews } from '../../viz/useViews'
+import { usePixelPathSelection } from '../../viz/usePixelPathSelection'
 
 
 // a table of the points on the {measure} layer of the active viewport
 export const Minimap = ({ path }) => {
-    // get the node in focus
-    const focus = useFocus()
+    // get the node selection
+    const selection = usePixelPathSelection()
     // get the {activeViewport} and the set of {views} from {viz}
     const { views, activeViewport } = useViews()
 
-    // if it's still uninitialized
-    if (focus === null) {
+    // if the selection does not contain precisely one element
+    if (selection.size !== 1) {
         // bail
         return null
     }
+    // get the node
+    const node = [...selection][0]
+
     // unpack the view associated with the active viewport
     const { reader, dataset, channel } = views[activeViewport]
     // check for the trivial cases
@@ -46,7 +49,7 @@ export const Minimap = ({ path }) => {
     const { uuid: datasetUUID, origin, shape } = dataset
 
     // get the point of interest
-    const point = path[focus]
+    const point = path[node]
     // we fetch a tile with shape
     const tile = [128, 128]
     // and origin that attempts to have our point at the center,
