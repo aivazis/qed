@@ -10,12 +10,15 @@ import React from 'react'
 // project
 // shapes
 import { Target } from '~/shapes'
+// styles
+import { theme } from '~/palette'
 
 // local
 // hooks
 import { useCenterViewport } from '../../viz/useCenterViewport'
 import { useGetZoomLevel } from '../../viz/useGetZoomLevel'
-import { useSetFocus } from './useSetFocus'
+import { usePixelPathSelection } from '../../viz/usePixelPathSelection'
+import { useSetPixelPathSelection } from '../../viz/useSetPixelPathSelection'
 // components
 import { Button } from './button'
 
@@ -26,16 +29,20 @@ export const Focus = ({ idx, point }) => {
     const zoom = useGetZoomLevel()
     // the handler that centers the active viewport
     const center = useCenterViewport()
-    // and the {focus} mutator
-    const { focus } = useSetFocus(idx)
+    // the current point selection
+    const selection = usePixelPathSelection()
+    // and build a handler that selects nodes in single node mode
+    const { select } = useSetPixelPathSelection()
 
+    // deduce my state
+    const selected = selection.has(idx)
     // turn the zoom level into a scale
     const scale = 2 ** zoom
 
-    // wrap it in a control
-    const activate = () => {
+    // when clicked
+    const focus = () => {
         // mark me as the focused one
-        focus()
+        select(idx)
         // center the viewport on my point
         center({ x: point[1] / scale, y: point[0] / scale })
         // and done
@@ -44,13 +51,20 @@ export const Focus = ({ idx, point }) => {
 
     // assemble my behaviors
     const behaviors = {
-        onClick: activate,
+        onClick: focus,
+    }
+
+    // mix paint for my shape
+    const paint = {
+        icon: {
+            stroke: selected ? theme.page.name : "hsl(0deg, 0%, 60%)",
+        },
     }
 
     // render
     return (
         <Button {...behaviors}>
-            <Target />
+            <Target style={paint} />
         </Button>
     )
 }
