@@ -11,6 +11,7 @@ import React from 'react'
 // context
 import { Context } from './context'
 import { useClearPixelPathSelection } from './useClearPixelPathSelection'
+import { useDatasetShape } from './useDatasetShape'
 
 
 // access to the mutator of the list of profile points
@@ -21,6 +22,8 @@ export const useSetPixelPath = (viewport = null) => {
     viewport ??= activeViewport
     // make a handler that clears the selection to use when removing a point from the path
     const clear = useClearPixelPathSelection(viewport)
+    // and get the active dataset shape and origin
+    const { origin, shape } = useDatasetShape(viewport)
 
 
     // make a handler that adds a point to the pile
@@ -94,7 +97,25 @@ export const useSetPixelPath = (viewport = null) => {
             // and find the portion that corresponds to this {viewport}
             const mine = pile[viewport]
             // make the adjustment
-            mine[node][axis] = value
+            mine[node][axis] = Math.max(origin[axis], Math.min(shape[axis], value))
+            // and return the updated points
+            return pile
+        })
+        // all done
+        return
+    }
+
+    // nudge a coordinate of a single {node} by a given {value} along a specified {axis}
+    const nudge = ({ node, axis, value = 1 }) => {
+        // update the list
+        setPixelPath(old => {
+            // make a copy
+            const pile = [...old]
+            // and find the portion that corresponds to this {viewport}
+            const mine = pile[viewport]
+            // make the adjustment
+            mine[node][axis] = Math.max(origin[axis],
+                Math.min(shape[axis], mine[node][axis] + value))
             // and return the updated points
             return pile
         })
@@ -115,9 +136,9 @@ export const useSetPixelPath = (viewport = null) => {
             nodes.forEach(node => {
                 // get each point
                 const point = mine[node]
-                // update it
-                point[0] += delta.y
-                point[1] += delta.x
+                // clip and update
+                point[0] = Math.max(origin[0], Math.min(shape[0], point[0] + delta.y))
+                point[1] = Math.max(origin[1], Math.min(shape[1], point[1] + delta.x))
                 // and get the next one
                 return
             })
@@ -130,7 +151,7 @@ export const useSetPixelPath = (viewport = null) => {
     }
 
     // and return the handlers
-    return { add, adjust, displace, remove, split }
+    return { add, adjust, displace, nudge, remove, split }
 }
 
 
