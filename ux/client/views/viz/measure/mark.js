@@ -31,7 +31,7 @@ export const Mark = ({ viewport, idx, at }) => {
     // grab the current selection
     const selection = usePixelPathSelection(viewport)
     // get the selection handler factory
-    const { select, toggle, selectContiguous } = useSetPixelPathSelection({ viewport, idx })
+    const { select, toggle, selectContiguous } = useSetPixelPathSelection(viewport)
 
     // deduce my state
     const selected = selection.has(idx)
@@ -61,7 +61,7 @@ export const Mark = ({ viewport, idx, at }) => {
         // if there is no modifier present
         if (!ctrlKey && !shiftKey) {
             // select me in single node mode
-            select()
+            select(idx)
             // done
             return
         }
@@ -69,7 +69,7 @@ export const Mark = ({ viewport, idx, at }) => {
         // if <ctrl> is present
         if (ctrlKey) {
             // toggle me in multinode mode
-            toggle()
+            toggle(idx)
             // done
             return
         }
@@ -77,7 +77,7 @@ export const Mark = ({ viewport, idx, at }) => {
         // if <shift> is present
         if (shiftKey) {
             // pick a range of nodes
-            selectContiguous()
+            selectContiguous(idx)
             // done
             return
         }
