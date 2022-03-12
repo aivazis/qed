@@ -18,10 +18,10 @@ import { SVG } from '~/widgets'
 // context
 import { Provider } from './context'
 // hooks
-import { useClearSelection } from './useClearSelection'
+import { useClearPixelPathSelection } from '../viz/useClearPixelPathSelection'
 import { useMoving } from './useMoving'
 import { usePixelPath } from '../viz/usePixelPath'
-import { useSelection } from './useSelection'
+import { usePixelPathSelection } from '../viz/usePixelPathSelection'
 import { useSetPixelPath } from '../viz/useSetPixelPath'
 import { useStopMoving } from './useStopMoving'
 // components
@@ -54,9 +54,9 @@ const Layer = ({ viewport, shape, zoom }) => {
     // and its mutator
     const stopMoving = useStopMoving()
     // get the current selection
-    const selection = useSelection()
+    const selection = usePixelPathSelection(viewport)
     // and the handler that clears it
-    const clearSelection = useClearSelection()
+    const clearSelection = useClearPixelPathSelection(viewport)
 
     // convert the zoom level to a scaling factor
     const scale = 2 ** zoom
@@ -146,7 +146,7 @@ const Layer = ({ viewport, shape, zoom }) => {
             {/* and draw markers for them */}
             {projected.map((point, idx) => {
                 // render a circle
-                return <Mark key={idx} idx={idx} at={point} />
+                return <Mark key={idx} idx={idx} at={point} viewport={viewport} />
             })}
         </Placemat>
     )

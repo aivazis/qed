@@ -14,14 +14,14 @@ import { useEvent } from '~/hooks'
 
 // local
 // hooks
-import { useSelection } from './useSelection'
-import { useSetSelection } from './useSetSelection'
+import { usePixelPathSelection } from '../viz/usePixelPathSelection'
+import { useSetPixelPathSelection } from '../viz/useSetPixelPathSelection'
 import { useStartMoving } from './useStartMoving'
 import { useStopMoving } from './useStopMoving'
 
 
 // mark a point
-export const Mark = ({ idx, at }) => {
+export const Mark = ({ viewport, idx, at }) => {
     // make a ref for my client area
     const me = React.useRef(null)
 
@@ -29,9 +29,9 @@ export const Mark = ({ idx, at }) => {
     const startMoving = useStartMoving(idx)
     const stopMoving = useStopMoving()
     // grab the current selection
-    const selection = useSelection()
+    const selection = usePixelPathSelection(viewport)
     // get the selection handler factory
-    const { select, toggle, selectContiguous } = useSetSelection(idx)
+    const { select, toggle, selectContiguous } = useSetPixelPathSelection({ viewport, idx })
 
     // deduce my state
     const selected = selection.has(idx)
