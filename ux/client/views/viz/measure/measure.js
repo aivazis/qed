@@ -81,7 +81,8 @@ const Layer = ({ viewport, shape, zoom }) => {
         }
 
         // the default action is to clear the selection
-        clearSelection()
+        // disabled for now, until we check with actual users
+        // clearSelection()
 
         // all done
         return
