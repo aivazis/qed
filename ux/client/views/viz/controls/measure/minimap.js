@@ -103,10 +103,18 @@ export const Minimap = ({ path }) => {
     const base = [api, readerUUID, datasetUUID, channel, 0, rep].join("/")
 
     // style the {target} shape
-    const style = {
+    const target = {
         icon: {
-            stroke: "hsl(28deg, 90%, 45%)",
+            stroke: "hsl(28deg, 90%, 25%)",
             strokeWidth: "3",
+        }
+    }
+    // and its placemat
+    const placemat = {
+        icon: {
+            stroke: "hsl(0deg, 0%, 10%)",
+            strokeWidth: "7",
+            vectorEffect: "non-scaling-stroke",
         }
     }
 
@@ -117,7 +125,8 @@ export const Minimap = ({ path }) => {
             <Map>
                 <g transform={`translate(${delta[1]} ${delta[0]}) scale(${256 / 1000})`}>
                     {/* the marker */}
-                    <Target style={style} />
+                    <Target style={placemat} />
+                    <Target style={target} />
                     {/* verniers */}
                     <Up node={node} />
                     <Right node={node} />

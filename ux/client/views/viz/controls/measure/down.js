@@ -6,14 +6,15 @@
 
 // externals
 import React from 'react'
-import styled from 'styled-components'
 
 // locals
+// components
+import { Arrow } from './arrow'
 // hooks
 import { useSetPixelPath } from '../../viz/useSetPixelPath'
 
 
-// a table of the points on the {measure} layer of the active viewport
+// nudge the selected {node} downwards
 export const Down = ({ node }) => {
     // make me a handler that nudges the current node
     const { nudge } = useSetPixelPath()
@@ -38,18 +39,14 @@ export const Down = ({ node }) => {
 
     // render
     return (
-        <g transform={`translate(${7 / 8 * 500} 650) scale(${1 / 8})`}>
-            <Arrow d={arrow} {...behaviors} />
-        </g>
+        <Arrow path={arrow}
+            placement={`translate(${7 / 8 * 500} 650) scale(${1 / 8})`}
+            behaviors={behaviors} />
     )
 }
 
 
-const Arrow = styled.path`
-    fill: hsl(0deg, 100%, 35%);
-    stroke: none;
-`
-
+// the path
 const arrow = "M 0 0 C 500 500 500 500 1000 0 L 500 1000 Z"
 
 
