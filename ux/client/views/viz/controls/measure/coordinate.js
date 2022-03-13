@@ -11,17 +11,21 @@ import styled from 'styled-components'
 // local
 // hooks
 import { useDatasetShape } from '../../viz/useDatasetShape'
+import { usePixelPathSelection } from '../../viz/usePixelPathSelection'
 import { useSetPixelPath } from '../../viz/useSetPixelPath'
 
 
 // a interactive entry with a coordinate of a point
 export const Coordinate = ({ node, axis, point }) => {
-    // make a ref for my input field
-    const input = React.useRef()
     // make me handler that can update the {axis} coordinate of my {node}
     const { adjust } = useSetPixelPath()
     // and get the active dataset shape and origin
     const { origin, shape } = useDatasetShape()
+    // the current point selection
+    const selection = usePixelPathSelection()
+
+    // deduce my state
+    const selected = selection.has(node)
 
     // validate, clip and set the value
     const set = value => {
@@ -65,44 +69,57 @@ export const Coordinate = ({ node, axis, point }) => {
         onChange: update,
     }
 
+    // pick my entry based on my state
+    const Entry = selected ? Selected : Enabled
+
     // make a mark
     return (
-        <Entry ref={input} type="text" value={point[axis]} {...behaviors} />
+        <Entry type="text" value={point[axis]} {...behaviors} />
     )
 }
 
 
-const Entry = styled.input`
+// the base entry
+const Base = styled.input`
+    display: inline-block;
+    appearance: textfield;
+    outline: none;
+    cursor: pointer;
+    font-family: inconsolata;
+    font-size: 100%;
+    width: 3.0rem;
+    text-align: end;
+    background-color: hsl(0deg, 0%, 7%);
+    padding: 0.0rem 0.25rem 0.0rem 0.0rem;
+    border: 0 transparent;
+`
+
+const Enabled = styled(Base)`
     & {
-        display: inline-block;
-        appearance: textfield;
-        outline: none;
-        font-family: inconsolata;
-        font-size: 100%;
-        width: 3.0rem;
-        text-align: end;
         color: hsl(0deg, 0%, 40%);
-        background-color: hsl(0deg, 0%, 7%);
-        padding: 0.0rem 0.25rem 0.0rem 0.0rem;
-        border: 0 transparent;
     }
 
     &:active{
-        color: hsl(28deg, 90%, 55%);
+        color: hsl(0deg, 0%, 60%);
     }
 
     &:focus{
-        color: hsl(28deg, 90%, 55%);
+        color: hsl(0deg, 0%, 60%);
     }
 
     &:invalid {
         color: hsl(0deg, 50%, 50%);
     }
 
-    &::selection{
-        color: hsl(28deg, 90%, 55%);
+    &::selection {
+        color: hsl(0deg, 0%, 60%);
         background-color: hsl(0deg, 0%, 20%);
     }
 `
+
+const Selected = styled(Base)`
+    color: hsl(28deg, 90%, 55%);
+`
+
 
 // end of file

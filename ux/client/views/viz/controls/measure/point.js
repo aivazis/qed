@@ -9,6 +9,8 @@ import React from 'react'
 import styled from 'styled-components'
 
 // local
+// hooks
+import { usePixelPathSelection } from '../../viz/usePixelPathSelection'
 // components
 import { Add } from './add'
 import { Coordinate } from './coordinate'
@@ -18,6 +20,14 @@ import { Focus } from './focus'
 
 // a line in the table of the points on the {measure} layer of the active viewport
 export const Point = ({ idx, point, last }) => {
+    // get the current point selection
+    const selection = usePixelPathSelection()
+
+    // deduce my state
+    const selected = selection.has(idx)
+    // pick my {index} component based on my state
+    const Index = selected ? Selected : Enabled
+
     // draw a line of the {path} table
     return (
         <Box>
@@ -44,10 +54,14 @@ const Box = styled.div`
     padding: 0.2rem 0.0rem;
 `
 
-const Index = styled.span`
+const Enabled = styled.span`
     display: inline-block;
     width: 2.0rem;
     text-align: end;
+`
+
+const Selected = styled(Enabled)`
+    color: hsl(28deg, 90%, 55%);
 `
 
 
