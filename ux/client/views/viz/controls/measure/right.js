@@ -18,9 +18,22 @@ export const Right = ({ node }) => {
     // make me a handler that nudges the current node
     const { nudge } = useSetPixelPath()
 
+    // make my handler
+    const move = evt => {
+        // unpack the event information
+        const { altKey } = evt
+        // pick a displacement
+        const value = altKey ? 5 : 1
+        // if the
+        // nudge
+        nudge({ node, axis: 1, value })
+        // all done
+        return
+    }
+
     // make my controller
     const behaviors = {
-        onClick: () => nudge({ node, axis: 1, value: 1 }),
+        onClick: move,
     }
 
     // render
