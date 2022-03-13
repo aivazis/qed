@@ -14,8 +14,6 @@ import styled from 'styled-components'
 import { Tray } from '~/widgets'
 
 // locals
-// context
-import { Provider } from './context'
 // hooks
 import { useMeasureLayer } from '../../viz/useMeasureLayer'
 import { usePixelPath } from '../../viz/usePixelPath'
@@ -24,19 +22,8 @@ import { Minimap } from './minimap'
 import { Path } from './path'
 
 
-// set up the context
-export const Measure = (props) => {
-    // set up my context and embed my panel
-    return (
-        <Provider>
-            <Panel {...props} />
-        </Provider>
-    )
-}
-
-
 // display the {measure} layer controls
-const Panel = () => {
+export const Measure = () => {
     // get the {measure} layer status of the active {viewport}
     const measureLayer = useMeasureLayer()
     // and the set of pixels on its profile path
