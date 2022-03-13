@@ -14,11 +14,11 @@ import { SVG } from '~/widgets'
 
 
 // a line in the table of the points on the {measure} layer of the active viewport
-export const Button = ({ children, ...rest }) => {
+export const Button = ({ behaviors, children }) => {
     // make a mark
     return (
-        <Mark {...rest}>
-            <Icon>
+        <Mark>
+            <Icon {...behaviors}>
                 <g transform={`scale(${14 / 1000})`} >
                     {children}
                 </g>

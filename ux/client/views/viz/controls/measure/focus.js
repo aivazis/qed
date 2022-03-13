@@ -63,7 +63,7 @@ export const Focus = ({ idx, point }) => {
 
     // render
     return (
-        <Button {...behaviors}>
+        <Button behaviors={behaviors}>
             <Target style={paint} />
         </Button>
     )

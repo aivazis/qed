@@ -37,7 +37,7 @@ export const Add = ({ idx }) => {
 
     // render
     return (
-        <Button {...behaviors}>
+        <Button behaviors={behaviors}>
             <Plus />
         </Button>
     )

@@ -37,7 +37,7 @@ export const Delete = ({ idx }) => {
 
     // render
     return (
-        <Button {...behaviors}>
+        <Button behaviors={behaviors}>
             <X />
         </Button>
     )
