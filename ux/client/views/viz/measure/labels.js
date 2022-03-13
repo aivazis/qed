@@ -28,11 +28,15 @@ export const Labels = ({ positions, values }) => {
                 const key = `${dataY}x${dataX}`
                 // and render
                 return (
-                    <Value key={key} x={x} y={y + 35}>
-                        {dataY} &#x2715; {dataX}
-                    </Value>
+                    <g key={key}>
+                        <Mat x={x} y={y + 35}>
+                            {dataY} &#x2715; {dataX}
+                        </Mat>
+                        <Value x={x} y={y + 35}>
+                            {dataY} &#x2715; {dataX}
+                        </Value>
+                    </g>
                 )
-
             })}
         </g>
     )
@@ -40,14 +44,25 @@ export const Labels = ({ positions, values }) => {
 
 
 // individual labels
+// the placemat
+const Mat = styled.text`
+            font-family: inconsolata;
+            font-size: 20px;
+            text-anchor: middle;
+            fill: none;
+            stroke: hsl(0deg, 0%, 10%);
+            stroke-width: 8;
+            `
+
+// the value
 const Value = styled.text`
-    font-family: inconsolata;
-    font-size: 20px;
-    text-anchor: middle;
-    cursor: default;
-    stroke: none;
-    fill: hsl(28deg, 90%, 35%);
-`
+            font-family: inconsolata;
+            font-size: 20px;
+            text-anchor: middle;
+            cursor: default;
+            stroke: none;
+            fill: hsl(28deg, 90%, 35%);
+            `
 
 
 // end of file
