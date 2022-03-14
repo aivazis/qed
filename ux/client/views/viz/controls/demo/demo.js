@@ -64,6 +64,7 @@ const RangeController = styled(Range)`
 // the state control
 const Button = styled.button`
     & {
+        cursor: pointer;
         font-family: inconsolata;
         font-size: 75%;
         text-align: start;
