@@ -11,7 +11,8 @@ import React from 'react'
 // context
 import {
     Context,
-    emptyView, syncedDefault, zoomDefault, measureDefault, pixelPathDefault,
+    emptyView, syncedDefault, zoomDefault,
+    measureDefault, pixelPathDefault, pixelPathSelectionDefault,
 } from './context'
 
 
