@@ -1,0 +1,45 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2022 all rights reserved
+
+// code guard
+#if !defined(qed_py_datasets_profile_icc)
+#error this file contains implementation details for qed::py::datasets::profile
+#else
+
+
+// collect statistics on a grid tile
+template <typename sourceT>
+auto
+qed::py::datasets::profileGrid(
+    // the source
+    const sourceT & source,
+    // the points
+    py::sequence points) -> values_t
+{
+    // make a container
+    values_t values;
+    // all done
+    return values;
+}
+
+
+template <typename sourceT>
+auto
+qed::py::datasets::profileHDF5(
+    // the source
+    const dataset_t & dataset,
+    // the points
+    py::sequence points) -> values_t
+{
+    // make a container
+    values_t values;
+    // all done
+    return values;
+}
+
+
+#endif
+
+// end of file

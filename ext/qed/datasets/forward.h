@@ -14,6 +14,9 @@ namespace qed::py::datasets {
     void datasets(py::module &);
 
     // interface
+    // sample a dataset along a path
+    void profile(py::module &);
+    // compute simple statistics on a sample of a dataset
     void stats(py::module &);
 }
 

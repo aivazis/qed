@@ -22,6 +22,9 @@ qed::py::datasets::datasets(py::module & m)
         "support for dataset specific operations");
 
     // add the interface
+    // sample a dataset along a path
+    profile(datasets);
+    // compute simple statistics on a sample of a dataset
     stats(datasets);
 
     // all done
