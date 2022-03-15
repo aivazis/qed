@@ -17,6 +17,7 @@ import { SVG } from '~/widgets'
 // local
 // hooks
 import { useViews } from '../../viz/useViews'
+import { usePixelPath } from '../../viz/usePixelPath'
 import { usePixelPathSelection } from '../../viz/usePixelPathSelection'
 // components
 import { Down } from './down'
@@ -27,7 +28,9 @@ import { Up } from './up'
 
 
 // a table of the points on the {measure} layer of the active viewport
-export const Minimap = ({ path }) => {
+export const Minimap = () => {
+    // get the set of pixels on the profile path
+    const pixelPath = usePixelPath()
     // get the node selection
     const selection = usePixelPathSelection()
     // get the {activeViewport} and the set of {views} from {viz}
@@ -53,7 +56,7 @@ export const Minimap = ({ path }) => {
     const { uuid: datasetUUID, origin, shape } = dataset
 
     // get the point of interest
-    const point = path[node]
+    const point = pixelPath[node]
     // we fetch a tile with shape
     const tile = [128, 128]
     // and origin that attempts to have our point at the center,
