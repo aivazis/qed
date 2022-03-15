@@ -38,6 +38,22 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         return viz.tile(source=dataset, zoom=zoom, origin=origin, shape=shape)
 
 
+    def profile(self, encoding, data, points):
+        """
+        Sample {dataset} along a path defined by {points}
+        """
+        # normalize the encoding
+        encoding = encoding.lower()
+        # look up the dataset
+        dataset = self.dataset(name=data)
+        # get the profile
+        profile = dataset.profile(encoding=encoding, points=points)
+        # form the file name
+        filename = f"{dataset.pyre_name}.{encoding}"
+        # and send them along
+        return filename, profile
+
+
     # metamethods
     def __init__(self, plexus, docroot, **kwds):
         # chain up

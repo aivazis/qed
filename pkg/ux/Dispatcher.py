@@ -89,7 +89,7 @@ class Dispatcher:
         """
         # unpack
         src = match.group('data_src')
-        data = match.group('data_set')
+        data = match.group('data_dataset')
         channel = match.group('data_channel')
         zoom = int(match.group('data_zoom'))
         tile = match.group('data_tile')
@@ -99,8 +99,8 @@ class Dispatcher:
         # attempt to
         try:
             # process the request
-            tile = self.panel.tile(src=src, data=data,
-                channel=channel, zoom=zoom, origin=origin, shape=shape)
+            tile = self.panel.tile(src=src, data=data, channel=channel,
+                                   zoom=zoom, origin=origin, shape=shape)
         # if anything goes wrong while looking up the data sources
         except KeyError:
             # we have a bug
@@ -155,6 +155,34 @@ class Dispatcher:
         return self.gql.respond(**kwds)
 
 
+    def profile(self, server, match, request, **kwds):
+        """
+        Handle a request for a dataset profile
+        """
+        # unpack
+        data = match.group('profile_dataset')
+        encoding = match.group('profile_format')
+        # the url contains the points of interest
+        url = request.url
+        # extract the query part
+        _, query = url.split("?")
+        # points are separated by "&", coordinates by ","
+        points = tuple(tuple(map(int, point.split(','))) for point in query.split('&'))
+
+        # generate the profile along with a suggestion for the download name
+        filename, profile = self.panel.profile(data=data, encoding=encoding, points=points)
+
+        # get the document factory
+        document = getattr(server.documents, encoding)
+        # build the response
+        response = document(server=server, value=profile)
+        # decorate it
+        response.headers["Content-disposition"] = f'attachment; filename="{filename}"'
+        # and send it off
+        return response
+
+
+    # basic handlers
     def stop(self, plexus, server, **kwds):
         """
         The client is asking me to die
@@ -214,21 +242,29 @@ class Dispatcher:
 
 
     # private data
-    # recognizers for part of the {data} url
+    # recognizers fragments
     uuid = r"\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"
     zoom = r"-?\d+"
     origin = r"-?\d+x-?\d+"
     shape = r"\d+x\d+"
+    # currently, only {csv} is supported
+    profileFormat = r"(CSV)"
 
     # the app api
     regex = re.compile("|".join([
         # the data request recognizer
         r"/(?P<data>data/" + "/".join([
             rf"(?P<data_src>{uuid})",
-            rf"(?P<data_set>{uuid})",
+            rf"(?P<data_dataset>{uuid})",
             r"(?P<data_channel>\w+)",
             rf"(?P<data_zoom>{zoom})",
             rf"(?P<data_tile>(?P<data_origin>{origin})\+(?P<data_shape>{shape}))"
+        ]) + ")",
+
+        # data profile requests
+        r"/(?P<profile>profile/" + "/".join([
+           rf"(?P<profile_format>{profileFormat})",
+           rf"(?P<profile_dataset>{uuid})",
         ]) + ")",
 
         # graphql requests
