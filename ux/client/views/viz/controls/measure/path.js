@@ -40,7 +40,6 @@ export const Path = () => {
                 <Point key={`p${idx}`} idx={idx} point={point} last={last} />)
             }
         </Box>
-
     )
 }
 

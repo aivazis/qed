@@ -18,6 +18,7 @@ import { Tray } from '~/widgets'
 import { useMeasureLayer } from '../../viz/useMeasureLayer'
 import { usePixelPath } from '../../viz/usePixelPath'
 // components
+import { Actions } from './actions'
 import { Minimap } from './minimap'
 import { Path } from './path'
 
@@ -46,9 +47,11 @@ export const Measure = () => {
                 </Help>
             }
             {/* render the pixel path */}
-            <Path path={pixelPath} />
-            {/* and the mini map */}
-            <Minimap path={pixelPath} />
+            <Path />
+            {/* the mini map */}
+            <Minimap />
+            {/* and the actions */}
+            <Actions />
         </Tray>
     )
 }
@@ -58,7 +61,7 @@ export const Measure = () => {
 const Help = styled.p`
     font-family: rubik-light;
     font-size: 75%;
-    padding: 1.0rem;
+    margin: 1.0rem;
 `
 
 
