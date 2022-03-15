@@ -24,7 +24,7 @@ export const Down = ({ node }) => {
         // unpack the event information
         const { altKey } = evt
         // pick a displacement
-        const value = altKey ? 5 : 1
+        const value = altKey ? -5 : -1
         // if the
         // nudge
         nudge({ node, axis: 0, value })
