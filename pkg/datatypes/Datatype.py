@@ -26,6 +26,10 @@ class Datatype(qed.flow.product, implements=qed.protocols.datatype):
     tile.doc = "the preferred shape of dataset subsets"
 
 
+    # constants
+    headers = ("value",)
+
+
     @property
     def tag(self):
         """

@@ -22,4 +22,8 @@ class Complex(Datatype):
     channels.doc = "the names of channels provided by complex datatypes"
 
 
+    # constants
+    headers = "real", "imaginary"
+
+
 # end of file
