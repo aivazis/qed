@@ -18,7 +18,7 @@ qed::py::datasets::profileGrid(
     // the points
     const points_t & path) -> values_t
 {
-    // make a container
+    // and a container
     values_t values;
 
     // if there are no points in the path
@@ -43,18 +43,41 @@ qed::py::datasets::profileGrid(
         return values;
     }
 
-    // make a channel
-    auto channel = pyre::journal::info_t("qed.datasets.profile");
-    // sign on
-    channel << "points: " << path.size() << pyre::journal::newline;
-    // go through the points
-    for (auto & p : path) {
-        channel
-            // show me the point
-            << std::get<0>(p) << "," << std::get<1>(p) << pyre::journal::newline;
+    // at this point, it guaranteed that there are at least two points in the path, so we can
+    // process line segments
+    for (auto it = path.cbegin(); it != path.cend() - 1; ++it) {
+        // get the tail of the segment
+        auto & tail = *it;
+        // and the head
+        auto & head = *(it + 1);
+
+        // make the tail into an index
+        auto origin = typename sourceT::index_type(std::get<0>(tail), std::get<1>(tail));
+        // compute the shape of the bounding box
+        auto shape = typename sourceT::shape_type(
+            std::abs(std::get<0>(tail) - std::get<0>(head)) + 1,
+            std::abs(std::get<1>(tail) - std::get<1>(head)) + 1);
+        // the number of samples is given by the {L1} norm of the shape; make sure this is
+        // a floating point number so we don't do integer arithmetic until it's time
+        double l1 = std::max(shape[0], shape[1]);
+
+        // go through them
+        for (int i = 0; i < l1; ++i) {
+            // interpolate
+            int dx = std::round(i / l1 * (std::get<0>(head) - std::get<0>(tail)));
+            int dy = std::round(i / l1 * (std::get<1>(head) - std::get<1>(tail)));
+            // to compute the index shift to this pixel
+            typename sourceT::index_type shift { dx, dy };
+            // assemble the index
+            typename sourceT::index_type idx = origin + shift;
+            // get the value
+            auto data = source[idx];
+            // make a tuple
+            auto entry = std::make_tuple(idx[0], idx[1], data.real(), data.imag());
+            // push it and get the next pixel
+            values.push_back(entry);
+        }
     }
-    // flush
-    channel << pyre::journal::endl(__HERE__);
 
     // all done
     return values;
