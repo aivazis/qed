@@ -13,13 +13,49 @@
 template <typename sourceT>
 auto
 qed::py::datasets::profileGrid(
-    // the source
+    // the dataset
     const sourceT & source,
     // the points
-    py::sequence points) -> values_t
+    const points_t & path) -> values_t
 {
     // make a container
     values_t values;
+
+    // if there are no points in the path
+    if (path.size() == 0) {
+        // nothing much to do
+        return values;
+    }
+
+    // if there is only one point in the path
+    if (path.size() == 1) {
+        // get the point
+        const points_t::value_type & p = path[0];
+        // turn it into an index
+        typename sourceT::index_type idx = { std::get<0>(p), std::get<1>(p) };
+        // use the index to get the value
+        auto data = source[idx];
+        // make a tuple
+        auto entry = std::make_tuple(idx[0], idx[1], data.real(), data.imag());
+        // push it
+        values.push_back(entry);
+        // and done
+        return values;
+    }
+
+    // make a channel
+    auto channel = pyre::journal::info_t("qed.datasets.profile");
+    // sign on
+    channel << "points: " << path.size() << pyre::journal::newline;
+    // go through the points
+    for (auto & p : path) {
+        channel
+            // show me the point
+            << std::get<0>(p) << "," << std::get<1>(p) << pyre::journal::newline;
+    }
+    // flush
+    channel << pyre::journal::endl(__HERE__);
+
     // all done
     return values;
 }
@@ -28,10 +64,10 @@ qed::py::datasets::profileGrid(
 template <typename sourceT>
 auto
 qed::py::datasets::profileHDF5(
-    // the source
+    // the data source
     const dataset_t & dataset,
     // the points
-    py::sequence points) -> values_t
+    const points_t & points) -> values_t
 {
     // make a container
     values_t values;

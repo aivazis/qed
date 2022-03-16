@@ -11,7 +11,11 @@
 // decorators
 namespace qed::py::datasets {
     // type aliases
-    using values_t = py::tuple;
+    // the set of points
+    using points_t = std::vector<std::tuple<int, int>>;
+    // the table of values
+    using values_t = std::vector<std::tuple<int, int, double, double>>;
+
 
     // profile for a complex grid source
     template <typename sourceT>
@@ -19,7 +23,7 @@ namespace qed::py::datasets {
         // the source
         const sourceT & source,
         // the points
-        py::sequence) -> values_t;
+        const points_t &) -> values_t;
 
     // profile for a complex HDF5 source
     template <typename sourceT>
@@ -27,7 +31,7 @@ namespace qed::py::datasets {
         // the source
         const dataset_t & source,
         // the points
-        py::sequence) -> values_t;
+        const points_t &) -> values_t;
 }
 
 
