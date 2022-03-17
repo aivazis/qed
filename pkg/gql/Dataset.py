@@ -29,6 +29,14 @@ class Dataset(graphene.ObjectType):
 
 
     # resolvers
+    def resolve_name(dataset, *_):
+        """
+        Get the name of the dataset
+        """
+        # easy enough
+        return dataset.pyre_name
+
+
     def resolve_id(dataset, *_):
         """
         Get the {dataset} id
