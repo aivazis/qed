@@ -101,6 +101,8 @@ qed::py::datasets::profileHDF5(
     // the points
     const points_t & path) -> values_t
 {
+    // make a channel
+    auto channel = pyre::journal::debug_t("qed.datasets.profile");
     // make a container for the answer
     values_t values;
 
@@ -169,6 +171,20 @@ qed::py::datasets::profileHDF5(
             // along the 1-axis
             std::abs(tail[1] - head[1]) + 1);
 
+        // show me
+        channel
+            // segment
+            << "segment: (" << tail << ") -> (" << head << ")"
+            << pyre::journal::newline
+            // origin
+            << "  origin: (" << origin << ")"
+            << pyre::journal::newline
+            // shape
+            << "  shape: (" << shape << ")"
+            << pyre::journal::newline
+            // flush
+            << pyre::journal::endl(__HERE__);
+
         // allocate a grid to receive the data
         auto source = sourceT(typename sourceT::packing_type(shape), shape.cells());
         // copy the HDF5 data
@@ -183,12 +199,17 @@ qed::py::datasets::profileHDF5(
         // make a dataspace for the destination
         auto writeSpace = dataspace_t(2, count);
         // transfer
-        dataset.read(source.data()->data(), dataset.getCompType(), writeSpace, readSpace);
+        try {
+            dataset.read(source.data()->data(), dataset.getCompType(), writeSpace, readSpace);
+        } catch (H5::Exception error) {
+            error.printErrorStack();
+        }
 
         // compute the pixel separation; make sure it is a floating point number
         // so we don't do integer arithmetic until it's time
         double sep = std::max(shape[0], shape[1]);
 
+        channel << "data:" << pyre::journal::newline;
         // go through them
         for (int i = 0; i < sep; ++i) {
             // interpolate
@@ -197,14 +218,17 @@ qed::py::datasets::profileHDF5(
             // to compute the index shift to this pixel
             typename sourceT::index_type shift { dx, dy };
             // get the value
-            auto data = source[shift];
+            auto data = source[tail - origin + shift];
             // build the index in the raster space
             typename sourceT::index_type idx = tail + shift;
+            channel << "  data[" << idx << "] = " << data << pyre::journal::newline;
             // make a tuple
             auto entry = std::make_tuple(idx[0], idx[1], data.real(), data.imag());
             // push it and get the next pixel
             values.push_back(entry);
         }
+
+        channel << pyre::journal::endl(__HERE__);
     }
 
     // all done
