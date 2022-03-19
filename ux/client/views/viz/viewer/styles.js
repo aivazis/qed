@@ -271,6 +271,39 @@ const sync = {
 }
 
 
+// the button that prints the screen
+const print = {
+    // inherit
+    ...badge,
+
+    // the icon container
+    badge: {
+        ...badge.badge,
+        base: {
+            ...badge.badge.base,
+            // for me
+            justifySelf: "end",
+        },
+    },
+
+    icon: {
+        ...badge.icon,
+        available: {
+            ...badge.icon.available,
+            stroke: theme.page.name,
+        },
+    },
+
+    decoration: {
+        ...badge.decoration,
+        available: {
+            ...badge.decoration.available,
+            stroke: theme.page.name,
+        },
+    }
+}
+
+
 // the blank view
 // structure from {~/widgets/badge}
 const blank = {
@@ -317,6 +350,7 @@ export default {
     blank,
     collapse,
     measure,
+    print,
     selector,
     split,
     sync,
