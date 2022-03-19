@@ -20,10 +20,11 @@ import { useViewports } from '../viz/useViewports'
 import { useMeasureLayer } from '../viz/useMeasureLayer'
 // components
 import { Measure } from '../measure'
+import { useGetTileURI } from '../viz/useGetTileURI'
 
 
 // export the data viewport
-export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
+export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     // get the state of the measuring layer
     const measure = useMeasureLayer(viewport)
     // get my zoom
@@ -32,6 +33,8 @@ export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
     const viewports = useViewports()
     // make a handler that centers my viewport
     const centerViewport = useCenterViewport(viewport)
+    // get the base URI for tiles
+    const uri = useGetTileURI()
 
     // get my view info
     const { dataset } = view
@@ -47,7 +50,6 @@ export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
     // assemble in a single object
     const zoomedShape = [height, width]
     // and fold my zoom level into the data request uri
-    const src = [uri, zoom].join("/")
 
     // center the viewport at the cursor position
     const center = ({ clientX, clientY }) => {
@@ -84,7 +86,7 @@ export const Viewport = ({ viewport, view, uri, registrar, ...rest }) => {
     return (
         <Box ref={registrar} {...controllers} {...rest} >
             {/* the data tiles */}
-            <View uri={src} shape={zoomedShape} origin={origin} tile={tile} />
+            <View uri={uri} shape={zoomedShape} origin={origin} tile={tile} />
             {/* the measure layer */}
             {measure && <Measure viewport={viewport} shape={zoomedShape} zoom={zoom} />}
         </Box>

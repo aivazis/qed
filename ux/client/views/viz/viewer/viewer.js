@@ -13,6 +13,7 @@ import { Meta } from '~/widgets'
 
 // locals
 // hooks
+import { useGetTileURI } from '../viz/useGetTileURI'
 import { useGetZoomLevel } from '../viz/useGetZoomLevel'
 // components
 import { Blank } from './blank'
@@ -26,6 +27,8 @@ import styles from './styles'
 export const Viewer = ({ viewport, view, registrar }) => {
     // get the viewport zoom level
     const zoom = Math.trunc(useGetZoomLevel(viewport))
+    // assemble the data request URI
+    const base = useGetTileURI()
 
     // unpack the view
     const { reader, dataset, channel } = view
@@ -41,13 +44,11 @@ export const Viewer = ({ viewport, view, registrar }) => {
     }
 
     // otherwise, unpack the view
-    const { uuid: readerUUID, id, uri, api } = reader
+    const { uuid: readerUUID, id, uri } = reader
     const { uuid: datasetUUID, datatype, shape, origin, tile } = dataset
 
     // scale the shape to the current zoom level
     const effectiveShape = shape.map(s => Math.trunc(s / (2 ** zoom)))
-    // assemble the data request URI
-    const base = [api, readerUUID, datasetUUID, channel].join("/")
 
     // mix my paint
     const paint = styles.viewer
@@ -95,7 +96,7 @@ export const Viewer = ({ viewport, view, registrar }) => {
             </Meta.Table>
 
             {/* the viewport */}
-            <Viewport viewport={viewport} view={view} uri={base} registrar={registrar} />
+            <Viewport viewport={viewport} view={view} registrar={registrar} />
         </>
     )
 }
