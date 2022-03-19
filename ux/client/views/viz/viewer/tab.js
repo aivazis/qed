@@ -18,6 +18,7 @@ import { useViews } from '../viz/useViews'
 // components
 import { Collapse } from './collapse'
 import { Measure } from './measure'
+import { Print } from './print'
 import { Selector } from './selector'
 import { Split } from './split'
 import { Sync } from './sync'
@@ -46,6 +47,8 @@ export const Tab = ({ viewport, view, behaviors }) => {
             {view && <Measure viewport={viewport} />}
             {/* the button that toggles the sync status of the data viewport */}
             {view && <Sync viewport={viewport} />}
+            {/* the button that prints the viewport */}
+            {view && <Print viewport={viewport} />}
             {/* the button that adds a new view to the {viz} panel */}
             <Split viewport={viewport} />
         </div>
