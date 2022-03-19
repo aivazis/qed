@@ -7,6 +7,7 @@
 # externals
 import journal
 import re
+import urllib
 # support
 import qed
 
@@ -92,7 +93,7 @@ class Dispatcher:
         data = match.group('data_dataset')
         channel = match.group('data_channel')
         zoom = int(match.group('data_zoom'))
-        tile = match.group('data_tile')
+        spec = match.group('data_tile')
         origin = tuple(map(int, match.group('data_origin').split("x")))
         shape = tuple(map(int, match.group('data_shape').split("x")))
 
@@ -129,8 +130,18 @@ class Dispatcher:
 
         # if all went well, we have a {tile} in memory; attempt to
         try:
-            # dress it up and return it
-            return server.documents.BMP(server=server, bmp=memoryview(tile))
+            # build the response
+            response = server.documents.BMP(server=server, bmp=memoryview(tile))
+            # get the dataset name
+            name = self.panel.dataset(data).pyre_name
+            # suggest a file name, in case the user wants to save the tile
+            filename = urllib.parse.quote(f"{name}.{channel}.{zoom}.{spec}.bmp")
+            print(filename)
+            # decorate it
+            response.headers["Content-disposition"] = f'attachment; filename="{filename}"'
+            # and return it
+            return response
+
         # if anything goes wrong
         except Exception as error:
             # we have a problem
