@@ -5,6 +5,7 @@
 
 
 // publish
+export { Camera } from './camera'
 export { Chevron } from './chevron'
 export Data from './data'
 export { Eye } from './eye'
