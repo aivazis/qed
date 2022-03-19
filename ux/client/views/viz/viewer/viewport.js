@@ -43,13 +43,8 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
 
     // convert the zoom level into a scale
     const scale = 2 ** zoom
-
     // compute the dimensions of the mosaic
-    const width = Math.trunc(shape[1] / scale)
-    const height = Math.trunc(shape[0] / scale)
-    // assemble in a single object
-    const zoomedShape = [height, width]
-    // and fold my zoom level into the data request uri
+    const zoomedShape = shape.map(extent => Math.trunc(extent / scale))
 
     // center the viewport at the cursor position
     const center = ({ clientX, clientY }) => {
