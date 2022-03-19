@@ -13,11 +13,13 @@ import { Context } from './context'
 
 
 // hook to pull the dataset readers out the outlet context
-export const useGetView = () => {
+export const useGetView = viewport => {
     // grab the {views} and the index of the {activeViewport}
     const { activeViewport, views } = React.useContext(Context)
-    // make a copy of the active view and return it
-    return { ...views[activeViewport] }
+    // normalize the viewport
+    viewport ??= activeViewport
+    // make a copy of the view and return it
+    return { ...views[viewport] }
 }
 
 
