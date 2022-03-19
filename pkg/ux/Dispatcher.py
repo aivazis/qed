@@ -136,7 +136,6 @@ class Dispatcher:
             name = self.panel.dataset(data).pyre_name
             # suggest a file name, in case the user wants to save the tile
             filename = urllib.parse.quote(f"{name}.{channel}.{zoom}.{spec}.bmp")
-            print(filename)
             # decorate it
             response.headers["Content-disposition"] = f'attachment; filename="{filename}"'
             # and return it
