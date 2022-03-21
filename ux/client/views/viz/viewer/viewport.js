@@ -34,7 +34,7 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     // make a handler that centers my viewport
     const centerViewport = useCenterViewport(viewport)
     // get the base URI for tiles
-    const uri = useGetTileURI(viewport)
+    const uri = useGetTileURI({ viewport })
 
     // get my view info
     const { dataset } = view

@@ -35,7 +35,7 @@ export const Print = ({ viewport }) => {
     // get my zoom level
     const zoom = Math.trunc(useGetZoomLevel(viewport))
     // get uri to the tile api
-    const uri = useGetTileURI()
+    const uri = useGetTileURI({ viewport })
 
     // i actually need the shape of the raster
     const { shape } = dataset
