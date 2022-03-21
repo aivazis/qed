@@ -46,7 +46,7 @@ qed::py::channels::imaginary(py::module & m)
         // the handler
         &imaginaryHDF5Tile<heapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
         "render the imaginary part a complex float tile");
     // and the bindings for {c16}
@@ -56,7 +56,7 @@ qed::py::channels::imaginary(py::module & m)
         // the handler
         &imaginaryHDF5Tile<heapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
         "render the imaginary part of a complex double tile");
 
