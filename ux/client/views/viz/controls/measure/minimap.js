@@ -16,7 +16,8 @@ import { SVG } from '~/widgets'
 
 // local
 // hooks
-import { useViews } from '../../viz/useViews'
+import { useDatasetShape } from '../../viz/useDatasetShape'
+import { useGetTileURI } from '../../viz/useGetTileURI'
 import { usePixelPath } from '../../viz/usePixelPath'
 import { usePixelPathSelection } from '../../viz/usePixelPathSelection'
 // components
@@ -33,8 +34,10 @@ export const Minimap = () => {
     const pixelPath = usePixelPath()
     // get the node selection
     const selection = usePixelPathSelection()
-    // get the {activeViewport} and the set of {views} from {viz}
-    const { views, activeViewport } = useViews()
+    // get form the base tile uri at zoom level 0, suitable for the minimap
+    const tileURI = useGetTileURI({ zoomLevel: 0 })
+    // get the active dataset extent
+    const { origin, shape } = useDatasetShape()
 
     // if the selection does not contain precisely one element
     if (selection.size !== 1) {
@@ -43,17 +46,6 @@ export const Minimap = () => {
     }
     // get the node; {selection} is a {set}, so we have to destructure it first
     const node = [...selection][0]
-
-    // unpack the view associated with the active viewport
-    const { reader, dataset, channel } = views[activeViewport]
-    // check for the trivial cases
-    if (!reader || !dataset || !channel) {
-        // bail
-        return null
-    }
-    // otherwise, unpack the view
-    const { uuid: readerUUID, api } = reader
-    const { uuid: datasetUUID, origin, shape } = dataset
 
     // get the point of interest
     const point = pixelPath[node]
@@ -103,7 +95,7 @@ export const Minimap = () => {
     // derive the tile rep
     const rep = `${anchor[0]}x${anchor[1]}+${tile[0]}x${tile[1]}`
     // assemble the data request URI
-    const base = [api, readerUUID, datasetUUID, channel, 0, rep].join("/")
+    const base = [tileURI, rep].join("/")
 
     // style the {target} shape
     const target = {
