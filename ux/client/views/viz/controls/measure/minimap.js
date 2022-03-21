@@ -41,7 +41,7 @@ export const Minimap = () => {
         // bail
         return null
     }
-    // get the node
+    // get the node; {selection} is a {set}, so we have to destructure it first
     const node = [...selection][0]
 
     // unpack the view associated with the active viewport
