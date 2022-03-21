@@ -28,7 +28,7 @@ export const Viewer = ({ viewport, view, registrar }) => {
     // get the viewport zoom level
     const zoom = Math.trunc(useGetZoomLevel(viewport))
     // assemble the data request URI
-    const base = useGetTileURI()
+    const base = useGetTileURI(viewport)
 
     // unpack the view
     const { reader, dataset, channel } = view
