@@ -20,8 +20,6 @@
 #include <pyre/grid.h>
 #include <pyre/viz.h>
 
-// hdf5
-#include <H5Cpp.h>
 
 // pybind support
 #include <pybind11/pybind11.h>
@@ -50,8 +48,9 @@ namespace qed::py {
     using stats_t = std::tuple<double, double, double>;
 
     // aliases for hdf5 entities
-    using dataset_t = H5::DataSet;
-    using dataspace_t = H5::DataSpace;
+    using dataset_t = pyre::h5::dataset_t;
+    using dataspace_t = pyre::h5::dataspace_t;
+    using datatype_t = pyre::h5::datatype_t;
 }
 
 // type aliases for pyre types
