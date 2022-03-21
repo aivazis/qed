@@ -45,7 +45,7 @@ qed::py::channels::complex(py::module & m)
         // the handler
         &complexHDF5Tile<heapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "saturation"_a,
+        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "saturation"_a,
         // the docstring
         "render the value of a complex float tile");
     // and the bindings for {c16}
@@ -55,7 +55,7 @@ qed::py::channels::complex(py::module & m)
         // the handler
         &complexHDF5Tile<heapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "saturation"_a,
+        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "saturation"_a,
         // the docstring
         "render the value of a complex double tile");
 
