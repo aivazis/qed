@@ -50,6 +50,10 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
     tile.default = 512,512
     tile.doc = "the preferred shape of dataset subsets"
 
+    # constants
+    # the in-memory data layout of NISAR complex data products
+    datatype = qed.libqed.nisar.datatypes.complexFloat
+
 
     # interface
     def channel(self, name):
@@ -58,6 +62,17 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
         """
         # look up the channel and return it
         return self.channels[name]
+
+
+    def render(self, channel, zoom, origin, shape):
+        """
+        Render a tile of the given specification
+        """
+        # resolve my channel
+        channel = self.channel(name=channel)
+        # render a tile and return it
+        return channel.tile(
+            source=self, datatype=self.datatype, zoom=zoom, origin=origin, shape=shape)
 
 
     def profile(self, encoding, points):
