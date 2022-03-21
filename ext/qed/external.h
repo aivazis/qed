@@ -16,8 +16,9 @@
 // journal
 #include <pyre/journal.h>
 // pyre
-#include <pyre/viz.h>
+#include <pyre/h5.h>
 #include <pyre/grid.h>
+#include <pyre/viz.h>
 
 // hdf5
 #include <H5Cpp.h>

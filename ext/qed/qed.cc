@@ -26,6 +26,9 @@ PYBIND11_MODULE(qed, m)
     // plugins
     qed::py::channels::channels(m);
     qed::py::datasets::datasets(m);
+
+    // NISAR support
+    qed::py::nisar::nisar(m);
 }
 
 

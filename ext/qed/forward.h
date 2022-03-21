@@ -24,13 +24,19 @@ namespace qed::py {
 
     // channels subpackage
     namespace channels {
-        // the initializer; everything else is private to the subpackage
+        // the initializer
         void channels(py::module &);
     }
     // datasets subpackage
     namespace datasets {
-        // the initializer; everything else is private to the subpackage
+        // the initializer
         void datasets(py::module &);
+    }
+
+    // nisar support
+    namespace nisar {
+        // the initializer
+        void nisar(py::module &);
     }
 }
 
