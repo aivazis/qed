@@ -17,9 +17,9 @@ import { useClearPixelPathSelection } from './useClearPixelPathSelection'
 // toggle the measure layer over this viewport
 export const useToggleMeasureLayer = viewport => {
     // grab the measure layer mutator from context
-    const { setMeasureLayer, setPixelPath, setPixelPathSelection } = React.useContext(Context)
+    const { setMeasureLayer } = React.useContext(Context)
     // make handlers that clear the pixel path and the selection
-    const clearPixelPath = useClearPixelPath()
+    const clearPixelPath = useClearPixelPath(viewport)
     const clearPixelPathSelection = useClearPixelPathSelection(viewport)
 
     // a handler that toggles whether the measure layer is visible
