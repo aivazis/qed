@@ -29,6 +29,8 @@ namespace qed::py::channels {
     auto amplitudeHDF5Tile(
         // the source
         const dataset_t & dataset,
+        // the data layout
+        const datatype_t & datatype,
         // the zoom level
         int zoom,
         // the origin of the tile
