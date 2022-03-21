@@ -46,7 +46,7 @@ qed::py::channels::phase(py::module & m)
         // the handler
         &phaseHDF5Tile<heapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "saturation"_a, "brightness"_a,
+        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "saturation"_a, "brightness"_a,
         // the docstring
         "render the phase of a complex float tile");
     // and the bindings for {c16}
@@ -56,7 +56,7 @@ qed::py::channels::phase(py::module & m)
         // the handler
         &phaseHDF5Tile<heapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "saturation"_a, "brightness"_a,
+        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "saturation"_a, "brightness"_a,
         // the docstring
         "render the phase of a complex double tile");
 
