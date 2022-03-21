@@ -10,12 +10,17 @@ import React from 'react'
 // local
 // context
 import { Context } from './context'
+import { useClearPixelPath } from './useClearPixelPath'
+import { useClearPixelPathSelection } from './useClearPixelPathSelection'
 
 
 // toggle the measure layer over this viewport
 export const useToggleMeasureLayer = viewport => {
     // grab the measure layer mutator from context
-    const { setMeasureLayer, setPixelPath } = React.useContext(Context)
+    const { setMeasureLayer, setPixelPath, setPixelPathSelection } = React.useContext(Context)
+    // make handlers that clear the pixel path and the selection
+    const clearPixelPath = useClearPixelPath()
+    const clearPixelPathSelection = useClearPixelPathSelection(viewport)
 
     // a handler that toggles whether the measure layer is visible
     const toggle = () => {
@@ -28,15 +33,12 @@ export const useToggleMeasureLayer = viewport => {
             // and return the new table
             return table
         })
-        // on toggle, clear the pixel path as well
-        setPixelPath(old => {
-            // make a copy of the paths
-            const paths = [...old]
-            // clear out the one that corresponds to {viewport}
-            paths[viewport] = []
-            // and return the new pile
-            return paths
-        })
+
+        // on toggle, clear the pixel path
+        clearPixelPath()
+        // and the selection
+        clearPixelPathSelection()
+
         // all done
         return
     }
