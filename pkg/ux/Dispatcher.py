@@ -133,11 +133,17 @@ class Dispatcher:
             # build the response
             response = server.documents.BMP(server=server, bmp=memoryview(tile))
             # get the dataset name
-            name = self.panel.dataset(data).pyre_name
+            dataname = self.panel.dataset(data).pyre_name
             # suggest a file name, in case the user wants to save the tile
-            filename = urllib.parse.quote(f"{name}.{channel}.{zoom}.{spec}.bmp")
+            filename = f"{dataname}.{channel}.{zoom}.{spec}.bmp"
+            # encode it
+            encoded = urllib.parse.quote(filename)
             # decorate it
-            response.headers["Content-disposition"] = f'attachment; filename="{filename}"'
+            response.headers["Content-disposition"] = (
+                f'attachment; '
+                f'filename="{filename}"; '
+                f'filename*={encoded}'
+            )
             # and return it
             return response
 
