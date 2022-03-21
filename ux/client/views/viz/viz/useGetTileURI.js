@@ -13,14 +13,14 @@ import { Context } from './context'
 
 
 // hook to pull the dataset readers out the outlet context
-export const useGetTileURI = viewport => {
+export const useGetTileURI = ({ viewport, zoomLevel }) => {
     // grab some stuff from my context
     const { activeViewport, views, zoom } = React.useContext(Context)
     // normalize the viewport
     viewport ??= activeViewport
+    // and the zoom level
+    zoomLevel ??= Math.trunc(zoom[viewport])
 
-    // get the zoom level
-    const zoomLevel = Math.trunc(zoom[viewport])
     // get the view
     const view = views[viewport]
     // unpack it
