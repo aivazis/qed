@@ -26,16 +26,14 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         return self.datasets[name]
 
 
-    def tile(self, src, data, channel, zoom, origin, shape, **kwds):
+    def tile(self, data, channel, zoom, origin, shape, **kwds):
         """
         Generate a BMP encoded tile from the supplied specification
         """
         # look up the dataset
         dataset = self.dataset(name=data)
-        # get the viz flow associated with the selected {channel}
-        viz = dataset.channel(name=channel)
-        # render a tile and return it
-        return viz.tile(source=dataset, zoom=zoom, origin=origin, shape=shape)
+        # ask to make the tile and return it
+        return dataset.render(channel=channel, zoom=zoom, origin=origin, shape=shape)
 
 
     def profile(self, encoding, data, points):
