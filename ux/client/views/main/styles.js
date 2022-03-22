@@ -33,29 +33,6 @@ export default {
         // NOT STYLABLE FROM HERE AT THIS POINT
         // THE ActivityBar DOES NOT PARTICIPATE IN PAINT MIXING
     },
-
-    sidebar: {
-        // size me
-        width: "100%",
-        height: "100%",
-        // paint
-        backgroundColor: "hsl(0deg, 0%, 15%, 1)",
-        // shift me a bit
-        paddingLeft: "0.25rem",
-    },
-
-    canvas: {
-        // paint
-        backgroundColor: "hsl(0deg, 0%, 5%, 1)",
-        // occupy all available space
-        width: "100%",
-        height: "100%",
-        // let me strech, initially
-        // flex: "4 1 auto",
-
-        // shift me a bit
-        paddingLeft: "0.25rem",
-    },
 }
 
 

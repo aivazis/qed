@@ -32,9 +32,9 @@ const Panel = () => {
                 <ActivityBar style={styles.activitybar} />
                 {/* the client area */}
                 <Outlet />
-            </section >
+            </section>
             <Status />
-        </section >
+        </section>
     )
 }
 
