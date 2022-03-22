@@ -24,7 +24,7 @@ const query = graphql`query useFetchAllReadersQuery {
        count
        edges {
            node {
-               # the uuid of the reader
+               # the name of the reader
                name
                # whatever readers need to render themselves
                ...context_reader
