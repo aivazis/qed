@@ -45,6 +45,8 @@ const activityPanels = {
         flex: "0 0 auto",
         // and set up the preferred initial width
         width: "400px",
+        // show scroll bars when we run out of room
+        overflow: "auto",
     },
 
     // the separator
