@@ -171,8 +171,11 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
         writer.writerow(headers)
 
         # ask my data manager to build a profile
-        for entry in qed.libqed.datasets.profile(self.data, points):
-            # and record each {entry}
+        profile = qed.libqed.datasets.profile(
+            source=self.data, datatype=self.datatype, points=points)
+        # go through the values
+        for entry in profile:
+            # and record each one
             writer.writerow(entry)
 
         # all done
