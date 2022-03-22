@@ -44,8 +44,8 @@ export const Viewer = ({ viewport, view, registrar }) => {
     }
 
     // otherwise, unpack the view
-    const { uuid: readerUUID, id, uri } = reader
-    const { uuid: datasetUUID, datatype, shape, origin, tile } = dataset
+    const { name: readerName, id, uri } = reader
+    const { name: datasetName, datatype, shape, origin, tile } = dataset
 
     // scale the shape to the current zoom level
     const effectiveShape = shape.map(s => Math.trunc(s / (2 ** zoom)))
@@ -85,10 +85,10 @@ export const Viewer = ({ viewport, view, registrar }) => {
                     {datatype}
                 </Meta.Entry>
                 <Meta.Entry threshold={4} attribute="reader" style={paint}>
-                    {readerUUID}
+                    {readerName}
                 </Meta.Entry>
                 <Meta.Entry threshold={4} attribute="dataset" style={paint}>
-                    {datasetUUID}
+                    {datasetName}
                 </Meta.Entry>
                 <Meta.Entry threshold={5} attribute="data" style={paint}>
                     {base}
