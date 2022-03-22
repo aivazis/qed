@@ -27,6 +27,8 @@ namespace qed::py::datasets {
     auto statsHDF5(
         // the source
         const dataset_t & source,
+        // the data layout
+        const datatype_t & datatype,
         // the zoom level
         int zoom,
         // the origin of the tile

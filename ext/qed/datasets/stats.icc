@@ -52,6 +52,8 @@ auto
 qed::py::datasets::statsHDF5(
     // the source
     const dataset_t & dataset,
+    // the layout
+    const datatype_t & datatype,
     // the zoom level
     int zoom,
     // the origin of the tile
@@ -66,25 +68,8 @@ qed::py::datasets::statsHDF5(
     // and so is the origin
     auto from = typename sourceT::index_type(scale * origin);
 
-    // allocate my source
-    auto source = sourceT(typename sourceT::packing_type(region), region.cells());
-
-    // copy the HDF5 data
-    // we read from
-    hsize_t readFrom[2] = { static_cast<hsize_t>(from[0]), static_cast<hsize_t>(from[1]) };
-    // the amount of data we transfer
-    hsize_t count[2] = { static_cast<hsize_t>(region[0]), static_cast<hsize_t>(region[1]) };
-
-    // get the dataspace of the dataset
-    auto readSpace = dataset.getSpace();
-    // select the hyperslab that corresponds to the tile we want to extract
-    readSpace.selectHyperslab(H5S_SELECT_SET, count, readFrom);
-
-    // make a dataspace for the destination
-    auto writeSpace = dataspace_t(2, count);
-
-    // transfer
-    dataset.read(source.data()->data(), dataset.getCompType(), writeSpace, readSpace);
+    // read the data
+    auto source = pyre::h5::read<sourceT>(dataset, datatype, from, region);
 
     // my stats
     int samples = 0;

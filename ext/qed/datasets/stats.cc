@@ -34,7 +34,7 @@ qed::py::datasets::stats(py::module & m)
         // the handler
         &statsHDF5<heapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a,
+        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a,
         // the docstring
         "collect statistics on a subset of a dataset");
 
