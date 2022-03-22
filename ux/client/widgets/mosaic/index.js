@@ -7,7 +7,7 @@
 // externals
 import React from 'react'
 import styled from 'styled-components'
-import { zip } from 'lodash'
+import zip from 'lodash/zip'
 
 // project
 // widgets
