@@ -19,6 +19,7 @@ class Dataset(graphene.ObjectType):
     # my fields
     id = graphene.ID()
     uuid = graphene.ID()
+    name = graphene.ID()
 
     channels = graphene.List(graphene.String)
     datatype = graphene.String()
@@ -29,14 +30,6 @@ class Dataset(graphene.ObjectType):
 
 
     # resolvers
-    def resolve_name(dataset, *_):
-        """
-        Get the name of the dataset
-        """
-        # easy enough
-        return dataset.pyre_name
-
-
     def resolve_id(dataset, *_):
         """
         Get the {dataset} id
@@ -51,6 +44,14 @@ class Dataset(graphene.ObjectType):
         """
         # return the {pyre_id} of the {reader}
         return dataset.pyre_id
+
+
+    def resolve_name(dataset, *_):
+        """
+        Get the name of the dataset
+        """
+        # easy enough
+        return dataset.pyre_name
 
 
     def resolve_channels(dataset, *_):

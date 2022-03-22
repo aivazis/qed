@@ -27,6 +27,7 @@ class Reader(graphene.ObjectType):
     # my fields
     id = graphene.ID()
     uuid = graphene.ID()
+    name = graphene.ID()
     uri = graphene.String()
     api = graphene.String()
     selectors = graphene.List(Selectors)
@@ -48,6 +49,14 @@ class Reader(graphene.ObjectType):
         """
         # return the {pyre_id} of the {reader}
         return reader.pyre_id
+
+
+    def resolve_name(reader, *_):
+        """
+        Get the {reader} name
+        """
+        # return the {pyre_id} of the {reader}
+        return reader.pyre_name
 
 
     def resolve_uri(reader, *_):
