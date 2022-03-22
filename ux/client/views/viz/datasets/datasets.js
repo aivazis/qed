@@ -31,7 +31,7 @@ export const Datasets = () => {
             <Header title="datasets" style={styles.header} />
             {/* go through the readers and render them */}
             {readers.edges.map(edge => (
-                <Reader key={edge.node.uuid} reader={edge.node} />
+                <Reader key={edge.node.name} reader={edge.node} />
             ))}
         </>
     )
