@@ -20,7 +20,7 @@ export const Provider = (props) => {
     const reader = useFragment(graphql`
         fragment context_reader on Reader {
             id
-            uuid
+            name
             uri
             api
             selectors {
@@ -28,7 +28,7 @@ export const Provider = (props) => {
                 values
             }
             datasets {
-                uuid
+                name
                 datatype
                 selector {
                     name
@@ -56,7 +56,7 @@ export const Provider = (props) => {
     // get the active view
     const view = useGetView()
     // if i'm the active reader
-    if (view?.reader?.uuid === reader.uuid) {
+    if (view?.reader?.name === reader.name) {
         // mark me as active
         active.current = true
         // if the view has a dataset
@@ -132,7 +132,7 @@ export const Provider = (props) => {
     return (
         <Context.Provider value={context} >
             {props.children}
-        </Context.Provider >
+        </Context.Provider>
     )
 }
 
