@@ -33,11 +33,11 @@ export const useGetTileURI = ({ viewport, zoomLevel }) => {
     }
 
     // otherwise, unpack
-    const { uuid: readerUUID, api } = reader
-    const { uuid: datasetUUID } = dataset
+    const { api } = reader
+    const { name } = dataset
 
     // assemble the base data request URI
-    const uri = [api, readerUUID, datasetUUID, channel, zoomLevel].join("/")
+    const uri = [api, name, channel, zoomLevel].join("/")
 
     // and return it
     return uri
