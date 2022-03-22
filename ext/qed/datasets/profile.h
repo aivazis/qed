@@ -30,6 +30,8 @@ namespace qed::py::datasets {
     auto profileHDF5(
         // the source
         const dataset_t & source,
+        // the data layout
+        const datatype_t & datatype,
         // the points
         const points_t &) -> values_t;
 }

@@ -25,7 +25,7 @@ qed::py::datasets::profile(py::module & m)
         // the signature
         "source"_a, "points"_a,
         // the docstring
-        "collect statistics on a subset of a dataset");
+        "collect values from a dataset along a path");
 
     // bindings for HDF5 sources
     m.def(
@@ -34,9 +34,9 @@ qed::py::datasets::profile(py::module & m)
         // the handler
         &profileHDF5<heapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "points"_a,
+        "source"_a, "datatype"_a, "points"_a,
         // the docstring
-        "collect statistics on a subset of a dataset");
+        "collect values from a dataset along a path");
 
     // all done
     return;

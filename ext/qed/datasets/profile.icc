@@ -98,6 +98,8 @@ auto
 qed::py::datasets::profileHDF5(
     // the data source
     const dataset_t & dataset,
+    // the layout
+    const datatype_t & datatype,
     // the points
     const points_t & path) -> values_t
 {
@@ -127,12 +129,12 @@ qed::py::datasets::profileHDF5(
         auto readSpace = dataset.getSpace();
         // select the hyperslab that corresponds to the pixel we want to extract
         readSpace.selectHyperslab(H5S_SELECT_SET, count, readFrom);
-        // make a datsapace for the destination
+        // make a dataspace for the destination
         auto writeSpace = dataspace_t(2, count);
         // make room for the value
         typename sourceT::value_type value;
         // transfer
-        dataset.read(&value, dataset.getCompType(), writeSpace, readSpace);
+        dataset.read(&value, datatype, writeSpace, readSpace);
 
         // make a tuple
         auto entry = std::make_tuple(std::get<0>(p), std::get<1>(p), value.real(), value.imag());
@@ -185,25 +187,8 @@ qed::py::datasets::profileHDF5(
             // flush
             << pyre::journal::endl(__HERE__);
 
-        // allocate a grid to receive the data
-        auto source = sourceT(typename sourceT::packing_type(shape), shape.cells());
-        // copy the HDF5 data
-        // we read from
-        hsize_t from[2] = { static_cast<hsize_t>(origin[0]), static_cast<hsize_t>(origin[1]) };
-        // the amount of data we transfer
-        hsize_t count[2] = { static_cast<hsize_t>(shape[0]), static_cast<hsize_t>(shape[1]) };
-        // get the dataspace of the dataset
-        auto readSpace = dataset.getSpace();
-        // select the hyperslab that corresponds to the tile we want to extract
-        readSpace.selectHyperslab(H5S_SELECT_SET, count, from);
-        // make a dataspace for the destination
-        auto writeSpace = dataspace_t(2, count);
-        // transfer
-        try {
-            dataset.read(source.data()->data(), dataset.getCompType(), writeSpace, readSpace);
-        } catch (H5::Exception error) {
-            error.printErrorStack();
-        }
+        // read the data
+        auto source = pyre::h5::read<sourceT>(dataset, datatype, origin, shape);
 
         // compute the pixel separation; make sure it is a floating point number
         // so we don't do integer arithmetic until it's time
