@@ -89,7 +89,6 @@ class Dispatcher:
         Handle a data request
         """
         # unpack
-        src = match.group('data_src')
         data = match.group('data_dataset')
         channel = match.group('data_channel')
         zoom = int(match.group('data_zoom'))
@@ -100,15 +99,14 @@ class Dispatcher:
         # attempt to
         try:
             # process the request
-            tile = self.panel.tile(src=src, data=data, channel=channel,
-                                   zoom=zoom, origin=origin, shape=shape)
+            tile = self.panel.tile(
+                data=data, channel=channel, zoom=zoom, origin=origin, shape=shape)
         # if anything goes wrong while looking up the data sources
         except KeyError:
             # we have a bug
             chnl = journal.firewall("qed.ux.dispatch")
             # complain
             chnl.line(f"could not find data source {data}")
-            chnl.line(f"while looking up reader {src}")
             # flush
             chnl.log()
             # let the client know
@@ -258,8 +256,9 @@ class Dispatcher:
 
 
     # private data
-    # recognizers fragments
+    # recognizer fragments
     uuid = r"\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"
+    pyreid = r"[^&?#:\s]+"
     zoom = r"-?\d+"
     origin = r"-?\d+x-?\d+"
     shape = r"\d+x\d+"
@@ -270,8 +269,7 @@ class Dispatcher:
     regex = re.compile("|".join([
         # the data request recognizer
         r"/(?P<data>data/" + "/".join([
-            rf"(?P<data_src>{uuid})",
-            rf"(?P<data_dataset>{uuid})",
+            rf"(?P<data_dataset>{pyreid})",
             r"(?P<data_channel>\w+)",
             rf"(?P<data_zoom>{zoom})",
             rf"(?P<data_tile>(?P<data_origin>{origin})\+(?P<data_shape>{shape}))"
@@ -280,7 +278,7 @@ class Dispatcher:
         # data profile requests
         r"/(?P<profile>profile/" + "/".join([
            rf"(?P<profile_format>{profileFormat})",
-           rf"(?P<profile_dataset>{uuid})",
+           rf"(?P<profile_dataset>{pyreid})",
         ]) + ")",
 
         # graphql requests
