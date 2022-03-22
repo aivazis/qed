@@ -25,7 +25,7 @@ const query = graphql`query useFetchAllReadersQuery {
        edges {
            node {
                # the uuid of the reader
-               uuid
+               name
                # whatever readers need to render themselves
                ...context_reader
            }
