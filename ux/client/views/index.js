@@ -3,8 +3,6 @@
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 // (c) 1998-2022 all rights reserved
 
-import { FRAGMENT_PROP_NAME_KEY } from 'relay-runtime/lib/store/RelayStoreUtils'
-
 
 // publish
 // app layout
