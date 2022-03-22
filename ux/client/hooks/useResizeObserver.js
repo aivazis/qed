@@ -6,7 +6,8 @@
 
 // externals
 import React from 'react'
-import { debounce, throttle } from 'lodash'
+import debounce from 'lodash/debounce'
+import throttle from 'lodash/throttle'
 
 
 // hook that listens to resize events
@@ -23,7 +24,7 @@ const useResizeObserver = ({
     // attach a resize handler
     const handler = React.useRef(null)
     // storage for the element extent
-    const [extent, setExtent] = React.useState({height: undefined, width: undefined})
+    const [extent, setExtent] = React.useState({ height: undefined, width: undefined })
 
     // figure out the event rate limiter strategy
     let limiterStrategy = null
@@ -31,11 +32,11 @@ const useResizeObserver = ({
     if (limiter.mode === "debounce") {
         // debounce, from {lodash}
         limiterStrategy = debounce
-    // if the client wants throttling
+        // if the client wants throttling
     } else if (limiter.mode === "throttle") {
         // throttle, from {lodash}
         limiterStrategy = throttle
-    // otherwise
+        // otherwise
     } else {
         // no dress up
         limiterStrategy = (callback, ...args) => callback
@@ -66,7 +67,7 @@ const useResizeObserver = ({
                 // get the extent
                 // N.B.: {contentRect} is considered the "legacy" interface and may be deprecated;
                 //       consider {contentBoxSize} or {borderBoxSize}
-                const extent = target?.contentRect ?? {height: undefined, width: undefined}
+                const extent = target?.contentRect ?? { height: undefined, width: undefined }
                 // invoke the notifier
                 notify(extent)
             })
@@ -93,8 +94,8 @@ const useResizeObserver = ({
             // all done
             return
         }
-    // dependencies: the client's handler
-    }, [ onResize ])
+        // dependencies: the client's handler
+    }, [onResize])
 
     // make the ref and the extent available
     return { ref: cref, extent }
