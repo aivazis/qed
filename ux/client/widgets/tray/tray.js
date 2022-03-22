@@ -56,6 +56,8 @@ const components = state => {
 // the box
 const Section = styled.section`
     /* for me */
+    /* i neither stretch nor shrink*/
+    flex: 0 0 auto;
     min-height: 1.3rem;
     /* for my children */
     display: flex;
@@ -102,8 +104,8 @@ const SelectedTitle = styled(Title)`
 
 // the items
 const Items = styled.div`
-    /* i stretch */
-    flex: 1;
+    /* i stretch but don't shrink*/
+    flex: 1 0 auto;
     /* gimme some room */
     padding: 0.25rem 0.0rem;
     /* for my children */
