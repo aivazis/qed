@@ -32,6 +32,7 @@ type Reader implements Node {
   # ids
   id: ID!
   uuid: ID!
+  name: ID!
   # the full path to the supporting file
   uri: String!
   # the prefix of the data request url
@@ -48,6 +49,7 @@ type Dataset implements Node {
   # ids
   id: ID!
   uuid: ID!
+  name: ID!
   # metadata
   channels: [String!]!
   datatype: String!
