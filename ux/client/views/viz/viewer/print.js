@@ -45,7 +45,7 @@ export const Print = ({ viewport }) => {
     const zoomedShape = shape.map(extent => Math.trunc(extent / scale))
 
     // make my handler
-    const print = evt => {
+    const print = () => {
         // get viewer placemat
         const placemat = viewports[viewport]
         // measure it
@@ -80,7 +80,7 @@ export const Print = ({ viewport }) => {
     const paint = styles.print
     // render
     return (
-        <a ref={link} download href="" >
+        <a ref={link} download href={`${uri}/0x0+512x512`} >
             <Badge size={16} state={state} behaviors={behaviors} style={paint} >
                 <Shape />
             </Badge>
