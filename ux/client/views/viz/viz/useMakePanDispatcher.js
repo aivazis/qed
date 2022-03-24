@@ -15,7 +15,7 @@ export const useMakePanDispatcher = () => {
     // get the sync registry
     const synced = useSynced()
     // the pile of viewports
-    const viewports = useViewports()
+    const { viewports } = useViewports()
 
     // make a handler that pans the shared camera and scrolls the synced viewports
     const pan = (evt, idx) => {

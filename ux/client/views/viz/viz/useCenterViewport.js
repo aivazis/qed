@@ -7,20 +7,19 @@
 // local
 // hooks
 import { useViewports } from './useViewports'
-import { useViews } from './useViews'
 
 
 // make a handler that centers a viewport at a given point
 export const useCenterViewport = (viewport = null) => {
-    // get the table of viewports
-    const viewports = useViewports()
-    // and the active viewport so we can use it as a fall back
-    const { activeViewport } = useViews()
+    // get the table of viewports and the active viewport so we can use it as a fall back
+    const { activeViewport, viewports } = useViewports()
+    // normalize the viewport
+    viewport ??= activeViewport
 
     // make a handler that scrolls the viewport so that the given point is at the center
     const center = ({ x, y }) => {
         // get the scrolling container
-        const placemat = viewports[viewport ?? activeViewport]
+        const placemat = viewports[viewport]
         // measure it
         const box = placemat.getBoundingClientRect()
         // extract the viewport size
