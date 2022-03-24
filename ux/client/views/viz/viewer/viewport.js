@@ -15,22 +15,22 @@ import { Mosaic } from '~/widgets'
 // locals
 // hooks
 import { useCenterViewport } from '../viz/useCenterViewport'
+import { useGetTileURI } from '../viz/useGetTileURI'
 import { useGetZoomLevel } from '../viz/useGetZoomLevel'
-import { useViewports } from '../viz/useViewports'
 import { useMeasureLayer } from '../viz/useMeasureLayer'
+import { useViewports } from '../viz/useViewports'
 // components
 import { Measure } from '../measure'
-import { useGetTileURI } from '../viz/useGetTileURI'
 
 
 // export the data viewport
 export const Viewport = ({ viewport, view, registrar, ...rest }) => {
+    // get the pile of registered {viewports}; i'm at {viewport}
+    const viewports = useViewports()
     // get the state of the measuring layer
     const measure = useMeasureLayer(viewport)
     // get my zoom
     const zoom = Math.trunc(useGetZoomLevel(viewport))
-    // get the pile of registered {viewports}; i'm at {viewport}
-    const viewports = useViewports()
     // make a handler that centers my viewport
     const centerViewport = useCenterViewport(viewport)
     // get the base URI for tiles
