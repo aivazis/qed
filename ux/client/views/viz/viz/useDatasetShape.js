@@ -18,8 +18,15 @@ export const useDatasetShape = (viewport) => {
     const { views, activeViewport } = React.useContext(Context)
     // extract the dataset information for the given {viewport}
     const { dataset } = views[viewport ?? activeViewport]
-    // and its origin and shape
-    const { origin, shape } = dataset
+
+    // if there is no registered dataset in {viewport}
+    if (dataset === null) {
+        // bail
+        return { origin: null, shape: null }
+    }
+
+    // extract the dataset origin and shape
+    const { origin = null, shape = null } = dataset
 
     // make them available
     return { origin, shape }
