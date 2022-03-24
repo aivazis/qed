@@ -15,9 +15,9 @@ import { Context } from './context'
 // storage for the refs to the {mosaic} placemats that frame the visible part of the data
 export const useViewports = () => {
     // grab the array of refs from my context
-    const { viewports } = React.useContext(Context)
+    const { activeViewport, viewports } = React.useContext(Context)
     // and return its current pile
-    return viewports.current
+    return { activeViewport, viewports: viewports.current }
 }
 
 
