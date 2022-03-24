@@ -55,8 +55,8 @@ const Layer = ({ viewport, shape, zoom }) => {
     const stopMoving = useStopMoving()
     // get the current selection
     const selection = usePixelPathSelection(viewport)
-    // and the handler that clears it
-    const clearSelection = useClearPixelPathSelection(viewport)
+    // and the handler that clears it; disabled for now, until we check with actual users
+    // const clearSelection = useClearPixelPathSelection(viewport)
 
     // convert the zoom level to a scaling factor
     const scale = 2 ** zoom
