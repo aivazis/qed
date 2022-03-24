@@ -29,7 +29,7 @@ export const Print = ({ viewport }) => {
     const link = React.useRef()
 
     // get the pile of registered {viewports}; mine is at {viewport}
-    const viewports = useViewports()
+    const { viewports } = useViewports()
     // get my view and extract my dataset
     const { dataset } = useGetView(viewport)
     // get my zoom level
