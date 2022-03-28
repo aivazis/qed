@@ -26,10 +26,10 @@ export const useDatasetShape = (viewport) => {
     }
 
     // extract the dataset origin and shape
-    const { origin = null, shape = null } = dataset
+    const { name = null, origin = null, shape = null } = dataset
 
     // make them available
-    return { origin, shape }
+    return { name, origin, shape }
 }
 
 
