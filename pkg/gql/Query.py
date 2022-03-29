@@ -12,6 +12,8 @@ import qed
 from .Version import Version
 # the known datasets
 from .ReaderConnection import ReaderConnection
+# and their contents
+from .Sample import Sample
 
 
 # the query
@@ -24,6 +26,9 @@ class Query(graphene.ObjectType):
     # the fields
     # known datasets
     readers = graphene.relay.ConnectionField(ReaderConnection)
+    # samples
+    sample = graphene.Field(Sample,
+                            dataset=graphene.ID(), sample=graphene.Int(), line=graphene.Int())
     # server version info
     version = graphene.Field(Version, required=True)
 
@@ -40,6 +45,27 @@ class Query(graphene.ObjectType):
         plexus = info.context["plexus"]
         # get the datasets and return them
         return plexus.datasets
+
+
+    # samples
+    def resolve_sample(root, info,
+                       dataset, line, sample,
+                       **kwds):
+        """
+        Sample a dataset at a specified pixel
+        """
+        # grab the plexus
+        panel = info.context["panel"]
+        # resolve the dataset
+        dataset = panel.dataset(name=dataset)
+        # assemble the sample resolution context
+        context = {
+            "dataset": dataset,
+            "line": line,
+            "sample": sample,
+        }
+        # just fake it, for now
+        return context
 
 
     # version
