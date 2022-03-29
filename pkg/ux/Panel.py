@@ -5,6 +5,8 @@
 
 
 # externals
+import csv
+import io
 import journal
 # support
 import qed
@@ -45,11 +47,24 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         # look up the dataset
         dataset = self.dataset(name=data)
         # get the profile
-        profile = dataset.profile(encoding=encoding, points=points)
+        profile = dataset.profile(points=points)
         # form the file name
         filename = f"{dataset.pyre_name}.{encoding}"
-        # and send them along
-        return filename, profile
+
+        # dispatch
+        if encoding == "csv":
+            # to my {CSV} handler
+            return filename, self._profileCSV(dataset=dataset, profile=profile)
+
+        # if i don't understand the encoding, call it a bug
+        channel = journal.firewall("qed.datasets.raw")
+        # explain
+        channel.line(f"unsupported encoding '{encoding}'")
+        channel.line(f"while generating a data profile for {dataset.pyre_name}")
+        # and complain
+        channel.log()
+        # bail, just in case the firewall is not fatal
+        return None, None
 
 
     # metamethods
@@ -68,6 +83,30 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
 
         # all done
         return
+
+
+    # implementation details
+    def _profileCSV(self, dataset, profile):
+        """
+        Encode the {dataset} {profile} as CSV
+        """
+        # make a buffer so {csv} has someplace to write into
+        buffer = io.StringIO()
+        # make a writer
+        writer = csv.writer(buffer)
+
+        # get the headers
+        headers = ("line", "sample") + dataset.cell.headers
+        # write them
+        writer.writerow(headers)
+
+        # go through the entries in the {profile}
+        for entry in profile:
+            # and record each one
+            writer.writerow(entry)
+
+        # all done
+        return buffer.getvalue()
 
 
 # end of file
