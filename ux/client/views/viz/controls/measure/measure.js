@@ -37,6 +37,10 @@ export const Measure = () => {
         return null
     }
 
+    // the platform dependent prompt; {platform} is deprecated, but the recommended replacement
+    // is neither an approved standard nor widely implemented; the web...
+    const stroke = navigator.platform.startsWith("Mac") ? "option+click" : "alt+click"
+
     // otherwise, render
     return (
         <Tray title="measure" state="enabled" initially={true}>
@@ -45,8 +49,7 @@ export const Measure = () => {
             {/* if the pixel path is empty, show a brief help message */}
             {pixelPath.length === 0 &&
                 <Help>
-                    Pick points using Alt+Click.
-                    On a Mac, the key may be labeled "option", or &#8997;
+                    pick points on the active view using {stroke}
                 </Help>
             }
             {/* render the pixel path */}
