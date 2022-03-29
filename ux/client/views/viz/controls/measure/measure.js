@@ -21,6 +21,7 @@ import { usePixelPath } from '../../viz/usePixelPath'
 import { Actions } from './actions'
 import { Minimap } from './minimap'
 import { Path } from './path'
+import { Track } from './track'
 
 
 // display the {measure} layer controls
@@ -39,6 +40,8 @@ export const Measure = () => {
     // otherwise, render
     return (
         <Tray title="measure" state="enabled" initially={true}>
+            {/* track the mouse */}
+            <Track />
             {/* if the pixel path is empty, show a brief help message */}
             {pixelPath.length === 0 &&
                 <Help>
@@ -57,11 +60,11 @@ export const Measure = () => {
 }
 
 
-// part
+// the box with the hint about how to add points to the measure layer
 const Help = styled.p`
     font-family: rubik-light;
     font-size: 75%;
-    margin: 1.0rem;
+    margin: 0.0rem 1.0rem 1.0rem 1.0rem;
 `
 
 
