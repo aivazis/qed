@@ -212,7 +212,7 @@ const query = graphql`
     query track_sampleDatasetQuery($dataset: ID!, $line: Int!, $sample: Int!) {
         sample(dataset: $dataset, line: $line, sample: $sample){
             pixel
-            data
+            value
         }
     }
 `
