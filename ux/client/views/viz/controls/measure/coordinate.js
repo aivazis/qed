@@ -45,7 +45,7 @@ export const Coordinate = ({ node, axis, point }) => {
         // if it's larger than the maximum possible
         if (value > max) {
             // clip it
-            value = maxs
+            value = max
         }
         // make the update
         adjust({ node, axis, value })
