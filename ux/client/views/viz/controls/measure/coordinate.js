@@ -29,20 +29,23 @@ export const Coordinate = ({ node, axis, point }) => {
 
     // validate, clip and set the value
     const set = value => {
+        // set up the bounds
+        const min = origin[axis]
+        const max = origin[axis] + shape[axis] - 1
         // if the value doesn't parse to a number
         if (isNaN(value)) {
             // set it to the minimum
-            value = origin[axis]
+            value = min
         }
         // if it's smaller than the minimum possible
-        if (value < origin[axis]) {
+        if (value < min) {
             // clip it
-            value = origin[axis]
+            value = min
         }
         // if it's larger than the maximum possible
-        if (value > shape[axis]) {
+        if (value > max) {
             // clip it
-            value = shape[axis]
+            value = maxs
         }
         // make the update
         adjust({ node, axis, value })
