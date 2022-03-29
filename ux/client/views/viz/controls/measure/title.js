@@ -31,10 +31,10 @@ const Box = styled.div`
 
 const Name = styled.span`
     display: inline-block;
-    width: 1.75rem;
-    text-align: start;
+    width: 1.5rem;
+    text-align: end;
     vertical-align: bottom;
-    padding: 0.0rem 0.0rem 0.25rem 0.25rem;
+    padding: 0.0rem 0.0rem 0.25rem 0.0rem;
     margin: 0.0rem 0.0rem 0.1rem 0.0rem;
     border-bottom: 1px solid hsl(0deg, 0%, 30%);
 `

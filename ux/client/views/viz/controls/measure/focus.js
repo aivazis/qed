@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import styled from 'styled-components'
 
 // project
 // shapes
@@ -63,11 +64,18 @@ export const Focus = ({ idx, point }) => {
 
     // render
     return (
-        <Button behaviors={behaviors}>
+        <Control behaviors={behaviors}>
             <Target style={paint} />
-        </Button>
+        </Control>
     )
 }
+
+
+// style me
+const Control = styled(Button)`
+    width: 1.5rem;
+    text-align: end;
+`
 
 
 // end of file
