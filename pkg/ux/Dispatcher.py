@@ -166,7 +166,7 @@ class Dispatcher:
         Handle a {graphql} request
         """
         # delegate to my {graphql} handler
-        return self.gql.respond(**kwds)
+        return self.gql.respond(dispatcher=self, panel=self.panel, **kwds)
 
 
     def profile(self, server, match, request, **kwds):

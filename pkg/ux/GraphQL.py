@@ -16,7 +16,7 @@ class GraphQL:
 
 
     # interface
-    def respond(self, plexus, server, request, **kwds):
+    def respond(self, plexus, dispatcher, panel, server, request, **kwds):
         """
         Resolve the {query} and generate a response for the client
         """
@@ -40,6 +40,8 @@ class GraphQL:
         context = dict(self.context)
         # decorate with the info for this request
         context["plexus"] = plexus
+        context["dispatcher"] = dispatcher
+        context["panel"] = panel
         context["server"] = server
         context["request"] = request
 
