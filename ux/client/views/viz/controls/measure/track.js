@@ -51,7 +51,7 @@ export const Track = () => {
     // get the environment
     const environment = useRelayEnvironment()
     // get the data
-    const sample = useLazyLoadQuery(query, payload.variables, payload.options)
+    const { sample } = useLazyLoadQuery(query, payload.variables, payload.options)
 
     // make a toggle
     const toggle = () => setEnabled(old => !old)
@@ -160,7 +160,7 @@ export const Track = () => {
     })
 
     // show me
-    console.log(sample)
+    console.log(sample.pixel, sample.value)
 
     // render
     return (
