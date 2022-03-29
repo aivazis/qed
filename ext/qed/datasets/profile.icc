@@ -43,7 +43,7 @@ qed::py::datasets::profileGrid(
         return values;
     }
 
-    // at this point, it guaranteed that there are at least two points in the path, so we can
+    // at this point, it is guaranteed that there are at least two points in the path, so we can
     // process line segments
     for (auto it = path.cbegin(); it != path.cend() - 1; ++it) {
         // unpack the tail of the segment
