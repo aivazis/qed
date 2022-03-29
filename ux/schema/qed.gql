@@ -13,6 +13,10 @@ schema {
 type Query {
   # information about the known data sets
   readers(after: String, first: Int, before: String, last: Int, order: String): ReaderConnection!
+
+  # collect pixel values at a set of points
+  sample(dataset: ID, line: Int!, sample: Int!): Sample!
+
   # server version information
   version: Version!
 }
@@ -85,6 +89,13 @@ type ReaderConnection {
 type ReaderEdge {
   node: Reader
   cursor: String!
+}
+
+
+# data exchanges
+type Sample {
+  pixel: [Int]
+  value: [Float]
 }
 
 
