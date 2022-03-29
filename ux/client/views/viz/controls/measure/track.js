@@ -159,16 +159,44 @@ export const Track = () => {
         }
     })
 
-    // show me
-    console.log(sample.pixel, sample.value)
+    // unpack
+    const { pixel, value } = sample
 
     // render
     return (
         <Box>
+            {/* space */}
+            <Spacer />
+            {/* the pixel */}
+            <Coordinate>{pixel[0]}</Coordinate>
+            <Coordinate>{pixel[1]}</Coordinate>
+
+            {/* the value */}
+            {value.map((raw, i) => {
+                // the value representation
+                let rep
+                // number that are too big
+                if (Math.abs(raw) >= 1e5) {
+                    // switch to scientific notation
+                    rep = raw.toExponential(2)
+                } else if (Math.abs(raw) <= 1e-2) {
+                    // so do numbers that are too small
+                    rep = raw.toExponential(2)
+                } else {
+                    // everybody else
+                    rep = raw.toFixed(2)
+                }
+
+                // render
+                return (
+                    <Value key={`value-${i}`}>{rep}</Value>
+                )
+            })}
+
             {/* show the button */}
-            <Button type="button" onClick={toggle}>
+            {/* <Button type="button" onClick={toggle}>
                 cursor
-            </Button>
+            </Button> */}
         </Box>
     )
 }
@@ -176,7 +204,35 @@ export const Track = () => {
 
 // the container
 const Box = styled.div`
-    margin: 0.0rem 1.0rem 1.0rem 1.0rem;
+    font-family: inconsolata;
+    font-size: 75%;
+    padding: 0.2rem 0.0rem;
+`
+
+const Coordinate = styled.span`
+    display: inline-block;
+    cursor: default;
+    width: 3.0rem;
+    text-align: end;
+    padding: 0.0rem 0.25rem 0.0rem 0.0rem;
+`
+
+const Value = styled.span`
+    display: inline-block;
+    cursor: default;
+    width: 3.5rem;
+    text-align: end;
+    padding: 0.0rem 0.25rem 0.0rem 0.0rem;
+    overflow: clip;
+`
+
+// the spacer
+const Spacer = styled.span`
+    display: inline-block;
+    width: 1.5rem;
+    text-align: end;
+    padding: 0.0rem 0.0rem 0.25rem 0.0rem;
+    margin: 0.0rem 0.0rem 0.1rem 0.0rem;
 `
 
 // the state control
