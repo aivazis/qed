@@ -19,9 +19,9 @@ import { useMeasureLayer } from '../../viz/useMeasureLayer'
 import { usePixelPath } from '../../viz/usePixelPath'
 // components
 import { Actions } from './actions'
+import { Cursor } from './cursor'
 import { Minimap } from './minimap'
 import { Path } from './path'
-import { Track } from './track'
 
 
 // display the {measure} layer controls
@@ -45,7 +45,7 @@ export const Measure = () => {
     return (
         <Tray title="measure" state="enabled" initially={true}>
             {/* track the mouse */}
-            <Track />
+            <Cursor />
             {/* if the pixel path is empty, show a brief help message */}
             {pixelPath.length === 0 &&
                 <Help>
