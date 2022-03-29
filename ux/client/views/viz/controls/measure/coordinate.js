@@ -17,7 +17,7 @@ import { useSetPixelPath } from '../../viz/useSetPixelPath'
 
 // a interactive entry with a coordinate of a point
 export const Coordinate = ({ node, axis, point }) => {
-    // make me handler that can update the {axis} coordinate of my {node}
+    // make a handler that can update the {axis} coordinate of my {node}
     const { adjust } = useSetPixelPath()
     // and get the active dataset shape and origin
     const { origin, shape } = useDatasetShape()
