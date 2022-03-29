@@ -24,8 +24,14 @@ class Sample(graphene.ObjectType):
         """
         Get the value of a dataset at the specified location
         """
-        # all done
-        return [0,0]
+        # unpack my context
+        dataset = context["dataset"]
+        points = [(context["line"], context["sample"])]
+        # ask the dataset for a profile over my point
+        profile = dataset.profile(points=points)
+
+        # extract the data payload and return it
+        return profile[0][2:]
 
 
     def resolve_pixel(context, info, **kwds):
