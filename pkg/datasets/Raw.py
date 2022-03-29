@@ -4,10 +4,6 @@
 # (c) 1998-2022 all rights reserved
 
 
-# externals
-import csv
-import io
-import journal
 # support
 import qed
 
@@ -70,25 +66,14 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
         return self.channels[name]
 
 
-    def profile(self, encoding, points):
+    def profile(self, points):
         """
-        Sample my data along the path defined by {points} and return the result
-        using {encoding} as the format
+        Sample my data along the path defined by {points}
         """
-        # dispatch
-        if encoding == "csv":
-            # to my {CSV} handler
-            return self._csv(points=points)
-
-        # if i don't understand the encoding, call it a bug
-        channel = journal.firewall("qed.datasets.raw")
-        # explain
-        channel.line(f"unsupported encoding '{encoding}'")
-        channel.line(f"while generating a data profile for {self.pyre_name}")
-        # and complain
-        channel.log()
-        # bail, just in case the firewall is not fatal
-        return
+        # ask my data manager to build a profile
+        profile = qed.libqed.datasets.profile(self._data, points)
+        # and return it
+        return profile
 
 
     def render(self, channel, zoom, origin, shape):
@@ -185,31 +170,6 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
         self._stats = None
         # all done
         return
-
-
-    # implementation details
-    def _csv(self, points):
-        """
-        Generate a profile by sampling my data along the path defined by {points} and
-        return the results encoded as CSV
-        """
-        # make a buffer so {csv} has someplace to write into
-        buffer = io.StringIO()
-        # make a writer
-        writer = csv.writer(buffer)
-
-        # my headers
-        headers = ("line", "sample") + self.cell.headers
-        # write them
-        writer.writerow(headers)
-
-        # ask my data manager to build a profile
-        for entry in qed.libqed.datasets.profile(self._data, points):
-            # and record each {entry}
-            writer.writerow(entry)
-
-        # all done
-        return buffer.getvalue()
 
 
 # end of file
