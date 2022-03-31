@@ -5,6 +5,7 @@
 
 
 # support
+import cmath
 import qed
 # superclass
 from .Channel import Channel
@@ -36,6 +37,14 @@ class Phase(Channel, family="qed.channels.phase"):
       """
       # add my configuration and chain up
       return super().tile(saturation=self.saturation, brightness=self.brightness, **kwds)
+
+
+   def rep(self, pixel):
+      """
+      Build a representation of {pixel}
+      """
+      # easy
+      return f"{cmath.phase(pixel):.3g}"
 
 
 # end of file

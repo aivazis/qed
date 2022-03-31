@@ -52,4 +52,12 @@ class Imaginary(Channel, family="qed.channels.imaginary"):
       return super().tile(source=source, min=low, max=high, **kwds)
 
 
+   def rep(self, pixel):
+      """
+      Build a representation of {pixel}
+      """
+      # easy
+      return f"{pixel.imag:.3g}"
+
+
 # end of file

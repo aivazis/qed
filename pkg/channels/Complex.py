@@ -56,4 +56,12 @@ class Complex(Channel, family="qed.channels.complex"):
                          **kwds)
 
 
+   def rep(self, pixel):
+      """
+      Build a representation of {pixel}
+      """
+      # easy
+      return f"{pixel:.3g}"
+
+
 # end of file
