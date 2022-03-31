@@ -239,7 +239,7 @@ const Value = styled.span`
 
 const Units = styled.span`
     display: inline-block;
-    font-family: inconsolata;
+    font-family: rubik-light;
     cursor: default;
     padding: 0.0rem 0.0rem 0.0rem 0.5rem;
 `
