@@ -168,7 +168,7 @@ export const Track = () => {
             {/* the cursor location */}
             <Entry>
                 {/* the label */}
-                <Label>pixel:</Label>
+                <Label>pixel :</Label>
                 {/* the pixel */}
                 <Coordinate>{pixel[0]}</Coordinate>
                 <Coordinate>{pixel[1]}</Coordinate>
@@ -176,7 +176,7 @@ export const Track = () => {
             {/* the reps */}
             {value.map(({ channel, rep }) => (
                 <Entry key={channel}>
-                    <Label>{channel}:</Label>
+                    <Label>{channel} :</Label>
                     <Value>{rep}</Value>
                 </Entry>
             ))}
@@ -199,18 +199,19 @@ const Entry = styled.div`
 const Coordinate = styled.span`
     display: inline-block;
     cursor: default;
-    width: 3.0rem;
+    /* width: 2.0rem; */
     text-align: end;
-    padding: 0.0rem 0.25rem 0.0rem 0.0rem;
+    padding: 0.0rem 0.0rem 0.0rem 0.5rem;
 `
 
 const Value = styled.div`
     display: inline-block;
     cursor: default;
     width: 6.25rem;
-    text-align: end;
+    text-align: start;
     padding: 0.0rem;
     overflow: clip;
+    padding: 0.0rem 0.0rem 0.0rem 0.5rem;
 `
 
 // the spacer
