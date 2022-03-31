@@ -101,6 +101,7 @@ type Sample {
 type ChannelValue {
   channel: String
   rep: String
+  units: String
 }
 
 # interfaces
