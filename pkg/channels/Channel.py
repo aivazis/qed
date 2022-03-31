@@ -34,9 +34,9 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         return tileMaker(source=source.data, zoom=zoom, origin=origin, shape=shape, **kwds)
 
 
-    def rep(self, pixel):
+    def project(self, pixel):
         """
-        Build a representation of {pixel}
+        Compute the channel representation of a {pixel}
         """
         # don't kow what to do
         raise NotImplementedError(f"class {type(self).__name__} must implement 'rep'")

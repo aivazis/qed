@@ -39,12 +39,12 @@ class Phase(Channel, family="qed.channels.phase"):
       return super().tile(saturation=self.saturation, brightness=self.brightness, **kwds)
 
 
-   def rep(self, pixel):
+   def project(self, pixel):
       """
-      Build a representation of {pixel}
+      Compute the pahse of a {pixel}
       """
       # easy
-      return f"{cmath.phase(pixel):.3g}"
+      return cmath.phase(pixel)
 
 
 # end of file

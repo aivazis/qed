@@ -52,12 +52,12 @@ class Real(Channel, family="qed.channels.real"):
       return super().tile(source=source, min=low, max=high, **kwds)
 
 
-   def rep(self, pixel):
+   def project(self, pixel):
       """
-      Build a representation of {pixel}
+      Compute the real part of a {pixel}
       """
       # easy
-      return f"{pixel.real:.3g}"
+      return pixel.real
 
 
 # end of file

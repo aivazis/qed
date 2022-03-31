@@ -51,12 +51,12 @@ class Amplitude(Channel, family="qed.channels.amplitude"):
       return super().tile(source=source, min=low, max=high, **kwds)
 
 
-   def rep(self, pixel):
+   def project(self, pixel):
       """
-      Build a representation of {pixel}
+      Compute the amplitude of a {pixel}
       """
-      # easy
-      return f"{abs(pixel):.3g}"
+      # easy enough
+      return abs(pixel)
 
 
 # end of file

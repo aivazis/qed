@@ -56,12 +56,12 @@ class Complex(Channel, family="qed.channels.complex"):
                          **kwds)
 
 
-   def rep(self, pixel):
+   def project(self, pixel):
       """
-      Build a representation of {pixel}
+      Represent a {pixel} as a complex number
       """
-      # easy
-      return f"{pixel:.3g}"
+      # this is a no-op
+      return pixel
 
 
 # end of file
