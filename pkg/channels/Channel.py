@@ -15,6 +15,11 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
     """
 
 
+    # constants
+    tag = None
+    units = ""
+
+
     # interface
     def tile(self, source, zoom, origin, shape, **kwds):
         """
