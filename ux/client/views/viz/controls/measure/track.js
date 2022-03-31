@@ -165,14 +165,15 @@ export const Track = () => {
     // render
     return (
         <Box>
-            {/* the cursor location */}
-            <Entry>
+            {/* the table header with the cursor location */}
+            <Header>
                 {/* the label */}
-                <Label>pixel :</Label>
-                {/* the pixel */}
+                <Title>cursor</Title>
+                {/* the mouse coordinates */}
                 <Coordinate>{pixel[0]}</Coordinate>
+                x
                 <Coordinate>{pixel[1]}</Coordinate>
-            </Entry>
+            </Header>
             {/* the reps */}
             {value.map(({ channel, rep }) => (
                 <Entry key={channel}>
@@ -188,33 +189,32 @@ export const Track = () => {
 
 // the container
 const Box = styled.div`
-    font-family: inconsolata;
-    font-size: 60%;
-    padding: 0.2rem 0.0rem;
+    margin: 0.5rem 1.0rem 0.5rem 1.0rem;
+`
+
+const Header = styled.div`
+    font-size: 65%;
 `
 
 const Entry = styled.div`
+    font-size: 60%;
+`
+
+const Title = styled.span`
+    display: inline-block;
+    font-family: rubik-light;
+    width: 2.5rem;
+    padding: 0.0rem 0.0rem 0.25rem 0.0rem;
+    margin: 0.0rem 0.0rem 0.1rem 0.0rem;
+    color: hsl(0deg, 0%, 75%);
 `
 
 const Coordinate = styled.span`
-    display: inline-block;
+    font-family: inconsolata;
     cursor: default;
-    width: 1.5rem;
-    text-align: end;
-    padding: 0.0rem 0.0rem 0.0rem 0.375rem;
+    padding: 0.0rem 0.25rem;
 `
 
-const Value = styled.div`
-    display: inline-block;
-    cursor: default;
-    width: 3.25rem;
-    text-align: end;
-    padding: 0.0rem;
-    overflow: clip;
-    padding: 0.0rem 0.0rem 0.0rem 0.5rem;
-`
-
-// the spacer
 const Label = styled.span`
     display: inline-block;
     font-family: rubik-light;
@@ -223,6 +223,17 @@ const Label = styled.span`
     text-transform: uppercase;
     padding: 0.0rem 0.0rem 0.25rem 0.0rem;
     margin: 0.0rem 0.0rem 0.1rem 0.0rem;
+`
+
+const Value = styled.div`
+    display: inline-block;
+    font-family: inconsolata;
+    cursor: default;
+    width: 3.25rem;
+    text-align: end;
+    padding: 0.0rem;
+    overflow: clip;
+    padding: 0.0rem 0.0rem 0.0rem 0.5rem;
 `
 
 // the state control
