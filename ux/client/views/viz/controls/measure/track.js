@@ -165,38 +165,22 @@ export const Track = () => {
     // render
     return (
         <Box>
-            {/* space */}
-            <Spacer />
-            {/* the pixel */}
-            <Coordinate>{pixel[0]}</Coordinate>
-            <Coordinate>{pixel[1]}</Coordinate>
+            {/* the cursor location */}
+            <Entry>
+                {/* the label */}
+                <Label>pixel:</Label>
+                {/* the pixel */}
+                <Coordinate>{pixel[0]}</Coordinate>
+                <Coordinate>{pixel[1]}</Coordinate>
+            </Entry>
+            {/* the reps */}
+            {value.map(({ channel, rep }) => (
+                <Entry key={channel}>
+                    <Label>{channel}:</Label>
+                    <Value>{rep}</Value>
+                </Entry>
+            ))}
 
-            {/* the value */}
-            {value.map((raw, i) => {
-                // the value representation
-                let rep
-                // number that are too big
-                if (Math.abs(raw) >= 1e5) {
-                    // switch to scientific notation
-                    rep = raw.toExponential(2)
-                } else if (Math.abs(raw) <= 1e-2) {
-                    // so do numbers that are too small
-                    rep = raw.toExponential(2)
-                } else {
-                    // everybody else
-                    rep = raw.toFixed(2)
-                }
-
-                // render
-                return (
-                    <Value key={`value-${i}`}>{rep}</Value>
-                )
-            })}
-
-            {/* show the button */}
-            {/* <Button type="button" onClick={toggle}>
-                cursor
-            </Button> */}
         </Box>
     )
 }
@@ -205,8 +189,11 @@ export const Track = () => {
 // the container
 const Box = styled.div`
     font-family: inconsolata;
-    font-size: 75%;
+    font-size: 60%;
     padding: 0.2rem 0.0rem;
+`
+
+const Entry = styled.div`
 `
 
 const Coordinate = styled.span`
@@ -217,20 +204,22 @@ const Coordinate = styled.span`
     padding: 0.0rem 0.25rem 0.0rem 0.0rem;
 `
 
-const Value = styled.span`
+const Value = styled.div`
     display: inline-block;
     cursor: default;
-    width: 3.5rem;
+    width: 6.25rem;
     text-align: end;
-    padding: 0.0rem 0.25rem 0.0rem 0.0rem;
+    padding: 0.0rem;
     overflow: clip;
 `
 
 // the spacer
-const Spacer = styled.span`
+const Label = styled.span`
     display: inline-block;
-    width: 1.5rem;
+    font-family: rubik-light;
+    width: 4.0rem;
     text-align: end;
+    text-transform: uppercase;
     padding: 0.0rem 0.0rem 0.25rem 0.0rem;
     margin: 0.0rem 0.0rem 0.1rem 0.0rem;
 `
@@ -268,7 +257,10 @@ const query = graphql`
     query track_sampleDatasetQuery($dataset: ID!, $line: Int!, $sample: Int!) {
         sample(dataset: $dataset, line: $line, sample: $sample){
             pixel
-            value
+            value {
+                channel
+                rep
+            }
         }
     }
 `

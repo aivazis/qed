@@ -21,9 +21,7 @@ export const Cursor = () => {
         <Box>
             {/* add a title to the table */}
             <Title>
-                <Name>cursor</Name>
-                <Header>line</Header>
-                <Header>sample</Header>
+                cursor
             </Title>
             {/* place the cursor position and the pixel value */}
             <Track />
@@ -41,30 +39,9 @@ const Box = styled.div`
 const Title = styled.div`
     font-family: rubik-light;
     font-size: 65%;
-`
-
-const Name = styled.span`
-    display: inline-block;
-    width: 1.5rem;
-    text-align: end;
-    vertical-align: bottom;
     padding: 0.0rem 0.0rem 0.25rem 0.0rem;
     margin: 0.0rem 0.0rem 0.1rem 0.0rem;
-    /* border-bottom: 1px solid hsl(0deg, 0%, 30%); */
 `
-
-const Header = styled.span`
-    display: inline-block;
-    width: 3.0rem;
-    text-align: end;
-    vertical-align: bottom;
-    padding: 0.0rem 0.25rem 0.25rem 0.0rem;
-    margin: 0.0rem 0.0rem 0.1rem 0.0rem;
-    /* border-bottom: 1px solid hsl(0deg, 0%, 30%); */
-`
-
-
-
 
 
 // end of file
