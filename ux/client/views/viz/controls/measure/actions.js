@@ -51,7 +51,7 @@ export const Actions = () => {
 const Box = styled.div`
     font-size: 75%;
     color: hsl(0deg, 0%, 40%);
-    margin: 0.0rem 1.0rem 1.0rem 1.0rem;
+    margin: 0.0rem 1.0rem 0.5rem 1.0rem;
 `
 
 // an action

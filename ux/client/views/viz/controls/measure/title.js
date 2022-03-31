@@ -36,6 +36,7 @@ const Name = styled.span`
     vertical-align: bottom;
     padding: 0.0rem 0.0rem 0.25rem 0.0rem;
     margin: 0.0rem 0.0rem 0.1rem 0.0rem;
+    color: hsl(0deg, 0%, 75%);
     /* border-bottom: 1px solid hsl(0deg, 0%, 30%); */
 `
 

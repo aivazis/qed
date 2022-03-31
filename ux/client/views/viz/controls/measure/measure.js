@@ -67,7 +67,7 @@ export const Measure = () => {
 const Help = styled.p`
     font-family: rubik-light;
     font-size: 75%;
-    margin: 0.0rem 1.0rem 1.0rem 1.0rem;
+    margin: 0.0rem 1.0rem 0.5rem 1.0rem;
 `
 
 

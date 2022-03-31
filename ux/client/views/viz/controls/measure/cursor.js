@@ -20,9 +20,7 @@ export const Cursor = () => {
     return (
         <Box>
             {/* add a title to the table */}
-            <Title>
-                cursor
-            </Title>
+            <Title>cursor</Title>
             {/* place the cursor position and the pixel value */}
             <Track />
         </Box>
@@ -33,12 +31,13 @@ export const Cursor = () => {
 // the container
 const Box = styled.div`
     color: hsl(0deg, 0%, 50%);
-    margin: 1.0rem;
+    margin: 0.5rem 1.0rem 0.25rem 1.0rem;
 `
 
 const Title = styled.div`
     font-family: rubik-light;
     font-size: 65%;
+    color: hsl(0deg, 0%, 75%);
     padding: 0.0rem 0.0rem 0.25rem 0.0rem;
     margin: 0.0rem 0.0rem 0.1rem 0.0rem;
 `

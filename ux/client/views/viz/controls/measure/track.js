@@ -199,16 +199,16 @@ const Entry = styled.div`
 const Coordinate = styled.span`
     display: inline-block;
     cursor: default;
-    /* width: 2.0rem; */
+    width: 1.5rem;
     text-align: end;
-    padding: 0.0rem 0.0rem 0.0rem 0.5rem;
+    padding: 0.0rem 0.0rem 0.0rem 0.375rem;
 `
 
 const Value = styled.div`
     display: inline-block;
     cursor: default;
-    width: 6.25rem;
-    text-align: start;
+    width: 3.25rem;
+    text-align: end;
     padding: 0.0rem;
     overflow: clip;
     padding: 0.0rem 0.0rem 0.0rem 0.5rem;
