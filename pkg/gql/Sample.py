@@ -33,10 +33,17 @@ class Sample(graphene.ObjectType):
         profile = dataset.profile(points=points)
         # unpack the pixel value out of the single entry
         _, _, pixel = profile[0]
+
+        # get the dataset channels
+        channels = dataset.channels
+
         # ask each {dataset} channel to represent the pixels
         reps = [
-            {"channel": name, "rep": channel.rep(pixel)}
-            for name, channel in dataset.channels.items()
+            {
+                "channel": name,
+                "rep": f"{channels[name].project(pixel):.3f}"
+            }
+            for name in dataset.cell.summary
         ]
         # and send them off
         return reps
