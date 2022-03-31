@@ -41,7 +41,8 @@ class Sample(graphene.ObjectType):
         reps = [
             {
                 "channel": name,
-                "rep": f"{channels[name].project(pixel):.3f}"
+                "rep": f"{channels[name].project(pixel):.3f}",
+                "units": channels[name].units,
             }
             for name in dataset.cell.summary
         ]

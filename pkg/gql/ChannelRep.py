@@ -17,6 +17,7 @@ class ChannelRep(graphene.ObjectType):
     # fields
     channel = graphene.String()
     rep = graphene.String()
+    units = graphene.String()
 
 
 # end of file
