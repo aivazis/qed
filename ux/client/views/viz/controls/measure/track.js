@@ -175,10 +175,11 @@ export const Track = () => {
                 <Coordinate>{pixel[1]}</Coordinate>
             </Header>
             {/* the reps */}
-            {value.map(({ channel, rep }) => (
+            {value.map(({ channel, rep, units }) => (
                 <Entry key={channel}>
                     <Label>{channel} :</Label>
                     <Value>{rep}</Value>
+                    <Units>{units}</Units>
                 </Entry>
             ))}
 
@@ -225,7 +226,7 @@ const Label = styled.span`
     margin: 0.0rem 0.0rem 0.1rem 0.0rem;
 `
 
-const Value = styled.div`
+const Value = styled.span`
     display: inline-block;
     font-family: inconsolata;
     cursor: default;
@@ -233,6 +234,13 @@ const Value = styled.div`
     text-align: end;
     padding: 0.0rem;
     overflow: clip;
+    padding: 0.0rem 0.0rem 0.0rem 0.5rem;
+`
+
+const Units = styled.span`
+    display: inline-block;
+    font-family: inconsolata;
+    cursor: default;
     padding: 0.0rem 0.0rem 0.0rem 0.5rem;
 `
 
@@ -272,6 +280,7 @@ const query = graphql`
             value {
                 channel
                 rep
+                units
             }
         }
     }
