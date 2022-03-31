@@ -27,7 +27,7 @@ class Datatype(qed.flow.product, implements=qed.protocols.datatype):
 
 
     # constants
-    headers = ("value",)
+    summary = ("value",)
 
 
     @property

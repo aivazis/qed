@@ -23,7 +23,7 @@ class Complex(Datatype):
 
 
     # constants
-    headers = "real", "imaginary"
+    summary = "real", "imaginary", "amplitude", "phase"
 
 
 # end of file
