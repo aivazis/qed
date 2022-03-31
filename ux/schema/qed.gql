@@ -95,9 +95,13 @@ type ReaderEdge {
 # data exchanges
 type Sample {
   pixel: [Int]
-  value: [Float]
+  value: [ChannelValue]
 }
 
+type ChannelValue {
+  channel: String
+  rep: String
+}
 
 # interfaces
 # the node interface
