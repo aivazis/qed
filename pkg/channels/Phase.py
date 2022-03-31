@@ -20,7 +20,7 @@ class Phase(Channel, family="qed.channels.phase"):
 
    # constants
    tag = "phase"
-   units = "pi radians"
+   units = "π radians"
 
 
    # user configurable state
