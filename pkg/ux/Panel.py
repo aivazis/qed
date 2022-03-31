@@ -106,8 +106,8 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         for entry in profile:
             # unpack
             line, sample, pixel = entry
-            # build the channel specific reps
-            reps = tuple(channel.rep(pixel) for channel in channels.values())
+            # build the channel specific representations
+            reps = tuple(channel.project(pixel) for channel in channels.values())
             # and record each one
             writer.writerow((line, sample) + reps)
 
