@@ -33,7 +33,7 @@ export const Focus = ({ idx, point }) => {
     // the current point selection
     const selection = usePixelPathSelection()
     // and build a handler that selects nodes in single node mode
-    const { toggle } = useSetPixelPathSelection()
+    const { selectContiguous, toggle, toggleMultinode } = useSetPixelPathSelection()
 
     // deduce my state
     const selected = selection.has(idx)
@@ -41,11 +41,39 @@ export const Focus = ({ idx, point }) => {
     const scale = 2 ** zoom
 
     // when clicked
-    const focus = () => {
-        // mark me as the focused one
-        toggle(idx)
-        // center the viewport on my point
-        center({ x: point[1] / scale, y: point[0] / scale })
+    const focus = evt => {
+        // don't let this bubble up
+        evt.stopPropagation()
+
+        // check the status of the modifiers
+        const { ctrlKey, shiftKey } = evt
+
+        // if there is no modifier present
+        if (!ctrlKey && !shiftKey) {
+            // select me in single node mode
+            toggle(idx)
+            // and center the viewport on my point
+            center({ x: point[1] / scale, y: point[0] / scale })
+            // done
+            return
+        }
+
+        // if <ctrl> is present
+        if (ctrlKey) {
+            // toggle me in multinode mode
+            toggleMultinode(idx)
+            // done
+            return
+        }
+
+        // if <shift> is present
+        if (shiftKey) {
+            // pick a range of nodes
+            selectContiguous(idx)
+            // done
+            return
+        }
+
         // and done
         return
     }
