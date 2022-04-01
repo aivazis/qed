@@ -63,7 +63,7 @@ export const Sync = ({ viewport }) => {
     const paint = styles.sync
     // render
     return (
-        <Badge size={16} state={state} behaviors={behaviors} style={paint} >
+        <Badge size={18} state={state} behaviors={behaviors} style={paint} >
             <Shape />
         </Badge >
     )

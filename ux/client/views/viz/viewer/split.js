@@ -45,7 +45,7 @@ export const Split = ({ viewport }) => {
     const paint = styles.split
     // and render
     return (
-        <Badge size={10} state="enabled" behaviors={behaviors} style={paint} >
+        <Badge size={16} state="enabled" behaviors={behaviors} style={paint} >
             <Icon />
         </Badge>
     )
