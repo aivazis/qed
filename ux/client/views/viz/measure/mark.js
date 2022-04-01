@@ -17,17 +17,19 @@ import { useEvent } from '~/hooks'
 import { usePixelPathSelection } from '../viz/usePixelPathSelection'
 import { useSetPixelPathSelection } from '../viz/useSetPixelPathSelection'
 import { useStartMoving } from './useStartMoving'
-import { useStopMoving } from './useStopMoving'
 
 
 // mark a point
 export const Mark = ({ viewport, idx, at }) => {
     // make a ref for my client area
     const me = React.useRef(null)
+    // record of the mouse position when the user clicks on me; this is used to detect
+    // motion between mouse down and mouse up so that we can skip the selection toggles
+    // when the mark is being moved around
+    const [position, setPosition] = React.useState(null)
 
-    // grab the moving flag mutators
+    // grab the moving flag mutator
     const startMoving = useStartMoving(idx)
-    const stopMoving = useStopMoving()
     // grab the current selection
     const selection = usePixelPathSelection(viewport)
     // get the selection handler factory
@@ -35,12 +37,13 @@ export const Mark = ({ viewport, idx, at }) => {
 
     // deduce my state
     const selected = selection.has(idx)
-    // and use it to pick a capture
+    // and use it to choose how to render the event capture area
     const Highlight = selected ? SelectedHighlight : EnabledHighlight
 
-
     // movement
-    const move = () => {
+    const move = evt => {
+        // record the mouse position
+        setPosition([evt.clientX, evt.clientY])
         // mark me as the initiator of the move
         startMoving()
         // all done
@@ -49,14 +52,14 @@ export const Mark = ({ viewport, idx, at }) => {
 
     // mark selection
     const pick = evt => {
-        // don't let this bubble up
-        evt.stopPropagation()
+        // if i've moved since clicked
+        if (position[0] !== evt.clientX || position[1] != evt.clientY) {
+            // do nothing
+            return
+        }
 
-        // check the status of the modifiers
+        // otherwise, grab the status of the modifiers
         const { ctrlKey, shiftKey } = evt
-
-        // the mouse activity started and ended with me, so nobody is moving
-        stopMoving()
 
         // if there is no modifier present
         if (!ctrlKey && !shiftKey) {
@@ -65,7 +68,6 @@ export const Mark = ({ viewport, idx, at }) => {
             // done
             return
         }
-
         // if <ctrl> is present
         if (ctrlKey) {
             // toggle me in multinode mode
@@ -73,7 +75,6 @@ export const Mark = ({ viewport, idx, at }) => {
             // done
             return
         }
-
         // if <shift> is present
         if (shiftKey) {
             // pick a range of nodes
@@ -81,7 +82,6 @@ export const Mark = ({ viewport, idx, at }) => {
             // done
             return
         }
-
         // all done
         return
     }
@@ -89,8 +89,8 @@ export const Mark = ({ viewport, idx, at }) => {
     // mouse event listeners
     // when the user clicks in my area
     useEvent({
-        name: "click", listener: pick, client: me,
-        triggers: [toggle, selectContiguous]
+        name: "mouseup", listener: pick, client: me,
+        triggers: [position, toggle, selectContiguous]
     })
 
     // when the mouse button is pressed in my area
