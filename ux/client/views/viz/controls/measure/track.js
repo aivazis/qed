@@ -168,7 +168,7 @@ export const Track = () => {
             {/* the table header with the cursor location */}
             <Header>
                 {/* the label */}
-                <Title>cursor</Title>
+                <Title>point</Title>
                 {/* the mouse coordinates */}
                 <Coordinate>{pixel[0]}</Coordinate>
                 x
