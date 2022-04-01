@@ -12,7 +12,7 @@ import style from '~/shapes/styles'
 
 
 // the shape color
-const ink = wheel.gray.aluminum
+const ink = "hsl(0deg, 0%, 90%)"
 
 // publish
 export default {
