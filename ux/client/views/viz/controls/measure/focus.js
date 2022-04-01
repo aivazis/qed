@@ -33,7 +33,7 @@ export const Focus = ({ idx, point }) => {
     // the current point selection
     const selection = usePixelPathSelection()
     // and build a handler that selects nodes in single node mode
-    const { select } = useSetPixelPathSelection()
+    const { toggle } = useSetPixelPathSelection()
 
     // deduce my state
     const selected = selection.has(idx)
@@ -43,7 +43,7 @@ export const Focus = ({ idx, point }) => {
     // when clicked
     const focus = () => {
         // mark me as the focused one
-        select(idx)
+        toggle(idx)
         // center the viewport on my point
         center({ x: point[1] / scale, y: point[0] / scale })
         // and done
