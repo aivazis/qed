@@ -18,7 +18,6 @@ import { SVG } from '~/widgets'
 // context
 import { Provider } from './context'
 // hooks
-import { useClearPixelPathSelection } from '../viz/useClearPixelPathSelection'
 import { useMoving } from './useMoving'
 import { usePixelPath } from '../viz/usePixelPath'
 import { usePixelPathSelection } from '../viz/usePixelPathSelection'
