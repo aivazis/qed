@@ -31,7 +31,7 @@ export const Mark = ({ viewport, idx, at }) => {
     // grab the current selection
     const selection = usePixelPathSelection(viewport)
     // get the selection handler factory
-    const { select, toggle, selectContiguous } = useSetPixelPathSelection(viewport)
+    const { selectContiguous, toggle, toggleMultinode } = useSetPixelPathSelection(viewport)
 
     // deduce my state
     const selected = selection.has(idx)
@@ -61,7 +61,7 @@ export const Mark = ({ viewport, idx, at }) => {
         // if there is no modifier present
         if (!ctrlKey && !shiftKey) {
             // select me in single node mode
-            select(idx)
+            toggle(idx)
             // done
             return
         }
@@ -69,7 +69,7 @@ export const Mark = ({ viewport, idx, at }) => {
         // if <ctrl> is present
         if (ctrlKey) {
             // toggle me in multinode mode
-            toggle(idx)
+            toggleMultinode(idx)
             // done
             return
         }
@@ -90,7 +90,7 @@ export const Mark = ({ viewport, idx, at }) => {
     // when the user clicks in my area
     useEvent({
         name: "click", listener: pick, client: me,
-        triggers: [select, toggle, selectContiguous]
+        triggers: [toggle, selectContiguous]
     })
 
     // when the mouse button is pressed in my area
