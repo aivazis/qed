@@ -19,7 +19,6 @@ import { useMeasureLayer } from '../../viz/useMeasureLayer'
 import { usePixelPath } from '../../viz/usePixelPath'
 // components
 import { Actions } from './actions'
-import { Minimap } from './minimap'
 import { Path } from './path'
 import { Track } from './track'
 
@@ -54,8 +53,6 @@ export const Measure = () => {
             }
             {/* render the pixel path */}
             <Path />
-            {/* the mini map */}
-            <Minimap />
             {/* and the actions */}
             <Actions />
         </Tray>

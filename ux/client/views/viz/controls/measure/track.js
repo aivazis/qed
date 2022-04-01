@@ -11,6 +11,8 @@ import styled from 'styled-components'
 
 
 // locals
+// components
+import { Minimap } from './minimap'
 // hooks
 import { useDatasetShape } from '../../viz/useDatasetShape'
 import { useGetZoomLevel } from '../../viz/useGetZoomLevel'
@@ -38,8 +40,6 @@ export const Track = () => {
     // and the extent of its dataset
     const { name, origin, shape } = useDatasetShape()
 
-    // the tracking flag
-    const [enabled, setEnabled] = React.useState(true)
     // query state management
     const [loading, setLoading] = React.useState(false)
     // query payload
@@ -137,12 +137,7 @@ export const Track = () => {
 
     // install a tracker on the active viewport
     React.useEffect(() => {
-        // if tracking is off
-        if (!enabled) {
-            // bail
-            return
-        }
-        // otherwise, get the active viewport ref
+        // get the active viewport ref
         const target = viewports[activeViewport]
         // install the tracker
         target.addEventListener("mousemove", track)
@@ -168,7 +163,7 @@ export const Track = () => {
             {/* the table header with the cursor location */}
             <Header>
                 {/* the label */}
-                <Title>point</Title>
+                <Title>peek</Title>
                 {/* the mouse coordinates */}
                 <Coordinate>{pixel[0]}</Coordinate>
                 x
@@ -182,7 +177,8 @@ export const Track = () => {
                     <Units>{units}</Units>
                 </Entry>
             ))}
-
+            {/* draw the minimap */}
+            <Minimap point={pixel} />
         </Box>
     )
 }
