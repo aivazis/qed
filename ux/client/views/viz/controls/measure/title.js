@@ -14,7 +14,7 @@ export const Title = () => {
     // make a mark
     return (
         <Box>
-            <Name>point</Name>
+            <Name>path</Name>
             <Header>line</Header>
             <Header>sample</Header>
         </Box>
