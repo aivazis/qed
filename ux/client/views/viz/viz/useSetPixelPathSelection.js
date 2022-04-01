@@ -34,8 +34,25 @@ export const useSetPixelPathSelection = (viewport) => {
         return
     }
 
-    // make a handler that toggles my node in multinode mode
+    // make a handler that toggles my node in single node mode
     const toggle = idx => {
+        // reset the selection
+        setPixelPathSelection(old => {
+            // make a copy of the old table
+            const table = [...old]
+            // get my old entry
+            const entry = table[viewport]
+            // toggle the selection in single node mode
+            table[viewport] = new Set(entry.has(idx) && entry.size === 1 ? [] : [idx])
+            // and return the updated table
+            return table
+        })
+        // all done
+        return
+    }
+
+    // make a handler that toggles my node in multinode mode
+    const toggleMultinode = idx => {
         // reset the selection
         setPixelPathSelection(old => {
             // make a copy of the old table
@@ -116,7 +133,7 @@ export const useSetPixelPathSelection = (viewport) => {
     }
 
     // and return the handlers
-    return { deselect, select, selectContiguous, toggle }
+    return { deselect, select, selectContiguous, toggle, toggleMultinode }
 }
 
 
