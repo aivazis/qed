@@ -53,9 +53,6 @@ export const Track = () => {
     // get the data
     const { sample } = useLazyLoadQuery(query, payload.variables, payload.options)
 
-    // make a toggle
-    const toggle = () => setEnabled(old => !old)
-
     // make a handler that tracks the mouse location in data coordinates
     const track = evt => {
         // turn the zoom level into a scale
