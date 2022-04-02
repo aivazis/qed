@@ -167,11 +167,11 @@ export const Track = () => {
                 <Coordinate>{pixel[1]}</Coordinate>
             </Header>
             {/* the reps */}
-            {value.map(({ channel, rep, units }) => (
+            {value.map(({ channel, reps }) => (
                 <Entry key={channel}>
                     <Label>{channel} :</Label>
-                    <Value>{rep}</Value>
-                    <Units>{units}</Units>
+                    <Value>{reps[0].rep}</Value>
+                    <Units>{reps[0].units}</Units>
                 </Entry>
             ))}
             {/* draw the minimap */}
@@ -272,8 +272,10 @@ const query = graphql`
             pixel
             value {
                 channel
-                rep
-                units
+                reps {
+                    rep
+                    units
+                }
             }
         }
     }
