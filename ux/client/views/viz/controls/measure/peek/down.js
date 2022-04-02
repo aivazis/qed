@@ -11,7 +11,7 @@ import React from 'react'
 // components
 import { Arrow } from './arrow'
 // hooks
-import { useSetPixelPath } from '../../viz/useSetPixelPath'
+import { useSetPixelPath } from '../../../viz/useSetPixelPath'
 
 
 // nudge the selected {node} downwards

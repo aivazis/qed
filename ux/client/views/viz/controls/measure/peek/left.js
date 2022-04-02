@@ -11,11 +11,11 @@ import React from 'react'
 // components
 import { Arrow } from './arrow'
 // hooks
-import { useSetPixelPath } from '../../viz/useSetPixelPath'
+import { useSetPixelPath } from '../../../viz/useSetPixelPath'
 
 
-// nudge the selected {node} to the right
-export const Right = ({ node }) => {
+// nudge the selected {node} to the left
+export const Left = ({ node }) => {
     // make me a handler that nudges the current node
     const { nudge } = useSetPixelPath()
 
@@ -24,7 +24,7 @@ export const Right = ({ node }) => {
         // unpack the event information
         const { altKey } = evt
         // pick a displacement
-        const value = altKey ? -5 : -1
+        const value = altKey ? 5 : 1
         // if the
         // nudge
         nudge({ node, axis: 1, value })
@@ -39,16 +39,15 @@ export const Right = ({ node }) => {
 
     // render
     return (
-        <Arrow
-            path={arrow}
-            placement={`translate(650 ${7 / 8 * 500}) scale(${1 / 8})`}
+        <Arrow path={arrow}
+            placement={`translate(225 ${7 / 8 * 500}) scale(${1 / 8})`}
             behaviors={behaviors} />
     )
 }
 
 
 // the path
-const arrow = "M 0 0 C 500 500 500 500 0 1000 L 1000 500 Z"
+const arrow = "M 1000 0 C 500 500 500 500 1000 1000 L 0 500 Z"
 
 
 // end of file

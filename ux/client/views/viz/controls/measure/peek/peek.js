@@ -12,9 +12,9 @@ import styled from 'styled-components'
 
 // locals
 // hooks
-import { useDatasetShape } from '../../viz/useDatasetShape'
-import { useGetZoomLevel } from '../../viz/useGetZoomLevel'
-import { useViewports } from '../../viz/useViewports'
+import { useDatasetShape } from '../../../viz/useDatasetShape'
+import { useGetZoomLevel } from '../../../viz/useGetZoomLevel'
+import { useViewports } from '../../../viz/useViewports'
 // components
 import { Channel } from './channel'
 import { Minimap } from './minimap'
@@ -33,7 +33,7 @@ import { Minimap } from './minimap'
 
 
 // display the {measure} layer controls
-export const Track = () => {
+export const Peek = () => {
     // get the viewport registry
     const { activeViewport, viewports } = useViewports()
     // get the zoom level of the active viewport
@@ -204,7 +204,7 @@ const Coordinate = styled.span`
 
 // the query
 const query = graphql`
-    query track_sampleDatasetQuery($dataset: ID!, $line: Int!, $sample: Int!) {
+    query peek_sampleDatasetQuery($dataset: ID!, $line: Int!, $sample: Int!) {
         sample(dataset: $dataset, line: $line, sample: $sample){
             pixel
             value {

@@ -16,10 +16,10 @@ import { SVG } from '~/widgets'
 
 // local
 // hooks
-import { useDatasetShape } from '../../viz/useDatasetShape'
-import { useGetTileURI } from '../../viz/useGetTileURI'
-import { usePixelPath } from '../../viz/usePixelPath'
-import { usePixelPathSelection } from '../../viz/usePixelPathSelection'
+import { useDatasetShape } from '../../../viz/useDatasetShape'
+import { useGetTileURI } from '../../../viz/useGetTileURI'
+import { usePixelPath } from '../../../viz/usePixelPath'
+import { usePixelPathSelection } from '../../../viz/usePixelPathSelection'
 // components
 import { Down } from './down'
 import { Left } from './left'

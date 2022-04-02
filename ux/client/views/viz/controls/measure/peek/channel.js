@@ -9,7 +9,6 @@ import React from 'react'
 import styled from 'styled-components'
 
 
-
 // display the channel specific representation of a pixel value
 export const Channel = ({ channel, reps }) => {
     // support for cycling through the possible value representations
