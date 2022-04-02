@@ -6,6 +6,8 @@
 
 # externals
 import graphene
+# the channel value projections
+from .ChannelValue import ChannelValue
 
 
 # a pixel value as represented by a channel
@@ -16,8 +18,25 @@ class ChannelRep(graphene.ObjectType):
 
     # fields
     channel = graphene.String()
-    rep = graphene.String()
-    units = graphene.String()
+    reps = graphene.List(ChannelValue)
+
+
+    # resolvers
+    def resolve_reps(context, info, **kwds):
+        """
+        Unpack the channel value representations
+        """
+        reps = context["reps"]
+        # go through them
+        for rep, units in reps:
+            # build context for the channel value resolvers
+            yield {
+                "rep": rep,
+                "units": units,
+            }
+
+        # all done
+        return
 
 
 # end of file

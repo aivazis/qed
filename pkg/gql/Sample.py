@@ -6,7 +6,7 @@
 
 # externals
 import graphene
-# the pixel values as represenged by each channel
+# the pixel values as represented by each channel
 from .ChannelRep import ChannelRep
 
 
@@ -37,17 +37,16 @@ class Sample(graphene.ObjectType):
         # get the dataset channels
         channels = dataset.channels
 
-        # ask each {dataset} channel to represent the pixels
-        reps = [
-            {
-                "channel": name,
-                "rep": f"{channels[name].project(pixel):.3f}",
-                "units": channels[name].units,
+        # go through the summary channels
+        for channel in dataset.cell.summary:
+            # build the representations
+            yield {
+                "channel": channel,
+                "reps": channels[channel].project(pixel),
             }
-            for name in dataset.cell.summary
-        ]
-        # and send them off
-        return reps
+
+        # all done
+        return
 
 
     def resolve_pixel(context, info, **kwds):
