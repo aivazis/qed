@@ -11,12 +11,13 @@ import styled from 'styled-components'
 
 
 // locals
-// components
-import { Minimap } from './minimap'
 // hooks
 import { useDatasetShape } from '../../viz/useDatasetShape'
 import { useGetZoomLevel } from '../../viz/useGetZoomLevel'
 import { useViewports } from '../../viz/useViewports'
+// components
+import { Channel } from './channel'
+import { Minimap } from './minimap'
 
 
 // N.B.:
@@ -168,11 +169,7 @@ export const Track = () => {
             </Header>
             {/* the reps */}
             {value.map(({ channel, reps }) => (
-                <Entry key={channel}>
-                    <Label>{channel} :</Label>
-                    <Value>{reps[0].rep}</Value>
-                    <Units>{reps[0].units}</Units>
-                </Entry>
+                <Channel key={channel} channel={channel} reps={reps} />
             ))}
             {/* draw the minimap */}
             <Minimap point={pixel} />
@@ -190,10 +187,6 @@ const Header = styled.div`
     font-size: 65%;
 `
 
-const Entry = styled.div`
-    font-size: 60%;
-`
-
 const Title = styled.span`
     display: inline-block;
     font-family: rubik-light;
@@ -208,62 +201,6 @@ const Coordinate = styled.span`
     cursor: default;
     padding: 0.0rem 0.25rem;
 `
-
-const Label = styled.span`
-    display: inline-block;
-    font-family: rubik-light;
-    width: 4.0rem;
-    text-align: end;
-    text-transform: uppercase;
-    padding: 0.0rem 0.0rem 0.25rem 0.0rem;
-    margin: 0.0rem 0.0rem 0.1rem 0.0rem;
-`
-
-const Value = styled.span`
-    display: inline-block;
-    font-family: inconsolata;
-    cursor: default;
-    width: 3.25rem;
-    text-align: end;
-    padding: 0.0rem;
-    overflow: clip;
-    padding: 0.0rem 0.0rem 0.0rem 0.5rem;
-`
-
-const Units = styled.span`
-    display: inline-block;
-    font-family: rubik-light;
-    cursor: default;
-    padding: 0.0rem 0.0rem 0.0rem 0.5rem;
-`
-
-// the state control
-const Button = styled.button`
-    & {
-        cursor: pointer;
-        font-family: rubik-light;
-        font-size: 65%;
-        text-align: start;
-        color: inherit;
-        background-color: transparent;
-        border: 0 transparent;
-        margin: 0.0rem;
-        padding: 0.0rem;
-    }
-
-    &:active {
-        color: hsl(28deg, 90%, 55%);
-        border: 1 solid hsl(0deg, 0%, 40%);
-    }
-
-    &:hover {
-        color: hsl(28deg, 90%, 55%);
-        border: 1 solid hsl(0deg, 0%, 40%);
-    }
-`
-
-const SelectedButton = styled(Button)
-
 
 // the query
 const query = graphql`
