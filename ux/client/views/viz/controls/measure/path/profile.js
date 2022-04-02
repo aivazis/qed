@@ -49,15 +49,16 @@ export const Profile = () => {
 
 // the container
 const Box = styled.div`
-    font-size: 75%;
-    color: hsl(0deg, 0%, 40%);
-    margin: 0.0rem 1.0rem 0.5rem 1.0rem;
+    font-size: 70%;
+    color: hsl(0deg, 0%, 50%);
+    padding: 0.5rem 0.0rem 0.0rem 0.0rem;
 `
 
 // an action
 const Action = styled.span`
     & {
         font-family: rubik-light;
+        cursor: default;
     }
 
     & a {
