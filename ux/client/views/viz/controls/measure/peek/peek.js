@@ -193,6 +193,7 @@ const Title = styled.span`
     width: 2.5rem;
     padding: 0.0rem 0.0rem 0.25rem 0.0rem;
     margin: 0.0rem 0.0rem 0.1rem 0.0rem;
+    cursor: default;
     color: hsl(0deg, 0%, 75%);
 `
 

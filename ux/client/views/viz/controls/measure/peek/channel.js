@@ -46,6 +46,7 @@ const Label = styled.span`
     text-transform: uppercase;
     padding: 0.0rem 0.0rem 0.25rem 0.0rem;
     margin: 0.0rem 0.0rem 0.1rem 0.0rem;
+    cursor: default;
 `
 
 const Value = styled.span`
@@ -57,6 +58,7 @@ const Value = styled.span`
     padding: 0.0rem;
     overflow: clip;
     padding: 0.0rem 0.0rem 0.0rem 0.5rem;
+    cursor: default;
 `
 
 // the state control
