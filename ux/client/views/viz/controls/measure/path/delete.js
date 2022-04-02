@@ -13,7 +13,7 @@ import { X } from '~/shapes'
 
 // local
 // hooks
-import { useSetPixelPath } from '../../viz/useSetPixelPath'
+import { useSetPixelPath } from '../../../viz/useSetPixelPath'
 // components
 import { Button } from './button'
 

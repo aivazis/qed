@@ -10,12 +10,12 @@ import styled from 'styled-components'
 
 // locals
 // hooks
-import { useGetView } from '../../viz/useGetView'
-import { usePixelPath } from '../../viz/usePixelPath'
+import { useGetView } from '../../../viz/useGetView'
+import { usePixelPath } from '../../../viz/usePixelPath'
 
 
 // the container of the {measure} actions
-export const Actions = () => {
+export const Profile = () => {
     // get the {dataset} in the active view; one is guaranteed to exist because
     // we wouldn't be here otherwise
     const { dataset } = useGetView()
