@@ -95,11 +95,15 @@ type ReaderEdge {
 # data exchanges
 type Sample {
   pixel: [Int]
-  value: [ChannelValue]
+  value: [ChannelRep]
+}
+
+type ChannelRep {
+  channel: String
+  reps: [ChannelValue]
 }
 
 type ChannelValue {
-  channel: String
   rep: String
   units: String
 }
