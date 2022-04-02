@@ -41,16 +41,17 @@ class Phase(Channel, family="qed.channels.phase"):
 
    def project(self, pixel):
       """
-      Compute the pahse of a {pixel}
+      Compute the phase of a {pixel}
       """
       # get the value as angle in radians in [-π, π]
+      # the interval above is closed thanks to the peculiarities of {atan2}
       value = cmath.phase(pixel) / cmath.pi
 
       # project
       # in π radians
       yield  value, "π radians"
-      # in degrees
-      yield 180*value, "degrees"
+      # in degrees in [0, 360]
+      yield 180*(1+value), "degrees"
       # in cycles
       yield (value+1)/2, "cycles"
 
