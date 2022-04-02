@@ -60,8 +60,10 @@ class Complex(Channel, family="qed.channels.complex"):
       """
       Represent a {pixel} as a complex number
       """
-      # this is a no-op
-      return pixel
+      # only one rep
+      yield pixel, ""
+      # all done
+      return
 
 
 # end of file

@@ -20,7 +20,6 @@ class Phase(Channel, family="qed.channels.phase"):
 
    # constants
    tag = "phase"
-   units = "π radians"
 
 
    # user configurable state
@@ -44,8 +43,19 @@ class Phase(Channel, family="qed.channels.phase"):
       """
       Compute the pahse of a {pixel}
       """
-      # easy
-      return cmath.phase(pixel) / cmath.pi
+      # get the value as angle in radians in [-π, π]
+      value = cmath.phase(pixel) / cmath.pi
+
+      # project
+      # in π radians
+      yield  value, "π radians"
+      # in degrees
+      yield 180*value, "degrees"
+      # in cycles
+      yield (value+1)/2, "cycles"
+
+      # all done
+      return
 
 
 # end of file

@@ -56,8 +56,10 @@ class Real(Channel, family="qed.channels.real"):
       """
       Compute the real part of a {pixel}
       """
-      # easy
-      return pixel.real
+      # only one rep
+      yield pixel.real, ""
+      # all done
+      return
 
 
 # end of file

@@ -57,7 +57,9 @@ class Imaginary(Channel, family="qed.channels.imaginary"):
       Compute the imaginary part of a {pixel}
       """
       # easy
-      return pixel.imag
+      yield pixel.imag, ""
+      # all done
+      return
 
 
 # end of file

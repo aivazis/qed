@@ -17,7 +17,6 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
 
     # constants
     tag = None
-    units = ""
 
 
     # interface

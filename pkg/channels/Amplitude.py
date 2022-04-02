@@ -55,8 +55,10 @@ class Amplitude(Channel, family="qed.channels.amplitude"):
       """
       Compute the amplitude of a {pixel}
       """
-      # easy enough
-      return abs(pixel)
+      # only one choice
+      yield abs(pixel), ""
+      # and done
+      return
 
 
 # end of file
