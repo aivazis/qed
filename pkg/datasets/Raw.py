@@ -71,7 +71,7 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
         Sample my data along the path defined by {points}
         """
         # ask my data manager to build a profile
-        profile = qed.libqed.datasets.profile(self._data, points)
+        profile = qed.libqed.datasets.profile(self.data, points)
         # and return it
         return profile
 
