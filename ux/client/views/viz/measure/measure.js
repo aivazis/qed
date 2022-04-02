@@ -86,7 +86,7 @@ const Layer = ({ viewport, shape, zoom }) => {
     }
 
     // move
-    const drag = evt => {
+    const drag = ({ offsetX, offsetY }) => {
         // if the moving indicator is in its trivial state
         if (moving === null) {
             // bail
@@ -94,10 +94,18 @@ const Layer = ({ viewport, shape, zoom }) => {
         }
         // compute the set of nodes we will displace
         const nodes = selection.has(moving) ? [...selection] : [moving]
-        // unpack the displacement from the event info
-        const { movementX, movementY } = evt
-        // displace
-        displace({ nodes, delta: { x: scale * movementX, y: scale * movementY } })
+        // compute the displacement implied by the current position of the cursor
+        const delta = {
+            x: scale * offsetX - points[moving][1],
+            y: scale * offsetY - points[moving][0],
+        }
+        // check for null displacement
+        if (Math.abs(delta.x) < 1 && Math.abs(delta.y) < 1) {
+            // and avoid repainting
+            return
+        }
+        // if there is real work, displace the selection
+        displace({ nodes, delta })
         // all done
         return
     }
