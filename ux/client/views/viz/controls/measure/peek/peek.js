@@ -14,6 +14,7 @@ import styled from 'styled-components'
 import { Provider } from './context'
 // hooks
 import { useGetPixelValue } from './useGetPixelValue'
+import { useUpdatePixelLocation } from './useUpdatePixelLocation'
 import { useViewports } from '../../../viz/useViewports'
 // components
 import { Channel } from './channel'
@@ -43,8 +44,10 @@ export const Peek = (props) => {
 const Panel = () => {
     // get the viewport registry
     const { activeViewport, viewports } = useViewports()
-    // get the pixel value and tracker
-    const { sample, track } = useGetPixelValue()
+    // get the pixel value
+    const sample = useGetPixelValue()
+    // and the tracker
+    const { track } = useUpdatePixelLocation()
 
     // the query refresh that's invoked when the mouse moves to a new pixel
     // install a tracker on the active viewport
