@@ -40,7 +40,7 @@ export const Context = React.createContext(
 
 
 // the error message that consumers see when accessing the context outside a provider
-const complaint = "while accessing the 'slider' context: no provider"
+const complaint = "while accessing the 'measure' context: no provider"
 
 
 // end of file
