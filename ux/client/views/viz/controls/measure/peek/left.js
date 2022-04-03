@@ -8,16 +8,22 @@
 import React from 'react'
 
 // locals
+// hooks
+import { usePixelPathSelection } from '../../../viz/usePixelPathSelection'
+import { useSetPixelPath } from '../../../viz/useSetPixelPath'
+import { useUpdatePixelLocation } from './useUpdatePixelLocation'
 // components
 import { Arrow } from './arrow'
-// hooks
-import { useSetPixelPath } from '../../../viz/useSetPixelPath'
 
 
 // nudge the selected {node} to the left
 export const Left = ({ node }) => {
-    // make me a handler that nudges the current node
-    const { nudge } = useSetPixelPath()
+    // pull info out of my context
+    const { nudge } = useUpdatePixelLocation()
+    // get the current pixel path selection
+    const nodes = usePixelPathSelection()
+    // make me a handler that moves the current selection
+    const { displace } = useSetPixelPath()
 
     // make my handler
     const move = evt => {
@@ -25,9 +31,10 @@ export const Left = ({ node }) => {
         const { altKey } = evt
         // pick a displacement
         const value = altKey ? 5 : 1
-        // if the
-        // nudge
-        nudge({ node, axis: 1, value })
+        // nudge the pixel location
+        nudge({ dLine: 0, dSample: value })
+        // and the selection, if any
+        displace({ nodes, delta: { y: 0, x: value } })
         // all done
         return
     }
