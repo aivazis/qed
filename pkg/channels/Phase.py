@@ -50,10 +50,16 @@ class Phase(Channel, family="qed.channels.phase"):
       # project
       # in π radians
       yield  value, "π radians"
+
+      # transform to [0, 2π]
+      if value < 0:
+         # by adding a cycle to negative value
+         value += 2
+
       # in degrees in [0, 360]
-      yield 180*(1+value), "degrees"
+      yield 180*value, "degrees"
       # in cycles
-      yield (value+1)/2, "cycles"
+      yield value/2, "cycles"
 
       # all done
       return
