@@ -11,10 +11,10 @@ schema {
 
 # the top level query
 type Query {
-  # information about the known data sets
+  # information about the known datasets
   readers(after: String, first: Int, before: String, last: Int, order: String): ReaderConnection!
 
-  # collect pixel values at a set of points
+  # collect data values as represented by the available channels at a particular pixel
   sample(dataset: ID, line: Int!, sample: Int!): Sample!
 
   # server version information
