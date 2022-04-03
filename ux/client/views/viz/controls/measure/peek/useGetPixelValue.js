@@ -6,15 +6,11 @@
 
 // externals
 import React from 'react'
-import { graphql, useLazyLoadQuery, fetchQuery, useRelayEnvironment } from 'react-relay'
+import { graphql, useLazyLoadQuery } from 'react-relay'
 
 // local
 // context
 import { Context } from './context'
-// hooks
-import { useGetZoomLevel } from '../../../viz/useGetZoomLevel'
-import { usePixelPath } from '../../../viz/usePixelPath'
-import { usePixelPathSelection } from '../../../viz/usePixelPathSelection'
 
 
 // the code below looks tricky because it is trying to avoid suspending component rendering
@@ -24,124 +20,20 @@ import { usePixelPathSelection } from '../../../viz/usePixelPathSelection'
 // set it up so we can get the value of a pixel
 export const useGetPixelValue = () => {
     // pull info out of my context
-    const {
-        // dataset
-        origin, shape,
-        // query state and info management
-        loading, variables, options, setLoading, setVariables, setOptions,
-    } = React.useContext(Context)
-
-    // get the current relay environment
-    const environment = useRelayEnvironment()
-
-    // get the zoom level of the active viewport
-    const zoom = useGetZoomLevel()
-    // get the set of pixels on the profile path
-    const pixelPath = usePixelPath()
-    // get the node selection
-    const selection = usePixelPathSelection()
+    const { variables, options } = React.useContext(Context)
 
     // get the data; the first time, {options} is null so we ask the server
     // on {refresh}, we adjust the {options} so queries get resolved from the store,
     // which bypasses suspense
     const { sample } = useLazyLoadQuery(pixelValueQuery, variables, options)
 
-    // build the handler that refreshes the query
-    const refresh = ({ line, sample }) => {
-        // if the query is in flight
-        if (loading) {
-            // bail
-            return
-        }
-        // otherwise, mark this query as in-flight
-        setLoading(true)
-
-        // assemble the query variables
-        const queryVars = { ...variables, line, sample }
-        // {fetchQuery} will update the {relay} store; this ensures that when {track}
-        // renders again, all the necessary data is already in place, and the rendering
-        // will not suspend
-        fetchQuery(environment, pixelValueQuery, queryVars)
-            .subscribe({
-                // once done
-                complete: () => {
-                    // the query is no longer in flight
-                    setLoading(false)
-                    // adjust the variables
-                    setVariables(queryVars)
-                    // adjust the options
-                    setOptions(old => ({
-                        // transaction id
-                        fetchKey: (old?.fetchKey ?? 0) + 1,
-                        // force {relay} to resolve the query without bothering
-                        // the server any more
-                        fetchPolicy: 'store-only',
-                    }))
-                },
-                // if something goes wrong
-                error: () => {
-                    // clear the flag
-                    setLoading(false)
-                    // and bail
-                    return
-                }
-            })
-        // all done
-        return
-    }
-
-    // build the handler that extracts a pixel location of interest either from the current
-    // mouse location in the active view, or the select mark in the measure layer
-    const track = evt => {
-        // if the selection contains precisely one node
-        if (selection.size === 1) {
-            // decouple from the mouse; instead, get the index of the selected mark
-            const mark = [...selection][0]
-            // get the associated point
-            const point = pixelPath[mark]
-            // and use it as the query location
-            refresh({ line: point[0], sample: point[1] })
-            // all done
-            return
-        }
-
-        // turn the zoom level into a scale
-        const scale = 2 ** zoom
-        // get the viewport
-        // make sure to grab the viewport, not whatever the mouse is over
-        const element = evt.currentTarget
-        // measure it
-        const box = element.getBoundingClientRect()
-        // compute the location of the mouse relative to the viewport
-        // and take the zoom level into account
-        const x = Math.trunc(scale * (element.scrollLeft + evt.clientX - box.left))
-        const y = Math.trunc(scale * (element.scrollTop + evt.clientY - box.top))
-
-        // if the position overflows the dataset along the x-axis
-        if (x < origin[1] || x > origin[1] + shape[1]) {
-            // bail
-            return
-        }
-        // repeat for the y axis
-        if (y < origin[0] || y > origin[0] + shape[0]) {
-            // bail
-            return
-        }
-
-        // record the current mouse location; this triggers the {sample} query to refresh
-        refresh({ line: y, sample: x })
-
-        // all done
-        return
-    }
-
-    // and return the pixel data and the location tracker
-    return { sample, track }
+    // and return it
+    return sample
 }
 
 
 // the query
-const pixelValueQuery = graphql`
+export const pixelValueQuery = graphql`
     query useGetPixelValue_sampleDatasetQuery($dataset: ID!, $line: Int!, $sample: Int!) {
         sample(dataset: $dataset, line: $line, sample: $sample){
             pixel
