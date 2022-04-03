@@ -18,8 +18,6 @@ import { SVG } from '~/widgets'
 // hooks
 import { useDatasetShape } from '../../../viz/useDatasetShape'
 import { useGetTileURI } from '../../../viz/useGetTileURI'
-import { usePixelPath } from '../../../viz/usePixelPath'
-import { usePixelPathSelection } from '../../../viz/usePixelPathSelection'
 // components
 import { Down } from './down'
 import { Left } from './left'
@@ -29,26 +27,12 @@ import { Up } from './up'
 
 
 // a table of the points on the {measure} layer of the active viewport
-export const Minimap = () => {
-    // get the set of pixels on the profile path
-    const pixelPath = usePixelPath()
-    // get the node selection
-    const selection = usePixelPathSelection()
+export const Minimap = ({ point }) => {
     // get form the base tile uri at zoom level 0, suitable for the minimap
     const tileURI = useGetTileURI({ zoomLevel: 0 })
     // get the active dataset extent
     const { origin, shape } = useDatasetShape()
 
-    // if the selection does not contain precisely one element
-    if (selection.size !== 1) {
-        // bail
-        return null
-    }
-    // get the node; {selection} is a {set}, so we have to destructure it first
-    const node = [...selection][0]
-
-    // get the point of interest
-    const point = pixelPath[node]
     // we fetch a tile with shape
     const tile = [128, 128]
     // and origin that attempts to have our point at the center,
@@ -123,10 +107,10 @@ export const Minimap = () => {
                     <Target style={placemat} />
                     <Target style={target} />
                     {/* verniers */}
-                    <Up node={node} />
-                    <Right node={node} />
-                    <Down node={node} />
-                    <Left node={node} />
+                    <Up />
+                    <Right />
+                    <Down />
+                    <Left />
                 </g>
             </Map>
         </Box>
