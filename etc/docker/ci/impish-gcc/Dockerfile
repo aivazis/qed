@@ -9,7 +9,7 @@ FROM ubuntu:impish
 # set up some build variables
 ARG instance=ci/impish-gcc
 # python version
-ARG python_version=3.10
+ARG python_version=3.9
 ARG python=python${python_version}
 # locations
 ARG prefix=/usr/local
@@ -52,9 +52,9 @@ RUN pip3 install graphene
 # go home
 WORKDIR /root
 # copy the files with support for interactive use
-COPY etc/docker/impish-gcc/inputrc .inputrc
+COPY etc/docker/${instance}/inputrc .inputrc
 # the startup file
-COPY etc/docker/impish-gcc/bashrc bashrc.in
+COPY etc/docker/${instance}/bashrc bashrc.in
 # expand
 RUN sed \
         -e "s:@SRCDIR@:${srcdir}:g" \
@@ -70,7 +70,7 @@ RUN sed \
 # make the pyre configuration directory
 WORKDIR /root/.pyre
 # get the {mm} configuration file
-COPY etc/docker/impish-gcc/mm.pfg mm.pfg.in
+COPY etc/docker/${instance}/mm.pfg mm.pfg.in
 # expand
 RUN sed \
         -e "s:@PREFIX@:${prefix}:g" \
@@ -98,11 +98,11 @@ RUN git clone https://github.com/aivazis/qed
 # go to the {pyre} top level directory
 WORKDIR ${srcdir}/pyre
 # build
-RUN ${mm}
+RUN ${mm} --serial
 # go to the {qed} top level directory
 WORKDIR ${srcdir}/qed
 # build
-RUN ${mm}
+RUN ${mm} --serial
 
 
 # end of file

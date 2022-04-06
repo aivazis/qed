@@ -9,7 +9,7 @@ FROM ubuntu:impish
 # set up some build variables
 ARG instance=dev/impish-gcc
 # python version
-ARG python_version=3.10
+ARG python_version=3.9
 ARG python=python${python_version}
 # locations
 ARG prefix=/usr/local
@@ -41,8 +41,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
         g++ gfortran make \
         npm \
         ${python} ${python}-dev python3-numpy python3-pip python3-pybind11 python3-yaml \
-        libgsl-dev libhdf5-dev \
-        fftw3-dev
+        libgsl-dev libhdf5-dev fftw3-dev
 
 
 # install packages through pip
