@@ -17,7 +17,7 @@ qed.tests := qed.pkg.tests qed.ext.tests qed.data
 # docker images
 qed.docker-images := \
     qed.ci.impish-gcc   \
-    qed.dev.impish-gcc  \
+    qed.dev.impish-clang qed.dev.impish-gcc  \
 
 # load the packages
 include $(qed.packages)
