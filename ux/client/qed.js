@@ -87,12 +87,12 @@ const Root = () => (
                 </Provider>
             </Router>
         </Suspense>
-    </RelayEnvironmentProvider >
+    </RelayEnvironmentProvider>
 )
 
 
 // render
-ReactDOM.render(<Root />, document.getElementById('qed'))
+ReactDOM.createRoot(document.getElementById('qed')).render(<Root />)
 
 
 // end of file
