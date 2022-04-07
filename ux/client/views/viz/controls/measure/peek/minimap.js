@@ -124,7 +124,7 @@ const Box = styled.div`
     width: 256px;
     height: 256px;
     background-color: hsl(0deg, 0%, 10%);
-    margin: 0.5rem 0.0rem;
+    margin: 0.5rem auto;
     border: 2px solid hsl(28deg, 30%, 25%);
 `
 
