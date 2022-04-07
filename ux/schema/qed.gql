@@ -17,6 +17,10 @@ type Query {
   # collect data values as represented by the available channels at a particular pixel
   sample(dataset: ID, line: Int!, sample: Int!): Sample!
 
+  # describe the visualization pipeline for the specified {channel} of a {dataset}
+  # so the client can render controls to manipulate its configuration
+  viz(dataset: ID, channel: String!): VisualizationPipeline!
+
   # server version information
   version: Version!
 }
@@ -107,6 +111,14 @@ type ChannelValue {
   rep: String
   units: String
 }
+
+
+# visualization pipeline
+type VisualizationPipeline {
+  dataset: ID
+  channel: String
+}
+
 
 # interfaces
 # the node interface
