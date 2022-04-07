@@ -13,9 +13,9 @@ import { Header } from '~/widgets'
 
 // locals
 // components
-import { Demo } from './demo'
 import { Measure } from './measure'
 import { Zoom } from './zoom'
+import { Viz } from './viz'
 // styles
 import styles from './styles'
 
@@ -31,8 +31,8 @@ export const Controls = () => {
             <Measure />
             {/* the controls common to all datasets */}
             <Zoom />
-            {/* my play area */}
-            <Demo />
+            {/* visualization pipeline controls */}
+            <Viz />
         </>
     )
 }
