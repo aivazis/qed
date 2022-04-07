@@ -12,8 +12,10 @@ import qed
 from .Version import Version
 # the known datasets
 from .ReaderConnection import ReaderConnection
-# and their contents
+# their contents
 from .Sample import Sample
+# and their visualization pipeline controls
+from .VizPipeline import VizPipeline
 
 
 # the query
@@ -28,7 +30,10 @@ class Query(graphene.ObjectType):
     readers = graphene.relay.ConnectionField(ReaderConnection)
     # samples
     sample = graphene.Field(Sample,
-                            dataset=graphene.ID(), sample=graphene.Int(), line=graphene.Int())
+       dataset=graphene.ID(), sample=graphene.Int(), line=graphene.Int())
+    # visualization pipeline
+    viz = graphene.Field(VizPipeline,
+       dataset=graphene.ID(), channel=graphene.String())
     # server version info
     version = graphene.Field(Version, required=True)
 
@@ -48,9 +53,7 @@ class Query(graphene.ObjectType):
 
 
     # samples
-    def resolve_sample(root, info,
-                       dataset, line, sample,
-                       **kwds):
+    def resolve_sample(root, info, dataset, line, sample, **kwds):
         """
         Sample a dataset at a specified pixel
         """
@@ -64,7 +67,27 @@ class Query(graphene.ObjectType):
             "line": line,
             "sample": sample,
         }
-        # just fake it, for now
+        # and hand it to the sample resolver
+        return context
+
+
+    # the viz controls
+    def resolve_viz(root, info, dataset, channel, **kwds):
+        """
+        Build a representation of the visualization controls
+        """
+        # grab the plexus
+        panel = info.context["panel"]
+        # resolve the dataset
+        dataset = panel.dataset(name=dataset)
+        # assemble the sample resolution context
+        context = {
+            "dataset": dataset,
+            "channel": channel,
+        }
+        # show me
+        print(f"resolve_viz: dataset: {dataset.pyre_name}, channel: {channel}")
+        # and hand it to the resolver
         return context
 
 
