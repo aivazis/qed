@@ -48,7 +48,7 @@ export const Right = ({ node }) => {
     return (
         <Arrow
             path={arrow}
-            placement={`translate(650 ${7 / 8 * 500}) scale(${1 / 8})`}
+            placement={`translate(800 ${9 / 10 * 500}) scale(${1 / 10})`}
             behaviors={behaviors} />
     )
 }

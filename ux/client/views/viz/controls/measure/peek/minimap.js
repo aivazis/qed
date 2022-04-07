@@ -18,6 +18,7 @@ import { SVG } from '~/widgets'
 // hooks
 import { useDatasetShape } from '../../../viz/useDatasetShape'
 import { useGetTileURI } from '../../../viz/useGetTileURI'
+import { usePixelPathSelection } from '../../../viz/usePixelPathSelection'
 // components
 import { Down } from './down'
 import { Left } from './left'
@@ -28,7 +29,9 @@ import { Up } from './up'
 
 // a table of the points on the {measure} layer of the active viewport
 export const Minimap = ({ point }) => {
-    // get form the base tile uri at zoom level 0, suitable for the minimap
+    // get the node selection, if any
+    const selection = usePixelPathSelection()
+    // form the base tile uri at zoom level 0, suitable for the minimap
     const tileURI = useGetTileURI({ zoomLevel: 0 })
     // get the active dataset extent
     const { origin, shape } = useDatasetShape()
@@ -103,9 +106,9 @@ export const Minimap = ({ point }) => {
             <Data src={base} />
             <Map>
                 <g transform={`translate(${delta[1]} ${delta[0]}) scale(${256 / 1000})`}>
-                    {/* the marker */}
-                    <Target style={placemat} />
-                    <Target style={target} />
+                    {/* the marker, visible only when there are selected markers */}
+                    {selection.size > 0 && <Target style={placemat} />}
+                    {selection.size > 0 && <Target style={target} />}
                     {/* verniers */}
                     <Up />
                     <Right />

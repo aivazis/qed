@@ -47,7 +47,7 @@ export const Up = () => {
     // render
     return (
         <Arrow path={arrow}
-            placement={`translate(${7 / 8 * 500} 225) scale(${1 / 8})`}
+            placement={`translate(${9 / 10 * 500} 100) scale(${1 / 10})`}
             behaviors={behaviors} />
     )
 }
