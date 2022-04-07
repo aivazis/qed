@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import styled from 'styled-components'
 
 // project
 // widgets
@@ -32,10 +33,20 @@ export const Controls = () => {
             {/* the controls common to all datasets */}
             <Zoom />
             {/* visualization pipeline controls */}
-            <Viz />
+            <React.Suspense fallback={<Loading />}>
+                <Viz />
+            </React.Suspense>
         </>
     )
 }
 
+
+const Loading = styled.div`
+    font-family: inconsolata;
+    font-size: 75%;
+    cursor: default;
+    padding: 0.25rem;
+    content: "loading";
+`
 
 // end of file
