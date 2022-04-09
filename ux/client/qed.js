@@ -6,7 +6,7 @@
 
 // the component framework
 import React, { Suspense } from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 // relay
 import { RelayEnvironmentProvider } from 'react-relay/hooks'
 // routing
@@ -91,8 +91,10 @@ const Root = () => (
 )
 
 
-// render
-ReactDOM.createRoot(document.getElementById('qed')).render(<Root />)
+// instantiate
+const root = createRoot(document.getElementById('qed'))
+// and render
+root.render(<Root />)
 
 
 // end of file
