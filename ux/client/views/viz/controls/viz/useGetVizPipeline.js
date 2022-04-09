@@ -27,18 +27,38 @@ export const useGetVizPipeline = () => {
     }
 
     // ask the server for the pipeline
-    const { viz } = useLazyLoadQuery(pixelValueQuery, variables)
+    const { viz } = useLazyLoadQuery(vizPipelineQuery, variables)
     // and return it
     return viz
 }
 
 
 // the query
-export const pixelValueQuery = graphql`
+export const vizPipelineQuery = graphql`
     query useGetVizPipeline_controlsQuery($dataset: ID!, $channel: String!) {
         viz(dataset: $dataset, channel: $channel) {
             dataset
             channel
+            controllers {
+                __typename
+                ... on Node {
+                   id
+                   uuid
+                }
+                ... on ValueController {
+                    slot
+                    min
+                    max
+                    value
+                }
+                ... on RangeController {
+                    slot
+                    min
+                    max
+                    low
+                    high
+                }
+            }
         }
     }
 `
