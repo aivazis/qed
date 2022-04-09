@@ -116,8 +116,32 @@ type ChannelValue {
 # visualization pipeline
 type VisualizationPipeline {
   dataset: ID
-  channel: String
+  channel: String!
+  controllers: [Controller!]!
 }
+
+# controllers
+type RangeController implements Node {
+  id: ID!
+  uuid: ID!
+  slot: String!
+  min: Float!
+  max: Float!
+  low: Float!
+  high: Float!
+}
+
+type ValueController implements Node {
+  id: ID!
+  uuid: ID!
+  slot: String!
+  min: Float!
+  max: Float!
+  value: Float!
+}
+
+# put them all together
+union Controller = ValueController | RangeController
 
 
 # interfaces
