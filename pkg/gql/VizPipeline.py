@@ -6,6 +6,8 @@
 
 # externals
 import graphene
+# individual controls
+from .Controller import Controller
 
 
 # a representation of the visualization pipeline for a specific {channel} of a {dataset}
@@ -17,6 +19,7 @@ class VizPipeline(graphene.ObjectType):
     # fields
     dataset = graphene.ID()
     channel = graphene.ID()
+    controllers = graphene.List(Controller)
 
 
     # resolvers
