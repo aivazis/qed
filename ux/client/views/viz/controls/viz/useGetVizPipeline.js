@@ -52,11 +52,7 @@ export const vizPipelineQuery = graphql`
                     value
                 }
                 ... on RangeController {
-                    slot
-                    min
-                    max
-                    low
-                    high
+                    ...range_range
                 }
             }
         }
