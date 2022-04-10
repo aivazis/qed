@@ -15,22 +15,36 @@ import { Tray } from '~/widgets'
 // local
 // hooks
 import { useGetVizPipeline } from './useGetVizPipeline'
+// components
+import { RangeController } from './range'
 
 
-//  display the demo control
+//  the tray with the visualization pipeline controls
 export const Viz = () => {
     // get the pipeline
-    const { dataset, channel } = useGetVizPipeline()
-
+    const { dataset, channel, controllers } = useGetVizPipeline()
     // and render
     return (
         <Tray title="viz" state="enabled" initially={true}>
-            <Dataset>{dataset}</Dataset>
-            <Channel>{channel}</Channel>
+            {controllers.map(configuration => {
+                // unpack the controller configuration
+                const { id, __typename: typename } = configuration
+                // look up the controller
+                const Controller = registry[typename]
+                // and render
+                return (
+                    <Controller key={id} configuration={configuration} />
+                )
+            })}
         </Tray>
     )
 }
 
+
+// the controller type registry
+const registry = {
+    RangeController,
+}
 
 // styling
 const Dataset = styled.div`
