@@ -33,4 +33,26 @@ class VizPipeline(graphene.ObjectType):
         return dataset.pyre_name
 
 
+    def resolve_channel(context, info, **kwds):
+        """
+        Extract the name of the channel
+        """
+        # get the dataset
+        channel = context["channel"]
+        # and return its name
+        return channel.tag
+
+
+    def resolve_controllers(context, info, **kwds):
+        """
+        Extract the necessary controllers from the dataset channel
+        """
+        # get the channel
+        channel = context["channel"]
+        # and ask it for its controllers
+        yield from channel.controllers()
+        # all done
+        return
+
+
 # end of file
