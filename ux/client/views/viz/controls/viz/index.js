@@ -4,7 +4,7 @@
 // (c) 1998-2022 all rights reserved
 
 
-// export the demo
+// export the tray with the visualization pipeline controls
 export { Viz } from './viz'
 
 
