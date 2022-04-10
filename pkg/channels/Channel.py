@@ -20,6 +20,14 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
 
 
     # interface
+    def controllers(self, **kwds):
+        """
+        Generate the set of controllers that can manipulate my state
+        """
+        # by default, nothing
+        return []
+
+
     def tile(self, source, zoom, origin, shape, **kwds):
         """
         Generate a tile of the given characteristics
