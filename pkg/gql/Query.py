@@ -80,13 +80,13 @@ class Query(graphene.ObjectType):
         panel = info.context["panel"]
         # resolve the dataset
         dataset = panel.dataset(name=dataset)
-        # assemble the sample resolution context
+        # and the channel
+        channel = dataset.channel(name=channel)
+        # assemble the resolution context
         context = {
             "dataset": dataset,
             "channel": channel,
         }
-        # show me
-        print(f"resolve_viz: dataset: {dataset.pyre_name}, channel: {channel}")
         # and hand it to the resolver
         return context
 
