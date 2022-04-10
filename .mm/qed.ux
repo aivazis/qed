@@ -8,5 +8,8 @@
 # its path relative to the project
 qed.ux.root := ux/
 
+# code chunks from external dependencies
+qed.ux.chunks := vendors-node_modules node_modules
+
 
 # end of file
