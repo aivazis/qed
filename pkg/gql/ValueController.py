@@ -32,21 +32,4 @@ class ValueController(graphene.ObjectType):
     value = graphene.Float()
 
 
-    # the resolvers
-    def resolve_id(channel, *_):
-        """
-        Get the {channel} id
-        """
-        # splice together the {family} and {name} of the {channel}
-        return f"{channel.pyre_family()}:{channel.pyre_name}"
-
-
-    def resolve_uuid(channel, *_):
-        """
-        Get the {channel} uuid
-        """
-        # return the {pyre_id} of the {channel}
-        return channel.pyre_id
-
-
 # end of file
