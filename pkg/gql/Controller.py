@@ -24,4 +24,23 @@ class Controller(graphene.Union):
         types = ValueController, RangeController
 
 
+    # the type resolver
+    @classmethod
+    def resolve_type(cls, instance, info):
+       """
+       Deduce the controller type from the {instance} information
+       """
+       # extract the type
+       controller = instance["controller"]
+       # look up the associated class in my registryand return it
+       return cls.registry[controller]
+
+
+    # the resolver table
+    registry = {
+        "range": RangeController,
+        "value": ValueController,
+    }
+
+
 # end of file
