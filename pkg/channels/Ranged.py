@@ -44,7 +44,7 @@ class Ranged(Channel, family="qed.channels.ranged"):
          "id": f"{self.pyre_name}.brightness",
          "uuid": self.pyre_id,
          "controller": "range",
-         "slot": self.tag,
+         "slot": "range",
          "min": self.min,
          "max": self.max,
          "low": self.low,
