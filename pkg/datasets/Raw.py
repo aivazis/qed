@@ -47,16 +47,6 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
     tile.doc = "the preferred shape of dataset subsets"
 
 
-    # public data
-    @property
-    def data(self):
-        """
-        Provide access to my data source
-        """
-        # delegate
-        return self.open()
-
-
     # interface
     def channel(self, name):
         """
@@ -86,48 +76,46 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
         return channel.tile(source=self, zoom=zoom, origin=origin, shape=shape)
 
 
-    def open(self):
+    # metamethods
+    def __init__(self, **kwds):
+        # chain up
+        super().__init__(**kwds)
+        # build my data object
+        self.data = self._open()
+        # get stats on a sample of my data
+        self.stats = self._collectStatistics()
+        # all done
+        return
+
+
+    # implementation details
+    def _open(self):
         """
         Initialize my data source
         """
-        # get my data source
-        data = self._data
+        # build the name of the buffer factory
+        memoryType = f"{self.cell.tag}ConstMap"
+        # look up the factory in the {pyre::memory} bindings
+        bufferFactory = getattr(qed.libpyre.memory, memoryType)
+        # make the memory buffer
+        buffer = bufferFactory(str(self.uri))
 
-        # if i'm not already attached to a data source
-        if data is None:
-            # build the name of the buffer factory
-            memoryType = f"{self.cell.tag}ConstMap"
-            # look up the factory in the {pyre::memory} bindings
-            bufferFactory = getattr(qed.libpyre.memory, memoryType)
-            # make the memory buffer
-            buffer = bufferFactory(str(self.uri))
-
-            # realize the shape
-            shape = qed.libpyre.grid.Shape2D(shape=self.shape)
-            # build the packing
-            packing = qed.libpyre.grid.Canonical2D(shape=shape)
-            # grab the grid factory
-            gridFactory = getattr(qed.libpyre.grid, f"{memoryType}Grid2D")
-            # put it all together
-            data = gridFactory(packing, buffer)
-            # and attach it
-            self._data = data
-
-        # return the data source
+        # realize the shape
+        shape = qed.libpyre.grid.Shape2D(shape=self.shape)
+        # build the packing
+        packing = qed.libpyre.grid.Canonical2D(shape=shape)
+        # grab the grid factory
+        gridFactory = getattr(qed.libpyre.grid, f"{memoryType}Grid2D")
+        # put it all together
+        data = gridFactory(packing, buffer)
+        # and return it
         return data
 
 
-    def stats(self):
+    def _collectStatistics(self):
         """
         Compute statistics on a sample of my data
         """
-        # get my stats
-        stats = self._stats
-        # if already computed
-        if stats is not None:
-            # return whatever i have
-            return stats
-
         # get my data
         data = self.data
         # and my shape
@@ -144,32 +132,8 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
         tile = qed.libpyre.grid.Shape2D(shape=tile)
         # compute the stats
         stats = qed.libqed.datasets.stats(source=data, zoom=0, origin=center, shape=tile)
-        # attach them
-        self._stats = stats
         # and return them
         return stats
-
-
-    def close(self):
-        """
-        Shutdown my data source
-        """
-        # release the data buffer
-        self._data = None
-        # all done
-        return
-
-
-    # metamethods
-    def __init__(self, **kwds):
-        # chain up
-        super().__init__(**kwds)
-        # make a placeholder for my data object
-        self._data = None
-        # stats on some sample of my data
-        self._stats = None
-        # all done
-        return
 
 
 # end of file

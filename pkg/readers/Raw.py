@@ -39,14 +39,18 @@ class Raw(qed.flow.factory, family="qed.readers.raw", implements=qed.protocols.r
         # chain up
         super().__init__(**kwds)
 
+        # unpack my state into a dataset configuration
+        config = {
+            "uri": self.uri,
+            "shape": self.shape,
+            "cell": self.cell,
+            "tile": self.cell.tile,
+        }
+
         # there is only one dataset in the file and it is structurally trivial
-        dataset = qed.datasets.raw(name=f"{self.pyre_name}.data")
+        dataset = qed.datasets.raw(name=f"{self.pyre_name}.data", **config)
 
         # decorate it
-        dataset.uri = self.uri
-        dataset.shape = self.shape
-        dataset.cell = self.cell
-        dataset.tile = self.cell.tile
         # go through the default channels provided by the data type
         for channel in self.cell.channels:
             # get their factories
