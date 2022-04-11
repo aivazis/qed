@@ -5,27 +5,22 @@
 
 
 // externals
-import React from 'react'
 import { graphql, useLazyLoadQuery } from 'react-relay'
 
 // local
 // hooks
-import { useViews } from '../../viz/useViews'
+import { useGetView } from '../../viz/useGetView'
 
 
 // get the visualization pipeline of the current {dataset} {channel}
 export const useGetVizPipeline = () => {
-    // get the views
-    const { views, activeViewport } = useViews()
     // unpack the active view
-    const { dataset, channel } = views[activeViewport]
-
+    const { dataset, channel } = useGetView()
     // set up the query variables
     const variables = {
         dataset: dataset.name,
         channel
     }
-
     // ask the server for the pipeline
     const { viz } = useLazyLoadQuery(vizPipelineQuery, variables)
     // and return it
