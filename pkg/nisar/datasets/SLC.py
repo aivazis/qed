@@ -82,14 +82,6 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
         return profile
 
 
-    def stats(self):
-        """
-        Compute statistics on a sample of my data
-        """
-        # i did this at construction time
-        return self._stats
-
-
     # metamethods
     def __init__(self, data, **kwds):
         # chain up
@@ -98,6 +90,8 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
         self.data = data
         # set my shape
         self.shape = data.shape
+        # collect statistics from a sample of my data
+        self.stats = self._collectStatistics()
 
         # go through the default channels of my cell type
         for channel in self.cell.channels:
@@ -105,9 +99,6 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
             cls = qed.protocols.channel.pyre_resolveSpecification(channel)
             # and instantiate a workflow for each one
             self.channels[channel] = cls(name=f"{self.pyre_name}.{channel}")
-
-        # collect statistics from a sample of my data
-        self._stats = self._collectStatistics()
 
         # all done
         return
