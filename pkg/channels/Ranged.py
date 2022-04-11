@@ -44,7 +44,7 @@ class Ranged(Channel, family="qed.channels.ranged"):
          "id": f"{self.pyre_name}.brightness",
          "uuid": self.pyre_id,
          "controller": "range",
-         "slot": "range",
+         "slot": "signal",
          "min": self.min,
          "max": self.max,
          "low": self.low,
@@ -65,7 +65,7 @@ class Ranged(Channel, family="qed.channels.ranged"):
       # if either is uninitialized
       if low is None or high is None:
          # extract from the dataset
-         low, mean, high = source.stats()
+         low, mean, high = source.stats
          # adjust
          high = min(high, 4*mean)
          # and remember for next time
