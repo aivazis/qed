@@ -13,6 +13,8 @@ import styled from 'styled-components'
 import { Header } from '~/widgets'
 
 // locals
+// hooks
+import { useGetView } from '../viz/useGetView'
 // components
 import { Measure } from './measure'
 import { Zoom } from './zoom'
@@ -23,20 +25,23 @@ import styles from './styles'
 
 // export the activity panel
 export const Controls = () => {
+    // unpack the active view
+    const { dataset, channel } = useGetView()
+    // disable some trays if either dataset or channel are trivial
+    const enabled = (dataset != null) && (channel != null)
+
     // render
     return (
-        <>
+        <React.Suspense fallback={<Loading />}>
             {/* the title of the panel */}
             <Header title="controls" style={styles.header} />
             {/* controls for the measuring layer */}
-            <Measure />
+            {enabled && <Measure />}
             {/* the controls common to all datasets */}
-            <Zoom />
+            {enabled && <Zoom />}
             {/* visualization pipeline controls */}
-            <React.Suspense fallback={<Loading />}>
-                <Viz />
-            </React.Suspense>
-        </>
+            {enabled && <Viz />}
+        </React.Suspense>
     )
 }
 
