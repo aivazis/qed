@@ -38,14 +38,14 @@ class RSLC(qed.readers.h5, family="qed.nisar.readers.rslc"):
         tag = self.tag
         # alias my constants
         DATASET = self.DATASET
-        FREQS = self.FREQS
-        POLS = self.POLS
+        FREQUENCIES = self.FREQUENCIES
+        POLARIZATIONS = self.POLARIZATIONS
 
         for band in self.selectors["band"]:
             # attempt to
             try:
                 # get the list of frequencies for this band
-                frequencies = d.dataset(FREQS.format(band=band)).strings()
+                frequencies = d.dataset(FREQUENCIES.format(band=band)).strings()
             # if anything goes wrong
             except Exception:
                 # move on
@@ -56,7 +56,7 @@ class RSLC(qed.readers.h5, family="qed.nisar.readers.rslc"):
                 # attempt
                 try:
                     # form the group name with the list polarizations
-                    polGrp = POLS.format(band=band, tag=tag, freq=frequency)
+                    polGrp = POLARIZATIONS.format(band=band, tag=tag, freq=frequency)
                     # get the list of polarizations
                     polarizations = d.dataset(polGrp).strings()
                 # if anything goes wrong
@@ -98,8 +98,8 @@ class RSLC(qed.readers.h5, family="qed.nisar.readers.rslc"):
 
     # layout
     DATASET = "/science/{band}SAR/{tag}/swaths/frequency{freq}/{pol}"
-    FREQS = "/science/{band}SAR/identification/listOfFrequencies"
-    POLS = "/science/{band}SAR/{tag}/swaths/frequency{freq}/listOfPolarizations"
+    FREQUENCIES = "/science/{band}SAR/identification/listOfFrequencies"
+    POLARIZATIONS = "/science/{band}SAR/{tag}/swaths/frequency{freq}/listOfPolarizations"
 
 
 # end of file
