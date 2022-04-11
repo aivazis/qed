@@ -121,6 +121,16 @@ type VisualizationPipeline {
 }
 
 # controllers
+type AmplitudeController implements Node {
+  id: ID!
+  uuid: ID!
+  slot: String!
+  min: Float!
+  max: Float!
+  low: Float!
+  high: Float!
+}
+
 type RangeController implements Node {
   id: ID!
   uuid: ID!
