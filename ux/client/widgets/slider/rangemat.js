@@ -59,6 +59,7 @@ export const Rangemat = ({ setValue, children, ...rest }) => {
             const range = [...old]
             // if both are sliding
             if (sliding < 0) {
+                // adjust both entries
                 range[0] += delta
                 range[1] += delta
             } else {
