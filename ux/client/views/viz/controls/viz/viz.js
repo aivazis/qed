@@ -16,8 +16,8 @@ import { Tray } from '~/widgets'
 // hooks
 import { useGetVizPipeline } from './useGetVizPipeline'
 // components
+import { LinearRangeController } from './linearrange'
 import { LogRangeController } from './logrange'
-import { RangeController } from './range'
 
 
 //  the tray with the visualization pipeline controls
@@ -44,8 +44,8 @@ export const Viz = () => {
 
 // the controller type registry
 const registry = {
+    LinearRangeController,
     LogRangeController,
-    RangeController,
 }
 
 // styling

@@ -40,17 +40,17 @@ export const vizPipelineQuery = graphql`
                    id
                    uuid
                 }
+                ... on LinearRangeController {
+                    ...linearrange_linearrange
+                }
+                ... on LogRangeController {
+                    ...logrange_logrange
+                }
                 ... on ValueController {
                     slot
                     min
                     max
                     value
-                }
-                ... on LogRangeController {
-                    ...logrange_logrange
-                }
-                ... on RangeController {
-                    ...range_range
                 }
             }
         }
