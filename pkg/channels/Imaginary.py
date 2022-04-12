@@ -7,11 +7,13 @@
 # support
 import qed
 # superclass
-from .Ranged import Ranged
+from .Channel import Channel
+# mixin
+from .LinearRange import LinearRange
 
 
 # a channel for displaying the imaginary part of complex values
-class Imaginary(Ranged, family="qed.channels.imaginary"):
+class Imaginary(LinearRange, Channel, family="qed.channels.imaginary"):
    """
    Make a visualization pipeline to display the imaginary part of complex values
    """
@@ -19,14 +21,6 @@ class Imaginary(Ranged, family="qed.channels.imaginary"):
 
    # constants
    tag = "imaginary"
-
-
-   # user configurable state
-   min = qed.properties.float(default=-1.0e3)
-   min.doc = "the minimum value; anything below is underflow"
-
-   max = qed.properties.float(default=1.0e3)
-   max.doc = "the maximum value; anything above is overflow"
 
 
    # interface
