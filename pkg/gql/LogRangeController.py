@@ -11,7 +11,7 @@ from .Node import Node
 
 
 # a controller that captures a range of values
-class AmplitudeController(graphene.ObjectType):
+class LogRangeController(graphene.ObjectType):
     """
     A controller that captures a range of values
     """
