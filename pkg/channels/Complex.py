@@ -7,11 +7,13 @@
 # support
 import qed
 # superclass
-from .Ranged import Ranged
+from .Channel import Channel
+# mix in
+from .LogRange import LogRange
 
 
 # a channel for displaying complex values
-class Complex(Ranged, family="qed.channels.complex"):
+class Complex(LogRange, Channel, family="qed.channels.complex"):
    """
    Make a visualization pipeline to display complex values
    """
@@ -37,14 +39,6 @@ class Complex(Ranged, family="qed.channels.complex"):
       return
 
 
-   def tile(self, **kwds):
-      """
-      Generate a tile of the given characteristics
-      """
-      # add my configuration and chain up
-      return super().tile(saturation=self.saturation, **kwds)
-
-
    def project(self, pixel):
       """
       Represent a {pixel} as a complex number
@@ -53,6 +47,14 @@ class Complex(Ranged, family="qed.channels.complex"):
       yield pixel, ""
       # all done
       return
+
+
+   def tile(self, **kwds):
+      """
+      Generate a tile of the given characteristics
+      """
+      # add my configuration and chain up
+      return super().tile(saturation=self.saturation, **kwds)
 
 
 # end of file

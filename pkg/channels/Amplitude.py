@@ -4,14 +4,14 @@
 # (c) 1998-2022 all rights reserved
 
 
-# support
-import qed
 # superclass
-from .Ranged import Ranged
+from .Channel import Channel
+# mix in
+from .LogRange import LogRange
 
 
 # a channel for displaying the amplitude of complex values
-class Amplitude(Ranged, family="qed.channels.amplitude"):
+class Amplitude(LogRange, Channel, family="qed.channels.amplitude"):
    """
    Make a visualization pipeline to display the amplitude of complex values
    """
