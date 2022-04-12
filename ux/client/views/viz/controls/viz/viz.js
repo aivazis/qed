@@ -16,7 +16,7 @@ import { Tray } from '~/widgets'
 // hooks
 import { useGetVizPipeline } from './useGetVizPipeline'
 // components
-import { AmplitudeController } from './amplitude'
+import { LogRangeController } from './logrange'
 import { RangeController } from './range'
 
 
@@ -44,7 +44,7 @@ export const Viz = () => {
 
 // the controller type registry
 const registry = {
-    AmplitudeController,
+    LogRangeController,
     RangeController,
 }
 

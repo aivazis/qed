@@ -46,6 +46,9 @@ export const vizPipelineQuery = graphql`
                     max
                     value
                 }
+                ... on LogRangeController {
+                    ...logrange_logrange
+                }
                 ... on RangeController {
                     ...range_range
                 }
