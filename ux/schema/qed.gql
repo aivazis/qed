@@ -121,7 +121,7 @@ type VisualizationPipeline {
 }
 
 # controllers
-type AmplitudeController implements Node {
+type LogRangeController implements Node {
   id: ID!
   uuid: ID!
   slot: String!
@@ -151,7 +151,7 @@ type ValueController implements Node {
 }
 
 # put them all together
-union Controller = ValueController | RangeController
+union Controller = ValueController | LogRangeController | RangeController
 
 
 # interfaces
