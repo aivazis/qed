@@ -60,17 +60,6 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
         return self.channels[name]
 
 
-    def render(self, channel, zoom, origin, shape):
-        """
-        Render a tile of the given specification
-        """
-        # resolve my channel
-        channel = self.channel(name=channel)
-        # render a tile and return it
-        return channel.tile(
-            source=self, datatype=self.datatype, zoom=zoom, origin=origin, shape=shape)
-
-
     def profile(self, points):
         """
         Sample my data along the path defined by {points}
@@ -80,6 +69,17 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
             source=self.data, datatype=self.datatype, points=points)
         # and return it
         return profile
+
+
+    def render(self, channel, zoom, origin, shape):
+        """
+        Render a tile of the given specification
+        """
+        # resolve my channel
+        channel = self.channel(name=channel)
+        # render a tile and return it
+        return channel.tile(
+            source=self, datatype=self.datatype, zoom=zoom, origin=origin, shape=shape)
 
 
     # metamethods
@@ -95,8 +95,12 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
         for channel in self.cell.channels:
             # get their factories
             cls = qed.protocols.channel.pyre_resolveSpecification(channel)
-            # and instantiate a workflow for each one
-            self.channels[channel] = cls(name=f"{self.pyre_name}.{channel}")
+            # instantiate a workflow for each one
+            pipeline = cls(name=f"{self.pyre_name}.{channel}")
+            # autotune it
+            pipeline.autotune(stats=self.stats)
+            # and register it
+            self.channels[channel] = pipeline
 
         # all done
         return
