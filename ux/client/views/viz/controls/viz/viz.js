@@ -34,7 +34,8 @@ export const Viz = () => {
                 const Controller = registry[typename]
                 // and render
                 return (
-                    <Controller key={id} configuration={configuration} />
+                    <Controller key={id}
+                        dataset={dataset} channel={channel} configuration={configuration} />
                 )
             })}
         </Tray>
