@@ -7,7 +7,7 @@
 # externals
 import graphene
 # base types
-from .AmplitudeController import AmplitudeController
+from .LogRangeController import LogRangeController
 from .RangeController import RangeController
 from .ValueController import ValueController
 
@@ -22,7 +22,7 @@ class Controller(graphene.Union):
     # metadata
     class Meta:
         # my possible types
-        types = AmplitudeController, RangeController, ValueController
+        types = LogRangeController, RangeController, ValueController
 
 
     # the type resolver
@@ -39,8 +39,8 @@ class Controller(graphene.Union):
 
     # the resolver table
     registry = {
-        "amplitude": AmplitudeController,
-        "range": RangeController,
+        "logrange": LogRangeController,
+        "linearrange": RangeController,
         "value": ValueController,
     }
 
