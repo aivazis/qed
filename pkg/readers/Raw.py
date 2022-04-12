@@ -47,18 +47,9 @@ class Raw(qed.flow.factory, family="qed.readers.raw", implements=qed.protocols.r
             "tile": self.cell.tile,
         }
 
-        # there is only one dataset in the file and it is structurally trivial
+        # there is only one dataset in the file and it is structurally trivial; build it
         dataset = qed.datasets.raw(name=f"{self.pyre_name}.data", **config)
-
-        # decorate it
-        # go through the default channels provided by the data type
-        for channel in self.cell.channels:
-            # get their factories
-            cls = qed.protocols.channel.pyre_resolveSpecification(channel)
-            # and instantiate a workflow for each one
-            dataset.channels[channel] = cls(name=f"{dataset.pyre_name}.{channel}")
-
-        # finally, add it to the pile of datasets
+        # and add it to the pile of datasets
         self.datasets.append(dataset)
 
         # all done
