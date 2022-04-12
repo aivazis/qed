@@ -6,6 +6,7 @@
 
 schema {
   query: Query
+  mutation: Mutation
 }
 
 
@@ -152,6 +153,38 @@ type ValueController implements Node {
 
 # put them all together
 union Controller = LinearRangeController | LogRangeController | ValueController
+
+
+# mutations
+type Mutation {
+
+  # updates to the viz pipeline
+  updateRangeController(range: RangeControllerInput!): RangeControllerInfo!
+}
+
+
+# support for updating range controllers
+# the input payload
+input RangeControllerInput {
+  # the dataset
+  dataset: ID!
+  # the channel
+  channel: String!
+  # the controller
+  slot: String!
+  # the parameters
+  low: Float!
+  high: Float!
+}
+
+# the output payload
+type RangeControllerInfo {
+  # just the controller parameters
+  min: Float!
+  max: Float!
+  low: Float!
+  high: Float!
+}
 
 
 # interfaces
