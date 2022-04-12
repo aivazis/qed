@@ -34,7 +34,7 @@ class GraphQL:
         # extract the variables
         variables = payload.get("variables")
         # and the operation
-        operation = payload.get("operation")
+        # operation = payload.get("operation")
 
         # make a fresh copy of my context
         context = dict(self.context)
@@ -60,7 +60,7 @@ class GraphQL:
                 # mark
                 channel.line(f"  variables:")
                 # go through them
-                for key, value in variables:
+                for key, value in variables.items():
                     # and print each binding
                     channel.line(f"    {key}: {value}")
             # flush
