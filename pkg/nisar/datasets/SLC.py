@@ -88,8 +88,6 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
         super().__init__(**kwds)
         # save the dataset
         self.data = data
-        # set my shape
-        self.shape = data.shape
         # collect statistics from a sample of my data
         self.stats = self._collectStatistics()
 
