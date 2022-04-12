@@ -15,10 +15,10 @@ import { Range, SVG } from '~/widgets'
 
 
 // a ranged controller
-export const RangeController = props => {
+export const LinearRangeController = props => {
     // unpack the data
     const configuration = useFragment(graphql`
-        fragment range_range on RangeController {
+        fragment linearrange_linearrange on LinearRangeController {
             id
             slot
             min
@@ -31,20 +31,15 @@ export const RangeController = props => {
     // unpack
     const { slot, min, max, low, high } = configuration
 
-    // switch to log scale
-    const logMin = Math.round(Math.log10(min))
-    const logMax = Math.round(Math.log10(max))
-    const logLow = Math.log10(Math.max(min, low))
-    const logHigh = Math.log10(Math.min(max, high))
     // set up the tick marks
-    const major = [...Array(logMax - logMin + 1).keys()].map((_, idx) => logMin + idx)
+    const major = [min, min / 2, 0, max / 2, max]
 
     // the value updated
     const setValue = v => console.log(v)
     // controller configuration
     const range = {
-        value: [logLow, logHigh], setValue,
-        min: logMin, max: logMax, major,
+        value: [low, high], setValue,
+        min, max, major,
         direction: "row", labels: "bottom", arrows: "top",
         height: 100, width: 250,
     }
