@@ -6,7 +6,7 @@
 
 // externals
 import React from 'react'
-import { graphql, useFragment } from 'react-relay/hooks'
+import { graphql, useFragment, useMutation } from 'react-relay/hooks'
 import styled from 'styled-components'
 
 // project
@@ -16,7 +16,10 @@ import { Range, SVG } from '~/widgets'
 
 // amplitude controller
 export const LogRangeController = props => {
-    // unpack the data
+    // build the range mutator
+    const [updateRange, isInFlight] = useMutation(updateRangeMutation)
+
+    // ask the store for the current configuration
     const configuration = useFragment(graphql`
         fragment logrange_logrange on LogRangeController {
             id
@@ -37,10 +40,40 @@ export const LogRangeController = props => {
     const logLow = Math.log10(Math.max(min, low))
     const logHigh = Math.log10(Math.min(max, high))
     // set up the tick marks
-    const major = [...Array(logMax - logMin + 1).keys()].map((_, idx) => logMin + idx)
+    // const major = [...Array(logMax - logMin + 1).keys()].map((_, idx) => logMin + idx)
+    const major = [logMin, 0, logMax]
 
-    // the value updated
-    const setValue = v => console.log(v)
+    // build the value updater to hand to the controller
+    // this is built in the style of {react} state updates: the controller invokes this
+    // and passes it as an argument a function that expects the current range and return
+    // the updated value
+    const setValue = f => {
+        // if there is a pending mutation
+        if (isInFlight) {
+            // skip the update
+            return
+        }
+
+        // invoke the controller's updater to get the new range
+        const [newLow, newHigh] = f([logLow, logHigh])
+
+        // send it to the server
+        updateRange({
+            variables: {
+                info: {
+                    dataset: props.dataset,
+                    channel: props.channel,
+                    slot,
+                    low: newLow,
+                    high: newHigh,
+                }
+            }
+        })
+
+        // all done
+        return
+    }
+
     // controller configuration
     const amplitude = {
         value: [logLow, logHigh], setValue,
@@ -48,9 +81,6 @@ export const LogRangeController = props => {
         direction: "row", labels: "bottom", arrows: "top",
         height: 100, width: 250,
     }
-
-    // show me
-    console.log(amplitude)
 
     // render
     return (
@@ -66,6 +96,20 @@ export const LogRangeController = props => {
 }
 
 
+// the range mutation
+const updateRangeMutation = graphql`
+mutation lograngeMutation($info: RangeControllerInput!) {
+    updateRangeController(range: $info) {
+        # refresh my parameters
+        min
+        max
+        low
+        high
+    }
+}`
+
+
+// styling
 // the section header
 const Header = styled.div`
     font-size: 65%;
