@@ -20,6 +20,14 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
 
 
     # interface
+    def autotune(self, **kwds):
+      """
+      Use the {stats} gathered on a data sample to adjust the range configuration
+      """
+      # nothing to do
+      return
+
+
     def controllers(self, **kwds):
         """
         Generate the set of controllers that can manipulate my state
