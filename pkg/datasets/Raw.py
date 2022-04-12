@@ -84,6 +84,14 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
         self.data = self._open()
         # get stats on a sample of my data
         self.stats = self._collectStatistics()
+
+        # go through the default channels provided my the data type
+        for channel in self.cell.channels:
+            # get their factories
+            cls = qed.protocols.channel.pyre_resolveSpecification(channel)
+            # and instantiate a workflow for each one
+            self.channels[channel] = cls(name=f"{self.pyre_name}.{channel}")
+
         # all done
         return
 
