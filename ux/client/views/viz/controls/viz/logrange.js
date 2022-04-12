@@ -15,10 +15,10 @@ import { Range, SVG } from '~/widgets'
 
 
 // amplitude controller
-export const AmplitudeController = props => {
+export const LogRangeController = props => {
     // unpack the data
     const configuration = useFragment(graphql`
-        fragment amplitude_amplitude on AmplitudeController {
+        fragment logrange_logrange on LogRangeController {
             id
             slot
             min
@@ -85,7 +85,7 @@ const Title = styled.span`
 // the controller housing
 const Housing = styled(SVG)`
     margin: 0.25rem auto;
-    border: 1px solid hsl(0deg, 0%, 10%);
+    /* border: 1px solid hsl(0deg, 0%, 10%); */
 `
 
 // the controller
