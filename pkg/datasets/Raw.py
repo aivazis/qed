@@ -89,8 +89,12 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
         for channel in self.cell.channels:
             # get their factories
             cls = qed.protocols.channel.pyre_resolveSpecification(channel)
-            # and instantiate a workflow for each one
-            self.channels[channel] = cls(name=f"{self.pyre_name}.{channel}")
+            # instantiate a workflow for each one
+            pipeline = cls(name=f"{self.pyre_name}.{channel}")
+            # autotune it
+            pipeline.autotune(stats=self.stats)
+            # and register it
+            self.channels[channel] = pipeline
 
         # all done
         return
