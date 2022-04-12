@@ -77,13 +77,20 @@ class RSLC(qed.readers.h5, family="qed.nisar.readers.rslc"):
                         continue
                     # generate a {pyre} name for the dataset
                     name = f"{self.pyre_name}.{band}.{frequency}.{polarization}"
+                    # build its selector table
+                    selector = {
+                        "band": band,
+                        "frequency": frequency,
+                        "polarization": polarization,
+                    }
+                    # pack its configuration
+                    config = {
+                        "uri": self.uri,
+                        "shape": data.shape,
+                        "selector": selector,
+                    }
                     # instantiate it
-                    slc = qed.nisar.datasets.slc(name=name, data=data)
-                    # decorate it
-                    slc.uri = self.uri
-                    slc.selector["band"] = band
-                    slc.selector["frequency"] = frequency
-                    slc.selector["polarization"] = polarization
+                    slc = qed.nisar.datasets.slc(name=name, data=data, **config)
                     # and add it to my dataset
                     self.datasets.append(slc)
 
