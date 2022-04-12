@@ -40,7 +40,7 @@ class LinearRange(qed.component, family="qed.channels.linearrange"):
       super().autotune(stats=stats, **kwds)
 
       # unpack the stats
-      _, mean, high = stats
+      _, mean, _ = stats
 
       # we want to be conservative, as this logic is only supposed to make sure that
       # the initial display is sensible
@@ -49,7 +49,7 @@ class LinearRange(qed.component, family="qed.channels.linearrange"):
       self.low = -self.high
 
       # set the max value to the next higher power of 10
-      self.max = 10**(math.ceil(math.log10(max(self.high, high))))
+      self.max = 10**(math.ceil(math.log10(self.high)))
       # and the min to the opposite
       self.min = -self.max
 
