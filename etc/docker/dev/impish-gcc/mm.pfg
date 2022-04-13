@@ -4,7 +4,7 @@
 
 mm:
     ; targets
-    target = debug,shared
+    target = opt,shared
 
     ; compilers
     compilers = gcc, nvcc, python/python3
