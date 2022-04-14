@@ -36,6 +36,16 @@ class RangeController(graphene.ObjectType):
 
 
     # resolvers
+    def resolve_id(controller, *_):
+        # form the controller id
+        return controller.pyre_name
+
+
+    def resolve_uuid(controller, *_):
+        # form the controller uuid
+        return controller.pyre_id
+
+
     def resolve_slot(controller, *_):
         """
         Resolve the slot managed by this controller
