@@ -31,7 +31,7 @@ class Controller(graphene.Union):
        Deduce the controller type from the {instance} information
        """
        # extract the type
-       controller = instance["controller"]
+       controller = instance.controller
        # look up the associated class in my registryand return it
        return cls.registry[controller]
 

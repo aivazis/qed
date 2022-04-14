@@ -35,4 +35,13 @@ class RangeController(graphene.ObjectType):
     high = graphene.Float()
 
 
+    # resolvers
+    def resolve_slot(controller, *_):
+        """
+        Resolve the slot managed by this controller
+        """
+        # easy enough
+        return controller.pyre_name
+
+
 # end of file
