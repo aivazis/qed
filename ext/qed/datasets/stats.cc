@@ -27,6 +27,17 @@ qed::py::datasets::stats(py::module & m)
         // the docstring
         "collect statistics on a subset of a dataset");
 
+    // bindings for {mapgrid_t} sources
+    m.def(
+        // the name of the function
+        "stats",
+        // the handler
+        &statsGrid<mapgrid_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a,
+        // the docstring
+        "collect statistics on a subset of a dataset");
+
     // bindings for HDF5 sources
     m.def(
         // the name of the function

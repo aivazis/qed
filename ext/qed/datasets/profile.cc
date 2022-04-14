@@ -27,6 +27,16 @@ qed::py::datasets::profile(py::module & m)
         // the docstring
         "collect values from a dataset along a path");
 
+    m.def(
+        // the name of the function
+        "profile",
+        // the handler
+        &profileGrid<mapgrid_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "points"_a,
+        // the docstring
+        "collect values from a dataset along a path");
+
     // bindings for HDF5 sources
     m.def(
         // the name of the function
