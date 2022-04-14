@@ -122,17 +122,7 @@ type VisualizationPipeline {
 }
 
 # controllers
-type LinearRangeController implements Node {
-  id: ID!
-  uuid: ID!
-  slot: String!
-  min: Float!
-  max: Float!
-  low: Float!
-  high: Float!
-}
-
-type LogRangeController implements Node {
+type RangeController implements Node {
   id: ID!
   uuid: ID!
   slot: String!
@@ -152,7 +142,7 @@ type ValueController implements Node {
 }
 
 # put them all together
-union Controller = LinearRangeController | LogRangeController | ValueController
+union Controller = RangeController | ValueController
 
 
 # mutations
