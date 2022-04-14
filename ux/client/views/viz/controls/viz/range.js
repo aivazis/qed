@@ -94,11 +94,15 @@ export const RangeController = props => {
 const updateRangeMutation = graphql`
 mutation rangeMutation($info: RangeControllerInput!) {
     updateRangeController(range: $info) {
-        # refresh my parameters
-        min
-        max
-        low
-        high
+        controller {
+            # refresh my parameters
+            id
+            uuid
+            min
+            max
+            low
+            high
+        }
     }
 }`
 
