@@ -11,7 +11,7 @@ from .Node import Node
 
 
 # a controller that captures a range of values
-class LogRangeController(graphene.ObjectType):
+class RangeController(graphene.ObjectType):
     """
     A controller that captures a range of values
     """
@@ -21,6 +21,7 @@ class LogRangeController(graphene.ObjectType):
     class Meta:
         # register my interface
         interfaces = Node,
+
 
     # my fields
     # id
