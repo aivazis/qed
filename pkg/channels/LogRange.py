@@ -9,25 +9,28 @@ import math
 # support
 import qed
 
+# superclass
+from .Controller import Controller
+
 
 # a channel for displaying the amplitude of complex values
-class LogRange(qed.component, family="qed.channels.logrange"):
+class LogRange(Controller, family="qed.controllers.logrange"):
    """
    Configuration for a channel with logarithmic data
    """
 
 
-   # user configurable state
-   low = qed.properties.float(default=1.0e-2)
+   # user configurable state, in log scale
+   low = qed.properties.float(default=-2)
    low.doc = "the lowest value; anything below is underflow"
 
-   high = qed.properties.float(default=1.0e+3)
+   high = qed.properties.float(default=3)
    high.doc = "the highest value; anything above is overflow"
 
-   min = qed.properties.float(default=1.0e-3)
+   min = qed.properties.float(default=-3)
    min.doc = "the smallest possible value"
 
-   max = qed.properties.float(default=1.0e+4)
+   max = qed.properties.float(default=4)
    max.doc = "the largest possible value"
 
 
@@ -47,43 +50,16 @@ class LogRange(qed.component, family="qed.channels.logrange"):
       # of the range at their default values
 
       # at the other end, use the gathered mean to set the {high} value
-      self.high = 4 * mean
+      self.high = math.log10(4 * mean)
       # and set the max value to the next higher power of 10
-      self.max = 10**(math.ceil(math.log10(max(self.high, high))))
+      self.max = math.ceil(max(self.high, math.log10(high)))
 
       # all done
       return
 
 
-   def controllers(self, **kwds):
-      """
-      Generate the controllers that manipulate my state
-      """
-      # chain up
-      yield from super().controllers(**kwds)
-
-      # a controller for my brightness
-      yield {
-         "id": f"{self.pyre_name}.brightness",
-         "uuid": self.pyre_id,
-         "controller": "logrange",
-         "slot": "signal",
-         "min": self.min,
-         "max": self.max,
-         "low": self.low,
-         "high": self.high,
-      }
-
-      # all done
-      return
-
-
-   def tile(self, **kwds):
-      """
-      Generate a tile of the given characteristics
-      """
-      # add my configuration and chain up
-      return super().tile(min=self.low, max=self.high, **kwds)
+   # constants
+   controller = "range"
 
 
 # end of file

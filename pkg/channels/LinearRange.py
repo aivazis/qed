@@ -9,9 +9,12 @@ import math
 # support
 import qed
 
+# superclass
+from .Controller import Controller
+
 
 # a mixin for a channel with rel values in a linear range
-class LinearRange(qed.component, family="qed.channels.linearrange"):
+class LinearRange(Controller, family="qed.controllers.linearrange"):
    """
    Configuration for a channel with data in a linear range
    """
@@ -57,35 +60,8 @@ class LinearRange(qed.component, family="qed.channels.linearrange"):
       return
 
 
-   def controllers(self, **kwds):
-      """
-      Generate the controllers that manipulate my state
-      """
-      # chain up
-      yield from super().controllers(**kwds)
-
-      # a controller for my brightness
-      yield {
-         "id": f"{self.pyre_name}.brightness",
-         "uuid": self.pyre_id,
-         "controller": "linearrange",
-         "slot": "signal",
-         "min": self.min,
-         "max": self.max,
-         "low": self.low,
-         "high": self.high,
-      }
-
-      # all done
-      return
-
-
-   def tile(self, **kwds):
-      """
-      Generate a tile of the given characteristics
-      """
-      # add my configuration and chain up
-      return super().tile(min=self.low, max=self.high, **kwds)
+   # constants
+   controller = "range"
 
 
 # end of file
