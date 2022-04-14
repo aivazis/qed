@@ -4,7 +4,7 @@
 # (c) 1998-2022 all rights reserved
 
 
-# support
+# externals
 import cmath
 import qed
 # superclass
@@ -18,10 +18,6 @@ class Phase(Channel, family="qed.channels.phase"):
    """
 
 
-   # constants
-   tag = "phase"
-
-
    # user configurable state
    brightness = qed.properties.float(default=1.0)
    brightness.doc = "the brightness"
@@ -31,12 +27,16 @@ class Phase(Channel, family="qed.channels.phase"):
 
 
    # interface
-   def tile(self, **kwds):
+   def controllers(self, **kwds):
       """
-      Generate a tile of the given characteristics
+      Generate the controllers that manipulate my state
       """
-      # add my configuration and chain up
-      return super().tile(saturation=self.saturation, brightness=self.brightness, **kwds)
+      # chain up
+      yield from super().controllers(**kwds)
+      # my brightness
+      # and my saturation
+      # all done
+      return
 
 
    def project(self, pixel):
@@ -63,6 +63,18 @@ class Phase(Channel, family="qed.channels.phase"):
 
       # all done
       return
+
+
+   def tile(self, **kwds):
+      """
+      Generate a tile of the given characteristics
+      """
+      # add my configuration and chain up
+      return super().tile(saturation=self.saturation, brightness=self.brightness, **kwds)
+
+
+   # constants
+   tag = "phase"
 
 
 # end of file

@@ -28,12 +28,20 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
       return
 
 
-    def controllers(self, **kwds):
+    def controllers(self):
         """
         Generate the set of controllers that can manipulate my state
         """
         # by default, nothing
         return []
+
+
+    def project(self, pixel):
+        """
+        Compute the channel representation of a {pixel}
+        """
+        # don't kow what to do
+        raise NotImplementedError(f"class {type(self).__name__} must implement 'rep'")
 
 
     def tile(self, source, zoom, origin, shape, **kwds):
@@ -54,12 +62,12 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         return tileMaker(source=source.data, zoom=zoom, origin=origin, shape=shape, **kwds)
 
 
-    def project(self, pixel):
+    def update(self, **kwds):
         """
-        Compute the channel representation of a {pixel}
+        Update the state of one of my controllers
         """
-        # don't kow what to do
-        raise NotImplementedError(f"class {type(self).__name__} must implement 'rep'")
+        # nothing for me to do
+        return {}
 
 
 # end of file

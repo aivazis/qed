@@ -8,33 +8,47 @@
 import qed
 # superclass
 from .Channel import Channel
-# mix in
+# my parts
 from .LogRange import LogRange
 
 
 # a channel for displaying complex values
-class Complex(LogRange, Channel, family="qed.channels.complex"):
+class Complex(Channel, family="qed.channels.complex"):
    """
    Make a visualization pipeline to display complex values
    """
 
 
-   # constants
-   tag = "complex"
+   # configurable state
+   range = qed.protocols.controller(default=LogRange)
+   range.doc = "the manager of the range of values to render"
 
-
-   # user configurable state
    saturation = qed.properties.float(default=1.0)
    saturation.doc = "the saturation"
 
 
    # interface
+   def autotune(self, **kwds):
+      """
+      Use the {stats} gathered on a data sample to adjust the range configuration
+      """
+      # chain up
+      super().autotune(**kwds)
+      # notify my range
+      self.range.autotune(**kwds)
+      # all done
+      return
+
+
    def controllers(self, **kwds):
       """
       Generate the controllers that manipulate my state
       """
       # chain up
       yield from super().controllers(**kwds)
+      # my range
+      yield self.range
+      # and my saturation
       # all done
       return
 
@@ -53,8 +67,16 @@ class Complex(LogRange, Channel, family="qed.channels.complex"):
       """
       Generate a tile of the given characteristics
       """
+      # get my configuration
+      low = 10**self.range.low
+      high = 10**self.range.high
+      saturation = self.saturation
       # add my configuration and chain up
-      return super().tile(saturation=self.saturation, **kwds)
+      return super().tile(min=low, max=high, saturation=saturation, **kwds)
+
+
+   # constants
+   tag = "complex"
 
 
 # end of file
