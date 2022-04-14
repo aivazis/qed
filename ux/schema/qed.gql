@@ -168,7 +168,7 @@ input RangeControllerInput {
 }
 
 # the output payload
-type RangeControllerInfo implements Node {
+type RangeControllerInfo {
   # the updated controller
   controller: RangeController!
 }
