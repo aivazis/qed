@@ -6,12 +6,10 @@
 
 # support
 import qed
-# my superclass
-from .Producer import Producer
 
 
 # the workflow
-class Controller(Producer, family="qed.controller"):
+class Controller(qed.protocol, family="qed.controllers"):
     """
     Controllers help manage state that is manipulated interactively
     """
