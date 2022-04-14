@@ -168,12 +168,9 @@ input RangeControllerInput {
 }
 
 # the output payload
-type RangeControllerInfo {
-  # just the controller parameters
-  min: Float!
-  max: Float!
-  low: Float!
-  high: Float!
+type RangeControllerInfo implements Node {
+  # the updated controller
+  controller: RangeController!
 }
 
 
