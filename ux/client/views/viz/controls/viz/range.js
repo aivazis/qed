@@ -15,13 +15,13 @@ import { Range, SVG } from '~/widgets'
 
 
 // amplitude controller
-export const LogRangeController = props => {
+export const RangeController = props => {
     // build the range mutator
     const [updateRange, isInFlight] = useMutation(updateRangeMutation)
 
     // ask the store for the current configuration
     const configuration = useFragment(graphql`
-        fragment logrange_logrange on LogRangeController {
+        fragment range_range on RangeController {
             id
             slot
             min
@@ -34,14 +34,8 @@ export const LogRangeController = props => {
     // unpack
     const { slot, min, max, low, high } = configuration
 
-    // switch to log scale
-    const logMin = Math.round(Math.log10(min))
-    const logMax = Math.round(Math.log10(max))
-    const logLow = Math.log10(Math.max(min, low))
-    const logHigh = Math.log10(Math.min(max, high))
     // set up the tick marks
-    // const major = [...Array(logMax - logMin + 1).keys()].map((_, idx) => logMin + idx)
-    const major = [logMin, 0, logMax]
+    const major = [min, 0, max]
 
     // build the value updater to hand to the controller
     // this is built in the style of {react} state updates: the controller invokes this
@@ -55,7 +49,7 @@ export const LogRangeController = props => {
         }
 
         // invoke the controller's updater to get the new range
-        const [newLow, newHigh] = f([logLow, logHigh])
+        const [newLow, newHigh] = f([low, high])
 
         // send it to the server
         updateRange({
@@ -76,8 +70,8 @@ export const LogRangeController = props => {
 
     // controller configuration
     const amplitude = {
-        value: [logLow, logHigh], setValue,
-        min: logMin, max: logMax, major,
+        value: [low, high], setValue,
+        min, max, major,
         direction: "row", labels: "bottom", arrows: "top",
         height: 100, width: 250,
     }
@@ -98,7 +92,7 @@ export const LogRangeController = props => {
 
 // the range mutation
 const updateRangeMutation = graphql`
-mutation lograngeMutation($info: RangeControllerInput!) {
+mutation rangeMutation($info: RangeControllerInput!) {
     updateRangeController(range: $info) {
         # refresh my parameters
         min
