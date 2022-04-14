@@ -19,6 +19,8 @@ from .Reader import Reader as reader
 
 # visualization workflows
 from .Channel import Channel as channel
+# and their controllers
+from .Controller import Controller as controller
 
 
 # end of file
