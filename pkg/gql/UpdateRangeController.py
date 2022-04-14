@@ -8,6 +8,8 @@
 import graphene
 # the input payload
 from .RangeControllerInput import RangeControllerInput
+# the result types
+from .RangeController import RangeController
 
 
 # update the range of a controller
@@ -23,14 +25,10 @@ class UpdateRangeController(graphene.Mutation):
         range = RangeControllerInput(required=True)
 
 
-    # the updated fields
-    min = graphene.Float(required=True)
-    max = graphene.Float(required=True)
-    low = graphene.Float(required=True)
-    high = graphene.Float(required=True)
+    # the result is always a range controller
+    controller = graphene.Field(RangeController)
 
 
-    # the mutator
     def mutate(root, info, range):
         """
         Update the range of a controller
@@ -44,22 +42,19 @@ class UpdateRangeController(graphene.Mutation):
         high = range["high"]
 
         # build the resolution context
-        # grab the plexus
+        # grab the panel
         panel = info.context["panel"]
-        # resolve the dataset
-        dataset = panel.dataset(name=dataset)
-        # and the channel
-        channel = dataset.channel(name=channel)
+        # get the nameserver
+        ns = panel.pyre_nameserver
+        # ask it for the controller
+        controller = ns[slot]
 
+        # update
+        controller.low = low
+        controller.high = high
 
-        print(f"channel: {channel.pyre_name}")
-        print(f"  slot: {slot}")
-        print(f"  new low: {low}")
-        print(f"  new high: {high}")
-
-
-        # resolve
-        return
+        # and use the result to resolve the mutation
+        return {"controller": controller}
 
 
 # end of file
