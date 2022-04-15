@@ -44,7 +44,7 @@ class Imaginary(Channel, family="qed.channels.imaginary"):
       # chain up
       yield from super().controllers(**kwds)
       # my range
-      yield self.range
+      yield self.range, self.pyre_trait(alias="range")
       # all done
       return
 

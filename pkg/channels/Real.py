@@ -44,7 +44,7 @@ class Real(Channel, family="qed.channels.real"):
       # chain up
       yield from super().controllers(**kwds)
       # my range
-      yield self.range
+      yield self.range, self.pyre_trait(alias="range")
       # all done
       return
 

@@ -47,7 +47,7 @@ class Complex(Channel, family="qed.channels.complex"):
       # chain up
       yield from super().controllers(**kwds)
       # my range
-      yield self.range
+      yield self.range, self.pyre_trait(alias="range")
       # and my saturation
       # all done
       return

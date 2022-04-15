@@ -44,7 +44,7 @@ class Amplitude(Channel, family="qed.channels.amplitude"):
       # chain up
       yield from super().controllers()
       # my range
-      yield self.range
+      yield self.range, self.pyre_trait(alias="range")
       # all done
       return
 
