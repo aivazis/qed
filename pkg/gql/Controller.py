@@ -26,14 +26,14 @@ class Controller(graphene.Union):
 
     # the type resolver
     @classmethod
-    def resolve_type(cls, instance, info):
+    def resolve_type(cls, context, info):
        """
        Deduce the controller type from the {instance} information
        """
-       # extract the type
-       controller = instance.controller
+       # extract the type id
+       tag = context["controller"].tag
        # look up the associated class in my registryand return it
-       return cls.registry[controller]
+       return cls.registry[tag]
 
 
     # the resolver table
