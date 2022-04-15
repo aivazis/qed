@@ -12,7 +12,7 @@ import React from 'react'
 import { Context } from './context'
 
 
-// hook that adjust the contents of a given viewport
+// hook that adjusts the contents of a given viewport
 // currently, only called by {reader} instances when selected/updated
 export const useVisualize = () => {
     // grab the active viewport index and the {views} mutator
