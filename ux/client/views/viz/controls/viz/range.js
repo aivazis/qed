@@ -13,9 +13,15 @@ import styled from 'styled-components'
 // widgets
 import { Range, SVG } from '~/widgets'
 
+// local
+// hooks
+import { useSetVizSession } from '../../viz/useSetVizSession'
+
 
 // amplitude controller
 export const RangeController = props => {
+    // make a handler that can update the session id of a view
+    const setSession = useSetVizSession()
     // build the range mutator
     const [updateRange, isInFlight] = useMutation(updateRangeMutation)
 
@@ -53,6 +59,7 @@ export const RangeController = props => {
 
         // send it to the server
         updateRange({
+            // input
             variables: {
                 info: {
                     dataset: props.dataset,
@@ -61,6 +68,16 @@ export const RangeController = props => {
                     low: newLow,
                     high: newHigh,
                 }
+            },
+
+            // when done
+            onCompleted: data => {
+                // get the session
+                const session = data.updateRangeController.controller.session
+                // and set it in the active view
+                setSession(session)
+                // all done
+                return
             }
         })
 
@@ -95,8 +112,10 @@ const updateRangeMutation = graphql`
 mutation rangeMutation($info: RangeControllerInput!) {
     updateRangeController(range: $info) {
         controller {
-            # refresh my parameters
             id
+            # get my new session id
+            session
+            # refresh my parameters
             min
             max
             low
