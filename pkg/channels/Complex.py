@@ -10,6 +10,7 @@ import qed
 from .Channel import Channel
 # my parts
 from .LogRange import LogRange
+from .Value import Value
 
 
 # a channel for displaying complex values
@@ -23,7 +24,7 @@ class Complex(Channel, family="qed.channels.complex"):
    range = qed.protocols.controller(default=LogRange)
    range.doc = "the manager of the range of values to render"
 
-   saturation = qed.properties.float(default=1.0)
+   saturation = qed.protocols.controller(default=Value)
    saturation.doc = "the saturation"
 
 
@@ -49,6 +50,7 @@ class Complex(Channel, family="qed.channels.complex"):
       # my range
       yield self.range, self.pyre_trait(alias="range")
       # and my saturation
+      yield self.saturation, self.pyre_trait(alias="saturation")
       # all done
       return
 
@@ -70,7 +72,7 @@ class Complex(Channel, family="qed.channels.complex"):
       # get my configuration
       low = 10**self.range.low
       high = 10**self.range.high
-      saturation = self.saturation
+      saturation = self.saturation.value
       # add my configuration and chain up
       return super().tile(min=low, max=high, saturation=saturation, **kwds)
 
