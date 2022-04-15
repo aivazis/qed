@@ -119,7 +119,7 @@ export const Context = React.createContext(
 
 
 // the empty view template
-export const emptyView = () => ({ reader: null, dataset: null, channel: null })
+export const emptyView = () => ({ reader: null, dataset: null, channel: null, session: "" })
 // the default synced state
 export const syncedDefault = false
 // the default zoom level
