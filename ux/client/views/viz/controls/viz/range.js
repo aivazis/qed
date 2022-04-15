@@ -97,7 +97,6 @@ mutation rangeMutation($info: RangeControllerInput!) {
         controller {
             # refresh my parameters
             id
-            uuid
             min
             max
             low
