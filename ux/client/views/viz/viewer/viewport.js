@@ -37,7 +37,7 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     const uri = useGetTileURI({ viewport })
 
     // get my view info
-    const { dataset } = view
+    const { dataset, session } = view
     // and unpack what i need
     const { shape, origin, tile } = dataset
 
@@ -81,7 +81,7 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     return (
         <Box ref={registrar} {...controllers} {...rest} >
             {/* the data tiles */}
-            <View uri={uri} shape={zoomedShape} origin={origin} tile={tile} />
+            <View uri={uri} shape={zoomedShape} origin={origin} tile={tile} session={session} />
             {/* the measure layer */}
             {measure && <Measure viewport={viewport} shape={zoomedShape} zoom={zoom} />}
         </Box>
@@ -113,6 +113,11 @@ const DataTiles = styled(Mosaic)`
 // memoize it
 // we need a function that looks at {props} and decides whether the mosaic should render
 const shouldRender = (prev, next) => {
+    // if the {session} has changed
+    if (prev.session != next.session) {
+        // render
+        return false
+    }
     // if the {uri} has changed
     if (prev.uri != next.uri) {
         // render
