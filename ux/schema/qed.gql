@@ -124,6 +124,7 @@ type VisualizationPipeline {
 # controllers
 type RangeController implements Node {
   id: ID!
+  session: ID!
   slot: String!
   min: Float!
   max: Float!
@@ -133,6 +134,7 @@ type RangeController implements Node {
 
 type ValueController implements Node {
   id: ID!
+  session: ID!
   slot: String!
   min: Float!
   max: Float!
@@ -158,7 +160,7 @@ input RangeControllerInput {
   dataset: ID!
   # the channel
   channel: String!
-  # the controller
+  # the controller name
   slot: String!
   # the parameters
   low: Float!
