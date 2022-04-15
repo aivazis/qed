@@ -24,9 +24,7 @@ class RangeController(graphene.ObjectType):
 
 
     # my fields
-    # id
     id = graphene.ID()
-    uuid = graphene.ID()
     # payload
     slot = graphene.String()
     min = graphene.Float()
@@ -36,22 +34,61 @@ class RangeController(graphene.ObjectType):
 
 
     # resolvers
-    def resolve_id(controller, *_):
+    def resolve_id(context, *_):
+        # extract the controller
+        controller = context["controller"]
         # form the controller id
         return controller.pyre_name
 
 
-    def resolve_uuid(controller, *_):
-        # form the controller uuid
-        return controller.pyre_id
-
-
-    def resolve_slot(controller, *_):
+    def resolve_slot(context, *_):
         """
         Resolve the slot managed by this controller
         """
+        # extract the controller metadata
+        trait = context["trait"]
         # easy enough
-        return controller.pyre_name
+        return trait.name
+
+
+    def resolve_min(context, *_):
+        """
+        Resolve the minimum value of the range
+        """
+        # extract the controller
+        controller = context["controller"]
+        # easy enough
+        return controller.min
+
+
+    def resolve_max(context, *_):
+        """
+        Resolve the maximum value of the range
+        """
+        # extract the controller
+        controller = context["controller"]
+        # easy enough
+        return controller.max
+
+
+    def resolve_low(context, *_):
+        """
+        Resolve the low end of the range
+        """
+        # extract the controller
+        controller = context["controller"]
+        # easy enough
+        return controller.low
+
+
+    def resolve_high(context, *_):
+        """
+        Resolve the high end of the range
+        """
+        # extract the controller
+        controller = context["controller"]
+        # easy enough
+        return controller.high
 
 
 # end of file
