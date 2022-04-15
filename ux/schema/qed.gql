@@ -124,7 +124,6 @@ type VisualizationPipeline {
 # controllers
 type RangeController implements Node {
   id: ID!
-  uuid: ID!
   slot: String!
   min: Float!
   max: Float!
@@ -134,7 +133,6 @@ type RangeController implements Node {
 
 type ValueController implements Node {
   id: ID!
-  uuid: ID!
   slot: String!
   min: Float!
   max: Float!
