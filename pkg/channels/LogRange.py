@@ -58,6 +58,18 @@ class LogRange(Controller, family="qed.controllers.logrange"):
       return
 
 
+   def updateRange(self, low, high):
+      """
+      Update my state with new values for the range
+      """
+      # update my state
+      self.low = low
+      self.high = high
+
+      # and let the caller know
+      return True
+
+
    # constants
    tag = "range"
 

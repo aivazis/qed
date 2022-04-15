@@ -27,7 +27,7 @@ class LinearRange(Controller, family="qed.controllers.linearrange"):
    high = qed.properties.float(default=None)
    high.doc = "the highest value; anything above is overflow"
 
-   min = qed.properties.float(default=1.0e-3)
+   min = qed.properties.float(default=-1.0e3)
    min.doc = "the smallest possible value"
 
    max = qed.properties.float(default=1.0e+3)
@@ -58,6 +58,17 @@ class LinearRange(Controller, family="qed.controllers.linearrange"):
 
       # all done
       return
+
+
+   def updateRange(self, low, high):
+      """
+      Update my state with new values for the range
+      """
+      # update my state
+      self.low = low
+      self.high = high
+      # and let the caller know
+      return True
 
 
    # constants
