@@ -50,7 +50,14 @@ class VizPipeline(graphene.ObjectType):
         # get the channel
         channel = context["channel"]
         # and ask it for its controllers
-        yield from channel.controllers()
+        for controller, trait in channel.controllers():
+            # pack into a resolution context
+            context = {
+                "controller": controller,
+                "trait": trait,
+            }
+            # and resolve it
+            yield context
         # all done
         return
 
