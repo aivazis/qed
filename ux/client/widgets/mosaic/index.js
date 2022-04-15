@@ -15,7 +15,7 @@ import { Tile } from '~/widgets'
 
 
 // a large raster represented as a rectangular grid of tiles
-export const Mosaic = ({ uri, shape, origin, tile }) => {
+export const Mosaic = ({ uri, shape, origin, tile, session }) => {
     // render
     return (
         <Box shape={shape}>
@@ -23,7 +23,7 @@ export const Mosaic = ({ uri, shape, origin, tile }) => {
                 // unpack
                 const [origin, extent] = spec
                 // form the uri
-                const tileURI = `${uri}/${origin.join("x")}+${extent.join("x")}`
+                const tileURI = `${uri}/${origin.join("x")}+${extent.join("x")}?session=${session}`
                 // render
                 return (
                     <Tile key={origin} uri={tileURI} shape={extent} />
