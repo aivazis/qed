@@ -40,7 +40,6 @@ type Version {
 type Reader implements Node {
   # ids
   id: ID!
-  uuid: ID!
   name: ID!
   # the full path to the supporting file
   uri: String!
@@ -57,7 +56,6 @@ type Reader implements Node {
 type Dataset implements Node {
   # ids
   id: ID!
-  uuid: ID!
   name: ID!
   # metadata
   channels: [String!]!
@@ -179,8 +177,6 @@ type RangeControllerInfo {
 interface Node {
   # the node relay id
   id: ID!
-  # and the uuid of the pyre object
-  uuid: ID!
 }
 
 
