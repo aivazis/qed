@@ -38,7 +38,6 @@ export const vizPipelineQuery = graphql`
                 __typename
                 ... on Node {
                    id
-                   uuid
                 }
                 ... on RangeController {
                     ...range_range
