@@ -23,11 +23,21 @@ export const useSetVizSession = viewport => {
     const set = session => {
         // adjust the view
         setViews(old => {
-            // make a copy of the old state
-            const clone = [...old]
-            // adjust the entry that corresponds to {viewport}
-            clone[viewport] = { ...old[viewport], session }
-            // and hand off the new state
+            // unpack the {view} of the {viewport}
+            const { dataset, channel } = old[viewport]
+
+            // build the new state
+            const clone = old.map(view => {
+                // if this view shows the same dataset and channel as my target
+                if (view.dataset.name === dataset.name && view.channel === channel) {
+                    // update its session
+                    return { ...view, session }
+                }
+                // otherwise, leave it alone
+                return view
+            })
+
+            // hand off the new state
             return clone
         })
         // all done
