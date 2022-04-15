@@ -18,7 +18,6 @@ class Dataset(graphene.ObjectType):
 
     # my fields
     id = graphene.ID()
-    uuid = graphene.ID()
     name = graphene.ID()
 
     channels = graphene.List(graphene.String)
@@ -36,14 +35,6 @@ class Dataset(graphene.ObjectType):
         """
         # splice together the {family} and {name} of the {reader}
         return f"{dataset.pyre_family()}:{dataset.pyre_name}"
-
-
-    def resolve_uuid(dataset, *_):
-        """
-        Get the {dataset} uuid
-        """
-        # return the {pyre_id} of the {reader}
-        return dataset.pyre_id
 
 
     def resolve_name(dataset, *_):

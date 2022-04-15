@@ -21,7 +21,6 @@ class Node(graphene.relay.Node):
 
     # the basic fields
     id = graphene.ID()
-    uuid = graphene.ID()
 
 
     #  {graphene} hooks
