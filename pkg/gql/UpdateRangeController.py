@@ -33,7 +33,6 @@ class UpdateRangeController(graphene.Mutation):
         """
         Update the range of a controller
         """
-        # assemble the resolution context
         # unpack the input payload
         dataset = range["dataset"]
         channel = range["channel"]
@@ -44,17 +43,30 @@ class UpdateRangeController(graphene.Mutation):
         # build the resolution context
         # grab the panel
         panel = info.context["panel"]
-        # get the nameserver
-        ns = panel.pyre_nameserver
-        # ask it for the controller
-        controller = ns[slot]
+
+        # get the dataset
+        dataset = panel.dataset(name=dataset)
+        # ask it for the channel
+        channel = dataset.channel(name=channel)
+        # ask it for its controller
+        controller = getattr(channel, slot)
+        # and the controller metadata
+        trait = channel.pyre_trait(alias=slot)
 
         # update
         controller.low = low
         controller.high = high
 
+        # build the context for the response resolution
+        context = {
+            "controller" : {
+                "controller": controller,
+                "trait": trait,
+            }
+        }
+
         # and use the result to resolve the mutation
-        return {"controller": controller}
+        return context
 
 
 # end of file
