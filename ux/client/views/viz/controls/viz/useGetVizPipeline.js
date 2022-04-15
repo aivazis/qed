@@ -40,13 +40,12 @@ export const vizPipelineQuery = graphql`
                    id
                 }
                 ... on RangeController {
+                    slot
                     ...range_range
                 }
                 ... on ValueController {
                     slot
-                    min
-                    max
-                    value
+                    ...value_value
                 }
             }
         }

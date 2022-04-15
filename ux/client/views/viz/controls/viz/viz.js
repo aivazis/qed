@@ -17,6 +17,7 @@ import { Tray } from '~/widgets'
 import { useGetVizPipeline } from './useGetVizPipeline'
 // components
 import { RangeController } from './range'
+import { ValueController } from './value'
 
 
 //  the tray with the visualization pipeline controls
@@ -28,12 +29,12 @@ export const Viz = () => {
         <Tray title="viz" state="enabled" initially={true}>
             {controllers.map(configuration => {
                 // unpack the controller configuration
-                const { id, __typename: typename } = configuration
+                const { slot, __typename: typename } = configuration
                 // look up the controller
                 const Controller = registry[typename]
                 // and render
                 return (
-                    <Controller key={id}
+                    <Controller key={slot}
                         dataset={dataset} channel={channel} configuration={configuration} />
                 )
             })}
@@ -45,22 +46,8 @@ export const Viz = () => {
 // the controller type registry
 const registry = {
     RangeController,
+    ValueController,
 }
-
-// styling
-const Dataset = styled.div`
-    font-family: inconsolata;
-    font-size: 75%;
-    cursor: default;
-    padding: 0.25rem;
-`
-
-const Channel = styled.div`
-    font-family: inconsolata;
-    font-size: 75%;
-    cursor: default;
-    padding: 0.25rem;
-`
 
 
 // end of file
