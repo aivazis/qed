@@ -67,8 +67,8 @@ S_051219:
 
 # attach them to the application
 datasets:
-    # - raw#c8
-    # - raw#c16
+    - raw#c8
+    - raw#c16
     - isce2.rslc#LA-20061231
     - isce2.rslc#LA-20070215
     - nisar.rslc#hawaii
