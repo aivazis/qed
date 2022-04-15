@@ -59,7 +59,7 @@ class LogRange(Controller, family="qed.controllers.logrange"):
 
 
    # constants
-   controller = "range"
+   tag = "range"
 
 
 # end of file

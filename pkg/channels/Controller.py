@@ -24,4 +24,8 @@ class Controller(qed.component, implements=qed.protocols.controller):
         return
 
 
+    # constants
+    tag = "controller"
+
+
 # end of file

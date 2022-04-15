@@ -61,7 +61,7 @@ class LinearRange(Controller, family="qed.controllers.linearrange"):
 
 
    # constants
-   controller = "range"
+   tag = "range"
 
 
 # end of file
