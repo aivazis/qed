@@ -25,6 +25,8 @@ class RangeController(graphene.ObjectType):
 
     # my fields
     id = graphene.ID()
+    # my session key; used to detect changes in the controller state
+    session = graphene.ID()
     # payload
     slot = graphene.String()
     min = graphene.Float()

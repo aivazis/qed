@@ -6,6 +6,7 @@
 
 # externals
 import graphene
+import uuid
 # the input payload
 from .RangeControllerInput import RangeControllerInput
 # the result types
@@ -29,6 +30,7 @@ class UpdateRangeController(graphene.Mutation):
     controller = graphene.Field(RangeController)
 
 
+    # the range controller mutator
     def mutate(root, info, range):
         """
         Update the range of a controller
@@ -54,14 +56,16 @@ class UpdateRangeController(graphene.Mutation):
         trait = channel.pyre_trait(alias=slot)
 
         # update
-        controller.low = low
-        controller.high = high
+        changed = controller.updateRange(low=low, high=high)
+        # and refresh the session key, if necessary
+        session = uuid.uuid1() if changed else controller.pyre_id
 
         # build the context for the response resolution
         context = {
             "controller" : {
                 "controller": controller,
                 "trait": trait,
+                "session": session,
             }
         }
 
