@@ -9,6 +9,7 @@ import graphene
 
 # the mutations
 from .UpdateRangeController import UpdateRangeController
+from .UpdateValueController import UpdateValueController
 
 
 # the mutation anchor
@@ -20,6 +21,7 @@ class Mutation(graphene.ObjectType):
 
     # updates to ranged controllers
     updateRangeController = UpdateRangeController.Field()
+    updateValueController = UpdateValueController.Field()
 
 
 # end of file
