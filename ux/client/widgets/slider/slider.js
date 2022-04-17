@@ -30,7 +30,7 @@ export const Slider = ({ value, setValue, ...config }) => {
 
 
 // lay out the control
-const Controller = ({ value, setValue, enabled }) => {
+const Controller = ({ value, setValue }) => {
     // render
     return (
         <Simplemat setValue={setValue} >
