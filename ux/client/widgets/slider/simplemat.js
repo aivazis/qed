@@ -33,7 +33,7 @@ export const Simplemat = ({ setValue, children, ...rest }) => {
     // make a handler that clears the {sliding} flag
     const stopSliding = useStopSliding()
     // get names
-    const { mainMovementName, mainOffsetName } = useNames()
+    const { mainNearEdgeName, mainPositionName } = useNames()
 
     // unpack my state
     const { enabled } = useConfig()
@@ -45,8 +45,10 @@ export const Simplemat = ({ setValue, children, ...rest }) => {
     // handler that converts mouse coordinates to user space and invokes {setValue} to inform
     // the client
     const pick = evt => {
+        // measure the {target} box
+        const box = evt.currentTarget.getBoundingClientRect()
         // get the position of the mouse relative to the main edge
-        const pixels = evt[mainOffsetName]
+        const pixels = evt[mainPositionName] - box[mainNearEdgeName]
         // transform the mouse coordinates into a user value
         const value = mouseToUser(pixels)
         // notify the client
@@ -63,14 +65,7 @@ export const Simplemat = ({ setValue, children, ...rest }) => {
             // do nothing
             return
         }
-        // get the mouse movement along my main axis
-        const dMain = evt[mainMovementName]
-        // if there is no change
-        if (Math.trunc(dMain) === 0) {
-            // bail
-            return
-        }
-        // otherwise, {pick} a value
+        // {pick} a value
         pick(evt)
         // all done
         return
@@ -78,10 +73,10 @@ export const Simplemat = ({ setValue, children, ...rest }) => {
 
     // install the mouse event listeners
     // when the use clicks anywhere inside the {placemat}
-    useEvent({
-        name: "click", listener: enabled ? pick : null, client: placemat,
-        triggers: [setValue]
-    })
+    // useEvent({
+    // name: "click", listener: enabled ? pick : null, client: placemat,
+    // triggers: [setValue]
+    // })
 
     // the mouse down is attached to the indicator
     // when the mouse drags
@@ -106,7 +101,7 @@ export const Simplemat = ({ setValue, children, ...rest }) => {
     // otherwise, the {mouseleave} will trigger when the mouse enters any of the other
     // {children} of the slider
     return (
-        <g ref={placemat} transform={emplace} >
+        <g ref={placemat} transform={emplace} onClick={enabled ? pick : null}>
             <Rect {...bboxMine} {...rest} />
             {children}
         </g>
