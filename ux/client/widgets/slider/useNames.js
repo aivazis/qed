@@ -19,14 +19,16 @@ export const useNames = () => {
     const {
         // names
         mainName, crossName, mainCoordinate, crossCoordinate,
-        mainCoordinateName, crossCoordinateName, mainNearEdge, mainPosition,
+        mainCoordinateName, crossCoordinateName, mainNearEdgeName,
+        mainPositionName, crossPositionName,
         mainMovementName, crossMovementName, mainOffsetName, crossOffsetName,
     } = React.useContext(Context)
 
     // and publish it
     return {
         mainName, crossName, mainCoordinate, crossCoordinate,
-        mainCoordinateName, crossCoordinateName, mainNearEdge, mainPosition,
+        mainCoordinateName, crossCoordinateName, mainNearEdgeName,
+        mainPositionName, crossPositionName,
         mainMovementName, crossMovementName, mainOffsetName, crossOffsetName,
     }
 }

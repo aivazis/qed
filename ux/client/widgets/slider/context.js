@@ -46,9 +46,10 @@ export const Provider = ({ config, children }) => {
             mainOffsetName: "offsetX",
             crossOffsetName: "offsetY",
             // what to look up to extract dimensions from my client rectangle
-            mainNearEdge: "left",
+            mainNearEdgeName: "left",
             // what to look to extract mouse coordinates from an event
-            mainPosition: "clientX",
+            mainPositionName: "clientX",
+            crossPositionName: "clientY",
         },
 
         column: {
@@ -67,15 +68,17 @@ export const Provider = ({ config, children }) => {
             mainOffsetName: "offsetY",
             crossOffsetName: "offsetX",
             // what to look up to extract dimensions from my client rectangle
-            mainNearEdge: "top",
+            mainNearEdgeName: "top",
             // what to look to extract mouse coordinates from an event
-            mainPosition: "clientY",
+            mainPositionName: "clientY",
+            crossPositionName: "clientX",
         },
     }
     // decode and unpack
     const {
         mainClient, crossClient, mainName, crossName,
-        mainCoordinateName, crossCoordinateName, mainNearEdge, mainPosition,
+        mainCoordinateName, crossCoordinateName, mainNearEdgeName,
+        mainPositionName, crossPositionName,
         mainMovementName, crossMovementName, mainOffsetName, crossOffsetName,
     } = extents[direction]
 
@@ -201,8 +204,10 @@ export const Provider = ({ config, children }) => {
 
         // names
         mainName, crossName, mainCoordinateName, crossCoordinateName,
+        mainNearEdgeName,
         // mouse events
         mainMovementName, crossMovementName, mainOffsetName, crossOffsetName,
+        mainPositionName, crossPositionName,
     }
 
     // provide from my children
@@ -244,6 +249,8 @@ export const Context = React.createContext(
         mouseDeltaToUser: () => { throw new Error(complaint) },
         // names
         mainName: null, crossName: null, mainCoordinateName: null, crossCoordinateName: null,
+        mainNearEdgeName: null,
+        mainPositionName: null, crossPositionName: null,
         // mouse events
         mainMovementName: null, crossMovementName: null,
         mainOffsetName: null, crossOffsetName: null,
