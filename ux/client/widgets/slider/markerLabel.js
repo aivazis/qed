@@ -16,7 +16,13 @@ import { useConfig } from './useConfig'
 // render a single label at the marker position
 export const MarkerLabel = ({ value }) => {
     // unpack the geometry
-    const { enabled, markerLabelPosition } = useConfig()
+    const { enabled, markers, markerLabelPosition } = useConfig()
+
+    // if the client does not want the value label
+    if (!markers) {
+        // bail
+        return null
+    }
 
     // pick an implementation based on my state
     const Label = enabled ? Enabled : Disabled
