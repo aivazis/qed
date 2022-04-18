@@ -21,13 +21,13 @@ class LogRange(Controller, family="qed.controllers.logrange"):
 
 
    # user configurable state, in log scale
-   low = qed.properties.float(default=-2)
+   low = qed.properties.float(default=-1)
    low.doc = "the lowest value; anything below is underflow"
 
    high = qed.properties.float(default=3)
    high.doc = "the highest value; anything above is overflow"
 
-   min = qed.properties.float(default=-3)
+   min = qed.properties.float(default=-2)
    min.doc = "the smallest possible value"
 
    max = qed.properties.float(default=4)
