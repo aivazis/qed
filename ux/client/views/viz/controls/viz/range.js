@@ -86,10 +86,10 @@ export const RangeController = props => {
     }
 
     // controller configuration
-    const amplitude = {
+    const opt = {
         value: [low, high], setValue,
         min, max, major,
-        direction: "row", labels: "bottom", arrows: "top",
+        direction: "row", labels: "bottom", arrows: "top", markers: true,
         height: 100, width: 250,
     }
 
@@ -99,8 +99,8 @@ export const RangeController = props => {
             <Header>
                 <Title>{slot}</Title>
             </Header>
-            <Housing height={amplitude.height} width={amplitude.width}>
-                <Controller enabled={true} {...amplitude} />
+            <Housing height={opt.height} width={opt.width}>
+                <Controller enabled={true} {...opt} />
             </Housing>
         </>
     )
