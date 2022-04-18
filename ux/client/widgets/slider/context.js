@@ -17,7 +17,7 @@ export const Provider = ({ config, children }) => {
     // state
     const { enabled } = config
     // directional configuration
-    const { direction, arrows, labels } = config
+    const { direction, arrows, labels, markers } = config
     // the layout of the controller in client coordinates
     const { height, width } = config
     // extract the controller limits and tick marks
@@ -176,7 +176,7 @@ export const Provider = ({ config, children }) => {
         // state
         enabled,
         // directional configuration
-        direction, arrows, labels,
+        direction, arrows, labels, markers,
         // the layout of the controller in client coordinates
         height, width,
         // the limits and tick marks
@@ -230,7 +230,7 @@ export const Context = React.createContext(
         // state
         enabled: null,
         // directional configuration
-        direction: null, arrows: null, labels: null,
+        direction: null, arrows: null, labels: null, markers: null,
         // the layout of the controller in client coordinates
         height: null, width: null,
         // the limits and tick marks
