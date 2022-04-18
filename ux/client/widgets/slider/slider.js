@@ -15,6 +15,7 @@ import { Axis } from './axis'
 import { Labels } from './labels'
 import { Major } from './major'
 import { Marker } from './marker'
+import { MarkerLabel } from './markerLabel'
 import { Simplemat } from './simplemat'
 
 
@@ -38,6 +39,7 @@ const Controller = ({ value, setValue }) => {
             <Axis />
             <Labels value={value} setValue={setValue} />
             <Marker value={value} />
+            <MarkerLabel value={value} />
         </Simplemat>
     )
 }
