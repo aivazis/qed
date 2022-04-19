@@ -29,42 +29,45 @@ export const Rangemat = ({ setValue, children, ...rest }) => {
     // make a ref to attach to the placemat so we can measure its extent
     const placemat = React.useRef(null)
     // get the {sliding} indicator
-    const sliding = useSliding()
+    const { cursor, sliding } = useSliding()
     // make a handler that clears the {sliding} flag
     const stopSliding = useStopSliding()
     // get names
-    const { mainMovementName } = useNames()
+    const { mainCoordinateName, mainNearEdgeName, mainPositionName } = useNames()
     // get my state
     const { enabled, min, max } = useConfig()
     // unpack the geometry
     const { emplace } = useClient()
     const { bboxMine } = useMine()
-    const { mouseDeltaToUser } = useUser()
+    const { mouseDeltaToUser, mouseToUser } = useUser()
 
     // handler that converts mouse coordinates to user space and invokes {setValue} to inform
     // the client
     const pick = evt => {
-        // get the mouse movement along my main axis
-        const dMain = evt[mainMovementName]
-        // if there is no change
-        if (Math.trunc(dMain) === 0) {
-            // bail
-            return
-        }
-        // transform the mouse coordinates into a user value
-        const delta = mouseDeltaToUser(dMain)
+        // get the current cursor position
+        const mouseMain = evt[mainPositionName]
         // notify the client
         setValue(old => {
             // make a copy
             const range = [...old]
             // if both are sliding
             if (sliding < 0) {
+                // get the position of the mouse relative to the main edge
+                const dCursor = mouseMain - cursor.current[mainCoordinateName]
+                // transform the mouse coordinates into a user value
+                const delta = mouseDeltaToUser(dCursor)
                 // adjust both entries
                 range[0] += delta
                 range[1] += delta
             } else {
+                // measure the {target} box
+                const box = evt.currentTarget.getBoundingClientRect()
+                // get the position of the mouse relative to the main edge
+                const pixels = mouseMain - box[mainNearEdgeName]
+                // compute the new value
+                const newValue = mouseToUser(pixels)
                 // use the selector id to modify to correct entry
-                range[sliding] += delta
+                range[sliding] = newValue
             }
 
             // clip
@@ -73,6 +76,8 @@ export const Rangemat = ({ setValue, children, ...rest }) => {
             // and return the new range
             return range
         })
+        // update the cursor location
+        cursor.current = { ...cursor.current, [mainCoordinateName]: mouseMain }
         // and done
         return
     }
