@@ -30,7 +30,7 @@ export const Down = ({ node }) => {
         // unpack the event information
         const { altKey } = evt
         // pick a displacement
-        const value = altKey ? -5 : -1
+        const value = altKey ? 5 : 1
         // nudge the pixel location
         nudge({ dLine: value, dSample: 0 })
         // and the selection, if any
