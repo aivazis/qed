@@ -29,7 +29,7 @@ export const Simplemat = ({ setValue, children, ...rest }) => {
     // make a ref to attach to the placemat so we can measure its extent
     const placemat = React.useRef(null)
     // get the {sliding} indicator
-    const sliding = useSliding()
+    const { sliding } = useSliding()
     // make a handler that clears the {sliding} flag
     const stopSliding = useStopSliding()
     // get names
@@ -72,13 +72,7 @@ export const Simplemat = ({ setValue, children, ...rest }) => {
     }
 
     // install the mouse event listeners
-    // when the use clicks anywhere inside the {placemat}
-    // useEvent({
-    // name: "click", listener: enabled ? pick : null, client: placemat,
-    // triggers: [setValue]
-    // })
-
-    // the mouse down is attached to the indicator
+    // mouse down is attached to the indicators themselves
     // when the mouse drags
     useEvent({
         name: "mousemove", listener: enabled ? drag : null, client: placemat,
