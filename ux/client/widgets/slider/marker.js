@@ -24,10 +24,17 @@ export const Marker = ({ value, id = 0, ...rest }) => {
     // pick a styling based on my state
     const Indicator = enabled ? Enabled : Disabled
 
+    // make a handler to indicate the beginning of dragging the marker
+    const start = evt => {
+        // save the marker {id} and the current mouse position
+        startSliding(id, evt)
+        // all done
+        return
+    }
     // set up my event handlers
     const behaviors = enabled ? {
         // when the user clicks in my client area, start modifying the value
-        onMouseDown: () => startSliding(id)
+        onMouseDown: start,
     } : {}
 
     // render

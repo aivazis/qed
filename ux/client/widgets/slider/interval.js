@@ -27,10 +27,17 @@ export const Interval = ({ value, ...rest }) => {
     // pick a renderer
     const Path = enabled ? Enabled : Disabled
 
+    // make a handler to indicate the beginning of dragging the marker
+    const start = evt => {
+        // indicate that both markers are sliding and record the current position of the mouse
+        startSliding(-1, evt)
+        // all done
+        return
+    }
     // set up my event handlers
     const behaviors = enabled ? {
         // when the user clicks in my client area, start modifying the value
-        onMouseDown: () => startSliding(-1)
+        onMouseDown: start,
     } : {}
 
 
