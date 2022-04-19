@@ -10,6 +10,8 @@ import React from "react"
 
 // the provider factory
 export const Provider = ({ config, children }) => {
+    // a record of the mouse coordinates that were processed most recently
+    const cursor = React.useRef(null)
     // a flag that indicates that the user has started dragging the marker
     // in order to support multiple movable markers, the state holds the marker id
     const [sliding, setSliding] = React.useState(null)
@@ -170,6 +172,8 @@ export const Provider = ({ config, children }) => {
 
     // build the initial context value
     const context = {
+        // the most recently processed mouse coordinates
+        cursor,
         // the sliding flag and its mutator
         sliding, setSliding,
 
@@ -223,6 +227,8 @@ export const Provider = ({ config, children }) => {
 export const Context = React.createContext(
     // the default value clients see when accessing the context outside a provider
     {
+        // the most recently processed mouse coordinates
+        cursor: null,
         // the sliding flag
         sliding: null,
         setSliding: () => { throw new Error(complaint) },
