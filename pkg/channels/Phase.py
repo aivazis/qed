@@ -9,6 +9,9 @@ import cmath
 import qed
 # superclass
 from .Channel import Channel
+# my controllers
+from .LinearRange import LinearRange
+from .Value import Value
 
 
 # a channel for displaying the phase of complex values
@@ -19,22 +22,45 @@ class Phase(Channel, family="qed.channels.phase"):
 
 
    # user configurable state
-   brightness = qed.properties.float(default=1.0)
+   phase = qed.protocols.controller(default=LinearRange)
+   phase.doc = "the manager of the range of values to render"
+
+   brightness = qed.protocols.controller(default=Value)
    brightness.doc = "the brightness"
 
-   saturation = qed.properties.float(default=1.0)
+   saturation = qed.protocols.controller(default=Value)
    saturation.doc = "the saturation"
 
 
    # interface
+   def autotune(self, **kwds):
+      # chain up
+      super().autotune(**kwds)
+      # adjust my range
+      self.phase.min = 0
+      self.phase.low = 0
+      self.phase.max = 1
+      self.phase.high = 1
+      # my brightness
+      self.brightness.value = 1
+      # and my saturation
+      self.saturation.value = 1
+      # all done
+      return
+
+
    def controllers(self, **kwds):
       """
       Generate the controllers that manipulate my state
       """
       # chain up
       yield from super().controllers(**kwds)
+      # my phase
+      yield self.phase, self.pyre_trait(alias="phase")
       # my brightness
+      yield self.brightness, self.pyre_trait(alias="brightness")
       # and my saturation
+      yield self.saturation, self.pyre_trait(alias="saturation")
       # all done
       return
 
@@ -69,8 +95,13 @@ class Phase(Channel, family="qed.channels.phase"):
       """
       Generate a tile of the given characteristics
       """
+      # unpack my configuration
+      low = self.phase.low
+      high = self.phase.high
+      saturation = self.saturation.value
+      brightness = self.brightness.value
       # add my configuration and chain up
-      return super().tile(saturation=self.saturation, brightness=self.brightness, **kwds)
+      return super().tile(low=low, high=high, saturation=saturation, brightness=brightness, **kwds)
 
 
    # constants
