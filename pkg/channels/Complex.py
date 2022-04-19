@@ -9,6 +9,7 @@ import qed
 # superclass
 from .Channel import Channel
 # my parts
+from .LinearRange import LinearRange
 from .LogRange import LogRange
 from .Value import Value
 
@@ -24,6 +25,9 @@ class Complex(Channel, family="qed.channels.complex"):
    range = qed.protocols.controller(default=LogRange)
    range.doc = "the manager of the range of values to render"
 
+   phase = qed.protocols.controller(default=LinearRange)
+   phase.doc = "the manager of the range of values to render"
+
    saturation = qed.protocols.controller(default=Value)
    saturation.doc = "the saturation"
 
@@ -37,6 +41,13 @@ class Complex(Channel, family="qed.channels.complex"):
       super().autotune(**kwds)
       # notify my range
       self.range.autotune(**kwds)
+      # adjust my range
+      self.phase.min = 0
+      self.phase.low = 0
+      self.phase.max = 1
+      self.phase.high = 1
+      # and my saturation
+      self.saturation.value = 1
       # all done
       return
 
@@ -49,6 +60,8 @@ class Complex(Channel, family="qed.channels.complex"):
       yield from super().controllers(**kwds)
       # my range
       yield self.range, self.pyre_trait(alias="range")
+      # my phase
+      yield self.phase, self.pyre_trait(alias="phase")
       # and my saturation
       yield self.saturation, self.pyre_trait(alias="saturation")
       # all done
