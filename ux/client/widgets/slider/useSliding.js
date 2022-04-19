@@ -16,9 +16,9 @@ import { Context } from "./context"
 // provide access to the {sliding} indicator id
 export const useSliding = () => {
     // grab the sliding indicator
-    const { sliding } = React.useContext(Context)
+    const { cursor, sliding } = React.useContext(Context)
     // and return it
-    return sliding
+    return { cursor, sliding }
 }
 
 
