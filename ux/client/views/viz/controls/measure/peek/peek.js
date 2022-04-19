@@ -69,6 +69,11 @@ const Panel = () => {
         }
     })
 
+    // sometimes, i'm asked to refresh but there is no data
+    if (!sample) {
+        // bail
+        return null
+    }
     // unpack
     const { pixel, value } = sample
 
