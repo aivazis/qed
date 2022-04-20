@@ -85,7 +85,7 @@ export const Rangemat = ({ setValue, children, ...rest }) => {
     // handler that checks whether the marker is being dragged before converting
     // mouse coordinates to user space
     const drag = evt => {
-        // if the indicator is not being dragged
+        // if no indicator is being dragged
         if (sliding === null) {
             // do nothing
             return
@@ -97,12 +97,6 @@ export const Rangemat = ({ setValue, children, ...rest }) => {
     }
 
     // install the mouse event listeners
-    // when the use clicks anywhere inside the {placemat}
-    useEvent({
-        name: "click", listener: enabled ? pick : null, client: placemat,
-        triggers: [setValue]
-    })
-
     // the mouse down is attached to the indicator
     // when the mouse drags
     useEvent({
