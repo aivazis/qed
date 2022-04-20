@@ -21,6 +21,8 @@ namespace qed::py::channels {
         typename sourceT::index_type origin,
         // the tile shape
         typename sourceT::shape_type tile,
+        // the hue interaval
+        double low, double high,
         // the range of values to render
         double saturation, double brightness) -> bmp_t;
 
@@ -37,6 +39,8 @@ namespace qed::py::channels {
         typename sourceT::index_type origin,
         // the tile shape
         typename sourceT::shape_type tile,
+        // the hue interaval
+        double low, double high,
         // the range of values to render
         double saturation, double brightness) -> bmp_t;
 }

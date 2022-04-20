@@ -21,6 +21,8 @@ qed::py::channels::phaseGridTile(
     typename sourceT::index_type origin,
     // the tile shape
     typename sourceT::shape_type tile,
+    // the hue range
+    double low, double high,
     // the range of values to render
     double saturation, double brightness) -> bmp_t
 {
@@ -28,9 +30,10 @@ qed::py::channels::phaseGridTile(
     // my decimator
     using zoom_t = decimate_t<sourceT>;
     // the phase selector
-    using selector_t = phase_t<zoom_t>;
+    using selector_t = cycle_t<zoom_t>;
+    using scale_t = affine_t<selector_t>;
     // the color map
-    using colormap_t = hsb_t<selector_t, constant_t, constant_t>;
+    using colormap_t = hsb_t<scale_t, constant_t, constant_t>;
 
     // make a bitmap
     bmp_t bmp(tile[0], tile[1]);
@@ -39,7 +42,8 @@ qed::py::channels::phaseGridTile(
     auto decimator = zoom_t(source, origin, tile, 1 << zoom);
 
     // extract the phase
-    auto h = selector_t(decimator);
+    auto c = selector_t(decimator, { low, high });
+    auto h = scale_t(c, { 0, 2 * M_PI });
     // set up the saturation
     auto s = constant_t(saturation);
     // and brightness
@@ -69,6 +73,8 @@ qed::py::channels::phaseHDF5Tile(
     typename sourceT::index_type origin,
     // the tile shape
     typename sourceT::shape_type tile,
+    // the hue range
+    double low, double high,
     // the range of values to render
     double saturation, double brightness) -> bmp_t
 {
@@ -83,7 +89,7 @@ qed::py::channels::phaseHDF5Tile(
     auto source = pyre::h5::read<sourceT>(dataset, datatype, from, region);
 
     // render and return
-    return phaseGridTile(source, zoom, { 0, 0 }, tile, saturation, brightness);
+    return phaseGridTile(source, zoom, { 0, 0 }, tile, low, high, saturation, brightness);
 }
 
 

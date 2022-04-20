@@ -90,11 +90,17 @@ namespace qed::py {
     using hsl_t = pyre::viz::colormaps::hsl_t<hueSourceT, saturationSourceT, luminositySourceT>;
 
     // filters
+    // map [0,1] to an interval
+    template <typename sourceT>
+    using affine_t = pyre::viz::filters::affine_t<sourceT>;
     // the amplitude of a complex source
     template <typename sourceT>
     using amplitude_t = pyre::viz::filters::amplitude_t<sourceT>;
     // a supplier of a constant value
     using constant_t = pyre::viz::filters::constant_t<double>;
+    // map phase to [0,1]
+    template <typename sourceT>
+    using cycle_t = pyre::viz::filters::cycle_t<sourceT>;
     // support for zooming
     template <typename sourceT>
     using decimate_t = pyre::viz::filters::decimate_t<sourceT>;
@@ -104,9 +110,6 @@ namespace qed::py {
     // map a range of values to the unit interval
     template <typename sourceT>
     using parametric_t = pyre::viz::filters::parametric_t<sourceT>;
-    // extract the phase of a complex source
-    template <typename sourceT>
-    using phase_t = pyre::viz::filters::phase_t<sourceT>;
     // extract the real of a complex source
     template <typename sourceT>
     using real_t = pyre::viz::filters::real_t<sourceT>;
