@@ -41,7 +41,7 @@ export const RangeController = props => {
     const { slot, min, max, low, high } = configuration
 
     // set up the tick marks
-    const major = [min, (max - min) / 2, max]
+    const major = [min, (max + min) / 2, max]
 
     // build the value updater to hand to the controller
     // this is built in the style of {react} state updates: the controller invokes this
