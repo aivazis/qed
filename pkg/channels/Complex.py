@@ -82,12 +82,15 @@ class Complex(Channel, family="qed.channels.complex"):
       """
       Generate a tile of the given characteristics
       """
-      # get my configuration
+      # unpack my configuration
       low = 10**self.range.low
       high = 10**self.range.high
+      lowPhase = self.phase.low
+      highPhase = self.phase.high
       saturation = self.saturation.value
       # add my configuration and chain up
-      return super().tile(min=low, max=high, saturation=saturation, **kwds)
+      return super().tile(min=low, max=high,
+         minPhase=lowPhase, maxPhase=highPhase, saturation=saturation, **kwds)
 
 
    # constants
