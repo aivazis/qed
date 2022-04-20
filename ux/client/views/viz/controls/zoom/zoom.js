@@ -29,7 +29,7 @@ export const Zoom = () => {
     const { reader, dataset, channel } = useGetView()
 
     // inspect the view components to initialize my state
-    const enabled = reader && dataset && channel
+    const enabled = (reader && dataset && channel) ? true : false
 
     // set the zoom level range
     const [min, max] = [0, 4]
