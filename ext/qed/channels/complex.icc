@@ -22,7 +22,7 @@ qed::py::channels::complexGridTile(
     // the tile shape
     typename sourceT::shape_type tile,
     // the range of values to render
-    double min, double max, double saturation) -> bmp_t
+    double min, double max, double phaseMin, double phaseMax, double saturation) -> bmp_t
 {
     // type aliases for the workflow nodes
     // my decimator
@@ -31,9 +31,10 @@ qed::py::channels::complexGridTile(
     using amplitudeSelector_t = amplitude_t<zoom_t>;
     using norm_t = parametric_t<amplitudeSelector_t>;
     // for the phase
-    using phaseSelector_t = phase_t<zoom_t>;
+    using cycleSelector_t = cycle_t<zoom_t>;
+    using phaseScaler_t = affine_t<cycleSelector_t>;
     // the color map
-    using colormap_t = hsb_t<phaseSelector_t, constant_t, norm_t>;
+    using colormap_t = hsb_t<phaseScaler_t, constant_t, norm_t>;
 
     // make a bitmap
     bmp_t bmp(tile[0], tile[1]);
@@ -41,7 +42,8 @@ qed::py::channels::complexGridTile(
     // zoom
     auto decimator = zoom_t(source, origin, tile, 1 << zoom);
     // extract the phase; it becomes the hue
-    auto h = phaseSelector_t(decimator);
+    auto c = cycleSelector_t(decimator, { phaseMin, phaseMax });
+    auto h = phaseScaler_t(c, { 0, 2 * M_PI });
 
     // make a constant saturation
     auto s = constant_t(saturation);
@@ -75,7 +77,7 @@ qed::py::channels::complexHDF5Tile(
     // the tile shape
     typename sourceT::shape_type tile,
     // the range of values to render
-    double min, double max, double saturation) -> bmp_t
+    double min, double max, double phaseMin, double phaseMax, double saturation) -> bmp_t
 {
     // compute the scale
     auto scale = 1 << zoom;
@@ -88,7 +90,7 @@ qed::py::channels::complexHDF5Tile(
     auto source = pyre::h5::read<sourceT>(dataset, datatype, from, region);
 
     // render and return
-    return complexGridTile(source, zoom, { 0, 0 }, tile, min, max, saturation);
+    return complexGridTile(source, zoom, { 0, 0 }, tile, min, max, phaseMin, phaseMax, saturation);
 }
 
 

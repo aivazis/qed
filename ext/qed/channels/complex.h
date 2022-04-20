@@ -22,7 +22,7 @@ namespace qed::py::channels {
         // the tile shape
         typename sourceT::shape_type tile,
         // the range of values to render
-        double min, double max, double saturation) -> bmp_t;
+        double min, double max, double phaseMin, double phaseMax, double saturation) -> bmp_t;
 
     // the tile generator for the complex of a complex HDF5 source
     template <typename sourceT>
@@ -38,7 +38,7 @@ namespace qed::py::channels {
         // the tile shape
         typename sourceT::shape_type tile,
         // the range of values to render
-        double min, double max, double saturation) -> bmp_t;
+        double min, double max, double phaseMin, double phaseMax, double saturation) -> bmp_t;
 }
 
 
