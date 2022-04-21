@@ -10,6 +10,8 @@ import journal
 # errors
 journal.error("qed.ux.dispatch").fatal = False
 # debug
+journal.debug("pyre.http.headers").active = False
+journal.debug("pyre.http.server").active = False
 journal.debug("qed.ux.dispatch").active = False
 journal.debug("qed.ux.graphql").active = False
 # firewalls
