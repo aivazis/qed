@@ -69,18 +69,22 @@ qed::py::channels::amplitudeHDF5Tile(
     // the range of values to render
     double min, double max) -> bmp_t
 {
+    // type aliases
+    using index_t = typename sourceT::index_type;
+    using shape_t = typename sourceT::shape_type;
+
     // compute the scale
     auto scale = 1 << zoom;
-    // the shape of the data region is scaled by this
-    auto region = typename sourceT::shape_type(scale * tile);
-    // and so is the origin
-    auto from = typename sourceT::index_type(scale * origin);
+    // the origin of the data region is scaled by this
+    auto from = index_t(scale * origin);
+    // form the strides
+    shape_t strides = shape_t::fill(scale);
 
     // read the data
-    auto source = pyre::h5::read<sourceT>(dataset, datatype, from, region);
+    auto source = pyre::h5::read<sourceT>(dataset, datatype, from, tile, strides);
 
     // and render
-    return amplitudeGridTile(source, zoom, { 0, 0 }, tile, min, max);
+    return amplitudeGridTile(source, 0, { 0, 0 }, tile, min, max);
 }
 
 
