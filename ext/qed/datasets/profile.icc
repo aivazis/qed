@@ -173,6 +173,9 @@ qed::py::datasets::profileHDF5(
             // along the 1-axis
             std::abs(tail[1] - head[1]) + 1);
 
+        // we operate at zoom level 0
+        typename sourceT::shape_type strides = sourceT::shape_type::one();
+
         // show me
         channel
             // segment
@@ -188,7 +191,7 @@ qed::py::datasets::profileHDF5(
             << pyre::journal::endl(__HERE__);
 
         // read the data
-        auto source = pyre::h5::read<sourceT>(dataset, datatype, origin, shape);
+        auto source = pyre::h5::read<sourceT>(dataset, datatype, origin, shape, strides);
 
         // compute the pixel separation; make sure it is a floating point number
         // so we don't do integer arithmetic until it's time

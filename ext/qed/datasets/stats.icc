@@ -67,9 +67,11 @@ qed::py::datasets::statsHDF5(
     auto region = typename sourceT::shape_type(scale * tile);
     // and so is the origin
     auto from = typename sourceT::index_type(scale * origin);
+    // we operate at zoom level 0
+    typename sourceT::shape_type strides = sourceT::shape_type::one();
 
     // read the data
-    auto source = pyre::h5::read<sourceT>(dataset, datatype, from, region);
+    auto source = pyre::h5::read<sourceT>(dataset, datatype, from, region, strides);
 
     // my stats
     int samples = 0;
