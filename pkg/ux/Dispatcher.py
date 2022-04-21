@@ -120,7 +120,6 @@ class Dispatcher:
             chnl.line(f"while fetching a tile of '{channel}' from '{data}'")
             chnl.line(f"with shape {shape} at {origin}")
             chnl.line(f"at zoom level {zoom}")
-            chnl.line(f"from '{src}'")
             # and flush
             chnl.log()
             # let the client know
@@ -154,7 +153,6 @@ class Dispatcher:
             chnl.line(f"while generating a '{channel}' tile of '{data}'")
             chnl.line(f"with shape {shape} at {origin}")
             chnl.line(f"at zoom level {zoom}")
-            chnl.line(f"from '{src}'")
             # and flush
             chnl.log()
         # let the client know
