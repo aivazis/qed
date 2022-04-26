@@ -11,7 +11,7 @@ import { Environment, Network, RecordSource, Store } from 'relay-runtime'
 // post a query and retrieve the results
 const fetchQuery = (operation, variables,) => (
     // post the query
-    fetch('/graphql', {
+    fetch('graphql', {
         method: 'POST',
         headers: {
             'content-type': 'application/json',
