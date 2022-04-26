@@ -62,8 +62,8 @@ class Reader(graphene.ObjectType):
         """
         Get the entry point for data requests
         """
-        # turn the {uri} into an absolute path and send it off
-        return "/data"
+        # requests are resolved against {data}
+        return "data"
 
 
     def resolve_selectors(reader, *_):
