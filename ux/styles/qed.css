@@ -60,7 +60,7 @@ body {
     /* placement */
     height: 100%;
     width: 100%;
-    margin: 0em;;
+    margin: 0em;
     padding: 0em;
 
     /* clip to my extent */
@@ -92,18 +92,18 @@ a:active {
 
 /* fonts */
 @font-face {
-   font-family: "inconsolata";
-   src: url("/fonts/inconsolata-regular.ttf");
+    font-family: "inconsolata";
+    src: url("../fonts/inconsolata-regular.ttf");
 }
 
 @font-face {
-   font-family: "rubik-medium";
-   src: url("/fonts/rubik-medium.ttf");
+    font-family: "rubik-medium";
+    src: url("../fonts/rubik-medium.ttf");
 }
 
 @font-face {
-   font-family: "rubik-light";
-   src: url("/fonts/rubik-light.ttf");
+    font-family: "rubik-light";
+    src: url("../fonts/rubik-light.ttf");
 }
 
 
