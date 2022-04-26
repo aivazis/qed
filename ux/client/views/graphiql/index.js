@@ -14,7 +14,7 @@ import { createGraphiQLFetcher } from '@graphiql/toolkit';
 export const GiQL = () => {
     // make a fetcher
     const fetcher = createGraphiQLFetcher({
-        url: window.location.origin + '/graphql',
+        url: 'graphql',
     });
 
     // render
