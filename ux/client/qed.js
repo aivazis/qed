@@ -49,7 +49,7 @@ const QEDApp = () => {
     return (
         <Routes >
             {/* the app */}
-            <Route path="/" element={<Main />} >
+            <Route path="" element={<Main />} >
                 {/* specific activities */}
                 <Route path="about" element={<NYI />} />
                 <Route path="explore" element={<NYI />} />
@@ -64,13 +64,13 @@ const QEDApp = () => {
 
             {/* meta navigation */}
             {/* the closing page */}
-            <Route path="/stop" element={<Stop />} />
+            <Route path="stop" element={<Stop />} />
             {/* the page to render while waiting for data to arrive */}
-            <Route path="/loading" element={<Loading />} />
+            <Route path="loading" element={<Loading />} />
 
 
             {/* the graphiql sandbox */}
-            <Route path="/graphiql" element={<GiQL />} />
+            <Route path="graphiql" element={<GiQL />} />
         </Routes>
     )
 }
