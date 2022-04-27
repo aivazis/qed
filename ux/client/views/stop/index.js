@@ -10,12 +10,12 @@ import React from 'react'
 import styles from './styles'
 
 
-// the area
-const stop = (props) => {
+// kill the server
+export const Stop = () => {
     // ask the server to shut down
-    fetch('/stop').catch(
-        // swallow any errors
-        (error) => null
+    fetch('/qed/stop').catch(
+        // and swallow any errors
+        () => null
     )
 
     // the container
@@ -27,10 +27,6 @@ const stop = (props) => {
         </section>
     )
 }
-
-
-// publish
-export default stop
 
 
 // end of file
