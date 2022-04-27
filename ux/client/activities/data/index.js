@@ -24,7 +24,7 @@ export const Data = ({ size, style }) => {
     return (
         <Activity size={size} url="/" style={paint} >
             <Icon />
-        </Activity >
+        </Activity>
     )
 }
 

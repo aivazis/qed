@@ -24,7 +24,7 @@ export const Help = ({ size, style }) => {
     return (
         <Activity size={size} url="/help" style={paint} >
             <Icon />
-        </Activity >
+        </Activity>
     )
 }
 

@@ -24,7 +24,7 @@ export const Debug = ({ size, style }) => {
     return (
         <Activity size={size} url="/graphiql" style={paint} >
             <Icon />
-        </Activity >
+        </Activity>
     )
 }
 

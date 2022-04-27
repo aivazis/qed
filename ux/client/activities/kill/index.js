@@ -24,7 +24,7 @@ export const Kill = ({ size, style }) => {
     return (
         <Activity size={size} url="/stop" style={paint} >
             <Icon />
-        </Activity >
+        </Activity>
     )
 }
 

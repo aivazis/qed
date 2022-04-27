@@ -24,7 +24,7 @@ export const Explore = ({ size, style }) => {
     return (
         <Activity size={size} url="/explore" style={paint} >
             <Icon />
-        </Activity >
+        </Activity>
     )
 }
 
