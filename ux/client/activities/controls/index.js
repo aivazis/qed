@@ -24,7 +24,7 @@ export const Controls = ({ size, style }) => {
     return (
         <Activity size={size} url="/controls" style={paint} >
             <Icon />
-        </Activity >
+        </Activity>
     )
 }
 

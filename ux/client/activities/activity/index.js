@@ -48,8 +48,8 @@ export const Activity = ({ size, url, children, style }) => {
         <Link to={url} >
             <Badge size={size} state={state} behaviors={behaviors} style={paint} >
                 {children}
-            </Badge >
-        </Link >
+            </Badge>
+        </Link>
     )
 }
 
