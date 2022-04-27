@@ -22,7 +22,7 @@ export { NYI } from './nyi'
 // while {suspense} is waiting
 export Loading from './loading'
 // the page rendered when the user kills the server
-export Stop from './stop'
+export { Stop } from './stop'
 
 
 // end of file
