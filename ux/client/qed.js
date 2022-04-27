@@ -49,7 +49,7 @@ const QEDApp = () => {
     return (
         <Routes >
             {/* the app */}
-            <Route path="" element={<Main />} >
+            <Route path="/" element={<Main />} >
                 {/* specific activities */}
                 <Route path="about" element={<NYI />} />
                 <Route path="explore" element={<NYI />} />
