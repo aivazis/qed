@@ -248,7 +248,7 @@ class Dispatcher:
         The client requested the root document
         """
         # form the uri
-        uri = "/ux/qed/{0.pyre_namespace}.html".format(plexus)
+        uri = "/ux/{0.pyre_namespace}.html".format(plexus)
         # open the document and serve it
         return server.documents.File(uri=uri, server=server, application=plexus)
 
@@ -266,7 +266,7 @@ class Dispatcher:
     # the app api
     regex = re.compile("|".join([
         # the data request recognizer
-        r"/qed/(?P<data>data/" + "/".join([
+        r"/(?P<data>data/" + "/".join([
             rf"(?P<data_dataset>{pyreid})",
             r"(?P<data_channel>\w+)",
             rf"(?P<data_zoom>{zoom})",
@@ -274,25 +274,25 @@ class Dispatcher:
         ]) + ")",
 
         # data profile requests
-        r"/qed/(?P<profile>profile/" + "/".join([
+        r"/(?P<profile>profile/" + "/".join([
            rf"(?P<profile_format>{profileFormat})",
            rf"(?P<profile_dataset>{pyreid})",
         ]) + ")",
 
         # graphql requests
-        r"/qed/(?P<graphql>graphql)",
+        r"/(?P<graphql>graphql)",
 
         # the kill command
-        r"/qed/(?P<stop>stop)",
+        r"/(?P<stop>stop)",
 
         # document requests
-        r"/qed/(?P<css>.+\.css)",
-        r"/qed/(?P<jscript>.+\.js)",
-        r"/qed/(?P<document>(graphics/.+)|(fonts/.+))",
-        r"/qed/(?P<favicon>favicon.ico)",
+        r"/(?P<css>.+\.css)",
+        r"/(?P<jscript>.+\.js)",
+        r"/(?P<document>(graphics/.+)|(fonts/.+))",
+        r"/(?P<favicon>favicon.ico)",
 
         # everything else gets the app page; see the {root} resolver above
-        r"(?P<root>.*)",
+        r"/(?P<root>.*)",
         ]))
 
 
