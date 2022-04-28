@@ -8,9 +8,6 @@
 # its path relative to the project
 qed.ux.root := ux/
 
-# support deployment in a shared namespace
-qed.ux.install.prefix ?= $(builder.dest.etc)/qed/ux/qed/
-
 # code chunks from external dependencies
 qed.ux.chunks := vendors-node_modules node_modules
 
