@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { Link } from 'react-router-dom'
 // locals
 import styles from './styles'
 
@@ -13,7 +14,7 @@ import styles from './styles'
 // kill the server
 export const Stop = () => {
     // ask the server to shut down
-    fetch('/qed/stop').catch(
+    fetch('stop').catch(
         // and swallow any errors
         () => null
     )
@@ -22,7 +23,8 @@ export const Stop = () => {
     return (
         <section style={styles.stop}>
             <div style={styles.placeholder}>
-                <a href="/" style={styles.link}>qed</a> has shut down; please close this window
+                <Link to="/" style={styles.link}>qed</Link>
+                &nbsp;has shut down; please close this window
             </div>
         </section>
     )
