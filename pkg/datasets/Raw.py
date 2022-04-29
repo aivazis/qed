@@ -138,9 +138,9 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
         # center it in my shape
         center = tuple((s-t)//2 for s,t in zip(shape, tile))
 
-        # otherwise, we need a sample of my data; go to the center of the dataset
+        # convert to a grid index
         center = qed.libpyre.grid.Index2D(index=center)
-        # make a 256x256 tile
+        # and a shape
         tile = qed.libpyre.grid.Shape2D(shape=tile)
         # compute the stats
         stats = qed.libqed.datasets.stats(source=data, origin=center, shape=tile)
