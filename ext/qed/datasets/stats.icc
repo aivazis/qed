@@ -22,28 +22,16 @@ qed::py::datasets::statsGrid(
     // the tile shape
     typename sourceT::shape_type tile) -> stats_t
 {
-    // my stats
+    // my counters
     int samples = 0;
     double sum = 0.0;
+    // my stats
     double min = 0, mean = 0, max = 0;
 
     // get the sample
     auto box = source.box(origin, tile);
-
-    // go through the data
-    for (auto z : box) {
-        // compute the magnitude
-        double r = std::abs(z);
-        // update the stats
-        min = std::min(min, r);
-        max = std::max(max, r);
-        // update the
-        sum += r;
-        ++samples;
-    }
-
-    // all done
-    return { min, sum / samples, max };
+    // compute the statistics and pass them on
+    return stats(box);
 }
 
 
@@ -72,10 +60,22 @@ qed::py::datasets::statsHDF5(
 
     // read the data
     auto source = pyre::h5::read<sourceT>(dataset, datatype, from, region, strides);
+    // compute the statistics and pass them on
+    return stats(source);
+}
 
-    // my stats
+
+// collect statistics on a dataset
+template <typename sourceT>
+auto
+qed::py::datasets::stats(
+    // the source
+    const sourceT & source) -> stats_t
+{
+    // my counters
     int samples = 0;
     double sum = 0.0;
+    // my stats
     double min = 0, mean = 0, max = 0;
 
     // go through the data
@@ -85,7 +85,7 @@ qed::py::datasets::statsHDF5(
         // update the stats
         min = std::min(min, r);
         max = std::max(max, r);
-        // update the count
+        // update the counters
         sum += r;
         ++samples;
     }

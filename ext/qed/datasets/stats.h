@@ -35,6 +35,10 @@ namespace qed::py::datasets {
         typename sourceT::index_type origin,
         // the tile shape
         typename sourceT::shape_type tile) -> stats_t;
+
+    // the helper that collects the statistics
+    template <typename sourceT>
+    auto stats(const sourceT & source) -> stats_t;
 }
 
 
