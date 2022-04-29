@@ -182,7 +182,7 @@ class Dispatcher:
         points = tuple(tuple(map(int, point.split(','))) for point in query.split('&'))
 
         # generate the profile along with a suggestion for the download name
-        filename, profile = self.panel.profile(data=data, encoding=encoding, points=points)
+        filename, profile = self.panel.profile(data=data, points=points, encoding=encoding)
 
         # get the document factory
         document = getattr(server.documents, encoding)
