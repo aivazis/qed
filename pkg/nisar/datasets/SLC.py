@@ -127,7 +127,7 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
         tile = qed.libpyre.grid.Shape2D(shape=tile)
         # compute the stats
         stats = qed.libqed.datasets.stats(
-            source=data, datatype=self.datatype, zoom=0, origin=center, shape=tile)
+            source=data, datatype=self.datatype, origin=center, shape=tile)
 
         # and return them
         return stats
