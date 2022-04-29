@@ -15,8 +15,6 @@ auto
 qed::py::datasets::statsGrid(
     // the source
     const sourceT & source,
-    // the zoom level
-    int zoom,
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
@@ -42,24 +40,15 @@ qed::py::datasets::statsHDF5(
     const dataset_t & dataset,
     // the layout
     const datatype_t & datatype,
-    // the zoom level
-    int zoom,
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
     typename sourceT::shape_type tile) -> stats_t
 {
-    // compute the scale
-    auto scale = 1 << zoom;
-    // the shape of the data region is scaled by this
-    auto region = typename sourceT::shape_type(scale * tile);
-    // and so is the origin
-    auto from = typename sourceT::index_type(scale * origin);
     // we operate at zoom level 0
     typename sourceT::shape_type strides = sourceT::shape_type::one();
-
     // read the data
-    auto source = pyre::h5::read<sourceT>(dataset, datatype, from, region, strides);
+    auto source = pyre::h5::read<sourceT>(dataset, datatype, origin, tile, strides);
     // compute the statistics and pass them on
     return stats(source);
 }

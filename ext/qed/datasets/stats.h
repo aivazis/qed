@@ -15,8 +15,6 @@ namespace qed::py::datasets {
     auto statsGrid(
         // the source
         const sourceT & source,
-        // the zoom level
-        int zoom,
         // the origin of the tile
         typename sourceT::index_type origin,
         // the tile shape
@@ -29,8 +27,6 @@ namespace qed::py::datasets {
         const dataset_t & source,
         // the data layout
         const datatype_t & datatype,
-        // the zoom level
-        int zoom,
         // the origin of the tile
         typename sourceT::index_type origin,
         // the tile shape
