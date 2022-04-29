@@ -143,7 +143,7 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
         # make a 256x256 tile
         tile = qed.libpyre.grid.Shape2D(shape=tile)
         # compute the stats
-        stats = qed.libqed.datasets.stats(source=data, zoom=0, origin=center, shape=tile)
+        stats = qed.libqed.datasets.stats(source=data, origin=center, shape=tile)
         # and return them
         return stats
 
