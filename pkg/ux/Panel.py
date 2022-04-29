@@ -38,7 +38,7 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         return dataset.render(channel=channel, zoom=zoom, origin=origin, shape=shape)
 
 
-    def profile(self, encoding, data, points):
+    def profile(self, data, points, encoding):
         """
         Sample {dataset} along a path defined by {points}
         """
@@ -98,7 +98,7 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         writer = csv.writer(buffer)
 
         # get the headers
-        headers = ("line", "sample") + tuple(channels)
+        headers = ("line", "sample") + tuple(dataset.cell.summary)
         # write them
         writer.writerow(headers)
 
@@ -107,7 +107,7 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
             # unpack
             line, sample, pixel = entry
             # build the channel specific representations
-            reps = tuple(channel.project(pixel) for channel in channels.values())
+            reps = tuple(channels[channel].eval(pixel) for channel in dataset.cell.summary)
             # and record each one
             writer.writerow((line, sample) + reps)
 
