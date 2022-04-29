@@ -68,6 +68,14 @@ class Complex(Channel, family="qed.channels.complex"):
       return
 
 
+   def eval(self, pixel):
+      """
+      Get the {pixel} value
+      """
+      # easy enough
+      return pixel
+
+
    def project(self, pixel):
       """
       Represent a {pixel} as a complex number

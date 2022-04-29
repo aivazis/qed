@@ -49,6 +49,14 @@ class Amplitude(Channel, family="qed.channels.amplitude"):
       return
 
 
+   def eval(self, pixel):
+      """
+      Get the {pixel} value
+      """
+      # easy enough
+      return abs(pixel)
+
+
    def project(self, pixel):
       """
       Compute the amplitude of a {pixel}

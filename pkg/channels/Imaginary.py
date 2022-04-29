@@ -49,6 +49,14 @@ class Imaginary(Channel, family="qed.channels.imaginary"):
       return
 
 
+   def eval(self, pixel):
+      """
+      Get the {pixel} value
+      """
+      # easy enough
+      return pixel.imag
+
+
    def project(self, pixel):
       """
       Compute the imaginary part of a {pixel}

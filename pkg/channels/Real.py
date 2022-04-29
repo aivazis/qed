@@ -49,6 +49,14 @@ class Real(Channel, family="qed.channels.real"):
       return
 
 
+   def eval(self, pixel):
+      """
+      Get the {pixel} value
+      """
+      # easy enough
+      return pixel.real
+
+
    def project(self, pixel):
       """
       Compute the real part of a {pixel}
