@@ -39,7 +39,7 @@ qed::py::channels::imaginaryGridTile(
 
     // zoom
     auto decimator = zoom_t(source, origin, tile, 1 << zoom);
-    // extract the imaginary
+    // extract the imaginary part
     auto selection = selector_t(decimator);
     // map to the unit interval
     auto norm = norm_t(selection, typename norm_t::interval_type(min, max));

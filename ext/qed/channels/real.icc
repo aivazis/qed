@@ -39,7 +39,7 @@ qed::py::channels::realGridTile(
 
     // zoom
     auto decimator = zoom_t(source, origin, tile, 1 << zoom);
-    // extract the real
+    // extract the real part
     auto selection = selector_t(decimator);
     // map to the unit interval
     auto norm = norm_t(selection, typename norm_t::interval_type(min, max));
