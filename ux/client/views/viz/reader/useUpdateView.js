@@ -43,32 +43,45 @@ export const useUpdateView = () => {
             })
             // if there is a candidate
             if (candidates) {
-                // select it
-                dataset.current = candidates[0]
-                // if the current value of the channel is not among the valid choices
-                if (!dataset.current.channels.includes(channel.current)) {
-                    // reset the channel
+                // if more than one dataset match the current selector
+                if (candidates.length > 1) {
+                    // it must be a server bug; complain
+                    console.error('FIREWALL: too many datasets match', currentSelector, candidates)
+                    // and reset both the dataset
+                    dataset.current = null
+                    // and the channel
                     channel.current = null
                 }
-                // if there were actually more than one match
-                if (candidates.length > 1) {
-                    // complain
-                    console.error('FIREWALL: too many datasets match', currentSelector, candidates)
+                // otherwise, activate it
+                else {
+                    dataset.current = candidates[0]
+                    // if the dataset has only one channel
+                    if (dataset.current.channels.length === 1) {
+                        // select it
+                        channel.current = dataset.current.channels[0]
+                    }
+                    // if the current value of the channel is not among the valid choices
+                    if (!dataset.current.channels.includes(channel.current)) {
+                        // reset it; it must be a left over from a previous selection,
+                        // so force the user to make a new choice
+                        channel.current = null
+                    }
                 }
             }
-            // otherwise, something is wrong
+            // if there are no candidates, something is wrong: we have a fully resolved selector
+            // but no matching dataset; this must be a server bug
             else {
-                // reset the dataset
+                // complain
+                console.error('FIREWALL: no datasets match', currentSelector)
+                // and reset both the dataset
                 dataset.current = null
                 // and the channel
                 channel.current = null
-                // complain
-                console.error('FIREWALL: no datasets match', currentSelector)
             }
         }
-        // if not
+        // if the selector is not fully resolved
         else {
-            // reset the dataset
+            // reset both the dataset
             dataset.current = null
             // and the channel
             channel.current = null
@@ -81,7 +94,7 @@ export const useUpdateView = () => {
         return
     }
 
-    // and return it
+    // publish the updater
     return update
 }
 
