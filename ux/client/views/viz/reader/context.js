@@ -91,6 +91,7 @@ export const Provider = (props) => {
         )
         // if it only has one channel
         if (dataset.current.channels.length == 1) {
+            // make it the current one
             channel.current = dataset.current.channels[0]
         }
     }
