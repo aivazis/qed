@@ -100,7 +100,7 @@ class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.prot
             # autotune it
             pipeline.autotune(stats=self.stats)
             # and register it
-            self.channels[channel] = pipeline
+            self.channels[pipeline.tag] = pipeline
 
         # all done
         return
