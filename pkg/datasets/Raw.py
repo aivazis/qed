@@ -94,7 +94,7 @@ class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.
             # autotune it
             pipeline.autotune(stats=self.stats)
             # and register it
-            self.channels[channel] = pipeline
+            self.channels[pipeline.tag] = pipeline
 
         # all done
         return
