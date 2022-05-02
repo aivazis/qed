@@ -4,7 +4,7 @@
 # (c) 1998-2022 all rights reserved
 
 
-# some ALOS datasets have support in {qed.isce2}
+# some ALOS datasets have support in {qed.readers.isce2}
 from ..isce2 import rslc
 
 
