@@ -8,10 +8,11 @@
 import qed
 
 
-# raw dataset, i.e. a dataset in binary file with no metadata
-class Raw(qed.flow.product, family="qed.datasets.raw", implements=qed.protocols.dataset):
+# a dataset in a binary file with no metadata
+class MemoryMap(qed.flow.product,
+                family="qed.datasets.native.mmap", implements=qed.protocols.dataset):
     """
-    A raw dataset
+    A dataset in a flat binary file
     """
 
 

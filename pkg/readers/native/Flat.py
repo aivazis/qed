@@ -6,12 +6,15 @@
 
 # support
 import qed
+# my dataset type
+from .MemoryMap import MemoryMap
 
 
-# the Raw reader
-class Raw(qed.flow.factory, family="qed.readers.raw", implements=qed.protocols.reader):
+# a reader of flat binary files
+class Flat(qed.flow.factory,
+           family="qed.readers.native.flat", implements=qed.protocols.reader):
     """
-    The reader for raw files
+    A reader of flat binary files
     """
 
 
@@ -48,7 +51,7 @@ class Raw(qed.flow.factory, family="qed.readers.raw", implements=qed.protocols.r
         }
 
         # there is only one dataset in the file and it is structurally trivial; build it
-        dataset = qed.datasets.raw(name=f"{self.pyre_name}.data", **config)
+        dataset = MemoryMap(name=f"{self.pyre_name}.data", **config)
         # and add it to the pile of datasets
         self.datasets.append(dataset)
 
