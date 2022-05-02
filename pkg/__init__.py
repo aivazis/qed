@@ -53,12 +53,6 @@ from . import shells         # the supported application shells
 from . import cli            # the command line interface
 from . import ux             # support for the web client
 
-# specializations
-from . import isce2
-from . import nisar
-from . import alos
-from . import asar
-
 
 # administrivia
 def copyright():
