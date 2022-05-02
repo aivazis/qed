@@ -94,7 +94,7 @@ class SLC(qed.flow.product, family="qed.datasets.nisar.slc", implements=qed.prot
         # go through the default channels of my cell type
         for channel in self.cell.channels:
             # get their factories
-            cls = qed.protocols.channel.pyre_resolveSpecification(channel)
+            cls = getattr(qed.readers.native, channel)
             # instantiate a workflow for each one
             pipeline = cls(name=f"{self.pyre_name}.{channel}")
             # autotune it
