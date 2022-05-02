@@ -88,9 +88,9 @@ class MemoryMap(qed.flow.product,
 
         # go through the default channels provided my the data type
         for channel in self.cell.channels:
-            # get their factories
-            cls = qed.protocols.channel.pyre_resolveSpecification(channel)
-            # instantiate a workflow for each one
+            # get the factory from my local context
+            cls = getattr(qed.readers.native, channel)
+            # instantiate a workflow
             pipeline = cls(name=f"{self.pyre_name}.{channel}")
             # autotune it
             pipeline.autotune(stats=self.stats)
