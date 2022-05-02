@@ -10,15 +10,15 @@ import qed
 from .Channel import Channel
 
 
-# a channel for displaying the real part of complex values
-class Real(Channel, family="qed.channels.real"):
+# a channel for displaying the amplitude of complex values
+class Amplitude(Channel, family="qed.channels.native.amplitude"):
    """
-   Make a visualization pipeline to display the real part of complex values
+   Make a visualization pipeline to display the amplitude of complex values
    """
 
 
    # configurable state
-   range = qed.protocols.controller(default=qed.controllers.linearRange)
+   range = qed.protocols.controller(default=qed.controllers.logRange)
    range.doc = "the manager of the range of values to render"
 
 
@@ -35,12 +35,12 @@ class Real(Channel, family="qed.channels.real"):
       return
 
 
-   def controllers(self, **kwds):
+   def controllers(self):
       """
       Generate the controllers that manipulate my state
       """
       # chain up
-      yield from super().controllers(**kwds)
+      yield from super().controllers()
       # my range
       yield self.range, self.pyre_trait(alias="range")
       # all done
@@ -52,16 +52,16 @@ class Real(Channel, family="qed.channels.real"):
       Get the {pixel} value
       """
       # easy enough
-      return pixel.real
+      return abs(pixel)
 
 
    def project(self, pixel):
       """
-      Compute the real part of a {pixel}
+      Compute the amplitude of a {pixel}
       """
-      # only one rep
-      yield pixel.real, ""
-      # all done
+      # only one choice
+      yield abs(pixel), ""
+      # and done
       return
 
 
@@ -69,12 +69,15 @@ class Real(Channel, family="qed.channels.real"):
       """
       Generate a tile of the given characteristics
       """
+      # get my configuration
+      low = 10**self.range.low
+      high = 10**self.range.high
       # add my configuration and chain up
-      return super().tile(min=self.range.low, max=self.range.high, **kwds)
+      return super().tile(min=low, max=high, **kwds)
 
 
    # constants
-   tag = "real"
+   tag = "amplitude"
 
 
 # end of file
