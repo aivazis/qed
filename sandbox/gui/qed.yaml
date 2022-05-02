@@ -24,11 +24,11 @@ samples: ../../../data
 # alos datasets
 alos.data: "{samples}/alos"
 
-LA-20061231:
+alos_LA-20061231:
     uri: "{alos.data}/20061231.slc"
     shape: 36864, 10344
 
-LA-20070215:
+alos_LA-20070215:
     uri: "{alos.data}/20070215.slc"
     shape: 36864, 10344
 
@@ -36,32 +36,32 @@ LA-20070215:
 # nisar datasets
 nisar.data: "{samples}/nisar"
 
-hawaii:
+nisar_float:
     uri: "{nisar.data}/BigIsl_32905_10003_012_100106_L090_CX_129_02.h5"
 
-bryan:
+nisar_half_float:
     uri: "{nisar.data}/rslc.h5"
 
 
 # asar datasets
 asar.data: "{samples}/asar"
 
-L_300621:
+asar_L_300621:
     uri: "{asar.data}/ASAR_L_JOINT_FP_ID09123_LINE15_RUN01_300621_LEVEL1_RSLC_V1.3.h5"
 
-S_300621:
+asar_S_300621:
     uri: "{asar.data}/ASAR_S_JOINT_FP_ID09123_LINE15_RUN01_300621_LEVEL1_RSLC_V1.3.h5"
 
-L_161219:
+asar_L_161219:
     uri: "{asar.data}/ASAR_L_JOINT_FP_ID19107_LINE05_RUN01_161219_LEVEL1_RSLC_V1.3.h5"
 
-S_161219:
+asar_S_161219:
     uri: "{asar.data}/ASAR_S_JOINT_FP_ID19107_LINE05_RUN01_161219_LEVEL1_RSLC_V1.3.h5"
 
-L_051219:
+asar_L_051219:
     uri: "{asar.data}/ASAR_L_JOINT_FP_ID35506_LINE10_RUN02_051219_LEVEL1_RSLC_V1.3.h5"
 
-S_051219:
+asar_S_051219:
     uri: "{asar.data}/ASAR_S_JOINT_FP_ID35506_LINE10_RUN02_051219_LEVEL1_RSLC_V1.3.h5"
 
 
@@ -69,16 +69,16 @@ S_051219:
 datasets:
     - native.flat#c8
     - native.flat#c16
-    # - isce2.rslc#LA-20061231
-    # - isce2.rslc#LA-20070215
-    # - nisar.rslc#hawaii
-    # - asar.rslc#bryan
-    # - asar.rslc#L_300621
-    # - asar.rslc#S_300621
-    # - asar.rslc#L_161219
-    # - asar.rslc#S_161219
-    # - asar.rslc#L_051219
-    # - asar.rslc#S_051219
+    - isce2.rslc#alos_LA-20061231
+    - alos.rslc#alos_LA-20070215
+    - qed.readers.nisar.rslc#nisar_float
+    - asar.rslc#nisar_half_float
+    - asar.rslc#asar_L_300621
+    - asar.rslc#asar_S_300621
+    # - asar.rslc#asar_L_161219
+    # - asar.rslc#asar_S_161219
+    # - asar.rslc#asar_L_051219
+    # - asar.rslc#asar_S_051219
 #
 
 # overall application configuration
