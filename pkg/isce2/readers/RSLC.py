@@ -9,7 +9,7 @@ import qed
 
 
 # the RSLC reader; RSLCs contain one {complex64} dataset
-class RSLC(qed.readers.raw, family="qed.isce2.readers.rslc"):
+class RSLC(qed.readers.native.flat, family="qed.isce2.readers.rslc"):
     """
     The reader of RSLC files
     """
