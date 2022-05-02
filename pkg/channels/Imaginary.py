@@ -8,8 +8,6 @@
 import qed
 # superclass
 from .Channel import Channel
-# my parts
-from .LinearRange import LinearRange
 
 
 # a channel for displaying the imaginary part of complex values
@@ -20,7 +18,7 @@ class Imaginary(Channel, family="qed.channels.imaginary"):
 
 
    # configurable state
-   range = qed.protocols.controller(default=LinearRange)
+   range = qed.protocols.controller(default=qed.controllers.linearRange)
    range.doc = "the manager of the range of values to render"
 
 

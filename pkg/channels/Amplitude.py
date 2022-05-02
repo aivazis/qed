@@ -8,8 +8,6 @@
 import qed
 # superclass
 from .Channel import Channel
-# my parts
-from .LogRange import LogRange
 
 
 # a channel for displaying the amplitude of complex values
@@ -20,7 +18,7 @@ class Amplitude(Channel, family="qed.channels.amplitude"):
 
 
    # configurable state
-   range = qed.protocols.controller(default=LogRange)
+   range = qed.protocols.controller(default=qed.controllers.logRange)
    range.doc = "the manager of the range of values to render"
 
 

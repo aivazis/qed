@@ -9,9 +9,6 @@ import cmath
 import qed
 # superclass
 from .Channel import Channel
-# my controllers
-from .LinearRange import LinearRange
-from .Value import Value
 
 
 # a channel for displaying the phase of complex values
@@ -22,13 +19,13 @@ class Phase(Channel, family="qed.channels.phase"):
 
 
    # user configurable state
-   phase = qed.protocols.controller(default=LinearRange)
+   phase = qed.protocols.controller(default=qed.controllers.linearRange)
    phase.doc = "the manager of the range of values to render"
 
-   brightness = qed.protocols.controller(default=Value)
+   brightness = qed.protocols.controller(default=qed.controllers.value)
    brightness.doc = "the brightness"
 
-   saturation = qed.protocols.controller(default=Value)
+   saturation = qed.protocols.controller(default=qed.controllers.value)
    saturation.doc = "the saturation"
 
 

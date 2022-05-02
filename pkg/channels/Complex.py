@@ -8,10 +8,6 @@
 import qed
 # superclass
 from .Channel import Channel
-# my parts
-from .LinearRange import LinearRange
-from .LogRange import LogRange
-from .Value import Value
 
 
 # a channel for displaying complex values
@@ -22,13 +18,13 @@ class Complex(Channel, family="qed.channels.complex"):
 
 
    # configurable state
-   range = qed.protocols.controller(default=LogRange)
+   range = qed.protocols.controller(default=qed.controllers.logRange)
    range.doc = "the manager of the range of values to render"
 
-   phase = qed.protocols.controller(default=LinearRange)
+   phase = qed.protocols.controller(default=qed.controllers.linearRange)
    phase.doc = "the manager of the range of values to render"
 
-   saturation = qed.protocols.controller(default=Value)
+   saturation = qed.protocols.controller(default=qed.controllers.value)
    saturation.doc = "the saturation"
 
 
