@@ -9,7 +9,7 @@ import qed
 
 
 # a NISAR SLC
-class SLC(qed.flow.product, family="qed.nisar.datasets.slc", implements=qed.protocols.dataset):
+class SLC(qed.flow.product, family="qed.datasets.nisar.slc", implements=qed.protocols.dataset):
     """
     A raw dataset
     """
