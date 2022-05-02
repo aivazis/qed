@@ -6,10 +6,11 @@
 
 # support
 import qed
-
+# my dataset
+from .SLC import SLC
 
 # the RSLC reader
-class RSLC(qed.readers.native.h5, family="qed.nisar.readers.rslc"):
+class RSLC(qed.readers.native.h5, family="qed.readers.nisar.rslc"):
     """
     The reader of RSLC files
     """
@@ -90,7 +91,7 @@ class RSLC(qed.readers.native.h5, family="qed.nisar.readers.rslc"):
                         "selector": selector,
                     }
                     # instantiate it
-                    slc = qed.nisar.datasets.slc(name=name, data=data, **config)
+                    slc = SLC(name=name, data=data, **config)
                     # and add it to my dataset
                     self.datasets.append(slc)
 
