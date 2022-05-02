@@ -4,12 +4,8 @@
 # (c) 1998-2022 all rights reserved
 
 
-# publish
-from . import readers
-
-
-# alias the readers, since this is expected to be the common use case
-rslc = readers.rslc
+# publish the readers
+from .RSLC import RSLC as rslc
 
 
 # end of file
