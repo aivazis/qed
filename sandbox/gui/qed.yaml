@@ -67,19 +67,19 @@ S_051219:
 
 # attach them to the application
 datasets:
-    - raw#c8
-    - raw#c16
-    - isce2.rslc#LA-20061231
-    - isce2.rslc#LA-20070215
-    - nisar.rslc#hawaii
-    - asar.rslc#bryan
+    - native.flat#c8
+    - native.flat#c16
+    # - isce2.rslc#LA-20061231
+    # - isce2.rslc#LA-20070215
+    # - nisar.rslc#hawaii
+    # - asar.rslc#bryan
     # - asar.rslc#L_300621
     # - asar.rslc#S_300621
     # - asar.rslc#L_161219
     # - asar.rslc#S_161219
-    - asar.rslc#L_051219
-    - asar.rslc#S_051219
-
+    # - asar.rslc#L_051219
+    # - asar.rslc#S_051219
+#
 
 # overall application configuration
 qed.app:
