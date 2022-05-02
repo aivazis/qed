@@ -14,10 +14,5 @@ from .Imaginary import Imaginary as imaginary
 from .Phase import Phase as phase
 from .Real import Real as real
 
-# the controllers
-from .LinearRange import LinearRange as linearRange
-from .LogRange import LogRange as logRange
-from .Value import Value as value
-
 
 # end of file
