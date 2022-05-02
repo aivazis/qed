@@ -10,15 +10,15 @@ import qed
 from .Channel import Channel
 
 
-# a channel for displaying the amplitude of complex values
-class Amplitude(Channel, family="qed.channels.amplitude"):
+# a channel for displaying the imaginary part of complex values
+class Imaginary(Channel, family="qed.channels.native.imaginary"):
    """
-   Make a visualization pipeline to display the amplitude of complex values
+   Make a visualization pipeline to display the imaginary part of complex values
    """
 
 
    # configurable state
-   range = qed.protocols.controller(default=qed.controllers.logRange)
+   range = qed.protocols.controller(default=qed.controllers.linearRange)
    range.doc = "the manager of the range of values to render"
 
 
@@ -35,12 +35,12 @@ class Amplitude(Channel, family="qed.channels.amplitude"):
       return
 
 
-   def controllers(self):
+   def controllers(self, **kwds):
       """
       Generate the controllers that manipulate my state
       """
       # chain up
-      yield from super().controllers()
+      yield from super().controllers(**kwds)
       # my range
       yield self.range, self.pyre_trait(alias="range")
       # all done
@@ -52,16 +52,16 @@ class Amplitude(Channel, family="qed.channels.amplitude"):
       Get the {pixel} value
       """
       # easy enough
-      return abs(pixel)
+      return pixel.imag
 
 
    def project(self, pixel):
       """
-      Compute the amplitude of a {pixel}
+      Compute the imaginary part of a {pixel}
       """
-      # only one choice
-      yield abs(pixel), ""
-      # and done
+      # easy
+      yield pixel.imag, ""
+      # all done
       return
 
 
@@ -69,15 +69,12 @@ class Amplitude(Channel, family="qed.channels.amplitude"):
       """
       Generate a tile of the given characteristics
       """
-      # get my configuration
-      low = 10**self.range.low
-      high = 10**self.range.high
       # add my configuration and chain up
-      return super().tile(min=low, max=high, **kwds)
+      return super().tile(min=self.range.low, max=self.range.high, **kwds)
 
 
    # constants
-   tag = "amplitude"
+   tag = "imaginary"
 
 
 # end of file

@@ -4,25 +4,26 @@
 # (c) 1998-2022 all rights reserved
 
 
-# support
+# externals
+import cmath
 import qed
 # superclass
 from .Channel import Channel
 
 
-# a channel for displaying complex values
-class Complex(Channel, family="qed.channels.complex"):
+# a channel for displaying the phase of complex values
+class Phase(Channel, family="qed.channels.native.phase"):
    """
-   Make a visualization pipeline to display complex values
+   Make a visualization pipeline to display the phase of complex values
    """
 
 
-   # configurable state
-   range = qed.protocols.controller(default=qed.controllers.logRange)
-   range.doc = "the manager of the range of values to render"
-
+   # user configurable state
    phase = qed.protocols.controller(default=qed.controllers.linearRange)
    phase.doc = "the manager of the range of values to render"
+
+   brightness = qed.protocols.controller(default=qed.controllers.value)
+   brightness.doc = "the brightness"
 
    saturation = qed.protocols.controller(default=qed.controllers.value)
    saturation.doc = "the saturation"
@@ -30,18 +31,15 @@ class Complex(Channel, family="qed.channels.complex"):
 
    # interface
    def autotune(self, **kwds):
-      """
-      Use the {stats} gathered on a data sample to adjust the range configuration
-      """
       # chain up
       super().autotune(**kwds)
-      # notify my range
-      self.range.autotune(**kwds)
       # adjust my range
       self.phase.min = 0
       self.phase.low = 0
       self.phase.max = 1
       self.phase.high = 1
+      # my brightness
+      self.brightness.value = 1
       # and my saturation
       self.saturation.value = 1
       # all done
@@ -54,10 +52,10 @@ class Complex(Channel, family="qed.channels.complex"):
       """
       # chain up
       yield from super().controllers(**kwds)
-      # my range
-      yield self.range, self.pyre_trait(alias="range")
       # my phase
       yield self.phase, self.pyre_trait(alias="phase")
+      # my brightness
+      yield self.brightness, self.pyre_trait(alias="brightness")
       # and my saturation
       yield self.saturation, self.pyre_trait(alias="saturation")
       # all done
@@ -69,15 +67,31 @@ class Complex(Channel, family="qed.channels.complex"):
       Get the {pixel} value
       """
       # easy enough
-      return pixel
+      return cmath.phase(pixel)
 
 
    def project(self, pixel):
       """
-      Represent a {pixel} as a complex number
+      Compute the phase of a {pixel}
       """
-      # only one rep
-      yield pixel, ""
+      # get the value as angle in radians in [-π, π]
+      # N.B.: the range interval is closed thanks to the peculiarities of {atan2}
+      value = cmath.phase(pixel) / cmath.pi
+
+      # project
+      # in π radians
+      yield  value, "π radians"
+
+      # transform to [0, 2π]
+      if value < 0:
+         # by adding a whole cycle to negative values
+         value += 2
+
+      # in degrees in [0, 360]
+      yield 180*value, "degrees"
+      # in cycles, in [0,1]
+      yield value/2, "cycles"
+
       # all done
       return
 
@@ -87,18 +101,16 @@ class Complex(Channel, family="qed.channels.complex"):
       Generate a tile of the given characteristics
       """
       # unpack my configuration
-      low = 10**self.range.low
-      high = 10**self.range.high
-      lowPhase = self.phase.low
-      highPhase = self.phase.high
+      low = self.phase.low
+      high = self.phase.high
       saturation = self.saturation.value
+      brightness = self.brightness.value
       # add my configuration and chain up
-      return super().tile(min=low, max=high,
-         minPhase=lowPhase, maxPhase=highPhase, saturation=saturation, **kwds)
+      return super().tile(low=low, high=high, saturation=saturation, brightness=brightness, **kwds)
 
 
    # constants
-   tag = "complex"
+   tag = "phase"
 
 
 # end of file

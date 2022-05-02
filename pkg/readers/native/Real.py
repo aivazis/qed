@@ -10,10 +10,10 @@ import qed
 from .Channel import Channel
 
 
-# a channel for displaying the imaginary part of complex values
-class Imaginary(Channel, family="qed.channels.imaginary"):
+# a channel for displaying the real part of complex values
+class Real(Channel, family="qed.channels.native.real"):
    """
-   Make a visualization pipeline to display the imaginary part of complex values
+   Make a visualization pipeline to display the real part of complex values
    """
 
 
@@ -52,15 +52,15 @@ class Imaginary(Channel, family="qed.channels.imaginary"):
       Get the {pixel} value
       """
       # easy enough
-      return pixel.imag
+      return pixel.real
 
 
    def project(self, pixel):
       """
-      Compute the imaginary part of a {pixel}
+      Compute the real part of a {pixel}
       """
-      # easy
-      yield pixel.imag, ""
+      # only one rep
+      yield pixel.real, ""
       # all done
       return
 
@@ -74,7 +74,7 @@ class Imaginary(Channel, family="qed.channels.imaginary"):
 
 
    # constants
-   tag = "imaginary"
+   tag = "real"
 
 
 # end of file
