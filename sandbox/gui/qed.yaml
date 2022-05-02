@@ -8,12 +8,12 @@
 qed.data: ../../data
 
 c8:
-    uri: "{qed.data}/raw/c8.dat"
+    uri: "{qed.data}/native/c8.dat"
     shape: 2*1964+1, 2*3024+1
     cell: c8
 
 c16:
-    uri: "{qed.data}/raw/c16.dat"
+    uri: "{qed.data}/native/c16.dat"
     shape: 2*1964+1, 2*3024+1
     cell: c16
 
