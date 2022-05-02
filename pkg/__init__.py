@@ -42,6 +42,7 @@ from .ext import libqed, libqed_cuda
 # protocols
 from . import protocols
 # support for readers, datasets, and data types
+from . import controllers
 from . import datatypes
 from . import readers
 # visualization workflows
