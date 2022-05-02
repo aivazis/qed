@@ -9,7 +9,7 @@ import qed
 
 
 # the RSLC reader
-class RSLC(qed.nisar.readers.rslc, family="qed.asar.readers.rslc"):
+class RSLC(qed.readers.nisar.rslc, family="qed.readers.asar.rslc"):
     """
     The reader of ASAR RSLC files
     """
