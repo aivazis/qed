@@ -14,7 +14,7 @@ qed.data.extern := pyre
 qed.data.c++.flags += $($(compiler.c++).std.c++20)
 
 # clean up
-data.raw.c8.clean += c8.dat
-data.raw.c16.clean += c16.dat
+data.native.c8.clean += c8.dat
+data.native.c16.clean += c16.dat
 
 # end of file
