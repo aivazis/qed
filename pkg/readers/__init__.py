@@ -4,7 +4,14 @@
 # (c) 1998-2022 all rights reserved
 
 
+# the base reader support
 from . import native
+
+# specialized readers
+from . import isce2
+from . import alos
+from . import nisar
+from . import asar
 
 
 # end of file
