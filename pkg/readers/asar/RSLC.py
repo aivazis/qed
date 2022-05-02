@@ -6,10 +6,12 @@
 
 # support
 import qed
+# superclass
+from .. import nisar
 
 
 # the RSLC reader
-class RSLC(qed.readers.nisar.rslc, family="qed.readers.asar.rslc"):
+class RSLC(nisar.rslc, family="qed.readers.asar.rslc"):
     """
     The reader of ASAR RSLC files
     """

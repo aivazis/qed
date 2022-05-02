@@ -6,10 +6,12 @@
 
 # support
 import qed
+# superclass
+from .. import native
 
 
 # the RSLC reader; RSLCs contain one {complex64} dataset
-class RSLC(qed.readers.native.flat, family="qed.readers.isce2.rslc"):
+class RSLC(native.flat, family="qed.readers.isce2.rslc"):
     """
     The reader of RSLC files
     """
