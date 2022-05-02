@@ -41,12 +41,11 @@ from . import exceptions     # the exception hierarchy
 from .ext import libqed, libqed_cuda
 # protocols
 from . import protocols
-# support for readers, datasets, and data types
-from . import controllers
+# support for data types, controllers, and readers
 from . import datatypes
+from . import controllers
 from . import readers
-# visualization workflows
-from . import channels
+
 # schema
 from . import gql
 # user interfaces
