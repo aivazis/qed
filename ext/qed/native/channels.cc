@@ -23,6 +23,67 @@ qed::py::native::channels(py::module & m)
 
 
     // add the individual channel bindings
+    // {b} value
+    channels.def(
+        // the name of the function
+        "value",
+        // the handler
+        &qed::native::channels::value<mapgrid_t<char>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the value of a byte tile");
+    // {i2} value
+    channels.def(
+        // the name of the function
+        "value",
+        // the handler
+        &qed::native::channels::value<mapgrid_t<int16_t>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the value of a int16_t tile");
+    // {i4} value
+    channels.def(
+        // the name of the function
+        "value",
+        // the handler
+        &qed::native::channels::value<mapgrid_t<int32_t>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the value of an int32_t tile");
+    // {i8} value
+    channels.def(
+        // the name of the function
+        "value",
+        // the handler
+        &qed::native::channels::value<mapgrid_t<int64_t>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the value of a int64_t tile");
+    // {r4} value
+    channels.def(
+        // the name of the function
+        "value",
+        // the handler
+        &qed::native::channels::value<mapgrid_t<float>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the value of a float tile");
+    // {r8} value
+    channels.def(
+        // the name of the function
+        "value",
+        // the handler
+        &qed::native::channels::value<mapgrid_t<double>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the value of a double tile");
+
     // {c8} amplitude
     channels.def(
         // the name of the function
@@ -42,7 +103,7 @@ qed::py::native::channels(py::module & m)
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
         // the docstring
-        "render the amplitude of a complex float tile");
+        "render the amplitude of a complex double tile");
 
     // {c8}
     m.def(
