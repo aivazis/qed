@@ -33,6 +33,11 @@ namespace qed::py {
         void datasets(py::module &);
     }
 
+    // native support
+    namespace native {
+        // the initializer
+        void native(py::module &);
+    }
     // nisar support
     namespace nisar {
         // the initializer

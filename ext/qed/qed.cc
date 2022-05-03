@@ -27,7 +27,8 @@ PYBIND11_MODULE(qed, m)
     qed::py::channels::channels(m);
     qed::py::datasets::datasets(m);
 
-    // NISAR support
+    // support for readers, their datasets and visualization pipelines
+    qed::py::native::native(m);
     qed::py::nisar::nisar(m);
 }
 
