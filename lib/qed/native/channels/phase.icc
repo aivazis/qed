@@ -1,0 +1,65 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2022 all rights reserved
+
+// code guard
+#if !defined(qed_native_channels_phase_icc)
+#error this file contains implementation details for qed::native::channels::phase
+#else
+
+
+// the tile generators
+template <typename sourceT>
+auto
+qed::native::channels::phase(
+    // the source
+    const sourceT & source,
+    // the zoom level
+    int zoom,
+    // the origin of the tile
+    typename sourceT::index_type origin,
+    // the tile shape
+    typename sourceT::shape_type tile,
+    // the hue range
+    double low, double high,
+    // the range of values to render
+    double saturation, double brightness) -> bmp_t
+{
+    // type aliases for the workflow nodes
+    // my decimator
+    using zoom_t = decimate_t<sourceT>;
+    // the phase selector
+    using selector_t = cycle_t<zoom_t>;
+    using scale_t = affine_t<selector_t>;
+    // the color map
+    using colormap_t = hsb_t<scale_t, constant_t, constant_t>;
+
+    // make a bitmap
+    bmp_t bmp(tile[0], tile[1]);
+
+    // zoom
+    auto decimator = zoom_t(source, origin, tile, 1 << zoom);
+
+    // extract the phase
+    auto c = selector_t(decimator, { low, high });
+    auto h = scale_t(c, { 0, 2 * M_PI });
+    // set up the saturation
+    auto s = constant_t(saturation);
+    // and brightness
+    auto b = constant_t(brightness);
+
+    // generate color
+    auto colormap = colormap_t(h, s, b);
+
+    // and encode
+    bmp.encode(colormap);
+
+    // all done
+    return bmp;
+}
+
+
+#endif
+
+// end of file

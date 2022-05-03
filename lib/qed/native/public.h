@@ -16,8 +16,14 @@
 // published type aliases; this is the file you are looking for...
 #include "api.h"
 
-
 // implementation
+// channels
+#include "channels/amplitude.h"
+#include "channels/complex.h"
+#include "channels/imaginary.h"
+#include "channels/phase.h"
+#include "channels/real.h"
+
 
 #endif
 
