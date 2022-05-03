@@ -23,6 +23,7 @@
 #include "channels/imaginary.h"
 #include "channels/phase.h"
 #include "channels/real.h"
+#include "channels/value.h"
 
 
 #endif
