@@ -8,6 +8,9 @@
 #define qed_py_native_external_h
 
 
+// pull the {native} support from {qed}
+#include <qed/native.h>
+
 // inherit
 #include "../external.h"
 

@@ -21,6 +21,9 @@ qed::py::native::native(py::module & m)
         // its docstring
         "support for native readers and their infrastructure");
 
+    // add the channel bindings
+    channels(native);
+
     // all done
     return;
 }

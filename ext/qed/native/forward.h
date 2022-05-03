@@ -13,11 +13,8 @@ namespace qed::py::native {
     // the subpackage intializaer
     void native(py::module &);
 
-    // interface
-    // sample a dataset along a path
-    void profile(py::module &);
-    // compute simple statistics on a sample of a dataset
-    void stats(py::module &);
+    // the channel bindings
+    void channels(py::module &);
 }
 
 
