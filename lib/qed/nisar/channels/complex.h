@@ -12,7 +12,7 @@
 namespace qed::nisar::channels {
     // the tile generator for the pixels of a complex HDF5 source
     template <typename sourceT>
-    auto complex(
+    inline auto complex(
         // the source
         const dataset_t & dataset,
         // the data layout
