@@ -6,8 +6,6 @@
 
 # support
 import qed
-# my dataset type
-from .MemoryMap import MemoryMap
 
 
 # a reader of flat binary files
@@ -51,7 +49,7 @@ class Flat(qed.flow.factory,
         }
 
         # there is only one dataset in the file and it is structurally trivial; build it
-        dataset = MemoryMap(name=f"{self.pyre_name}.data", **config)
+        dataset = qed.readers.native.datasets.mmap(name=f"{self.pyre_name}.data", **config)
         # and add it to the pile of datasets
         self.datasets.append(dataset)
 

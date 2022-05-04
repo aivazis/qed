@@ -4,12 +4,8 @@
 # (c) 1998-2022 all rights reserved
 
 
-# channels
-from . import channels
 # datasets
-from . import datasets
-# readers
-from .Flat import Flat as flat
+from .MemoryMap import MemoryMap as mmap
 
 
 # end of file
