@@ -7,13 +7,13 @@
 # support
 import qed
 # superclass
-from .. import native
+from .H5 import H5
 # my dataset
 from .SLC import SLC
 
 
 # the RSLC reader
-class RSLC(native.h5, family="qed.readers.nisar.rslc"):
+class RSLC(H5, family="qed.readers.nisar.rslc"):
     """
     The reader of RSLC files
     """

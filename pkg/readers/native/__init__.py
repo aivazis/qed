@@ -16,7 +16,6 @@ from .Real import Real as real
 
 # readers
 from .Flat import Flat as flat
-from .H5 import H5 as h5
 
 
 # end of file
