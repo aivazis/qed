@@ -9,9 +9,6 @@
 // namespace setup
 #include "forward.h"
 
-// my declarations
-#include "datatypes.h"
-
 
 // build the submodule
 void
