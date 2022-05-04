@@ -12,7 +12,7 @@
 namespace qed::native::channels {
     // the tile generator for the amplitude of a complex grid source
     template <typename sourceT>
-    auto amplitude(
+    inline auto amplitude(
         // the source
         const sourceT & source,
         // the zoom level

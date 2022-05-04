@@ -12,7 +12,7 @@
 namespace qed::native::channels {
     // the tile generator for the complex of a complex grid source
     template <typename sourceT>
-    auto complex(
+    inline auto complex(
         // the source
         const sourceT & source,
         // the zoom level

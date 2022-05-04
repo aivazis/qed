@@ -12,7 +12,7 @@
 namespace qed::native::channels {
     // the tile generator for the phase of a complex grid source
     template <typename sourceT>
-    auto phase(
+    inline auto phase(
         // the source
         const sourceT & source,
         // the zoom level
