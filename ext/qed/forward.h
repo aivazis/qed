@@ -22,11 +22,6 @@ namespace qed::py {
     // version info
     void version(py::module &);
 
-    // channels subpackage
-    namespace channels {
-        // the initializer
-        void channels(py::module &);
-    }
     // datasets subpackage
     namespace datasets {
         // the initializer
