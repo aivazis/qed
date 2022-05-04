@@ -12,7 +12,7 @@
 namespace qed::nisar::channels {
     // the tile generator for the amplitude of a complex HDF5 source
     template <typename sourceT>
-    auto amplitude(
+    inline auto amplitude(
         // the source
         const dataset_t & dataset,
         // the data layout

@@ -12,7 +12,7 @@
 namespace qed::nisar::channels {
     // the tile generator for the real part of a complex HDF5 source
     template <typename sourceT>
-    auto real(
+    inline auto real(
         // the source
         const dataset_t & source,
         // the data layout

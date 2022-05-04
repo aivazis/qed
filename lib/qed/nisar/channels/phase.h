@@ -12,7 +12,7 @@
 namespace qed::nisar::channels {
     // the tile generator for the phase of a complex HDF5 source
     template <typename sourceT>
-    auto phase(
+    inline auto phase(
         // the source
         const dataset_t & dataset,
         // the data layout
