@@ -59,7 +59,7 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         # get my name
         name = self.tag
         # look for the tile maker in {libqed}
-        tileMaker = getattr(qed.libqed.channels, name)
+        pipeline = getattr(qed.libqed.native.channels, name)
 
         # turn the shape into a {pyre::grid::shape_t}
         shape = qed.libpyre.grid.Shape2D(shape=shape)
@@ -67,7 +67,7 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         origin = qed.libpyre.grid.Index2D(index=origin)
 
         # ask it to make a tile and return it
-        return tileMaker(source=source.data, zoom=zoom, origin=origin, shape=shape, **kwds)
+        return pipeline(source=source.data, zoom=zoom, origin=origin, shape=shape, **kwds)
 
 
     def update(self, **kwds):
