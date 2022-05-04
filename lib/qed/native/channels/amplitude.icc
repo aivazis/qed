@@ -9,7 +9,7 @@
 #else
 
 
-// the tile generators
+// the amplitude tile generator
 template <typename sourceT>
 auto
 qed::native::channels::amplitude(
