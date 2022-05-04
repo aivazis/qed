@@ -18,12 +18,6 @@ namespace qed::py::nisar {
     void datatypes(py::module &);
     // the channel bindings
     void channels(py::module &);
-
-    // in-memory layout for the composite type that encodes complex values in NISAR products
-    // we use {pyre::grid} of {std::complex<float>}, and need the names of the members
-    // of the in-file composite type in order to make the mapping work
-    template <typename valueT>
-    inline auto complexType() -> pyre::h5::comptype_t *;
 }
 
 

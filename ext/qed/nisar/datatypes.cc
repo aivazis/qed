@@ -9,9 +9,6 @@
 // namespace setup
 #include "forward.h"
 
-// the datatypes
-#include "datatypes.h"
-
 
 // amplitude
 void
@@ -26,8 +23,8 @@ qed::py::nisar::datatypes(py::module & m)
 
 
     // attach the complex type descriptions
-    datatypes.attr("complexFloat") = complexType<float>();
-    datatypes.attr("complexDouble") = complexType<double>();
+    datatypes.attr("complexFloat") = qed::nisar::datatypes::complex<float>();
+    datatypes.attr("complexDouble") = qed::nisar::datatypes::complex<double>();
 
     // all done
     return;
