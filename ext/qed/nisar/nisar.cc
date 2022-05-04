@@ -23,8 +23,8 @@ qed::py::nisar::nisar(py::module & m)
 
     // add the supported nisar data types
     datatypes(nisar);
-    // channels
-    channels(nisar);
+    // datasets
+    slc(nisar);
 
     // all done
     return;
