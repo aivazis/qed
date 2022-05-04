@@ -4,17 +4,17 @@
 // (c) 1998-2022 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_channels_real_h)
-#define qed_nisar_channels_real_h
+#if !defined(qed_nisar_slc_amplitude_h)
+#define qed_nisar_slc_amplitude_h
 
 
-// the real part tile generator
-namespace qed::nisar::channels {
-    // the tile generator for the real part of a complex HDF5 source
+// amplitude tile generator
+namespace qed::nisar::slc {
+    // the tile generator for the amplitude of a complex HDF5 source
     template <typename sourceT>
-    inline auto real(
+    inline auto amplitude(
         // the source
-        const dataset_t & source,
+        const dataset_t & dataset,
         // the data layout
         const datatype_t & datatype,
         // the zoom level
@@ -29,9 +29,9 @@ namespace qed::nisar::channels {
 
 
 // pull in the implementations
-#define qed_nisar_channels_real_icc
-#include "real.icc"
-#undef qed_nisar_channels_real_icc
+#define qed_nisar_slc_amplitude_icc
+#include "amplitude.icc"
+#undef qed_nisar_slc_amplitude_icc
 
 #endif
 
