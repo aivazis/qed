@@ -12,7 +12,7 @@
 namespace qed::native::channels {
     // the tile generator for the imaginary part of a complex grid source
     template <typename sourceT>
-    auto imaginary(
+    inline auto imaginary(
         // the source
         const sourceT & source,
         // the zoom level
