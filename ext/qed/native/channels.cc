@@ -106,7 +106,7 @@ qed::py::native::channels(py::module & m)
         "render the amplitude of a complex double tile");
 
     // {c8}
-    m.def(
+    channels.def(
         // the name of the function
         "complex",
         // the handler
@@ -117,7 +117,7 @@ qed::py::native::channels(py::module & m)
         // the docstring
         "render the value of a complex float tile");
     // {c16}
-    m.def(
+    channels.def(
         // the name of the function
         "complex",
         // the handler
@@ -129,7 +129,7 @@ qed::py::native::channels(py::module & m)
         "render the value of a complex double tile");
 
     // imaginary part of {c8}
-    m.def(
+    channels.def(
         // the name of the function
         "imaginary",
         // the handler
@@ -139,7 +139,7 @@ qed::py::native::channels(py::module & m)
         // the docstring
         "render the imaginary part a complex float tile");
     // imaginary part of {c16}
-    m.def(
+    channels.def(
         // the name of the function
         "imaginary",
         // the handler
@@ -150,7 +150,7 @@ qed::py::native::channels(py::module & m)
         "render the imaginary part of a complex double tile");
 
     // phase of {c8}
-    m.def(
+    channels.def(
         // the name of the function
         "phase",
         // the handler
@@ -161,7 +161,7 @@ qed::py::native::channels(py::module & m)
         // the docstring
         "render the phase of a complex float tile");
     // phase of {c16}
-    m.def(
+    channels.def(
         // the name of the function
         "phase",
         // the handler
@@ -173,7 +173,7 @@ qed::py::native::channels(py::module & m)
         "render the phase of a complex double tile");
 
     // real part of {c8}
-    m.def(
+    channels.def(
         // the name of the function
         "real",
         // the handler
@@ -183,7 +183,7 @@ qed::py::native::channels(py::module & m)
         // the docstring
         "render the real part a complex float tile");
     // real part of {c16}
-    m.def(
+    channels.def(
         // the name of the function
         "real",
         // the handler
