@@ -59,7 +59,7 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         # get my name
         name = self.tag
         # look for the tile maker in {libqed}
-        pipeline = getattr(qed.libqed.nisar.channels, name)
+        pipeline = getattr(qed.libqed.nisar.slc, name)
 
         # turn the shape into a {pyre::grid::shape_t}
         shape = qed.libpyre.grid.Shape2D(shape=shape)
