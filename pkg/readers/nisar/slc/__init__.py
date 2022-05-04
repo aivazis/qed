@@ -4,8 +4,4 @@
 # (c) 1998-2022 all rights reserved
 
 
-# the product
-from .SLC import SLC as slc
-
-
 # end of file
