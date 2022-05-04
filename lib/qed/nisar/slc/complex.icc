@@ -4,15 +4,15 @@
 // (c) 1998-2022 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_channels_real_icc)
-#error this file contains implementation details for qed::nisar::channels::real
+#if !defined(qed_nisar_slc_complex_icc)
+#error this file contains implementation details for qed::nisar::slc::complex
 #else
 
 
-// the real part tile generator
+// the complex tile generator
 template <typename sourceT>
 auto
-qed::nisar::channels::real(
+qed::nisar::slc::complex(
     // the source
     const dataset_t & dataset,
     // the layout
@@ -24,7 +24,7 @@ qed::nisar::channels::real(
     // the tile shape
     typename sourceT::shape_type tile,
     // the range of values to render
-    double min, double max) -> bmp_t
+    double min, double max, double phaseMin, double phaseMax, double saturation) -> bmp_t
 {
     // type aliases
     using index_t = typename sourceT::index_type;
@@ -41,7 +41,8 @@ qed::nisar::channels::real(
     auto source = pyre::h5::read<sourceT>(dataset, datatype, from, tile, strides);
 
     // render and return
-    return native::channels::real(source, 0, { 0, 0 }, tile, min, max);
+    return native::channels::complex(
+        source, 0, { 0, 0 }, tile, min, max, phaseMin, phaseMax, saturation);
 }
 
 

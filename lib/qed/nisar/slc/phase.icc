@@ -4,15 +4,15 @@
 // (c) 1998-2022 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_channels_imaginary_icc)
-#error this file contains implementation details for qed::nisar::channels::imaginary
+#if !defined(qed_nisar_slc_phase_icc)
+#error this file contains implementation details for qed::nisar::slc::phase
 #else
 
 
-// the imaginary part tile generator
+// the phase tile generator
 template <typename sourceT>
 auto
-qed::nisar::channels::imaginary(
+qed::nisar::slc::phase(
     // the source
     const dataset_t & dataset,
     // the layout
@@ -23,8 +23,10 @@ qed::nisar::channels::imaginary(
     typename sourceT::index_type origin,
     // the tile shape
     typename sourceT::shape_type tile,
+    // the hue range
+    double low, double high,
     // the range of values to render
-    double min, double max) -> bmp_t
+    double saturation, double brightness) -> bmp_t
 {
     // type aliases
     using index_t = typename sourceT::index_type;
@@ -41,7 +43,7 @@ qed::nisar::channels::imaginary(
     auto source = pyre::h5::read<sourceT>(dataset, datatype, from, tile, strides);
 
     // render and return
-    return native::channels::imaginary(source, 0, { 0, 0 }, tile, min, max);
+    return native::channels::phase(source, 0, { 0, 0 }, tile, low, high, saturation, brightness);
 }
 
 

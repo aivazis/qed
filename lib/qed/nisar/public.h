@@ -19,12 +19,8 @@
 // implementation
 // datatypes
 #include "datatypes/complex.h"
-// channels
-#include "channels/amplitude.h"
-#include "channels/complex.h"
-#include "channels/imaginary.h"
-#include "channels/phase.h"
-#include "channels/real.h"
+// data products
+#include "slc/slc.h"
 
 
 #endif

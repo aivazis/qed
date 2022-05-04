@@ -4,12 +4,12 @@
 // (c) 1998-2022 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_channels_complex_h)
-#define qed_nisar_channels_complex_h
+#if !defined(qed_nisar_slc_complex_h)
+#define qed_nisar_slc_complex_h
 
 
 // the complex tile generator
-namespace qed::nisar::channels {
+namespace qed::nisar::slc {
     // the tile generator for the pixels of a complex HDF5 source
     template <typename sourceT>
     inline auto complex(
@@ -29,9 +29,9 @@ namespace qed::nisar::channels {
 
 
 // pull in the implementations
-#define qed_nisar_channels_complex_icc
+#define qed_nisar_slc_complex_icc
 #include "complex.icc"
-#undef qed_nisar_channels_complex_icc
+#undef qed_nisar_slc_complex_icc
 
 #endif
 

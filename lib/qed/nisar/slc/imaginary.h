@@ -4,15 +4,15 @@
 // (c) 1998-2022 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_channels_phase_h)
-#define qed_nisar_channels_phase_h
+#if !defined(qed_nisar_slc_imaginary_h)
+#define qed_nisar_slc_imaginary_h
 
 
-// the phase tile generator
-namespace qed::nisar::channels {
-    // the tile generator for the phase of a complex HDF5 source
+// the imaginary part tile generator
+namespace qed::nisar::slc {
+    // the tile generator for the imaginary part of a complex HDF5 source
     template <typename sourceT>
-    inline auto phase(
+    inline auto imaginary(
         // the source
         const dataset_t & dataset,
         // the data layout
@@ -23,17 +23,15 @@ namespace qed::nisar::channels {
         typename sourceT::index_type origin,
         // the tile shape
         typename sourceT::shape_type tile,
-        // the hue interaval
-        double low, double high,
         // the range of values to render
-        double saturation, double brightness) -> bmp_t;
+        double min, double max) -> bmp_t;
 }
 
 
 // pull in the implementations
-#define qed_nisar_channels_phase_icc
-#include "phase.icc"
-#undef qed_nisar_channels_phase_icc
+#define qed_nisar_slc_imaginary_icc
+#include "imaginary.icc"
+#undef qed_nisar_slc_imaginary_icc
 
 #endif
 
