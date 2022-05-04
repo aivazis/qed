@@ -16,8 +16,8 @@ namespace qed::py::nisar {
 
     // the submodule with the data type definitions
     void datatypes(py::module &);
-    // the channel bindings
-    void channels(py::module &);
+    // data products
+    void slc(py::module &);
 }
 
 
