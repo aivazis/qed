@@ -13,9 +13,11 @@ namespace qed::py::nisar {
     // the module linitializers
     // top level
     void nisar(py::module &);
+
     // the submodule with the data type definitions
     void datatypes(py::module &);
-
+    // the channel bindings
+    void channels(py::module &);
 
     // in-memory layout for the composite type that encodes complex values in NISAR products
     // we use {pyre::grid} of {std::complex<float>}, and need the names of the members

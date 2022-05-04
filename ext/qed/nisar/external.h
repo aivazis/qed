@@ -8,6 +8,9 @@
 #define qed_py_nisar_external_h
 
 
+// pull the {nisar} support from {qed}
+#include <qed/nisar.h>
+
 // inherit
 #include "../external.h"
 
