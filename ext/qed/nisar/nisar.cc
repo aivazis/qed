@@ -24,8 +24,10 @@ qed::py::nisar::nisar(py::module & m)
         // its docstring
         "NISAR specific support");
 
-    // add the supported nisar
+    // add the supported nisar data types
     datatypes(nisar);
+    // channels
+    channels(nisar);
 
     // all done
     return;
