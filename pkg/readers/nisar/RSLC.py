@@ -9,7 +9,7 @@ import qed
 # superclass
 from .H5 import H5
 # my dataset
-from .SLC import SLC
+from . import datasets
 
 
 # the RSLC reader
@@ -94,7 +94,7 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
                         "selector": selector,
                     }
                     # instantiate it
-                    slc = SLC(name=name, data=data, **config)
+                    slc = datasets.slc(name=name, data=data, **config)
                     # and add it to my dataset
                     self.datasets.append(slc)
 
