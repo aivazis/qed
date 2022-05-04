@@ -17,6 +17,8 @@
 #include "api.h"
 
 // implementation
+// datatypes
+#include "datatypes/complex.h"
 // channels
 #include "channels/amplitude.h"
 #include "channels/complex.h"

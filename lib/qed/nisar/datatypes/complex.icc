@@ -4,14 +4,15 @@
 // (c) 1998-2022 all rights reserved
 
 // code guard
-#if !defined(qed_py_nisar_datatypes_h)
-#define qed_py_nisar_datatypes_h
+#if !defined(qed_nisar_datatypes_complex_icc)
+#error this file contains implementation details for qed::nisar::datatypes::complex
+#else
 
 
 // implementations
 template <typename valueT>
-inline auto
-qed::py::nisar::complexType() -> pyre::h5::comptype_t *
+auto
+qed::nisar::datatypes::complex() -> pyre::h5::comptype_t *
 {
     // alias for my in-memory representation
     using complex_t = std::complex<valueT>;
