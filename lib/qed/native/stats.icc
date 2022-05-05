@@ -1,0 +1,62 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2022 all rights reserved
+
+// code guard
+#if !defined(qed_native_stats_icc)
+#error this file contains implementation details for qed::native::stats
+#else
+
+
+// collect statistics on a grid tile
+template <typename sourceT>
+auto
+qed::native::stats(
+    // the source
+    const sourceT & source,
+    // the origin of the tile
+    typename sourceT::index_type origin,
+    // the tile shape
+    typename sourceT::shape_type tile) -> stats_t
+{
+    // get the sample
+    auto box = source.box(origin, tile);
+    // compute the statistics and pass them on
+    return collectStatistics(box);
+}
+
+
+// collect statistics on a dataset
+template <typename sourceT>
+auto
+qed::native::collectStatistics(
+    // the source
+    const sourceT & source) -> stats_t
+{
+    // my counters
+    int samples = 0;
+    double sum = 0.0;
+    // my stats
+    double min = 0, mean = 0, max = 0;
+
+    // go through the data
+    for (auto z : source) {
+        // compute the magnitude
+        double r = std::abs(z);
+        // update the stats
+        min = std::min(min, r);
+        max = std::max(max, r);
+        // update the counters
+        sum += r;
+        ++samples;
+    }
+
+    // all done
+    return { min, sum / samples, max };
+}
+
+
+#endif
+
+// end of file

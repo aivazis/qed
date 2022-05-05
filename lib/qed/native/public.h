@@ -25,6 +25,11 @@
 #include "channels/real.h"
 #include "channels/value.h"
 
+// profile
+#include "profile.h"
+// statistics
+#include "stats.h"
+
 
 #endif
 

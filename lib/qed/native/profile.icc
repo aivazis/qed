@@ -1,0 +1,97 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2022 all rights reserved
+
+// code guard
+#if !defined(qed_native_profile_icc)
+#error this file contains implementation details for qed::native::profile
+#else
+
+
+// collect statistics on a grid tile
+template <typename sourceT>
+auto
+qed::native::profile(
+    // the dataset
+    const sourceT & source,
+    // the points
+    const points_t & path) -> values_t<typename sourceT::value_type>
+{
+    // make a container for the answer
+    values_t<typename sourceT::value_type> values;
+
+    // if there are no points in the path
+    if (path.size() == 0) {
+        // nothing much to do
+        return values;
+    }
+
+    // if there is only one point in the path
+    if (path.size() == 1) {
+        // get the point
+        const points_t::value_type & p = path[0];
+        // turn it into an index
+        typename sourceT::index_type idx = { std::get<0>(p), std::get<1>(p) };
+        // use the index to get the value
+        auto data = source[idx];
+        // make a tuple
+        auto entry = std::make_tuple(idx[0], idx[1], data);
+        // push it
+        values.push_back(entry);
+        // and done
+        return values;
+    }
+
+    // at this point, it is guaranteed that there are at least two points in the path, so we can
+    // process line segments
+    for (auto it = path.cbegin(); it != path.cend() - 1; ++it) {
+        // unpack the tail of the segment
+        auto tail = typename sourceT::index_type(
+            // 0-axis: lines
+            std::get<0>(*it),
+            // 1-axis: samples
+            std::get<1>(*it));
+        // and the head
+        auto head = typename sourceT::index_type(
+            // 0-axis: lines
+            std::get<0>(*(it + 1)),
+            // 1-axis: samples
+            std::get<1>(*(it + 1)));
+
+        // compute the shape of the bounding box
+        auto shape = typename sourceT::shape_type(
+            // along the 0-axis
+            std::abs(tail[0] - head[0]) + 1,
+            // along the 1-axis
+            std::abs(tail[1] - head[1]) + 1);
+
+        // compute the pixel separation; make sure this is a floating point number
+        // so we don't do integer arithmetic until it's time
+        double sep = std::max(shape[0], shape[1]);
+
+        // go through them
+        for (int i = 0; i < sep; ++i) {
+            // interpolate
+            int dx = std::round(i / sep * (head[0] - tail[0]));
+            int dy = std::round(i / sep * (head[1] - tail[1]));
+            // to compute the index shift to this pixel
+            typename sourceT::index_type shift { dx, dy };
+            // assemble the index
+            typename sourceT::index_type idx = tail + shift;
+            // get the value
+            auto data = source[idx];
+            // make a tuple
+            auto entry = std::make_tuple(idx[0], idx[1], data);
+            // push it and get the next pixel
+            values.push_back(entry);
+        }
+    }
+
+    // all done
+    return values;
+}
+
+#endif
+
+// end of file
