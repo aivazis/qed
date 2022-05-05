@@ -25,6 +25,10 @@ qed::py::nisar::nisar(py::module & m)
     datatypes(nisar);
     // datasets
     slc(nisar);
+    // profile
+    profile(nisar);
+    // stats
+    stats(nisar);
 
     // all done
     return;
