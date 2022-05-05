@@ -23,9 +23,6 @@ PYBIND11_MODULE(qed, m)
     // version info
     qed::py::version(m);
 
-    // plugins
-    qed::py::datasets::datasets(m);
-
     // support for readers, their datasets and visualization pipelines
     qed::py::native::native(m);
     qed::py::nisar::nisar(m);
