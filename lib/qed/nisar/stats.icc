@@ -1,0 +1,36 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2022 all rights reserved
+
+// code guard
+#if !defined(qed_nisar_stats_icc)
+#error this file contains implementation details for qed::nisar::stats
+#else
+
+
+// collect statistics on a tile
+template <typename sourceT>
+auto
+qed::nisar::stats(
+    // the source
+    const dataset_t & dataset,
+    // the layout
+    const datatype_t & datatype,
+    // the origin of the tile
+    typename sourceT::index_type origin,
+    // the tile shape
+    typename sourceT::shape_type tile) -> native::stats_t
+{
+    // we operate at zoom level 0
+    typename sourceT::shape_type strides = sourceT::shape_type::one();
+    // read the data
+    auto source = pyre::h5::read<sourceT>(dataset, datatype, origin, tile, strides);
+    // compute the statistics and pass them on
+    return native::collectStatistics(source);
+}
+
+
+#endif
+
+// end of file

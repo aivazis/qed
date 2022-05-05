@@ -21,6 +21,10 @@
 #include "datatypes/complex.h"
 // data products
 #include "slc/slc.h"
+// profile
+#include "profile.h"
+// statistics
+#include "stats.h"
 
 
 #endif
