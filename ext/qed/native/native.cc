@@ -23,6 +23,10 @@ qed::py::native::native(py::module & m)
 
     // add the channel bindings
     channels(native);
+    // profile
+    profile(native);
+    // statistics
+    stats(native);
 
     // all done
     return;

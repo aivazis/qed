@@ -10,7 +10,6 @@
 
 // pull the {native} support from {qed}
 #include <qed/native.h>
-
 // inherit
 #include "../external.h"
 
