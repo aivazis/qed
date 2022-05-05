@@ -9,6 +9,11 @@
 #define qed_native_externals_h
 
 
+// STL
+#include <tuple>
+#include <vector>
+
+
 // journal
 #include <pyre/journal.h>
 // pyre
