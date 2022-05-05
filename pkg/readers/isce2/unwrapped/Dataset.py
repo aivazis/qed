@@ -62,7 +62,7 @@ class Dataset(qed.flow.product,
         Sample my data along the path defined by {points}
         """
         # ask my data manager to build a profile
-        profile = qed.libqed.datasets.profile(self.data, points)
+        profile = qed.libqed.native.profile(self.data, points)
         # and return it
         return profile
 
@@ -164,7 +164,7 @@ class Dataset(qed.flow.product,
         # only use {channel} values when computing stats
         tile = qed.libpyre.grid.Shape3D(shape=(tile[0], 1, tile[1]))
         # compute them
-        stats = qed.libqed.datasets.stats(source=data, origin=center, shape=tile)
+        stats = qed.libqed.native.stats(source=data, origin=center, shape=tile)
         # and return them
         return stats
 
