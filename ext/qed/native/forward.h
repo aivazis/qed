@@ -15,6 +15,10 @@ namespace qed::py::native {
 
     // the channel bindings
     void channels(py::module &);
+    // profile
+    void profile(py::module &);
+    // statistics
+    void stats(py::module &);
 }
 
 
