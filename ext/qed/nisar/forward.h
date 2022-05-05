@@ -18,6 +18,10 @@ namespace qed::py::nisar {
     void datatypes(py::module &);
     // data products
     void slc(py::module &);
+    // profile
+    void profile(py::module &);
+    // stats
+    void stats(py::module &);
 }
 
 
