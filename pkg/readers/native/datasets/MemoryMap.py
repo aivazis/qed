@@ -62,7 +62,7 @@ class MemoryMap(qed.flow.product,
         Sample my data along the path defined by {points}
         """
         # ask my data manager to build a profile
-        profile = qed.libqed.datasets.profile(self.data, points)
+        profile = qed.libqed.native.profile(self.data, points)
         # and return it
         return profile
 
@@ -144,7 +144,7 @@ class MemoryMap(qed.flow.product,
         # and a shape
         tile = qed.libpyre.grid.Shape2D(shape=tile)
         # compute the stats
-        stats = qed.libqed.datasets.stats(source=data, origin=center, shape=tile)
+        stats = qed.libqed.native.stats(source=data, origin=center, shape=tile)
         # and return them
         return stats
 
