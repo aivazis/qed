@@ -67,7 +67,7 @@ class SLC(qed.flow.product, family="qed.datasets.nisar.slc", implements=qed.prot
         Sample my data along the path defined by {points}
         """
         # ask my data manager to build a profile
-        profile = qed.libqed.datasets.profile(
+        profile = qed.libqed.nisar.profile(
             source=self.data, datatype=self.datatype, points=points)
         # and return it
         return profile
@@ -128,7 +128,7 @@ class SLC(qed.flow.product, family="qed.datasets.nisar.slc", implements=qed.prot
         # and a shape
         tile = qed.libpyre.grid.Shape2D(shape=tile)
         # compute the stats
-        stats = qed.libqed.datasets.stats(
+        stats = qed.libqed.nisar.stats(
             source=data, datatype=self.datatype, origin=center, shape=tile)
 
         # and return them
