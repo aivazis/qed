@@ -24,9 +24,6 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
    phase = qed.protocols.controller(default=qed.controllers.linearRange)
    phase.doc = "the manager of the range of values to render"
 
-   saturation = qed.protocols.controller(default=qed.controllers.value)
-   saturation.doc = "the saturation"
-
 
    # interface
    def autotune(self, **kwds):
@@ -42,8 +39,6 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
       self.phase.low = 0
       self.phase.max = 1
       self.phase.high = 1
-      # and my saturation
-      self.saturation.value = 1
       # all done
       return
 
@@ -58,8 +53,6 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
       yield self.range, self.pyre_trait(alias="range")
       # my phase
       yield self.phase, self.pyre_trait(alias="phase")
-      # and my saturation
-      yield self.saturation, self.pyre_trait(alias="saturation")
       # all done
       return
 
@@ -91,10 +84,8 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
       high = 10**self.range.high
       lowPhase = self.phase.low
       highPhase = self.phase.high
-      saturation = self.saturation.value
       # add my configuration and chain up
-      return super().tile(min=low, max=high,
-         minPhase=lowPhase, maxPhase=highPhase, saturation=saturation, **kwds)
+      return super().tile(min=low, max=high, minPhase=lowPhase, maxPhase=highPhase, **kwds)
 
 
    # constants
