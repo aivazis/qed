@@ -33,6 +33,11 @@ namespace qed::py {
         // the initializer
         void native(py::module &);
     }
+    // isce2 support
+    namespace isce2 {
+        // the initializer
+        void isce2(py::module &);
+    }
     // nisar support
     namespace nisar {
         // the initializer
