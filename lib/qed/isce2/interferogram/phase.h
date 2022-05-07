@@ -24,7 +24,7 @@ namespace qed::isce2::interferogram::channels {
         // the hue interaval
         double low, double high,
         // the range of values to render
-        double saturation, double brightness) -> bmp_t;
+        double brightness) -> bmp_t;
 }
 
 
