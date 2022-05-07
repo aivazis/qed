@@ -22,7 +22,7 @@ namespace qed::isce2::interferogram::channels {
         // the tile shape
         typename sourceT::shape_type tile,
         // the range of values to render
-        double min, double max, double phaseMin, double phaseMax, double saturation) -> bmp_t;
+        double min, double max, double phaseMin, double phaseMax) -> bmp_t;
 }
 
 
