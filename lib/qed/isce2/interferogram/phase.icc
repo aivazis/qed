@@ -24,7 +24,7 @@ qed::isce2::interferogram::channels::phase(
     // the hue range
     double low, double high,
     // the range of values to render
-    double saturation, double brightness) -> bmp_t
+    double brightness) -> bmp_t
 {
     // type aliases for the workflow nodes
     // my decimator
@@ -33,7 +33,7 @@ qed::isce2::interferogram::channels::phase(
     using selector_t = cycle_t<zoom_t>;
     using scale_t = affine_t<selector_t>;
     // the color map
-    using colormap_t = hsb_t<scale_t, constant_t, constant_t>;
+    using colormap_t = hl_t<scale_t, constant_t>;
 
     // make a bitmap
     bmp_t bmp(tile[0], tile[1]);
@@ -44,13 +44,11 @@ qed::isce2::interferogram::channels::phase(
     // extract the phase
     auto c = selector_t(decimator, { low, high });
     auto h = scale_t(c, { 0, 2 * M_PI });
-    // set up the saturation
-    auto s = constant_t(saturation);
-    // and brightness
+    // set up the brightness
     auto b = constant_t(brightness);
 
     // generate color
-    auto colormap = colormap_t(h, s, b);
+    auto colormap = colormap_t(h, b);
 
     // and encode
     bmp.encode(colormap);
