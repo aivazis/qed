@@ -4,8 +4,8 @@
 // (c) 1998-2022 all rights reserved
 
 // code guard
-#if !defined(qed_isce2_interferorgram_channels_phase_h)
-#define qed_isce2_interferorgram_channels_phase_h
+#if !defined(qed_isce2_interferogram_channels_phase_h)
+#define qed_isce2_interferogram_channels_phase_h
 
 
 // the phase tile generator
@@ -29,9 +29,9 @@ namespace qed::isce2::interferogram::channels {
 
 
 // pull in the implementations
-#define qed_isce2_interferorgram_channels_phase_icc
+#define qed_isce2_interferogram_channels_phase_icc
 #include "phase.icc"
-#undef qed_isce2_interferorgram_channels_phase_icc
+#undef qed_isce2_interferogram_channels_phase_icc
 
 #endif
 

@@ -4,8 +4,8 @@
 // (c) 1998-2022 all rights reserved
 
 // code guard
-#if !defined(qed_isce2_interferorgram_channels_real_h)
-#define qed_isce2_interferorgram_channels_real_h
+#if !defined(qed_isce2_interferogram_channels_real_h)
+#define qed_isce2_interferogram_channels_real_h
 
 
 // the real part tile generator
@@ -27,9 +27,9 @@ namespace qed::isce2::interferogram::channels {
 
 
 // pull in the implementations
-#define qed_isce2_interferorgram_channels_real_icc
+#define qed_isce2_interferogram_channels_real_icc
 #include "real.icc"
-#undef qed_isce2_interferorgram_channels_real_icc
+#undef qed_isce2_interferogram_channels_real_icc
 
 #endif
 
