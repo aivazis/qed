@@ -25,9 +25,6 @@ class Phase(Channel, family="qed.channels.isce2.int.phase"):
    brightness = qed.protocols.controller(default=qed.controllers.value)
    brightness.doc = "the brightness"
 
-   saturation = qed.protocols.controller(default=qed.controllers.value)
-   saturation.doc = "the saturation"
-
 
    # interface
    def autotune(self, **kwds):
@@ -38,10 +35,8 @@ class Phase(Channel, family="qed.channels.isce2.int.phase"):
       self.phase.low = 0
       self.phase.max = 1
       self.phase.high = 1
-      # my brightness
-      self.brightness.value = 1
-      # and my saturation
-      self.saturation.value = 1
+      # and my brightness
+      self.brightness.value = 0.5
       # all done
       return
 
@@ -56,8 +51,6 @@ class Phase(Channel, family="qed.channels.isce2.int.phase"):
       yield self.phase, self.pyre_trait(alias="phase")
       # my brightness
       yield self.brightness, self.pyre_trait(alias="brightness")
-      # and my saturation
-      yield self.saturation, self.pyre_trait(alias="saturation")
       # all done
       return
 
@@ -103,10 +96,9 @@ class Phase(Channel, family="qed.channels.isce2.int.phase"):
       # unpack my configuration
       low = self.phase.low
       high = self.phase.high
-      saturation = self.saturation.value
       brightness = self.brightness.value
       # add my configuration and chain up
-      return super().tile(low=low, high=high, saturation=saturation, brightness=brightness, **kwds)
+      return super().tile(low=low, high=high, brightness=brightness, **kwds)
 
 
    # constants
