@@ -52,7 +52,6 @@ qed::py::isce2::interferogram::channels(py::module & m)
         &qed::isce2::interferogram::channels::complex<mapgrid_t<std::complex<float>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
-        "saturation"_a,
         // the docstring
         "render the value of a complex float tile");
     // {c16}
@@ -63,7 +62,6 @@ qed::py::isce2::interferogram::channels(py::module & m)
         &qed::isce2::interferogram::channels::complex<mapgrid_t<std::complex<double>>>,
         // the signature
         "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
-        "saturation"_a,
         // the docstring
         "render the value of a complex double tile");
 
