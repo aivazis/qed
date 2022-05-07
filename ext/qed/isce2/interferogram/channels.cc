@@ -95,8 +95,7 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the handler
         &qed::isce2::interferogram::channels::phase<mapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "low"_a, "high"_a, "saturation"_a,
-        "brightness"_a,
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "low"_a, "high"_a, "brightness"_a,
         // the docstring
         "render the phase of a complex float tile");
     // phase of {c16}
@@ -106,8 +105,7 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the handler
         &qed::isce2::interferogram::channels::phase<mapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "low"_a, "high"_a, "saturation"_a,
-        "brightness"_a,
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "low"_a, "high"_a, "brightness"_a,
         // the docstring
         "render the phase of a complex double tile");
 
