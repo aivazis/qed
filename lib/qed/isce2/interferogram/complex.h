@@ -4,8 +4,8 @@
 // (c) 1998-2022 all rights reserved
 
 // code guard
-#if !defined(qed_isce2_interferorgram_channels_complex_h)
-#define qed_isce2_interferorgram_channels_complex_h
+#if !defined(qed_isce2_interferogram_channels_complex_h)
+#define qed_isce2_interferogram_channels_complex_h
 
 
 // the complex tile generator
@@ -27,9 +27,9 @@ namespace qed::isce2::interferogram::channels {
 
 
 // pull in the implementations
-#define qed_isce2_interferorgram_channels_complex_icc
+#define qed_isce2_interferogram_channels_complex_icc
 #include "complex.icc"
-#undef qed_isce2_interferorgram_channels_complex_icc
+#undef qed_isce2_interferogram_channels_complex_icc
 
 #endif
 
