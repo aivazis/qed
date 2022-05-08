@@ -12,7 +12,7 @@ from .Dataset import Dataset
 
 # interferograms are flat complex datasets
 class Reader(qed.flow.factory,
-             family="qed.readers.isce2.int", implements=qed.protocols.reader):
+             family="qed.readers.isce2.interferogram", implements=qed.protocols.reader):
     """
     The interferogram reader
     """
@@ -23,7 +23,7 @@ class Reader(qed.flow.factory,
     uri.doc = "the uri of the data source"
 
     cell = qed.protocols.datatype()
-    cell.default = None
+    cell.default = "complex8"
     cell.doc = "the type of the dataset payload"
 
     shape = qed.properties.tuple(schema=qed.properties.int())
