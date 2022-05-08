@@ -14,7 +14,7 @@ from .channels import channels as channelRegistry
 class Dataset(qed.flow.product,
               family="qed.datasets.isce2.int", implements=qed.protocols.dataset):
     """
-    A line interleaved unwrapped interferogram
+    An interferogram
     """
 
 
