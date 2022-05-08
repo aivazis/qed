@@ -63,13 +63,11 @@ namespace qed::py {
     using map_t = pyre::memory::constmap_t<cellT>;
 
     // from {pyre::grid}
-    // layouts
-    using layout_t = pyre::grid::canonical_t<2>;
     // grids
-    template <typename cellT>
-    using heapgrid_t = pyre::grid::grid_t<layout_t, heap_t<cellT>>;
-    template <typename cellT>
-    using mapgrid_t = pyre::grid::grid_t<layout_t, map_t<cellT>>;
+    template <typename cellT, int dim = 2>
+    using heapgrid_t = pyre::grid::grid_t<pyre::grid::canonical_t<dim>, heap_t<cellT>>;
+    template <typename cellT, int dim = 2>
+    using mapgrid_t = pyre::grid::grid_t<pyre::grid::canonical_t<dim>, map_t<cellT>>;
 
     // from {pyre::viz}
     // encodings
