@@ -23,7 +23,7 @@ class Reader(qed.flow.factory,
     uri.doc = "the uri of the data source"
 
     cell = qed.protocols.datatype()
-    cell.default = "complex8"
+    cell.default = "complex64"
     cell.doc = "the type of the dataset payload"
 
     shape = qed.properties.tuple(schema=qed.properties.int())
