@@ -13,7 +13,7 @@ from .Dataset import Dataset
 # unwrapped interferograms contain one line interleaved {real32} complex dataset
 # with a line of amplitudes, followed by a line of phases
 class Reader(qed.flow.factory,
-             family="qed.readers.isce2.unw", implements=qed.protocols.reader):
+             family="qed.readers.isce2.unwwrapped", implements=qed.protocols.reader):
     """
     The reader of unwrapped interferograms
     """
