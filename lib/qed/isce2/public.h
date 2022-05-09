@@ -18,6 +18,7 @@
 
 // implementation
 #include "interferogram/interferogram.h"
+#include "unwrapped/unwrapped.h"
 
 
 #endif
