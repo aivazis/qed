@@ -6,6 +6,8 @@
 
 # support
 import qed
+# get my channels
+from .channels import channels as channelRegistry
 
 
 # raw dataset, i.e. a dataset in binary file with no metadata
@@ -62,7 +64,7 @@ class Dataset(qed.flow.product,
         Sample my data along the path defined by {points}
         """
         # ask my data manager to build a profile
-        profile = qed.libqed.native.profile(self.data, points)
+        profile = qed.libqed.isce2.unwrapped.profile(self.data, points)
         # and return it
         return profile
 
@@ -101,23 +103,6 @@ class Dataset(qed.flow.product,
         # and register it
         self.channels[amplitude.tag] = amplitude
 
-        # the phase
-        # and the complex value
-
-        return
-
-        # go through the default channels provided my the data type
-        for channel in self.cell.channels:
-            # get their factories
-            cls = qed.protocols.channel.pyre_resolveSpecification(channel)
-            # instantiate a workflow for each one
-            pipeline = cls(name=f"{self.pyre_name}.{channel}")
-            # autotune it
-            pipeline.autotune(stats=self.stats)
-            # and register it
-            self.channels[channel] = pipeline
-
-        # all done
         return
 
 
