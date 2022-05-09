@@ -23,6 +23,7 @@ qed::py::isce2::isce2(py::module & m)
 
     // add support for the various products
     interferogram::interferogram(isce2);
+    unwrapped::unwrapped(isce2);
 
     // all done
     return;
