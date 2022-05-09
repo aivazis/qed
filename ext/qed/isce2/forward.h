@@ -17,6 +17,9 @@ namespace qed::py::isce2 {
     namespace interferogram {
         void interferogram(py::module &);
     }
+    namespace unwrapped {
+        void unwrapped(py::module &);
+    }
 }
 
 
