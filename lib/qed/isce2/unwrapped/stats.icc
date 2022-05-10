@@ -21,7 +21,7 @@ qed::isce2::unwrapped::stats(
     typename sourceT::shape_type tile) -> native::stats_t
 {
     // compute the statistics and pass them on
-    return native::collectStatistics(source);
+    return native::collectStatistics(source.box(origin, tile));
 }
 
 
