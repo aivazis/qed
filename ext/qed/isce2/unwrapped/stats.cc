@@ -19,9 +19,9 @@ qed::py::isce2::unwrapped::stats(py::module & m)
         // the name of the function
         "stats",
         // the handler
-        &qed::isce2::unwrapped::stats<mapgrid_t<std::complex<float>, 3>>,
+        &qed::isce2::unwrapped::stats<mapgrid_t<float, 3>>,
         // the signature
-        "source"_a, "channel"_a, "origin"_a, "shape"_a,
+        "source"_a, "origin"_a, "shape"_a,
         // the docstring
         "collect statistics on a subset of a dataset");
 
@@ -30,9 +30,9 @@ qed::py::isce2::unwrapped::stats(py::module & m)
         // the name of the function
         "stats",
         // the handler
-        &qed::isce2::unwrapped::stats<mapgrid_t<std::complex<double>, 3>>,
+        &qed::isce2::unwrapped::stats<mapgrid_t<double, 3>>,
         // the signature
-        "source"_a, "channel"_a, "origin"_a, "shape"_a,
+        "source"_a, "origin"_a, "shape"_a,
         // the docstring
         "collect statistics on a subset of a dataset");
 
