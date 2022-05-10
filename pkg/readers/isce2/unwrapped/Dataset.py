@@ -149,7 +149,7 @@ class Dataset(qed.flow.product,
         # only use {channel} values when computing stats
         tile = qed.libpyre.grid.Shape3D(shape=(tile[0], 1, tile[1]))
         # compute them
-        stats = qed.libqed.native.stats(source=data, origin=center, shape=tile)
+        stats = qed.libqed.isce2.unwrapped.stats(source=data, origin=center, shape=tile)
         # and return them
         return stats
 
