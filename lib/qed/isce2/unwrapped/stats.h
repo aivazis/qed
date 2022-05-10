@@ -15,8 +15,6 @@ namespace qed::isce2::unwrapped {
     auto stats(
         // the source
         const sourceT & source,
-        // the channel
-        int channel,
         // the origin of the tile
         typename sourceT::index_type origin,
         // the tile shape
