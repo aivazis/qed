@@ -22,7 +22,7 @@ namespace qed::isce2::unwrapped::channels {
         // the tile shape
         typename sourceT::shape_type tile,
         // the range of values to render
-        double min, double max, double phaseMin, double phaseMax) -> bmp_t;
+        double mean, double scale, double exponent, double phaseMin, double phaseMax) -> bmp_t;
 }
 
 
