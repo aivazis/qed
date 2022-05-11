@@ -18,19 +18,28 @@ class Amplitude(Channel, family="qed.channels.isce2.int.amplitude"):
 
 
    # configurable state
-   range = qed.protocols.controller(default=qed.controllers.logRange)
-   range.doc = "the manager of the range of values to render"
+   scale = qed.protocols.controller(default=qed.controllers.value)
+   scale.doc = "the overall amplitude scaling"
+
+   exponent = qed.protocols.controller(default=qed.controllers.value)
+   exponent.doc = "the amplitude exponent"
 
 
    # interface
-   def autotune(self, **kwds):
+   def autotune(self, stats, **kwds):
       """
       Use the {stats} gathered on a data sample to adjust the range configuration
       """
       # chain up
       super().autotune(**kwds)
-      # notify my range
-      self.range.autotune(**kwds)
+
+      # set my scale
+      self.scale.value = 0.5
+      # and my exponent
+      self.exponent.value = 0.3
+      # record the mean amplitude
+      self.mean = stats[0][1]
+
       # all done
       return
 
@@ -41,8 +50,10 @@ class Amplitude(Channel, family="qed.channels.isce2.int.amplitude"):
       """
       # chain up
       yield from super().controllers()
-      # my range
-      yield self.range, self.pyre_trait(alias="range")
+      # my scale
+      yield self.scale, self.pyre_trait(alias="scale")
+      # and my exponent
+      yield self.exponent, self.pyre_trait(alias="exponent")
       # all done
       return
 
@@ -70,8 +81,10 @@ class Amplitude(Channel, family="qed.channels.isce2.int.amplitude"):
       Generate a tile of the given characteristics
       """
       # get my configuration
-      low = 10**self.range.low
-      high = 10**self.range.high
+      scale = self.scale.value
+      exponent = self.exponent.value
+      # and the mean amplitude
+      mean = self.mean
 
       # unpack the {tile} origin
       line, sample = origin
@@ -83,12 +96,24 @@ class Amplitude(Channel, family="qed.channels.isce2.int.amplitude"):
       # and the origin into a {pyre::grid::index_t}
       origin = qed.libpyre.grid.Index3D(index=(line, 0, sample))
       # look for the tile maker in {libqed}
-      tileMaker = qed.libqed.channels.value
+      tileMaker = qed.libqed.isce2.unwrapped.channels.amplitude
       # and ask it to make a tile
       tile = tileMaker(source=source.data,
-                       zoom=zoom, origin=origin, shape=shape, min=low, max=high, **kwds)
+                       zoom=zoom, origin=origin, shape=shape,
+                       mean=mean, scale=scale, exponent=exponent,
+                       **kwds)
       # and return it
       return tile
+
+
+   # metamethods
+   def __init__(self, **kwds):
+      # chain up
+      super().__init__(**kwds)
+      # the mean amplitude; set during auto tuning
+      self.mean = 0
+      # all done
+      return
 
 
    # constants
