@@ -51,7 +51,8 @@ qed::py::isce2::unwrapped::channels(py::module & m)
         // the handler
         &qed::isce2::unwrapped::channels::complex<mapgrid_t<float, 3>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "mean"_a, "scale"_a, "exponent"_a,
+        "minPhase"_a, "maxPhase"_a,
         // the docstring
         "render the value of a complex float tile");
     // {c16}
@@ -61,7 +62,8 @@ qed::py::isce2::unwrapped::channels(py::module & m)
         // the handler
         &qed::isce2::unwrapped::channels::complex<mapgrid_t<double, 3>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "mean"_a, "scale"_a, "exponent"_a,
+        "minPhase"_a, "maxPhase"_a,
         // the docstring
         "render the value of a complex double tile");
 
