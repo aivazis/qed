@@ -30,13 +30,13 @@ qed::isce2::unwrapped::channels::phase(
     // my decimator
     using zoom_t = decimate_t<sourceT>;
     // the phase selector
-    using selector_t = cycle_t<zoom_t>;
+    using selector_t = parametric_t<zoom_t>;
     using scale_t = affine_t<selector_t>;
     // the color map
     using colormap_t = hl_t<scale_t, constant_t>;
 
     // make a bitmap
-    bmp_t bmp(tile[0], tile[1]);
+    bmp_t bmp(tile[0], tile[2]);
 
     // zoom
     auto decimator = zoom_t(source, origin, tile, 1 << zoom);
