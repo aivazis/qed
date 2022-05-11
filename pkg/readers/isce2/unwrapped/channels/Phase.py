@@ -83,7 +83,7 @@ class Phase(Channel, family="qed.channels.isce2.int.phase"):
 
       # project
       # in π radians
-      yield  value, "π radians"
+      yield value, "π radians"
 
       # transform to [0, 2π]
       if value < 0:
