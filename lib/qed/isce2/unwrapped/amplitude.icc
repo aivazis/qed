@@ -22,29 +22,25 @@ qed::isce2::unwrapped::channels::amplitude(
     // the tile shape
     typename sourceT::shape_type tile,
     // the range of values to render
-    double min, double max) -> bmp_t
+    double mean, double scale, double exponent) -> bmp_t
 {
     // type aliases for the workflow nodes
     // my decimator
     using zoom_t = decimate_t<sourceT>;
-    // the amplitude selector
-    using selector_t = amplitude_t<zoom_t>;
     // the normalizer
-    using norm_t = parametric_t<selector_t>;
+    using val_t = power_t<zoom_t>;
     // the color map
-    using colormap_t = gray_t<norm_t>;
+    using colormap_t = gray_t<val_t>;
 
     // make a bitmap
-    bmp_t bmp(tile[0], tile[1]);
+    bmp_t bmp(tile[0], tile[2]);
 
     // zoom
     auto decimator = zoom_t(source, origin, tile, 1 << zoom);
-    // extract the amplitude
-    auto selection = selector_t(decimator);
-    // map to the unit interval
-    auto norm = norm_t(selection, typename norm_t::interval_type(min, max));
+    // power law
+    auto value = val_t(decimator, mean, scale, exponent);
     // generate color
-    auto colormap = colormap_t(norm);
+    auto colormap = colormap_t(value);
     // and encode
     bmp.encode(colormap);
 
