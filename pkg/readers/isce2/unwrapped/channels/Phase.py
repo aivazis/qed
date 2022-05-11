@@ -27,16 +27,26 @@ class Phase(Channel, family="qed.channels.isce2.int.phase"):
 
 
    # interface
-   def autotune(self, **kwds):
+   def autotune(self, stats, **kwds):
       # chain up
       super().autotune(**kwds)
+
+      # get π
+      π = cmath.pi
+
+      # extract the high phase
+      high = stats[1][2]
+      # round up to the next multiple of 2π
+      max = 2 * π * (int(high / (2*π)) + 1)
+
       # adjust my range
       self.phase.min = 0
       self.phase.low = 0
-      self.phase.max = 1
-      self.phase.high = 1
+      self.phase.max = max
+      self.phase.high = high
       # and my brightness
       self.brightness.value = 0.5
+
       # all done
       return
 
@@ -89,7 +99,7 @@ class Phase(Channel, family="qed.channels.isce2.int.phase"):
       return
 
 
-   def tile(self, **kwds):
+   def tile(self, source, zoom, origin, shape, **kwds):
       """
       Generate a tile of the given characteristics
       """
@@ -108,25 +118,13 @@ class Phase(Channel, family="qed.channels.isce2.int.phase"):
       # and the origin into a {pyre::grid::index_t}
       origin = qed.libpyre.grid.Index3D(index=(line, 1, sample))
       # look for the tile maker in {libqed}
-      tileMaker = qed.libqed.channels.value
+      tileMaker = qed.libqed.isce2.unwrapped.channels.phase
       # and ask it to make a tile
       tile = tileMaker(source=source.data,
                        zoom=zoom, origin=origin, shape=shape,
-                       min=low, max=high, brightness=brightness, **kwds)
+                       low=low, high=high, brightness=brightness, **kwds)
       # and return it
       return tile
-
-
-   def tile(self, **kwds):
-      """
-      Generate a tile of the given characteristics
-      """
-      # unpack my configuration
-      low = self.phase.low
-      high = self.phase.high
-      brightness = self.brightness.value
-      # add my configuration and chain up
-      return super().tile(low=low, high=high, brightness=brightness, **kwds)
 
 
    # constants
