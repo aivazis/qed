@@ -47,6 +47,9 @@ namespace qed::isce2 {
     // the amplitude of a complex source
     template <typename sourceT>
     using amplitude_t = pyre::viz::filters::amplitude_t<sourceT>;
+    // a power law filter on the amplitude of a complex source
+    template <typename sourceT>
+    using power_t = pyre::viz::filters::power_t<sourceT>;
     // a supplier of a constant value
     using constant_t = pyre::viz::filters::constant_t<double>;
     // map phase to [0,1]
