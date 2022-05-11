@@ -151,8 +151,6 @@ class Dataset(qed.flow.product,
             # and add them to the pile
             stats.append(channelStats)
 
-            print(f"{channel}: {channelStats=}")
-
         # and return them
         return stats
 
