@@ -91,18 +91,12 @@ class Dataset(qed.flow.product,
 
         # build my data object
         self.data = self._open()
-
         # get stats on a sample of my data
-        self.amplitudeStats = self._collectStatistics(channel=0)
-        self.phaseStats = self._collectStatistics(channel=1)
+        self.stats = self._collectStatistics()
+        # populate my channels
+        self._registerChannels()
 
-        # build the amplitude channel
-        amplitude = qed.isce2.channels.licapAmplitude(name="{self.pyre_name}.amplitude")
-        # autotune it
-        amplitude.autotune(stats=self.amplitudeStats)
-        # and register it
-        self.channels[amplitude.tag] = amplitude
-
+        # all done
         return
 
 
@@ -130,7 +124,7 @@ class Dataset(qed.flow.product,
         return data
 
 
-    def _collectStatistics(self, channel):
+    def _collectStatistics(self):
         """
         Compute statistics on a sample of my data
         """
@@ -144,14 +138,39 @@ class Dataset(qed.flow.product,
         # center it in my shape
         center = tuple((s-t)//2 for s,t in zip(shape, tile))
 
-        # convert to a grid index by injecting the index of the {channel}
-        center = qed.libpyre.grid.Index3D(index=(center[0], channel, center[1]))
-        # only use {channel} values when computing stats
-        tile = qed.libpyre.grid.Shape3D(shape=(tile[0], 1, tile[1]))
-        # compute them
-        stats = qed.libqed.isce2.unwrapped.stats(source=data, origin=center, shape=tile)
+        # make a pile for the channel stats
+        stats = []
+        # go through my two channels
+        for channel in range(2):
+            # inject the index of the {channel} into the center index
+            center = qed.libpyre.grid.Index3D(index=(center[0], channel, center[1]))
+            # extend the tile shape
+            tile = qed.libpyre.grid.Shape3D(shape=(tile[0], 1, tile[1]))
+            # compute the stats
+            channelStats = qed.libqed.isce2.unwrapped.stats(source=data, origin=center, shape=tile)
+            # and add them to the pile
+            stats.append(channelStats)
+
+            print(f"{channel}: {channelStats=}")
+
         # and return them
         return stats
+
+
+    def _registerChannels(self):
+        """
+        Register my channels
+        """
+        # go through the registry
+        for channel in channelRegistry():
+            # instantiate a workflow
+            pipeline = channel(name=f"{self.pyre_name}.{channel.tag}")
+            # autotune
+            pipeline.autotune(stats=self.stats)
+            # and register it
+            self.channels[channel.tag] = pipeline
+        # all done
+        return
 
 
 # end of file
