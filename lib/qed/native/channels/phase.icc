@@ -26,6 +26,12 @@ qed::native::channels::phase(
     // the range of values to render
     double saturation, double brightness) -> bmp_t
 {
+    // type aliases for the source
+    using source_t = sourceT;
+    // and its parts
+    using index_t = typename source_t::index_type;
+    using shape_t = typename source_t::shape_type;
+
     // type aliases for the workflow nodes
     // my decimator
     using zoom_t = decimate_t<sourceT>;
@@ -35,11 +41,20 @@ qed::native::channels::phase(
     // the color map
     using colormap_t = hsb_t<scale_t, constant_t, constant_t>;
 
+    // turn the zoom level into a scale
+    auto scale = 1 << zoom;
+    // compute the zoomed origin
+    auto zoomedOrigin = scale * origin;
+    // and the zoomed tile
+    auto zoomedTile = scale * tile;
+    // set up the decimation stride
+    index_t stride { scale };
+
     // make a bitmap
     bmp_t bmp(tile[0], tile[1]);
 
     // zoom
-    auto decimator = zoom_t(source, origin, tile, 1 << zoom);
+    auto decimator = zoom_t(source, zoomedOrigin, zoomedTile, stride);
 
     // extract the phase
     auto c = selector_t(decimator, { low, high });
