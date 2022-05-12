@@ -19,7 +19,7 @@ qed::py::isce2::unwrapped::profile(py::module & m)
         // the name of the function
         "profile",
         // the handler
-        &qed::native::profile<mapgrid_t<std::complex<float>>>,
+        &qed::isce2::unwrapped::profile<mapgrid_t<float, 3>>,
         // the signature
         "source"_a, "points"_a,
         // the docstring
@@ -29,7 +29,7 @@ qed::py::isce2::unwrapped::profile(py::module & m)
         // the name of the function
         "profile",
         // the handler
-        &qed::native::profile<mapgrid_t<std::complex<double>>>,
+        &qed::isce2::unwrapped::profile<mapgrid_t<double, 3>>,
         // the signature
         "source"_a, "points"_a,
         // the docstring
