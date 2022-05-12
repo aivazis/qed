@@ -57,6 +57,28 @@ class MemoryMap(qed.flow.product,
         return self.channels[name]
 
 
+    def peek(self, pixel):
+        """
+        Build a family of value representations at the given {pixel}
+        """
+        # get my data type
+        cell = self.cell
+        # my channels
+        channels = self.channels
+        # and the value of the {pixel}
+        _, _, value = self.profile(points=[pixel])[0]
+
+        # go through the channels marked as special by my data type
+        for name in cell.summary:
+            # get the corresponding channel
+            channel = channels[name]
+            # and ask each one for {value} representations
+            yield name, channel.project(pixel=value)
+
+        # all done
+        return
+
+
     def profile(self, points):
         """
         Sample my data along the path defined by {points}
@@ -75,6 +97,23 @@ class MemoryMap(qed.flow.product,
         channel = self.channel(name=channel)
         # render a tile and return it
         return channel.tile(source=self, zoom=zoom, origin=origin, shape=shape)
+
+
+    def summary(self):
+        """
+        Build a sequence of the important channels that form my summary view
+        """
+        # get my channels
+        channels = self.channels
+        # ask my cell type for its list
+        for name in self.cell.summary:
+            # resolve into the actual channel
+            channel = channels[name]
+            # and make it available
+            yield channel
+
+        # all done
+        return
 
 
     # metamethods
