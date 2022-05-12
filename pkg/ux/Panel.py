@@ -90,24 +90,24 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         """
         Encode the {dataset} {profile} as CSV
         """
-        # grab the dataset channels
-        channels = dataset.channels
+        # grab the important dataset channels
+        channels = tuple(dataset.summary())
         # make a buffer so {csv} has someplace to write into
         buffer = io.StringIO()
         # make a writer
         writer = csv.writer(buffer)
 
         # get the headers
-        headers = ("line", "sample") + tuple(dataset.cell.summary)
+        headers = ("line", "sample") + tuple(channel.tag for channel in channels)
         # write them
         writer.writerow(headers)
 
         # go through the entries in the {profile}
         for entry in profile:
             # unpack
-            line, sample, pixel = entry
+            line, sample, *pixel = entry
             # build the channel specific representations
-            reps = tuple(channels[channel].eval(pixel) for channel in dataset.cell.summary)
+            reps = tuple(channel.eval(*pixel) for channel in channels)
             # and record each one
             writer.writerow((line, sample) + reps)
 
