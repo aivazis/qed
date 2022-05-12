@@ -78,24 +78,6 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
       return
 
 
-   def eval(self, pixel):
-      """
-      Get the {pixel} value
-      """
-      # easy enough
-      return pixel
-
-
-   def project(self, pixel):
-      """
-      Represent a {pixel} as a complex number
-      """
-      # only one rep
-      yield pixel, ""
-      # all done
-      return
-
-
    def tile(self, source, zoom, origin, shape, **kwds):
       """
       Generate a tile of the given characteristics
