@@ -22,8 +22,14 @@ qed::isce2::unwrapped::channels::amplitude(
     // the tile shape
     typename sourceT::shape_type tile,
     // the range of values to render
-    double mean, double scale, double exponent) -> bmp_t
+    double mean, double brightness, double exponent) -> bmp_t
 {
+    // type aliases for the source
+    using source_t = sourceT;
+    // and its parts
+    using index_t = typename source_t::index_type;
+    using shape_t = typename source_t::shape_type;
+
     // type aliases for the workflow nodes
     // my decimator
     using zoom_t = decimate_t<sourceT>;
@@ -32,13 +38,22 @@ qed::isce2::unwrapped::channels::amplitude(
     // the color map
     using colormap_t = gray_t<val_t>;
 
+    // turn the zoom level into a scale
+    auto scale = 1 << zoom;
+    // compute the zoomed origin
+    index_t zoomedOrigin { scale * origin[0], origin[1], scale * origin[2] };
+    // and the zoomed tile
+    shape_t zoomedTile { scale * tile[0], tile[1], scale * tile[2] };
+    // set up the decimation stride
+    index_t stride { scale, 1, scale };
+
     // make a bitmap
     bmp_t bmp(tile[0], tile[2]);
 
     // zoom
-    auto decimator = zoom_t(source, origin, tile, 1 << zoom);
+    auto decimator = zoom_t(source, zoomedOrigin, zoomedTile, stride);
     // power law
-    auto value = val_t(decimator, mean, scale, exponent);
+    auto value = val_t(decimator, mean, brightness, exponent);
     // generate color
     auto colormap = colormap_t(value);
     // and encode
