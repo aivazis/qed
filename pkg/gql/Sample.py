@@ -28,21 +28,15 @@ class Sample(graphene.ObjectType):
         """
         # unpack my context
         dataset = context["dataset"]
-        points = [(context["line"], context["sample"])]
-        # ask the dataset for a profile over my point
-        profile = dataset.profile(points=points)
-        # unpack the pixel value out of the single entry
-        _, _, pixel = profile[0]
+        line = context["line"]
+        sample = context["sample"]
 
-        # get the dataset channels
-        channels = dataset.channels
-
-        # go through the summary channels
-        for channel in dataset.cell.summary:
-            # build the representations
+        # ask the dataset for the pixel value projected on its favorite channels
+        for channel, reps in dataset.peek(pixel=(line, sample)):
+            # and assemble a resolution context for my {value}
             yield {
                 "channel": channel,
-                "reps": channels[channel].project(pixel),
+                "reps": reps,
             }
 
         # all done
