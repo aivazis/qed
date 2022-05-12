@@ -59,6 +59,22 @@ class Dataset(qed.flow.product,
         return self.channels[name]
 
 
+    def peek(self, pixel):
+        """
+        Build a family of value representations at the given {pixel}
+        """
+        # get the pixel value
+        _, _, amplitude, phase = self.profile(points=[pixel])[0]
+
+        # report the amplitude
+        yield "amplitude", [(amplitude, "")]
+        # and the phase
+        yield "phase", [(phase, "")]
+
+        # all done
+        return
+
+
     def profile(self, points):
         """
         Sample my data along the path defined by {points}
@@ -77,6 +93,22 @@ class Dataset(qed.flow.product,
         channel = self.channel(name=channel)
         # render a tile and return it
         return channel.tile(source=self, zoom=zoom, origin=origin, shape=shape)
+
+
+    def summary(self):
+        """
+        Build a sequence of the important channels that form my summary view
+        """
+        # get my channels
+        channels = self.channels
+
+        # use my amplitude
+        yield channels["amplitude"]
+        # and my phase
+        yield channels["phase"]
+
+        # as the only important channels
+        return
 
 
     # metamethods
