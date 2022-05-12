@@ -65,12 +65,12 @@ class Phase(Channel, family="qed.channels.isce2.int.phase"):
       return
 
 
-   def eval(self, pixel):
+   def eval(self, amplitude, phase):
       """
-      Get the {pixel} value
+      Get the phase of the pixel
       """
       # easy enough
-      return cmath.phase(pixel)
+      return phase
 
 
    def project(self, pixel):

@@ -58,12 +58,12 @@ class Amplitude(Channel, family="qed.channels.isce2.int.amplitude"):
       return
 
 
-   def eval(self, pixel):
+   def eval(self, amplitude, phase):
       """
-      Get the {pixel} value
+      Get the amplitude of the pixel
       """
       # easy enough
-      return pixel
+      return amplitude
 
 
    def project(self, pixel):
