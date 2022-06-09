@@ -8,7 +8,12 @@
     "scripts": {
         "build": "webpack --mode development",
         "dev": "webpack --mode development",
-        "relay": "relay-compiler --src ./client --schema ./schema/qed.gql"
+        "relay": "relay-compiler"
+    },
+    "relay": {
+        "src": "./client",
+        "schema": "./schema/qed.gql",
+        "language": "javascript"
     },
     "devDependencies": {
         "@babel/core": "latest",
