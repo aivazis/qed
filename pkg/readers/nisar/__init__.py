@@ -5,6 +5,7 @@
 
 
 # publish the readers
+from .L0A import L0A as l0a
 from .RSLC import RSLC as rslc
 
 
