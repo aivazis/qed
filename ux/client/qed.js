@@ -70,7 +70,7 @@ const QEDApp = () => {
 
 
             {/* the graphiql sandbox */}
-            <Route path="graphiql" element={<GiQL />} />
+            <Route path="graphiql" element={<NYI />} />
         </Routes>
     )
 }

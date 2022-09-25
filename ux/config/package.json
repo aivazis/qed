@@ -32,11 +32,10 @@
     },
     "dependencies": {
         "graphql": "latest",
-        "graphiql": "latest",
         "lazysizes": "latest",
         "lodash": "latest",
         "path-browserify": "latest",
-        "react": "latest",
+        "react": "18.2.0",
         "react-dom": "latest",
         "react-relay": "latest",
         "react-router": "latest",

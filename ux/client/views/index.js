@@ -12,7 +12,7 @@ export Status from './status'
 export { Main, useActivityPanel } from './main'
 
 // sandboxes
-export { GiQL } from './graphiql'
+// export { GiQL } from './graphiql'
 export { Viz, Controls, Datasets } from './viz'
 
 // a blank panel with size information
