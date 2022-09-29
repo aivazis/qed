@@ -6,8 +6,10 @@
 
 # support
 import qed
+
 # superclass
 from .H5 import H5
+
 # my dataset
 from .slc.SLC import SLC
 
@@ -17,7 +19,6 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
     """
     The reader of RSLC files
     """
-
 
     # public data
     # my selectors
@@ -30,14 +31,13 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
         "polarization": ["HH", "HV", "VH", "VV"],
     }
 
-
     # metamethods
     def __init__(self, **kwds):
         # chain up
         super().__init__(**kwds)
 
         # grab my file
-        d = self.h5
+        d = self.h5.pyre_id
         # get my tag
         tag = self.tag
         # alias my constants
@@ -72,7 +72,9 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
                     # attempt
                     try:
                         # form the name of the dataset
-                        dName = DATASET.format(band=band, tag=tag, freq=frequency, pol=polarization)
+                        dName = DATASET.format(
+                            band=band, tag=tag, freq=frequency, pol=polarization
+                        )
                         # get the HDF5 dataset
                         data = d.dataset(dName)
                     # if anything goes wrong
@@ -101,7 +103,6 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
         # all done
         return
 
-
     # constants
     # constants
     # NISAR RSLCs are not tagged correctly
@@ -110,7 +111,9 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
     # layout
     DATASET = "/science/{band}SAR/{tag}/swaths/frequency{freq}/{pol}"
     FREQUENCIES = "/science/{band}SAR/identification/listOfFrequencies"
-    POLARIZATIONS = "/science/{band}SAR/{tag}/swaths/frequency{freq}/listOfPolarizations"
+    POLARIZATIONS = (
+        "/science/{band}SAR/{tag}/swaths/frequency{freq}/listOfPolarizations"
+    )
 
 
 # end of file
