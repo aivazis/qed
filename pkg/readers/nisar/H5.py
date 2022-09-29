@@ -14,7 +14,6 @@ class H5(qed.flow.factory, implements=qed.protocols.reader):
     The base class for readers of HDF5 files
     """
 
-
     # public data
     uri = qed.properties.path()
     uri.doc = "the uri of the data source"
@@ -25,18 +24,16 @@ class H5(qed.flow.factory, implements=qed.protocols.reader):
     selectors = qed.protocols.selectors()
     selectors.doc = "a map of selector names to their allowed values"
 
-
     # metamethods
     def __init__(self, **kwds):
         # chain up
         super().__init__(**kwds)
 
         # open my file
-        self.h5 = qed.libh5.File(path=str(self.uri))
+        self.h5 = qed.h5.open(uri=str(self.uri))
 
         # all done
         return
-
 
 
 # end of file
