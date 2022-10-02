@@ -6,20 +6,22 @@
 
 # support
 import qed
+
 # my channels
 from . import channels
 
 
 # a NISAR SLC
-class SLC(qed.flow.product, family="qed.datasets.nisar.slc", implements=qed.protocols.dataset):
+class SLC(
+    qed.flow.product, family="qed.datasets.nisar.slc", implements=qed.protocols.dataset
+):
     """
     A raw dataset
     """
 
-
     # public data
     # the source
-    uri = qed.properties.path()
+    uri = qed.properties.uri(scheme="file")
     uri.default = None
     uri.doc = "the path to the data source"
 
@@ -33,7 +35,7 @@ class SLC(qed.flow.product, family="qed.datasets.nisar.slc", implements=qed.prot
     channels.doc = "the table of channels supported by this dataset"
 
     origin = qed.properties.tuple(schema=qed.properties.int())
-    origin.default = 0,0
+    origin.default = 0, 0
     origin.doc = "the smallest possible index"
 
     shape = qed.properties.tuple(schema=qed.properties.int())
@@ -45,13 +47,12 @@ class SLC(qed.flow.product, family="qed.datasets.nisar.slc", implements=qed.prot
     selector.doc = "a key/value map that identifies the dataset to its reader"
 
     tile = qed.properties.tuple(schema=qed.properties.int())
-    tile.default = 512,512
+    tile.default = 512, 512
     tile.doc = "the preferred shape of dataset subsets"
 
     # constants
     # the in-memory data layout of NISAR complex data products
     datatype = qed.libqed.nisar.datatypes.complexFloat
-
 
     # interface
     def channel(self, name):
@@ -60,7 +61,6 @@ class SLC(qed.flow.product, family="qed.datasets.nisar.slc", implements=qed.prot
         """
         # look up the channel and return it
         return self.channels[name]
-
 
     def peek(self, pixel):
         """
@@ -83,17 +83,16 @@ class SLC(qed.flow.product, family="qed.datasets.nisar.slc", implements=qed.prot
         # all done
         return
 
-
     def profile(self, points):
         """
         Sample my data along the path defined by {points}
         """
         # ask my data manager to build a profile
         profile = qed.libqed.nisar.profile(
-            source=self.data, datatype=self.datatype, points=points)
+            source=self.data, datatype=self.datatype, points=points
+        )
         # and return it
         return profile
-
 
     def render(self, channel, zoom, origin, shape):
         """
@@ -103,8 +102,8 @@ class SLC(qed.flow.product, family="qed.datasets.nisar.slc", implements=qed.prot
         channel = self.channel(name=channel)
         # render a tile and return it
         return channel.tile(
-            source=self, datatype=self.datatype, zoom=zoom, origin=origin, shape=shape)
-
+            source=self, datatype=self.datatype, zoom=zoom, origin=origin, shape=shape
+        )
 
     def summary(self):
         """
@@ -121,7 +120,6 @@ class SLC(qed.flow.product, family="qed.datasets.nisar.slc", implements=qed.prot
 
         # all done
         return
-
 
     # metamethods
     def __init__(self, data, **kwds):
@@ -146,7 +144,6 @@ class SLC(qed.flow.product, family="qed.datasets.nisar.slc", implements=qed.prot
         # all done
         return
 
-
     # implementation details
     def _collectStatistics(self):
         """
@@ -160,7 +157,7 @@ class SLC(qed.flow.product, family="qed.datasets.nisar.slc", implements=qed.prot
         # make a tile that fits within my shape
         tile = tuple(min(256, s) for s in shape)
         # center it in my shape
-        center = tuple((s-t)//2 for s,t in zip(shape, tile))
+        center = tuple((s - t) // 2 for s, t in zip(shape, tile))
 
         # convert to a grid index
         center = qed.libpyre.grid.Index2D(index=center)
@@ -168,7 +165,8 @@ class SLC(qed.flow.product, family="qed.datasets.nisar.slc", implements=qed.prot
         tile = qed.libpyre.grid.Shape2D(shape=tile)
         # compute the stats
         stats = qed.libqed.nisar.stats(
-            source=data, datatype=self.datatype, origin=center, shape=tile)
+            source=data, datatype=self.datatype, origin=center, shape=tile
+        )
 
         # and return them
         return stats
