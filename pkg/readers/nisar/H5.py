@@ -15,7 +15,7 @@ class H5(qed.flow.factory, implements=qed.protocols.reader):
     """
 
     # public data
-    uri = qed.properties.path()
+    uri = qed.properties.uri(scheme="file")
     uri.doc = "the uri of the data source"
 
     datasets = qed.properties.list(schema=qed.protocols.dataset.output())
