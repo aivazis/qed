@@ -6,10 +6,13 @@
 
 # support
 import qed
+
 # my superclass
 from .Producer import Producer
+
 # my product specs
 from .Dataset import Dataset
+
 # local traits
 from . import properties
 
@@ -20,9 +23,8 @@ class Reader(Producer, family="qed.readers"):
     A dataset factory
     """
 
-
     # public data
-    uri = qed.properties.path()
+    uri = qed.properties.uri()
     uri.doc = "the uri of the data source"
 
     selectors = properties.selectors()
