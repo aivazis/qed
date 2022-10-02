@@ -6,20 +6,23 @@
 
 # support
 import qed
+
 # my dataset
 from .Dataset import Dataset
 
 
 # interferograms are flat complex datasets
-class Reader(qed.flow.factory,
-             family="qed.readers.isce2.interferogram", implements=qed.protocols.reader):
+class Reader(
+    qed.flow.factory,
+    family="qed.readers.isce2.interferogram",
+    implements=qed.protocols.reader,
+):
     """
     The interferogram reader
     """
 
-
     # public data
-    uri = qed.properties.path()
+    uri = qed.properties.uri(scheme="file")
     uri.doc = "the uri of the data source"
 
     cell = qed.protocols.datatype()
@@ -35,7 +38,6 @@ class Reader(qed.flow.factory,
 
     datasets = qed.properties.list(schema=qed.protocols.dataset.output())
     datasets.doc = "the list of data sets provided by the reader"
-
 
     # metamethods
     def __init__(self, **kwds):
