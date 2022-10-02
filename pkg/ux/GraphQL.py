@@ -74,7 +74,7 @@ class GraphQL:
         # in addition, if something went wrong
         if result.errors:
             # inform the client
-            doc["errors"] = [ {"message": error.message} for error in result.errors ]
+            doc["errors"] = [ {"message": str(error)} for error in result.errors ]
 
             # make a channel
             channel = journal.error("qed.ux.graphql")
