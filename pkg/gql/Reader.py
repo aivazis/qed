@@ -6,8 +6,13 @@
 
 # externals
 import graphene
+
+# support
+import qed
+
 # my interface
 from .Node import Node
+
 # my parts
 from .Dataset import Dataset
 from .Selectors import Selectors
@@ -22,7 +27,7 @@ class Reader(graphene.ObjectType):
     # {graphene} metadata
     class Meta:
         # register my interface
-        interfaces = Node,
+        interfaces = (Node,)
 
     # my fields
     id = graphene.ID()
@@ -32,7 +37,6 @@ class Reader(graphene.ObjectType):
     selectors = graphene.List(Selectors)
     datasets = graphene.List(Dataset)
 
-
     # the resolvers
     def resolve_id(reader, *_):
         """
@@ -41,7 +45,6 @@ class Reader(graphene.ObjectType):
         # splice together the {family} and {name} of the {reader}
         return f"{reader.pyre_family()}:{reader.pyre_name}"
 
-
     def resolve_name(reader, *_):
         """
         Get the {reader} name
@@ -49,14 +52,18 @@ class Reader(graphene.ObjectType):
         # return the {pyre_id} of the {reader}
         return reader.pyre_name
 
-
     def resolve_uri(reader, *_):
         """
         Get the path to the file
         """
-        # turn the {uri} into an absolute path and send it off
-        return reader.uri.resolve()
-
+        # get the uri
+        uri = reader.uri
+        # if it's a file
+        if uri.scheme is None or uri.scheme == "file":
+            # get the address and turn it into an absolute path
+            return qed.primitives.path(uri.address).resolve()
+        # otherwise, just return the uri
+        return str(uri)
 
     def resolve_api(reader, *_):
         """
@@ -65,13 +72,11 @@ class Reader(graphene.ObjectType):
         # requests are resolved against {data}
         return "data"
 
-
     def resolve_selectors(reader, *_):
         """
         Build a list of the selector names and their allowed values
         """
         return reader.selectors.items()
-
 
     def resolve_datasets(reader, *_):
         """
