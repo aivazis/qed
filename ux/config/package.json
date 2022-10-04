@@ -1,6 +1,6 @@
 {
     "name": "qed",
-    "version": "0.7.0",
+    "version": "0.7.1",
     "description": "a visualization environment for large raster data",
     "license": "BSD-2-Clause",
     "repository": "https://github.com/aivazis/qed",
