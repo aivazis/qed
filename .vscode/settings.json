@@ -11,5 +11,6 @@
         "plaintext",
         "python",
         "html"
-    ]
+    ],
+    "python.analysis.typeCheckingMode": "basic"
 }
