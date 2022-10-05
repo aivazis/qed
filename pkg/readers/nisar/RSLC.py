@@ -32,9 +32,16 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
     }
 
     # metamethods
-    def __init__(self, **kwds):
+    def __init__(self, name, **kwds):
+        # make a timer that measures the layout discovery time
+        discovery = qed.timers.wall(f"qed.profiler.discovery.{name}")
+        # and another that measures the amount of time it takes to collect statistics
+        stats = qed.timers.wall(f"qed.profiler.stats.{name}")
+
+        # start the discovery timer
+        discovery.start()
         # chain up
-        super().__init__(**kwds)
+        super().__init__(name=name, **kwds)
 
         # grab my file
         d = self.h5.pyre_id
@@ -95,17 +102,28 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
                         "shape": data.shape,
                         "selector": selector,
                     }
+                    # stop discovery
+                    discovery.stop()
+                    # and start stats
+                    stats.start()
                     # instantiate it
                     slc = SLC(name=name, data=data, **config)
-                    # and add it to my dataset
+                    # stop stats
+                    stats.stop()
+                    # and restart discovery
+                    discovery.start()
+
+                    # add the dataset to my pile
                     self.datasets.append(slc)
+
+        # stop the discovery
+        discovery.stop()
 
         # all done
         return
 
     # constants
-    # constants
-    # NISAR RSLCs are not tagged correctly
+    # older NISAR RSLCs are not tagged correctly
     tag = "SLC"
 
     # layout
