@@ -4,14 +4,16 @@
 # (c) 1998-2022 all rights reserved
 
 
-# get the framework
-import pyre
+# get the base framework exception
+from pyre import PyreError
+
 
 # the base class for my exceptions
-class QEDError(pyre.PyreError):
+class QEDError(PyreError):
     """
     Base class for all qed errors
     """
+
 
 # component configuration errors
 class ConfigurationError(QEDError):
