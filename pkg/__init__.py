@@ -7,9 +7,15 @@
 # import and publish pyre symbols
 from pyre import (
     # protocols, components, traits, and their infrastructure
-    schemata, constraints, properties, protocol, component, foundry,
+    schemata,
+    constraints,
+    properties,
+    protocol,
+    component,
+    foundry,
     # decorators
-    export, provides,
+    export,
+    provides,
     # the manager of the pyre runtime
     executive,
     # support for concurrency
@@ -17,30 +23,40 @@ from pyre import (
     # support for workflows, products, and factories
     flow,
     # shells
-    application, plexus,
+    application,
+    plexus,
     # miscellaneous
-    primitives, tracking, units, weaver,
+    patterns,
+    primitives,
+    tracking,
+    units,
+    timers,
+    weaver,
     # hdf5
     h5,
     # bindings of things
-    libpyre, libh5,
-    )
+    libpyre,
+    libh5,
+)
 
 
 # register the package with the framework
-package = executive.registerPackage(name='qed', file=__file__)
+package = executive.registerPackage(name="qed", file=__file__)
 # save the geography
 home, prefix, defaults = package.layout()
 
 
 # publish the local modules
 # basic functionality
-from . import meta           # package meta-data
-from . import exceptions     # the exception hierarchy
+from . import meta  # package meta-data
+from . import exceptions  # the exception hierarchy
+
 # the bindings
 from .ext import libqed, libqed_cuda
+
 # protocols
 from . import protocols
+
 # support for data types, controllers, and readers
 from . import datatypes
 from . import controllers
@@ -48,10 +64,14 @@ from . import readers
 
 # schema
 from . import gql
+
 # user interfaces
-from . import shells         # the supported application shells
-from . import cli            # the command line interface
-from . import ux             # support for the web client
+from . import shells  # the supported application shells
+from . import cli  # the command line interface
+from . import ux  # support for the web client
+
+# inspectors
+from . import inspect
 
 
 # administrivia
