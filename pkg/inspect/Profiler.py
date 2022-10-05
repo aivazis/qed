@@ -22,9 +22,11 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
         """
         Run a profile schedule and report performance
         """
-        # grab the profiling store
+        # make a channel
+        c = journal.info("qed.inspect.profile")
+        # a profiling store
         profile = qed.patterns.vivify(levels=2, atom=float)
-        # make a timer
+        # and a timer
         tileTimer = qed.timers.wall("qed.profiler.tiles")
 
         # go through the datasets
@@ -42,6 +44,8 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
                     tile = (2**tileExp,) * 2
                     # make zoom
                     for zoom in range(1):
+                        # show me
+                        c.log(f"measuring {name}, {channel}, {tile}")
                         # start the timer
                         tileTimer.start()
                         # attempt to
