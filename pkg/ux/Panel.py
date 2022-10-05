@@ -8,6 +8,7 @@
 import csv
 import io
 import journal
+
 # support
 import qed
 
@@ -18,7 +19,6 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
     Select application behavior that is mapped to the capabilities of the web client
     """
 
-
     # interface
     def dataset(self, name):
         """
@@ -26,7 +26,6 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         """
         # look it up and return it
         return self.datasets[name]
-
 
     def tile(self, data, channel, zoom, origin, shape, **kwds):
         """
@@ -36,7 +35,6 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         dataset = self.dataset(name=data)
         # ask to make the tile and return it
         return dataset.render(channel=channel, zoom=zoom, origin=origin, shape=shape)
-
 
     def profile(self, data, points, encoding):
         """
@@ -66,7 +64,6 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         # bail, just in case the firewall is not fatal
         return None, None
 
-
     # metamethods
     def __init__(self, plexus, docroot, **kwds):
         # chain up
@@ -79,11 +76,11 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
             # for all known readers
             for src in plexus.datasets
             # for all available datasets in each reader
-            for data in src.datasets}
+            for data in src.datasets
+        }
 
         # all done
         return
-
 
     # implementation details
     def _profileCSV(self, dataset, profile):
