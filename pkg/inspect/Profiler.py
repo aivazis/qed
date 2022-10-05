@@ -5,6 +5,7 @@
 
 
 # externals
+import csv
 import journal
 
 # support
@@ -25,7 +26,7 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
         # make a channel
         c = journal.info("qed.inspect.profile")
         # a profiling store
-        profile = qed.patterns.vivify(levels=2, atom=float)
+        profile = qed.patterns.vivify(levels=3, atom=float)
         # and a timer
         tileTimer = qed.timers.wall("qed.profiler.tiles")
 
@@ -34,8 +35,8 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
             # get the name of the dataset
             name = dataset.pyre_name
             # save the startup costs
-            profile[name]["discovery"] = discovery
-            profile[name]["stats"] = stats
+            profile[name]["startup"]["discovery"] = discovery
+            profile[name]["startup"]["stats"] = stats
             # go through its channels
             for channel in dataset.channels:
                 # make tile exponents
@@ -61,12 +62,14 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
                         # stop the timer
                         tileTimer.stop()
                         # record the time
-                        profile[name][channel, tile, zoom] = tileTimer.ms()
+                        profile[name]["tiles"][channel, tile, zoom] = tileTimer.ms()
                         # reset the timer
                         tileTimer.reset()
 
         # send the report to the screen
         self.screen(profile=profile)
+        # and save a csv file
+        self.csv(profile=profile)
         # all done
         return
 
@@ -116,18 +119,62 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
         # sign on
         channel.line(f"profiler:")
         channel.line(f"  number of datasets: {len(profile)}")
-
         # go through the datasets
-        for name, times in profile.items():
+        for name, phases in profile.items():
             # show me the dataset
             channel.line(f"    {name}")
-            # and the profiling categories
-            for category, cost in times.items():
-                # show me the times
-                channel.line(f"      {category}: {cost:.3f} ms")
-
+            # go through the phases
+            for times in phases.values():
+                # and the profiling categories
+                for category, cost in times.items():
+                    # show me the times
+                    channel.line(f"      {category}: {cost:.3f} ms")
         # flush
         channel.log()
+
+        # all done
+        return
+
+    def csv(self, profile):
+        """
+        Save the {profile} as a {csv} file
+        """
+        # make a pile of all shapes
+        shapes = set()
+        # a pile of all channels
+        channels = set()
+        # and a new table
+        table = qed.patterns.vivify(levels=3, atom=type(None))
+
+        # go through the datasets
+        for name in profile:
+            # and the tile timings for each one
+            for (channel, shape, _), cost in profile[name]["tiles"].items():
+                # record the shape
+                shapes.add(shape)
+                # the channel
+                channels.add(channel)
+                # and the cost
+                table[shape][channel][name] = cost
+
+        # in order to write the data out to a CSV file
+        with open("qed.csv", mode="w", newline="") as stream:
+            # make a writer
+            writer = csv.writer(stream)
+            # build my headers
+            headers = ["tile", "pixels"] + [
+                f"{name}.{channel}" for name in profile for channel in sorted(channels)
+            ]
+            writer.writerow(headers)
+
+            # go through the shapes
+            for shape in sorted(shapes):
+                record = [shape, shape[0] * shape[1]] + [
+                    table[shape][channel][name]
+                    for name in profile
+                    for channel in sorted(channels)
+                ]
+                writer.writerow(record)
 
         # all done
         return
