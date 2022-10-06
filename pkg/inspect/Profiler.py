@@ -40,7 +40,7 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
             # go through its channels
             for channel in dataset.channels:
                 # make tile exponents
-                for tileExp in range(5, 13):
+                for tileExp in range(5, 11):
                     # make a tile
                     tile = (2**tileExp,) * 2
                     # make zoom
