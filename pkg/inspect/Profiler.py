@@ -91,8 +91,6 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
         for reader in self.readers:
             # get the name of the reader
             name = reader.pyre_name
-            # find out how many datasets it knows about
-            available = len(reader.datasets)
 
             # access the reader specific timers
             discoveryTimer = qed.timers.wall(f"qed.profiler.discovery.{name}")
@@ -105,7 +103,7 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
             # go through each dataset
             for dataset in reader.datasets:
                 # and report it along with the access times
-                yield dataset, discovery / available, stats / available
+                yield dataset, discovery, stats
 
         # all done
         return
@@ -166,6 +164,12 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
                 f"{name}.{channel}" for name in profile for channel in sorted(channels)
             ]
             writer.writerow(headers)
+
+            # record the discovery time as a zero pixel tile
+            discovery = [(0, 0), 0] + [
+                profile[name]["startup"]["discovery"] for name in profile
+            ]
+            writer.writerow(discovery)
 
             # go through the shapes
             for shape in sorted(shapes):
