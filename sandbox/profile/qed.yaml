@@ -1,0 +1,62 @@
+# -*- pyre -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2022 all rights reserved
+
+
+# local data
+local.data: /home/jovyan/dv/data/nisar
+
+nisar_float:
+    uri: "{local.data}/BigIsl_32905_10003_012_100106_L090_CX_129_02.h5"
+
+nisar_half_float:
+    uri: "{local.data}/rslc.h5"
+
+nisar_local:
+    uri: "{local.data}/NISAR_L1_PR_RSLC_007_147_D_144_2800_HH_20070101T053038_20070101T053045_D00200_P_F_001.h5"
+
+# datasets from howard
+zebker.data: /home/jovyan/dv/data/zebker
+
+deathvalley_int:
+    uri: "{zebker.data}/deathvalley1160x1460.int"
+    shape: 1460, 1160
+    cell: c8
+
+deathvalley_unw:
+    uri: "{zebker.data}/deathvalley1160x1460.unw"
+    shape: 1460, 1160
+
+# s3
+s3.data: s3://nisar-st-lts-ondemand/SDS_DAAC_benchmark
+
+nisar_s3:
+    uri: "{s3.data}/L1_L_RSLC/2007/01/01/NISAR_L1_PR_RSLC_007_147_D_144_2800_HH_20070101T053038_20070101T053045_D00200_P_F_001/NISAR_L1_PR_RSLC_007_147_D_144_2800_HH_20070101T053038_20070101T053045_D00200_P_F_001.h5"
+
+
+# mount them
+datasets:
+    - isce2.int#deathvalley_int
+    - isce2.unw#deathvalley_unw
+    - nisar.rslc#nisar_float
+    - asar.rslc#nisar_half_float
+    - asar.rslc#nisar_local
+    - asar.rslc#nisar_s3
+
+
+# overall application configuration
+qed.app:
+    # run as a web app
+    shell: web
+    # for the web server
+    nexus.services.web:
+        # pin the port for serving web content to some number in user space
+        address: ip4:0.0.0.0:8005
+
+# configure the {web} shell
+pyre.shells.web#qed.app.shell:
+    # spawn a new browser window/tab every time the server starts?
+    auto: no
+
+# end of file
