@@ -40,7 +40,7 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
             # go through its channels
             for channel in dataset.channels:
                 # make tile exponents
-                for tileExp in range(5, 11):
+                for tileExp in range(5, 13):
                     # make a tile
                     tile = (2**tileExp,) * 2
                     # make zoom
@@ -155,8 +155,8 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
                 # and the cost
                 table[shape][channel][name] = cost
 
-        # in order to write the data out to a CSV file
-        with open("qed.csv", mode="w", newline="") as stream:
+        # write string scaling data out to a CSV file
+        with open("qed-strong.csv", mode="w", newline="") as stream:
             # make a writer
             writer = csv.writer(stream)
             # build my headers
@@ -165,16 +165,46 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
             ]
             writer.writerow(headers)
 
-            # record the discovery time as a zero pixel tile
-            discovery = [(0, 0), 0] + [
-                profile[name]["startup"]["discovery"] for name in profile
+            # go through the shapes
+            for shape in sorted(shapes):
+                # compute the number of pixels
+                pixels = shape[0] * shape[1]
+                # build the record
+                record = [shape, pixels] + [
+                    (
+                        profile[name]["startup"]["discovery"]
+                        + table[shape][channel][name]
+                    )
+                    if table[shape][channel][name] is not None
+                    else None
+                    for name in profile
+                    for channel in sorted(channels)
+                ]
+                writer.writerow(record)
+
+        # write weak scaling data out to a CSV file
+        with open("qed-weak.csv", mode="w", newline="") as stream:
+            # make a writer
+            writer = csv.writer(stream)
+            # build my headers
+            headers = ["tile", "pixels"] + [
+                f"{name}.{channel}" for name in profile for channel in sorted(channels)
             ]
-            writer.writerow(discovery)
+            writer.writerow(headers)
 
             # go through the shapes
             for shape in sorted(shapes):
-                record = [shape, shape[0] * shape[1]] + [
-                    table[shape][channel][name]
+                # compute the number of pixels
+                pixels = shape[0] * shape[1]
+                # build the record
+                record = [shape, pixels] + [
+                    (
+                        profile[name]["startup"]["discovery"]
+                        + table[shape][channel][name]
+                    )
+                    / pixels
+                    if table[shape][channel][name] is not None
+                    else None
                     for name in profile
                     for channel in sorted(channels)
                 ]
