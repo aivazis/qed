@@ -7,16 +7,16 @@
 # nisar
 nisar.data: /home/jovyan/dv/data/nisar
 
-f32:
+nisar_f32:
     uri: "{nisar.data}/BigIsl_32905_10003_012_100106_L090_CX_129_02.h5"
 
-f16:
+nisar_f16:
     uri: "{nisar.data}/NISAR_L1_PR_RSLC_007_147_D_144_2800_HH_20070101T053038_20070101T053045_D00200_P_F_001.h5"
 
 # s3
 s3.data: s3://nisar-st-lts-ondemand/SDS_DAAC_benchmark
 
-s3_f16:
+nisar_s3_f16:
     uri: "{s3.data}/L1_L_RSLC/2007/01/01/NISAR_L1_PR_RSLC_007_147_D_144_2800_HH_20070101T053038_20070101T053045_D00200_P_F_001/NISAR_L1_PR_RSLC_007_147_D_144_2800_HH_20070101T053038_20070101T053045_D00200_P_F_001.h5"
 
 
@@ -31,7 +31,7 @@ isce2_slc:
 # datasets from howard
 zebker.data: /home/jovyan/dv/data/zebker
 
-isc2_int:
+isce2_int:
     uri: "{zebker.data}/deathvalley1160x1460.int"
     shape: 1460, 1160
     cell: c8
