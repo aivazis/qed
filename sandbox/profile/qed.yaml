@@ -24,7 +24,7 @@ nisar_s3_f16:
 alos.data: /home/jovyan/dv/data/alos
 
 isce2_slc:
-    uri: "{alos.data}/20061231.slc"
+    uri: "{alos.data}/20070215.slc"
     shape: 36864, 10344
 
 
@@ -44,8 +44,6 @@ isce2_unw:
 # mount them
 datasets:
     - isce2.rslc#isce2_slc
-    - isce2.int#isce2_int
-    - isce2.unw#isce2_unw
     - nisar.rslc#nisar_f32
     - asar.rslc#nisar_f16
     - asar.rslc#nisar_s3_f16
