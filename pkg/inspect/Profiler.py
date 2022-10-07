@@ -171,10 +171,7 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
                 pixels = shape[0] * shape[1]
                 # build the record
                 record = [shape, pixels] + [
-                    (
-                        profile[name]["startup"]["discovery"]
-                        + table[shape][channel][name]
-                    )
+                    table[shape][channel][name]
                     if table[shape][channel][name] is not None
                     else None
                     for name in profile
@@ -198,11 +195,7 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
                 pixels = shape[0] * shape[1]
                 # build the record
                 record = [shape, pixels] + [
-                    (
-                        profile[name]["startup"]["discovery"]
-                        + table[shape][channel][name]
-                    )
-                    / pixels
+                    table[shape][channel][name] / pixels
                     if table[shape][channel][name] is not None
                     else None
                     for name in profile
