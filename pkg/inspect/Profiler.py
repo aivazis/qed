@@ -40,13 +40,15 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
             # go through its channels
             for channel in dataset.channels:
                 # make tile exponents
-                for tileExp in range(5, 11):
+                for tileExp in range(5, 14):
                     # make a tile
                     tile = (2**tileExp,) * 2
                     # make zoom
                     for zoom in range(1):
                         # show me
                         c.log(f"measuring {name}, {channel}, {tile}")
+                        # reset the timer
+                        tileTimer.reset()
                         # start the timer
                         tileTimer.start()
                         # attempt to
@@ -57,14 +59,14 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
                             )
                         # if anything goes wrong
                         except qed.exceptions.PyreError:
-                            # ignore and move on
+                            # stop the timer
+                            tileTimer.stop()
+                            # and move on
                             continue
-                        # stop the timer
+                        # if all goes well, stop the timer
                         tileTimer.stop()
-                        # record the time
+                        # and record the time
                         profile[name]["tiles"][channel, tile, zoom] = tileTimer.ms()
-                        # reset the timer
-                        tileTimer.reset()
 
         # send the report to the screen
         # self.screen(profile=profile)
