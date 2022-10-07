@@ -67,7 +67,7 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
                         tileTimer.reset()
 
         # send the report to the screen
-        self.screen(profile=profile)
+        # self.screen(profile=profile)
         # and save a csv file
         self.csv(profile=profile)
         # all done
@@ -91,6 +91,8 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
         for reader in self.readers:
             # get the name of the reader
             name = reader.pyre_name
+            # and the number of available datasets
+            available = len(reader.datasets)
 
             # access the reader specific timers
             discoveryTimer = qed.timers.wall(f"qed.profiler.discovery.{name}")
@@ -98,7 +100,8 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
             # read the number of milliseconds elapsed while instantiating the reader
             discovery = discoveryTimer.ms()
             # and the number of milliseconds it took to collect statistics
-            stats = statsTimer.ms()
+            # split over the number of available datasets
+            stats = statsTimer.ms() / available
 
             # go through each dataset
             for dataset in reader.datasets:
