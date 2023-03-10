@@ -17,8 +17,6 @@
 #include "api.h"
 
 // implementation
-// datatypes
-#include "datatypes/complex.h"
 // data products
 #include "slc/slc.h"
 // profile
