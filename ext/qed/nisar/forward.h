@@ -14,8 +14,6 @@ namespace qed::py::nisar {
     // top level
     void nisar(py::module &);
 
-    // the submodule with the data type definitions
-    void datatypes(py::module &);
     // data products
     void slc(py::module &);
     // profile

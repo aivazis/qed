@@ -21,8 +21,6 @@ qed::py::nisar::nisar(py::module & m)
         // its docstring
         "NISAR specific support");
 
-    // add the supported nisar data types
-    datatypes(nisar);
     // datasets
     slc(nisar);
     // profile
