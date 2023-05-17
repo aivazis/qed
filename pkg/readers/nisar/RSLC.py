@@ -44,7 +44,7 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
         super().__init__(name=name, **kwds)
 
         # grab my file
-        d = self.h5.pyre_id
+        d = self.h5._pyre_id
         # get my tag
         tag = self.tag
         # alias my constants

@@ -32,13 +32,11 @@ from pyre import (
     units,
     timers,
     weaver,
-    # hdf5
+    # hdf5 support
     h5,
     # bindings of things
     libpyre,
-    libh5,
 )
-
 
 # register the package with the framework
 package = executive.registerPackage(name="qed", file=__file__)

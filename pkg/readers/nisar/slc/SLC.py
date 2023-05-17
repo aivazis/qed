@@ -52,7 +52,7 @@ class SLC(
 
     # constants
     # the in-memory data layout of NISAR complex data products
-    datatype = qed.libqed.nisar.datatypes.complexFloat
+    datatype = qed.h5.memtypes.complex64
 
     # interface
     def channel(self, name):
@@ -89,7 +89,7 @@ class SLC(
         """
         # ask my data manager to build a profile
         profile = qed.libqed.nisar.profile(
-            source=self.data, datatype=self.datatype, points=points
+            source=self.data, datatype=self.datatype.htype, points=points
         )
         # and return it
         return profile
@@ -102,7 +102,11 @@ class SLC(
         channel = self.channel(name=channel)
         # render a tile and return it
         return channel.tile(
-            source=self, datatype=self.datatype, zoom=zoom, origin=origin, shape=shape
+            source=self,
+            datatype=self.datatype.htype,
+            zoom=zoom,
+            origin=origin,
+            shape=shape,
         )
 
     def summary(self):
@@ -165,7 +169,7 @@ class SLC(
         tile = qed.libpyre.grid.Shape2D(shape=tile)
         # compute the stats
         stats = qed.libqed.nisar.stats(
-            source=data, datatype=self.datatype, origin=center, shape=tile
+            source=data, datatype=self.datatype.htype, origin=center, shape=tile
         )
 
         # and return them
