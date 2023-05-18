@@ -13,6 +13,7 @@ from .ROFF import ROFF as roff
 
 # level 2
 from .GSLC import GSLC as gslc
+from .GOFF import GOFF as goff
 
 
 # end of file
