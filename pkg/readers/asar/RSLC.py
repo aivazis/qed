@@ -4,8 +4,6 @@
 # (c) 1998-2023 all rights reserved
 
 
-# support
-import qed
 # superclass
 from .. import nisar
 
@@ -15,11 +13,6 @@ class RSLC(nisar.rslc, family="qed.readers.asar.rslc"):
     """
     The reader of ASAR RSLC files
     """
-
-
-    # constants
-    # ASAR RSLCs are tagged correctly
-    tag = "RSLC"
 
 
 # end of file

@@ -89,7 +89,7 @@ class SLC(
         """
         # ask my data manager to build a profile
         profile = qed.libqed.nisar.profile(
-            source=self.data, datatype=self.datatype.htype, points=points
+            source=self.data.dataset, datatype=self.datatype.htype, points=points
         )
         # and return it
         return profile
@@ -155,6 +155,8 @@ class SLC(
         """
         # get my data
         data = self.data
+        # extract the underlying dataset
+        source = data.dataset
         # and its shape
         shape = data.shape
 
@@ -169,7 +171,7 @@ class SLC(
         tile = qed.libpyre.grid.Shape2D(shape=tile)
         # compute the stats
         stats = qed.libqed.nisar.stats(
-            source=data, datatype=self.datatype.htype, origin=center, shape=tile
+            source=source, datatype=self.datatype.htype, origin=center, shape=tile
         )
 
         # and return them

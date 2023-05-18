@@ -20,7 +20,7 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
     The reader of RSLC files
     """
 
-    # public data
+    # user configurable data
     # my selectors
     selectors = qed.protocols.selectors()
     selectors.doc = "a map of selector names to their allowed values"
@@ -43,54 +43,47 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
         # chain up
         super().__init__(name=name, **kwds)
 
-        # grab my file
-        d = self.h5._pyre_id
-        # get my tag
-        tag = self.tag
-        # alias my constants
-        DATASET = self.DATASET
-        FREQUENCIES = self.FREQUENCIES
-        POLARIZATIONS = self.POLARIZATIONS
-
-        for band in self.selectors["band"]:
+        # grab the data product
+        product = self.product
+        # grab my selectors
+        selectors = self.selectors
+        # get the science group
+        science = product.science
+        # go through the possible bands
+        for band in selectors["band"]:
             # attempt to
             try:
-                # get the list of frequencies for this band
-                frequencies = d.dataset(FREQUENCIES.format(band=band)).strings()
-            # if anything goes wrong
-            except Exception:
+                # get the band group
+                sar = getattr(science, f"{band}SAR")
+            # if this band isn't present
+            except AttributeError:
                 # move on
                 continue
-
+            # get the product group
+            slc = getattr(sar, self.tag)
+            # and the group with the swaths
+            swaths = slc.swaths
+            # get the list of frequencies for this band
+            frequencies = sar.identification.listOfFrequencies
             # go through them
             for frequency in frequencies:
-                # attempt
-                try:
-                    # form the group name with the list polarizations
-                    polGrp = POLARIZATIONS.format(band=band, tag=tag, freq=frequency)
-                    # get the list of polarizations
-                    polarizations = d.dataset(polGrp).strings()
-                # if anything goes wrong
-                except Exception:
-                    # move on
-                    continue
+                # look up the swath group for this frequency
+                swath = getattr(swaths, f"frequency{frequency}")
+                # and get the list of polarizations present
+                polarizations = swath.listOfPolarizations
                 # go through them
                 for polarization in polarizations:
-                    # attempt
+                    # some datasets lie, so attempt to
                     try:
-                        # form the name of the dataset
-                        dName = DATASET.format(
-                            band=band, tag=tag, freq=frequency, pol=polarization
-                        )
-                        # get the HDF5 dataset
-                        data = d.dataset(dName)
-                    # if anything goes wrong
-                    except Exception:
-                        # move on
+                        # get the dataset
+                        dataset = getattr(swath, polarization)
+                    # if not there
+                    except AttributeError:
+                        # just ignore it
                         continue
-                    # generate a {pyre} name for the dataset
+                    # generate a name for the dataset
                     name = f"{self.pyre_name}.{band}.{frequency}.{polarization}"
-                    # build its selector table
+                    # build its selector
                     selector = {
                         "band": band,
                         "frequency": frequency,
@@ -99,7 +92,7 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
                     # pack its configuration
                     config = {
                         "uri": self.uri,
-                        "shape": data.shape,
+                        "shape": dataset.shape,
                         "selector": selector,
                     }
                     # stop discovery
@@ -107,31 +100,20 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
                     # and start stats
                     stats.start()
                     # instantiate it
-                    slc = SLC(name=name, data=data, **config)
+                    slc = SLC(name=name, data=dataset, **config)
                     # stop stats
                     stats.stop()
                     # and restart discovery
                     discovery.start()
-
                     # add the dataset to my pile
                     self.datasets.append(slc)
-
         # stop the discovery
         discovery.stop()
-
         # all done
         return
 
     # constants
-    # older NISAR RSLCs are not tagged correctly
-    tag = "SLC"
-
-    # layout
-    DATASET = "/science/{band}SAR/{tag}/swaths/frequency{freq}/{pol}"
-    FREQUENCIES = "/science/{band}SAR/identification/listOfFrequencies"
-    POLARIZATIONS = (
-        "/science/{band}SAR/{tag}/swaths/frequency{freq}/listOfPolarizations"
-    )
+    tag = "RSLC"
 
 
 # end of file
