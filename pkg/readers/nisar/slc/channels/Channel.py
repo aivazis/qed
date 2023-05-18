@@ -6,7 +6,6 @@
 
 # support
 import qed
-import journal
 
 
 # a channel is visualization workflow
