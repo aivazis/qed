@@ -11,7 +11,7 @@ import qed
 from .H5 import H5
 
 # my dataset
-from .slc.SLC import SLC
+from .products.SLC import SLC
 
 
 # the GSLC reader
