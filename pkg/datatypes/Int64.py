@@ -8,7 +8,7 @@
 from .Integer import Integer
 
 
-# a complex number implemented as a pair of floats
+# a 64 bit integer
 class Int64(Integer, family="qed.datatypes.int64"):
     """
     The specification for eight byte integers

@@ -8,7 +8,7 @@
 from .Integer import Integer
 
 
-# a complex number implemented as a pair of floats
+# a 32 bit integer
 class Int32(Integer, family="qed.datatypes.int32"):
     """
     The specification for four byte integers

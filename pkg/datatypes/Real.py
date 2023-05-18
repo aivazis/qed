@@ -6,11 +6,12 @@
 
 # support
 import qed
+
 # my base class
 from .Datatype import Datatype
 
 
-# a complex number implemented as a pair of floats
+# base type for real numbers
 class Real(Datatype):
     """
     The base specification for real numbers

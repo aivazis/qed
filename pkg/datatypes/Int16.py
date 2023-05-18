@@ -8,7 +8,7 @@
 from .Integer import Integer
 
 
-# a complex number implemented as a pair of floats
+# a 16 bit integer
 class Int16(Integer, family="qed.datatypes.int16"):
     """
     The specification for two byte integers

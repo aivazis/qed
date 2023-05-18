@@ -6,11 +6,12 @@
 
 # support
 import qed
+
 # my base class
 from .Datatype import Datatype
 
 
-# a complex number implemented as a pair of floats
+# base class for complex numbers
 class Complex(Datatype):
     """
     The base specification for complex numbers
@@ -20,7 +21,6 @@ class Complex(Datatype):
     channels = qed.properties.strings()
     channels.default = ["complex", "amplitude", "phase", "real", "imaginary"]
     channels.doc = "the names of channels provided by complex datatypes"
-
 
     # constants
     summary = "real", "imaginary", "amplitude", "phase"

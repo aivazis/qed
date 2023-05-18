@@ -8,7 +8,7 @@
 from .Integer import Integer
 
 
-# a complex number implemented as a pair of floats
+# a single byte integer
 class Char(Integer, family="qed.datatypes.Char"):
     """
     The specification for one byte integers
