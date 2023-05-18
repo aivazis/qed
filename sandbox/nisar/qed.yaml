@@ -11,6 +11,7 @@ nisar.data: "../../../data/workflows"
 ree2.data: "{nisar.data}/ree2"
 focus.data: "{nisar.data}/focus"
 gslc.data: "{nisar.data}/gslc"
+insar.data: "{nisar.data}/insar"
 
 # data
 ree2.rslc:
@@ -27,10 +28,18 @@ gslc.gslc:
     uri: "{gslc.data}/gslc.h5"
 
 
+insar.roff:
+    uri: "{insar.data}/roff.h5"
+
+insar.goff:
+    uri: "{insar.data}/goff.h5"
+
 # attach the datasets to the application
 datasets:
     - nisar.rslc#focus.rslc
     - nisar.gslc#gslc.gslc
+    - nisar.roff#insar.roff
+    - nisar.goff#insar.goff
 
 
 # overall application configuration
