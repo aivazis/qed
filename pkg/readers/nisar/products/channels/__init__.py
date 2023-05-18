@@ -4,6 +4,10 @@
 # (c) 1998-2023 all rights reserved
 
 
+# channels suitable for a real dataset
+from .Magnitude import Magnitude as abs
+from .Value import Value as value
+
 # channels suitable for a complex dataset
 from .Amplitude import Amplitude as amplitude
 from .Complex import Complex as complex
