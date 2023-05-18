@@ -1,4 +1,4 @@
-# -*- pyre -*-
+# -*- yaml -*-
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # (c) 1998-2023 all rights reserved
@@ -6,21 +6,37 @@
 
 # nisar datasets
 # location
-nisar.data: "../../../data/nisar"
+nisar.data: "../../../data/workflows"
+
+ree2.data: "{nisar.data}/ree2"
+focus.data: "{nisar.data}/focus"
+gslc.data: "{nisar.data}/gslc"
+
 # data
-l0a:
-    uri: "{nisar.data}/sif_dqa1_20220723_195934_hwc0191_AF_ricp.bin"
+ree2.rslc:
+    uri: "{ree2.data}/rslc.h5"
+
+ree2.gslc:
+    uri: "{ree2.data}/gslc.h5"
+
+
+focus.rslc:
+    uri: "{focus.data}/rslc.h5"
+
+gslc.gslc:
+    uri: "{gslc.data}/gslc.h5"
 
 
 # attach the datasets to the application
 datasets:
-    - nisar.l0a#l0a
+    - nisar.rslc#focus.rslc
+    - nisar.gslc#gslc.gslc
 
 
 # overall application configuration
 qed.app:
     # run as a web app
-    # shell: web
+    shell: web
     # for the web server
     nexus.services.web:
         # pin the port for serving web content to some number in user space
@@ -29,6 +45,6 @@ qed.app:
 # configure the {web} shell
 pyre.shells.web#qed.app.shell:
     # spawn a new browser window/tab every time the server starts?
-    auto: no
+    auto: yes
 
 # end of file
