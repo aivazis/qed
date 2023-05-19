@@ -16,6 +16,7 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
 
     # constants
     tag = None
+    category = None
 
     # interface
     def autotune(self, **kwds):
@@ -50,10 +51,10 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         """
         Generate a tile of the given characteristics
         """
-        # get my name
-        name = self.tag
+        # lookup the pipeline category
+        category = getattr(qed.libqed.nisar, self.category)
         # look for the tile maker in {libqed}
-        pipeline = getattr(qed.libqed.nisar.slc, name)
+        pipeline = getattr(category, self.tag)
         # turn the shape into a {pyre::grid::shape_t}
         shape = qed.libpyre.grid.Shape2D(shape=shape)
         # and the origin into a {pyre::grid::index_t}
