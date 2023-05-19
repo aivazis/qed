@@ -22,6 +22,7 @@ qed::py::nisar::nisar(py::module & m)
         "NISAR specific support");
 
     // datasets
+    real(nisar);
     slc(nisar);
     // profile
     profile(nisar);

@@ -15,6 +15,7 @@ namespace qed::py::nisar {
     void nisar(py::module &);
 
     // data products
+    void real(py::module &);
     void slc(py::module &);
     // profile
     void profile(py::module &);

@@ -18,6 +18,7 @@
 
 // implementation
 // data products
+#include "real/real.h"
 #include "slc/slc.h"
 // profile
 #include "profile.h"
