@@ -68,7 +68,8 @@ class Magnitude(Channel, family="qed.channels.nisar.value"):
         return super().tile(min=self.range.low, max=self.range.high, **kwds)
 
     # constants
-    tag = "real"
+    tag = "abs"
+    category = "real"
 
 
 # end of file
