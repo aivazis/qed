@@ -67,8 +67,14 @@ class GOFF(H5):
                 polarizations = grid.listOfPolarizations
                 # go through them
                 for polarization in polarizations:
-                    # get the group
-                    offsets = getattr(grid.pixelOffsets, polarization)
+                    # carefully, because some data product lie
+                    try:
+                        # get the group
+                        offsets = getattr(grid.pixelOffsets, polarization)
+                        # if this polarization dataset doesn't exist
+                    except AttributeError:
+                        # move on
+                        continue
                     # there is a number of layers
                     for layerName in selectors["layer"]:
                         # get the layer

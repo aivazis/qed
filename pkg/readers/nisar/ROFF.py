@@ -67,8 +67,14 @@ class ROFF(H5):
                 polarizations = swath.listOfPolarizations
                 # go through them
                 for polarization in polarizations:
-                    # get the group
-                    offsets = getattr(swath.pixelOffsets, polarization)
+                    # carefully, because some data product lie
+                    try:
+                        # get the group
+                        offsets = getattr(swath.pixelOffsets, polarization)
+                        # if this polarization dataset doesn't exist
+                    except AttributeError:
+                        # move on
+                        continue
                     # there is a number of layers
                     for layerName in selectors["layer"]:
                         # get the layer
