@@ -11,10 +11,10 @@ import qed
 from .Product import Product
 
 
-# a NISAR SLC
+# a NISAR offsets data product
 class OFF(Product, family="qed.datasets.nisar.products.off"):
     """
-    An SLC dataset
+    An OFF dataset
     """
 
     # public data
