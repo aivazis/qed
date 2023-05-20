@@ -24,8 +24,18 @@ class UNW(Product, family="qed.datasets.nisar.products.unw"):
     cell.doc = "the type of the dataset payload"
 
     # constants
-    # the in-memory data layout of NISAR complex data products
+    # the in-memory data layout of NISAR unwrapped interferograms
     datatype = qed.h5.memtypes.float32
+
+    # implementation details
+    def _retrieveChannels(self):
+        """
+        Generate a sequence of channel pipelines for this products
+        """
+        # by default, look to my cell type
+        yield "unwrapped"
+        # all done
+        return
 
 
 # end of file

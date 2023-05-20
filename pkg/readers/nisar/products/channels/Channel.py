@@ -59,6 +59,7 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         shape = qed.libpyre.grid.Shape2D(shape=shape)
         # and the origin into a {pyre::grid::index_t}
         origin = qed.libpyre.grid.Index2D(index=origin)
+        # build the visualization pipeline and return it
         return pipeline(
             source=source.data.dataset,
             datatype=datatype,
