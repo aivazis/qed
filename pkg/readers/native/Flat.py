@@ -5,7 +5,6 @@
 
 
 # support
-from cgi import print_environ
 import qed
 
 
