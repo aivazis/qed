@@ -31,15 +31,26 @@ gslc.gslc:
 insar.roff:
     uri: "{insar.data}/roff.h5"
 
+insar.rifg:
+    uri: "{insar.data}/rifg.h5"
+
+insar.runw:
+    uri: "{insar.data}/runw.h5"
+
 insar.goff:
     uri: "{insar.data}/goff.h5"
 
+insar.gunw:
+    uri: "{insar.data}/gunw.h5"
+
 # attach the datasets to the application
 datasets:
-    - nisar.rslc#focus.rslc
     - nisar.gslc#gslc.gslc
     - nisar.roff#insar.roff
+    - nisar.rifg#insar.rifg
+    - nisar.runw#insar.runw
     - nisar.goff#insar.goff
+    - nisar.gunw#insar.gunw
 
 
 # overall application configuration
