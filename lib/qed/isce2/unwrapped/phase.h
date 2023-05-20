@@ -21,7 +21,7 @@ namespace qed::isce2::unwrapped::channels {
         typename sourceT::index_type origin,
         // the tile shape
         typename sourceT::shape_type tile,
-        // the hue interaval
+        // the hue interval
         double low, double high,
         // the range of values to render
         double brightness) -> bmp_t;
