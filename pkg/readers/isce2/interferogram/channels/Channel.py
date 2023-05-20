@@ -14,19 +14,16 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
     The base class for all channels
     """
 
-
     # constants
     tag = None
 
-
     # interface
     def autotune(self, **kwds):
-      """
-      Use the {stats} gathered on a data sample to adjust the range configuration
-      """
-      # nothing to do
-      return
-
+        """
+        Use the {stats} gathered on a data sample to adjust the range configuration
+        """
+        # nothing to do
+        return
 
     def controllers(self):
         """
@@ -35,7 +32,6 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         # by default, nothing
         return []
 
-
     def eval(self, pixel):
         """
         Extract the channel value from a {pixel}
@@ -43,14 +39,12 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         # don't kow what to do
         raise NotImplementedError(f"class {type(self).__name__} must implement 'rep'")
 
-
     def project(self, pixel):
         """
         Compute the channel representation of a {pixel}
         """
         # don't kow what to do
         raise NotImplementedError(f"class {type(self).__name__} must implement 'rep'")
-
 
     def tile(self, source, zoom, origin, shape, **kwds):
         """
@@ -67,8 +61,9 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         origin = qed.libpyre.grid.Index2D(index=origin)
 
         # ask it to make a tile and return it
-        return pipeline(source=source.data, zoom=zoom, origin=origin, shape=shape, **kwds)
-
+        return pipeline(
+            source=source.data, zoom=zoom, origin=origin, shape=shape, **kwds
+        )
 
     def update(self, **kwds):
         """
