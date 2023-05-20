@@ -17,6 +17,7 @@ from .RUNW import RUNW as runw
 from .GSLC import GSLC as gslc
 from .GOFF import GOFF as goff
 from .GUNW import GUNW as gunw
+from .GCOV import GCOV as gcov
 
 
 # end of file
