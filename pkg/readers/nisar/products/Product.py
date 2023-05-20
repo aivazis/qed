@@ -130,9 +130,19 @@ class Product(
         self.data = data
         # collect statistics from a sample of my data
         self.stats = self._collectStatistics()
+        # populate my channel pipelines
+        self._registerChannels()
 
+        # all done
+        return
+
+    # implementation details
+    def _registerChannels(self):
+        """
+        Build the channel pipelines
+        """
         # go through the default channels of my cell type
-        for channel in self.cell.channels:
+        for channel in self._retrieveChannels():
             # get their factories
             cls = getattr(channels, channel)
             # instantiate a workflow for each one
@@ -141,11 +151,18 @@ class Product(
             pipeline.autotune(stats=self.stats)
             # and register it
             self.channels[pipeline.tag] = pipeline
-
         # all done
         return
 
-    # implementation details
+    def _retrieveChannels(self):
+        """
+        Generate a sequence of channel pipelines for this products
+        """
+        # by default, look to my cell type
+        yield from self.cell.channels
+        # all done
+        return
+
     def _collectStatistics(self):
         """
         Collect statistics from a sample of my data
