@@ -5,6 +5,7 @@
 
 
 # datasets
+from .GDALBand import GDALBand as gdal
 from .MemoryMap import MemoryMap as mmap
 
 
