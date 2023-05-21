@@ -26,6 +26,7 @@
 #include <pybind11/complex.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
+#include <pybind11/numpy.h>
 
 
 // type aliases
@@ -61,13 +62,31 @@ namespace qed::py {
     using heap_t = pyre::memory::heap_t<cellT>;
     template <typename cellT>
     using map_t = pyre::memory::constmap_t<cellT>;
+    template <typename cellT>
+    using view_t = pyre::memory::constview_t<cellT>;
 
     // from {pyre::grid}
+    // indices
+    using index2d_t = pyre::grid::index_t<2>;
+    // shapes
+    using shape2d_t = pyre::grid::shape_t<2>;
     // grids
     template <typename cellT, int dim = 2>
     using heapgrid_t = pyre::grid::grid_t<pyre::grid::canonical_t<dim>, heap_t<cellT>>;
     template <typename cellT, int dim = 2>
     using mapgrid_t = pyre::grid::grid_t<pyre::grid::canonical_t<dim>, map_t<cellT>>;
+    template <typename cellT, int dim = 2>
+    using viewgrid_t = pyre::grid::grid_t<pyre::grid::canonical_t<dim>, view_t<cellT>>;
+
+    // from {pyre::viz}
+    // encodings
+    using bmp_t = pyre::viz::bmp_t;
+    // grayscale
+    template <typename sourceT>
+    using gray_t = pyre::viz::colormaps::gray_t<sourceT>;
+    // map a range of values to the unit interval
+    template <typename sourceT>
+    using parametric_t = pyre::viz::filters::parametric_t<sourceT>;
 }
 
 

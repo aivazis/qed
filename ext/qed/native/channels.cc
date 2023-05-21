@@ -84,6 +84,46 @@ qed::py::native::channels(py::module & m)
         // the docstring
         "render the value of a double tile");
 
+    channels.def(
+        // the name
+        "value",
+        // the handler
+        [](py::array_t<float, py::array::c_style | py::array::forcecast> source, shape2d_t shape,
+           float low, float high) {
+            // type aliases
+            // the normalizer
+            using norm_t = parametric_t<const float *>;
+            // the color map
+            using colormap_t = gray_t<norm_t>;
+
+            // make
+            auto channel = pyre::journal::info_t("qed.native.value");
+            channel
+                // the shape
+                << shape
+                << pyre::journal::newline
+                // flush
+                << pyre::journal::endl(__HERE__);
+
+            // get the array data buffer
+            auto buffer = static_cast<const float *>(source.request().ptr);
+            // map to the unit interval
+            auto norm = norm_t(buffer, norm_t::interval_type(low, high));
+            // generate color
+            auto colormap = colormap_t(norm);
+
+            // make a bitmap
+            bmp_t bmp(shape[0], shape[1]);
+            // render
+            bmp.encode(colormap);
+            // and return it
+            return bmp;
+        },
+        // the signature
+        "source"_a, "shape"_a, "low"_a, "high"_a,
+        // the docstring
+        "render the values of a numpy array");
+
     // {c8} amplitude
     channels.def(
         // the name of the function
