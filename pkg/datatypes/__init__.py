@@ -14,12 +14,16 @@ from .Int32 import Int32 as int32
 from .Int64 import Int64 as int64
 
 # real numbers
-from .Float import Float as real32
-from .Double import Double as real64
+from .Float import Float as float32
+from .Double import Double as float64
 
 # complex numbers
 from .ComplexFloat import ComplexFloat as complex64
 from .ComplexDouble import ComplexDouble as complex128
+
+# aliases
+real32 = float32
+real64 = float64
 
 
 # end of file
