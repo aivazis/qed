@@ -95,16 +95,6 @@ qed::py::native::channels(py::module & m)
             using norm_t = parametric_t<const float *>;
             // the color map
             using colormap_t = gray_t<norm_t>;
-
-            // make
-            auto channel = pyre::journal::info_t("qed.native.value");
-            channel
-                // the shape
-                << shape
-                << pyre::journal::newline
-                // flush
-                << pyre::journal::endl(__HERE__);
-
             // get the array data buffer
             auto buffer = static_cast<const float *>(source.request().ptr);
             // map to the unit interval
