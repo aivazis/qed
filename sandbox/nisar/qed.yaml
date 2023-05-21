@@ -8,6 +8,7 @@
 # location
 nisar.data: "../../../data/workflows"
 
+tiff.data: "{nisar.data}/tiff"
 ree2.data: "{nisar.data}/ree2"
 focus.data: "{nisar.data}/focus"
 gslc.data: "{nisar.data}/gslc"
@@ -43,6 +44,9 @@ insar.goff:
 insar.gunw:
     uri: "{insar.data}/gunw.h5"
 
+srtm.tif:
+    uri: "{tiff.data}/srtm_cropped.tif"
+
 # attach the datasets to the application
 datasets:
     - nisar.gslc#gslc.gslc
@@ -51,6 +55,7 @@ datasets:
     - nisar.runw#insar.runw
     - nisar.goff#insar.goff
     - nisar.gunw#insar.gunw
+    - native.gdal#srtm.tif
 
 
 # overall application configuration
