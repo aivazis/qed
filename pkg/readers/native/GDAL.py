@@ -4,6 +4,7 @@
 # (c) 1998-2023 all rights reserved
 
 # support
+import os
 import qed
 import journal
 from osgeo import gdal
@@ -38,7 +39,7 @@ class GDAL(
         # chain up
         super().__init__(name=name, **kwds)
         # open the file
-        dataset = gdal.Open(str(self.uri.address))
+        dataset = self._open()
         # if something went wrong
         if dataset is None:
             # make a channel
@@ -68,6 +69,47 @@ class GDAL(
         # and update th selectors
         self.selectors["raster"] = bands
         # all done
+        return
+
+    # implementation details
+    def _open(self):
+        """
+        Retrieve the dataset from my {uri}
+        """
+        # get my {uri}
+        uri = self.uri
+        # local files
+        if uri.scheme == "file":
+            # are easy
+            return gdal.Open(str(uri.address))
+        # s3 buckets
+        if uri.scheme == "s3":
+            # extract the profile and region
+            region, _, profile, _ = uri.server
+            # the uri specifies a profile
+            if profile:
+                # override the value in the the environment
+                os.environ["AWS_PROFILE"] = profile
+            # if the uri specifies a region
+            if region:
+                # override the value in the the environment
+                os.environ["AWS_REGION"] = profile
+            # get the address, expected to be of the form {/bucket/path-to-file}
+            address = uri.address
+            # assemble the filename
+            name = f"/vsis3{address}"
+            # get the dataset and return it
+            return gdal.Open(name)
+        # anything else is unsupported
+        channel = journal.error("qed.readers.native")
+        # so complain
+        channel.line(f"unsupported scheme '{uri.scheme}'")
+        channel.line(f"in the uri '{uri}")
+        channel.line(f"while attempting to read a GDAL dataset")
+        channel.line(f"using {self}")
+        # flush
+        channel.log()
+        # and bail, just in case errors aren't fatal
         return
 
 
