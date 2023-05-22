@@ -8,11 +8,15 @@
 parasim: s3://parasim@eu-central-1/parasim-qed
 
 srtm.tif:
-    uri: "{parasim}/strm.tif"
+    uri: "{parasim}/srtm.tif"
+
+srtm_cog.tif:
+    uri: "{parasim}/srtm_cog.tif"
 
 # attach to the application
 datasets:
     - native.gdal#srtm.tif
+    - native.gdal#srtm_cog.tif
 
 
 # overall application configuration
