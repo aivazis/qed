@@ -5,21 +5,28 @@
 
 
 # test data
-nisar.data: s3://nisar-st-lts-ondemand/SDS_DAAC_benchmark
+parasim: s3://parasim@eu-central-1/parasim-qed
 
-RSLC_20070101:
-    uri: "{nisar.data}/L1_L_RSLC/2007/01/01/NISAR_L1_PR_RSLC_007_147_D_144_2800_HH_20070101T053038_20070101T053045_D00200_P_F_001/NISAR_L1_PR_RSLC_007_147_D_144_2800_HH_20070101T053038_20070101T053045_D00200_P_F_001.h5"
-
-GSLC_20080218:
-    uri: "{nisar.data}/L2_L_GSLC/2008/02/18/NISAR_L2_PR_GSLC_016_117_D_172_2800_HH_20080218T062020_20080218T062027_D00200_P_F_001/NISAR_L2_PR_GSLC_016_117_D_172_2800_HH_20080218T062020_20080218T062027_D00200_P_F_001.h5"
-
-GSLC_20110325:
-    uri: "{nisar.data}/L2_L_GSLC/2011/03/25/NISAR_L2_PR_GSLC_041_007_D_076_2800_HH_20110325T063353_20110325T063400_D00200_P_F_001/NISAR_L2_PR_GSLC_041_007_D_076_2800_HH_20110325T063353_20110325T063400_D00200_P_F_001.h5"
-
+srtm.tif:
+    uri: "{parasim}/strm.tif"
 
 # attach to the application
 datasets:
-    - nisar.rslc#RSLC_20070101
+    - native.gdal#srtm.tif
 
+
+# overall application configuration
+qed.app:
+    # run as a web app
+    shell: web
+    # for the web server
+    nexus.services.web:
+        # pin the port for serving web content to some number in user space
+        address: ip4:0.0.0.0:8005
+
+# configure the {web} shell
+pyre.shells.web#qed.app.shell:
+    # spawn a new browser window/tab every time the server starts?
+    auto: yes
 
 # end of file
