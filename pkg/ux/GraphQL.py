@@ -7,21 +7,20 @@
 # externals
 import journal
 import json
+
 # support
 import qed
 
 
 # the {graphql} request handler
 class GraphQL:
-
-
     # interface
     def respond(self, plexus, dispatcher, panel, server, request, **kwds):
         """
         Resolve the {query} and generate a response for the client
         """
         # assemble the raw payload
-        raw = b'\n'.join(request.payload)
+        raw = b"\n".join(request.payload)
         # if there's nothing there
         if not raw:
             # respond with an empty document; should never happen
@@ -70,41 +69,35 @@ class GraphQL:
         result = self.schema.execute(query, context=context, variables=variables)
 
         # assemble the resulting document
-        doc = { "data": result.data }
+        doc = {"data": result.data}
         # in addition, if something went wrong
         if result.errors:
             # inform the client
-            doc["errors"] = [ {"message": str(error)} for error in result.errors ]
-
+            doc["errors"] = [{"message": str(error)} for error in result.errors]
             # make a channel
             channel = journal.error("qed.ux.graphql")
             # go through the errors
             for error in result.errors:
                 # report each one
-                channel.line(error)
+                channel.line(str(error))
             # flush
             channel.log()
 
         # encode it using JSON and serve it
         return server.documents.JSON(server=server, value=doc)
 
-
     # metamethods
     def __init__(self, panel, **kwds):
         # chain up
         super().__init__(**kwds)
-
         # load my schema and attach it
         self.schema = qed.gql.schema
-
         # initialize the execution context
         self.context = {
             "nameserver": panel.pyre_nameserver,
         }
-
         # make sure my error channel is not fatal
         journal.error("qed.ux.graphql").fatal = False
-
         # all done
         return
 
