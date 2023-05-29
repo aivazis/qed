@@ -15,6 +15,17 @@ from .. import foundry
 
 
 # utilities
+@foundry(implements=action, tip="access to S3 buckets")
+def s3():
+    # get the action
+    from .S3 import S3
+
+    # borrow its docstring
+    __doc__ = S3.__doc__
+    # and publish it
+    return S3
+
+
 @foundry(implements=action, tip="a collection of introspection utilities")
 def inspect():
     # get the action
