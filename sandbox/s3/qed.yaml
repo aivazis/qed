@@ -28,6 +28,11 @@ qed.app:
         # pin the port for serving web content to some number in user space
         address: ip4:0.0.0.0:8005
 
+# S3 configuration
+qed.app.s3:
+    profile: parasim
+    bucket: parasim-ros3eu
+
 # configure the {web} shell
 pyre.shells.web#qed.app.shell:
     # spawn a new browser window/tab every time the server starts?
