@@ -93,7 +93,7 @@ class GDAL(
             # if the uri specifies a region
             if region:
                 # override the value in the the environment
-                os.environ["AWS_REGION"] = profile
+                os.environ["AWS_REGION"] = region
             # get the address, expected to be of the form {/bucket/path-to-file}
             address = uri.address
             # assemble the filename
