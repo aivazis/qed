@@ -102,5 +102,34 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         # all done
         return 0
 
+    @qed.export(tip="list the contents of an S3 bucket")
+    def ls(self, plexus, **kwds):
+        """
+        Delete a file from an S3 bucket
+        """
+        # unpack  my state
+        profile = self.profile
+        bucket = self.bucket
+        # start a session
+        s3 = boto3.Session(profile_name=profile).client("s3")
+        # get the contents
+        response = s3.list_objects_v2(Bucket=bucket)
+        # make a channel
+        channel = journal.info("qed.s3.ls")
+        # sign on
+        channel.line(f"{bucket}:")
+        # push in
+        channel.indent()
+        # go through the contents
+        for key in response["Contents"]:
+            # show me
+            channel.line(f"{key}")
+        # pull out
+        channel.outdent()
+        # and flush
+        channel.log()
+        # all done
+        return 0
+
 
 # end of file
