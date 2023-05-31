@@ -5,8 +5,17 @@
 
 
 # datasets
-from .GDALBand import GDALBand as gdal
+# memory mapped files from the local filesystem
 from .MemoryMap import MemoryMap as mmap
+
+# carefully
+try:
+    # load the support for {gdal} rasters
+    from .GDALBand import GDALBand as gdal
+# if it fails
+except ImportError:
+    # no worries
+    pass
 
 
 # end of file
