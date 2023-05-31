@@ -4,19 +4,24 @@
 # (c) 1998-2023 all rights reserved
 
 
-# test data
+# the bucket
 parasim: s3://parasim@eu-central-1/parasim-qed
 
-srtm.tif:
+# the datasets
+s3.rslc:
+    uri: "{parasim}/rslc.h5"
+
+s3.srtm:
     uri: "{parasim}/srtm.tif"
 
-srtm_cog.tif:
+s3.srtm_cog:
     uri: "{parasim}/srtm_cog.tif"
 
-# attach to the application
+# attach them to the application
 datasets:
-    - native.gdal#srtm.tif
-    - native.gdal#srtm_cog.tif
+    - nisar.rslc#s3.rslc
+    - native.gdal#s3.srtm
+    - native.gdal#s3.srtm_cog
 
 
 # overall application configuration
@@ -31,7 +36,7 @@ qed.app:
 # S3 configuration
 qed.app.s3:
     profile: parasim
-    bucket: parasim-ros3eu
+    bucket: parasim-qed
 
 # configure the {web} shell
 pyre.shells.web#qed.app.shell:
