@@ -64,7 +64,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         # start a session
         s3 = boto3.Session(profile_name=profile).client("s3")
         # get the file
-        with open(f"{bucket}/{key}", mode="rb") as stream:
+        with open(f"{key}", mode="rb") as stream:
             # upload
             s3.upload_fileobj(stream, bucket, key)
         # all done
