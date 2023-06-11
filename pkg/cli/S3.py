@@ -32,6 +32,10 @@ class S3(qed.shells.command, family="qed.cli.s3"):
     key = qed.properties.str()
     key.doc = "the lookup key of the bucket entry"
 
+    page = qed.properties.int()
+    page.default = 0
+    page.doc = "the size of file space management pages"
+
     # interface
     @qed.export(tip="create an S3 bucket")
     def create(self, plexus, **kwds):
@@ -130,6 +134,62 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         channel.log()
         # all done
         return 0
+
+    @qed.export(
+        tip="create an empty file with the given file space management page size"
+    )
+    def empty(self, **kwds):
+        """
+        Create an empty file with the given file space management page size
+        """
+        # make a writer; this creates an empty file as a side-effect
+        self._newWriter(uri="empty.h5")
+        # all done
+        return 0
+
+    @qed.export(
+        tip="create an empty RSLC file with the given file space management page size"
+    )
+    def rslc(self, **kwds):
+        """
+        Create an empty NISAR RSLC file with the given file space management page size
+        """
+        # get the product specs
+        import nisar.products.spec as spec
+
+        # build the rslc description
+        rslc = spec.rslc()
+        # create the file writer
+        writer = self._newWriter(uri="rslc.h5")
+        # ask it to write an empty rslc
+        writer.write(query=rslc)
+
+        # all done
+        return 0
+
+    # implementation details
+    def _newWriter(self, uri):
+        """
+        Build an h5 writer
+        """
+        # get my page size
+        page = self.page
+        # get the h5 bindings
+        libh5 = qed.h5.libh5
+        # make an fcpl
+        fcpl = libh5.FCPL()
+        # if it's non-trivial
+        if page:
+            # ask for the paged strategy
+            fcpl.setFilespaceStrategy(
+                strategy=libh5.FilespaceStrategy.page, persist=False, threshold=1
+            )
+            # set the page size
+            fcpl.setPageSize(size=1024 * self.page)
+        # use the fcpl to create the file writer
+        writer = qed.h5.writer(uri=uri, fcpl=fcpl)
+        # and return it
+        return writer
 
 
 # end of file
