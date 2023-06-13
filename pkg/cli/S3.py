@@ -135,6 +135,41 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         # all done
         return 0
 
+    @qed.export(tip="read the entire structure of a data product")
+    def explore(self, **kwds):
+        """
+        Read the entire structure of a data product
+        """
+        # unpack  my state
+        profile = self.profile
+        region = self.region
+        bucket = self.bucket
+        key = self.key
+        # build the uri
+        uri = f"s3://{profile}@{region}/{bucket}/{key}"
+        # make a reader
+        reader = self._newReader(uri=uri)
+
+        # make a timer
+        timer = qed.timers.wall("qed.app.s3.read")
+        # start it
+        timer.start()
+        # get the data
+        reader.read()
+        # stop the time
+        timer.stop()
+
+        # make a channel
+        channel = journal.info("qed.s3.app.read")
+        # report
+        channel.line(f"in {timer.sec()} sec")
+        # and flush
+        channel.log()
+
+        # all done
+        return
+
+    # specific datasets
     @qed.export(
         tip="create an empty file with the given file space management page size"
     )
@@ -158,26 +193,65 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         import nisar.products.spec as spec
 
         # build the rslc description
-        rslc = spec.rslc()
+        spec = spec.rslc()
+        # assemble it into an actual product
+        data = qed.h5.product(spec=spec)
+
+        # set the list of frequencies
+        data.science.LSAR.identification.listOfFrequencies = ["A"]
+        # get the swaths
+        swaths = data.science.LSAR.RSLC.swaths
+        # trim the B frequency
+        del swaths.frequencyB
+        # get the A frequency
+        a = swaths.frequencyA
+        # set the list of polarizations
+        a.listOfPolarizations = ["HH"]
+        # go through the other polarizations
+        for pol in "HV", "VH", "VV", "RH", "RV":
+            # and remove them
+            delattr(a, pol)
+
         # create the file writer
         writer = self._newWriter(uri="rslc.h5")
         # ask it to write an empty rslc
-        writer.write(query=rslc)
+        writer.write(data=data)
 
         # all done
         return 0
 
     # implementation details
+    def _newReader(self, uri):
+        """
+        Build an h5 reader
+        """
+        # get the h5 bindings
+        libh5 = qed.h5.libh5
+        # make an access property list
+        fapl = libh5.FAPL()
+        # get my page size
+        page = self.page
+        # if it's non-trivial
+        if page:
+            # convert it into K, and make it a little bigger
+            page *= 2 * 1024
+            # set the paging characteristics
+            fapl.setPageBufferSize(page=page, meta=50, raw=50)
+        # make a reader
+        reader = qed.h5.reader(uri=uri, fapl=fapl)
+        # and return it
+        return reader
+
     def _newWriter(self, uri):
         """
         Build an h5 writer
         """
-        # get my page size
-        page = self.page
         # get the h5 bindings
         libh5 = qed.h5.libh5
-        # make an fcpl
+        # make a creation property list
         fcpl = libh5.FCPL()
+        # get my page size
+        page = self.page
         # if it's non-trivial
         if page:
             # ask for the paged strategy
