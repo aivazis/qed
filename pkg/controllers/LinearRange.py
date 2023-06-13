@@ -43,6 +43,8 @@ class LinearRange(Controller, family="qed.controllers.linearrange"):
 
         # unpack the stats
         _, mean, _ = stats
+        # make sure the mean value won't cause problems
+        mean = max(mean, 1)
 
         # we want to be conservative, as this logic is only supposed to make sure that
         # the initial display is sensible
