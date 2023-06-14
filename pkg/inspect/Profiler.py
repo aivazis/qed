@@ -18,6 +18,19 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
     The base profiler
     """
 
+    # configurable state
+    channels = qed.properties.strings()
+    channels.default = ["complex"]
+    channels.doc = "the channels to use during profiling"
+
+    tiles = qed.properties.tuple(schema=qed.properties.int())
+    tiles.default = 5, 14
+    tiles.doc = "the range of exponents used to make tile shapes"
+
+    zoom = qed.properties.tuple(schema=qed.properties.int())
+    zoom.default = 0, 1
+    zoom.doc = "the sequence of zoom levels"
+
     # interface
     def measure(self):
         """
@@ -30,6 +43,10 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
         # and a timer
         tileTimer = qed.timers.wall("qed.profiler.tiles")
 
+        # build the target tiles
+        tiles = [(2**pow,) * 2 for pow in range(*self.tiles)]
+        # and the target zoon levels
+        zoomLevels = tuple(range(*self.zoom))
         # go through the datasets
         for dataset, discovery, stats in self.datasets():
             # get the name of the dataset
@@ -38,13 +55,11 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
             profile[name]["startup"]["discovery"] = discovery
             profile[name]["startup"]["stats"] = stats
             # go through its channels
-            for channel in dataset.channels:
+            for channel in self.channels:
                 # make tile exponents
-                for tileExp in range(5, 14):
-                    # make a tile
-                    tile = (2**tileExp,) * 2
+                for tile in tiles:
                     # make zoom
-                    for zoom in range(1):
+                    for zoom in zoomLevels:
                         # show me
                         c.log(f"measuring {name}, {channel}, {tile}")
                         # reset the timer
@@ -61,6 +76,8 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
                         except qed.exceptions.PyreError:
                             # stop the timer
                             tileTimer.stop()
+                            # leave a marker
+                            profile[name]["tiles"][channel, tile, zoom] = ""
                             # and move on
                             continue
                         # if all goes well, stop the timer
@@ -142,71 +159,39 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
         """
         Save the {profile} as a {csv} file
         """
-        # make a pile of all shapes
-        shapes = set()
-        # a pile of all channels
-        channels = set()
-        # and a new table
-        table = qed.patterns.vivify(levels=3, atom=type(None))
+        # get the channels
+        channels = self.channels
+        # build the target tiles
+        tiles = [(2**pow,) * 2 for pow in range(*self.tiles)]
+        # and the target zoom levels
+        zoomLevels = tuple(range(*self.zoom))
 
-        # go through the datasets
-        for name in profile:
-            # and the tile timings for each one
-            for (channel, shape, _), cost in profile[name]["tiles"].items():
-                # record the shape
-                shapes.add(shape)
-                # the channel
-                channels.add(channel)
-                # and the cost
-                table[shape][channel][name] = cost
-
-        # write string scaling data out to a CSV file
+        # save the profile data
         with open("qed-strong.csv", mode="w", newline="") as stream:
             # make a writer
             writer = csv.writer(stream)
-            # build my headers
-            headers = ["tile", "pixels"] + [
-                f"{name}.{channel}" for name in profile for channel in sorted(channels)
-            ]
+            # the first row of headers has the tiles shapes
+            headers = [""] + tiles
+            # write it out
+            writer.writerow(headers)
+            # the second row of headers expands out the number of pixels in each tile
+            headers = ["dataset"] + [x * y for x, y in tiles]
+            # write it out
             writer.writerow(headers)
 
-            # go through the shapes
-            for shape in sorted(shapes):
-                # compute the number of pixels
-                pixels = shape[0] * shape[1]
-                # build the record
-                record = [shape, pixels] + [
-                    table[shape][channel][name]
-                    if table[shape][channel][name] is not None
-                    else None
-                    for name in profile
-                    for channel in sorted(channels)
-                ]
-                writer.writerow(record)
-
-        # write weak scaling data out to a CSV file
-        with open("qed-weak.csv", mode="w", newline="") as stream:
-            # make a writer
-            writer = csv.writer(stream)
-            # build my headers
-            headers = ["tile", "pixels"] + [
-                f"{name}.{channel}" for name in profile for channel in sorted(channels)
-            ]
-            writer.writerow(headers)
-
-            # go through the shapes
-            for shape in sorted(shapes):
-                # compute the number of pixels
-                pixels = shape[0] * shape[1]
-                # build the record
-                record = [shape, pixels] + [
-                    table[shape][channel][name] / pixels
-                    if table[shape][channel][name] is not None
-                    else None
-                    for name in profile
-                    for channel in sorted(channels)
-                ]
-                writer.writerow(record)
+            # go through the datasets
+            for name in profile:
+                # the zoom levels
+                for zoom in zoomLevels:
+                    # the channels
+                    for channel in channels:
+                        # assemble the record
+                        record = [f"{name}.{channel}"] + [
+                            profile[name]["tiles"][channel, shape, zoom]
+                            for shape in tiles
+                        ]
+                        # and write it out
+                        writer.writerow(record)
 
         # all done
         return
