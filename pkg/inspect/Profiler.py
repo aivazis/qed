@@ -167,7 +167,7 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
         zoomLevels = tuple(range(*self.zoom))
 
         # save the profile data
-        with open("qed-strong.csv", mode="w", newline="") as stream:
+        with open(f"{self.pyre_host.nickname}.csv", mode="w", newline="") as stream:
             # make a writer
             writer = csv.writer(stream)
             # the first row of headers has the tiles shapes
