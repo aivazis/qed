@@ -211,6 +211,28 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         for pol in "HV", "VH", "VV", "RH", "RV":
             # and remove them
             delattr(a, pol)
+        # get the HH dataset
+        hh = a.HH
+        # set the shape
+        hh.shape = 8 * 1024, 8 * 1024
+        # make a grid
+        grid = hh.memtype.grid(shape=hh.shape)
+        # populate it
+        for i in range(hh.shape[0]):
+            # every so often
+            if i % 100 == 0:
+                # show me some progress
+                print(i)
+            # build the imaginary part
+            for j in range(hh.shape[1]):
+                # place value in the grid
+                grid[i, j] = complex(i, j) / hh.shape[0]
+        # dress it up as a tile
+        tile = hh.tile(
+            data=grid, type=hh.memtype, shape=hh.shape, origin=[0] * len(hh.shape)
+        )
+        # stage it
+        hh._staged.append(tile)
 
         # create the file writer
         writer = self._newWriter(uri="rslc.h5")
