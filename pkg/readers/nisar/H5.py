@@ -24,12 +24,28 @@ class H5(qed.flow.factory, implements=qed.protocols.reader):
     selectors = qed.protocols.selectors()
     selectors.doc = "a map of selector names to their allowed values"
 
+    pages = qed.properties.int()
+    pages.default = None
+    pages.doc = "the number of 4K pages in the aggregation cache"
+
     # metamethods
-    def __init__(self, **kwds):
+    def __init__(self, fapl=None, **kwds):
         # chain up
         super().__init__(**kwds)
+        # if the caller didn't provide an access property list
+        if fapl is None:
+            # make a default one
+            fapl = qed.h5.libh5.FAPL()
+        # get the number of pages to set aside for the page aggregator
+        pages = self.pages
+        # if it is non-trivial
+        if pages:
+            # form the cache size
+            size = 4 * 1024 * pages
+            # adjust the {fapl}
+            fapl.setPageBufferSize(page=size, meta=50, raw=50)
         # open my file
-        self.product = qed.h5.read(uri=str(self.uri))
+        self.product = qed.h5.reader(uri=self.uri, fapl=fapl).read()
         # all done
         return
 
