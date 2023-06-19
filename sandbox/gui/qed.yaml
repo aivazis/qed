@@ -37,7 +37,7 @@ alos_LA-20070215:
 nisar.data: "{samples}/nisar"
 
 nisar_float:
-    uri: "{nisar.data}/BigIsl_32905_10003_012_100106_L090_CX_129_02.h5"
+    uri: "{nisar.data}/hawaii.h5"
 
 nisar_half_float:
     uri: "{nisar.data}/rslc.h5"
@@ -86,10 +86,10 @@ datasets:
     - isce2.unw#deathvalley_unw
     - isce2.rslc#alos_LA-20061231
     - alos.rslc#alos_LA-20070215
-    - nisar.rslc#nisar_float
+    # - nisar.rslc#nisar_float
     - asar.rslc#nisar_half_float
-    - asar.rslc#asar_L_300621
-    - asar.rslc#asar_S_300621
+    # - asar.rslc#asar_L_300621
+    # - asar.rslc#asar_S_300621
     # - asar.rslc#asar_L_161219
     # - asar.rslc#asar_S_161219
     # - asar.rslc#asar_L_051219
