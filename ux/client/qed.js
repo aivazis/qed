@@ -29,8 +29,6 @@ import { environment, Provider } from '~/context'
 import {
     // the data view
     Viz, Controls, Datasets,
-    // graphiql
-    GiQL,
     // the main page
     Main,
     // boilerplate
@@ -67,10 +65,6 @@ const QEDApp = () => {
             <Route path="stop" element={<Stop />} />
             {/* the page to render while waiting for data to arrive */}
             <Route path="loading" element={<Loading />} />
-
-
-            {/* the graphiql sandbox */}
-            <Route path="graphiql" element={<NYI />} />
         </Routes>
     )
 }

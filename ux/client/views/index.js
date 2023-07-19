@@ -11,8 +11,7 @@ export Status from './status'
 // the main page
 export { Main, useActivityPanel } from './main'
 
-// sandboxes
-// export { GiQL } from './graphiql'
+// the main app logic
 export { Viz, Controls, Datasets } from './viz'
 
 // a blank panel with size information
