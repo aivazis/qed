@@ -19,7 +19,7 @@ export const Provider = ({ children }) => {
     // attach them as read-only state
     const [readers] = React.useState(sources)
 
-    // initialize the set viewports; this is where the refs of the mosaic placemats live
+    // initialize the set of viewports; this is where the refs of the mosaic placemats live
     // which are needed for the implementation of the shared camera
     const viewports = React.useRef([])
     // the ref registrar gets called by react when the placemat ref is created; ours just update
