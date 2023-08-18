@@ -1,0 +1,15 @@
+# -*- makefile -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2023 all rights reserved
+
+
+# lunar-clang image configuration
+qed.dev.lunar-clang.name := lunar-clang
+qed.dev.lunar-clang.root := etc/docker/dev/
+qed.dev.lunar-clang.launch.mounts := mm pyre qed data
+# qed listens on port 8005, by default; map it to port 8006 on the host
+qed.dev.lunar-clang.launch.options := -p 8006:8005
+
+
+# end of file

@@ -16,8 +16,8 @@ qed.webpack := qed.ux
 qed.tests := qed.pkg.tests qed.ext.tests qed.data
 # docker images
 qed.docker-images := \
-    qed.ci.impish-gcc   \
-    qed.dev.impish-clang qed.dev.impish-gcc  \
+    qed.ci.lunar-gcc   \
+    qed.dev.lunar-clang qed.dev.lunar-gcc  \
 
 # load the packages
 include $(qed.packages)
