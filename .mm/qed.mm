@@ -16,7 +16,8 @@ qed.webpack := qed.ux
 qed.tests := qed.pkg.tests qed.ext.tests qed.data
 # docker images
 qed.docker-images := \
-    qed.ci.lunar-gcc   \
+    qed.ci.lunar-gcc qed.ci.jammy-gcc  \
+    qed.dev.jammy-clang qed.dev.jammy-gcc  \
     qed.dev.lunar-clang qed.dev.lunar-gcc  \
 
 # load the packages
