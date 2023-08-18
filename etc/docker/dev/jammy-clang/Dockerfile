@@ -36,13 +36,15 @@ RUN apt dist-upgrade -y
 # install the base software stack
 RUN DEBIAN_FRONTEND=noninteractive \
         apt install -y \
-        git vim unzip zip \
+        git vim unzip zip curl \
         openssh-server \
         clang gfortran make \
-        npm \
         ${python} ${python}-dev \
         python3-graphene python3-numpy python3-pip python3-pybind11 python3-yaml \
         libgsl-dev libhdf5-dev libfftw3-dev
+
+# install nodejs from source
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs
 
 
 # setup the interactive environment
