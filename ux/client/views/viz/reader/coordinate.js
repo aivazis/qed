@@ -70,10 +70,13 @@ export const Coordinate = ({ axis, coordinate }) => {
 
     // make a handler that toggles me as the value of my {axis}
     const toggle = () => {
-        // toggle me as the value of my {axis}
-        toggleCoordinate()
-        // reset the extra polish
-        setPolish(false)
+        // if there are multiple possible solutions
+        if (reader.datasets.size > 1) {
+            // toggle me as the value of my {axis}
+            toggleCoordinate()
+            // reset the extra polish
+            setPolish(false)
+        }
         // all done
         return
     }
@@ -98,18 +101,23 @@ export const Coordinate = ({ axis, coordinate }) => {
             // all done
             return
         }
-        // add the toggle and the highlighter
+        // assemble the behaviors
         behaviors = {
+            // by extending what was already there
             ...behaviors,
+            // with the coordinate toggle
             onClick: toggle,
+            // and the highlighter
             onMouseEnter: highlight,
         }
     }
     // if i'm selected
     else if (state == "selected") {
-        // add only the toggle
+        // assemble the behaviors
         behaviors = {
+            // by extending what was already there
             ...behaviors,
+            // with the coordinate toggle only; the coordinate is already highlighted
             onClick: toggle,
         }
     }
