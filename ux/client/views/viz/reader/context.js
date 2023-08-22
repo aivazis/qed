@@ -82,6 +82,15 @@ export const Provider = (props) => {
         channel.current = null
     }
 
+    // let's figure out the set of values for each selector among the available datasets
+    const candidates = new Map(reader.selectors.map(selector => [selector.name, new Set()]))
+    // go through the datasets
+    reader.datasets.forEach(dataset => {
+        dataset.selector.forEach(({ name, value }) => {
+            candidates.get(name).add(value)
+        })
+    })
+
     // if there is a dataset choice
     if (dataset.current) {
         // use it to initialize my selector
@@ -97,16 +106,9 @@ export const Provider = (props) => {
     }
     // otherwise
     else {
-        // let's figure out the set of values for each selector among the available datasets
-        const hist = new Map(reader.selectors.map(selector => [selector.name, new Set()]))
-        // go through the datasets
-        reader.datasets.forEach(dataset => {
-            dataset.selector.forEach(({ name, value }) => {
-                hist.get(name).add(value)
-            })
-        })
+
         // now, go through the histogram
-        hist.forEach((values, name) => {
+        candidates.forEach((values, name) => {
             // if we have a selector key that only shows up with one specific value
             if (values.size == 1) {
                 // select it
@@ -127,6 +129,8 @@ export const Provider = (props) => {
         selector,
         // the channel
         channel,
+        // the table of possible choices
+        candidates,
     }
 
     // provide for my children
@@ -152,6 +156,8 @@ export const Context = React.createContext(
         selector: null,
         // the channel
         channel: null,
+        // the possible solutions
+        candidates: null,
     }
 )
 
