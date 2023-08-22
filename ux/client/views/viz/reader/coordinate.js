@@ -12,6 +12,7 @@ import React from 'react'
 import { useReader } from './useReader'
 import { useIsActive } from './useIsActive'
 import { useSelector } from './useSelector'
+import { useCandidates } from './useCandidates'
 import { useToggleCoordinate } from './useToggleCoordinate'
 // styles
 import styles from './styles'
@@ -25,11 +26,15 @@ export const Coordinate = ({ axis, coordinate }) => {
     const activeReader = useIsActive()
     // and the current selector
     const selector = useSelector()
+    // ask for the pile of possible values for my {axis}
+    const candidates = useCandidates(axis)
     // make a toggle
     const toggleCoordinate = useToggleCoordinate(axis, coordinate)
     // park extra state dependent styling here
     const [polish, setPolish] = React.useState(false)
 
+    // i'm a possible solution if and only is the set of {candidates} contains my {coordinate}
+    const possible = candidates.has(coordinate)
     // get the current value of my axis
     const currentCoordinate = selector.get(axis)
 
@@ -39,6 +44,11 @@ export const Coordinate = ({ axis, coordinate }) => {
     if (activeReader && currentCoordinate === coordinate) {
         // mark me as selected
         state = "selected"
+    }
+    // if i'm not part of the selection solution
+    else if (!possible) {
+        // mark me as disabled
+        state = "disabled"
     }
     // otherwise, check whether i'm viable
     else {
@@ -71,7 +81,7 @@ export const Coordinate = ({ axis, coordinate }) => {
     // make a handler that toggles me as the value of my {axis}
     const toggle = () => {
         // if there are multiple possible solutions
-        if (reader.datasets.size > 1) {
+        if (candidates.size > 1) {
             // toggle me as the value of my {axis}
             toggleCoordinate()
             // reset the extra polish
