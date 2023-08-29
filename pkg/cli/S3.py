@@ -34,7 +34,11 @@ class S3(qed.shells.command, family="qed.cli.s3"):
 
     page = qed.properties.int()
     page.default = 0
-    page.doc = "the size of file space management pages"
+    page.doc = "the size of file space management pages, in K"
+
+    cache = qed.properties.int()
+    cache.default = 64
+    cache.doc = "the size of the read cache, in pages"
 
     tile = qed.properties.tuple(schema=qed.properties.int())
     tile.default = (8 * 1024, 8 * 1024)
@@ -117,6 +121,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         """
         # unpack  my state
         profile = self.profile
+        region = self.region
         bucket = self.bucket
         # start a session
         s3 = boto3.Session(profile_name=profile).client("s3")
@@ -125,11 +130,14 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         # make a channel
         channel = journal.info("qed.s3.ls")
         # sign on
-        channel.line(f"{bucket}:")
+        channel.line(f"profile: {profile}")
+        channel.line(f"region: {region}")
+        channel.line(f"bucket: {bucket}")
+        channel.line(f"contents:")
         # push in
         channel.indent()
         # go through the contents
-        for key in response["Contents"]:
+        for key in response.get("Contents", []):
             # show me
             channel.line(f"{key}")
         # pull out
@@ -182,7 +190,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         Create an empty file with the given file space management page size
         """
         # make a writer; this creates an empty file as a side-effect
-        self._newWriter(uri="empty.h5")
+        self._newWriter(seed="empty")
         # all done
         return 0
 
@@ -196,11 +204,22 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         # get the product specs
         import nisar.products.spec as spec
 
+        # sign on
+        channel = journal.info("qed.s3.rslc")
+        # show me what we are doing
+        channel.line(f"profile: {self.profile}")
+        channel.line(f"region: {self.region}")
+        channel.line(f"bucket: {self.bucket}")
+        channel.line(f"key: rsls.h5")
+        channel.line(f"page: {self.page}")
+        channel.line(f"tile: {self.tile}")
+        # flush
+        channel.log()
+
         # build the rslc description
         spec = spec.rslc()
         # assemble it into an actual product
         data = qed.h5.product(spec=spec)
-
         # set the list of frequencies
         data.science.LSAR.identification.listOfFrequencies = ["A"]
         # get the swaths
@@ -239,8 +258,8 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         hh._staged.append(tile)
 
         # create the file writer
-        writer = self._newWriter(uri="rslc.h5")
-        # ask it to write an empty rslc
+        writer = self._newWriter(seed="rslc")
+        # and write the data product
         writer.write(data=data)
 
         # all done
@@ -260,15 +279,28 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         # if it's non-trivial
         if page:
             # convert it into K, and make it a little bigger
-            page *= 2 * 1024
+            cache = self.cache * 1024 * page
             # set the paging characteristics
-            fapl.setPageBufferSize(page=page, meta=50, raw=50)
+            fapl.setPageBufferSize(page=cache, meta=50, raw=50)
         # make a reader
         reader = qed.h5.reader(uri=uri, fapl=fapl)
-        # and return it
+
+        # make a channel
+        channel = journal.info("qed.s3.reader")
+        # show me
+        channel.line(f"opened '{uri}'")
+        channel.indent()
+        channel.line(
+            f"page size: {reader._file._pyre_id.fapl.getPageBufferSize()} bytes"
+        )
+        channel.outdent()
+        # flush
+        channel.log()
+
+        # and return the reader
         return reader
 
-    def _newWriter(self, uri):
+    def _newWriter(self, seed):
         """
         Build an h5 writer
         """
@@ -276,7 +308,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         libh5 = qed.h5.libh5
         # make a creation property list
         fcpl = libh5.FCPL()
-        # get my page size
+        # get the page size
         page = self.page
         # if it's non-trivial
         if page:
@@ -285,7 +317,11 @@ class S3(qed.shells.command, family="qed.cli.s3"):
                 strategy=libh5.FilespaceStrategy.page, persist=False, threshold=1
             )
             # set the page size
-            fcpl.setPageSize(size=1024 * self.page)
+            fcpl.setPageSize(size=1024 * page)
+        # make a tag
+        tag = "default" if page == 0 else f"{page}k"
+        # assemble the filename
+        uri = f"{seed}-{tag}.h5"
         # use the fcpl to create the file writer
         writer = qed.h5.writer(uri=uri, fcpl=fcpl)
         # and return it
