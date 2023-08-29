@@ -4,12 +4,34 @@
 # (c) 1998-2023 all rights reserved
 
 
-# the bucket
-parasim: s3://parasim@eu-central-1/parasim-qed
+# the bucket specification
+qed.app.s3:
+    profile: parasim
+    region: us-west-1
+    bucket: parasim-ros3us
+
+# local
+data.local: .
+# the s3 data uri
+data.s3: "s3://{qed.app.s3.profile}@{qed.app.s3.region}/{qed.app.s3.bucket}"
 
 # the datasets
-s3.rslc:
-    uri: "{parasim}/rslc.h5"
+local.rslc-default:
+    uri: "{data.local}/rslc-default.h5"
+
+local.rslc-2048k:
+    uri: "{data.local}/rslc-2048k.h5"
+
+s3.rslc-default:
+    uri: "{data.s3}/rslc-default.h5"
+
+s3.rslc-2048k:
+    uri: "{data.s3}/rslc-2048k.h5"
+    pages: 512
+
+s3.rslc-4096k:
+    uri: "{data.s3}/rslc-4096K.h5"
+    pages: 64 * 1024
 
 s3.srtm:
     uri: "{parasim}/srtm.tif"
@@ -19,9 +41,13 @@ s3.srtm_cog:
 
 # attach them to the application
 datasets:
-    - nisar.rslc#s3.rslc
-    - native.gdal#s3.srtm
-    - native.gdal#s3.srtm_cog
+    # - nisar.rslc#local.rslc-default
+    # - nisar.rslc#local.rslc-2048k
+    # - nisar.rslc#s3.rslc-default
+    # - nisar.rslc#s3.rslc-2048k
+    - nisar.rslc#s3.rslc-4096k
+    # - native.gdal#s3.srtm
+    # - native.gdal#s3.srtm_cog
 
 
 # overall application configuration
@@ -32,11 +58,6 @@ qed.app:
     nexus.services.web:
         # pin the port for serving web content to some number in user space
         address: ip4:0.0.0.0:8005
-
-# S3 configuration
-qed.app.s3:
-    profile: parasim
-    bucket: parasim-qed
 
 # configure the {web} shell
 pyre.shells.web#qed.app.shell:
