@@ -24,6 +24,7 @@ class Plexus(pyre.plexus, family='qed.shells.plexus'):
     # the pile of known datasets
     datasets = qed.properties.list(schema=qed.protocols.reader())
     datasets.doc = "the list of datasets to display"
+    datasets.aliases = {"ds"}
 
     # individual metadata, used to assemble a default layout
     cell = qed.protocols.datatype()
