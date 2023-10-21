@@ -32,7 +32,7 @@ alias git.tag='git describe --tags --long --always'
 
 # the location of the sources
 export SRCDIR=@SRCDIR@
-# mm 4.x
-alias mm='python3 ${SRCDIR}/mm/mm.py'
+# mm 5.x
+alias mm='python3 ${SRCDIR}/mm/mm'
 
 # end of file
