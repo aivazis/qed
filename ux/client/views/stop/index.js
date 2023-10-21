@@ -6,29 +6,8 @@
 
 // externals
 import React from 'react'
-import { Link } from 'react-router-dom'
-// locals
-import styles from './styles'
-
-
-// kill the server
-export const Stop = () => {
-    // ask the server to shut down
-    fetch('stop').catch(
-        // and swallow any errors
-        () => null
-    )
-
-    // the container
-    return (
-        <section style={styles.stop}>
-            <div style={styles.placeholder}>
-                <Link to="/" style={styles.link}>qed</Link>
-                &nbsp;has shut down; please close this window
-            </div>
-        </section>
-    )
-}
-
+// components
+export { Dead } from './dead'
+export { Stop } from './stop'
 
 // end of file
