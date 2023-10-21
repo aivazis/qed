@@ -19,6 +19,7 @@ qed.docker-images := \
     qed.ci.lunar-gcc qed.ci.jammy-gcc  \
     qed.dev.jammy-clang qed.dev.jammy-gcc  \
     qed.dev.lunar-clang qed.dev.lunar-gcc  \
+    qed.dev.mantic-clang qed.dev.mantic-gcc  \
 
 # load the packages
 include $(qed.packages)
