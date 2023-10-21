@@ -5,10 +5,7 @@
 
 
 // publish
-export { environment } from './environment'
-export { Context, Provider } from './context'
-export { useServerVersion } from './useServerVersion'
-export { useHeartbeat } from './useHeartbeat'
+export environment from './environment'
 
 
 // end of file
