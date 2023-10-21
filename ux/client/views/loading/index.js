@@ -14,7 +14,7 @@ import styles from './styles'
 
 
 // the area
-const loading = () => (
+export const Loading = () => (
     <section style={styles.loading}>
         <div style={styles.placeholder}>
             <svg style={styles.logo} version="1.1" xmlns="http://www.w3.org/2000/svg">
@@ -28,10 +28,6 @@ const loading = () => (
         </div>
     </section>
 )
-
-
-// publish
-export default loading
 
 
 // end of file

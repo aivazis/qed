@@ -14,7 +14,7 @@ import styles from './styles'
 
 
 // the area
-const blank = () => {
+export const Blank = () => {
     // get my extent
     const { ref, extent } = useResizeObserver()
 
@@ -25,10 +25,6 @@ const blank = () => {
         </section>
     )
 }
-
-
-// publish
-export default blank
 
 
 // end of file

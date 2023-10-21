@@ -15,11 +15,11 @@ export { Main, useActivityPanel } from './main'
 export { Viz, Controls, Datasets } from './viz'
 
 // a blank panel with size information
-export Blank from './blank'
+export { Blank } from './blank'
 // not yet implemented
 export { NYI } from './nyi'
 // while {suspense} is waiting
-export Loading from './loading'
+export { Loading } from './loading'
 // the page rendered when the user kills the server
 export { Stop, Dead } from './stop'
 
