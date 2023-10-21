@@ -26,7 +26,6 @@ import 'lazysizes/plugins/native-loading/ls.native-loading'
 // context
 import { environment } from '~/context'
 // components
-import { Dead } from './dead'
 import { ErrorBoundary } from './boundary'
 // views
 import {
@@ -35,7 +34,7 @@ import {
     // the main page
     Main,
     // boilerplate
-    Loading, NYI, Stop,
+    Loading, NYI, Stop, Dead,
 } from '~/views'
 
 
