@@ -8,8 +8,8 @@
 qed.dev.lunar-gcc.name := lunar-gcc
 qed.dev.lunar-gcc.root := etc/docker/dev/
 qed.dev.lunar-gcc.launch.mounts := mm pyre qed data
-# qed listens on port 8005, by default; map it to port 8006 on the host
-qed.dev.lunar-gcc.launch.options := -p 8006:8005
+# qed listens on port 8005, by default; map it to port 9005 on the host
+qed.dev.lunar-gcc.launch.options := -p 9005:8005
 
 
 # end of file

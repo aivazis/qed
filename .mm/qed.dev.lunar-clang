@@ -8,8 +8,8 @@
 qed.dev.lunar-clang.name := lunar-clang
 qed.dev.lunar-clang.root := etc/docker/dev/
 qed.dev.lunar-clang.launch.mounts := mm pyre qed data
-# qed listens on port 8005, by default; map it to port 8006 on the host
-qed.dev.lunar-clang.launch.options := -p 8006:8005
+# qed listens on port 8005, by default; map it to port 9005 on the host
+qed.dev.lunar-clang.launch.options := -p 9005:8005
 
 
 # end of file
