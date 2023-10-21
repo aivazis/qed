@@ -12,27 +12,23 @@ import styles from './styles'
 
 
 // the bar at the bottom of every page
-const status = () => (
+export const Status = () => (
     // the container
     <footer style={styles.box}>
 
         {/* version info and status of the app server */}
-        <Server style={styles.server}/>
+        <Server style={styles.server} />
 
         {/* render a separator */}
         <Spacer style={styles.spacer} />
 
         {/* the box with the copyright note */}
         <Colophon author="Michael&nbsp;Aïvázis" link="https://github.com/aivazis"
-                  span="1998-2023"
-                  style={styles.colophon} />
+            span="1998-2023"
+            style={styles.colophon} />
 
     </footer>
 )
-
-
-// publish
-export default status
 
 
 // end of file
