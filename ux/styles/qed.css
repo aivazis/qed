@@ -108,6 +108,16 @@ a:active {
 
 
 /* animations */
+@keyframes busy {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0.0;
