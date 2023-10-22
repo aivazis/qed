@@ -6,14 +6,22 @@
 
 # externals
 import graphene
+
 # support
 import qed
+
 # server version tag
 from .Version import Version
+
+# the data archives
+from .ArchiveConnection import ArchiveConnection
+
 # the known datasets
 from .ReaderConnection import ReaderConnection
+
 # their contents
 from .Sample import Sample
+
 # and their visualization pipeline controls
 from .VizPipeline import VizPipeline
 
@@ -24,25 +32,35 @@ class Query(graphene.ObjectType):
     The top level query
     """
 
-
     # the fields
+    # known data archives
+    archives = graphene.relay.ConnectionField(ArchiveConnection)
     # known datasets
     readers = graphene.relay.ConnectionField(ReaderConnection)
     # samples
-    sample = graphene.Field(Sample,
-       dataset=graphene.ID(), sample=graphene.Int(), line=graphene.Int())
+    sample = graphene.Field(
+        Sample, dataset=graphene.ID(), sample=graphene.Int(), line=graphene.Int()
+    )
     # visualization pipeline
-    viz = graphene.Field(VizPipeline,
-       dataset=graphene.ID(), channel=graphene.String())
+    viz = graphene.Field(VizPipeline, dataset=graphene.ID(), channel=graphene.String())
     # server version info
     version = graphene.Field(Version, required=True)
 
-
     # the resolvers
+    # data archives
+    def resolve_archives(
+        root, info, first=1, last=None, after=None, before=None, **kwds
+    ):
+        """
+        Generate a sequence of know data archives
+        """
+        # nothing, for now
+        return []
+
     # datasets
-    def resolve_readers(root, info,
-                        first=1, last=None, after=None, before=None,
-                        **kwds):
+    def resolve_readers(
+        root, info, first=1, last=None, after=None, before=None, **kwds
+    ):
         """
         Generate a list of all known readers
         """
@@ -50,7 +68,6 @@ class Query(graphene.ObjectType):
         plexus = info.context["plexus"]
         # get the datasets and return them
         return plexus.datasets
-
 
     # samples
     def resolve_sample(root, info, dataset, line, sample, **kwds):
@@ -70,7 +87,6 @@ class Query(graphene.ObjectType):
         # and hand it to the sample resolver
         return context
 
-
     # the viz controls
     def resolve_viz(root, info, dataset, channel, **kwds):
         """
@@ -89,7 +105,6 @@ class Query(graphene.ObjectType):
         }
         # and hand it to the resolver
         return context
-
 
     # version
     def resolve_version(root, info):
