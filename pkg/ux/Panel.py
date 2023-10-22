@@ -69,6 +69,14 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         # chain up
         super().__init__(plexus=plexus, **kwds)
 
+        # prime the known data archives
+        self.archives = {
+            # map the uri to the data archive
+            str(archive.uri): archive
+            # for all known archives
+            for archive in plexus.archives
+        }
+
         # get the known data sources and build a registry of available data sets
         self.datasets = {
             # map the pyre name to the dataset
