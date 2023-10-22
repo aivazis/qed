@@ -17,6 +17,11 @@ import { Flex } from '~/widgets'
 // local
 // context
 import { Provider } from './context'
+// hooks
+import { useViews } from './useViews'
+import { useSetActiveViewport } from './useSetActiveViewport'
+// components
+import { Viewer } from './viewer'
 // paint
 import { activityPanels as panelPaint, flex as flexPaint } from './styles'
 
@@ -33,9 +38,15 @@ export const Explorer = () => {
 
 // my panel
 const Panel = () => {
-    // mix my paint
     // the state of the activity panel
     const { activityPanel } = useActivityPanel()
+
+    // the registered views
+    const { views } = useViews()
+    // get the view activator
+    const activateViewport = useSetActiveViewport()
+
+    // mix my paint
     // make a copy of the activity panel paint
     const activityPaint = { ...panelPaint }
     // so we can hide it when its not visible
@@ -47,6 +58,25 @@ const Panel = () => {
             <Flex.Panel min={200} style={activityPaint} >
                 <Outlet />
             </Flex.Panel>
+
+            {/* a panel for each registered view */}
+            {views.map((view, viewport) => {
+                // assemble the behaviors
+                const behaviors = {
+                    onClick: activateViewport(viewport),
+                }
+                // the view behaviors are attached to the flex panel because the {viewer} is not
+                // a real container, just a react fragment
+                return (
+                    <Flex.Panel key={`panel:${viewport}`}
+                        auto={true}
+                        style={flexPaint} {...behaviors}
+                    >
+                        <Viewer viewport={viewport} view={view} />
+                    </Flex.Panel>
+                )
+            })}
+
         </Flex.Box>
     )
 }

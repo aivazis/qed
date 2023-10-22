@@ -12,7 +12,7 @@ import React from 'react'
 import { Context } from './context'
 
 
-// provide access to the collection of table repositories
+// provide access to the collection of data archives
 export const useArchives = () => {
     // get the data sources
     const { archives } = React.useContext(Context)
