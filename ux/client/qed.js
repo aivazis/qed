@@ -29,7 +29,9 @@ import { environment } from '~/context'
 import { ErrorBoundary } from './boundary'
 // views
 import {
-    // the data view
+    // data archives
+    Explorer, Archives,
+    // datasets
     Viz, Controls, Datasets,
     // the main page
     Main,
@@ -52,10 +54,14 @@ const QEDApp = () => {
             <Route path="/" element={<Main />} >
                 {/* specific activities */}
                 <Route path="about" element={<NYI />} />
-                <Route path="explore" element={<NYI />} />
                 <Route path="help" element={<NYI />} />
 
-                {/* the default page */}
+                {/* data archives */}
+                <Route element={<Explorer />}>
+                    <Route path="explore" element={<Archives />} />
+                </Route>
+
+                {/* datasets */}
                 <Route element={<Viz />} >
                     <Route path="controls" element={<Controls />} />
                     <Route index element={<Datasets />} />

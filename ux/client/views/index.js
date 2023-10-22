@@ -7,7 +7,9 @@
 // publish
 // the main page
 export { Main, useActivityPanel } from './main'
-// the main app logic
+// data archives
+export { Explorer, Archives } from './explorer'
+// datasets
 export { Viz, Controls, Datasets } from './viz'
 // the status bar
 export { Status } from './status'
