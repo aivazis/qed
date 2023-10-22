@@ -6,20 +6,27 @@
 
 # externals
 import textwrap
+
 # access the pyre framework
 import pyre
+
 # and my package
 import qed
 
 
 # declaration
-class Plexus(pyre.plexus, family='qed.shells.plexus'):
+class Plexus(pyre.plexus, family="qed.shells.plexus"):
     """
     The main action dispatcher
     """
 
     # types
     from .Action import Action as pyre_action
+
+    # the known archives
+    archives = qed.properties.list(schema=qed.protocols.archive())
+    archives.default = [qed.archives.local(name="workspace")]
+    archives.doc = "the list of registered data archives"
 
     # the pile of known datasets
     datasets = qed.properties.list(schema=qed.protocols.reader())
@@ -44,7 +51,6 @@ class Plexus(pyre.plexus, family='qed.shells.plexus'):
     reader.default = None
     reader.doc = "the component that understands the data encoding of a dataset"
 
-
     # pyre framework hooks
     # support for the help system
     def pyre_banner(self):
@@ -54,12 +60,11 @@ class Plexus(pyre.plexus, family='qed.shells.plexus'):
         # the project header
         yield from textwrap.dedent(qed.meta.banner).splitlines()
         # the doc string
-        yield from self.pyre_showSummary(indent='')
+        yield from self.pyre_showSummary(indent="")
         # the authors
         yield from textwrap.dedent(qed.meta.authors).splitlines()
         # all done
         return
-
 
     # interactive session management
     def pyre_interactiveSessionContext(self, context=None):
@@ -69,10 +74,9 @@ class Plexus(pyre.plexus, family='qed.shells.plexus'):
         # prime the execution context
         context = context or {}
         # grant access to my package
-        context['qed'] = qed  # my package
+        context["qed"] = qed  # my package
         # and chain up
         return super().pyre_interactiveSessionContext(context=context)
-
 
     # virtual filesystem configuration
     def pyre_mountApplicationFolders(self, pfs, prefix, **kwds):
@@ -121,7 +125,6 @@ class Plexus(pyre.plexus, family='qed.shells.plexus'):
         # all done
         return pfs
 
-
     # main entry point for the web shell
     def pyre_respond(self, server, request):
         """
@@ -137,9 +140,8 @@ class Plexus(pyre.plexus, family='qed.shells.plexus'):
         # otherwise, ask the dispatcher to do its thing
         return ux.dispatch(plexus=self, server=server, request=request)
 
-
     # private data
-    _ux = None # the UX manager
+    _ux = None  # the UX manager
 
 
 # end of file
