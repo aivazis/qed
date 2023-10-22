@@ -49,7 +49,6 @@ class Archive(graphene.ObjectType):
         """
         Get the archive location
         """
-        print(archive.uri)
         # convert the archive URI into a string
         return f"{archive.uri}"
 
