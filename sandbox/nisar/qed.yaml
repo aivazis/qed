@@ -6,7 +6,7 @@
 
 # nisar datasets
 # location
-nisar.data: "../../../data/workflows"
+nisar.data: "{pyre.environ.HOME}/dv/data/workflows"
 
 tiff.data: "{nisar.data}/tiff"
 ree2.data: "{nisar.data}/ree2"
@@ -49,6 +49,7 @@ srtm.tif:
 
 # attach the datasets to the application
 datasets:
+    - nisar.rslc#focus.rslc
     - nisar.gslc#gslc.gslc
     - nisar.roff#insar.roff
     - nisar.rifg#insar.rifg
