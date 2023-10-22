@@ -12,6 +12,10 @@ schema {
 
 # the top level query
 type Query {
+  # information about the known data archives
+  archives(after: String, first: Int, before:String, last:Int, order:String):
+    ArchiveConnection!
+
   # information about the known datasets
   readers(after: String, first: Int, before: String, last: Int, order: String): ReaderConnection!
 
@@ -33,6 +37,29 @@ type Version {
   minor: Int!
   micro: Int!
   revision: String!
+}
+
+
+# archives
+type Archive implements Node {
+  # id
+  id: ID!
+  # the name of the archive
+  name: String!
+  # its uri
+  uri: String!
+}
+
+# their connections
+type ArchiveConnection {
+  count: Int
+  edges: [ArchiveEdge]
+  pageInfo: PageInfo!
+}
+
+type ArchiveEdge {
+  node: Archive
+  cursor: String!
 }
 
 
