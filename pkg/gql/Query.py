@@ -52,10 +52,12 @@ class Query(graphene.ObjectType):
         root, info, first=1, last=None, after=None, before=None, **kwds
     ):
         """
-        Generate a sequence of know data archives
+        Generate a sequence of known data archives
         """
-        # nothing, for now
-        return []
+        # grab the plexus
+        plexus = info.context["plexus"]
+        # and hand off the pile of archives to the resolver
+        return plexus.archives
 
     # datasets
     def resolve_readers(
@@ -74,7 +76,7 @@ class Query(graphene.ObjectType):
         """
         Sample a dataset at a specified pixel
         """
-        # grab the plexus
+        # grab the panel
         panel = info.context["panel"]
         # resolve the dataset
         dataset = panel.dataset(name=dataset)

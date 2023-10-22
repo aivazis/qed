@@ -24,7 +24,7 @@ class Archive(graphene.ObjectType):
 
     # my fields
     id = graphene.ID()
-    name = graphene.ID()
+    name = graphene.String()
     uri = graphene.String()
 
     # the resolvers
@@ -33,8 +33,25 @@ class Archive(graphene.ObjectType):
         """
         Get the {archive} id
         """
-        # use the archive {name} to build a unique identifier
-        return f"Archive:{archive.name}"
+        # use the archive {uri} to build a unique identifier
+        return f"Archive:{archive.uri}"
+
+    @staticmethod
+    def resolve_name(archive, *_):
+        """
+        Generate the archive name
+        """
+        # use the component name
+        return archive.pyre_name
+
+    @staticmethod
+    def resolve_uri(archive, *_):
+        """
+        Get the archive location
+        """
+        print(archive.uri)
+        # convert the archive URI into a string
+        return f"{archive.uri}"
 
 
 # end of file

@@ -34,7 +34,6 @@ class ArchiveConnection(graphene.relay.Connection):
         # get the panel
         panel = info.context["panel"]
         # get the number of registered data archives
-        return 0
         return len(panel.archives)
 
 
