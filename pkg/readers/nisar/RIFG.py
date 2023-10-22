@@ -6,6 +6,7 @@
 
 # support
 import qed
+import journal
 
 # superclass
 from .H5 import H5
@@ -60,8 +61,23 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
             frequencies = sar.identification.listOfFrequencies
             # go through them
             for frequency in frequencies:
-                # look up the swath group for this frequency
-                swath = getattr(swaths, f"frequency{frequency}")
+                # attempt to
+                try:
+                    # look up the swath group for this frequency
+                    swath = getattr(swaths, f"frequency{frequency}")
+                # sometimes the product lies
+                except AttributeError:
+                    # so grab a channel
+                    channel = journal.warning("qed.nisar.rslc")
+                    # and complain
+                    channel.line(f"while exploring '{name}'")
+                    channel.line(
+                        f"no '{frequency}' frequency in the '{band}'-band swaths"
+                    )
+                    # flush
+                    channel.log()
+                    # and move on
+                    continue
                 # and get the list of polarizations present
                 polarizations = swath.listOfPolarizations
                 # go through them
@@ -72,7 +88,16 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                         data = getattr(swath.interferogram, polarization)
                     # if not there
                     except AttributeError:
-                        # just ignore it
+                        # so grab a channel
+                        channel = journal.warning("qed.nisar.rslc")
+                        # and complain
+                        channel.line(f"while exploring '{name}'")
+                        channel.line(
+                            f"no '{polarization}' polarization in the '{frequency}' swath"
+                        )
+                        # flush
+                        channel.log()
+                        # and move on
                         continue
                     # get the dataset
                     dataset = data.wrappedInterferogram

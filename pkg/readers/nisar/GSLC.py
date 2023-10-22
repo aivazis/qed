@@ -6,6 +6,7 @@
 
 # support
 import qed
+import journal
 
 # superclass
 from .H5 import H5
@@ -67,8 +68,23 @@ class GSLC(H5, family="qed.readers.nisar.gslc"):
             frequencies = sar.identification.listOfFrequencies
             # go through them
             for frequency in frequencies:
-                # look up the grid group for this frequency
-                grid = getattr(grids, f"frequency{frequency}")
+                # attempt to
+                try:
+                    # look up the swath group for this frequency
+                    grid = getattr(grids, f"frequency{frequency}")
+                # sometimes the product lies
+                except AttributeError:
+                    # so grab a channel
+                    channel = journal.warning("qed.nisar.rslc")
+                    # and complain
+                    channel.line(f"while exploring '{name}'")
+                    channel.line(
+                        f"no '{frequency}' frequency in the '{band}'-band grids"
+                    )
+                    # flush
+                    channel.log()
+                    # and move on
+                    continue
                 # and get the list of polarizations present
                 polarizations = grid.listOfPolarizations
                 # go through them
@@ -79,7 +95,16 @@ class GSLC(H5, family="qed.readers.nisar.gslc"):
                         dataset = getattr(grid, polarization)
                     # if not there
                     except AttributeError:
-                        # just ignore it
+                        # so grab a channel
+                        channel = journal.warning("qed.nisar.rslc")
+                        # and complain
+                        channel.line(f"while exploring '{name}'")
+                        channel.line(
+                            f"no '{polarization}' polarization in the '{frequency}' grid"
+                        )
+                        # flush
+                        channel.log()
+                        # and move on
                         continue
                     # generate a name for the dataset
                     name = f"{self.pyre_name}.{band}.{frequency}.{polarization}"

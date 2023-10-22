@@ -6,6 +6,7 @@
 
 # support
 import qed
+import journal
 
 # superclass
 from .H5 import H5
@@ -61,8 +62,23 @@ class ROFF(H5):
             frequencies = sar.identification.listOfFrequencies
             # go through them
             for frequency in frequencies:
-                # look up the swath group for this frequency
-                swath = getattr(swaths, f"frequency{frequency}")
+                # attempt to
+                try:
+                    # look up the swath group for this frequency
+                    swath = getattr(swaths, f"frequency{frequency}")
+                # sometimes the product lies
+                except AttributeError:
+                    # so grab a channel
+                    channel = journal.warning("qed.nisar.rslc")
+                    # and complain
+                    channel.line(f"while exploring '{name}'")
+                    channel.line(
+                        f"no '{frequency}' frequency in the '{band}'-band swaths"
+                    )
+                    # flush
+                    channel.log()
+                    # and move on
+                    continue
                 # and get the list of polarizations present
                 polarizations = swath.listOfPolarizations
                 # go through them
@@ -73,7 +89,16 @@ class ROFF(H5):
                         offsets = getattr(swath.pixelOffsets, polarization)
                         # if this polarization dataset doesn't exist
                     except AttributeError:
-                        # move on
+                        # so grab a channel
+                        channel = journal.warning("qed.nisar.rslc")
+                        # and complain
+                        channel.line(f"while exploring '{name}'")
+                        channel.line(
+                            f"no '{polarization}' polarization in the '{frequency}' pixel offsets"
+                        )
+                        # flush
+                        channel.log()
+                        # and move on
                         continue
                     # there is a number of layers
                     for layerName in selectors["layer"]:

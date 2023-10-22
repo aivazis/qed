@@ -6,6 +6,7 @@
 
 # support
 import qed
+import journal
 
 # superclass
 from .H5 import H5
@@ -61,19 +62,43 @@ class GOFF(H5):
             frequencies = sar.identification.listOfFrequencies
             # go through them
             for frequency in frequencies:
-                # look up the grid group for this frequency
-                grid = getattr(grids, f"frequency{frequency}")
+                # attempt to
+                try:
+                    # look up the swath group for this frequency
+                    grid = getattr(grids, f"frequency{frequency}")
+                # sometimes the product lies
+                except AttributeError:
+                    # so grab a channel
+                    channel = journal.warning("qed.nisar.rslc")
+                    # and complain
+                    channel.line(f"while exploring '{name}'")
+                    channel.line(
+                        f"no '{frequency}' frequency in the '{band}'-band grids"
+                    )
+                    # flush
+                    channel.log()
+                    # and move on
+                    continue
                 # and get the list of polarizations present
                 polarizations = grid.listOfPolarizations
                 # go through them
                 for polarization in polarizations:
-                    # carefully, because some data product lie
+                    # carefully, because some data products lie
                     try:
                         # get the group
                         offsets = getattr(grid.pixelOffsets, polarization)
-                        # if this polarization dataset doesn't exist
+                    # if this polarization dataset doesn't exist
                     except AttributeError:
-                        # move on
+                        # grab a channel
+                        channel = journal.warning("qed.nisar.rslc")
+                        # and complain
+                        channel.line(f"while exploring '{name}'")
+                        channel.line(
+                            f"no '{polarization}' polarization in the '{frequency}' pixel offsets"
+                        )
+                        # flush
+                        channel.log()
+                        # and move on
                         continue
                     # there is a number of layers
                     for layerName in selectors["layer"]:
