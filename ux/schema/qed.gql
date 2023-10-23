@@ -16,6 +16,9 @@ type Query {
   archives(after: String, first: Int, before:String, last:Int, order:String):
     ArchiveConnection!
 
+  # retrieve the contents of a data archive
+  contents(archive: String!): [Item]
+
   # information about the known datasets
   readers(after: String, first: Int, before: String, last: Int, order: String): ReaderConnection!
 
@@ -62,6 +65,17 @@ type ArchiveEdge {
   cursor: String!
 }
 
+# archive contents
+type Item implements Node {
+  # id
+  id: ID!
+  # the name of the item
+  name: String!
+  # its uri
+  uri: String!
+  # a marker for directories
+  isFolder: Boolean!
+}
 
 # readers
 type Reader implements Node {
