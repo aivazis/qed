@@ -25,19 +25,15 @@ Z`
 
 
 // the bar at the bottom of every page
-const widget = ({style, ...xforms}) => (
+export const Flame = ({ style, ...xforms }) => (
     // the container
-    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" style={{...base.box, ...style.box}}>
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" style={{ ...base.box, ...style.box }}>
         {/* the shape */}
         <g {...base.shape} {...style.shape} {...xforms}>
-            <path d={flame}/>
+            <path d={flame} />
         </g>
     </svg>
 )
-
-
-// publish
-export default widget
 
 
 // end of file

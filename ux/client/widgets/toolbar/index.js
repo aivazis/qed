@@ -12,11 +12,12 @@ import styles from './styles'
 
 // a container with author and copyright notes
 export const Toolbar = ({ direction, style, children }) => {
-    // mix my paint
-    const paint = styles.toolbar({ client: style, direction })
-    // and render
+    // mix my styles
+    const boxStyle = { ...styles.box, ...style?.box, flexDirection: direction }
+
+    // paint me
     return (
-        <nav style={paint} >
+        <nav style={boxStyle} >
             {children}
         </nav>
     )

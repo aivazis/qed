@@ -47,25 +47,21 @@ M 100 42.783564 C 100 37.00355 98.68787 31.40666 96.10338 26.13025 C 93.61166
 
 
 // the bar at the bottom of every page
-const widget = ({style, onKill, ...xforms}) => (
+export const Kill = ({ style, onKill, ...xforms }) => (
     // the action
     <Link to="/stop"
-          onClick={onKill}
-          style={{...base.action, ...style.action}}
-          title="kill the server; you'll have to close this window yourself, though">
+        onClick={onKill}
+        style={{ ...base.action, ...style.action }}
+        title="kill the server; you'll have to close this window yourself, though">
         {/* the box */}
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" style={{...base.box, ...style.box}}>
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" style={{ ...base.box, ...style.box }}>
             {/* the shape */}
             <g {...base.shape} {...style.shape} {...xforms}>
-                <path d={mark}/>
+                <path d={mark} />
             </g>
         </svg>
     </Link>
 )
-
-
-// publish
-export default widget
 
 
 // end of file

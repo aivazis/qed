@@ -4,12 +4,8 @@
 // (c) 1998-2023 all rights reserved
 
 
-// get colors
-import { theme } from '~/palette'
-
-
 // mixer of badge paint
-const badge = ({ state, client, polish }) => ({
+export const badge = ({ state, client, polish }) => ({
     // the container
     badge: {
         // the base coat
@@ -51,12 +47,6 @@ const badge = ({ state, client, polish }) => ({
         ...(polish ? client.decoration?.available : null),
     },
 })
-
-
-// publish
-export default {
-    badge,
-}
 
 
 // the default paint

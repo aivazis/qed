@@ -22,7 +22,7 @@ export default () => {
     const endFlex = (evt) => {
         // stop this event from bubbling up
         evt.stopPropagation()
-        // and quash any side effects
+        // an quash any side effects
         evt.preventDefault()
 
         // if no panel is flexing

@@ -45,6 +45,7 @@ export default ({ panel }) => {
             return
         })
 
+
         //  find the position of the flexing panel
         const pos = extents.get(panel)[mainPos]
 

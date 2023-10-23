@@ -11,7 +11,7 @@ import styles from './styles'
 
 
 // a stylable shimmy
-const spacer = ({ style }) => {
+export const Spacer = ({ style }) => {
     // mix my styles
     const spacerStyle = { ...styles, ...style }
 
@@ -20,10 +20,6 @@ const spacer = ({ style }) => {
         <div style={spacerStyle} />
     )
 }
-
-
-// publish
-export default spacer
 
 
 // end of file

@@ -7,7 +7,7 @@
 // externals
 import React from 'react'
 // locals
-import styles from './styles'
+import { badge as paintBadge } from './styles'
 
 
 // a button with an SVG image as content
@@ -51,7 +51,7 @@ export const Badge = ({ size, state, behaviors, style, children }) => {
     // size the shape
     const shrink = `scale(${size / 1000})`
     // mix my paint
-    const paint = styles.badge({ state, client: style, polish })
+    const paint = paintBadge({ state, client: style, polish })
     // and render
     return (
         <div style={paint.badge} {...controls}>

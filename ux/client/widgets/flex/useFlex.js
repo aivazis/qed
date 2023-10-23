@@ -85,10 +85,10 @@ export default () => {
             // punt; the proposed size change cannot be accommodated
             return
         }
-
         // otherwise, update the sizes of every panel that flexes
         resize(updates)
-        // and record the new reference location
+
+        // record the new reference location
         setSeparatorLocation({ x, y })
 
         // all done

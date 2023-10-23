@@ -11,6 +11,8 @@ import styled from 'styled-components'
 // project
 // theme
 import { theme } from '~/palette'
+// widgets
+import { Spacer } from '~/widgets'
 
 // locals
 // components
@@ -18,7 +20,16 @@ import { Indicator } from './indicator'
 
 
 // a tray with a header and some items
-export const Tray = ({ title, state, initially = false, children }) => {
+export const Tray = ({
+    style,
+    title, state, initially = false, scale = 1.0, busy = false, controls = null,
+    children
+}) => {
+    // scale up a bit on large displays
+    const rem = (window.screen.width > 2048 ? 1.2 : 1.0) * scale
+    // convert to pixels
+    const size = rem * parseFloat(getComputedStyle(document.documentElement).fontSize)
+
     // storage for my state
     const [expanded, setExpanded] = React.useState(initially)
     // handler for flipping my state
@@ -27,14 +38,25 @@ export const Tray = ({ title, state, initially = false, children }) => {
     // pick my parts based on my state
     const { Header, Title } = components(state)
 
+    // mix my paint
+    const paint = {
+        // set the font size
+        '--font-size': `${size}px`,
+        // plus whatever the user said
+        ...style,
+    }
+
     // paint me
     return (
-        <Section>
-            <Header onClick={toggle}>
-                <Indicator expanded={expanded} />
+        <Section style={paint}>
+            <Header style={paint} onClick={toggle}>
+                <Indicator expanded={expanded} size={0.6 * size} />
                 <Title>{title}</Title>
+                <Spacer />
+                {busy && <Busy />}
+                {controls}
             </Header>
-            {expanded && <Items>{children}</Items>}
+            {expanded && <Items style={paint}>{children}</Items>}
         </Section>
     )
 }
@@ -54,27 +76,29 @@ const components = state => {
 
 // parts
 // the box
-const Section = styled.section`
+export const Section = styled.section`
+    /* sizing */
+    font-size: var(--font-size);
+    font-family: inconsolata;
+
     /* for me */
     /* i neither stretch nor shrink*/
     flex: 0 0 auto;
-    min-height: 1.3rem;
+
     /* for my children */
     display: flex;
     flex-direction: column;
     overflow: hidden;
 `
 
-
 // the header
-const Header = styled.div`
+export const Header = styled.div`
     /* style */
-    font-size: 60%;
-    padding: 0.25rem 0.0rem 0.25rem 0.6rem;
+    padding: 0.25rem 0.5rem 0.25rem 0.5rem;
     cursor: pointer;
     /* colors */
-    color: hsl(0deg, 0%, 60%, 1);
-    background-color: hsl(0deg, 0%, 12%, 1);
+    color: var(--header-color, hsl(0deg, 0%, 60%, 1));
+    background-color: var(--header-background, hsl(0deg, 0%, 12%, 1));
     /* don't stretch me */
     flex: 0;
 
@@ -83,31 +107,41 @@ const Header = styled.div`
     align-items: center;
 `
 
-const SelectedHeader = styled(Header)`
-    background-color: hsl(0deg, 0%, 17%, 1);
+export const SelectedHeader = styled(Header)`
+    background-color: var(--header-selected, hsl(0deg, 0%, 17%, 1));
 `
 
-
 // the title
-const Title = styled.span`
+export const Title = styled.span`
     /* style */
     font-family: rubik-medium;
-    padding: 0.0rem 0.0rem 0.0rem 0.5rem;
+    padding-left: 0.5em;
     /* disable text selection */
     user-select: none;
 `
 
-const SelectedTitle = styled(Title)`
+export const SelectedTitle = styled(Title)`
     color: ${theme.page.name};
 `
 
+// the busy indicator
+export const Busy = styled.div`
+    width: 1.0em;
+    height: 1.0em;
+    border: 3px solid hsl(0deg, 0%, 30%, 1);
+    border-radius: 50%;
+    border-top: 3px solid hsl(0deg, 0%, 40%, 1);
+    animation: busy 1s linear infinite;
+`
 
 // the items
-const Items = styled.div`
-    /* i stretch but don't shrink*/
+export const Items = styled.div`
+    /* i stretch but don't shrink */
     flex: 1 0 auto;
     /* gimme some room */
-    padding: 0.25rem 0.0rem;
+    padding-left: var(--indent, 0em);
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
     /* for my children */
     display: flex;
     flex-direction: column;

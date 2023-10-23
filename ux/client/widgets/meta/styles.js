@@ -9,7 +9,10 @@ import { wheel, theme } from '~/palette'
 
 
 // paint
-const box = {}
+const box = {
+    tableLayout: "fixed",
+    // width: "100%",
+}
 
 const entry = {
     cursor: "default",
@@ -21,7 +24,6 @@ const attribute = {
     textTransform: "uppercase",
     textAlign: "right",
     padding: "0.0em 0.0em 0.0em 0.5em",
-    width: "30%",
 }
 
 const separator = {
@@ -35,6 +37,8 @@ const value = {
     padding: "0.0em 0.5em 0.0em 0.0em",
     // for my children
     textAlign: "left",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
     textOverflow: "ellipsis",
 }
 

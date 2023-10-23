@@ -11,7 +11,7 @@ import styles from './styles'
 
 
 // a container with author and copyright notes
-const colophon = ({ author, link, span, style }) => {
+export const Colophon = ({ author, link, span, style }) => {
     // mix my styles
     const boxStyle = { ...styles.box, ...style?.box }
     const copynoteStyle = { ...styles.copyright, ...style?.copyright }
@@ -32,10 +32,6 @@ const colophon = ({ author, link, span, style }) => {
         </div>
     )
 }
-
-
-// publish
-export default colophon
 
 
 // end of file

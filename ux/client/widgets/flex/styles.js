@@ -1,7 +1,7 @@
 // -*- web -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
-// (c) 1998-2023 all rights reserved
+// (c) 1998-2020 all rights reserved
 
 
 // get colors
@@ -18,9 +18,8 @@ export default {
 
     // the individual panels
     panel: {
-        // the initial flex
-        // for me; a flex basis of 100% seems to behave better than auto
-        flex: "1 1 100%",
+        // for me
+        flex: "1 1 auto",
         // for my children
         overflow: "hidden",
         display: "flex",
@@ -61,7 +60,6 @@ export default {
         color: theme.page.name,
         backgroundColor: "hsl(0, 20%, 7%)",
     },
-
 }
 
 

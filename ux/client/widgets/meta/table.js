@@ -37,13 +37,17 @@ const Panel = ({ style, children, ...rest }) => {
     // mix my paint
     const tableStyle = { ...styles.box, ...style?.box }
     const detailStyle = { ...styles.detail.box, ...style?.detail?.box }
+    const attributeStyle = { ...styles.attribute, ...style?.attribute }
+    const separatorStyle = { ...styles.separator, ...style?.separator }
     // render
     return (
         <table style={tableStyle} {...rest}>
             {min != max &&
                 <thead>
                     <tr>
-                        <th colSpan="3" style={detailStyle} >
+                        <th style={attributeStyle}></th>
+                        <th style={separatorStyle}></th>
+                        <th style={detailStyle} >
                             info:
                             <Less />
                             |
@@ -58,7 +62,9 @@ const Panel = ({ style, children, ...rest }) => {
             {min != max &&
                 <tfoot>
                     <tr>
-                        <th colSpan="3" style={detailStyle}></th>
+                        <th style={attributeStyle}></th>
+                        <th style={separatorStyle}></th>
+                        <th style={detailStyle}></th>
                     </tr>
                 </tfoot>
             }

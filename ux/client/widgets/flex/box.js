@@ -10,7 +10,6 @@ import React from 'react'
 // project
 // hooks
 import { useEvent } from '~/hooks'
-
 // locals
 // context
 import { Provider } from './context'
@@ -39,7 +38,7 @@ const Flexbox = ({ style, children, ...rest }) => {
         name: "mouseup", listener: endFlex, client: ref,
         triggers: [flexingPanel]
     })
-    // end the flex when the cursor leaves my client area
+    // end the flex when the  mouse leaves my client area
     useEvent({
         name: "mouseleave", listener: endFlex, client: ref,
         triggers: [flexingPanel]
