@@ -109,6 +109,13 @@ export const blank = {
             // fill
             fill: "none",
         },
+        decoration: {
+            // stroke
+            stroke: theme.page.name,
+            strokeWidth: 2,
+            // fill
+            fill: "none",
+        },
     },
 
     // for the user instructions
