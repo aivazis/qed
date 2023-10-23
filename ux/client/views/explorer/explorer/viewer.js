@@ -14,7 +14,7 @@ import { Busy } from './busy'
 import { Tab } from './tab'
 
 
-// export the table viewer
+// export the dataset viewer
 export const Viewer = ({ view, viewport }) => {
     // unpack the view
     const { archive, dataset } = view

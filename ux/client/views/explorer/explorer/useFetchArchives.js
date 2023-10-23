@@ -24,7 +24,7 @@ export const useFetchArchives = () => {
 }
 
 
-// query all known table archives
+// query all known data archives
 const query = graphql`query useFetchArchivesQuery {
 archives(first:100) @connection(key: "query_archives") {
     count
@@ -32,7 +32,7 @@ archives(first:100) @connection(key: "query_archives") {
         node {
             # the archive id
             id
-            # the name of the table archive
+            # the name of the data archive
             name
             # whatever archives need to render themselves
             ...context_archive
