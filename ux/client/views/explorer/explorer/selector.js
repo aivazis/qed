@@ -14,7 +14,7 @@ import { useViews } from './useViews'
 import { selector as paintSelector } from './styles'
 
 
-// remove a {viewport} from the {viz} panel
+// the decorator of a {dataset} tab
 export const Selector = ({ viewport, view }) => {
     // get the active view
     const { activeViewport } = useViews()
@@ -38,7 +38,7 @@ export const Selector = ({ viewport, view }) => {
             {/* a separator */}
             {archiveName && <span style={paint.separator}>&middot;</span>}
             {/* the dataset name */}
-            {datasetName && <span style={paint.selector}>{tableName}</span>}
+            {datasetName && <span style={paint.selector}>{datasetName}</span>}
         </span>
     )
 }
