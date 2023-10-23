@@ -9,12 +9,16 @@ import graphene
 
 # support
 import qed
+import journal
 
 # server version tag
 from .Version import Version
 
 # the data archives
 from .ArchiveConnection import ArchiveConnection
+
+# directory contents
+from .Item import Item
 
 # the known datasets
 from .ReaderConnection import ReaderConnection
@@ -35,6 +39,8 @@ class Query(graphene.ObjectType):
     # the fields
     # known data archives
     archives = graphene.relay.ConnectionField(ArchiveConnection)
+    # directory contents
+    contents = graphene.List(Item, required=True, archive=graphene.String())
     # known datasets
     readers = graphene.relay.ConnectionField(ReaderConnection)
     # samples
@@ -58,6 +64,54 @@ class Query(graphene.ObjectType):
         plexus = info.context["plexus"]
         # and hand off the pile of archives to the resolver
         return plexus.archives
+
+    # the contents of a directory
+    @staticmethod
+    def resolve_contents(root, info, archive, **kwds):
+        """
+        Generate a list with the contents of a directory
+        """
+        # this resolver must exist; its job is to build an object that gets handed to the
+        # {Item} resolvers; here we prep such an object using the query execution
+        # context in {info.context} and the variable bindings in {kwds}
+        #
+        #     root: should be {None}; this is the root
+        #     info: has {.context} with whatever was built by the executioner
+        #     kwds: contains the variable bindings for this query resolution
+        #
+
+        # MGA: 20231023
+        #   MUST GO THROUGH THE archive TO GET CONTENTS
+        mga = journal.warning("qed.NYI")
+        mga.line("NYI: must go through the registered archives to get their contents")
+        mga.line(f"  archive: {archive}")
+        mga.log()
+
+        # interpret {archive} as a uri
+        uri = qed.primitives.uri.parse(value=archive, scheme="file")
+        # if it's a local file
+        if uri.scheme == "file":
+            # get its path and mount the directory
+            dir = qed.filesystem.local(root=uri.address)
+            # explore just one level
+            dir.discover(levels=1)
+            # make a pile of datasets
+            datasets = [
+                (dir, name, node)
+                for name, node in sorted(dir.contents.items())
+                if not node.isFolder
+            ]
+            # and a pile of directories
+            folders = [
+                (dir, name, node)
+                for name, node in sorted(dir.contents.items())
+                if node.isFolder
+            ]
+            # present them in this order
+            return datasets + folders
+
+        # out of ideas
+        return []
 
     # datasets
     def resolve_readers(

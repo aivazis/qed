@@ -26,6 +26,7 @@ from pyre import (
     application,
     plexus,
     # miscellaneous
+    filesystem,
     patterns,
     primitives,
     tracking,
