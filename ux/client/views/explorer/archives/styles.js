@@ -129,7 +129,6 @@ const directoryPaint = {
     },
 }
 
-
 const filePaint = {
     // base state
     base: {
