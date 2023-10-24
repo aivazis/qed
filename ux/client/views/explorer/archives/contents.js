@@ -41,7 +41,7 @@ export const Contents = ({ qref }) => {
             {contents.map(item => (
                 item.isFolder ?
                     <Tray key={item.id} title={item.name} state={state(item.uri)}
-                        initially={false} style={paint} scale={.6}
+                        initially={false} style={paint} scale={.5}
                     >
                         <React.Suspense fallback={<Busy />}>
                             <Directory uri={item.uri} />

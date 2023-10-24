@@ -45,7 +45,7 @@ const Panel = () => {
     const paint = paintArchive(state)
     // render
     return (
-        <Tray title={name} initially={true} state={state} scale={0.6} controls={Controls}>
+        <Tray title={name} initially={true} state={state} scale={0.5} controls={Controls}>
             <Meta.Table style={paint.meta}>
                 <Meta.Entry attribute="uri" style={paint.meta}>
                     {uri}
