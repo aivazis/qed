@@ -6,12 +6,17 @@
 
 // externals
 import React from 'react'
+
+// project
+// widgets
+import { Spacer } from '~/widgets'
+
 // locals
 import styles from './styles'
 
 
 // a widget that can act as a header or a title
-export const Header = ({ title, style }) => {
+export const Header = ({ title, controls = null, style }) => {
     // mix my styles
     const headerStyle = { ...styles, ...style }
 
@@ -19,6 +24,8 @@ export const Header = ({ title, style }) => {
     return (
         <div style={headerStyle} >
             {title}
+            <Spacer />
+            {controls}
         </div>
     )
 }

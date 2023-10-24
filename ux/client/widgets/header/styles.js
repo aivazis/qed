@@ -10,6 +10,8 @@ import { wheel, theme } from '~/palette'
 
 // publish
 export default {
+    // for me
+    display: "flex",
     // text
     fontSize: "60%",
     fontFamily: "rubik-medium",
