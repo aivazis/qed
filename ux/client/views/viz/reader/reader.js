@@ -22,6 +22,7 @@ import { useUpdateView } from './useUpdateView'
 // components
 import { Axis } from './axis'
 import { Channels } from './channels'
+import { Disconnect } from './disconnect'
 // styles
 import styles from './styles'
 
@@ -59,17 +60,19 @@ const Panel = () => {
     // - {selected} iff in {view}, which is checked as part of my {context} initialization
     const state = active ? "selected" : "enabled"
 
-    // set up my controllers
+    // set up my behaviors
     const behaviors = {
         // click to select
         onClick: update,
     }
+    // build my controls
+    const Controls = <Disconnect uri={uri} />
 
     // mix my paint
     const paint = styles.reader(state)
     // and render
     return (
-        <Tray title={name} initially={true} state={state} scale={0.5}>
+        <Tray title={name} initially={true} state={state} scale={0.5} controls={Controls}>
             <Meta.Table style={paint.meta} {...behaviors}>
                 {null &&
                     <Meta.Entry attribute="uri" style={paint.meta}>

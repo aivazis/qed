@@ -88,6 +88,13 @@ const mark = {
     verticalAlign: "baseline",
 }
 
+// the button that disconnects an archive
+export const disconnect = {
+    // inherit
+    ...styles.control,
+}
+
+
 // publish
 export default {
     axis,

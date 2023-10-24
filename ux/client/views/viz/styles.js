@@ -31,9 +31,65 @@ const meta = {
 }
 
 
+// common paint for controls, in normal form
+const control = {
+    // the icon container
+    badge: {
+        base: {
+            // for me
+            flex: "0 0 auto",
+            padding: "0.0rem 0.5rem",
+            cursor: "pointer",
+            // for my children
+            display: "flex",
+            alignItems: "center",
+        },
+        disabled: {},
+        enabled: {},
+        selected: {},
+        available: {},
+    },
+
+    // for the shape container
+    shape: {
+        base: {},
+        disabled: {},
+        enabled: {
+            // dim it a bit
+            strokeOpacity: 0.5,
+        },
+        selected: {},
+        available: {
+            // full intensity
+            strokeOpacity: 1.0,
+        },
+    },
+
+    // for the icon main features
+    icon: {
+        base: {},
+        disabled: {},
+        enabled: {},
+        selected: {},
+        available: {},
+    },
+
+    // for the icon decoration
+    decoration: {
+        base: {},
+        disabled: {},
+        enabled: {},
+        selected: {},
+        available: {},
+    },
+}
+
+
+
 // publish
 export default {
-    meta
+    meta,
+    control,
 }
 
 
