@@ -19,6 +19,7 @@ import { useArchive } from './useArchive'
 import { useGetActiveView } from '../explorer/useGetActiveView'
 // components
 import { Directory } from './directory'
+import { Disconnect } from './disconnect'
 // styles
 import { archive as paintArchive } from './styles'
 
@@ -40,7 +41,7 @@ const Panel = () => {
     // deduce my state
     const state = (activeArchive?.id === id) ? "selected" : "enabled"
     // build my controls
-    const Controls = null
+    const Controls = <Disconnect uri={uri} />
     // mix my paint
     const paint = paintArchive(state)
     // render

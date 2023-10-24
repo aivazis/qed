@@ -16,6 +16,7 @@ import { Header } from '~/widgets'
 import { useArchives } from '../explorer/useArchives'
 // components
 import { Archive } from './archive'
+import { Connect } from './connect'
 // styles
 import { header as headerPaint } from './styles'
 
@@ -28,7 +29,7 @@ export const Archives = () => {
     return (
         <>
             {/* the title of the panel */}
-            <Header title="data archives" style={headerPaint} />
+            <Header title="data archives" style={headerPaint} controls={<Connect />} />
             {/* go through the repositories and render them */}
             {archives.edges.map(edge => (
                 <Archive key={edge.node.name} archive={edge.node} />

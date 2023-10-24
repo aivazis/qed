@@ -152,8 +152,15 @@ const filePaint = {
     },
 }
 
-// the button that creates a new repo
-export const create = {
+// the button that connects a new archive
+export const connect = {
+    // inherit
+    ...control,
+}
+
+
+// the button that disconnects an archive
+export const disconnect = {
     // inherit
     ...control,
 }
