@@ -15,7 +15,6 @@ const meta = {
     // the overall table: three columns: {attribute}, {separator}, {value}
     box: {
         fontFamily: "rubik-light",
-        fontSize: "60%",
         color: theme.header.color,
     },
     // for each row

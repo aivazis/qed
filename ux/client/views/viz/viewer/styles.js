@@ -35,11 +35,11 @@ const viewer = {
 
 // the viewer tab
 const tab = state => ({
+    // styling
+    backgroundColor: state === "selected" ? "hsl(0deg, 0%, 12%)" : "hsl(0deg, 0%, 10%)",
     // for me
     flex: "0 0 auto",
     height: "1.6rem",
-    // styling
-    backgroundColor: state === "selected" ? "hsl(0deg, 0%, 12%)" : "hsl(0deg, 0%, 10%)",
     // for my children
     display: "flex",
     flexDirection: "row",
