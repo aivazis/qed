@@ -63,7 +63,9 @@ export const Context = React.createContext(
 )
 
 // the empty view template
-export const emptyView = () => ({ archive: null, dataset: null })
+export const emptyView = () => ({
+    archive: null, dataset: null, newArchive: null, newDataset: null
+})
 // the error message to show consumers that are not nested within a provider
 const complaint = "while accessing the 'archives' context: no provider"
 
