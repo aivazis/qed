@@ -41,8 +41,8 @@ export const useQueryDirectoryContents = (qref) => {
 }
 
 // query the contents of the directory at {uri}
-const query = graphql`query useFetchDirectoryContentsQuery($path: String!) {
-    contents(archive: $path) {
+const query = graphql`query useFetchDirectoryContentsQuery($archive: String!, $path: String!) {
+    contents(archive: $archive, path:$path) {
         id
         name
         uri
