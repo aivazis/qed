@@ -17,7 +17,7 @@ type Query {
     ArchiveConnection!
 
   # retrieve the contents of a data archive
-  contents(archive: String!): [Item]
+  contents(archive: String!, path: String!): [Item]
 
   # information about the known datasets
   readers(after: String, first: Int, before: String, last: Int, order: String): ReaderConnection!
