@@ -4,9 +4,6 @@
 // (c) 1998-2023 all rights reserved
 
 
-// externals
-import React from 'react'
-
 // local
 // hooks
 import { useArchive } from './useArchive'
@@ -21,7 +18,7 @@ export const useSelectDataset = ({ name, uri }) => {
     // get my archive
     const archive = useArchive()
     // get the views
-    const { views, activeViewport, emptyView } = useViews()
+    const { views, emptyView } = useViews()
     // unpack the active view
     const { dataset } = useGetActiveView()
     // get the view activator
@@ -35,7 +32,9 @@ export const useSelectDataset = ({ name, uri }) => {
     if (state) {
         // we are done
         return {
+            // when selected
             state: "selected",
+            // disable the selector
             selector: () => null
         }
     }
@@ -55,7 +54,7 @@ export const useSelectDataset = ({ name, uri }) => {
         const replace = views.findIndex(view => view.archive === null && view.dataset == null)
         // use this to figure where to place my view
         const spot = replace == -1 ? views.length : replace
-        // put  me in the pile of views
+        // put me in the pile of views
         activateView({
             // start with a clean slate
             ...emptyView(),
