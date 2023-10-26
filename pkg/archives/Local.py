@@ -52,7 +52,7 @@ class Local(
             if node.isFolder
         ]
         # present them in this order
-        return datasets + folders
+        return folders + datasets
 
     # metamethods
     def __init__(self, **kwds):
