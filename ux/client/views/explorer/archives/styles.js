@@ -12,7 +12,7 @@ import { activityPanels as panelPaint } from '../explorer/styles'
 // paint for the metadata container
 import { meta as metaPaint } from '../styles'
 // paint for my badges
-import { control } from '../explorer/styles'
+import { control, collapse } from '../explorer/styles'
 
 // my header
 export const header = {
@@ -162,7 +162,7 @@ export const connect = {
 // the button that disconnects an archive
 export const disconnect = {
     // inherit
-    ...control,
+    ...collapse,
 }
 
 
