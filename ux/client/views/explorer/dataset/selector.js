@@ -22,7 +22,7 @@ export const Selector = ({ viewport, view }) => {
     // unpack the view
     const { dataset } = view
     // get the dataset uri
-    const uri = '/some/path/rslc.h5'
+    const uri = dataset?.uri ?? ""
 
     // deduce my state
     const state = (viewport === activeViewport) ? "selected" : "enabled"
