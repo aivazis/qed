@@ -48,7 +48,7 @@ export const Contents = ({ qref }) => {
                         </React.Suspense>
                     </Tray >
                     :
-                    <File key={item.id} uri={item.uri} name={item.name} style={paint} />
+                    <File key={item.id} uri={item.uri} name={item.name} />
             ))}
         </>
     )
