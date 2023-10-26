@@ -12,7 +12,7 @@ import React from 'react'
 import { Blank } from './blank'
 import { Busy } from './busy'
 import { Tab } from './tab'
-import { NewArchiveForm } from '../archives'
+import { NewArchiveForm } from '../archive'
 
 
 // export the dataset viewer
@@ -25,8 +25,8 @@ export const Viewer = ({ view, viewport }) => {
             <Tab viewport={viewport} view={view} />
             {archive === null && dataset === null && < Blank />}
             <React.Suspense fallback={<Busy />}>
-                {archive && <NewArchiveForm />}
-                {dataset && <Blank />}
+                {archive !== null && <NewArchiveForm view={view} viewport={viewport} />}
+                {dataset !== null && <Blank />}
             </React.Suspense>
         </>
     )

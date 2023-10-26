@@ -6,6 +6,6 @@
 
 // publish
 export { Archives } from './archives'
-export { Info as NewArchiveForm } from './connect'
+
 
 // end of file

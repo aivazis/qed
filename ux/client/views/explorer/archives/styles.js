@@ -8,11 +8,9 @@
 import { wheel, theme } from '~/palette'
 
 // the base styling for children of the {explorer} panel
-import { activityPanels as panelPaint } from '../explorer/styles'
+import { activityPanels as panelPaint, collapse } from '../explorer/styles'
 // paint for the metadata container
 import { meta as metaPaint } from '../styles'
-// paint for my badges
-import { control, collapse } from '../explorer/styles'
 
 // my header
 export const header = {
@@ -71,6 +69,13 @@ export const file = state => {
         ...filePaint[state],
     }
 }
+
+// the button that disconnects an archive
+export const disconnect = {
+    // inherit
+    ...collapse,
+}
+
 
 // the paint
 // for the {archive} mixer
@@ -151,19 +156,5 @@ const filePaint = {
         color: theme.page.name,
     },
 }
-
-// the button that connects a new archive
-export const connect = {
-    // inherit
-    ...control,
-}
-
-
-// the button that disconnects an archive
-export const disconnect = {
-    // inherit
-    ...collapse,
-}
-
 
 // end of file
