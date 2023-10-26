@@ -6,12 +6,19 @@
 
 // get colors
 import { theme, wheel } from "~/palette"
-// and the selector styling from the explorer
-import { selector as baseSelector } from '../explorer/styles'
+// paint for my badges
+import { control, selector as baseSelector } from '../explorer/styles'
 
 
 // just use the base selector
 export const selector = baseSelector
+
+
+// the button that connects a new archive
+export const connect = {
+    // inherit
+    ...control,
+}
 
 
 // end of file

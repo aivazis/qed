@@ -22,7 +22,7 @@ export const Selector = ({ viewport, view }) => {
     // unpack the view
     const { archive } = view
     // get the archive uri
-    const uri = "scheme://somewhere/some/path"
+    const uri = archive?.uri ?? ""
 
     // deduce my state
     const state = (viewport === activeViewport) ? "selected" : "enabled"

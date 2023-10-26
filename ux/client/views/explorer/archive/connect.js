@@ -11,7 +11,6 @@ import styled from 'styled-components'
 // project
 // hooks
 import { useConnectArchive } from './useConnectArchive'
-import { useGetActiveView } from '../explorer/useGetActiveView'
 // shapes
 import { Plus as Icon } from '~/shapes'
 // widgets
@@ -60,17 +59,15 @@ export const Connect = () => {
 }
 
 
-export const Info = () => {
+export const Info = ({ view, viewport }) => {
     // render
     return (
         <Table>
             <Body>
-                <ArchiveTypes />
+                <ArchiveTypes archive={view.archive} />
             </Body>
             <Footer>
-
             </Footer>
-
         </Table>
     )
 }
@@ -82,14 +79,12 @@ const Table = styled(Form)`
 `
 
 // support for selecting table types
-const ArchiveTypes = () => {
-    // unpack the active view
-    const { newArchive } = useGetActiveView()
+const ArchiveTypes = ({ archive }) => {
     // render
     return (
         <Row>
             <Prompt>
-                {newArchive.uri === null && <Required>*</Required>}
+                {archive.uri === null && <Required>*</Required>}
                 uri
             </Prompt>
             <Separator>:</Separator>

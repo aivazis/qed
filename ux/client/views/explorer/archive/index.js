@@ -5,6 +5,8 @@
 
 
 // publish
+export { Connect } from './connect'
+export { Info as NewArchiveForm } from './connect'
 export { Selector } from './selector'
 
 // end of file
