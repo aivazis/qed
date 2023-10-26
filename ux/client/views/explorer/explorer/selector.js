@@ -8,39 +8,27 @@
 import React from 'react'
 
 // locals
-// hooks
-import { useViews } from './useViews'
-// styles
-import { selector as paintSelector } from './styles'
+// components
+import { Selector as Archive } from '../archive'
+import { Selector as Dataset } from '../dataset'
 
 
 // the decorator of a {dataset} tab
 export const Selector = ({ viewport, view }) => {
-    // get the active view
-    const { activeViewport } = useViews()
-
     // unpack the view
     const { archive, dataset } = view
-    // get the name of the data archive
-    const archiveName = archive.name
-    // the name of the dataset
-    const datasetName = dataset?.name
-
-    // deduce my state
-    const state = (viewport === activeViewport) ? "selected" : "enabled"
-    // mix my paint
-    const paint = paintSelector(state)
-    // and render
-    return (
-        <span style={paint.box}>
-            {/* the archive name */}
-            {archiveName && <span style={paint.name}>{archiveName}</span>}
-            {/* a separator */}
-            {archiveName && <span style={paint.separator}>&middot;</span>}
-            {/* the dataset name */}
-            {datasetName && <span style={paint.selector}>{datasetName}</span>}
-        </span>
-    )
+    // if we are collecting information for connecting a new archive
+    if (archive !== null) {
+        // use its selector
+        return <Archive viewport={viewport} view={view} />
+    }
+    // if we are collecting information for connecting a new dataset
+    if (dataset !== null) {
+        // use its selector
+        return <Dataset viewport={viewport} view={view} />
+    }
+    // otherwise, don't contribute anything
+    return null
 }
 
 

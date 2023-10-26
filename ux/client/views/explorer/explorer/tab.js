@@ -37,7 +37,7 @@ export const Tab = ({ viewport, view, behaviors }) => {
             {/* the button that removes this view from the panel */}
             <Collapse viewport={viewport} />
             {/* the panel title */}
-            {view?.archive && <Selector viewport={viewport} view={view} />}
+            {(view.archive || view.dataset) && <Selector viewport={viewport} view={view} />}
             {/* some blank space */}
             <Spacer />
             {/* the button that adds a new view to the {roster} panel */}
