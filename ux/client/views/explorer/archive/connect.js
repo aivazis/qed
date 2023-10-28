@@ -59,40 +59,4 @@ export const Connect = () => {
 }
 
 
-export const Info = ({ view, viewport }) => {
-    // render
-    return (
-        <Table>
-            <Body>
-                <ArchiveTypes archive={view.archive} />
-            </Body>
-            <Footer>
-            </Footer>
-        </Table>
-    )
-}
-
-// override of the form component
-const Table = styled(Form)`
-    font-size: 70%;
-    padding-top: 1.0em;
-`
-
-// support for selecting table types
-const ArchiveTypes = ({ archive }) => {
-    // render
-    return (
-        <Row>
-            <Prompt>
-                {archive.uri === null && <Required>*</Required>}
-                uri
-            </Prompt>
-            <Separator>:</Separator>
-            <Value>
-            </Value>
-        </Row>
-    )
-}
-
-
 // end of file
