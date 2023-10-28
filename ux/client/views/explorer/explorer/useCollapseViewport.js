@@ -16,20 +16,20 @@ import {
 
 
 // build a handler that collapses a given view
-export const useCollapseViewport = view => {
-    // grab the list of {views} from context
+export const useCollapseViewport = viewport => {
+    // grab the mutators for the set of views and teh active viewport
     const {
         // mutators
         setActiveViewport, setViews,
     } = React.useContext(Context)
-    // make a handler that adds a new blank view after a given on
-    const collapseView = () => {
+    // make a handler that adds a new blank view after a given one
+    const collapseViewport = () => {
         // adjust the view
         setViews(old => {
             // make a copy of the old state
             const clone = [...old]
-            // adjust the entry specified by the caller
-            clone.splice(view, 1)
+            // remove the entry specified by the caller
+            clone.splice(viewport, 1)
             // if i'm left with an empty pile
             if (clone.length === 0) {
                 // reinitialize
@@ -38,15 +38,13 @@ export const useCollapseViewport = view => {
             // and hand off the new state
             return clone
         })
-
         // activate the previous view
-        setActiveViewport(Math.max(view - 1, 0))
-
+        setActiveViewport(Math.max(viewport - 1, 0))
         // all done
         return
     }
     // and return it
-    return collapseView
+    return collapseViewport
 }
 
 
