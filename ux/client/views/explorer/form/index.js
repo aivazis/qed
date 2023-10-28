@@ -9,9 +9,9 @@ export {
     // top level
     Form,
     // containers
-    Header, Body, Footer, Row,
+    Header, Body, Footer, Row, Panel,
     // items
-    Prompt, Separator, Required,
+    Prompt, Separator, Required, Cancel,
     // editors
     EnumValue, SelectedEnumValue, enumValue,
     Button, EnabledButton,

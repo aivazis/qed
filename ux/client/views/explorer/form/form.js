@@ -24,6 +24,20 @@ export const Footer = styled.tfoot``
 
 export const Row = styled.tr``
 
+// the editor panel
+export const Panel = styled.div`
+    padding: 1.0rem 0.0 0.5rem 0.0em;
+    // border-top: 1px solid hsl(0, 0%, 15%);
+    // border-bottom: 1px solid hsl(0, 0%, 15%);
+    // background-color: hsl(0deg, 0%, 7%);
+`
+
+export const Title = styled.div`
+    font-size: 110%;
+    padding: 0.0rem 0.0 1.0rem 1.0rem;
+    color: ${theme.page.name};
+`
+
 export const Prompt = styled.td`
     font-family: "rubik-light";
     text-align: right;
@@ -83,6 +97,10 @@ export const EnabledButton = styled(Button)`
     }
 `
 
+// the cancel button
+export const Cancel = styled(EnabledButton)`
+    color: hsl(0deg, 100%, 50%);
+`
 
 // state dependent selection
 export const enumValue = state => (
