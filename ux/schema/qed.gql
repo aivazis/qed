@@ -186,10 +186,20 @@ union Controller = RangeController | ValueController
 
 # mutations
 type Mutation {
+  # data archive connections
+  connectArchive(name: String!, uri: String!): ConnectArchiveInfo!
 
   # updates to the viz pipeline
   updateRangeController(range: RangeControllerInput!): RangeControllerInfo!
   updateValueController(value: ValueControllerInput!): ValueControllerInfo!
+}
+
+
+# support for connecting new data archives
+# the output payload
+type ConnectArchiveInfo {
+  # the new archive
+  archive: Archive
 }
 
 
