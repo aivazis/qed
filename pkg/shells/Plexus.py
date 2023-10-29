@@ -25,7 +25,7 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
 
     # the known archives
     archives = qed.properties.list(schema=qed.protocols.archive())
-    archives.default = [qed.archives.local(name="workspace")]
+    archives.default = [qed.archives.local(name="local:workspace")]
     archives.doc = "the list of registered data archives"
 
     # the pile of known datasets
