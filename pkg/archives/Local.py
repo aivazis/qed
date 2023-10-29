@@ -19,17 +19,19 @@ class Local(
 
     # the location
     uri = qed.properties.uri()
-    uri.default = qed.primitives.uri(address=qed.primitives.path.cwd())
+    uri.default = qed.primitives.uri(scheme="file", address=qed.primitives.path.cwd())
     uri.doc = "the location of the archive"
 
     # interface
-    def getContents(self, path):
+    def getContents(self, uri):
         """
         Retrieve my contents at {path}
         """
         # get my root
         root = self.fs
-        # project the {path} onto my {root}
+        # get the target address
+        path = qed.primitives.path(uri.address)
+        # project the {address} onto my {root}
         rel = path.relativeTo(root.uri)
         # starting at the top, descend as many levels as necessary
         for crumb in rel:
