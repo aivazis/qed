@@ -16,18 +16,18 @@ import {
     // top level
     Form,
     // containers
-    Body, Footer, Row, Panel,
+    Body, Footer, Row,
     // items
     Prompt, Separator, Value, Required,
-    // buttons
-    Cancel,
 } from '../form'
+import { Cancel, EnabledConnect, DisabledConnect, } from './buttons'
+import { Local } from './local'
+import { S3 } from './s3'
 import { TypeSelector } from './type'
 
 
 // the form
 export const Archive = ({ view, viewport }) => {
-    console.log(viewport, view)
     // make some room for the archive type
     const [type, setType] = React.useState(null)
     // make a handler that collapses this viewport
@@ -55,25 +55,40 @@ export const Archive = ({ view, viewport }) => {
         // render
         return (
             <Panel>
-                <Table>
+                <Form>
                     <Body>
                         <TypeSelector value={type} update={update} />
                     </Body>
                     <Footer>
                     </Footer>
-                </Table>
+                </Form>
+                <DisabledConnect />
                 <Cancel onClick={cancel}>cancel</Cancel>
             </Panel>
         )
     }
-    // otherwise, do stuff
-    return null
+    // otherwise, resolve the connector
+    const Connector = types[type]
+    // and render it
+    return (
+        <Connector setType={update} cance={cancel} />
+    )
 }
 
-// override of the form component
-const Table = styled(Form)`
+// the dispatch table with the archive types
+const types = {
+    local: Local,
+    s3: S3,
+}
+
+
+// the editor panel
+const Panel = styled.div`
     font-size: 70%;
-    padding-top: 1.0em;
+    padding: 1.0rem 0.0 0.5rem 0.0em;
+    // border-top: 1px solid hsl(0, 0%, 15%);
+    // border-bottom: 1px solid hsl(0, 0%, 15%);
+    // background-color: hsl(0deg, 0%, 7%);
 `
 
 
