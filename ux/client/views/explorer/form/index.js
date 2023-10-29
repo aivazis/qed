@@ -9,12 +9,12 @@ export {
     // top level
     Form,
     // containers
-    Header, Body, Footer, Row, Panel,
+    Header, Body, Footer, Row,
     // items
-    Prompt, Separator, Required, Cancel,
+    Prompt, Separator, Required,
     // editors
     EnumValue, SelectedEnumValue, enumValue,
-    Button, EnabledButton,
+    Button, EnabledPrimaryButton, EnabledSecondaryButton,
 } from './form'
 
 // high level widgets

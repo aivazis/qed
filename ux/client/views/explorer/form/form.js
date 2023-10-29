@@ -24,14 +24,6 @@ export const Footer = styled.tfoot``
 
 export const Row = styled.tr``
 
-// the editor panel
-export const Panel = styled.div`
-    padding: 1.0rem 0.0 0.5rem 0.0em;
-    // border-top: 1px solid hsl(0, 0%, 15%);
-    // border-bottom: 1px solid hsl(0, 0%, 15%);
-    // background-color: hsl(0deg, 0%, 7%);
-`
-
 export const Title = styled.div`
     font-size: 110%;
     padding: 0.0rem 0.0 1.0rem 1.0rem;
@@ -84,22 +76,26 @@ export const Button = styled.div`
     color: hsl(0deg, 0%, 30%);
 `
 
-export const EnabledButton = styled(Button)`
+export const EnabledPrimaryButton = styled(Button)`
     & {
         cursor: pointer;
         color: hsl(0deg, 0%, 60%);
-        // border-bottom: 1px solid hsl(0deg, 0%, 60%);
     }
 
     &:hover {
         color: hsl(28deg, 90%, 55%);
-        // border-bottom: 1px solid hsl(28deg, 90%, 55%);
     }
 `
 
-// the cancel button
-export const Cancel = styled(EnabledButton)`
-    color: hsl(0deg, 100%, 50%);
+export const EnabledSecondaryButton = styled(Button)`
+    & {
+        cursor: pointer;
+        color: hsl(0deg, 100%, 50%, 0.5);
+    }
+
+    &:hover {
+        color: hsl(0deg, 100%, 50%, 1.0);
+    }
 `
 
 // state dependent selection
