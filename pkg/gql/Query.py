@@ -62,10 +62,10 @@ class Query(graphene.ObjectType):
         """
         Generate a sequence of known data archives
         """
-        # grab the plexus
-        plexus = info.context["plexus"]
+        # grab the panel
+        panel = info.context["panel"]
         # and hand off the pile of archives to the resolver
-        return plexus.archives
+        return tuple(panel.archives.values())
 
     # the contents of a directory
     @staticmethod
@@ -87,7 +87,7 @@ class Query(graphene.ObjectType):
         # identify the archive
         manager = panel.archives[archive]
         # ask it for its contents
-        return manager.getContents(path=qed.primitives.path(path))
+        return manager.getContents(uri=qed.primitives.uri.parse(path))
 
     # datasets
     def resolve_readers(
