@@ -34,9 +34,9 @@ export const Prompt = styled.td`
     font-family: "rubik-light";
     text-align: right;
     text-transform: uppercase;
-    width: 18.0em;
-    min-width: 18.0em;
-    max-width: 18.0em;
+    width: 8.0em;
+    min-width: 8.0em;
+    max-width: 8.0em;
 `
 
 export const Separator = styled.td`
