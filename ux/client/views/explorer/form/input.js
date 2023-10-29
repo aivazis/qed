@@ -12,6 +12,7 @@ import styled from 'styled-components'
 import { theme } from '~/palette'
 
 
+// the base input
 export const Input = styled.input`
     display: inline-block;
     font-size: 100%;
@@ -19,7 +20,7 @@ export const Input = styled.input`
     outline: none;
     cursor: pointer;
     font-family: inconsolata;
-    /* width: 3.0rem; */
+    width: 20.0rem;
     text-align: start;
     padding: 0.0rem 0.25rem 0.0rem 0.0rem;
     border: 0 transparent;
