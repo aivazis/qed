@@ -11,19 +11,14 @@ import styled from 'styled-components'
 // local
 // hooks
 import { useCollapseViewport } from '../explorer/useCollapseViewport'
+import { useSetActiveView } from '../explorer/useSetActiveView'
 // components
-import {
-    // top level
-    Form,
-    // containers
-    Body, Footer, Row,
-    // items
-    Prompt, Separator, Value, Required,
-} from '../form'
-import { Cancel, EnabledConnect, DisabledConnect, } from './buttons'
+import { Panel } from './panel'
+import { Cancel, DisabledConnect, } from './buttons'
 import { Local } from './local'
 import { S3 } from './s3'
 import { TypeSelector } from './type'
+import { Form, Body } from '../form'
 
 
 // the form
@@ -39,8 +34,8 @@ export const Archive = ({ view, viewport }) => {
         // all done
         return
     }
-    // build a handler that cancels the new archive connection
-    const cancel = evt => {
+    // build a handler that removes the form from view
+    const hide = evt => {
         // stop this event from bubbling up
         evt.stopPropagation()
         // and quash any side effects
@@ -59,11 +54,9 @@ export const Archive = ({ view, viewport }) => {
                     <Body>
                         <TypeSelector value={type} update={update} />
                     </Body>
-                    <Footer>
-                    </Footer>
                 </Form>
                 <DisabledConnect />
-                <Cancel onClick={cancel}>cancel</Cancel>
+                <Cancel onClick={hide}>cancel</Cancel>
             </Panel>
         )
     }
@@ -71,7 +64,7 @@ export const Archive = ({ view, viewport }) => {
     const Connector = types[type]
     // and render it
     return (
-        <Connector setType={update} cance={cancel} />
+        <Connector setType={update} hide={hide} />
     )
 }
 
@@ -80,16 +73,6 @@ const types = {
     local: Local,
     s3: S3,
 }
-
-
-// the editor panel
-const Panel = styled.div`
-    font-size: 70%;
-    padding: 1.0rem 0.0 0.5rem 0.0em;
-    // border-top: 1px solid hsl(0, 0%, 15%);
-    // border-bottom: 1px solid hsl(0, 0%, 15%);
-    // background-color: hsl(0deg, 0%, 7%);
-`
 
 
 // end of file
