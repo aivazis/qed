@@ -15,20 +15,18 @@ import { Button, EnabledPrimaryButton, EnabledSecondaryButton } from '../form'
 
 
 // the cancel button
-export const Cancel = styled(EnabledSecondaryButton)`
-`
+export const Cancel = styled(EnabledSecondaryButton)``
 
-export const EnabledConnect = ({ connect, hide }) => {
+// the connect button
+export const EnabledConnect = ({ connect }) => {
     // build the handler that creates a new record
     const createRecord = evt => {
         // stop this event from bubbling up
         evt.stopPropagation()
         // and quash any side effects
         evt.preventDefault()
-        // add the record
+        // add the data archive to the pile
         connect()
-        // hide the editor
-        hide()
         // all done
         return
     }
@@ -44,6 +42,7 @@ export const EnabledConnect = ({ connect, hide }) => {
     )
 }
 
+// the connect button when disabled
 export const DisabledConnect = ({ children }) => {
     // render
     return (
