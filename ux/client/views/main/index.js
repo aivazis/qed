@@ -7,6 +7,7 @@
 // publish the view
 export { Main } from './main'
 // and the hooks
+export { useQED } from './useQED'
 export { useActivityPanel } from './useActivityPanel'
 
 
