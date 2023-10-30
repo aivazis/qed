@@ -24,7 +24,7 @@ import 'lazysizes/plugins/native-loading/ls.native-loading'
 
 // locals
 // context
-import { environment } from '~/context'
+import { environment } from './environment'
 // components
 import { ErrorBoundary } from './boundary'
 // views
