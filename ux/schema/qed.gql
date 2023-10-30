@@ -19,7 +19,6 @@ type Query {
   qed: QED!
 
   # TOGO
-  archives: [Archive]
   readers: [Reader]
 
   # retrieve the contents of a data archive
