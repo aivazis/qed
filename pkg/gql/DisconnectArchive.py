@@ -8,8 +8,6 @@
 import graphene
 import journal
 
-# the input payload
-from .DisconnectArchiveInput import DisconnectArchiveInput
 
 # the result types
 from .Archive import Archive
