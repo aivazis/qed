@@ -30,8 +30,8 @@ export const Datasets = () => {
             {/* the title of the panel */}
             <Header title="datasets" style={styles.header} />
             {/* go through the readers and render them */}
-            {readers.edges.map(edge => (
-                <Reader key={edge.node.name} reader={edge.node} />
+            {readers.map(reader => (
+                <Reader key={reader.name} reader={reader} />
             ))}
         </>
     )
