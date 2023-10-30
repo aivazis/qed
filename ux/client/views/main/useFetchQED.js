@@ -10,7 +10,7 @@ import { graphql, useLazyLoadQuery } from 'react-relay/hooks'
 
 // get the session manager
 export const useFetchQED = () => {
-    // g
+    // ask for the session manager
     const { qed } = useLazyLoadQuery(
         // the query
         query,
@@ -19,7 +19,7 @@ export const useFetchQED = () => {
         // the options
         { fetchPolicy: "network-only" }
     )
-    // and return them
+    // and return it
     return qed
 }
 
@@ -30,20 +30,13 @@ query useFetchQEDQuery {
     qed {
         # metadata
         id
-        # the connected archives
-        archives {
-            # metadata
-            id
-            name
-            # plus whatever else archives need to render themselves
-        }
+        # info for the archive panel
+        ...context_archives
         # and data readers
         readers {
             # metadata
             id
             name
-            # plus whatever else readers need to render themselves
-            ...context_reader
         }
     }
 }`
