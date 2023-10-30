@@ -14,14 +14,13 @@ import journal
 # server version tag
 from .Version import Version
 
-# the data archives
-from .ArchiveConnection import ArchiveConnection
+# the session manager
+from .QED import QED
+from .Archive import Archive
+from .Reader import Reader
 
-# directory contents
+# archive contents
 from .Item import Item
-
-# the known datasets
-from .ReaderConnection import ReaderConnection
 
 # their contents
 from .Sample import Sample
@@ -36,15 +35,17 @@ class Query(graphene.ObjectType):
     The top level query
     """
 
-    # the fields
-    # known data archives
-    archives = graphene.relay.ConnectionField(ArchiveConnection)
+    # the known queries
+    qed = graphene.Field(QED)
+
+    # TOGO
+    archives = graphene.List(Archive)
+    readers = graphene.List(Reader)
+
     # directory contents
     contents = graphene.List(
         Item, required=True, archive=graphene.String(), path=graphene.String()
     )
-    # known datasets
-    readers = graphene.relay.ConnectionField(ReaderConnection)
     # samples
     sample = graphene.Field(
         Sample, dataset=graphene.ID(), sample=graphene.Int(), line=graphene.Int()
@@ -55,17 +56,37 @@ class Query(graphene.ObjectType):
     version = graphene.Field(Version, required=True)
 
     # the resolvers
+    # the session
+    @staticmethod
+    def resolve_qed(root, info, **kwds):
+        """
+        Get the session layout
+        """
+        # grab the panel
+        panel = info.context["panel"]
+        # and pass it on
+        return panel
+
+    # TOGO
     # data archives
-    def resolve_archives(
-        root, info, first=1, last=None, after=None, before=None, **kwds
-    ):
+    def resolve_archives(root, info, **kwds):
         """
         Generate a sequence of known data archives
         """
         # grab the panel
         panel = info.context["panel"]
-        # and hand off the pile of archives to the resolver
+        # hand off the pile of archives to the resolver
         return tuple(panel.archives.values())
+
+    # datasets
+    def resolve_readers(root, info, **kwds):
+        """
+        Generate a list of all known dataset readers
+        """
+        # grab the panel
+        panel = info.context["panel"]
+        # get the datasets and return them
+        return tuple(panel.datasets.values())
 
     # the contents of a directory
     @staticmethod
@@ -88,18 +109,6 @@ class Query(graphene.ObjectType):
         manager = panel.archives[archive]
         # ask it for its contents
         return manager.getContents(uri=qed.primitives.uri.parse(path))
-
-    # datasets
-    def resolve_readers(
-        root, info, first=1, last=None, after=None, before=None, **kwds
-    ):
-        """
-        Generate a list of all known readers
-        """
-        # grab the plexus
-        plexus = info.context["plexus"]
-        # get the datasets and return them
-        return plexus.datasets
 
     # samples
     def resolve_sample(root, info, dataset, line, sample, **kwds):
