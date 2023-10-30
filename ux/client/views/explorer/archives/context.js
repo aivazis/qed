@@ -6,30 +6,19 @@
 
 // externals
 import React from "react"
-import { graphql, useFragment } from 'react-relay/hooks'
+
 
 // the provider factory
-export const Provider = (props) => {
-    // extract the data
-    const archive = useFragment(graphql`
-        fragment context_archive on Archive {
-            id
-            name
-            uri
-        }`,
-        props.archive
-    )
-
+export const Provider = ({ archive, children }) => {
     // build the initial context value
     const context = {
         // the data archive
         archive,
     }
-
     // provide for my children
     return (
         <Context.Provider value={context}>
-            {props.children}
+            {children}
         </Context.Provider>
     )
 }
@@ -38,8 +27,8 @@ export const Provider = (props) => {
 export const Context = React.createContext(
     // the default value clients see when accessing the context outside a provide
     {
-        // the data archives
-        archive: [],
+        // the data archive
+        archive: null,
     }
 )
 
