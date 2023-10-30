@@ -20,24 +20,14 @@ export const useFetchAllReaders = () => {
 
 // query all known data sources
 const query = graphql`query useFetchAllReadersQuery {
-   readers(first:100) @connection(key: "query_readers") {
-       count
-       edges {
-           node {
-               # the name of the reader
-               name
-               # whatever readers need to render themselves
-               ...context_reader
-           }
-           cursor
-       }
-       pageInfo {
-           startCursor
-           endCursor
-           hasNextPage
-           hasPreviousPage
-       }
-   }
+    readers {
+        # the id of the reader
+        id
+        # its name of the reader
+        name
+        # plus whatever readers need to render themselves
+        ...context_reader
+    }
 }`
 
 
