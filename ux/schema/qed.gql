@@ -15,6 +15,9 @@ type Query {
   # server version information
   version: Version!
 
+  # the qed session
+  qed: QED!
+
   # TOGO
   archives: [Archive]
   readers: [Reader]
@@ -35,6 +38,16 @@ type Version {
   minor: Int!
   micro: Int!
   revision: String!
+}
+
+# the qed session
+type QED implements Node {
+  # the id
+  id: ID!
+  # the connected data archives
+  archives: [Archive]
+  # the connected datasets
+  readers: [Reader]
 }
 
 
