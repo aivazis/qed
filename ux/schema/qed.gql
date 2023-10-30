@@ -12,25 +12,20 @@ schema {
 
 # the top level query
 type Query {
-  # information about the known data archives
-  archives(after: String, first: Int, before:String, last:Int, order:String):
-    ArchiveConnection!
+  # server version information
+  version: Version!
+
+  # TOGO
+  archives: [Archive]
+  readers: [Reader]
 
   # retrieve the contents of a data archive
   contents(archive: String!, path: String!): [Item]
-
-  # information about the known datasets
-  readers(after: String, first: Int, before: String, last: Int, order: String): ReaderConnection!
-
   # collect data values as represented by the available channels at a particular pixel
   sample(dataset: ID, line: Int!, sample: Int!): Sample!
-
   # describe the visualization pipeline for the specified {channel} of a {dataset}
   # so the client can render controls to manipulate its configuration
   viz(dataset: ID, channel: String!): VisualizationPipeline!
-
-  # server version information
-  version: Version!
 }
 
 
@@ -51,18 +46,6 @@ type Archive implements Node {
   name: String!
   # its uri
   uri: String!
-}
-
-# their connections
-type ArchiveConnection {
-  count: Int
-  edges: [ArchiveEdge]
-  pageInfo: PageInfo!
-}
-
-type ArchiveEdge {
-  node: Archive
-  cursor: String!
 }
 
 # archive contents
@@ -121,20 +104,6 @@ type Selector {
   name: String!
   value: String!
 }
-
-
-# connections
-type ReaderConnection {
-  count: Int
-  edges: [ReaderEdge]
-  pageInfo: PageInfo!
-}
-
-type ReaderEdge {
-  node: Reader
-  cursor: String!
-}
-
 
 # data exchanges
 type Sample {
