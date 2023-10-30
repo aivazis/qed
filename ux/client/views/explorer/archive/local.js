@@ -18,7 +18,7 @@ import { Path } from './path'
 import { Form, Body, Footer, } from '../form'
 
 // a data archive local to the qed server
-export const Local = ({ updateURI, setType, hide }) => {
+export const Local = ({ setType, hide }) => {
     // set up my state
     const [form, setForm] = React.useState({
         // the nickname
@@ -39,8 +39,6 @@ export const Local = ({ updateURI, setType, hide }) => {
                 // with the value of the given field replaced with the new one
                 [field]: value,
             }
-            // update the view
-            updateURI(`file:${clone.path}`)
             // hand it off
             return clone
         })
@@ -100,9 +98,9 @@ const connectMutation = graphql`
     mutation localArchiveMutation($name: String!, $uri: String!) {
         connectArchive(name: $name, uri: $uri) {
             archive {
-                id
-                name
-                uri
+                    id
+                    name
+                    uri
             }
         }
     }
