@@ -17,7 +17,7 @@ export const useQED = () => {
     // grab the list of {views} from context
     const { qed } = React.useContext(Context)
     // and return it
-    return { qed }
+    return qed
 }
 
 
