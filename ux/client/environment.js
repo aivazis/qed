@@ -5,7 +5,7 @@
 
 
 // externals
-import { Environment, Network, RecordSource, Store  } from 'relay-runtime'
+import { Environment, Network, RecordSource, Store } from 'relay-runtime'
 
 
 // post a query and retrieve the results
@@ -35,16 +35,12 @@ const fetchQuery = (operation, variables,) => (
 
 
 // create an environment
-const environment = new Environment({
+export const environment = new Environment({
     // set up a network
     network: Network.create(fetchQuery),
     // and a store
     store: new Store(new RecordSource()),
 })
-
-
-// publish
-export default environment
 
 
 // end of file
