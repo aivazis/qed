@@ -16,7 +16,6 @@ from .Version import Version
 
 # the session manager
 from .QED import QED
-from .Archive import Archive
 from .Reader import Reader
 
 # archive contents
@@ -39,7 +38,6 @@ class Query(graphene.ObjectType):
     qed = graphene.Field(QED)
 
     # TOGO
-    archives = graphene.List(Archive)
     readers = graphene.List(Reader)
 
     # directory contents
