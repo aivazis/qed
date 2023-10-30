@@ -57,8 +57,12 @@ class ConnectArchive(graphene.Mutation):
             return None
         # add the new one to the pile
         archives[str(uri)] = archive
+        # make a resolution context
+        context = {
+            "archive": archive,
+        }
         # and resolve the mutation
-        return archive
+        return context
 
 
 # end of file
