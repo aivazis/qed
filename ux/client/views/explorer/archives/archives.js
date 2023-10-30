@@ -31,8 +31,8 @@ export const Archives = () => {
             {/* the title of the panel */}
             <Header title="data archives" style={headerPaint} controls={<Connect />} />
             {/* go through the repositories and render them */}
-            {archives.edges.map(edge => (
-                <Archive key={edge.node.name} archive={edge.node} />
+            {archives.map(archive => (
+                <Archive key={archive.name} archive={archive} />
             ))}
         </>
     )
