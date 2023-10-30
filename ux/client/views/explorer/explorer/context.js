@@ -6,18 +6,27 @@
 
 // externals
 import React from "react"
+import { graphql, useFragment } from 'react-relay/hooks'
 
-//local
+// project
 // hooks
-import { useFetchArchives } from "./useFetchArchives"
+import { useQED } from '../../main'
 
 // the provider factory
 export const Provider = ({ children }) => {
     // ask the server for all known data archives
-    const known = useFetchArchives()
+    const qed = useQED()
     // attach them as read-only state
-    const [archives] = React.useState(known)
-
+    const { archives } = useFragment(graphql`
+        fragment context_archives on QED {
+            archives {
+                id
+                name
+                uri
+            }
+        }`,
+        qed
+    )
     // the set of known views; it starts out with one empty vew
     const [views, setViews] = React.useState([emptyView()])
     //  the active viewport is an index into the set of views
