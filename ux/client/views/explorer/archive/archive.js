@@ -26,7 +26,7 @@ export const Archive = ({ view, viewport }) => {
     // make some room for the archive type
     const [type, setType] = React.useState(null)
     // make a handler that collapses this viewport
-    const collapseViewport = useCollapseViewport(viewport)
+    const hide = useCollapseViewport(viewport)
     // build a selector with the correct signature
     const update = (field, value) => {
         // set the value
@@ -35,7 +35,7 @@ export const Archive = ({ view, viewport }) => {
         return
     }
     // build a handler that removes the form from view
-    const hide = evt => {
+    const cancel = evt => {
         // stop this event from bubbling up
         evt.stopPropagation()
         // and quash any side effects
@@ -56,7 +56,7 @@ export const Archive = ({ view, viewport }) => {
                     </Body>
                 </Form>
                 <DisabledConnect />
-                <Cancel onClick={hide}>cancel</Cancel>
+                <Cancel onClick={cancel}>cancel</Cancel>
             </Panel>
         )
     }

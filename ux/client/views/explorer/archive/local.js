@@ -58,14 +58,40 @@ export const Local = ({ setType, hide }) => {
                 name: `local:${form.name}`,
                 uri: `file:${form.path}`,
             },
+            // updater
+            updater: store => {
+                // get the root field of the query result
+                const payload = store.getRootField("connectArchive")
+                // ask for the new archive
+                const archive = payload.getLinkedRecord("archive")
+                // get the session manager
+                const qed = store.get("QED")
+                // get its connected archives
+                const archives = qed.getLinkedRecords("archives")
+                // add the new one to the pile
+                qed.setLinkedRecords([...archives, archive], "archives")
+                // all done
+                return
+            },
             // when done
             onCompleted: data => {
-                // hide the form
-                // hide()
-                // and done
+                // remove the form from the view
+                hide()
+                // not much to do, for now
                 return
             }
         })
+    }
+    // build a handler that removes the form from view
+    const cancel = evt => {
+        // stop this event from bubbling up
+        evt.stopPropagation()
+        // and quash any side effects
+        evt.preventDefault()
+        // remove the view in my viewport from the pile
+        collapseViewport()
+        // all done
+        return
     }
     // determine whether i have enough information to make the connection
     const ready = (
@@ -87,7 +113,7 @@ export const Local = ({ setType, hide }) => {
                 </Footer>
             </Form>
             <Connect connect={connect} />
-            <Cancel onClick={hide}>cancel</Cancel>
+            <Cancel onClick={cancel}>cancel</Cancel>
         </Panel>
     )
 }
@@ -98,9 +124,9 @@ const connectMutation = graphql`
     mutation localArchiveMutation($name: String!, $uri: String!) {
         connectArchive(name: $name, uri: $uri) {
             archive {
-                    id
-                    name
-                    uri
+                id
+                name
+                uri
             }
         }
     }
