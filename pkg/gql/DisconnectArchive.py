@@ -24,7 +24,7 @@ class DisconnectArchive(graphene.Mutation):
         # the update context
         uri = graphene.String(required=True)
 
-    # the result is always an archive
+    # the result is the disconnected archive
     archive = graphene.Field(Archive)
 
     # the range controller mutator
@@ -34,11 +34,27 @@ class DisconnectArchive(graphene.Mutation):
         """
         # grab the panel
         panel = info.context["panel"]
-        # show me
-        channel = journal.info("qed.gql.archives")
-        channel.log(f"disconnecting {uri}")
+        # get the collection of archives
+        archives = panel.archives
+        # if the {uri} is not already connected
+        if uri not in archives:
+            # we have a bug
+            channel = journal.firewall("qed.gql.disconnect")
+            # complain
+            channel.line(f"while attempting to disconnect '{uri}")
+            channel.line(f"the URI does not correspond to a connected data archive")
+            # flush
+            channel.log()
+            # bail, just in case firewall aren't fatal
+            return None
+        # if it is, get it
+        archive = archives[uri]
+        # remove it from the pile
+        del archives[uri]
+        # put it in the mutation resolution context
+        context = {"archive": archive}
         # and resolve the mutation
-        return None
+        return context
 
 
 # end of file
