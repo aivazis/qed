@@ -7,17 +7,28 @@
 // externals
 import React from 'react'
 
-// local
+// project
 // hooks
-import { useFetchAllReaders } from './useFetchAllReaders'
+import { useQED } from '../../main'
+import { useFragment } from 'react-relay/hooks'
 
 
 // the provider factory
 export const Provider = ({ children }) => {
-    // ask the server for the known data sources
-    const sources = useFetchAllReaders()
-    // attach them as read-only state
-    const [readers] = React.useState(sources)
+    // get the session manager
+    const qed = useQED()
+    // ask it for all known data readers and attach them as read-only state
+    const { readers } = useFragment(graphql`
+        fragment context_readers on QED {
+            readers {
+                id
+                name
+                # and whatever else readers need
+                ...context_reader
+            }
+        }`,
+        qed
+    )
 
     // initialize the set of viewports; this is where the refs of the mosaic placemats live
     // which are needed for the implementation of the shared camera
