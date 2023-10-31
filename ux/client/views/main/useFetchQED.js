@@ -30,14 +30,10 @@ query useFetchQEDQuery {
     qed {
         # metadata
         id
-        # info for the archive panel
+        # the connected data archives
         ...context_archives
         # and data readers
-        readers {
-            # metadata
-            id
-            name
-        }
+        ...context_readers
     }
 }`
 
