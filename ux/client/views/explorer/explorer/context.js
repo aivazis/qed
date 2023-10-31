@@ -14,9 +14,9 @@ import { useQED } from '../../main'
 
 // the provider factory
 export const Provider = ({ children }) => {
-    // ask the server for all known data archives
+    // get the session manager
     const qed = useQED()
-    // attach them as read-only state
+    // ask it for all known data archives and attach them as read-only state
     const { archives } = useFragment(graphql`
         fragment context_archives on QED {
             archives {
