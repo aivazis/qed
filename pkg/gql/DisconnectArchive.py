@@ -30,7 +30,7 @@ class DisconnectArchive(graphene.Mutation):
     # the range controller mutator
     def mutate(root, info, uri):
         """
-        add a new archive to the pile
+        Remove an archive from the pile
         """
         # grab the panel
         panel = info.context["panel"]
