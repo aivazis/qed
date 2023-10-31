@@ -11,24 +11,24 @@ import React from 'react'
 // components
 import { EnabledInput, Field, Value } from '../form'
 
-// the AWS region with the data products
-export const Region = ({ value, update }) => {
-    // build the region mutator
-    const setRegion = evt => {
+// the profile of the AWS connection
+export const Profile = ({ value, update }) => {
+    // build the profile mutator
+    const setProfile = evt => {
         // set up the validation regex
-        const regex = /^[\w_]?[\w\d_-]*$/g
+        const regex = /^[\w_]?[\w\d_]*$/g
         // get the value
         const candidate = evt.target.value
         // update the form state
-        update("region", regex.test(candidate) ? candidate : value)
+        update("profile", regex.test(candidate) ? candidate : value)
     }
     // assemble my behaviors
     const behaviors = {
-        onChange: setRegion,
+        onChange: setProfile,
     }
     // all done
     return (
-        <Field name="region" value={value} tip="the AWS region with the data products">
+        <Field name="profile" value={value} tip="the profile with the AWS credentials">
             <Value>
                 <EnabledInput type="text" value={value === null ? "" : value} {...behaviors} />
             </Value>
