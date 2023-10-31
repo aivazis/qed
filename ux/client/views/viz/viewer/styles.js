@@ -16,6 +16,7 @@ import styles from '../styles'
 const viewer = {
     box: {
         ...styles.meta.box,
+        fontSize: "60%",
     },
     entry: {
         ...styles.meta.entry,
