@@ -23,7 +23,7 @@ import { disconnect as paintDisconnect } from './styles'
 export const Disconnect = ({ uri }) => {
     // build the mutation request
     const [request, isInFlight] = useMutation(disconnectMutation)
-    // connect a new archive
+    // build the handler that disconnects an archive
     const disconnect = evt => {
         // stop this event from propagating
         evt.stopPropagation()
@@ -56,7 +56,7 @@ export const Disconnect = ({ uri }) => {
                     // by filtering out entries that match its id
                     entry => entry.getDataID() !== archive.getDataID()
                 )
-                // add the new one to the pile
+                // attach the modified pile to the session manager
                 qed.setLinkedRecords(filtered, "archives")
                 // all done
                 return
