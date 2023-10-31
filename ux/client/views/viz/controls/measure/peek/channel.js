@@ -33,9 +33,8 @@ export const Channel = ({ channel, reps }) => {
 }
 
 
-// theo cntainer
+// the container
 const Entry = styled.div`
-    font-size: 60%;
 `
 
 const Label = styled.span`

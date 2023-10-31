@@ -41,7 +41,6 @@ export const Point = ({ idx, point, last }) => {
 // the container
 const Box = styled.div`
     font-family: inconsolata;
-    font-size: 75%;
     padding: 0.2rem 0.0rem;
 `
 

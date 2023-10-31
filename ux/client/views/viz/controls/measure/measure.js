@@ -41,7 +41,7 @@ export const Measure = () => {
 
     // otherwise, render
     return (
-        <Tray title="measure" state="enabled" initially={true}>
+        <Tray title="measure" state="enabled" initially={true} scale={0.5}>
             {/* display pixel values */}
             <Peek />
             {/* if the pixel path is empty, show a brief help message */}

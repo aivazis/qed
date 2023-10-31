@@ -106,7 +106,6 @@ const Box = styled.div`
 `
 
 const Header = styled.div`
-    font-size: 65%;
 `
 
 const Title = styled.span`
