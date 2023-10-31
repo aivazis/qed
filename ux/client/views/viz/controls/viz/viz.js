@@ -26,7 +26,7 @@ export const Viz = () => {
     const { dataset, channel, controllers } = useGetVizPipeline()
     // and render
     return (
-        <Tray title="viz" state="enabled" initially={true}>
+        <Tray title="viz" state="enabled" initially={true} scale={0.5}>
             {controllers.map(configuration => {
                 // unpack the controller configuration
                 const { slot, __typename: typename } = configuration

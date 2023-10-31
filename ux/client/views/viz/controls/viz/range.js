@@ -128,7 +128,6 @@ mutation rangeMutation($info: RangeControllerInput!) {
 // styling
 // the section header
 const Header = styled.div`
-    font-size: 65%;
     margin: 0.5rem 1.0rem 0.25rem 1.0rem;
 `
 
