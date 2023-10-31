@@ -18,9 +18,6 @@ type Query {
   # the qed session
   qed: QED!
 
-  # TOGO
-  readers: [Reader]
-
   # retrieve the contents of a data archive
   contents(archive: String!, path: String!): [Item]
   # collect data values as represented by the available channels at a particular pixel
