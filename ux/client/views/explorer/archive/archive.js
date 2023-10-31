@@ -64,7 +64,7 @@ export const Archive = ({ view, viewport }) => {
     const Connector = types[type]
     // and render it
     return (
-        <Connector setType={update} hide={hide} />
+        <Connector view={view} setType={update} hide={hide} />
     )
 }
 

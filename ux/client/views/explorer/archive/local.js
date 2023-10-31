@@ -9,6 +9,8 @@ import React from 'react'
 import { graphql, useMutation } from 'react-relay/hooks'
 
 // local
+// hooks
+import { useSetActiveView } from '../explorer/useSetActiveView'
 // components
 import { Panel } from './panel'
 import { EnabledConnect, DisabledConnect, Cancel } from './buttons'
@@ -18,7 +20,7 @@ import { Path } from './path'
 import { Form, Body, Footer, } from '../form'
 
 // a data archive local to the qed server
-export const Local = ({ setType, hide }) => {
+export const Local = ({ view, setType, hide }) => {
     // set up my state
     const [form, setForm] = React.useState({
         // the nickname
@@ -26,6 +28,8 @@ export const Local = ({ setType, hide }) => {
         // the path
         path: "",
     })
+    // get the view mutator
+    const decorate = useSetActiveView()
     // build the mutation request
     const [request, isInFlight] = useMutation(connectMutation)
     // set up the state update
@@ -42,6 +46,15 @@ export const Local = ({ setType, hide }) => {
             // hand it off
             return clone
         })
+        // if the field is the path
+        if (field === "path") {
+            // update the uri of the archive in the current view
+            view.archive.uri = `file:${value}`
+            // and set it
+            decorate(view)
+        }
+        // all done
+        return
     }
     // set up the archive connector
     const connect = () => {
