@@ -60,7 +60,6 @@ export const Measure = () => {
 // the box with the hint about how to add points to the measure layer
 const Help = styled.p`
     font-family: rubik-light;
-    font-size: 75%;
     margin: 0.0rem 1.0rem 0.5rem 1.0rem;
 `
 
