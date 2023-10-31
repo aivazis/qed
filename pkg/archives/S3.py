@@ -6,6 +6,7 @@
 
 # support
 import qed
+import journal
 
 
 # a S3 data archive
@@ -16,15 +17,83 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
 
     # the location
     uri = qed.properties.uri()
+    uri.default = qed.primitives.uri(scheme="file", address=qed.primitives.path.cwd())
     uri.doc = "the location of the archive"
 
     # interface
-    def getContents(self, path):
+    def getContents(self, uri):
         """
         Retrieve my contents at {path}
         """
-        # nothing, until we learn how to retrieve the contents of S3 buckets
-        return []
+        # get my contents
+        contents = self._contents
+        # if i haven't retrieved them before
+        if contents is None:
+            # connect and retrieve
+            contents = self._retrieve()
+            # and populate the cache
+            self._contents = contents
+            # make a channel
+            channel = journal.info("qed.archives.s3")
+            # sign on
+            channel.line(f"{self.uri}:")
+            # show me the contents
+            channel.indent()
+            channel.report(report=contents)
+            channel.outdent()
+            # and flush
+            channel.log()
+        # don't do more, for now
+        return list((key, key, False) for key in contents)
+
+    # metamethods
+    def __init__(self, **kwds):
+        # chain up
+        super().__init__(**kwds)
+        # set up the content cache
+        self._contents = None
+        # all done
+        return
+
+    # implementation details
+    def _retrieve(self):
+        """
+        Retrieve the contents of the data archive
+        """
+        # attempt to
+        try:
+            # get the AWS support
+            import boto3
+        # if this fails
+        except ImportError:
+            # we have a problem
+            channel = journal.warning("qed.archives.s3")
+            # complain
+            channel.line(f"while attempting to connect to {self.uri}")
+            channel.line(f"could not import 'boto3'")
+            channel.line(f"this installation of 'qed' doesn't support S3 data archives")
+            # flush
+            channel.log()
+            # and bail
+            return []
+        # if we have support, unpack my state
+        uri = self.uri
+        # unpack the profile and region from the authority field
+        region, _, profile, _ = uri.server
+        # get the address and turn it into a path
+        address = qed.primitives.path(uri.address)
+        # the bucket is the root
+        bucket = address[1]
+        # and the key is the rest
+        key = qed.primitives.path(address[2:])
+        # start a session
+        s3 = boto3.Session(profile_name=profile, region_name=region).client("s3")
+        # get the contents
+        response = s3.list_objects_v2(Bucket=bucket)
+        # retrieve the contents
+        contents = response.get("Contents", [])
+        # make a list of the keys and return them
+        return list(entry["Key"] for entry in contents)
 
 
 # end of file
