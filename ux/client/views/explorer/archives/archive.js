@@ -18,9 +18,9 @@ import { Provider } from './context'
 import { useArchive } from './useArchive'
 import { useGetActiveView } from '../explorer/useGetActiveView'
 // components
+import { Busy } from './busy'
 import { Directory } from './directory'
 import { Disconnect } from './disconnect'
-import { Busy } from '../explorer/busy'
 // styles
 import { archive as paintArchive } from './styles'
 

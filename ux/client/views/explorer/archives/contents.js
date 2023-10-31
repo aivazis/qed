@@ -16,7 +16,7 @@ import { Tray } from '~/widgets'
 import { useGetActiveView } from '../explorer/useGetActiveView'
 import { useQueryDirectoryContents } from './useFetchDirectoryContents'
 // components
-import { Busy } from '../explorer/busy'
+import { Busy } from './busy'
 import { Directory } from './directory'
 import { File } from './file'
 
