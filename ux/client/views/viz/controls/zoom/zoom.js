@@ -48,7 +48,7 @@ export const Zoom = () => {
 
     // and render
     return (
-        <Tray title="zoom" initially={true} state={state}>
+        <Tray title="zoom" initially={true} state={state} scale={0.5}>
             {/* the control housing */}
             <Housing height={slider.height} width={slider.width}>
                 {/* the slider */}
