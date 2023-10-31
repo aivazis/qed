@@ -16,15 +16,14 @@ from .Version import Version
 
 # the session manager
 from .QED import QED
-from .Reader import Reader
 
 # archive contents
 from .Item import Item
 
-# their contents
+# dataset samples
 from .Sample import Sample
 
-# and their visualization pipeline controls
+# visualization pipeline controls
 from .VizPipeline import VizPipeline
 
 
@@ -35,10 +34,8 @@ class Query(graphene.ObjectType):
     """
 
     # the known queries
+    # the session manager
     qed = graphene.Field(QED)
-
-    # TOGO
-    readers = graphene.List(Reader)
 
     # directory contents
     contents = graphene.List(
@@ -54,7 +51,7 @@ class Query(graphene.ObjectType):
     version = graphene.Field(Version, required=True)
 
     # the resolvers
-    # the session
+    # the session manager
     @staticmethod
     def resolve_qed(root, info, **kwds):
         """
@@ -65,28 +62,7 @@ class Query(graphene.ObjectType):
         # and pass it on
         return panel
 
-    # TOGO
-    # data archives
-    def resolve_archives(root, info, **kwds):
-        """
-        Generate a sequence of known data archives
-        """
-        # grab the panel
-        panel = info.context["panel"]
-        # hand off the pile of archives to the resolver
-        return tuple(panel.archives.values())
-
-    # datasets
-    def resolve_readers(root, info, **kwds):
-        """
-        Generate a list of all known dataset readers
-        """
-        # grab the panel
-        panel = info.context["panel"]
-        # get the datasets and return them
-        return tuple(panel.datasets.values())
-
-    # the contents of a directory
+    # directory contents
     @staticmethod
     def resolve_contents(root, info, archive, path, **kwds):
         """
