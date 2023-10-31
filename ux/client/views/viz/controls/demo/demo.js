@@ -37,7 +37,7 @@ export const Demo = () => {
 
     // and render
     return (
-        <Tray title="demo" state="enabled" initially={true}>
+        <Tray title="demo" state="enabled" initially={true} scale={0.5}>
             {/* state control */}
             <Button type="button" onClick={toggle}>
                 {enabled ? "disable" : "enable"}
