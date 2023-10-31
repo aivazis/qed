@@ -35,9 +35,9 @@ class Item(graphene.ObjectType):
         Get the {item} id
         """
         # unpack
-        fs, name, node = item
+        name, uri, isFolder = item
         # use the {uri} to build a unique identifier
-        return f"Item:{node.uri}"
+        return f"Item:{uri}"
 
     @staticmethod
     def resolve_name(item: tuple, *_):
@@ -45,19 +45,19 @@ class Item(graphene.ObjectType):
         Get the {item} name
         """
         # unpack
-        fs, name, node = item
-        # use the {uri} to build a unique identifier
+        name, uri, isFolder = item
+        # resolve the {name}
         return name
 
     @staticmethod
     def resolve_uri(item: tuple, *_):
         """
-        Get the {item} name
+        Get the {item} uri
         """
         # unpack
-        fs, name, node = item
-        # use the {uri} to build a unique identifier
-        return node.uri
+        name, uri, isFolder = item
+        # resolve the {uri}
+        return uri
 
     @staticmethod
     def resolve_isFolder(item: tuple, *_):
@@ -65,9 +65,9 @@ class Item(graphene.ObjectType):
         Get the {item} name
         """
         # unpack
-        fs, name, node = item
-        # use the {uri} to build a unique identifier
-        return node.isFolder
+        name, uri, isFolder = item
+        # separate files from folders
+        return isFolder
 
 
 # end of file
