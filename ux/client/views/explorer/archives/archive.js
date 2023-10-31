@@ -20,6 +20,7 @@ import { useGetActiveView } from '../explorer/useGetActiveView'
 // components
 import { Directory } from './directory'
 import { Disconnect } from './disconnect'
+import { Busy } from '../explorer/busy'
 // styles
 import { archive as paintArchive } from './styles'
 
@@ -52,7 +53,9 @@ const Panel = () => {
                     {uri}
                 </Meta.Entry>
             </Meta.Table>
-            <Directory uri={uri} />
+            <React.Suspense fallback={<Busy />}>
+                <Directory uri={uri} />
+            </React.Suspense>
         </Tray>
     )
 }
