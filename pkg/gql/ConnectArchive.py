@@ -31,7 +31,7 @@ class ConnectArchive(graphene.Mutation):
     # the range controller mutator
     def mutate(root, info, name, uri):
         """
-        add a new archive to the pile
+        Add a new archive to the pile
         """
         # grab the panel
         panel = info.context["panel"]
