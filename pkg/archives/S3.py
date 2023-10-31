@@ -34,7 +34,7 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
             # and populate the cache
             self._contents = contents
             # make a channel
-            channel = journal.info("qed.archives.s3")
+            channel = journal.debug("qed.archives.s3")
             # sign on
             channel.line(f"{self.uri}:")
             # show me the contents
