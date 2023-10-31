@@ -117,9 +117,9 @@ class S3(qed.shells.command, family="qed.cli.s3"):
     @qed.export(tip="list the contents of an S3 bucket")
     def ls(self, plexus, **kwds):
         """
-        Delete a file from an S3 bucket
+        List the contents of an S3 bucket
         """
-        # unpack  my state
+        # unpack my state
         profile = self.profile
         region = self.region
         bucket = self.bucket
