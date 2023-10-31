@@ -19,7 +19,7 @@ import { Badge } from '~/widgets'
 import { disconnect as paintDisconnect } from './styles'
 
 
-// control to connect a new data archive
+// control to disconnect a data archive
 export const Disconnect = ({ uri }) => {
     // build the mutation request
     const [request, isInFlight] = useMutation(disconnectMutation)
@@ -84,7 +84,7 @@ export const Disconnect = ({ uri }) => {
 }
 
 
-// the mutation that disconnects an  archive
+// the mutation that disconnects an archive
 const disconnectMutation = graphql`
     mutation disconnectArchiveMutation($uri: String!) {
         disconnectArchive(uri: $uri) {
