@@ -43,13 +43,13 @@ class Local(
         root.discover(levels=1)
         # make a pile of datasets
         datasets = [
-            (root.uri, name, node)
+            (name, node.uri, node.isFolder)
             for name, node in sorted(root.contents.items())
             if not node.isFolder
         ]
         # and a pile of directories
         folders = [
-            (root.uri, name, node)
+            (name, node.uri, node.isFolder)
             for name, node in sorted(root.contents.items())
             if node.isFolder
         ]
