@@ -5,7 +5,7 @@
 
 
 # test data
-qed.data: ../../data
+qed.data: ../../../data
 
 c8:
     uri: "{qed.data}/native/c8.dat"
