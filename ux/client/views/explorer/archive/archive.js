@@ -41,7 +41,7 @@ export const Archive = ({ view, viewport }) => {
         // and quash any side effects
         evt.preventDefault()
         // remove the view in my viewport from the pile
-        collapseViewport()
+        hide()
         // all done
         return
     }
