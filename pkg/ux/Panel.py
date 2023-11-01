@@ -78,12 +78,25 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         }
 
         # prime the known readers
-        self.readers = {
-            # map the reader uri to the reader
-            str(reader.uri): reader
-            # for all registered readers
-            for reader in plexus.datasets
-        }
+        readers = {}
+        # by going through the pile in the {plexus}
+        for reader in plexus.datasets:
+            # get the uri
+            uri = reader.uri
+            # force the scheme
+            if uri.scheme is None:
+                # to be local
+                uri.scheme = "file"
+            # if it's local
+            if uri.scheme == "file":
+                # get the address and convert it into an absolute path
+                address = qed.primitives.path(uri.address).resolve()
+                # and reattach it
+                uri.address = str(address)
+            # register the reader
+            readers[str(uri)] = reader
+        # attach the registry
+        self.readers = readers
 
         # build a registry of available data sets
         self.datasets = {
