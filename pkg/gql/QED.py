@@ -58,10 +58,8 @@ class QED(graphene.ObjectType):
         """
         Generate a list of all known dataset readers
         """
-        # get the plexus
-        plexus = info.context["plexus"]
-        # get the datasets and return them
-        return plexus.datasets
+        # get the registered readers and return them
+        return tuple(panel.readers.values())
 
 
 # end of file
