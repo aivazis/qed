@@ -77,7 +77,15 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
             for archive in plexus.archives
         }
 
-        # get the known data sources and build a registry of available data sets
+        # prime the known readers
+        self.readers = {
+            # map the reader uri to the reader
+            str(reader.uri): reader
+            # for all registered readers
+            for reader in plexus.datasets
+        }
+
+        # build a registry of available data sets
         self.datasets = {
             # map the pyre name to the dataset
             str(data.pyre_name): data
