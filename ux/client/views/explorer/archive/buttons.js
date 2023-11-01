@@ -19,8 +19,8 @@ export const Cancel = styled(EnabledSecondaryButton)``
 
 // the connect button
 export const EnabledConnect = ({ connect }) => {
-    // build the handler that creates a new record
-    const createRecord = evt => {
+    // build the handler that registers a new data archive
+    const connectArchive = evt => {
         // stop this event from bubbling up
         evt.stopPropagation()
         // and quash any side effects
@@ -32,7 +32,7 @@ export const EnabledConnect = ({ connect }) => {
     }
     // assemble the behaviors
     const behaviors = {
-        onClick: createRecord,
+        onClick: connectArchive,
     }
     // render
     return (
