@@ -107,7 +107,7 @@ class Query(graphene.ObjectType):
         """
         Build a representation of the visualization controls
         """
-        # grab the plexus
+        # get the panel
         panel = info.context["panel"]
         # resolve the dataset
         dataset = panel.dataset(name=dataset)
