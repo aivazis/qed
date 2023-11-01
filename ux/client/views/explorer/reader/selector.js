@@ -14,15 +14,15 @@ import { useViews } from '../explorer/useViews'
 import { selector as paintSelector } from './styles'
 
 
-// the decorator of a {dataset} tab
+// the decorator of a {reader} tab
 export const Selector = ({ viewport, view }) => {
     // get the active view
     const { activeViewport } = useViews()
 
     // unpack the view
-    const { dataset } = view
-    // get the dataset uri
-    const uri = dataset?.uri ?? ""
+    const { reader } = view
+    // get the reader uri
+    const uri = reader?.uri ?? ""
 
     // deduce my state
     const state = (viewport === activeViewport) ? "selected" : "enabled"
@@ -35,7 +35,7 @@ export const Selector = ({ viewport, view }) => {
             <span style={paint.name}>connect dataset</span>
             {/* a separator */}
             <span style={paint.separator}>&middot;</span>
-            {/* the dataset uri */}
+            {/* the reader uri */}
             <span style={paint.selector}>{uri}</span>
         </span>
     )

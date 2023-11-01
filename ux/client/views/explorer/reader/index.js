@@ -5,6 +5,8 @@
 
 
 // publish
+export { Connect } from './connect'
+export { Reader } from './reader'
 export { Selector } from './selector'
 
 // end of file
