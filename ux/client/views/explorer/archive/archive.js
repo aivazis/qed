@@ -11,7 +11,6 @@ import styled from 'styled-components'
 // local
 // hooks
 import { useCollapseViewport } from '../explorer/useCollapseViewport'
-import { useSetActiveView } from '../explorer/useSetActiveView'
 // components
 import { Panel } from './panel'
 import { Cancel, DisabledConnect, } from './buttons'
