@@ -16,24 +16,26 @@ import {
 } from './context'
 
 
-// access to the registered views
-export const useCollapseView = view => {
+// remove a viewport
+export const useCollapseView = () => {
     // grab the list of {views} from context
     const {
+        // the active viewport
+        activeViewport,
         // mutators
         setActiveViewport, setViews, setSynced, setZoom,
         setMeasureLayer, setPixelPath, setPixelPathSelection,
         // the ref with the base zoom levels
         baseZoom,
     } = React.useContext(Context)
-    // make a handler that adds a new blank view after a given on
-    const collapseView = () => {
+    // make a handler that removes a viewport
+    const collapseView = viewport => {
         // adjust the view
         setViews(old => {
             // make a copy of the old state
             const clone = [...old]
             // adjust the entry specified by the caller
-            clone.splice(view, 1)
+            clone.splice(viewport, 1)
             // if i'm left with an empty pile
             if (clone.length === 0) {
                 // reinitialize
@@ -48,7 +50,7 @@ export const useCollapseView = view => {
             // make a copy of the old table
             const table = [...old]
             // remove the status of the current view
-            table.splice(view, 1)
+            table.splice(viewport, 1)
             // if i'm left with an empty pile
             if (table.length === 0) {
                 // reinitialize
@@ -63,7 +65,7 @@ export const useCollapseView = view => {
             // make a copy of the old table
             const table = [...old]
             // remove the zoom level of the current view
-            table.splice(view, 1)
+            table.splice(viewport, 1)
             // if i'm left with an empty pile
             if (table.length === 0) {
                 // reinitialize
@@ -76,7 +78,7 @@ export const useCollapseView = view => {
         // maintain the base zoom level table
         const bz = baseZoom.current
         // remove the entry for the current view
-        bz.splice(view, 1)
+        bz.splice(viewport, 1)
         // if this leaves us with an empty table
         if (bz.length == 0) {
             // reinitialize
@@ -88,7 +90,7 @@ export const useCollapseView = view => {
             // make a copy
             const table = [...old]
             // remove the marker for the collapsing viewport
-            table.splice(view, 1)
+            table.splice(viewport, 1)
             // if this leaves us with nothing
             if (table.length === 0) {
                 // reinitialize
@@ -102,7 +104,7 @@ export const useCollapseView = view => {
             // make a copy of the current state
             const table = [...old]
             // remove the pixel path of the collapsing view
-            table.splice(view, 1)
+            table.splice(viewport, 1)
             // if this leaves us with nothing
             if (table.length === 0) {
                 // reinitialize
@@ -116,7 +118,7 @@ export const useCollapseView = view => {
             // make a copy of the current state
             const table = [...old]
             // remove the pixel path of the collapsing view
-            table.splice(view, 1)
+            table.splice(viewport, 1)
             // if this leaves us with nothing
             if (table.length === 0) {
                 // reinitialize
@@ -126,8 +128,11 @@ export const useCollapseView = view => {
             return table
         })
 
-        // activate the previous view
-        setActiveViewport(Math.max(view - 1, 0))
+        // if this is the active viewport
+        if (viewport == activeViewport) {
+            // activate the previous one
+            setActiveViewport(Math.max(viewport - 1, 0))
+        }
 
         // all done
         return
