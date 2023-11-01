@@ -10,6 +10,8 @@ import graphene
 # the mutations
 from .ConnectArchive import ConnectArchive
 from .DisconnectArchive import DisconnectArchive
+from .ConnectReader import ConnectReader
+from .DisconnectReader import DisconnectReader
 from .UpdateRangeController import UpdateRangeController
 from .UpdateValueController import UpdateValueController
 
@@ -20,10 +22,12 @@ class Mutation(graphene.ObjectType):
     The resting place for mutations
     """
 
-    # connect a new data archive
+    # data archive connection management
     connectArchive = ConnectArchive.Field()
-    # disconnect an existing data archive
     disconnectArchive = DisconnectArchive.Field()
+    # data reader connection management
+    connectReader = ConnectReader.Field()
+    disconnectReader = DisconnectReader.Field()
 
     # updates to ranged controllers
     updateRangeController = UpdateRangeController.Field()
