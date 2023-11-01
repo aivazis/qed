@@ -22,6 +22,7 @@ class ConnectReader(graphene.Mutation):
     # inputs
     class Arguments:
         # the update context
+        reader = graphene.String(required=True)
         name = graphene.String(required=True)
         uri = graphene.String(required=True)
 
@@ -29,12 +30,24 @@ class ConnectReader(graphene.Mutation):
     reader = graphene.Field(Reader)
 
     # the range controller mutator
-    def mutate(root, info, name, uri):
+    def mutate(root, info, reader, name, uri):
         """
         Add a new reader to the pile
         """
+        # resolve the {reader} into a factory
+        factory = qed.protocols.reader.pyre_resolveSpecification(spec=reader)
+        # instantiate
+        source = factory(name=name, uri=uri)
+        # get the panel
+        panel = info.context["panel"]
+        # add the new source to the panel
+        panel.readers[uri] = source
+        # now, go through its datasets
+        for dataset in source.datasets:
+            # and add each one to the dataset registry
+            panel.datasets[dataset.pyre_name] = dataset
         # make a resolution context
-        context = {}
+        context = {"reader": source}
         # and resolve the mutation
         return context
 
