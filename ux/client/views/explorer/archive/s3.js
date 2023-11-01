@@ -112,7 +112,7 @@ export const S3 = ({ view, setType, hide }) => {
             onCompleted: data => {
                 // remove the form from the view
                 hide()
-                // not much to do, for now
+                // all done
                 return
             }
         })
