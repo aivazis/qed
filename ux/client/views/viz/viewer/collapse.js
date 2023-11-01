@@ -23,7 +23,7 @@ import styles from './styles'
 // remove a {viewport} from the {viz} panel
 export const Collapse = ({ viewport }) => {
     // grab the hook that collapses a {viewport}
-    const collapseView = useCollapseView(viewport)
+    const collapseView = useCollapseView()
     // turn it into a handler that collapses this {viewport}
     const collapse = (evt) => {
         // stop this event from bubbling up
@@ -31,7 +31,7 @@ export const Collapse = ({ viewport }) => {
         // and quash any side effects
         evt.preventDefault()
         // manage the {viewport} state
-        collapseView()
+        collapseView(viewport)
         // all done
         return
     }
