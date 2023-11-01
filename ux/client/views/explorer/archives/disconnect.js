@@ -47,6 +47,11 @@ export const Disconnect = ({ uri }) => {
                 const payload = store.getRootField("disconnectArchive")
                 // ask for the target archive
                 const archive = payload.getLinkedRecord("archive")
+                // if we didn't get back a valid archive
+                if (archive === null) {
+                    // something went wrong at the server; there isn't much more to do
+                    return
+                }
                 // get the session manager
                 const qed = store.get("QED")
                 // get its connected archives
