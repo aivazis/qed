@@ -56,14 +56,8 @@ class Reader(graphene.ObjectType):
         """
         Get the path to the file
         """
-        # get the uri
-        uri = reader.uri
-        # if it's a file
-        if uri.scheme is None or uri.scheme == "file":
-            # get the address and turn it into an absolute path
-            return qed.primitives.path(uri.address).resolve()
-        # otherwise, just return the uri
-        return str(uri)
+        # resolve the uri
+        return str(reader.uri)
 
     def resolve_api(reader, *_):
         """
