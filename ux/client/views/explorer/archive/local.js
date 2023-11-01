@@ -122,8 +122,6 @@ export const Local = ({ view, setType, hide }) => {
                     <Name value={form.name} update={update} />
                     <Path value={form.path} update={update} />
                 </Body>
-                <Footer>
-                </Footer>
             </Form>
             <Connect connect={connect} />
             <Cancel onClick={cancel}>cancel</Cancel>

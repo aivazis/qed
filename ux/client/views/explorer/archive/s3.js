@@ -148,8 +148,6 @@ export const S3 = ({ view, setType, hide }) => {
                     <Bucket value={form.bucket} update={update} />
                     <Path value={form.path} update={update} />
                 </Body>
-                <Footer>
-                </Footer>
             </Form>
             <Connect connect={connect} />
             <Cancel onClick={cancel}>cancel</Cancel>
