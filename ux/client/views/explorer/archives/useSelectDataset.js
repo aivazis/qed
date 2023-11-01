@@ -13,21 +13,21 @@ import { useSetActiveView } from '../explorer/useSetActiveView'
 import { useSetActiveViewport } from '../explorer/useSetActiveViewport'
 
 
-// place {dataset} in the active view
+// place {reader} in the active view
 export const useSelectDataset = ({ name, uri }) => {
     // get my archive
     const archive = useArchive()
     // get the views
     const { views, emptyView } = useViews()
     // unpack the active view
-    const { dataset } = useGetActiveView()
+    const { reader } = useGetActiveView()
     // get the view activator
     const activateView = useSetActiveView()
     // get the viewport activator
     const activateViewport = useSetActiveViewport()
 
     // deduce my state
-    const state = dataset?.uri === uri
+    const state = reader?.uri === uri
     // if i'm selected
     if (state) {
         // we are done
@@ -42,7 +42,7 @@ export const useSelectDataset = ({ name, uri }) => {
     // otherwise, build the selector
     const selector = () => {
         // look through the views; perhaps i'm already in there
-        const already = views.findIndex(view => view.dataset?.uri == uri)
+        const already = views.findIndex(view => view.reader?.uri == uri)
         // if i'm there
         if (already > -1) {
             // just activate that viewport
@@ -51,15 +51,15 @@ export const useSelectDataset = ({ name, uri }) => {
             return
         }
         // otherwise, check whether i should replace a blank view
-        const replace = views.findIndex(view => view.archive === null && view.dataset == null)
+        const replace = views.findIndex(view => view.archive === null && view.reader == null)
         // use this to figure where to place my view
         const spot = replace == -1 ? views.length : replace
         // put me in the pile of views
         activateView({
             // start with a clean slate
             ...emptyView(),
-            // add the dataset description
-            dataset: {
+            // add the reader description
+            reader: {
                 name,
                 uri,
                 archive: archive.uri,

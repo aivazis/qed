@@ -13,20 +13,21 @@ import { Blank } from './blank'
 import { Busy } from './busy'
 import { Tab } from './tab'
 import { Archive } from '../archive'
+import { Reader } from '../reader'
 
 
 // export the dataset viewer
 export const Viewer = ({ view, viewport }) => {
     // unpack the view
-    const { archive, dataset } = view
+    const { archive, reader } = view
     // render
     return (
         <>
             <Tab viewport={viewport} view={view} />
-            {archive === null && dataset === null && < Blank />}
+            {archive === null && reader === null && < Blank />}
             <React.Suspense fallback={<Busy />}>
                 {archive !== null && <Archive view={view} viewport={viewport} />}
-                {dataset !== null && <Blank />}
+                {reader !== null && <Reader view={view} viewport={viewport} />}
             </React.Suspense>
         </>
     )

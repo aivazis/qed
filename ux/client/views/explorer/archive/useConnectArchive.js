@@ -23,7 +23,7 @@ export const useConnectArchive = () => {
     // build the view activator
     const activator = () => {
         // look through the views; perhaps there is a blank one to replace
-        const already = views.findIndex(view => view.archive == null && view.dataset == null)
+        const already = views.findIndex(view => view.archive == null && view.reader == null)
         // compute my spot
         const spot = already == -1 ? views.length : already
         // place me in the pile of views

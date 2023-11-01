@@ -25,9 +25,9 @@ export const Contents = ({ qref }) => {
     // get the contents
     const { contents } = useQueryDirectoryContents(qref)
     // get the active view information
-    const { dataset: activeDataset } = useGetActiveView()
+    const { reader: activeReader } = useGetActiveView()
     // build a function that determines the state of my items
-    const state = (uri) => activeDataset?.uri.startsWith(uri + "/") ? "selected" : "active"
+    const state = (uri) => activeReader?.uri.startsWith(uri + "/") ? "selected" : "active"
 
     // tray paint
     const paint = {

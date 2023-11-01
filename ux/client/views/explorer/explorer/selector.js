@@ -10,22 +10,22 @@ import React from 'react'
 // locals
 // components
 import { Selector as Archive } from '../archive'
-import { Selector as Dataset } from '../dataset'
+import { Selector as Reader } from '../reader'
 
 
 // the decorator of a {dataset} tab
 export const Selector = ({ viewport, view }) => {
     // unpack the view
-    const { archive, dataset } = view
+    const { archive, reader } = view
     // if we are collecting information for connecting a new archive
     if (archive !== null) {
         // use its selector
         return <Archive viewport={viewport} view={view} />
     }
-    // if we are collecting information for connecting a new dataset
-    if (dataset !== null) {
+    // if we are collecting information for connecting a new reader
+    if (reader !== null) {
         // use its selector
-        return <Dataset viewport={viewport} view={view} />
+        return <Reader viewport={viewport} view={view} />
     }
     // otherwise, don't contribute anything
     return null
