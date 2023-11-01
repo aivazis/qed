@@ -16,6 +16,7 @@ import { Cancel, DisabledConnect } from './buttons'
 import { Type } from './type'
 import { Form, Body } from '../form'
 // reader types
+import { GDAL } from './gdal'
 import { NISAR } from './nisar'
 
 
@@ -70,6 +71,7 @@ export const Reader = ({ view, viewport }) => {
 // the dispatch table with the reader types
 const types = {
     nisar: NISAR,
+    gdal: GDAL,
 }
 
 
