@@ -77,8 +77,6 @@ export const NISAR = ({ view, setType, hide }) => {
             },
             // when done
             onCompleted: data => {
-                // show me
-                console.log(data)
                 // remove the form from view
                 hide()
                 // all done
