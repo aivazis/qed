@@ -22,18 +22,18 @@ class ReaderConnection(graphene.relay.Connection):
         # register my node type
         node = Reader
 
-
     # my extra fields
     count = graphene.Int()
-
 
     # resolvers
     def resolve_count(connection, info, *_):
         """
         Count the number of readers
         """
-        # get the number of registered {readers} from the {plexus}
-        return len(info.context["plexus"].datasets)
+        # get the panel
+        panel = info.context["panel"]
+        # get the number of registered {readers}
+        return len(panel.readers)
 
 
 # end of file
