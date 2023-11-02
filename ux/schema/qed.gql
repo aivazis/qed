@@ -168,7 +168,7 @@ type Mutation {
   connectArchive(name: String!, uri: String!): ArchiveInfo!
   disconnectArchive(uri: String!): ArchiveInfo!
   # reader connections
-  connectReader(reader: String!, name: String!, uri: String!): ReaderInfo!
+  connectReader(spec: ReaderInput!): ReaderInfo!
   disconnectReader(uri: String!): ReaderInfo!
 
   # updates to the viz pipeline
@@ -185,6 +185,16 @@ type ArchiveInfo {
 }
 
 # support for connecting and disconnecting data readers
+# the input payload
+input ReaderInput {
+  reader: String!
+  name: String!
+  uri: String!
+  lines: Int
+  samples: Int
+  cell: String
+}
+
 # the output payload
 type ReaderInfo {
   # the new archive
