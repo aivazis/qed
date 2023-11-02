@@ -18,6 +18,7 @@ import { Form, Body } from '../form'
 // reader types
 import { GDAL } from './gdal'
 import { ISCE2 } from './isce2'
+import { Native } from './native'
 import { NISAR } from './nisar'
 
 
@@ -73,6 +74,7 @@ export const Reader = ({ view, viewport }) => {
 const types = {
     gdal: GDAL,
     isce2: ISCE2,
+    native: Native,
     nisar: NISAR,
 }
 
