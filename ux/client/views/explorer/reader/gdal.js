@@ -55,9 +55,14 @@ export const GDAL = ({ view, setType, hide }) => {
             // input
             variables: {
                 // the payload
-                reader: "native.gdal",
-                name: form.name,
-                uri: view.reader.uri,
+                spec: {
+                    reader: "native.gdal",
+                    name: form.name,
+                    uri: view.reader.uri,
+                    lines: null,
+                    samples: null,
+                    cell: null,
+                }
             },
             updater: store => {
                 // get the root field of the query result
@@ -117,8 +122,8 @@ export const GDAL = ({ view, setType, hide }) => {
 
 // the mutation that associates a GDAL reader with a data product
 const connectMutation = graphql`
-    mutation gdalReaderMutation($reader: String!, $name: String!, $uri: String!) {
-        connectReader(reader: $reader, name: $name, uri: $uri) {
+    mutation gdalReaderMutation($spec: ReaderInput!) {
+        connectReader(spec: $spec) {
             reader {
                 id
                 name

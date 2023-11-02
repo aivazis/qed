@@ -57,9 +57,14 @@ export const NISAR = ({ view, setType, hide }) => {
             // input
             variables: {
                 // the payload
-                reader: `nisar.${form.product}`,
-                name: form.name,
-                uri: view.reader.uri,
+                spec: {
+                    reader: `nisar.${form.product}`,
+                    name: form.name,
+                    uri: view.reader.uri,
+                    lines: null,
+                    samples: null,
+                    cell: null,
+                }
             },
             updater: store => {
                 // get the root field of the query result
@@ -169,8 +174,8 @@ const Product = ({ name, rep, current, select }) => {
 
 // the mutation that associates a NISAR reader with a data product
 const connectMutation = graphql`
-    mutation nisarReaderMutation($reader: String!, $name: String!, $uri: String!) {
-        connectReader(reader: $reader, name: $name, uri: $uri) {
+    mutation nisarReaderMutation($spec: ReaderInput!) {
+        connectReader(spec: $spec) {
             reader {
                 id
                 name
