@@ -68,7 +68,8 @@ const dark = {
 
     // widgets
     widgets: {
-        background: "hsl(0deg, 0%, 7%)",
+        focus: "hsl(0deg, 0%, 15%)",
+        background: "hsl(0deg, 0%, 10%)",
     },
 
     // journal colors
