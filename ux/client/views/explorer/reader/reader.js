@@ -17,6 +17,7 @@ import { Type } from './type'
 import { Form, Body } from '../form'
 // reader types
 import { GDAL } from './gdal'
+import { ISCE2 } from './isce2'
 import { NISAR } from './nisar'
 
 
@@ -70,8 +71,9 @@ export const Reader = ({ view, viewport }) => {
 
 // the dispatch table with the reader types
 const types = {
-    nisar: NISAR,
     gdal: GDAL,
+    isce2: ISCE2,
+    nisar: NISAR,
 }
 
 
