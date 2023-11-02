@@ -29,7 +29,7 @@ export const Input = styled.input`
 export const EnabledInput = styled(Input)`
     & {
         color: hsl(0deg, 0%, 60%);
-        background-color: ${theme.page.background};
+        background-color: ${theme.widgets.background};
     }
 
     &:hover {
@@ -42,7 +42,7 @@ export const EnabledInput = styled(Input)`
 
     &:focus{
         color: hsl(0deg, 0%, 60%);
-        background-color: hsl(0deg, 0%, 10%);
+        background-color: ${theme.widgets.focus};
     }
 
     &:invalid {
@@ -57,6 +57,11 @@ export const EnabledInput = styled(Input)`
 
 export const SelectedInput = styled(Input)`
     color: hsl(28deg, 90%, 55%);
+`
+
+export const Numeric = styled(EnabledInput)`
+    width: 6em;
+    text-align: end;
 `
 
 // end of file

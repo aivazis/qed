@@ -21,7 +21,7 @@ export {
 export { Field } from './field'
 // editors
 export { Value, EnabledValue, Values } from './value'
-export { Input, EnabledInput, SelectedInput } from './input'
+export { Input, EnabledInput, SelectedInput, Numeric } from './input'
 
 
 // end of file
