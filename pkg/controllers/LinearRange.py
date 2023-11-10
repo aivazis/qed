@@ -42,21 +42,18 @@ class LinearRange(Controller, family="qed.controllers.linearrange"):
         super().autotune(stats=stats, **kwds)
 
         # unpack the stats
-        _, mean, _ = stats
-        # make sure the mean value won't cause problems
-        mean = max(mean, 1)
+        low, mean, high = stats
+        # compute the spread
+        spread = high - low
 
-        # we want to be conservative, as this logic is only supposed to make sure that
-        # the initial display is sensible
-        self.high = max(1, abs(4 * mean))
+        # set the initial guess for the low value
+        self.low = low
+        # and prime the minimum
+        self.min = mean - 2 * spread
+        # similarly
+        self.high = high
         # use the opposite for the low end
-        self.low = -self.high
-
-        # set the max value to the next higher power of 10
-        self.max = 10 ** (math.ceil(math.log10(self.high)))
-        # and the min to the opposite
-        self.min = -self.max
-
+        self.max = mean + 2 * spread
         # all done
         return
 
