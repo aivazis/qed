@@ -18,8 +18,8 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
     """
 
     # configurable state
-    range = qed.protocols.controller(default=qed.controllers.logRange)
-    range.doc = "the manager of the range of values to render"
+    amplitude = qed.protocols.controller(default=qed.controllers.logRange)
+    amplitude.doc = "the manager of the range of values to render"
 
     phase = qed.protocols.controller(default=qed.controllers.linearRange)
     phase.doc = "the manager of the range of values to render"
@@ -31,8 +31,8 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
         """
         # chain up
         super().autotune(**kwds)
-        # notify my range
-        self.range.autotune(**kwds)
+        # notify my amplitude
+        self.amplitude.autotune(**kwds)
         # adjust my range
         self.phase.min = 0
         self.phase.low = 0
@@ -47,8 +47,8 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
         """
         # chain up
         yield from super().controllers(**kwds)
-        # my range
-        yield self.range, self.pyre_trait(alias="range")
+        # my amplitude
+        yield self.amplitude, self.pyre_trait(alias="amplitude")
         # my phase
         yield self.phase, self.pyre_trait(alias="phase")
         # all done
@@ -75,8 +75,8 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
         Generate a tile of the given characteristics
         """
         # unpack my configuration
-        low = 10**self.range.low
-        high = 10**self.range.high
+        low = 10**self.amplitude.low
+        high = 10**self.amplitude.high
         lowPhase = self.phase.low
         highPhase = self.phase.high
         # add my configuration and chain up

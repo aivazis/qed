@@ -18,18 +18,18 @@ class Amplitude(Channel, family="qed.channels.isce2.int.amplitude"):
     """
 
     # configurable state
-    range = qed.protocols.controller(default=qed.controllers.logRange)
-    range.doc = "the manager of the range of values to render"
+    amplitude = qed.protocols.controller(default=qed.controllers.logRange)
+    amplitude.doc = "the manager of the range of values to render"
 
     # interface
     def autotune(self, **kwds):
         """
-        Use the {stats} gathered on a data sample to adjust the range configuration
+        Use the {stats} gathered on a data sample to adjust the amplitude configuration
         """
         # chain up
         super().autotune(**kwds)
-        # notify my range
-        self.range.autotune(**kwds)
+        # notify my amplitude
+        self.amplitude.autotune(**kwds)
         # all done
         return
 
@@ -39,8 +39,8 @@ class Amplitude(Channel, family="qed.channels.isce2.int.amplitude"):
         """
         # chain up
         yield from super().controllers()
-        # my range
-        yield self.range, self.pyre_trait(alias="range")
+        # my amplitude
+        yield self.amplitude, self.pyre_trait(alias="amplitude")
         # all done
         return
 
@@ -65,8 +65,8 @@ class Amplitude(Channel, family="qed.channels.isce2.int.amplitude"):
         Generate a tile of the given characteristics
         """
         # get my configuration
-        low = 10**self.range.low
-        high = 10**self.range.high
+        low = 10**self.amplitude.low
+        high = 10**self.amplitude.high
         # add my configuration and chain up
         return super().tile(min=low, max=high, **kwds)
 
