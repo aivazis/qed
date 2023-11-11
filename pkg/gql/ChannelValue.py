@@ -18,16 +18,15 @@ class ChannelValue(graphene.ObjectType):
     rep = graphene.String()
     units = graphene.String()
 
-
     # resolvers
     def resolve_rep(context, info, **kwds):
         """
         Generate the representation of the value
         """
         # extract the value
-        rep = context["rep"]
-        # fixed point
-        return f"{rep:.3f}"
+        value = context["rep"]
+        # and render
+        return f"{value:10.4g}"
 
 
 # end of file
