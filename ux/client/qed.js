@@ -43,9 +43,12 @@ import {
 // the app layout
 const QEDApp = () => {
     // page layout and top-level, disrupting, navigation
-    // the app renders a client area over a status bar; most urls render the normal ui, but
+    // the app renders a client area over a status bar
+    // most urls render the normal ui, but
     // - /stop: the user clicked on the "kill the server" action; show a "close this window" page
     // - /loading: shown while the app is fetching itself from the server
+
+    // see the discussion in <Root> about how hosting complexities affect the app routes
 
     // render
     return (
@@ -70,27 +73,46 @@ const QEDApp = () => {
 
             {/* meta navigation */}
             {/* the closing page */}
-            <Route path="stop" element={<Stop />} />
+            <Route path="/stop" element={<Stop />} />
             {/* the page to render while waiting for data to arrive */}
-            <Route path="loading" element={<Loading />} />
+            <Route path="/loading" element={<Loading />} />
         </Routes>
     )
 }
 
 
-// the outer component that sets up access to the {relay}, {suspense},
-// and {router} environments
-const Root = () => (
-    <RelayEnvironmentProvider environment={environment}>
-        <ErrorBoundary fallback={<Dead />}>
-            <Suspense fallback={< Loading />}>
-                <Router basename={"/"}>
-                    <QEDApp />
-                </Router>
-            </Suspense>
-        </ErrorBoundary>
-    </RelayEnvironmentProvider>
-)
+// the outer component that sets up access to the {relay}, {suspense}, and {router} environments
+const Root = () => {
+    // a bit of complexity arises from the fact that we have to support
+    // the following hosting use cases
+
+    // - hosting on the local machine at some port:
+    //   users run the server, it grabs a port on its host and browsers connect directly
+    //   using host:port
+
+    // - hosting as a embedded app in an existing document structure
+    //   an example of which is the NISAR on-demand system, where the url seen by the user,
+    //   e.g. https://<host>/ondemand/user/<username>/qed, is forwarded to the qed server port
+
+    // in order to support these use cases, we require that the embedding url ends in "qed/"
+    const regex = /^(?<base>.*\/qed).*/
+    // run the current location through it
+    const match = location.pathname.match(regex)
+    // deduce the base url
+    const basename = match === null ? "/" : match.groups.base
+    // render
+    return (
+        <RelayEnvironmentProvider environment={environment}>
+            <ErrorBoundary fallback={<Dead />}>
+                <Suspense fallback={< Loading />}>
+                    <Router basename={basename}>
+                        <QEDApp />
+                    </Router>
+                </Suspense>
+            </ErrorBoundary>
+        </RelayEnvironmentProvider>
+    )
+}
 
 
 // instantiate
