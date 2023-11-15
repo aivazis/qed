@@ -20,11 +20,6 @@ import { useSetVizSession } from '../../viz/useSetVizSession'
 
 // amplitude controller
 export const RangeController = props => {
-    // make a handler that can update the session id of a view
-    const setSession = useSetVizSession()
-    // build the range mutator
-    const [updateRange, isInFlight] = useMutation(updateRangeMutation)
-
     // ask the store for the current configuration
     const configuration = useFragment(graphql`
         fragment range_range on RangeController {
@@ -36,27 +31,49 @@ export const RangeController = props => {
             high
         }
     `, props.configuration)
-
     // unpack
     const { slot, min, max, low, high } = configuration
-
+    // initialize my local values of the range
+    const [range, setRange] = React.useState([low, high])
+    // make a handler that can update the session id of a view
+    const setSession = useSetVizSession()
+    // build the range mutator
+    const [updateRange, isInFlight] = useMutation(updateRangeMutation)
     // set up the tick marks
     const major = [min, (max + min) / 2, max]
+
+    // leave this here, for now
+    // make some room for the performance stats
+    const [served, setServed] = React.useState(0)
+    const [dropped, setDropped] = React.useState(0)
+    // show me
+    console.log(`range: served: ${served}, dropped: ${dropped}, p: ${served / (served + dropped)}`)
+    // make a handler that updates them
+    const monitor = flag => {
+        // pick an updater
+        const update = flag ? setDropped : setServed
+        // and invoke it
+        update(old => old + 1)
+        // all done
+        return
+    }
 
     // build the value updater to hand to the controller
     // this is built in the style of {react} state updates: the controller invokes this
     // and passes it as an argument a function that expects the current range and return
     // the updated value
     const setValue = f => {
+        // invoke the controller's updater to get the new range
+        const [newLow, newHigh] = f(range)
+        // update my state
+        setRange([newLow, newHigh])
+        // update the stats
+        monitor(isInFlight)
         // if there is a pending mutation
         if (isInFlight) {
             // skip the update
             return
         }
-
-        // invoke the controller's updater to get the new range
-        const [newLow, newHigh] = f([low, high])
-
         // send it to the server
         updateRange({
             // input
@@ -69,7 +86,6 @@ export const RangeController = props => {
                     high: newHigh,
                 }
             },
-
             // when done
             onCompleted: data => {
                 // get the session
@@ -84,10 +100,10 @@ export const RangeController = props => {
         // all done
         return
     }
-
     // controller configuration
     const opt = {
-        value: [low, high], setValue,
+        value: range,
+        setValue,
         min, max, major,
         direction: "row", labels: "bottom", arrows: "top", markers: true,
         height: 100, width: 250,
