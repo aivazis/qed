@@ -47,7 +47,7 @@ export const Labels = ({ positions, values }) => {
 // the placemat
 const Mat = styled.text`
             font-family: inconsolata;
-            font-size: 20px;
+            font-size: 14px;
             text-anchor: middle;
             fill: none;
             stroke: hsl(0deg, 0%, 10%);
@@ -57,7 +57,7 @@ const Mat = styled.text`
 // the value
 const Value = styled.text`
             font-family: inconsolata;
-            font-size: 20px;
+            font-size: 14px;
             text-anchor: middle;
             cursor: default;
             stroke: none;
