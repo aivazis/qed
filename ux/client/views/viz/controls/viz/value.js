@@ -20,11 +20,6 @@ import { useSetVizSession } from '../../viz/useSetVizSession'
 
 // amplitude controller
 export const ValueController = props => {
-    // make a handler that can update the session id of a view
-    const setSession = useSetVizSession()
-    // build the value mutator
-    const [updateValue, isInFlight] = useMutation(updateValueMutation)
-
     // ask the store for the current configuration
     const configuration = useFragment(graphql`
         fragment value_value on ValueController {
@@ -35,25 +30,48 @@ export const ValueController = props => {
             value
         }
     `, props.configuration)
-
     // unpack
     const { slot, min, max, value } = configuration
-
+    // initialize my local value
+    const [marker, setMarker] = React.useState(value)
+    // make a handler that can update the session id of a view
+    const setSession = useSetVizSession()
+    // build the value mutator
+    const [updateValue, isInFlight] = useMutation(updateValueMutation)
     // set up the tick marks
     const major = [min, (min + max) / 2, max]
+
+    // leave this here, for now
+    // make some room for the performance stats
+    const [served, setServed] = React.useState(0)
+    const [dropped, setDropped] = React.useState(0)
+    // show me
+    console.log(`value: served: ${served}, dropped: ${dropped}, p: ${served / (served + dropped)}`)
+    // make a handler that updates them
+    const monitor = flag => {
+        // pick an updater
+        const update = flag ? setDropped : setServed
+        // and invoke it
+        update(old => old + 1)
+        // all done
+        return
+    }
 
     // build the value updater to hand to the controller
     // this is built in the style of {react} state updates: the controller invokes this
     // and passes it as an argument a function that expects the current value and return
     // the updated value
     const setValue = newValue => {
+        // update my state
+        setMarker(newValue)
+        // update the delivery stats
+        monitor(isInFlight)
         // if there is a pending mutation
         if (isInFlight) {
             // skip the update
             return
         }
-
-        // send it to the server
+        // otherwise, send the new value to the server
         updateValue({
             // input
             variables: {
@@ -64,7 +82,6 @@ export const ValueController = props => {
                     value: newValue,
                 }
             },
-
             // when done
             onCompleted: data => {
                 // get the session
@@ -75,14 +92,14 @@ export const ValueController = props => {
                 return
             }
         })
-
         // all done
         return
     }
 
     // controller configuration
     const opt = {
-        value, setValue,
+        value: marker
+        , setValue,
         min, max, major,
         direction: "row", labels: "bottom", arrows: "top", markers: true,
         height: 100, width: 250,
