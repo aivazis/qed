@@ -12,7 +12,7 @@ from .Channel import Channel
 
 
 # a channel for displaying the absolute value of real values
-class Magnitude(Channel, family="qed.channels.nisar.value"):
+class Magnitude(Channel, family="qed.channels.nisar.abs"):
     """
     Make a visualization pipeline to display the absolute value of real values
     """
