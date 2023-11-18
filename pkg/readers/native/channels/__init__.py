@@ -11,6 +11,7 @@ from .Channel import Channel as channel
 from .Amplitude import Amplitude as amplitude
 from .Complex import Complex as complex
 from .Imaginary import Imaginary as imaginary
+from .Magnitude import Magnitude as abs
 from .Phase import Phase as phase
 from .Real import Real as real
 from .Value import Value as value
