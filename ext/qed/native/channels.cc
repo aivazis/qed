@@ -84,6 +84,67 @@ qed::py::native::channels(py::module & m)
         // the docstring
         "render the value of a double tile");
 
+    // {b} abs
+    channels.def(
+        // the name of the function
+        "abs",
+        // the handler
+        &qed::native::channels::magnitude<mapgrid_t<char>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the absolute value of a byte tile");
+    // {i2} abs
+    channels.def(
+        // the name of the function
+        "abs",
+        // the handler
+        &qed::native::channels::magnitude<mapgrid_t<int16_t>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the absolute value of a int16_t tile");
+    // {i4} abs
+    channels.def(
+        // the name of the function
+        "abs",
+        // the handler
+        &qed::native::channels::magnitude<mapgrid_t<int32_t>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the absolute value of an int32_t tile");
+    // {i8} abs
+    channels.def(
+        // the name of the function
+        "abs",
+        // the handler
+        &qed::native::channels::magnitude<mapgrid_t<int64_t>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the absolute value of a int64_t tile");
+    // {r4} abs
+    channels.def(
+        // the name of the function
+        "abs",
+        // the handler
+        &qed::native::channels::magnitude<mapgrid_t<float>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the absolute value of a float tile");
+    // {r8} abs
+    channels.def(
+        // the name of the function
+        "abs",
+        // the handler
+        &qed::native::channels::magnitude<mapgrid_t<double>>,
+        // the signature
+        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the absolute value of a double tile");
+
     channels.def(
         // the name
         "value",
