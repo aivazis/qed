@@ -24,6 +24,7 @@
 #include "channels/phase.h"
 #include "channels/real.h"
 #include "channels/value.h"
+#include "channels/magnitude.h"
 
 // profile
 #include "profile.h"
