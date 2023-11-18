@@ -19,6 +19,56 @@ qed::py::native::stats(py::module & m)
         // the name of the function
         "stats",
         // the handler
+        &qed::native::stats<mapgrid_t<char>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a,
+        // the docstring
+        "collect statistics on a subset of a dataset");
+
+    m.def(
+        // the name of the function
+        "stats",
+        // the handler
+        &qed::native::stats<mapgrid_t<int8_t>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a,
+        // the docstring
+        "collect statistics on a subset of a dataset");
+
+    m.def(
+        // the name of the function
+        "stats",
+        // the handler
+        &qed::native::stats<mapgrid_t<int16_t>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a,
+        // the docstring
+        "collect statistics on a subset of a dataset");
+
+    m.def(
+        // the name of the function
+        "stats",
+        // the handler
+        &qed::native::stats<mapgrid_t<int32_t>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a,
+        // the docstring
+        "collect statistics on a subset of a dataset");
+
+    m.def(
+        // the name of the function
+        "stats",
+        // the handler
+        &qed::native::stats<mapgrid_t<int64_t>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a,
+        // the docstring
+        "collect statistics on a subset of a dataset");
+
+    m.def(
+        // the name of the function
+        "stats",
+        // the handler
         &qed::native::stats<mapgrid_t<std::complex<float>>>,
         // the signature
         "source"_a, "origin"_a, "shape"_a,

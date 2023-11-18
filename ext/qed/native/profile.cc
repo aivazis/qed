@@ -19,6 +19,56 @@ qed::py::native::profile(py::module & m)
         // the name of the function
         "profile",
         // the handler
+        &qed::native::profile<mapgrid_t<char>>,
+        // the signature
+        "source"_a, "points"_a,
+        // the docstring
+        "collect values from a dataset along a path");
+
+    m.def(
+        // the name of the function
+        "profile",
+        // the handler
+        &qed::native::profile<mapgrid_t<int8_t>>,
+        // the signature
+        "source"_a, "points"_a,
+        // the docstring
+        "collect values from a dataset along a path");
+
+    m.def(
+        // the name of the function
+        "profile",
+        // the handler
+        &qed::native::profile<mapgrid_t<int16_t>>,
+        // the signature
+        "source"_a, "points"_a,
+        // the docstring
+        "collect values from a dataset along a path");
+
+    m.def(
+        // the name of the function
+        "profile",
+        // the handler
+        &qed::native::profile<mapgrid_t<int32_t>>,
+        // the signature
+        "source"_a, "points"_a,
+        // the docstring
+        "collect values from a dataset along a path");
+
+    m.def(
+        // the name of the function
+        "profile",
+        // the handler
+        &qed::native::profile<mapgrid_t<int64_t>>,
+        // the signature
+        "source"_a, "points"_a,
+        // the docstring
+        "collect values from a dataset along a path");
+
+    m.def(
+        // the name of the function
+        "profile",
+        // the handler
         &qed::native::profile<mapgrid_t<std::complex<float>>>,
         // the signature
         "source"_a, "points"_a,
