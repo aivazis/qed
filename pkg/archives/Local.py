@@ -17,10 +17,14 @@ class Local(
     A data archive that resides on local disk
     """
 
-    # the location
+    # user configurable state
     uri = qed.properties.uri()
     uri.default = qed.primitives.uri(scheme="file", address=qed.primitives.path.cwd())
     uri.doc = "the location of the archive"
+
+    all = qed.properties.bool()
+    all.default = False
+    all.doc = "do not ignore entries that start with '.'"
 
     # interface
     def getContents(self, uri):
@@ -29,6 +33,8 @@ class Local(
         """
         # get my root
         root = self.fs
+        # and the filter state
+        all = self.all
         # get the target address
         path = qed.primitives.path(uri.address)
         # project the {address} onto my {root}
@@ -45,13 +51,13 @@ class Local(
         datasets = [
             (name, f"file:{node.uri}", node.isFolder)
             for name, node in sorted(root.contents.items())
-            if not node.isFolder
+            if not node.isFolder and (all or not name.startswith("."))
         ]
         # and a pile of directories
         folders = [
             (name, f"file:{node.uri}", node.isFolder)
             for name, node in sorted(root.contents.items())
-            if node.isFolder
+            if node.isFolder and (all or not name.startswith("."))
         ]
         # present them in this order
         return folders + datasets
