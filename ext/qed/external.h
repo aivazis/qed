@@ -78,15 +78,15 @@ namespace qed::py {
     template <typename cellT, int dim = 2>
     using viewgrid_t = pyre::grid::grid_t<pyre::grid::canonical_t<dim>, view_t<cellT>>;
 
-    // from {pyre::viz}
+    // from {pyre::viz::iterators}
     // encodings
-    using bmp_t = pyre::viz::bmp_t;
+    using bmp_t = pyre::viz::iterators::codecs::bmp_t;
     // grayscale
     template <typename sourceT>
-    using gray_t = pyre::viz::colormaps::gray_t<sourceT>;
+    using gray_t = pyre::viz::iterators::colormaps::gray_t<sourceT>;
     // map a range of values to the unit interval
     template <typename sourceT>
-    using parametric_t = pyre::viz::filters::parametric_t<sourceT>;
+    using parametric_t = pyre::viz::iterators::filters::parametric_t<sourceT>;
 }
 
 
