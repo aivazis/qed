@@ -1,7 +1,7 @@
 // -*- web -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
-// (c) 1998-2023 all rights reserved
+// (c) 1998-2024 all rights reserved
 
 
 // externals
@@ -24,7 +24,7 @@ export const Status = () => (
 
         {/* the box with the copyright note */}
         <Colophon author="Michael&nbsp;Aïvázis" link="https://github.com/aivazis"
-            span="1998-2023"
+            span="1998-2024"
             style={styles.colophon} />
 
     </footer>
