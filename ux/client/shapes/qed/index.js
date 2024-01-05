@@ -11,7 +11,7 @@ import styles from './styles'
 
 
 // render the logo
-export const Logo = ({ style }) => {
+export const QED = ({ style }) => {
     // paint me
     return (
         <g transform="rotate(-45 500 500)">
