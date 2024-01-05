@@ -92,6 +92,11 @@ a:active {
 
 /* fonts */
 @font-face {
+    font-family: "didot";
+    src: url("../fonts/didot.ttf");
+}
+
+@font-face {
     font-family: "inconsolata";
     src: url("../fonts/inconsolata-regular.ttf");
 }
