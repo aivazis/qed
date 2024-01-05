@@ -11,7 +11,7 @@ import React from 'react'
 // widgets
 import { Activity } from '~/activities'
 // my shape
-import { Flame as Icon } from '~/shapes'
+import { QED as Icon } from '~/shapes'
 // styles
 import styles from './styles'
 
