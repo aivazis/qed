@@ -103,7 +103,7 @@ const Root = () => {
     // render
     return (
         <RelayEnvironmentProvider environment={environment}>
-            <ErrorBoundary fallback={<Dead />}>
+            <ErrorBoundary fallback={<Dead base={basename} />}>
                 <Suspense fallback={< Loading />}>
                     <Router basename={basename}>
                         <QEDApp />

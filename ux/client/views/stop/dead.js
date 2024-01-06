@@ -11,12 +11,12 @@ import styles from './styles'
 
 
 // show the dead screen
-export const Dead = () => {
+export const Dead = ({ base }) => {
     // render
     return (
         <section style={styles.stop}>
             <div style={styles.placeholder}>
-                <a href="/" style={styles.link}>qed</a>
+                <a href={base} style={styles.link}>qed</a>
                 {" "}
                 has shut down; please close this window
             </div>
