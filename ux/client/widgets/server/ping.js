@@ -29,9 +29,14 @@ export const Ping = ({ style, ...props }) => {
         // get the data immediately
         getVersion(variables, options)
         // and schedule a recurring refresh
-        const timer = setInterval(getVersion, 1000, variables, options)
+        // const timer = setInterval(getVersion, 1000, variables, options)
         // return the cleanup function
-        return () => clearInterval(timer)
+        return () => {
+            // disable the timer
+            // clearInterval(timer)
+            // all done
+            return
+        }
     }, [])
     // if this is the first time
     if (qref === null) {
