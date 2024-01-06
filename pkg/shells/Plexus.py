@@ -7,8 +7,9 @@
 # externals
 import textwrap
 
-# access the pyre framework
+# framework access
 import pyre
+import journal
 
 # and my package
 import qed
@@ -50,6 +51,24 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     reader = qed.protocols.reader()
     reader.default = None
     reader.doc = "the component that understands the data encoding of a dataset"
+
+    logfile = qed.properties.path()
+    logfile.default = None
+    logfile.doc = "file that captures all journal output"
+
+    # metamethods
+    def __init__(self, **kwds):
+        # chain up
+        super().__init__(**kwds)
+        # if i have a logfile
+        if self.logfile:
+            # enable the debug channels
+            journal.debug("qed").active = True
+            journal.debug("pyre.http").active = True
+            # redirect all journal output to the file
+            journal.logfile(path=str(self.logfile), mode="a")
+        # all done
+        return
 
     # pyre framework hooks
     # support for the help system
