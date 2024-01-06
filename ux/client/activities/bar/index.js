@@ -35,7 +35,8 @@ export const Bar = ({ style }) => {
 
             <Spacer />
 
-            <Kill size={size} style={paint} />
+            {/* disable, for now: it is unrecoverable on NISAR the on-demand system */}
+            {/* <Kill size={size} style={paint} /> */}
             <About size={size} style={paint} />
         </Toolbar>
     )
