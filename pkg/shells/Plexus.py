@@ -62,11 +62,8 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         super().__init__(**kwds)
         # if i have a logfile
         if self.logfile:
-            # enable the debug channels
-            journal.debug("qed").active = True
-            journal.debug("pyre.http").active = True
             # redirect all journal output to the file
-            journal.logfile(path=str(self.logfile), mode="a")
+            journal.logfile(name=str(self.logfile), mode="a")
         # all done
         return
 
