@@ -3,101 +3,10 @@
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # (c) 1998-2024 all rights reserved
 
-
-# test data
-qed.data: ../../../data
-
-c8:
-    uri: "{qed.data}/native/c8.dat"
-    shape: 2*1964+1, 2*3024+1
-    cell: c8
-
-c16:
-    uri: "{qed.data}/native/c16.dat"
-    shape: 2*1964+1, 2*3024+1
-    cell: c16
-
-
-# sample data
-samples: ../../../data
-
-# alos datasets
-alos.data: "{samples}/alos"
-
-alos_LA-20061231:
-    uri: "{alos.data}/20061231.slc"
-    shape: 36864, 10344
-
-alos_LA-20070215:
-    uri: "{alos.data}/20070215.slc"
-    shape: 36864, 10344
-
-
-# nisar datasets
-nisar.data: "{samples}/nisar"
-
-nisar_float:
-    uri: "{nisar.data}/hawaii.h5"
-
-nisar_half_float:
-    uri: "{nisar.data}/rslc.h5"
-
-
-# howard's dataset
-zebker.data: "{samples}/zebker"
-
-deathvalley_int:
-    uri: "{zebker.data}/deathvalley1160x1460.int"
-    shape: 1460, 1160
-    cell: c8
-
-deathvalley_unw:
-    uri: "{zebker.data}/deathvalley1160x1460.unw"
-    shape: 1460, 1160
-
-
-# asar datasets
-asar.data: "{samples}/asar"
-
-asar_L_300621:
-    uri: "{asar.data}/ASAR_L_JOINT_FP_ID09123_LINE15_RUN01_300621_LEVEL1_RSLC_V1.3.h5"
-
-asar_S_300621:
-    uri: "{asar.data}/ASAR_S_JOINT_FP_ID09123_LINE15_RUN01_300621_LEVEL1_RSLC_V1.3.h5"
-
-asar_L_161219:
-    uri: "{asar.data}/ASAR_L_JOINT_FP_ID19107_LINE05_RUN01_161219_LEVEL1_RSLC_V1.3.h5"
-
-asar_S_161219:
-    uri: "{asar.data}/ASAR_S_JOINT_FP_ID19107_LINE05_RUN01_161219_LEVEL1_RSLC_V1.3.h5"
-
-asar_L_051219:
-    uri: "{asar.data}/ASAR_L_JOINT_FP_ID35506_LINE10_RUN02_051219_LEVEL1_RSLC_V1.3.h5"
-
-asar_S_051219:
-    uri: "{asar.data}/ASAR_S_JOINT_FP_ID35506_LINE10_RUN02_051219_LEVEL1_RSLC_V1.3.h5"
-
-
-# attach them to the application
-datasets:
-    - native.flat#c8
-    - native.flat#c16
-    - isce2.int#deathvalley_int
-    - isce2.unw#deathvalley_unw
-    - isce2.rslc#alos_LA-20061231
-    - alos.rslc#alos_LA-20070215
-    # - nisar.rslc#nisar_float
-    - asar.rslc#nisar_half_float
-    # - asar.rslc#asar_L_300621
-    # - asar.rslc#asar_S_300621
-    # - asar.rslc#asar_L_161219
-    # - asar.rslc#asar_S_161219
-    # - asar.rslc#asar_L_051219
-    # - asar.rslc#asar_S_051219
-#
-
 # overall application configuration
 qed.app:
+    # send console outout to a logfile
+    logfile: qed.log
     # run as a web app
     shell: web
     # for the web server
