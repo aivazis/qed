@@ -7,20 +7,20 @@
 
 # journal channel management
 import journal
+
 # errors
 journal.error("qed.ux.dispatch").fatal = False
 # debug
-journal.debug("pyre.http.headers").active = False
-journal.debug("pyre.http.server").active = False
-journal.debug("qed.ux.dispatch").active = False
-journal.debug("qed.ux.graphql").active = False
+# journal.debug("pyre.http").active = False
+journal.debug("qed.ux").active = True
 # firewalls
 journal.firewall("qed.ux.dispatch").fatal = False
 
 # get the package
 import qed
+
 # build an app instance
-app = qed.shells.qed(name='qed.app')
+app = qed.shells.qed(name="qed.app")
 # and run it
 status = app.run()
 # pass its exit status on to the shell
