@@ -95,7 +95,7 @@ const Root = () => {
     //   e.g. https://<host>/ondemand/user/<username>/qed, is forwarded to the qed server port
 
     // in order to support these use cases, we require that the embedding url ends in "qed/"
-    const regex = /^(?<base>.*\/qed).*/
+    const regex = /^(?<base>.*\/qed\/).*/
     // run the current location through it
     const match = location.pathname.match(regex)
     // deduce the base url
