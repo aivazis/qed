@@ -8,6 +8,7 @@
 import journal
 import re
 import urllib
+
 # support
 import qed
 
@@ -20,7 +21,6 @@ class Dispatcher:
     """
     The handler of web requests
     """
-
 
     # interface
     def dispatch(self, plexus, server, request):
@@ -58,7 +58,6 @@ class Dispatcher:
         # invoke
         return handler(plexus=plexus, server=server, request=request, match=match)
 
-
     # metamethods
     def __init__(self, plexus, docroot, pfs, **kwds):
         # chain up
@@ -66,15 +65,16 @@ class Dispatcher:
         # save the location of my document root so i can serve static assets
         self.docroot = docroot.discover()
         # attach it to the app's private filesystem
-        pfs['ux'] = docroot
+        pfs["ux"] = docroot
 
         # make a spec for the app engine
-        spec = 'ux'
+        spec = "ux"
         # use the spec to build a name for my panel
         name = f"{plexus.pyre_name}.{spec}"
         # make an instance of the application engine
-        self.panel = qed.ux.panel(name=name, spec=spec, plexus=plexus, docroot=docroot,
-            globalAliases=True)
+        self.panel = qed.ux.panel(
+            name=name, spec=spec, plexus=plexus, docroot=docroot, globalAliases=True
+        )
 
         # instantiate the {GraphQL} handler
         self.gql = GraphQL(panel=self.panel)
@@ -82,25 +82,25 @@ class Dispatcher:
         # all done
         return
 
-
     # handlers
     def data(self, server, match, **kwds):
         """
         Handle a data request
         """
         # unpack
-        data = match.group('data_dataset')
-        channel = match.group('data_channel')
-        zoom = int(match.group('data_zoom'))
-        spec = match.group('data_tile')
-        origin = tuple(map(int, match.group('data_origin').split("x")))
-        shape = tuple(map(int, match.group('data_shape').split("x")))
+        data = match.group("data_dataset")
+        channel = match.group("data_channel")
+        zoom = int(match.group("data_zoom"))
+        spec = match.group("data_tile")
+        origin = tuple(map(int, match.group("data_origin").split("x")))
+        shape = tuple(map(int, match.group("data_shape").split("x")))
 
         # attempt to
         try:
             # process the request
             tile = self.panel.tile(
-                data=data, channel=channel, zoom=zoom, origin=origin, shape=shape)
+                data=data, channel=channel, zoom=zoom, origin=origin, shape=shape
+            )
         # if anything goes wrong while looking up the data sources
         except KeyError:
             # we have a bug
@@ -136,14 +136,15 @@ class Dispatcher:
             # encode it
             encoded = urllib.parse.quote(filename)
             # decorate it
-            response.headers["Content-disposition"] = (
-                f'attachment; '
-                f'filename="{filename}"; '
-                f'filename*={encoded}'
-            )
+            response.headers[
+                "Content-disposition"
+            ] = f'attachment; filename="{filename}"; filename*={encoded}'
+            # grab a channel
+            chnl = journal.debug("qed.ux.dispatch")
+            # show me
+            chnl.log(f"serving '{filename}'")
             # and return it
             return response
-
         # if anything goes wrong
         except Exception as error:
             # we have a problem
@@ -158,7 +159,6 @@ class Dispatcher:
         # let the client know
         return server.responses.NotFound(server=server)
 
-
     def graphql(self, **kwds):
         """
         Handle a {graphql} request
@@ -166,23 +166,24 @@ class Dispatcher:
         # delegate to my {graphql} handler
         return self.gql.respond(dispatcher=self, panel=self.panel, **kwds)
 
-
     def profile(self, server, match, request, **kwds):
         """
         Handle a request for a dataset profile
         """
         # unpack
-        data = match.group('profile_dataset')
-        encoding = match.group('profile_format')
+        data = match.group("profile_dataset")
+        encoding = match.group("profile_format")
         # the url contains the points of interest
         url = request.url
         # extract the query part
         _, query = url.split("?")
         # points are separated by "&", coordinates by ","
-        points = tuple(tuple(map(int, point.split(','))) for point in query.split('&'))
+        points = tuple(tuple(map(int, point.split(","))) for point in query.split("&"))
 
         # generate the profile along with a suggestion for the download name
-        filename, profile = self.panel.profile(data=data, points=points, encoding=encoding)
+        filename, profile = self.panel.profile(
+            data=data, points=points, encoding=encoding
+        )
 
         # get the document factory
         document = getattr(server.documents, encoding)
@@ -192,7 +193,6 @@ class Dispatcher:
         response.headers["Content-disposition"] = f'attachment; filename="{filename}"'
         # and send it off
         return response
-
 
     # basic handlers
     def stop(self, plexus, server, **kwds):
@@ -204,7 +204,6 @@ class Dispatcher:
         # and exit
         return server.documents.Exit(server=server)
 
-
     def document(self, plexus, server, request, **kwds):
         """
         The client requested a document from the {plexus} pfs
@@ -213,7 +212,6 @@ class Dispatcher:
         uri = "/ux" + request.url
         # open the document and serve it
         return server.documents.File(uri=uri, server=server, application=plexus)
-
 
     def css(self, plexus, server, request, **kwds):
         """
@@ -224,7 +222,6 @@ class Dispatcher:
         # open the document and serve it
         return server.documents.CSS(uri=uri, server=server, application=plexus)
 
-
     def jscript(self, plexus, server, request, **kwds):
         """
         The client requested a document from the {plexus} pfs
@@ -234,14 +231,12 @@ class Dispatcher:
         # open the document and serve it
         return server.documents.Javascript(uri=uri, server=server, application=plexus)
 
-
     def favicon(self, plexus, server, request, **kwds):
         """
         The client requested the app icon
         """
         # we don't have one
         return server.responses.NotFound(server=server)
-
 
     def root(self, plexus, server, request, **kwds):
         """
@@ -251,7 +246,6 @@ class Dispatcher:
         uri = "/ux/{0.pyre_namespace}.html".format(plexus)
         # open the document and serve it
         return server.documents.File(uri=uri, server=server, application=plexus)
-
 
     # private data
     # recognizer fragments
@@ -264,36 +258,43 @@ class Dispatcher:
     profileFormat = r"(CSV)"
 
     # the app api
-    regex = re.compile("|".join([
-        # the data request recognizer
-        r"/(?P<data>data/" + "/".join([
-            rf"(?P<data_dataset>{pyreid})",
-            r"(?P<data_channel>\w+)",
-            rf"(?P<data_zoom>{zoom})",
-            rf"(?P<data_tile>(?P<data_origin>{origin})\+(?P<data_shape>{shape}))"
-        ]) + ")",
-
-        # data profile requests
-        r"/(?P<profile>profile/" + "/".join([
-           rf"(?P<profile_format>{profileFormat})",
-           rf"(?P<profile_dataset>{pyreid})",
-        ]) + ")",
-
-        # graphql requests
-        r"/(?P<graphql>graphql)",
-
-        # the kill command
-        r"/(?P<stop>stop)",
-
-        # document requests
-        r"/(?P<css>.+\.css)",
-        r"/(?P<jscript>.+\.js)",
-        r"/(?P<document>(graphics/.+)|(fonts/.+))",
-        r"/(?P<favicon>favicon.ico)",
-
-        # everything else gets the app page; see the {root} resolver above
-        r"/(?P<root>.*)",
-        ]))
+    regex = re.compile(
+        "|".join(
+            [
+                # the data request recognizer
+                r"/(?P<data>data/"
+                + "/".join(
+                    [
+                        rf"(?P<data_dataset>{pyreid})",
+                        r"(?P<data_channel>\w+)",
+                        rf"(?P<data_zoom>{zoom})",
+                        rf"(?P<data_tile>(?P<data_origin>{origin})\+(?P<data_shape>{shape}))",
+                    ]
+                )
+                + ")",
+                # data profile requests
+                r"/(?P<profile>profile/"
+                + "/".join(
+                    [
+                        rf"(?P<profile_format>{profileFormat})",
+                        rf"(?P<profile_dataset>{pyreid})",
+                    ]
+                )
+                + ")",
+                # graphql requests
+                r"/(?P<graphql>graphql)",
+                # the kill command
+                r"/(?P<stop>stop)",
+                # document requests
+                r"/(?P<css>.+\.css)",
+                r"/(?P<jscript>.+\.js)",
+                r"/(?P<document>(graphics/.+)|(fonts/.+))",
+                r"/(?P<favicon>favicon.ico)",
+                # everything else gets the app page; see the {root} resolver above
+                r"/(?P<root>.*)",
+            ]
+        )
+    )
 
 
 # end of file
