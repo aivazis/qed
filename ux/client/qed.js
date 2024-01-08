@@ -41,7 +41,7 @@ import {
 
 
 // the app layout
-const QEDApp = () => {
+const QEDApp = ({ base }) => {
     // page layout and top-level, disrupting, navigation
     // the app renders a client area over a status bar
     // most urls render the normal ui, but
@@ -73,7 +73,7 @@ const QEDApp = () => {
 
             {/* meta navigation */}
             {/* the closing page */}
-            <Route path="/stop" element={<Stop />} />
+            <Route path="/stop" element={<Stop base={base} />} />
             {/* the page to render while waiting for data to arrive */}
             <Route path="/loading" element={<Loading />} />
         </Routes>
@@ -99,14 +99,14 @@ const Root = () => {
     // run the current location through it
     const match = location.pathname.match(regex)
     // deduce the base url
-    const basename = match === null ? "/" : match.groups.base
+    const base = match === null ? "/" : match.groups.base
     // render
     return (
         <RelayEnvironmentProvider environment={environment}>
-            <ErrorBoundary fallback={<Dead base={basename} />}>
+            <ErrorBoundary fallback={<Dead base={base} />}>
                 <Suspense fallback={< Loading />}>
-                    <Router basename={basename}>
-                        <QEDApp />
+                    <Router basename={base}>
+                        <QEDApp base={base} />
                     </Router>
                 </Suspense>
             </ErrorBoundary>
