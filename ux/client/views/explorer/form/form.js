@@ -64,7 +64,7 @@ export const EnumValue = styled.div`
 `
 
 export const SelectedEnumValue = styled(EnumValue)`
-    color: hsl(0deg, 0%, 60%);
+    color: hsl(28deg, 90%, 55%);
 `
 
 export const Button = styled.div`
@@ -79,7 +79,7 @@ export const Button = styled.div`
 export const EnabledPrimaryButton = styled(Button)`
     & {
         cursor: pointer;
-        color: hsl(0deg, 0%, 60%);
+        color: hsl(28deg, 90%, 55%);
     }
 
     &:hover {

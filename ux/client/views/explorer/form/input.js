@@ -29,6 +29,7 @@ export const Input = styled.input`
 export const EnabledInput = styled(Input)`
     & {
         color: hsl(0deg, 0%, 60%);
+        color: hsl(28deg, 90%, 55%);
         background-color: ${theme.widgets.background};
     }
 
