@@ -14,8 +14,11 @@ import styles from './styles'
 
 
 // the area
-export const NYI = () => {
-
+export const NYI = ({ base }) => {
+    // get the location, as known to the app
+    const url = location.pathname
+    // form the page name by removig {base} from it
+    const where = url.replace(base, "")
     // render
     return (
         <section style={styles.nyi}>
@@ -26,7 +29,7 @@ export const NYI = () => {
                     </g>
                 </svg>
                 <p style={styles.message}>
-                    <span style={styles.location}>{location.pathname}</span> is not implemented yet
+                    <span style={styles.location}>{where}</span> is not implemented yet
                 </p>
             </div>
         </section>
