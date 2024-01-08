@@ -12,7 +12,7 @@ import journal
 journal.error("qed.ux.dispatch").fatal = False
 # debug
 # journal.debug("pyre.http").active = False
-journal.debug("qed.ux").active = True
+# journal.debug("qed.ux").active = False
 # firewalls
 journal.firewall("qed.ux.dispatch").fatal = False
 
