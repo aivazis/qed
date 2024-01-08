@@ -13,7 +13,7 @@ import { Dead } from './dead'
 
 
 // kill the server
-export const Stop = () => {
+export const Stop = ({ base }) => {
     // ask the server to shut down
     fetch('stop').catch(
         // and swallow any errors
@@ -21,7 +21,7 @@ export const Stop = () => {
     )
     // render the dead screen
     return (
-        <Dead />
+        <Dead base={base} />
     )
 }
 
