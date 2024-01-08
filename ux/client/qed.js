@@ -56,8 +56,8 @@ const QEDApp = ({ base }) => {
             {/* the app */}
             <Route path="/" element={<Main />} >
                 {/* specific activities */}
-                <Route path="about" element={<NYI />} />
-                <Route path="help" element={<NYI />} />
+                <Route path="about" element={<NYI base={base} />} />
+                <Route path="help" element={<NYI base={base} />} />
 
                 {/* data archives */}
                 <Route element={<Explorer />}>
