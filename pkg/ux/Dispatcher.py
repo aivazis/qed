@@ -5,11 +5,12 @@
 
 
 # externals
-import journal
 import re
+import signal
 import urllib
 
 # support
+import journal
 import qed
 
 # the query handler
@@ -202,7 +203,7 @@ class Dispatcher:
         # log it
         plexus.info.log("shutting down")
         # and exit
-        return server.documents.Exit(server=server)
+        return server.documents.Exit(server=server, code=128 + signal.SIGQUIT)
 
     def document(self, plexus, server, request, **kwds):
         """
