@@ -5,8 +5,8 @@
 
 # overall application configuration
 qed.app:
-    # send console outout to a logfile
-    logfile: qed.log
+    # send console output to a log file
+    # logfile: qed.log
     # run as a web app
     shell: web
     # for the web server
