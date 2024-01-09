@@ -19,7 +19,7 @@ export const Provider = ({ config, children }) => {
     // state
     const { enabled } = config
     // directional configuration
-    const { direction, arrows, labels, markers } = config
+    const { direction, flipped = false, arrows, labels, markers } = config
     // the layout of the controller in client coordinates
     const { height, width } = config
     // extract the controller limits and tick marks
@@ -111,18 +111,26 @@ export const Provider = ({ config, children }) => {
     const userToICS = value => {
         // clip
         value = Math.min(Math.max(value, min), max)
-        // compute the offset in diagram coordinates and return it
-        return margin + userScale * (value - min)
+        // compute the delta in an orientation sensitive way
+        const delta = flipped ? (max - value) : (value - min)
+        // compute the offset in diagram coordinates
+        const offset = margin + userScale * delta
+        // and return it
+        return offset
     }
 
     // the scaling factor for projecting viewport coordinates to user values
     const viewportScale = (max - min) / (mainMine - 2 * margin)
     // build a transform to project mouse coordinates to user values
     const mouseToUser = pixels => {
-        // project
-        const value = min + viewportScale * (pixels / ils - margin)
-        // clip and return
-        return Math.min(Math.max(value, min), max)
+        // compute the offset into the diagram in user coordinates
+        const offset = viewportScale * (pixels / ils - margin)
+        // project to user coordinates
+        let value = flipped ? max - offset : min + offset
+        // clip it
+        value = Math.min(Math.max(value, min), max)
+        // and return it
+        return value
     }
     // project mouse motion to user coordinates
     const mouseDeltaToUser = delta => viewportScale * delta / ils
@@ -193,7 +201,7 @@ export const Provider = ({ config, children }) => {
 
         // extents
         ils, mainMine, crossMine, bboxMine,
-        // the transform that lets placemat put me on the screen
+        // the transform that lets my place mat put me on the screen
         emplace,
         // projection from mouse coordinates to user coordinates
         mouseToUser, mouseDeltaToUser,
