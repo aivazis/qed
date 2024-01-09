@@ -65,8 +65,8 @@ export const Native = ({ view, setType, hide }) => {
                     reader: "native.flat",
                     name: form.name,
                     uri: view.reader.uri,
-                    lines: parseInt(form.lines),
-                    samples: parseInt(form.samples),
+                    lines: form.lines,
+                    samples: form.samples,
                     cell: form.cell,
                 }
             },

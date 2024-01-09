@@ -18,8 +18,8 @@ class ReaderInput(graphene.InputObjectType):
     reader = graphene.String(required=True)
     name = graphene.String(required=True)
     uri = graphene.String(required=True)
-    lines = graphene.Int(required=False)
-    samples = graphene.Int(required=False)
+    lines = graphene.String(required=False)
+    samples = graphene.String(required=False)
     cell = graphene.String(required=False)
 
 

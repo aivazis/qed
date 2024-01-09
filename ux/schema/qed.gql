@@ -190,8 +190,8 @@ input ReaderInput {
   reader: String!
   name: String!
   uri: String!
-  lines: Int
-  samples: Int
+  lines: String
+  samples: String
   cell: String
 }
 
