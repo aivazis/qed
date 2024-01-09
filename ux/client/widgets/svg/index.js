@@ -4,7 +4,7 @@
 // (c) 1998-2024 all rights reserved
 
 
-// export the zoom
+// export the svg wrapper
 export { SVG } from './svg'
 
 

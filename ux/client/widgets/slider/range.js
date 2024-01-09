@@ -31,7 +31,7 @@ export const Range = ({ value, setValue, ...config }) => {
 }
 
 
-// render the zoom control
+// render the controller
 const Controller = ({ value, setValue }) => {
     // render
     return (
