@@ -22,7 +22,7 @@ export const Shape = ({ lines, samples, update }) => {
         // make the event handler
         const set = evt => {
             // set up the validation regex
-            const regex = /^\d*$/g
+            const regex = /^[\d().*\/+-]*$/g
             // get the value
             const candidate = evt.target.value
             // update the form state
