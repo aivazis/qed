@@ -28,7 +28,7 @@ export const Info = ({ viewport, view }) => {
 
     // unpack the view
     const { reader, dataset } = view
-    // otherwise, unpack the view
+    // extract the relevant metadata
     const { name: readerName, id, uri } = reader
     const { name: datasetName, datatype, shape, origin, tile } = dataset
 
