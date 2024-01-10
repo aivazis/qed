@@ -13,20 +13,19 @@ import { graphql, useLazyLoadQuery } from 'react-relay'
 import { Context } from './context'
 
 
-// the code below looks tricky because it is trying to avoid suspending component rendering
-// while the query is in flight and rendering again once the result is available because this
-// causes flicker
+// the code below looks tricky because it is trying to avoid the flicker caused by suspense
 
 // set it up so we can get the value of a pixel
 export const useGetPixelValue = () => {
     // pull info out of my context
     const { variables, options } = React.useContext(Context)
 
-    // get the data; the first time, {options} is null so we ask the server
-    // on {refresh}, we adjust the {options} so queries get resolved from the store,
-    // which bypasses suspense
-    const { sample } = useLazyLoadQuery(pixelValueQuery, variables, options)
+    // - the first time, {options} is null so we ask the server
+    // - on {refresh}, we adjust the {options} so queries get resolved from the store,
+    //   which bypasses suspense
 
+    // get the data
+    const { sample } = useLazyLoadQuery(pixelValueQuery, variables, options)
     // and return it
     return sample
 }
