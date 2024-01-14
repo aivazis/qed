@@ -17,10 +17,12 @@ import { SVG, Slider, Tray } from '~/widgets'
 import { useGetView } from '../../viz/useGetView'
 import { useGetZoomLevel } from '../../viz/useGetZoomLevel'
 import { useSetZoomLevel } from '../../viz/useSetZoomLevel'
+// components
+import { Minimap } from './minimap'
 
 
 //  display the zoom control
-export const Zoom = () => {
+export const Zoom = ({ min = 0, max = 4 }) => {
     // look up the zoom level of the active viewport
     const zoom = useGetZoomLevel()
     // make a handler that sets the zoom level
@@ -31,17 +33,24 @@ export const Zoom = () => {
     // inspect the view components to initialize my state
     const enabled = (reader && dataset && channel) ? true : false
 
-    // set the zoom level range
-    const [min, max] = [0, 4]
     // set up the tick marks
     const major = [...Array(max - min + 1).keys()].map((_, idx) => min + idx)
     // slider configuration
-    const slider = {
+    const xSlider = {
         value: zoom, setValue: setZoom,
         min, max, major,
-        direction: "row", labels: "bottom", arrows: "top",
+        direction: "row", labels: "top", arrows: "bottom",
         height: 100, width: 200,
     }
+    const ySlider = {
+        value: zoom, setValue: setZoom,
+        min, max, major,
+        direction: "column", flipped: true, labels: "right", arrows: "left",
+        height: 200, width: 100,
+    }
+
+    const width = ySlider.width + xSlider.width
+    const height = ySlider.height + xSlider.height - 40
 
     // mix my paint
     const state = enabled ? "enabled" : "disabled"
@@ -50,9 +59,23 @@ export const Zoom = () => {
     return (
         <Tray title="zoom" initially={true} state={state} scale={0.5}>
             {/* the control housing */}
-            <Housing height={slider.height} width={slider.width}>
-                {/* the slider */}
-                <Controller enabled={enabled} {...slider} />
+            <Housing height={height} width={width}>
+                {/* the vertical slider */}
+                <g transform="translate(-20 0)">
+                    <Controller enabled={enabled} {...ySlider} />
+                </g>
+                {/* the horizontal slider */}
+                <g transform="translate(60 180)">
+                    <Controller enabled={enabled} {...xSlider} />
+                </g>
+                {/* the minimap */}
+                <g transform="translate(60 0) scale(200)">
+                    <Minimap zoom={zoom} shape={dataset.shape} />
+                </g>
+                {/* the lock */}
+                <g transform="translate()">
+                    <Lock cx={30} cy={230} r={5} />
+                </g>
             </Housing>
         </Tray>
     )
@@ -64,9 +87,17 @@ const Housing = styled(SVG)`
     margin: 1.0rem auto;
 `
 
-
-// the controller
+// the controllers
 const Controller = styled(Slider)`
+`
+
+// the lock button
+const Lock = styled.circle`
+    fill: hsl(28deg, 90%, 45%);
+
+    stroke: hsl(28deg, 90%, 55%);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
 `
 
 
