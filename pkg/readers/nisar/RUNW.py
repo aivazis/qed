@@ -116,9 +116,9 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         "selector": selector,
                     }
                     # instantiate it
-                    slc = UNW(name=name, data=dataset, **config)
+                    unw = UNW(name=name, data=dataset, **config)
                     # add the dataset to my pile
-                    self.datasets.append(slc)
+                    self.datasets.append(unw)
         # all done
         return
 
