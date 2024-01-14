@@ -85,7 +85,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                     # some datasets lie, so attempt to
                     try:
                         # get the dataset
-                        data = getattr(grid.interferogram, polarization)
+                        data = getattr(grid.unwrappedInterferogram, polarization)
                     # if not there
                     except AttributeError:
                         # so grab a channel
@@ -116,9 +116,9 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                         "selector": selector,
                     }
                     # instantiate it
-                    slc = UNW(name=name, data=dataset, **config)
+                    unw = UNW(name=name, data=dataset, **config)
                     # add the dataset to my pile
-                    self.datasets.append(slc)
+                    self.datasets.append(unw)
         # all done
         return
 
