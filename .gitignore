@@ -1,0 +1,22 @@
+# ignore rules
+# emacs backups
+*~
+
+# tex lint
+*.aux
+*.bbl
+*.blg
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+# ignore pdfs
+*.pdf
+# but not the ones that are figures, so add an exclusion when there are some
+
+# mac folder attributes 
+**.DS_Store
+
+# end of file
