@@ -18,11 +18,14 @@ import { useGetView } from '../../viz/useGetView'
 import { useGetZoomLevel } from '../../viz/useGetZoomLevel'
 import { useSetZoomLevel } from '../../viz/useSetZoomLevel'
 // components
+import { Lock } from './lock'
 import { Minimap } from './minimap'
 
 
 //  display the zoom control
 export const Zoom = ({ min = 0, max = 4 }) => {
+    // the lock button state
+    const [lock, setLock] = React.useState(true)
     // look up the zoom level of the active viewport
     const zoom = useGetZoomLevel()
     // make a handler that sets the zoom level
@@ -30,6 +33,13 @@ export const Zoom = ({ min = 0, max = 4 }) => {
     // get the active view and unpack it
     const { reader, dataset, channel } = useGetView()
 
+    // make the zoom lock toggle
+    const toggle = () => {
+        // toggle the state
+        setLock(old => !old)
+        // all done
+        return
+    }
     // inspect the view components to initialize my state
     const enabled = (reader && dataset && channel) ? true : false
 
@@ -73,8 +83,8 @@ export const Zoom = ({ min = 0, max = 4 }) => {
                     <Minimap zoom={zoom} shape={dataset.shape} />
                 </g>
                 {/* the lock */}
-                <g transform="translate()">
-                    <Lock cx={30} cy={230} r={5} />
+                <g transform="translate(30 230)">
+                    <Lock lock={lock} toggle={toggle} />
                 </g>
             </Housing>
         </Tray>
@@ -90,15 +100,5 @@ const Housing = styled(SVG)`
 // the controllers
 const Controller = styled(Slider)`
 `
-
-// the lock button
-const Lock = styled.circle`
-    fill: hsl(28deg, 90%, 45%);
-
-    stroke: hsl(28deg, 90%, 55%);
-    stroke-width: 1;
-    vector-effect: non-scaling-stroke;
-`
-
 
 // end of file
