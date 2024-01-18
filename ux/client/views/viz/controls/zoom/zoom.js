@@ -24,6 +24,8 @@ import { Minimap } from './minimap'
 
 //  display the zoom control
 export const Zoom = ({ min = 0, max = 4 }) => {
+    // set the scale
+    const ils = 200
     // the lock button state
     const [lock, setLock] = React.useState(true)
     // look up the zoom level of the active viewport
@@ -50,13 +52,13 @@ export const Zoom = ({ min = 0, max = 4 }) => {
         value: zoom, setValue: setZoom,
         min, max, major,
         direction: "row", labels: "top", arrows: "bottom",
-        height: 100, width: 200,
+        height: ils / 2, width: ils,
     }
     const ySlider = {
         value: zoom, setValue: setZoom,
         min, max, major,
         direction: "column", flipped: true, labels: "right", arrows: "left",
-        height: 200, width: 100,
+        height: ils, width: ils / 2,
     }
 
     const width = ySlider.width + xSlider.width
@@ -79,8 +81,8 @@ export const Zoom = ({ min = 0, max = 4 }) => {
                     <Controller enabled={enabled} {...xSlider} />
                 </g>
                 {/* the minimap */}
-                <g transform="translate(60 0) scale(200)">
-                    <Minimap zoom={zoom} shape={dataset.shape} />
+                <g transform={`translate(60 0) scale(${ils})`}>
+                    <Minimap ils={ils} zoom={zoom} shape={dataset.shape} />
                 </g>
                 {/* the lock */}
                 <g transform="translate(30 230)">
