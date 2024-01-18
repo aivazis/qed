@@ -24,6 +24,8 @@ export const Minimap = ({ ils, shape, zoom }) => {
 
     // make a ref for the placemat
     const placemat = React.useRef(null)
+    // one of the data
+    const data = React.useRef(null)
     // and one for the viewport rep
     const rep = React.useRef(null)
     // the dragging flag, used for dragging the minimap rendering of the viewport
@@ -50,7 +52,7 @@ export const Minimap = ({ ils, shape, zoom }) => {
     const scale = 1 / Math.max(dWidth, zoomX * (x + width),
         dHeight, zoomY * (y + height))
 
-    // install the trackers on the active viewport
+    // install trackers in the active viewport
     React.useEffect(() => {
         // get the active viewport ref
         const viewport = viewports[activeViewport]
@@ -118,10 +120,21 @@ export const Minimap = ({ ils, shape, zoom }) => {
         }
         // by registering a listener
         viewport.addEventListener("scroll", scroll)
+        // register a cleanup
+        return () => {
+            // disconnect the viewport from the observer
+            observer.disconnect()
+            // remove the scroll listener
+            viewport.removeEventListener("scroll", scroll)
+            // all done
+            return
+        }
+    }, [viewports, activeViewport])
 
-        // event handlers for dragging the viewport rep within the minimap
-        // initiate the dragging
-        const startDragging = evt => {
+    // dragging the viewport rep is initiated by mousedown on it
+    React.useEffect(() => {
+        // the handler
+        const start = evt => {
             // stop this event from bubbling up
             evt.stopPropagation()
             // and quash any side effect
@@ -133,8 +146,23 @@ export const Minimap = ({ ils, shape, zoom }) => {
             // all done
             return
         }
+        // get the view rep element
+        const viewRep = rep.current
+        // attach the mouse down handler to the viewport rep
+        viewRep.addEventListener("mousedown", start)
+        // register a clean up
+        return () => {
+            // remove the event listener
+            viewRep.removeEventListener("mousedown", start)
+            // all done
+            return
+        }
+    }, [rep, cursor])
+
+    // the releasing of the button is handled by the placemat
+    React.useEffect(() => {
         // terminate the dragging
-        const stopDragging = evt => {
+        const stop = evt => {
             // stop this event from bubbling up
             evt.stopPropagation()
             // and quash any side effect
@@ -146,37 +174,18 @@ export const Minimap = ({ ils, shape, zoom }) => {
             // all done
             return
         }
-
-        // attach the mouse down handler to the viewport rep
-        rep.current.addEventListener("mousedown", startDragging)
-        // and the rest to the placemat
-        placemat.current.addEventListener("mouseup", stopDragging)
-        placemat.current.addEventListener("mouseleave", stopDragging)
-
+        // get the placemat rep
+        const placematRep = placemat.current
+        // attach the event listeners
+        placematRep.addEventListener("mouseup", stop)
+        placematRep.addEventListener("mouseleave", stop)
         // register a clean up
         return () => {
-            // if we have a valid viewport
-            if (viewport) {
-                // disconnect it from the observer
-                observer.disconnect()
-                // remove the scroll listener
-                viewport.removeEventListener("scroll", scroll)
-            }
-            // if the viewport rep is still around
-            if (rep.current) {
-                // remove its event listeners
-                rep.current.removeEventListener("mousedown", startDragging)
-            }
-            // if the placemat is still around
-            if (placemat.current) {
-                // remove its event listeners
-                placemat.current.removeEventListener("mouseup", stopDragging)
-                placemat.current.removeEventListener("mouseleave", stopDragging)
-            }
-            // all done
-            return
+            // remove the placemat event listeners
+            placematRep.removeEventListener("mouseup", stop)
+            placematRep.removeEventListener("mouseleave", stop)
         }
-    }, [viewports, activeViewport])
+    }, [placemat, cursor])
 
     // the mouse move listener is attached separately because it depends on the dragging state
     React.useEffect(() => {
@@ -187,13 +196,14 @@ export const Minimap = ({ ils, shape, zoom }) => {
             // bail
             return
         }
+        // if dragging is not currently on
+        if (!dragging) {
+            // bail
+            return
+        }
         // move the viewport ref
         const drag = evt => {
-            // if we are not dragging the viewport ref
-            if (!dragging) {
-                return
-            }
-            // otherwise, get the position of the mouse
+            // get the position of the mouse
             const x = evt.clientX
             const y = evt.clientY
             // compute the displacement in viewport pixels since the last time we took a measurement
@@ -207,26 +217,59 @@ export const Minimap = ({ ils, shape, zoom }) => {
             // all done
             return
         }
-        // attach the mouse movement handler to the placemat
-        placemat.current.addEventListener("mousemove", drag)
+        // get the rep
+        const placematRep = placemat.current
+        // attach the mouse movement handler
+        placematRep.addEventListener("mousemove", drag)
         // register the clean up
         return () => {
-            // if the placemat is still around
-            if (placemat.current) {
-                // remove the mouse movement listener
-                placemat.current.removeEventListener("mousemove", drag)
-            }
+            // remove the mouse movement listener
+            placematRep.removeEventListener("mousemove", drag)
+        }
+    }, [viewports, activeViewport, dragging, scale])
+
+    // the user can also click to place the viewport rep at a specific location
+    React.useEffect(() => {
+        // get the active viewport ref
+        const viewport = viewports[activeViewport]
+        // get the data rep
+        const dataRep = data.current
+        // viewport placement
+        const place = evt => {
+            // stop this event from bubbling up
+            evt.stopPropagation()
+            // and quash any side effect
+            evt.preventDefault()
+            // get the position of the mouse
+            const x = evt.clientX
+            const y = evt.clientY
+            // measure the data rep
+            const box = dataRep.getBoundingClientRect()
+            // compute the displacement
+            const dx = x - box.left
+            const dy = y - box.top
+            // ask the active viewport to scroll by this much
+            viewport.scrollLeft = dx / (ils * scale * zoomX)
+            viewport.scrollTop = dy / (ils * scale * zoomY)
             // all done
             return
         }
-
-    }, [viewports, activeViewport, dragging, scale])
+        // add the click listener
+        dataRep.addEventListener("click", place)
+        // register a clean up
+        return () => {
+            // remove the event listener
+            dataRep.removeEventListener("click", place)
+            // all done
+            return
+        }
+    }, [viewports, activeViewport, data, scale])
 
     // render
     return (
         <g ref={placemat}>
             <Placemat x={0} y={0} width={1} height={1} />
-            <Data x={0} y={0} width={dWidth * scale} height={dHeight * scale} />
+            <Data ref={data} x={0} y={0} width={dWidth * scale} height={dHeight * scale} />
             <Viewport ref={rep} x={zoomX * x * scale} y={zoomY * y * scale}
                 width={zoomX * width * scale} height={zoomY * height * scale} />
         </g>
