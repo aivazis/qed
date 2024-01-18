@@ -18,8 +18,12 @@ export const useGetTileURI = ({ viewport, zoomLevel }) => {
     const { activeViewport, views, zoom } = React.useContext(Context)
     // normalize the viewport
     viewport ??= activeViewport
+    // get the viewport zoom setting
+    const viewportZoom = zoom[viewport]
     // and the zoom level
-    zoomLevel ??= Math.trunc(zoom[viewport])
+    zoomLevel ??= viewportZoom
+    // project
+    const level = Math.trunc(Math.min(zoomLevel.horizontal, zoomLevel.vertical))
 
     // get the view
     const view = views[viewport]
@@ -37,7 +41,7 @@ export const useGetTileURI = ({ viewport, zoomLevel }) => {
     const { name } = dataset
 
     // assemble the base data request URI
-    const uri = [api, name, channel, zoomLevel].join("/")
+    const uri = [api, name, channel, level].join("/")
 
     // and return it
     return uri

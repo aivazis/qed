@@ -113,7 +113,7 @@ export const useUpdatePixelLocation = () => {
         }
 
         // turn the zoom level into a scale
-        const scale = 2 ** zoom
+        const scale = [2 ** zoom.vertical, 2 ** zoom.horizontal]
         // get the viewport
         // make sure to grab the viewport, not whatever the mouse is over
         const element = evt.currentTarget
@@ -121,8 +121,8 @@ export const useUpdatePixelLocation = () => {
         const box = element.getBoundingClientRect()
         // compute the location of the mouse relative to the viewport
         // and take the zoom level into account
-        const x = Math.trunc(scale * (element.scrollLeft + evt.clientX - box.left))
-        const y = Math.trunc(scale * (element.scrollTop + evt.clientY - box.top))
+        const x = Math.trunc(scale[1] * (element.scrollLeft + evt.clientX - box.left))
+        const y = Math.trunc(scale[0] * (element.scrollTop + evt.clientY - box.top))
 
         // if the position overflows the dataset along the x-axis
         if (x < origin[1] || x > origin[1] + shape[1]) {

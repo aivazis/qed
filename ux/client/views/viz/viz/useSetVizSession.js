@@ -19,13 +19,12 @@ export const useSetVizSession = viewport => {
     // normalize the viewport
     viewport ??= activeViewport
 
-    // a handler that sets the zoom level of the active viewport
+    // a handler that sets the session id of the active viewport
     const set = session => {
         // adjust the view
         setViews(old => {
             // unpack the {view} of the {viewport}
             const { dataset, channel } = old[viewport]
-
             // build the new state
             const clone = old.map(view => {
                 // if this view shows the same dataset and channel as my target
@@ -36,7 +35,6 @@ export const useSetVizSession = viewport => {
                 // otherwise, leave it alone
                 return view
             })
-
             // hand off the new state
             return clone
         })

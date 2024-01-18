@@ -21,8 +21,6 @@ export const useSetZoomLevel = () => {
     const set = value => {
         // update the zoom table
         setZoom(old => {
-            // preprocess, until continuous zooming is supported
-            value = Math.round(value)
             // make a copy of the old table
             const table = [...old]
             // adjust the entry that corresponds to the active view
@@ -49,12 +47,13 @@ export const useSetZoomLevel = () => {
             const oldZoom = old[activeViewport]
             // and the new one
             const newZoom = table[activeViewport]
-            // compute the magnification factor
-            const m = 2 ** (oldZoom - newZoom)
+            // compute the magnification factors
+            const mH = 2 ** (oldZoom.horizontal - newZoom.horizontal)
+            const mV = 2 ** (oldZoom.vertical - newZoom.vertical)
 
             // compute the new scroll location so the center pixel remains the same after zoom
-            const top = m * (scrollTop + clientHeight / 2) - clientHeight / 2
-            const left = m * (scrollLeft + clientWidth / 2) - clientWidth / 2
+            const top = mV * (scrollTop + clientHeight / 2) - clientHeight / 2
+            const left = mH * (scrollLeft + clientWidth / 2) - clientWidth / 2
 
             // scroll there
             viewport.scroll(left, top)

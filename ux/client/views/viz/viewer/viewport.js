@@ -29,8 +29,8 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     const { viewports } = useViewports()
     // get the state of the measuring layer
     const measure = useMeasureLayer(viewport)
-    // get my zoom
-    const zoom = Math.trunc(useGetZoomLevel(viewport))
+    // get he viewport zoom level
+    const zoom = useGetZoomLevel(viewport)
     // make a handler that centers my viewport
     const centerViewport = useCenterViewport(viewport)
     // get the base URI for tiles
@@ -42,9 +42,9 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     const { shape, origin, tile } = dataset
 
     // convert the zoom level into a scale
-    const scale = 2 ** zoom
+    const scale = [2 ** zoom.vertical, 2 ** zoom.horizontal]
     // compute the dimensions of the mosaic
-    const zoomedShape = shape.map(extent => Math.trunc(extent / scale))
+    const zoomedShape = shape.map((extent, idx) => Math.trunc(extent / scale[idx]))
 
     // center the viewport at the cursor position
     const center = ({ clientX, clientY }) => {
@@ -83,7 +83,7 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
             {/* the data tiles */}
             <View uri={uri} shape={zoomedShape} origin={origin} tile={tile} session={session} />
             {/* the measure layer */}
-            {measure && <Measure viewport={viewport} shape={zoomedShape} zoom={zoom} />}
+            {measure && <Measure viewport={viewport} shape={zoomedShape} scale={scale} />}
         </Box>
     )
 }

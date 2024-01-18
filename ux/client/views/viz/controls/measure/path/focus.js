@@ -38,7 +38,7 @@ export const Focus = ({ idx, point }) => {
     // deduce my state
     const selected = selection.has(idx)
     // turn the zoom level into a scale
-    const scale = 2 ** zoom
+    const scale = [2 ** zoom.vertical, 2 ** zoom.horizontal]
 
     // when clicked
     const focus = evt => {
@@ -53,7 +53,7 @@ export const Focus = ({ idx, point }) => {
             // select me in single node mode
             toggle(idx)
             // and center the viewport on my point
-            center({ x: point[1] / scale, y: point[0] / scale })
+            center({ x: point[1] / scale[1], y: point[0] / scale[0] })
             // done
             return
         }

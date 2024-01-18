@@ -22,7 +22,9 @@ import styles from './styles'
 // export the data viewer
 export const Info = ({ viewport, view }) => {
     // get the viewport zoom level
-    const zoom = Math.trunc(useGetZoomLevel(viewport))
+    const viewportZoom = useGetZoomLevel(viewport)
+    // unpack
+    const zoom = [viewportZoom.vertical, viewportZoom.horizontal]
     // assemble the data request URI
     const base = useGetTileURI({ viewport })
 
@@ -33,7 +35,7 @@ export const Info = ({ viewport, view }) => {
     const { name: datasetName, datatype, shape, origin, tile } = dataset
 
     // scale the shape to the current zoom level
-    const effectiveShape = shape.map(s => Math.trunc(s / (2 ** zoom)))
+    const effectiveShape = shape.map((s, idx) => s / (2 ** zoom[idx]))
 
     // mix my paint
     const paint = styles.viewer
@@ -47,7 +49,7 @@ export const Info = ({ viewport, view }) => {
                 {shape.join(" x ")}
             </Meta.Entry>
             <Meta.Entry threshold={2} attribute="zoom level" style={paint}>
-                {zoom}
+                {zoom.join(" x ")}
             </Meta.Entry>
             <Meta.Entry threshold={2} attribute="effective shape" style={paint}>
                 {effectiveShape.join(" x ")}
