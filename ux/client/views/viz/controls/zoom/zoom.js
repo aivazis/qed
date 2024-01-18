@@ -45,17 +45,36 @@ export const Zoom = ({ min = 0, max = 4 }) => {
     // inspect the view components to initialize my state
     const enabled = (reader && dataset && channel) ? true : false
 
+    // adjust the horizontal zoom
+    const setHorizontalZoom = value => {
+        // build the new value
+        const level = { horizontal: value, vertical: lock ? value : zoom.vertical }
+        // and set it
+        setZoom(level)
+        // all done
+        return
+    }
+    // adjust the vertical zoom
+    const setVerticalZoom = value => {
+        // build the new value
+        const level = { vertical: value, horizontal: lock ? value : zoom.horizontal }
+        // and set it
+        setZoom(level)
+        // all done
+        return
+    }
+
     // set up the tick marks
     const major = [...Array(max - min + 1).keys()].map((_, idx) => min + idx)
     // slider configuration
     const xSlider = {
-        value: zoom, setValue: setZoom,
+        value: zoom.horizontal, setValue: setHorizontalZoom,
         min, max, major,
         direction: "row", labels: "top", arrows: "bottom",
         height: ils / 2, width: ils,
     }
     const ySlider = {
-        value: zoom, setValue: setZoom,
+        value: zoom.vertical, setValue: setVerticalZoom,
         min, max, major,
         direction: "column", flipped: true, labels: "right", arrows: "left",
         height: ils, width: ils / 2,

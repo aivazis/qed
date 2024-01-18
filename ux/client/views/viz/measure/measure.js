@@ -41,7 +41,7 @@ export const Measure = (props) => {
 
 
 // the layer implementation
-const Layer = ({ viewport, shape, zoom }) => {
+const Layer = ({ viewport, shape, scale }) => {
     // make a ref for my client area
     const me = React.useRef(null)
     // get the list of points on the profile
@@ -55,10 +55,8 @@ const Layer = ({ viewport, shape, zoom }) => {
     // get the current selection
     const selection = usePixelPathSelection(viewport)
 
-    // convert the zoom level to a scaling factor
-    const scale = 2 ** zoom
     // and project the points back into screen coordinates
-    const projected = points.map(point => point.map(coord => Math.trunc(coord / scale)))
+    const projected = points.map(point => point.map((coord, idx) => Math.trunc(coord / scale[idx])))
 
     // add a point to the pile
     const pick = evt => {
@@ -70,7 +68,7 @@ const Layer = ({ viewport, shape, zoom }) => {
             // unpack the mouse coordinates relative to ULC of the client area
             const { offsetX, offsetY } = evt
             // scale and pack
-            const p = [scale * offsetY, scale * offsetX]
+            const p = [scale[0] * offsetY, scale[1] * offsetX]
             // add to my pile
             addPoint(p)
             // all done
@@ -96,8 +94,8 @@ const Layer = ({ viewport, shape, zoom }) => {
         const nodes = selection.has(moving) ? [...selection] : [moving]
         // compute the displacement implied by the current position of the cursor
         const delta = {
-            x: scale * offsetX - points[moving][1],
-            y: scale * offsetY - points[moving][0],
+            x: scale[1] * offsetX - points[moving][1],
+            y: scale[0] * offsetY - points[moving][0],
         }
         // check for null displacement
         if (Math.abs(delta.x) < 1 && Math.abs(delta.y) < 1) {
@@ -122,13 +120,13 @@ const Layer = ({ viewport, shape, zoom }) => {
     // when the user clicks in my area
     useEvent({
         name: "click", listener: pick, client: me,
-        triggers: [viewport, zoom, addPoint]
+        triggers: [viewport, scale, addPoint]
     })
 
     // dragging happens when mouse move events are delivered
     useEvent({
         name: "mousemove", listener: drag, client: me,
-        triggers: [viewport, zoom, moving, points, selection, displace]
+        triggers: [viewport, scale, moving, points, selection, displace]
     })
 
     // dragging ends when the user lets go of the mouse button

@@ -43,7 +43,7 @@ export const Minimap = ({ ils, shape, zoom }) => {
     // unpack the dataset shape
     const [dHeight, dWidth] = shape
     // unpack the zoom
-    const [zoomX, zoomY] = [2 ** zoom, 2 ** zoom]
+    const [zoomX, zoomY] = [2 ** zoom.horizontal, 2 ** zoom.vertical]
     // unpack the viewport origin
     const { x, y } = origin
     // and its extent

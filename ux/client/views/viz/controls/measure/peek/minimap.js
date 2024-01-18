@@ -32,7 +32,7 @@ export const Minimap = ({ point }) => {
     // get the node selection, if any
     const selection = usePixelPathSelection()
     // form the base tile uri at zoom level 0, suitable for the minimap
-    const tileURI = useGetTileURI({ zoomLevel: 0 })
+    const tileURI = useGetTileURI({ zoomLevel: { horizontal: 0, vertical: 0 }})
     // get the active dataset extent
     const { origin, shape } = useDatasetShape()
 

@@ -134,7 +134,7 @@ export const emptyView = () => ({ reader: null, dataset: null, channel: null, se
 // the default synced state
 export const syncedDefault = false
 // the default zoom level
-export const zoomDefault = 0
+export const zoomDefault = { horizontal: 0, vertical: 0 }
 // the default state of the measure layer
 export const measureDefault = false
 // the default pixel path

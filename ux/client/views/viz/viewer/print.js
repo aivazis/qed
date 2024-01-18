@@ -32,17 +32,19 @@ export const Print = ({ viewport }) => {
     const { viewports } = useViewports()
     // get my view and extract my dataset
     const { dataset } = useGetView(viewport)
-    // get my zoom level
-    const zoom = Math.trunc(useGetZoomLevel(viewport))
+    // get the viewport zoom level
+    const viewportZoom = useGetZoomLevel(viewport)
+    // unpack
+    const zoom = [viewportZoom.vertical, viewportZoom.horizontal]
     // get uri to the tile api
     const uri = useGetTileURI({ viewport })
 
     // i actually need the shape of the raster
     const { shape } = dataset
     // convert the zoom level into a scale
-    const scale = 2 ** zoom
+    const scale = zoom.map(level => 2 ** level)
     // compute the dimensions of the mosaic
-    const zoomedShape = shape.map(extent => Math.trunc(extent / scale))
+    const zoomedShape = shape.map((extent, idx) => extent / scale[idx])
 
     // make my handler
     const print = () => {
