@@ -22,8 +22,10 @@ export const useGetTileURI = ({ viewport, zoomLevel }) => {
     const viewportZoom = zoom[viewport]
     // and the zoom level
     zoomLevel ??= viewportZoom
-    // project
-    const level = [Math.trunc(zoomLevel.vertical), Math.trunc(zoomLevel.horizontal)].join("x")
+    // unpack
+    const level = [zoomLevel.vertical, zoomLevel.horizontal]
+    // normalize and form the tag
+    const tag = level.map(l => Math.trunc(Math.max(l, 0))).join("x")
 
     // get the view
     const view = views[viewport]
@@ -41,7 +43,7 @@ export const useGetTileURI = ({ viewport, zoomLevel }) => {
     const { name } = dataset
 
     // assemble the base data request URI
-    const uri = [api, name, channel, level].join("/")
+    const uri = [api, name, channel, tag].join("/")
 
     // and return it
     return uri
