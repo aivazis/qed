@@ -76,6 +76,22 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
         # all done
         return
 
+    def eval(self, amplitude, phase):
+        """
+        Get the amplitude of the pixel
+        """
+        # easy enough
+        return cmath.rect(amplitude, phase)
+
+    def project(self, pixel):
+        """
+        Compute the amplitude of a {pixel}
+        """
+        # only one choice
+        yield pixel, ""
+        # and done
+        return
+
     def tile(self, source, zoom, origin, shape, **kwds):
         """
         Generate a tile of the given characteristics
@@ -95,16 +111,18 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
 
         # turn the shape into a {pyre::grid::shape_t}
         shape = qed.libpyre.grid.Shape3D(shape=(lines, 1, samples))
-        # and the origin into a {pyre::grid::index_t}
+        # the origin into a {pyre::grid::index_t}
         origin = qed.libpyre.grid.Index3D(index=(line, 0, sample))
+        # and the zoom level into a {pyre::grid::index_t}
+        stride = qed.libpyre.grid.Index3D(index=(2 ** zoom[0], 1, 2 ** zoom[1]))
         # look for the tile maker in {libqed}
         tileMaker = qed.libqed.isce2.unwrapped.channels.complex
         # and ask it to make a tile
         tile = tileMaker(
             source=source.data,
-            zoom=zoom,
             origin=origin,
             shape=shape,
+            stride=stride,
             mean=mean,
             scale=scale,
             exponent=exponent,

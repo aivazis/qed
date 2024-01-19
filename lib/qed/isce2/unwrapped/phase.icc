@@ -15,12 +15,12 @@ auto
 qed::isce2::unwrapped::channels::phase(
     // the source
     const sourceT & source,
-    // the zoom level
-    int zoom,
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
     typename sourceT::shape_type tile,
+    // the strides
+    typename sourceT::index_type stride,
     // the hue range
     double low, double high,
     // the range of values to render
@@ -41,14 +41,10 @@ qed::isce2::unwrapped::channels::phase(
     // the color map
     using colormap_t = hl_t<scale_t, constant_t>;
 
-    // turn the zoom level into a scale
-    auto scale = 1 << zoom;
     // compute the zoomed origin
-    index_t zoomedOrigin { scale * origin[0], origin[1], scale * origin[2] };
+    index_t zoomedOrigin { stride[0] * origin[0], 1, stride[2] * origin[2] };
     // and the zoomed tile
-    shape_t zoomedTile { scale * tile[0], tile[1], scale * tile[2] };
-    // set up the decimation stride
-    index_t stride { scale, 1, scale };
+    shape_t zoomedTile { stride[0] * tile[0], 1, stride[2] * tile[2] };
 
     // make a bitmap
     bmp_t bmp(tile[0], tile[2]);
