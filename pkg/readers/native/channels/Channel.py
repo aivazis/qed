@@ -61,8 +61,7 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         origin = qed.libpyre.grid.Index2D(index=origin)
         # and the zoom into strides
         stride = qed.libpyre.grid.Index2D(index=tuple(2**level for level in zoom))
-
-        # ask it to make a tile and return it
+        # build the visualization pipeline and return it
         return pipeline(
             source=source.data, origin=origin, shape=shape, stride=stride, **kwds
         )
