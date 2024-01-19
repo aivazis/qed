@@ -15,13 +15,13 @@ namespace qed::isce2::interferogram::channels {
     inline auto phase(
         // the source
         const sourceT & source,
-        // the zoom level
-        int zoom,
         // the origin of the tile
         typename sourceT::index_type origin,
         // the tile shape
         typename sourceT::shape_type tile,
-        // the hue interaval
+        // the stride
+        typename sourceT::index_type stride,
+        // the hue interval
         double low, double high,
         // the range of values to render
         double brightness) -> bmp_t;

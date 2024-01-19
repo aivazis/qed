@@ -30,7 +30,7 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the handler
         &qed::isce2::interferogram::channels::amplitude<mapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the amplitude of a complex float tile");
     // {c16} amplitude
@@ -40,7 +40,7 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the handler
         &qed::isce2::interferogram::channels::amplitude<mapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the amplitude of a complex double tile");
 
@@ -51,7 +51,7 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the handler
         &qed::isce2::interferogram::channels::complex<mapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
         // the docstring
         "render the value of a complex float tile");
     // {c16}
@@ -61,7 +61,7 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the handler
         &qed::isce2::interferogram::channels::complex<mapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
         // the docstring
         "render the value of a complex double tile");
 
@@ -72,7 +72,7 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the handler
         &qed::isce2::interferogram::channels::imaginary<mapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the imaginary part a complex float tile");
     // imaginary part of {c16}
@@ -82,7 +82,7 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the handler
         &qed::isce2::interferogram::channels::imaginary<mapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the imaginary part of a complex double tile");
 
@@ -93,7 +93,7 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the handler
         &qed::isce2::interferogram::channels::phase<mapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "low"_a, "high"_a, "brightness"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "low"_a, "high"_a, "brightness"_a,
         // the docstring
         "render the phase of a complex float tile");
     // phase of {c16}
@@ -103,7 +103,7 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the handler
         &qed::isce2::interferogram::channels::phase<mapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "low"_a, "high"_a, "brightness"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "low"_a, "high"_a, "brightness"_a,
         // the docstring
         "render the phase of a complex double tile");
 
@@ -114,7 +114,7 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the handler
         &qed::isce2::interferogram::channels::real<mapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the real part a complex float tile");
     // real part of {c16}
@@ -124,7 +124,7 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the handler
         &qed::isce2::interferogram::channels::real<mapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the real part of a complex double tile");
 
