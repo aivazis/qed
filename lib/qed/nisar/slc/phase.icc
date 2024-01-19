@@ -17,12 +17,12 @@ qed::nisar::slc::phase(
     const dataset_t & dataset,
     // the layout
     const datatype_t & datatype,
-    // the zoom level
-    int zoom,
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
     typename sourceT::shape_type tile,
+    // the stride
+    typename sourceT::index_type stride,
     // the hue range
     double low, double high,
     // the range of values to render
@@ -32,18 +32,19 @@ qed::nisar::slc::phase(
     using index_t = typename sourceT::index_type;
     using shape_t = typename sourceT::shape_type;
 
-    // compute the scale
-    auto scale = 1 << zoom;
     // the origin of the data region is scaled by this
-    auto from = index_t(scale * origin);
-    // form the strides
-    shape_t strides = shape_t::fill(scale);
+    auto from = origin;
+    // by going through its entries
+    for (int axis = 0; axis < index_t::rank(); ++axis) {
+        // and multiplying them by the stride
+        from[axis] *= stride[axis];
+    }
 
     // read the data
-    auto source = pyre::h5::read<sourceT>(dataset, datatype, from, tile, strides);
-
+    auto source = pyre::h5::read<sourceT>(dataset, datatype, from, tile, stride);
     // render and return
-    return native::channels::phase(source, 0, { 0, 0 }, tile, low, high, saturation, brightness);
+    return native::channels::phase(
+        source, { 0, 0 }, tile, { 1, 1 }, low, high, saturation, brightness);
 }
 
 

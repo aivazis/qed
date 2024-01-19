@@ -28,7 +28,7 @@ qed::py::nisar::slc(py::module & m)
         // the handler
         &qed::nisar::slc::amplitude<heapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the amplitude of a complex float tile");
     // {c16} amplitude
@@ -38,7 +38,7 @@ qed::py::nisar::slc(py::module & m)
         // the handler
         &qed::nisar::slc::amplitude<heapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the amplitude of a complex double tile");
 
@@ -49,7 +49,7 @@ qed::py::nisar::slc(py::module & m)
         // the handler
         &qed::nisar::slc::complex<heapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "minPhase"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "minPhase"_a,
         "maxPhase"_a, "saturation"_a,
         // the docstring
         "render the value of a complex float tile");
@@ -60,7 +60,7 @@ qed::py::nisar::slc(py::module & m)
         // the handler
         &qed::nisar::slc::complex<heapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "minPhase"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "minPhase"_a,
         "maxPhase"_a, "saturation"_a,
         // the docstring
         "render the value of a complex double tile");
@@ -72,7 +72,7 @@ qed::py::nisar::slc(py::module & m)
         // the handler
         &qed::nisar::slc::imaginary<heapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the imaginary part a complex float tile");
     // imaginary part of {c16}
@@ -82,7 +82,7 @@ qed::py::nisar::slc(py::module & m)
         // the handler
         &qed::nisar::slc::imaginary<heapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the imaginary part of a complex double tile");
 
@@ -93,7 +93,7 @@ qed::py::nisar::slc(py::module & m)
         // the handler
         &qed::nisar::slc::phase<heapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "low"_a, "high"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "low"_a, "high"_a,
         "saturation"_a, "brightness"_a,
         // the docstring
         "render the phase of a complex float tile");
@@ -104,7 +104,7 @@ qed::py::nisar::slc(py::module & m)
         // the handler
         &qed::nisar::slc::phase<heapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "low"_a, "high"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "low"_a, "high"_a,
         "saturation"_a, "brightness"_a,
         // the docstring
         "render the phase of a complex double tile");
@@ -116,7 +116,7 @@ qed::py::nisar::slc(py::module & m)
         // the handler
         &qed::nisar::slc::real<heapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the real part a complex float tile");
     // real part of {c16}
@@ -126,7 +126,7 @@ qed::py::nisar::slc(py::module & m)
         // the handler
         &qed::nisar::slc::real<heapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the real part of a complex double tile");
 

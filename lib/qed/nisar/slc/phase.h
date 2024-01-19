@@ -17,13 +17,13 @@ namespace qed::nisar::slc {
         const dataset_t & dataset,
         // the data layout
         const datatype_t & datatype,
-        // the zoom level
-        int zoom,
         // the origin of the tile
         typename sourceT::index_type origin,
         // the tile shape
         typename sourceT::shape_type tile,
-        // the hue interaval
+        // the stride
+        typename sourceT::index_type stride,
+        // the hue interval
         double low, double high,
         // the range of values to render
         double saturation, double brightness) -> bmp_t;

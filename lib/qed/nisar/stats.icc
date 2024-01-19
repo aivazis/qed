@@ -23,7 +23,7 @@ qed::nisar::stats(
     typename sourceT::shape_type tile) -> native::stats_t
 {
     // we operate at zoom level 0
-    typename sourceT::shape_type strides = sourceT::shape_type::one();
+    auto strides = sourceT::index_type::one();
     // read the data
     auto source = pyre::h5::read<sourceT>(dataset, datatype, origin, tile, strides);
     // compute the statistics and pass them on

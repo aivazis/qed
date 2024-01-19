@@ -91,7 +91,7 @@ qed::nisar::profile(
             std::abs(tail[1] - head[1]) + 1);
 
         // we operate at zoom level 0
-        typename sourceT::shape_type strides = sourceT::shape_type::one();
+        auto strides = sourceT::index_type::one();
 
         // show me
         channel
