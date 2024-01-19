@@ -15,12 +15,12 @@ namespace qed::isce2::unwrapped::channels {
     inline auto amplitude(
         // the source
         const sourceT & source,
-        // the zoom level
-        int zoom,
         // the origin of the tile
         typename sourceT::index_type origin,
         // the tile shape
         typename sourceT::shape_type tile,
+        // the strides
+        typename sourceT::index_type stride,
         // the range of values to render
         double mean, double scale, double exponent) -> bmp_t;
 }
