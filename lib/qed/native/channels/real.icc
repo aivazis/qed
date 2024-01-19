@@ -15,12 +15,12 @@ auto
 qed::native::channels::real(
     // the source
     const sourceT & source,
-    // the zoom level
-    int zoom,
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
     typename sourceT::shape_type tile,
+    // the stride
+    typename sourceT::index_type stride,
     // the range of values to render
     double min, double max) -> bmp_t
 {
@@ -40,14 +40,20 @@ qed::native::channels::real(
     // the color map
     using colormap_t = gray_t<norm_t>;
 
-    // turn the zoom level into a scale
-    auto scale = 1 << zoom;
     // compute the zoomed origin
-    auto zoomedOrigin = scale * origin;
-    // and the zoomed tile
-    auto zoomedTile = scale * tile;
-    // set up the decimation stride
-    index_t stride { scale };
+    auto zoomedOrigin = origin;
+    // by setting each of its entries
+    for (int axis = 0; axis < index_t::rank(); ++axis) {
+        // to the product of the stride with the specified origin
+        zoomedOrigin[axis] *= stride[axis];
+    }
+    // similarly, for the zoomed tile
+    auto zoomedTile = tile;
+    // set each of its entries
+    for (int axis = 0; axis < index_t::rank(); ++axis) {
+        // to the product of the stride with the specified tile
+        zoomedTile[axis] *= stride[axis];
+    }
 
     // make a bitmap
     bmp_t bmp(tile[0], tile[1]);

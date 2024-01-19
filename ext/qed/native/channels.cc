@@ -30,7 +30,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::value<mapgrid_t<char>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the value of a byte tile");
     // {i2} value
@@ -40,7 +40,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::value<mapgrid_t<int16_t>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the value of a int16_t tile");
     // {i4} value
@@ -50,7 +50,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::value<mapgrid_t<int32_t>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the value of an int32_t tile");
     // {i8} value
@@ -60,7 +60,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::value<mapgrid_t<int64_t>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the value of a int64_t tile");
     // {r4} value
@@ -70,7 +70,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::value<mapgrid_t<float>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the value of a float tile");
     // {r8} value
@@ -80,7 +80,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::value<mapgrid_t<double>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the value of a double tile");
 
@@ -91,7 +91,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::magnitude<mapgrid_t<char>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the absolute value of a byte tile");
     // {i2} abs
@@ -101,7 +101,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::magnitude<mapgrid_t<int16_t>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the absolute value of a int16_t tile");
     // {i4} abs
@@ -111,7 +111,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::magnitude<mapgrid_t<int32_t>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the absolute value of an int32_t tile");
     // {i8} abs
@@ -121,7 +121,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::magnitude<mapgrid_t<int64_t>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the absolute value of a int64_t tile");
     // {r4} abs
@@ -131,7 +131,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::magnitude<mapgrid_t<float>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the absolute value of a float tile");
     // {r8} abs
@@ -141,7 +141,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::magnitude<mapgrid_t<double>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the absolute value of a double tile");
 
@@ -182,7 +182,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::amplitude<mapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the amplitude of a complex float tile");
     // {c16} amplitude
@@ -192,7 +192,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::amplitude<mapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the amplitude of a complex double tile");
 
@@ -203,7 +203,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::complex<mapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
         "saturation"_a,
         // the docstring
         "render the value of a complex float tile");
@@ -214,7 +214,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::complex<mapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
         "saturation"_a,
         // the docstring
         "render the value of a complex double tile");
@@ -226,7 +226,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::imaginary<mapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the imaginary part a complex float tile");
     // imaginary part of {c16}
@@ -236,7 +236,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::imaginary<mapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the imaginary part of a complex double tile");
 
@@ -247,7 +247,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::phase<mapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "low"_a, "high"_a, "saturation"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "low"_a, "high"_a, "saturation"_a,
         "brightness"_a,
         // the docstring
         "render the phase of a complex float tile");
@@ -258,7 +258,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::phase<mapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "low"_a, "high"_a, "saturation"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "low"_a, "high"_a, "saturation"_a,
         "brightness"_a,
         // the docstring
         "render the phase of a complex double tile");
@@ -270,7 +270,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::real<mapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the real part a complex float tile");
     // real part of {c16}
@@ -280,7 +280,7 @@ qed::py::native::channels(py::module & m)
         // the handler
         &qed::native::channels::real<mapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the real part of a complex double tile");
 
