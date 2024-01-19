@@ -15,18 +15,31 @@ import { Tile } from '~/widgets'
 
 
 // a large raster represented as a rectangular grid of tiles
-export const Mosaic = ({ uri, shape, origin, tile, session }) => {
+export const Mosaic = ({ uri, origin, shape, tile, zoom, session }) => {
+    // split the zoom level into two parts:
+    // - magnification: the integer part of the zoom level
+    // - distortion: the fractional part of the zoom level
+    const magnification = zoom.map(level => 2 ** ((level < 0) ? 0 : Math.trunc(level)))
+    const distortion = zoom.map(level => 2 ** (level < 0 ? level : level - Math.trunc(level)))
+
+    // compute the zoomed shape using only the magnification
+    const magShape = shape.map((s, idx) => Math.trunc(s / magnification[idx]))
+    // compute the zoomed shape taking into account the entire zoom level
+    const zoomedShape = shape.map((s, idx) => Math.trunc(s / (2 ** zoom[idx])))
+
     // render
     return (
-        <Box shape={shape}>
-            {mosaic(shape, origin, tile).map(spec => {
+        <Box shape={zoomedShape}>
+            {mosaic(magShape, origin, tile).map(spec => {
                 // unpack
-                const [origin, extent] = spec
+                const [origin, shape] = spec
+                // distort the shape
+                const distorted = shape.map((s, idx) => Math.trunc(s / distortion[idx]))
                 // form the uri
-                const tileURI = `${uri}/${origin.join("x")}+${extent.join("x")}?session=${session}`
+                const tileURI = `${uri}/${origin.join("x")}+${shape.join("x")}?session=${session}`
                 // render
                 return (
-                    <Tile key={origin} uri={tileURI} shape={extent} />
+                    <Tile key={origin} uri={tileURI} shape={distorted} />
                 )
             })}
         </Box>
