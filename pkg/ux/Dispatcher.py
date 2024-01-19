@@ -91,7 +91,8 @@ class Dispatcher:
         # unpack
         data = match.group("data_dataset")
         channel = match.group("data_channel")
-        zoom = int(match.group("data_zoom"))
+        zoomSpec = match.group("data_zoom")
+        zoom = tuple(map(int, zoomSpec.split("x")))
         spec = match.group("data_tile")
         origin = tuple(map(int, match.group("data_origin").split("x")))
         shape = tuple(map(int, match.group("data_shape").split("x")))
@@ -133,7 +134,7 @@ class Dispatcher:
             # get the dataset name
             dataname = self.panel.dataset(data).pyre_name
             # suggest a file name, in case the user wants to save the tile
-            filename = f"{dataname}.{channel}.{zoom}.{spec}.bmp"
+            filename = f"{dataname}.{channel}.{zoomSpec}.{spec}.bmp"
             # encode it
             encoded = urllib.parse.quote(filename)
             # decorate it
@@ -252,7 +253,7 @@ class Dispatcher:
     # recognizer fragments
     uuid = r"\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"
     pyreid = r"[^&?#:\s]+"
-    zoom = r"-?\d+"
+    zoom = r"-?\d+x-?\d+"
     origin = r"-?\d+x-?\d+"
     shape = r"\d+x\d+"
     # currently, only {csv} is supported
