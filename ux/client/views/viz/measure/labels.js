@@ -23,7 +23,7 @@ export const Labels = ({ positions, values }) => {
                 // get the position of the marker
                 const [y, x] = position
                 // get the value
-                const [dataY, dataX] = values[idx]
+                const [dataY, dataX] = values[idx].map(value => Math.trunc(value))
                 // use the value to make a key
                 const key = `${dataY}x${dataX}`
                 // and render
