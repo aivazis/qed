@@ -23,7 +23,7 @@ export const useGetTileURI = ({ viewport, zoomLevel }) => {
     // and the zoom level
     zoomLevel ??= viewportZoom
     // project
-    const level = Math.trunc(Math.min(zoomLevel.horizontal, zoomLevel.vertical))
+    const level = [Math.trunc(zoomLevel.vertical), Math.trunc(zoomLevel.horizontal)].join("x")
 
     // get the view
     const view = views[viewport]
