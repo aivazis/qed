@@ -81,7 +81,10 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     return (
         <Box ref={registrar} {...controllers} {...rest} >
             {/* the data tiles */}
-            <View uri={uri} shape={zoomedShape} origin={origin} tile={tile} session={session} />
+            <View uri={uri}
+                origin={origin} shape={shape} tile={tile}
+                zoom={[zoom.vertical, zoom.horizontal]}
+                session={session} />
             {/* the measure layer */}
             {measure && <Measure viewport={viewport} shape={zoomedShape} scale={scale} />}
         </Box>
@@ -115,6 +118,11 @@ const DataTiles = styled(Mosaic)`
 const shouldRender = (prev, next) => {
     // if the {session} has changed
     if (prev.session != next.session) {
+        // render
+        return false
+    }
+    // if the {zoom} level has changed
+    if (prev.zoom[0] != next.zoom[0] || prev.zoom[1] != next.zoom[1]) {
         // render
         return false
     }
