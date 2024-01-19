@@ -74,7 +74,7 @@ qed::py::nisar::slc(py::module & m)
         // the signature
         "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
-        "render the imaginary part a complex float tile");
+        "render the imaginary part of a complex float tile");
     // imaginary part of {c16}
     slc.def(
         // the name of the function
@@ -118,7 +118,7 @@ qed::py::nisar::slc(py::module & m)
         // the signature
         "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
-        "render the real part a complex float tile");
+        "render the real part of a complex float tile");
     // real part of {c16}
     slc.def(
         // the name of the function
