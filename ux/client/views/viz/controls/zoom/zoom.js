@@ -23,7 +23,7 @@ import { Minimap } from './minimap'
 
 
 //  display the zoom control
-export const Zoom = ({ min = 0, max = 4 }) => {
+export const Zoom = ({ min = -4, max = 4 }) => {
     // set the scale
     const ils = 200
     // the lock button state
@@ -65,7 +65,7 @@ export const Zoom = ({ min = 0, max = 4 }) => {
     }
 
     // set up the tick marks
-    const major = [...Array(max - min + 1).keys()].map((_, idx) => min + idx)
+    const major = [-4, -2, 0, 2, 4]
     // slider configuration
     const xSlider = {
         value: zoom.horizontal, setValue: setHorizontalZoom,
