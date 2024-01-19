@@ -15,7 +15,6 @@
 #include "phase.h"
 #include "real.h"
 
-
 #endif
 
 // end of file

@@ -17,12 +17,12 @@ qed::nisar::real::abs(
     const dataset_t & dataset,
     // the layout
     const datatype_t & datatype,
-    // the zoom level
-    int zoom,
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
     typename sourceT::shape_type tile,
+    // the stride
+    typename sourceT::index_type stride,
     // the range of values to render
     double min, double max) -> bmp_t
 {
@@ -30,18 +30,18 @@ qed::nisar::real::abs(
     using index_t = typename sourceT::index_type;
     using shape_t = typename sourceT::shape_type;
 
-    // compute the scale
-    auto scale = 1 << zoom;
     // the origin of the data region is scaled by this
-    auto from = index_t(scale * origin);
-    // form the strides
-    shape_t strides = shape_t::fill(scale);
+    auto from = origin;
+    // by going through its entries
+    for (int axis = 0; axis < index_t::rank(); ++axis) {
+        // and multiplying them by the stride
+        from[axis] *= stride[axis];
+    }
 
     // read the data
-    auto source = pyre::h5::read<sourceT>(dataset, datatype, from, tile, strides);
-
+    auto source = pyre::h5::read<sourceT>(dataset, datatype, from, tile, stride);
     // and render
-    return native::channels::amplitude(source, 0, { 0, 0 }, tile, min, max);
+    return native::channels::amplitude(source, { 0, 0 }, tile, stride, min, max);
 }
 
 

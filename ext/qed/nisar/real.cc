@@ -28,7 +28,7 @@ qed::py::nisar::real(py::module & m)
         // the handler
         &qed::nisar::real::value<heapgrid_t<float>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the value of a float tile");
     // {r8} amplitude
@@ -38,7 +38,7 @@ qed::py::nisar::real(py::module & m)
         // the handler
         &qed::nisar::real::value<heapgrid_t<double>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the amplitude of a double tile");
 
@@ -50,7 +50,7 @@ qed::py::nisar::real(py::module & m)
         // the handler
         &qed::nisar::real::abs<heapgrid_t<float>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the absolute value of a float tile");
     // {r8}
@@ -60,7 +60,7 @@ qed::py::nisar::real(py::module & m)
         // the handler
         &qed::nisar::real::abs<heapgrid_t<double>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the absolute value of a double tile");
 
@@ -71,7 +71,8 @@ qed::py::nisar::real(py::module & m)
         // the handler
         &qed::nisar::real::unwrapped<heapgrid_t<float>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "brightness"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        "brightness"_a,
         // the docstring
         "render the absolute value of a float tile");
     // {r8}
@@ -81,7 +82,8 @@ qed::py::nisar::real(py::module & m)
         // the handler
         &qed::nisar::real::unwrapped<heapgrid_t<double>>,
         // the signature
-        "source"_a, "datatype"_a, "zoom"_a, "origin"_a, "shape"_a, "min"_a, "max"_a, "brightness"_a,
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        "brightness"_a,
         // the docstring
         "render the absolute value of a double tile");
 

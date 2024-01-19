@@ -17,12 +17,12 @@ namespace qed::nisar::real {
         const dataset_t & source,
         // the data layout
         const datatype_t & datatype,
-        // the zoom level
-        int zoom,
         // the origin of the tile
         typename sourceT::index_type origin,
         // the tile shape
         typename sourceT::shape_type tile,
+        // the stride
+        typename sourceT::index_type stride,
         // the range of values to render
         double min, double max) -> bmp_t;
 }
