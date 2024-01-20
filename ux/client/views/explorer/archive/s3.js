@@ -20,7 +20,7 @@ import { Profile } from './profile'
 import { Region } from './region'
 import { Bucket } from './bucket'
 import { Path } from './path'
-import { Form, Body, Footer, } from '../form'
+import { Form, Body } from '../form'
 
 // a data archive in an S3 bucket
 export const S3 = ({ view, setType, hide }) => {
@@ -29,7 +29,7 @@ export const S3 = ({ view, setType, hide }) => {
         // the nickname of the archive; get's used to generate the name of the component
         name: "",
         // the connection profile with the AWS credentials
-        profile: "",
+        profile: "default",
         // the AWS region
         region: "",
         // the name of the bucket
