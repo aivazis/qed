@@ -65,17 +65,18 @@ export const Zoom = ({ min = -4, max = 4 }) => {
     }
 
     // set up the tick marks
-    const major = [-4, -2, 0, 2, 4]
+    const major = [...Array((max - min) / 2 + 1).keys()].map((_, idx) => min + 2 * idx)
+    const minor = [...Array((max - min) / 2).keys()].map((_, idx) => min + 1 + 2 * idx)
     // slider configuration
     const xSlider = {
         value: zoom.horizontal, setValue: setHorizontalZoom,
-        min, max, major,
+        min, max, major, minor,
         direction: "row", labels: "top", arrows: "bottom",
         height: ils / 2, width: ils,
     }
     const ySlider = {
         value: zoom.vertical, setValue: setVerticalZoom,
-        min, max, major,
+        min, max, major, minor,
         direction: "column", flipped: true, labels: "right", arrows: "left",
         height: ils, width: ils / 2,
     }
