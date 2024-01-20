@@ -28,7 +28,9 @@ export const Profile = ({ value, update }) => {
     }
     // all done
     return (
-        <Field name="profile" value={value} tip="the profile with the AWS credentials">
+        <Field name="profile" required={false} value={value}
+            tip="the name of the profile with the AWS credentials"
+        >
             <Value>
                 <EnabledInput type="text" value={value === null ? "" : value} {...behaviors} />
             </Value>
