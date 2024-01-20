@@ -23,7 +23,7 @@ export const Provider = ({ config, children }) => {
     // the layout of the controller in client coordinates
     const { height, width } = config
     // extract the controller limits and tick marks
-    const { min, max, major } = config
+    const { min, max, major = [], minor = [] } = config
 
     // my unit cell, in intrinsic coordinates
     const cell = 10
@@ -149,10 +149,15 @@ export const Provider = ({ config, children }) => {
         right: value => ({ x: 3 * cell, y: userToICS(value) + cell }),
     }
 
-    // position a major tick mark
+    // position tick marks
     const majorPosition = {
         row: value => `M ${userToICS(value)} ${-cell} l 0 ${2 * cell}`,
         column: value => `M ${-cell} ${userToICS(value)} l ${2 * cell} 0`,
+    }
+
+    const minorPosition = {
+        row: value => `M ${userToICS(value)} ${-cell / 2} l 0 ${cell}`,
+        column: value => `M ${-cell / 2} ${userToICS(value)} l ${cell} 0`,
     }
 
     // generate a marker
@@ -192,7 +197,7 @@ export const Provider = ({ config, children }) => {
         // the layout of the controller in client coordinates
         height, width,
         // the limits and tick marks
-        min, max, major,
+        min, max, major, minor,
 
         // my unit cell
         cell,
@@ -210,6 +215,7 @@ export const Provider = ({ config, children }) => {
         intervalPosition: intervalPosition[direction],
         labelPosition: labelPosition[labels],
         majorPosition: majorPosition[direction],
+        minorPosition: minorPosition[direction],
         marker: marker[arrows],
         markerPosition: markerPosition[arrows],
         markerLabelPosition: markerLabelPosition[arrows],
@@ -248,7 +254,7 @@ export const Context = React.createContext(
         // the layout of the controller in client coordinates
         height: null, width: null,
         // the limits and tick marks
-        min: null, max: null, major: null,
+        min: null, max: null, major: null, minor: null,
 
         // my unit cell
         cell: null,
@@ -273,6 +279,7 @@ export const Context = React.createContext(
         intervalPosition: () => { throw new Error(complaint) },
         labelPosition: () => { throw new Error(complaint) },
         majorPosition: () => { throw new Error(complaint) },
+        minorPosition: () => { throw new Error(complaint) },
         marker: () => { throw new Error(complaint) },
         markerPosition: () => { throw new Error(complaint) },
         markerLabelPosition: () => { throw new Error(complaint) },
