@@ -15,6 +15,7 @@ import { Axis } from './axis'
 import { Interval } from './interval'
 import { Labels } from './labels'
 import { Major } from './major'
+import { Minor } from './minor'
 import { Marker } from './marker'
 import { MarkerLabel } from './markerLabel'
 import { Rangemat } from './rangemat'
@@ -37,6 +38,7 @@ const Controller = ({ value, setValue }) => {
     return (
         <Rangemat setValue={setValue} >
             <Major />
+            <Minor />
             <Axis />
             <Labels />
             <Interval value={value} />

@@ -19,17 +19,17 @@ export const useConfig = () => {
     const {
         enabled,
         arrows, labels, markers,
-        min, max, major,
+        min, max, major, minor,
         intervalPosition,
-        labelPosition, majorPosition, marker, markerPosition, markerLabelPosition,
+        labelPosition, majorPosition, minorPosition, marker, markerPosition, markerLabelPosition,
     } = React.useContext(Context)
 
     // and publish
     return {
         enabled,
         arrows, labels, markers,
-        min, max, major,
-        intervalPosition, labelPosition, majorPosition,
+        min, max, major, minor,
+        intervalPosition, labelPosition, majorPosition, minorPosition,
         marker, markerPosition, markerLabelPosition,
     }
 }
