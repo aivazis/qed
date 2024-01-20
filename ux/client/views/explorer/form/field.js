@@ -12,14 +12,14 @@ import React from 'react'
 import { Row, Prompt, Separator, Required } from './form'
 
 // render a field
-export const Field = ({ name, value, tip, children }) => {
+export const Field = ({ name, value, tip, required = true, children }) => {
     // check validity
     const invalid = value === null || value.toString().length == 0
     // render
     return (
         <Row>
             <Prompt title={tip}>
-                {invalid && <Required>*</Required>}
+                {required && invalid && <Required>*</Required>}
                 {name}
             </Prompt>
             <Separator>:</Separator>
