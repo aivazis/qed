@@ -18,13 +18,18 @@ export const Minor = ({ ...rest }) => {
 
     // get the minor tick mark values and the mark generator
     const { enabled, minor, minorPosition } = useConfig()
-    // generate them
-    const ticks = minor.map(value => minorPosition(value)).join(" ")
-    // pick an implementation based on my state
-    const Path = enabled ? Enabled : Disabled
     // render
     return (
-        <Path d={ticks} {...rest} />
+        <g>
+            {minor.map(tick => {
+                // pick an implementation based on my state
+                const Path = enabled ? Enabled : Disabled
+                // render
+                return (
+                    <Path key={tick} d={minorPosition(tick)} {...rest} />
+                )
+            })}
+        </g>
     )
 }
 
@@ -32,7 +37,7 @@ export const Minor = ({ ...rest }) => {
 // styling
 const Base = styled.path`
     fill: none;
-    stroke-width: 1;
+    stroke-width: 2;
     vector-effect: non-scaling-stroke;
 `
 
@@ -43,7 +48,17 @@ const Disabled = styled(Base)`
 
 
 const Enabled = styled(Base)`
-    stroke: hsl(0deg, 0%, 60%);
+    & {
+        stroke: hsl(0deg, 0%, 40%);
+    }
+
+    &:hover {
+        stroke: hsl(28deg, 90%, 55%);
+    }
+
+    &:active {
+        stroke: hsl(28deg, 90%, 55%);
+    }
 `
 
 

@@ -156,8 +156,8 @@ export const Provider = ({ config, children }) => {
     }
 
     const minorPosition = {
-        row: value => `M ${userToICS(value)} ${-cell / 2} l 0 ${cell}`,
-        column: value => `M ${-cell / 2} ${userToICS(value)} l ${cell} 0`,
+        row: value => `M ${userToICS(value)} ${- 0.8 * cell} l 0 ${1.6 * cell}`,
+        column: value => `M ${-0.8 * cell} ${userToICS(value)} l ${1.6 * cell} 0`,
     }
 
     // generate a marker

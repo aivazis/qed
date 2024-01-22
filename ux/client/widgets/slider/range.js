@@ -37,9 +37,9 @@ const Controller = ({ value, setValue }) => {
     // render
     return (
         <Rangemat setValue={setValue} >
+            <Axis />
             <Major />
             <Minor />
-            <Axis />
             <Labels />
             <Interval value={value} />
             <Marker id={0} value={value[0]} />
