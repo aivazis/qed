@@ -24,8 +24,7 @@ export const Labels = ({ value = null, setValue = null }) => {
     return (
         <>
             {major.map(tick => (
-                <Label key={tick}
-                    tick={tick} value={value} setValue={setValue} />
+                <Label key={tick} tick={tick} value={value} setValue={setValue} />
             ))}
         </>
     )

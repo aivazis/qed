@@ -36,9 +36,9 @@ const Controller = ({ value, setValue }) => {
     // render
     return (
         <Simplemat setValue={setValue} >
+            <Axis />
             <Major />
             <Minor />
-            <Axis />
             <Labels value={value} setValue={setValue} />
             <Marker value={value} />
             <MarkerLabel value={value} />

@@ -44,7 +44,7 @@ export const Axis = ({ ...rest }) => {
 // styling
 const Base = styled.path`
     fill: none;
-    stroke-width: 1;
+    stroke-width: 2;
     vector-effect: non-scaling-stroke;
 `
 
@@ -55,7 +55,7 @@ const Disabled = styled(Base)`
 
 
 const Enabled = styled(Base)`
-    stroke: hsl(0deg, 0%, 60%);
+    stroke: hsl(0deg, 0%, 40%);
 `
 
 
