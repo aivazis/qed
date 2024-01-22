@@ -17,8 +17,9 @@ import { Header } from '~/widgets'
 import { useGetView } from '../viz/useGetView'
 // components
 import { Measure } from './measure'
-import { Zoom } from './zoom'
+import { Sync } from './sync'
 import { Viz } from './viz'
+import { Zoom } from './zoom'
 // styles
 import styles from './styles'
 
@@ -41,6 +42,8 @@ export const Controls = () => {
             {enabled && <Zoom />}
             {/* visualization pipeline controls */}
             {enabled && <Viz />}
+            {/* viewport synchronization controls */}
+            {enabled && <Sync />}
         </React.Suspense>
     )
 }
