@@ -64,7 +64,7 @@ const Panel = () => {
     return (
         <Flex.Box direction="row" style={styles.flex}>
             {/* the panel with activity specific content, as determined by the current route */}
-            <Flex.Panel min={350} max={450} style={activityPaint} >
+            <Flex.Panel min={350} style={activityPaint} >
                 <Outlet />
             </Flex.Panel>
 
