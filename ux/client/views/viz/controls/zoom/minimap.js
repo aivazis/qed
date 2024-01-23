@@ -280,6 +280,10 @@ export const Minimap = ({ ils, shape, zoom }) => {
 // the helpers
 const Placemat = styled.rect`
     fill: hsl(0deg, 0%, 7%);
+
+    stroke: hsl(0deg, 0%, 20%);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
 `
 
 const Viewport = styled.rect`
