@@ -28,7 +28,8 @@ export const Region = ({ value, update }) => {
     }
     // all done
     return (
-        <Field name="region" value={value} tip="the AWS region with the data products">
+        <Field name="region" required={false} value={value}
+            tip="the AWS region with the data products">
             <Value>
                 <EnabledInput type="text" value={value === null ? "" : value} {...behaviors} />
             </Value>

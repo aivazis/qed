@@ -28,7 +28,7 @@ export const Path = ({ value, update }) => {
     }
     // all done
     return (
-        <Field name="path" value={value} tip="the path to the data archive">
+        <Field name="path" required={false} value={value} tip="the path to the data archive">
             <Value>
                 <EnabledInput type="text" value={value === null ? "" : value} {...behaviors} />
             </Value>

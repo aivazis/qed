@@ -28,7 +28,8 @@ export const Bucket = ({ value, update }) => {
     }
     // all done
     return (
-        <Field name="bucket" value={value} tip="the AWS bucket with the data products">
+        <Field name="bucket" required={false}
+            value={value} tip="the AWS bucket with the data products">
             <Value>
                 <EnabledInput type="text" value={value === null ? "" : value} {...behaviors} />
             </Value>
