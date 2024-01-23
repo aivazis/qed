@@ -35,7 +35,7 @@ export const Info = ({ viewport, view }) => {
     const { name: datasetName, datatype, shape, origin, tile } = dataset
 
     // scale the shape to the current zoom level
-    const effectiveShape = shape.map((s, idx) => s / (2 ** zoom[idx]))
+    const effectiveShape = shape.map((s, idx) => s / (2 ** -zoom[idx]))
 
     // mix my paint
     const paint = styles.viewer

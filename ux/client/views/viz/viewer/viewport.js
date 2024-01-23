@@ -42,7 +42,7 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     const { shape, origin, tile } = dataset
 
     // convert the zoom level into a scale
-    const scale = [2 ** zoom.vertical, 2 ** zoom.horizontal]
+    const scale = [2 ** -zoom.vertical, 2 ** -zoom.horizontal]
     // compute the dimensions of the mosaic
     const zoomedShape = shape.map((extent, idx) => Math.trunc(extent / scale[idx]))
 

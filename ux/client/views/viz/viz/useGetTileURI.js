@@ -23,7 +23,7 @@ export const useGetTileURI = ({ viewport, zoomLevel }) => {
     // and the zoom level
     zoomLevel ??= viewportZoom
     // unpack
-    const level = [zoomLevel.vertical, zoomLevel.horizontal]
+    const level = [-zoomLevel.vertical, -zoomLevel.horizontal]
     // normalize and form the tag
     const tag = level.map(l => Math.trunc(Math.max(l, 0))).join("x")
 
