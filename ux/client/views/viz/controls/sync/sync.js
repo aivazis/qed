@@ -15,11 +15,14 @@ import { Tray } from '~/widgets'
 // locals
 // hooks
 import { useViews } from '../../viz/useViews'
+import { useSynced } from '../../viz/useSynced'
 
 // the sync control
 export const Sync = () => {
-    // get the active view and unpack it
+    // get the set of views
     const { views } = useViews()
+    // get the sync state of all the viewports
+    const synced = useSynced()
 
     console.log(views)
 
@@ -38,14 +41,24 @@ export const Sync = () => {
                     </Title>
                 </Head>
                 <Body>
-                    {views.map(({ dataset, channel }, viewport) =>
-                        <Viewport key={`${dataset.name}:${viewport}`}>
-                            <Index>{`${viewport}:`}</Index>
-                            <Dataset>{dataset.name}</Dataset>
-                            <Channel></Channel>
-                            <Scroll>+5 -3</Scroll>
-                        </Viewport>
-                    )}
+                    {views.map(({ dataset, channel }, viewport) => {
+                        // get the sync state of the viewport
+                        const sync = synced[viewport]
+                        // unpack the scroll offset
+                        const offset = sync.scroll ? [
+                            sync.scroll.x.toString(),
+                            sync.scroll.y.toString(),
+                        ].join(" ") : "no"
+                        // render
+                        return (
+                            <Viewport key={`${dataset.name}:${viewport}`}>
+                                <Index>{`${viewport}:`}</Index>
+                                <Dataset>{dataset.name}</Dataset>
+                                <Channel></Channel>
+                                <Scroll>{offset}</Scroll>
+                            </Viewport>
+                        )
+                    })}
                 </Body>
             </Housing>
         </Tray>
