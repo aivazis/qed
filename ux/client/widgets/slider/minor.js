@@ -53,7 +53,7 @@ export const Minor = ({ setValue = null, ...rest }) => {
 // styling
 const Base = styled.path`
     fill: none;
-    stroke-width: 2;
+    stroke-width: 1;
     vector-effect: non-scaling-stroke;
 `
 
