@@ -130,9 +130,7 @@ export const S3 = ({ view, setType, hide }) => {
     }
     // determine whether i have enough information to make the connection
     const ready = (
-        form.name !== null && form.name.length &&
-        form.region !== null && form.region.length &&
-        form.bucket !== null && form.bucket.length
+        form.name !== null && form.name.length
     )
     // use this to figure out which button to render
     const Connect = ready ? EnabledConnect : DisabledConnect
