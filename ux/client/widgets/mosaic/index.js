@@ -19,13 +19,13 @@ export const Mosaic = ({ uri, origin, shape, tile, zoom, session }) => {
     // split the zoom level into two parts:
     // - magnification: the integer part of the zoom level
     // - distortion: the fractional part of the zoom level
-    const magnification = zoom.map(level => 2 ** ((level < 0) ? 0 : Math.trunc(level)))
-    const distortion = zoom.map(level => 2 ** (level < 0 ? level : level - Math.trunc(level)))
+    const magnification = zoom.map(level => 2 ** -((level > 0) ? 0 : Math.trunc(level)))
+    const distortion = zoom.map(level => 2 ** -(level > 0 ? level : level - Math.trunc(level)))
 
     // compute the zoomed shape using only the magnification
     const magShape = shape.map((s, idx) => Math.trunc(s / magnification[idx]))
     // compute the zoomed shape taking into account the entire zoom level
-    const zoomedShape = shape.map((s, idx) => Math.trunc(s / (2 ** zoom[idx])))
+    const zoomedShape = shape.map((s, idx) => Math.trunc(s / (2 ** -zoom[idx])))
 
     // render
     return (
