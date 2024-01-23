@@ -38,7 +38,7 @@ export const Focus = ({ idx, point }) => {
     // deduce my state
     const selected = selection.has(idx)
     // turn the zoom level into a scale
-    const scale = [2 ** zoom.vertical, 2 ** zoom.horizontal]
+    const scale = [2 ** -zoom.vertical, 2 ** -zoom.horizontal]
 
     // when clicked
     const focus = evt => {

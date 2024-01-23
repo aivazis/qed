@@ -42,7 +42,7 @@ export const Print = ({ viewport }) => {
     // i actually need the shape of the raster
     const { shape } = dataset
     // convert the zoom level into a scale
-    const scale = zoom.map(level => 2 ** level)
+    const scale = zoom.map(level => 2 ** -level)
     // compute the dimensions of the mosaic
     const zoomedShape = shape.map((extent, idx) => extent / scale[idx])
 

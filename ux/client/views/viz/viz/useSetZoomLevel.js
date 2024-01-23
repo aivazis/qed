@@ -48,8 +48,8 @@ export const useSetZoomLevel = () => {
             // and the new one
             const newZoom = table[activeViewport]
             // compute the magnification factors
-            const mH = 2 ** (oldZoom.horizontal - newZoom.horizontal)
-            const mV = 2 ** (oldZoom.vertical - newZoom.vertical)
+            const mH = 2 ** -(oldZoom.horizontal - newZoom.horizontal)
+            const mV = 2 ** -(oldZoom.vertical - newZoom.vertical)
 
             // compute the new scroll location so the center pixel remains the same after zoom
             const top = mV * (scrollTop + clientHeight / 2) - clientHeight / 2

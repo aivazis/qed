@@ -113,7 +113,7 @@ export const useUpdatePixelLocation = () => {
         }
 
         // turn the zoom level into a scale
-        const scale = [2 ** zoom.vertical, 2 ** zoom.horizontal]
+        const scale = [2 ** -zoom.vertical, 2 ** -zoom.horizontal]
         // get the viewport
         // make sure to grab the viewport, not whatever the mouse is over
         const element = evt.currentTarget
