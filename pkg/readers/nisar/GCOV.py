@@ -12,6 +12,7 @@ import journal
 from .H5 import H5
 
 # my dataset
+from .products.Real import Real
 from .products.SLC import SLC
 
 
@@ -134,7 +135,7 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                     # the diagonal terms
                     else:
                         # are real
-                        data = SLC(name=name, data=dataset, **config)
+                        data = Real(name=name, data=dataset, **config)
                     # add the dataset to my pile
                     self.datasets.append(data)
         # all done
