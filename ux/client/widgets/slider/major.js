@@ -14,18 +14,34 @@ import { useConfig } from "./useConfig"
 
 
 // render the major tick marks
-export const Major = ({ ...rest }) => {
+export const Major = ({ setValue = null, ...rest }) => {
     // get the major tick mark values and the mark generator
     const { enabled, major, majorPosition } = useConfig()
+    // build a handler factory that uses my exact value
+    const pick = value => {
+        // make a handler
+        return evt => {
+            // suppress the placemat listener
+            evt.stopPropagation()
+            // quash any side effects
+            evt.preventDefault()
+            // set the value
+            setValue(value)
+            // all done
+            return
+        }
+    }
     // render
     return (
         <g>
             {major.map(tick => {
                 // pick an implementation based on my state
                 const Path = enabled ? Enabled : Disabled
+                // build my behaviors
+                const behaviors = setValue ? { onClick: pick(tick) } : {}
                 // render
                 return (
-                    <Path key={tick} d={majorPosition(tick)} {...rest} />
+                    <Path key={tick} d={majorPosition(tick)} {...behaviors} {...rest} />
                 )
             })}
         </g>
