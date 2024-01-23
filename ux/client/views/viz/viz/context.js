@@ -132,7 +132,7 @@ export const Context = React.createContext(
 // the empty view template
 export const emptyView = () => ({ reader: null, dataset: null, channel: null, session: "" })
 // the default synced state
-export const syncedDefault = false
+export const syncedDefault = { scroll: null }
 // the default zoom level
 export const zoomDefault = { horizontal: 0, vertical: 0 }
 // the default state of the measure layer

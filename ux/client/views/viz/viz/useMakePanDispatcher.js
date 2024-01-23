@@ -26,8 +26,10 @@ export const useMakePanDispatcher = () => {
             // and bail
             return
         }
+        // get my state
+        const mySync = synced[idx]
         // if i am not synced
-        if (!synced[idx]) {
+        if (!mySync.scroll) {
             // nothing to do
             return
         }
@@ -38,15 +40,17 @@ export const useMakePanDispatcher = () => {
         const x = Math.max(element.scrollLeft, 0)
         // go through the viewports
         viewports.forEach((port, i) => {
+            // get the sync state
+            const sync = synced[i]
             // if i bumped into myself or a viewport that isn't synced
-            if (i === idx || !synced[i]) {
+            if (i === idx || !sync.scroll) {
                 // move on
                 return
             }
             // everybody else gets a bump on its semaphore
             ++semaphores[i]
             // and scrolls to my location
-            port.scroll(x, y)
+            port.scroll(x + sync.scroll.x - mySync.scroll.x, y + sync.scroll.y - mySync.scroll.y)
             // all done
             return
         })

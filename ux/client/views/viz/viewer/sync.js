@@ -25,7 +25,7 @@ import styles from './styles'
 // control viewport synchronization with a shared camera
 export const Sync = ({ viewport }) => {
     // look up the current sync state of the {viewport}
-    const isSynced = useGetViewportSync(viewport)
+    const { scroll: isSynced } = useGetViewportSync(viewport)
     // build the sync toggle
     const toggle = useToggleViewportSync(viewport)
     // and the one that syncs all them

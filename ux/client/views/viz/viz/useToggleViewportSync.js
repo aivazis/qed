@@ -23,8 +23,10 @@ export const useToggleViewportSync = idx => {
         setSynced(old => {
             // make a copy of the old table
             const table = [...old]
-            // add flip the viewport status
-            table[idx] = !old[idx]
+            // get my sync state
+            const sync = old[idx]
+            // add flip the scroll status of the specified viewport
+            table[idx] = { ...sync, scroll: (sync.scroll === null) ? { x: 0, y: 0 } : null }
             // return the new table
             return table
         })
