@@ -71,41 +71,40 @@ export const Zoom = ({ min = -4, max = 4 }) => {
     const xSlider = {
         value: zoom.horizontal, setValue: setHorizontalZoom,
         min, max, major, minor,
-        direction: "row", labels: "top", arrows: "bottom",
+        direction: "row", labels: "top", arrows: "bottom", markers: true,
         height: ils / 2, width: ils,
     }
     const ySlider = {
         value: zoom.vertical, setValue: setVerticalZoom,
         min, max, major, minor,
-        direction: "column", flipped: true, labels: "right", arrows: "left",
+        direction: "column", flipped: true, labels: "right", arrows: "left", markers: true,
         height: ils, width: ils / 2,
     }
-
-    const width = ySlider.width + xSlider.width
-    const height = ySlider.height + xSlider.height - 40
+    // set up the overall dimensions of the control
+    const width = 340
+    const height = 290
 
     // mix my paint
     const state = enabled ? "enabled" : "disabled"
-
     // and render
     return (
         <Tray title="zoom" initially={true} state={state} scale={0.5}>
             {/* the control housing */}
             <Housing height={height} width={width}>
                 {/* the vertical slider */}
-                <g transform="translate(-20 0)">
+                <g transform="translate(10 0)">
                     <Controller enabled={enabled} {...ySlider} />
                 </g>
                 {/* the horizontal slider */}
-                <g transform="translate(60 180)">
+                <g transform="translate(100 190)">
                     <Controller enabled={enabled} {...xSlider} />
                 </g>
                 {/* the minimap */}
-                <g transform={`translate(60 0) scale(${ils})`}>
+                <g transform={`translate(100 0) scale(${ils})`}>
                     <Minimap ils={ils} zoom={zoom} shape={dataset.shape} />
                 </g>
                 {/* the lock */}
-                <g transform="translate(30 230)">
+                <g transform="translate(60 240)">
                     <Lock lock={lock} toggle={toggle} />
                 </g>
             </Housing>
