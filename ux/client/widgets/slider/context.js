@@ -179,7 +179,7 @@ export const Provider = ({ config, children }) => {
     const markerLabelPosition = {
         top: value => ({ x: userToICS(value), y: -6 * cell }),
         bottom: value => ({ x: userToICS(value), y: 8.5 * cell }),
-        left: value => ({ x: -5 * cell, y: userToICS(value) + cell }),
+        left: value => ({ x: -9 * cell, y: userToICS(value) + cell }),
         right: value => ({ x: 5 * cell, y: userToICS(value) + cell }),
     }
 
