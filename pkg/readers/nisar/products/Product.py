@@ -156,7 +156,7 @@ class Product(
 
     def _retrieveChannels(self):
         """
-        Generate a sequence of channel pipelines for this products
+        Generate a sequence of channel pipelines for this product
         """
         # by default, look to my cell type
         yield from self.cell.channels

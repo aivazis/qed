@@ -30,7 +30,7 @@ class UNW(Product, family="qed.datasets.nisar.products.unw"):
     # implementation details
     def _retrieveChannels(self):
         """
-        Generate a sequence of channel pipelines for this products
+        Generate a sequence of channel pipelines for this product
         """
         # by default, look to my cell type
         yield "unwrapped"
