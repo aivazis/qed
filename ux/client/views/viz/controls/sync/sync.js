@@ -31,6 +31,7 @@ export const Sync = () => {
                     <Title>
                         <Header></Header>
                         <Header></Header>
+                        <Header>channel</Header>
                         <Header>scroll</Header>
                         <Header>zoom</Header>
                         <Header>viz</Header>
@@ -40,7 +41,8 @@ export const Sync = () => {
                     {views.map(({ dataset, channel }, viewport) =>
                         <Viewport key={`${dataset.name}:${viewport}`}>
                             <Index>{`${viewport}:`}</Index>
-                            <Dataset>{`${dataset.name}.${channel}`}</Dataset>
+                            <Dataset>{dataset.name}</Dataset>
+                            <Channel></Channel>
                             <Scroll>+5 -3</Scroll>
                         </Viewport>
                     )}
@@ -92,6 +94,11 @@ const Index = styled(Cell)`
 
 // the dataset
 const Dataset = styled(Cell)`
+    overflow: auto;
+`
+
+// the channel
+const Channel = styled(Cell)`
     overflow: auto;
 `
 
