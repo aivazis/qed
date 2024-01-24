@@ -6,7 +6,6 @@
 
 // external
 import React from 'react'
-import styled from 'styled-components'
 
 // project
 // hooks
@@ -17,15 +16,6 @@ import { Plus as Icon } from '~/shapes'
 import { Badge } from '~/widgets'
 
 // local
-// components
-import {
-    // top level
-    Form,
-    // containers
-    Body, Footer, Row,
-    // items
-    Prompt, Separator, Value, Required,
-} from '../form'
 // styles
 import { connect as paintConnect } from './styles'
 
