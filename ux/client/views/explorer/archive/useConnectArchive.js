@@ -11,7 +11,7 @@ import { useSetActiveView } from "../explorer/useSetActiveView"
 import { useSetActiveViewport } from "../explorer/useSetActiveViewport"
 
 
-// add the form that collects the new archive form to the set of views
+// add the form that connects the new archive form to the set of views
 export const useConnectArchive = () => {
     // get the views
     const { views, emptyView } = useViews()
