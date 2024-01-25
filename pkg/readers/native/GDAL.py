@@ -98,13 +98,6 @@ class GDAL(
             address = uri.address
             # assemble the filename
             name = f"/vsis3{address}"
-            # make a channel
-            channel = journal.info("qed.readers.native.gdal")
-            # show me
-            channel.line(f"uri: {uri}")
-            channel.line(f"   opening: {name}")
-            # flush
-            channel.log()
             # get the dataset and return it
             return gdal.Open(name)
         # anything else is unsupported
