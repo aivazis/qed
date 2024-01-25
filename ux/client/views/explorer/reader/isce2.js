@@ -65,8 +65,8 @@ export const ISCE2 = ({ view, setType, hide }) => {
                     reader: `isce2.${form.product}`,
                     name: form.name,
                     uri: view.reader.uri,
-                    lines: parseInt(form.lines),
-                    samples: parseInt(form.samples),
+                    lines: form.lines,
+                    samples: form.samples,
                     cell: null,
                 }
             },
