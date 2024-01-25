@@ -25,6 +25,13 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
         """
         Retrieve my contents at {path}
         """
+        # get my uri
+        uri = str(self.uri)
+        # if it doesn't end in a slash
+        if not uri.endswith("/"):
+            # make sure it does
+            uri = f"{uri}/"
+
         # get my contents
         contents = self._contents
         # if i haven't retrieved them before
@@ -44,7 +51,7 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
             # and flush
             channel.log()
         # don't do more, for now
-        return list((key, key, False) for key in contents)
+        return list((key, f"{uri}{key}", False) for key in contents)
 
     # metamethods
     def __init__(self, **kwds):
