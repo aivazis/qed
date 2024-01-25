@@ -93,10 +93,12 @@ class GDALBand(
         """
         Render a tile of the given specification
         """
+        # interpret the zoom level as a scale
+        scale = [1 << level for level in zoom]
         # scale up the origin
-        scaledOrigin = [(1 << level) * value for level, value in zip(zoom, origin)]
+        scaledOrigin = [s * value for s, value in zip(scale, origin)]
         # and the shape
-        scaledShape = [(1 << level) * value for level, value in zip(zoom, shape)]
+        scaledShape = [s * value for s, value in zip(scale, shape)]
         # get the data
         tile = self.data.ReadAsArray(
             scaledOrigin[1], scaledOrigin[0], scaledShape[1], scaledShape[0]
@@ -104,7 +106,7 @@ class GDALBand(
         # unpack my range
         low, _, high = self.stats
         # zoom
-        zoomedTile = tile[:: zoom[1], :: zoom[0]]
+        zoomedTile = tile[:: scale[1], :: scale[0]]
         # resolve my channel
         channel = self.channel(name=channel)
         # render a tile and return it
