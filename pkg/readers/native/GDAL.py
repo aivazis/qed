@@ -66,7 +66,7 @@ class GDAL(
             self.datasets.append(band)
         # remember the data product
         self.product = dataset
-        # and update th selectors
+        # and update the selectors
         self.selectors["raster"] = bands
         # all done
         return
