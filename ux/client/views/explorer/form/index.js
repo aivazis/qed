@@ -19,6 +19,8 @@ export {
 
 // high level widgets
 export { Field } from './field'
+// error boxed
+export { Error } from './error'
 // editors
 export { Value, EnabledValue, Values } from './value'
 export { Input, EnabledInput, SelectedInput, Numeric } from './input'
