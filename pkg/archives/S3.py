@@ -75,6 +75,12 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
         if not s3:
             # i'm empty
             return []
+        # if we have support, unpack my state
+        uri = self.uri
+        # get the address and turn it into a path
+        address = qed.primitives.path(uri.address)
+        # the bucket is the root
+        bucket = address[1]
         # get the contents
         response = s3.list_objects_v2(Bucket=bucket)
         # retrieve the contents
@@ -106,12 +112,6 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
         uri = self.uri
         # unpack the profile and region from the authority field
         region, _, profile, _ = uri.server
-        # get the address and turn it into a path
-        address = qed.primitives.path(uri.address)
-        # the bucket is the root
-        bucket = address[1]
-        # and the key is the rest
-        key = qed.primitives.path(address[2:])
         # attempt to
         try:
             # start a session
