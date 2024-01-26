@@ -14,11 +14,13 @@ import { Panel } from './panel'
 import { Cancel, DisabledConnect, EnabledConnect } from './buttons'
 import { Type } from './type'
 import { Name } from './name'
-import { Form, Body, Field, Values, enumValue } from '../form'
+import { Form, Body, Field, Values, Error, enumValue } from '../form'
 
 
 // associate a NISAR reader with a given data product
 export const NISAR = ({ view, setType, hide }) => {
+    // error placeholder
+    const [error, setError] = React.useState(null)
     // set up my state
     const [form, setForm] = React.useState({
         // the pyre name of the reader
@@ -30,6 +32,8 @@ export const NISAR = ({ view, setType, hide }) => {
     const [request, isInFlight] = useMutation(connectMutation)
     // set up the state update
     const update = (field, value) => {
+        // clear any errors
+        setError(null)
         // replace my state
         setForm(old => {
             // with
@@ -82,8 +86,19 @@ export const NISAR = ({ view, setType, hide }) => {
             },
             // when done
             onCompleted: data => {
+                // clear the error
+                setError(null)
                 // remove the form from view
                 hide()
+                // all done
+                return
+            },
+            // if something went wrong
+            onError: error => {
+                // clear the product type; do this first because the update clears the error state
+                update("product", "")
+                // and now record the error
+                setError(error)
                 // all done
                 return
             }
@@ -119,6 +134,7 @@ export const NISAR = ({ view, setType, hide }) => {
             </Form>
             <Connect connect={connect} />
             <Cancel onClick={cancel}>cancel</Cancel>
+            {error && <Error>{error}</Error>}
         </Panel>
     )
 }
@@ -145,6 +161,7 @@ export const Products = ({ value, update }) => {
                 <Product name="roff" rep="roff" current={value} select={select} />
                 <Product name="runw" rep="runw" current={value} select={select} />
                 <Product name="gslc" rep="gslc" current={value} select={select} />
+                <Product name="goff" rep="goff" current={value} select={select} />
                 <Product name="gunw" rep="gunw" current={value} select={select} />
                 <Product name="gcov" rep="gcov" current={value} select={select} />
             </Values>
