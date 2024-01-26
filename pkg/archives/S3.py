@@ -59,6 +59,8 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
         super().__init__(**kwds)
         # set up the content cache
         self._contents = None
+        # establish the session
+        self._session = self._connect()
         # all done
         return
 
@@ -67,6 +69,23 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
         """
         Retrieve the contents of the data archive
         """
+        # get the session
+        s3 = self._session
+        # if i couldn't establish one
+        if not s3:
+            # i'm empty
+            return []
+        # get the contents
+        response = s3.list_objects_v2(Bucket=bucket)
+        # retrieve the contents
+        contents = response.get("Contents", [])
+        # make a list of the keys and return them
+        return list(entry["Key"] for entry in contents)
+
+    def _connect(self):
+        """
+        Establish a connection to the archive
+        """
         # attempt to
         try:
             # get the AWS support
@@ -74,7 +93,7 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
         # if this fails
         except ImportError:
             # we have a problem
-            channel = journal.warning("qed.archives.s3")
+            channel = journal.error("qed.archives.s3")
             # complain
             channel.line(f"while attempting to connect to {self.uri}")
             channel.line(f"could not import 'boto3'")
@@ -82,7 +101,7 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
             # flush
             channel.log()
             # and bail
-            return []
+            return None
         # if we have support, unpack my state
         uri = self.uri
         # unpack the profile and region from the authority field
@@ -93,14 +112,24 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
         bucket = address[1]
         # and the key is the rest
         key = qed.primitives.path(address[2:])
-        # start a session
-        s3 = boto3.Session(profile_name=profile, region_name=region).client("s3")
-        # get the contents
-        response = s3.list_objects_v2(Bucket=bucket)
-        # retrieve the contents
-        contents = response.get("Contents", [])
-        # make a list of the keys and return them
-        return list(entry["Key"] for entry in contents)
+        # attempt to
+        try:
+            # start a session
+            s3 = boto3.Session(profile_name=profile, region_name=region).client("s3")
+        # if there is something wrong with the boto3 installation
+        except ImportError as error:
+            # we have a problem
+            channel = journal.error("qed.archives.s3")
+            # complain
+            channel.line(f"while attempting to connect to {self.uri}")
+            channel.line(f"something is wrong with the 'boto3' installation")
+            channel.line(f"this installation of 'qed' doesn't support S3 data archives")
+            # flush
+            channel.log()
+            # just in case errors aren't fatal
+            s3 = None
+        # and return it
+        return s3
 
 
 # end of file
