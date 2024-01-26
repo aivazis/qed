@@ -14,11 +14,13 @@ import { Panel } from './panel'
 import { Cancel, DisabledConnect, EnabledConnect } from './buttons'
 import { Type } from './type'
 import { Name } from './name'
-import { Form, Body, Field, Values, enumValue } from '../form'
+import { Form, Body, Error } from '../form'
 
 
 // associate a GDAL reader with a given data product
 export const GDAL = ({ view, setType, hide }) => {
+    // error placeholder
+    const [error, setError] = React.useState(null)
     // set up my state
     const [form, setForm] = React.useState({
         // the pyre name of the reader
@@ -28,6 +30,8 @@ export const GDAL = ({ view, setType, hide }) => {
     const [request, isInFlight] = useMutation(connectMutation)
     // set up the state update
     const update = (field, value) => {
+        // clear any errors
+        setError(null)
         // replace my state
         setForm(old => {
             // with
@@ -80,8 +84,19 @@ export const GDAL = ({ view, setType, hide }) => {
             },
             // when done
             onCompleted: data => {
+                // clear the error
+                setError(null)
                 // remove the form from view
                 hide()
+                // all done
+                return
+            },
+            // if something went wrong
+            onError: error => {
+                // clear the form
+                update("product", "")
+                // and now record the error
+                setError(error)
                 // all done
                 return
             }
@@ -115,6 +130,7 @@ export const GDAL = ({ view, setType, hide }) => {
             </Form>
             <Connect connect={connect} />
             <Cancel onClick={cancel}>cancel</Cancel>
+            {error && <Error>{error}</Error>}
         </Panel>
     )
 }
