@@ -16,6 +16,8 @@ import { Tray } from '~/widgets'
 // hooks
 import { useViews } from '../../viz/useViews'
 import { useSynced } from '../../viz/useSynced'
+// components
+import { Channel } from './channel'
 
 // the sync control
 export const Sync = () => {
@@ -54,7 +56,7 @@ export const Sync = () => {
                             <Viewport key={`${dataset.name}:${viewport}`}>
                                 <Index>{`${viewport}:`}</Index>
                                 <Dataset>{dataset.name}</Dataset>
-                                <Channel></Channel>
+                                <Channel />
                                 <Scroll>{offset}</Scroll>
                             </Viewport>
                         )
@@ -83,7 +85,8 @@ const Header = styled.th`
     font-family: rubik-light;
     font-weight: normal;
     padding: 0.125rem;
-    text-align: left;
+    text-align: center;
+    vertical-align: middle;
 `
 
 // the table body
@@ -110,10 +113,6 @@ const Dataset = styled(Cell)`
     overflow: auto;
 `
 
-// the channel
-const Channel = styled(Cell)`
-    overflow: auto;
-`
 
 // the scroll offset
 const Scroll = styled(Cell)`
