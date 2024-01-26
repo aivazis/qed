@@ -54,7 +54,7 @@ class GraphQL:
             for line in query.strip().splitlines():
                 # and print each line
                 channel.line(f"    {line}")
-            # if there are variable bidings
+            # if there are variable bindings
             if variables:
                 # mark
                 channel.line(f"  variables:")
@@ -72,13 +72,14 @@ class GraphQL:
         doc = {"data": result.data}
         # in addition, if something went wrong
         if result.errors:
-            # inform the client
-            doc["errors"] = [{"message": str(error)} for error in result.errors]
+            # inform the client; pick the first error, since it doesn't seem that the client
+            # can get the whole list in a usable way
+            doc["errors"] = [{"message": str(result.errors[0].original_error)}]
             # make a channel
-            channel = journal.error("qed.ux.graphql")
+            channel = journal.warning("qed.ux.graphql")
             # go through the errors
             for error in result.errors:
-                # report each one
+                # and report each one
                 channel.line(str(error))
             # flush
             channel.log()
