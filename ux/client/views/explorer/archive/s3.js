@@ -20,10 +20,12 @@ import { Profile } from './profile'
 import { Region } from './region'
 import { Bucket } from './bucket'
 import { Path } from './path'
-import { Form, Body } from '../form'
+import { Form, Body, Error } from '../form'
 
 // a data archive in an S3 bucket
 export const S3 = ({ view, setType, hide }) => {
+    // error placeholder
+    const [error, setError] = React.useState(null)
     // set up my state
     const [form, setForm] = React.useState({
         // the nickname of the archive; get's used to generate the name of the component
@@ -43,6 +45,8 @@ export const S3 = ({ view, setType, hide }) => {
     const [request, isInFlight] = useMutation(connectMutation)
     // set up the state update
     const update = (field, value) => {
+        // clear any errors
+        setError(null)
         // replace my state
         setForm(old => {
             // with
@@ -95,6 +99,7 @@ export const S3 = ({ view, setType, hide }) => {
             },
             // updater
             updater: store => {
+                console.log("updater")
                 // get the root field of the query result
                 const payload = store.getRootField("connectArchive")
                 // ask for the new archive
@@ -110,8 +115,24 @@ export const S3 = ({ view, setType, hide }) => {
             },
             // when done
             onCompleted: data => {
+                console.log("completed: ", data)
+                // clear the error
+                setError(null)
                 // remove the form from the view
                 hide()
+                // all done
+                return
+            },
+            // if something went wrong
+            onError: error => {
+                console.log("error: ", error)
+                // clear the form
+                update("profile", "")
+                update("region", "")
+                update("bucket", "")
+                update("path", "")
+                // and now record the error
+                setError(error)
                 // all done
                 return
             }
@@ -149,6 +170,7 @@ export const S3 = ({ view, setType, hide }) => {
             </Form>
             <Connect connect={connect} />
             <Cancel onClick={cancel}>cancel</Cancel>
+            {error && <Error>{error}</Error>}
         </Panel>
     )
 }

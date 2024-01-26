@@ -17,10 +17,12 @@ import { EnabledConnect, DisabledConnect, Cancel } from './buttons'
 import { TypeSelector } from './type'
 import { Name } from './name'
 import { Path } from './path'
-import { Form, Body, Footer, } from '../form'
+import { Form, Body, Error } from '../form'
 
 // a data archive local to the qed server
 export const Local = ({ view, setType, hide }) => {
+    // error placeholder
+    const [error, setError] = React.useState(null)
     // set up my state
     const [form, setForm] = React.useState({
         // the nickname
@@ -34,6 +36,8 @@ export const Local = ({ view, setType, hide }) => {
     const [request, isInFlight] = useMutation(connectMutation)
     // set up the state update
     const update = (field, value) => {
+        // clear any errors
+        setError(null)
         // replace my state
         setForm(old => {
             // with
@@ -88,8 +92,19 @@ export const Local = ({ view, setType, hide }) => {
             },
             // when done
             onCompleted: data => {
+                // clear the error
+                setError(null)
                 // remove the form from the view
                 hide()
+                // all done
+                return
+            },
+            // if something went wrong
+            onError: error => {
+                // clear the form
+                update("path", "")
+                // and now record the error
+                setError(error)
                 // all done
                 return
             }
@@ -125,6 +140,7 @@ export const Local = ({ view, setType, hide }) => {
             </Form>
             <Connect connect={connect} />
             <Cancel onClick={cancel}>cancel</Cancel>
+            {error && <Error>{error}</Error>}
         </Panel>
     )
 }
