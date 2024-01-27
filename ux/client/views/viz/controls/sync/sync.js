@@ -17,7 +17,9 @@ import { Tray } from '~/widgets'
 import { useViews } from '../../viz/useViews'
 import { useSynced } from '../../viz/useSynced'
 // components
+import { Cell } from './cell'
 import { Channel } from './channel'
+import { Zoom } from './zoom'
 
 // the sync control
 export const Sync = () => {
@@ -37,9 +39,9 @@ export const Sync = () => {
                         <Header></Header>
                         <Header></Header>
                         <Header>channel</Header>
-                        <Header>scroll</Header>
                         <Header>zoom</Header>
-                        <Header>viz</Header>
+                        <Header>scroll</Header>
+                        <Header>path</Header>
                     </Title>
                 </Head>
                 <Body>
@@ -57,6 +59,7 @@ export const Sync = () => {
                                 <Index>{`${viewport}:`}</Index>
                                 <Dataset>{dataset.name}</Dataset>
                                 <Channel />
+                                <Zoom />
                                 <Scroll>{offset}</Scroll>
                             </Viewport>
                         )
@@ -69,6 +72,8 @@ export const Sync = () => {
 
 // the container
 const Housing = styled.table`
+    margin: 1.0em auto ;
+    padding: 1.0em;
     font-family: inconsolata;
     color: hsl(0deg, 0%, 50%);
     margin: 0.0rem 0.5rem 0.5rem 0.5rem;
@@ -84,23 +89,17 @@ const Title = styled.tr`
 const Header = styled.th`
     font-family: rubik-light;
     font-weight: normal;
-    padding: 0.125rem;
     text-align: center;
     vertical-align: middle;
 `
 
 // the table body
 const Body = styled.tbody`
+    font-size: 100%;
 `
 
 // viewport info
 const Viewport = styled.tr`
-`
-
-// cells
-const Cell = styled.td`
-    padding: 0.125rem;
-    text-align: left;
 `
 
 // the viewport

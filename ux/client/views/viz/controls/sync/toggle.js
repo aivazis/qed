@@ -8,51 +8,43 @@
 import React from 'react'
 import styled from 'styled-components'
 
-// project
-// widgets
-import { SVG } from '~/widgets'
-
 
 //  a toggle
-export const Toggle = ({ size, state, toggle }) => {
+export const Toggle = ({ state, toggle }) => {
     // set up my behaviors
     const behaviors = {
+        // on click, toggle my state
         onClick: toggle,
     }
     // mix my paint
-    const Button = state ? SelectedButton : ActiveButton;
+    const Control = state ? SelectedButton : ActiveButton;
     // and render
     return (
-        <Housing width={size + 4} height={size + 4}>
-            <g transform={`translate(${size / 2 + 2} ${size / 2 + 2}) scale(${size / 2})`}>
-                <Button cx={0} cy={0} r={1} {...behaviors} />
-            </g>
-        </Housing>
+        <Control {...behaviors} />
     )
 }
 
-//            </g>
-//            <g transform={`translate(${ size / 2} ${ size / 2}) scale(${ size })`}>
-
 
 // the housing
-const Housing = styled(SVG)`
+const Button = styled.div`
+    margin: 0.0 auto;
+    width: 0.75em;
+    height: 0.75em;
+    background-color: none;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 50%;
+    cursor: pointer;
 `
 
 // the  button
-const ActiveButton = styled.circle`
-    fill: none;
-
-    stroke: hsl(0deg, 0%, 40%);
-    stroke-width: 1;
-    vector-effect: non-scaling-stroke;
-
-    cursor: pointer;
+const ActiveButton = styled(Button)`
+    border-color: (0deg, 0%, 40%);
 `
 
-const SelectedButton = styled.circle`
-    fill: hsl(28deg, 90%, 45%);
-    cursor: pointer;
+const SelectedButton = styled(Button)`
+    background-color: hsl(28deg, 90%, 45%);
+    border-color: hsl(28deg, 90%, 45%);
 `
 
 
