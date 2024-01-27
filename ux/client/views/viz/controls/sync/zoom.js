@@ -12,8 +12,8 @@ import styled from 'styled-components'
 import { Cell } from './cell'
 import { Toggle } from './toggle'
 
-// the channel sync control
-export const Channel = () => {
+// the zoom sync control
+export const Zoom = () => {
     // set aside some state
     const [state, setState] = React.useState(false)
     // build the state toggle
