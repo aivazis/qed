@@ -16,7 +16,7 @@ export const Name = ({ value, update }) => {
     // build the name mutator
     const setName = evt => {
         // set up the validation regex
-        const regex = /^[\w_]?[\w\d@$()_-]*$/g
+        const regex = /^[\w_]?[\w\d@$()_.-]*$/g
         // get the value
         const candidate = evt.target.value
         // update the form state
