@@ -106,7 +106,6 @@ export const Provider = (props) => {
     }
     // otherwise
     else {
-
         // now, go through the histogram
         candidates.forEach((values, name) => {
             // if we have a selector key that only shows up with one specific value
