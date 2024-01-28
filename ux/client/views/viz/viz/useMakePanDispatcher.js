@@ -50,7 +50,7 @@ export const useMakePanDispatcher = () => {
             // everybody else gets a bump on its semaphore
             ++semaphores[i]
             // and scrolls to my location
-            port.scroll(x + sync.scroll.x - mySync.scroll.x, y + sync.scroll.y - mySync.scroll.y)
+            port.scroll(x + sync.offset.x - mySync.offset.x, y + sync.offset.y - mySync.offset.y)
             // all done
             return
         })
