@@ -27,11 +27,11 @@ export const useSetZoomLevel = () => {
             table[activeViewport] = value
 
             // if the active port is synced
-            if (synced[activeViewport]) {
+            if (synced[activeViewport].zoom) {
                 // go through all the views in the sync table
                 synced.forEach((status, viewport) => {
                     // find the synced ones
-                    if (status) {
+                    if (status.zoom) {
                         // and adjust their zoom level as well
                         table[viewport] = value
                     }

@@ -25,8 +25,8 @@ export const useToggleViewportSync = idx => {
             const table = [...old]
             // get my sync state
             const sync = old[idx]
-            // add flip the scroll status of the specified viewport
-            table[idx] = { ...sync, scroll: (sync.scroll === null) ? { x: 0, y: 0 } : null }
+            // flip the scroll status of the specified viewport
+            table[idx] = { ...sync, scroll: !sync.scroll }
             // return the new table
             return table
         })
