@@ -12,7 +12,7 @@ import { Cell } from './cell'
 import { Toggle } from './toggle'
 
 // the channel sync control
-export const Channel = ({ state, toggle }) => {
+export const Scroll = ({ state, toggle }) => {
     // render
     return (
         <Cell>

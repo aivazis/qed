@@ -9,6 +9,7 @@ import styled from 'styled-components'
 
 // cells
 export const Cell = styled.td`
+    text-align: center;
 `
 
 // end of file

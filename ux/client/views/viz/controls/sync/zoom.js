@@ -6,26 +6,13 @@
 
 // externals
 import React from 'react'
-import styled from 'styled-components'
 
 // local
 import { Cell } from './cell'
 import { Toggle } from './toggle'
 
 // the zoom sync control
-export const Zoom = () => {
-    // set aside some state
-    const [state, setState] = React.useState(false)
-    // build the state toggle
-    const toggle = evt => {
-        // stop this event from bubbling up
-        evt.stopPropagation()
-        // and quash any side effects
-        evt.preventDefault()
-        // flip the state
-        setState(old => !old)
-        // all done
-    }
+export const Zoom = ({ state, toggle }) => {
     // render
     return (
         <Cell>
