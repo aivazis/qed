@@ -11,10 +11,21 @@ import styled from 'styled-components'
 
 //  a toggle
 export const Toggle = ({ state, toggle }) => {
+    // build the event handler
+    const handler = evt => {
+        // stop this event from bubbling up
+        evt.stopPropagation()
+        // and quash any side effects
+        evt.preventDefault()
+        // flip the state
+        toggle()
+        // all done
+        return
+    }
     // set up my behaviors
     const behaviors = {
         // on click, toggle my state
-        onClick: toggle,
+        onClick: handler,
     }
     // mix my paint
     const Control = state ? SelectedButton : ActiveButton;
@@ -26,7 +37,8 @@ export const Toggle = ({ state, toggle }) => {
 
 
 // the housing
-const Button = styled.div`
+const Button = styled.span`
+    display: inline-block;
     margin: 0.0 auto;
     width: 0.75em;
     height: 0.75em;
