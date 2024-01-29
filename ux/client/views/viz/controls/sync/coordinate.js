@@ -10,7 +10,7 @@ import styled from 'styled-components'
 
 
 // an interactive entry with a pixel offset
-export const Coordinate = ({ point, axis, adjust }) => {
+export const Coordinate = ({ className, point, axis, adjust }) => {
     // state
     const selected = false
     // on input
@@ -39,7 +39,7 @@ export const Coordinate = ({ point, axis, adjust }) => {
 
     // make a mark
     return (
-        <Entry type="text" value={rep} {...behaviors} />
+        <Entry className={className} type="text" value={rep} {...behaviors} />
     )
 }
 
@@ -47,15 +47,15 @@ export const Coordinate = ({ point, axis, adjust }) => {
 // the base entry
 const Base = styled.input`
     display: inline-block;
+    font-size: 110%;
     appearance: textfield;
     outline: none;
     cursor: pointer;
     font-family: inconsolata;
     font-size: 100%;
-    width: 2.0em;
-    text-align: end;
+    width: 2.5em;
     background-color: hsl(0deg, 0%, 7%);
-    padding: 0.0rem 0.0rem 0.0rem 0.125rem;
+    padding: 0.0rem;
     border: 0 transparent;
 `
 

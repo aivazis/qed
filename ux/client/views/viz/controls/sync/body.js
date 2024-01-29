@@ -16,6 +16,7 @@ import { useToggleSyncedAspect, useSetSyncedAspect } from '../../viz/useSyncAspe
 // components
 import { Cell } from './cell'
 import { Channel } from './channel'
+import { Offset } from './offset'
 import { Path } from './path'
 import { Scroll } from './scroll'
 import { Zoom } from './zoom'
@@ -29,7 +30,7 @@ export const Body = () => {
     // build the toggle factory
     const toggle = useToggleSyncedAspect()
     // and the setter factory
-    const set = useSetSyncedAspect()
+    const update = useSetSyncedAspect()
     // render
     return (
         <Container>
@@ -44,6 +45,7 @@ export const Body = () => {
                         <Zoom state={sync.zoom} toggle={toggle(viewport, "zoom")} />
                         <Scroll state={sync.scroll} toggle={toggle(viewport, "scroll")} />
                         <Path state={sync.path} toggle={toggle(viewport, "path")} />
+                        <Offset offset={sync.offset} update={update(viewport, "offset")} />
                     </Viewport>
                 )
             })}
