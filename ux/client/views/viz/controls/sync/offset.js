@@ -11,45 +11,44 @@ import styled from 'styled-components'
 // local
 import { Cell } from './cell'
 import { Coordinate } from './coordinate'
-import { Toggle } from './toggle'
 
 // the channel sync control
-export const Scroll = ({ sync }) => {
-    // set aside some state
-    const [state, setState] = React.useState(sync)
-    const [offset, setOffset] = React.useState([0, 0])
+export const Offset = ({ offset, update }) => {
     // build the state toggle
-    const toggle = evt => {
-        // stop this event from bubbling up
-        evt.stopPropagation()
-        // and quash any side effects
-        evt.preventDefault()
-        // flip the state
-        setState(old => !old)
-        // all done
-        return
-    }
-    // build the state toggle
-    const adjust = (axis, offset) => {
-        console.log(axis, offset)
+    const adjust = (axis, value) => {
+        // cast the value to an int
+        const coord = parseInt(value)
+        // if this fails
+        if (isNaN(coord)) {
+            // bail
+            return
+        }
         // adjust the correct entry and set the state
-        setOffset(old => old.toSpliced(axis, 1, offset))
+        update({ ...offset, [axis]: coord })
         // all done
         return
     }
     // render
     return (
         <Housing>
-            <Toggle state={state} toggle={toggle} />
-            :
-            <Coordinate point={offset} axis={0} adjust={adjust} />
-            <Coordinate point={offset} axis={1} adjust={adjust} />
+            <Line point={offset} axis={"y"} adjust={adjust} />
+            <Sample point={offset} axis={"x"} adjust={adjust} />
         </Housing>
     )
 }
 
 const Housing = styled(Cell)`
     min-width: 6em;
+`
+
+const Line = styled(Coordinate)`
+    text-align: right;
+    padding-right: 0.5em;
+`
+
+const Sample = styled(Coordinate)`
+    text-align: left;
+    padding-left: 0.5em;
 `
 
 // end of file
