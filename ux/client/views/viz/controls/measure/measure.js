@@ -16,7 +16,6 @@ import { Tray } from '~/widgets'
 // locals
 // hooks
 import { useMeasureLayer } from '../../viz/useMeasureLayer'
-import { usePixelPath } from '../../viz/usePixelPath'
 // components
 import { Path } from './path'
 import { Peek } from './peek'
@@ -26,10 +25,6 @@ import { Peek } from './peek'
 export const Measure = () => {
     // get the {measure} layer status of the active {viewport}
     const measureLayer = useMeasureLayer()
-    // the set of pixels on its profile path
-    const pixelPath = usePixelPath()
-    // and the set of points on its profile path
-    const points = pixelPath.points
 
     // if the {measure} layer has not been activated
     if (!measureLayer) {
@@ -48,7 +43,7 @@ export const Measure = () => {
             <Peek />
             {/* if the pixel path is empty, show a brief help message */}
             <Help>
-                pick points on the active view using {stroke}
+                use {stroke} to pick points on the active view
             </Help>
             {/* render the pixel path */}
             <Path />
@@ -60,6 +55,7 @@ export const Measure = () => {
 // the box with the hint about how to add points to the measure layer
 const Help = styled.p`
     font-family: rubik-light;
+    font-style: italic;
     margin: 0.0rem 1.0rem 0.5rem 1.0rem;
 `
 
