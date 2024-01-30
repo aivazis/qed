@@ -150,8 +150,25 @@ export const useSetPixelPath = (viewport = null) => {
         return
     }
 
+    // make a handler that toggles whether the path is open or closed
+    const toggle = () => {
+        // update the list
+        setPixelPath(old => {
+            // make a copy of the whole pile
+            const pile = [...old]
+            // get the portion that corresponds to this {viewport}
+            const mine = pile[viewport]
+            // toggle the closed flags
+            mine.closed = !mine.closed
+            // and return the new pile
+            return pile
+        })
+        // all done
+        return
+    }
+
     // and return the handlers
-    return { add, adjust, displace, nudge, remove, split }
+    return { add, adjust, displace, nudge, remove, split, toggle }
 }
 
 
