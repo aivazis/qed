@@ -44,8 +44,10 @@ export const Measure = (props) => {
 const Layer = ({ viewport, shape, scale }) => {
     // make a ref for my client area
     const me = React.useRef(null)
+    // get the path spec of the current viewport
+    const pixelPath = usePixelPath(viewport)
     // get the list of points on the profile
-    const points = usePixelPath(viewport)
+    const points = pixelPath.points
     // and the handler that adds points to the profile
     const { add: addPoint, displace } = useSetPixelPath(viewport)
     // get the movement marker
@@ -56,7 +58,9 @@ const Layer = ({ viewport, shape, scale }) => {
     const selection = usePixelPathSelection(viewport)
 
     // and project the points back into screen coordinates
-    const projected = points.map(point => point.map((coord, idx) => Math.trunc(coord / scale[idx])))
+    const projected = points.map(
+        point => point.map((coord, idx) => Math.trunc(coord / scale[idx]))
+    )
 
     // add a point to the pile
     const pick = evt => {

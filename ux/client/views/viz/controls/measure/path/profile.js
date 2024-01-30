@@ -23,7 +23,7 @@ export const Profile = () => {
     const pixelPath = usePixelPath()
 
     // if the path is empty
-    if (pixelPath.length === 0) {
+    if (pixelPath.points.length === 0) {
         // bail
         return null
     }
@@ -31,7 +31,7 @@ export const Profile = () => {
     // the profile uri
     const url = encoding => {
         // encode the points
-        const points = pixelPath.map(p => `${p[0]},${p[1]}`).join("&")
+        const points = pixelPath.points.map(p => `${p[0]},${p[1]}`).join("&")
         // form the url and return it
         return ["profile", encoding, dataset.name].join("/") + '?' + points
     }

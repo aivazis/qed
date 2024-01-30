@@ -35,7 +35,7 @@ export const useSetPixelPath = (viewport = null) => {
             // make a copy of the whole pile
             const pile = [...old]
             // get the portion that corresponds to this {viewport}
-            const mine = pile[viewport]
+            const mine = pile[viewport].points
             // add the new point to it
             pos === null ? mine.push(p) : mine.splice(pos, 0, p)
             // and return the new pile
@@ -54,7 +54,7 @@ export const useSetPixelPath = (viewport = null) => {
             // make a copy of the whole pile
             const pile = [...old]
             // get the portion that corresponds to this {viewport}
-            const mine = pile[viewport]
+            const mine = pile[viewport].points
             // remove the point at the given slot
             mine.splice(node, 1)
             // and return the new pile
@@ -72,7 +72,7 @@ export const useSetPixelPath = (viewport = null) => {
             // make a copy
             const pile = [...old]
             // and find the portion that corresponds to this {viewport}
-            const mine = pile[viewport]
+            const mine = pile[viewport].points
             // get the tail point
             const tail = mine[node]
             // and the head
@@ -95,7 +95,7 @@ export const useSetPixelPath = (viewport = null) => {
             // make a copy
             const pile = [...old]
             // and find the portion that corresponds to this {viewport}
-            const mine = pile[viewport]
+            const mine = pile[viewport].points
             // make the adjustment
             mine[node][axis] = Math.max(origin[axis], Math.min(shape[axis], value))
             // and return the updated points
@@ -112,7 +112,7 @@ export const useSetPixelPath = (viewport = null) => {
             // make a copy
             const pile = [...old]
             // and find the portion that corresponds to this {viewport}
-            const mine = pile[viewport]
+            const mine = pile[viewport].points
             // make the adjustment
             mine[node][axis] = Math.max(origin[axis],
                 Math.min(shape[axis], mine[node][axis] + value))
@@ -130,7 +130,7 @@ export const useSetPixelPath = (viewport = null) => {
             // make a copy
             const pile = [...old]
             // and find the portion that corresponds to this {viewport}
-            const mine = pile[viewport]
+            const mine = pile[viewport].points
 
             // go through the node ids
             nodes.forEach(node => {

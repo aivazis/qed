@@ -26,8 +26,10 @@ import { Peek } from './peek'
 export const Measure = () => {
     // get the {measure} layer status of the active {viewport}
     const measureLayer = useMeasureLayer()
-    // and the set of pixels on its profile path
+    // the set of pixels on its profile path
     const pixelPath = usePixelPath()
+    // and the set of points on its profile path
+    const points = pixelPath.points
 
     // if the {measure} layer has not been activated
     if (!measureLayer) {
@@ -45,11 +47,9 @@ export const Measure = () => {
             {/* display pixel values */}
             <Peek />
             {/* if the pixel path is empty, show a brief help message */}
-            {pixelPath.length === 0 &&
-                <Help>
-                    pick points on the active view using {stroke}
-                </Help>
-            }
+            <Help>
+                pick points on the active view using {stroke}
+            </Help>
             {/* render the pixel path */}
             <Path />
         </Tray>

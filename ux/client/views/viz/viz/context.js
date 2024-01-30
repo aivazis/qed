@@ -52,7 +52,7 @@ export const Provider = ({ children }) => {
     // the measuring layer state
     const [measureLayer, setMeasureLayer] = React.useState([measureDefault])
     // storage for the collection of pixels in a {measure} layer profile
-    const [pixelPath, setPixelPath] = React.useState([...pixelPathDefault()])
+    const [pixelPath, setPixelPath] = React.useState([pixelPathDefault()])
     // the set of selected nodes in a {measure} layer profile
     const [pixelPathSelection, setPixelPathSelection] = React.useState(
         [...pixelPathSelectionDefault()])
@@ -141,7 +141,7 @@ export const zoomDefault = { horizontal: 0, vertical: 0 }
 // the default state of the measure layer
 export const measureDefault = false
 // the default pixel path
-export const pixelPathDefault = () => [[]]
+export const pixelPathDefault = () => ({ closed: false, points: [] })
 // the default pixel path selection
 export const pixelPathSelectionDefault = () => [new Set()]
 

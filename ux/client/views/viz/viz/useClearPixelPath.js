@@ -9,7 +9,7 @@ import React from 'react'
 
 // local
 // context
-import { Context } from './context'
+import { Context, pixelPathDefault } from './context'
 
 
 // clear the current selection
@@ -26,7 +26,7 @@ export const useClearPixelPath = viewport => {
             // make a copy
             const paths = [...old]
             // clear out the one that corresponds to {viewport}
-            paths[viewport] = []
+            paths[viewport] = pixelPathDefault()
             // and return the new pile
             return paths
         })
