@@ -10,7 +10,7 @@ import styled from 'styled-components'
 
 
 // mark a point
-export const Path = ({ points }) => {
+export const Path = ({ points, closed }) => {
     // check whether we have any points yet
     if (points.length === 0) {
         // in which case, bail
@@ -21,11 +21,13 @@ export const Path = ({ points }) => {
         (prev, current) => prev + ` L ${current[1]} ${current[0]}`,
         `M ${points[0][1]} ${points[0][0]} `
     )
+    // the additional tail that specifies whether the path is open or closed
+    const tail = closed ? " Z" : ""
     // and render
     return (
         <g>
-            <Mat d={path} />
-            <Line d={path} />
+            <Mat d={path + tail} />
+            <Line d={path + tail} />
         </g>
     )
 }
