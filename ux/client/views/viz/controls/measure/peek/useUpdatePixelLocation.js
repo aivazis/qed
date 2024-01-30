@@ -105,7 +105,7 @@ export const useUpdatePixelLocation = () => {
             // decouple from the mouse; instead, get the index of the selected mark
             const mark = [...selection][0]
             // get the associated point
-            const point = pixelPath[mark]
+            const point = pixelPath.points[mark]
             // and use it as the query location
             refresh({ line: point[0], sample: point[1] })
             // all done

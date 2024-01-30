@@ -20,16 +20,18 @@ import { Title } from './title'
 
 // a table of the points on the {measure} layer of the active viewport
 export const Path = () => {
-    // get the set of pixels on the profile path
+    // get the path profile
     const pixelPath = usePixelPath()
+    // and the set of points n the path
+    const points = pixelPath.points
     // if the path is empty
-    if (pixelPath.length === 0) {
+    if (points.length === 0) {
         // bail
         return null
     }
 
     // otherwise, compute the id of the last point
-    const last = pixelPath.length - 1
+    const last = points.length - 1
 
     // render the points
     return (
@@ -37,7 +39,7 @@ export const Path = () => {
             {/* add a title to the table */}
             <Title />
             {/* render the points on the path */}
-            {pixelPath.map((point, idx) =>
+            {points.map((point, idx) =>
                 <Point key={`p${idx}`} idx={idx} point={point} last={last} />)
             }
             {/* download the profile */}
