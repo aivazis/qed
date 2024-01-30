@@ -49,7 +49,6 @@ export const Profile = () => {
 
 // the container
 const Box = styled.div`
-    font-size: 70%;
     color: hsl(0deg, 0%, 50%);
     padding: 0.5rem 0.0rem 0.0rem 0.0rem;
 `
