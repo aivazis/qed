@@ -11,6 +11,7 @@ import styled from 'styled-components'
 // local
 // components
 import { Add } from './add'
+import { Close } from './close'
 import { Coordinate } from './coordinate'
 import { Delete } from './delete'
 import { Focus } from './focus'
@@ -30,9 +31,10 @@ export const Point = ({ idx, point, last }) => {
 
             {/* delete this point */}
             <Delete idx={idx} />
-            {/* add a point after this one, unless its the last */}
+            {/* place the control that adds a point after this one, unless its the last one */}
             {idx != last && <Add idx={idx} />}
-
+            {/* instead, the last point gets a control to close the path */}
+            {idx == last && <Close />}
         </Box>
     )
 }
