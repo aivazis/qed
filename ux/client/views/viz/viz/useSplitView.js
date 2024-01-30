@@ -76,7 +76,7 @@ export const useSplitView = view => {
             // make a copy of the current state
             const table = [...old]
             // add an empty path at the right spot
-            table.splice(view + 1, 0, ...pixelPathDefault())
+            table.splice(view + 1, 0, pixelPathDefault())
             // and return the new table
             return table
         })
