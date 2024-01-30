@@ -46,8 +46,6 @@ const Layer = ({ viewport, shape, scale }) => {
     const me = React.useRef(null)
     // get the path spec of the current viewport
     const pixelPath = usePixelPath(viewport)
-    // get the list of points on the profile
-    const points = pixelPath.points
     // and the handler that adds points to the profile
     const { add: addPoint, displace } = useSetPixelPath(viewport)
     // get the movement marker
@@ -57,6 +55,8 @@ const Layer = ({ viewport, shape, scale }) => {
     // get the current selection
     const selection = usePixelPathSelection(viewport)
 
+    // get the list of points on the profile
+    const { closed, points } = pixelPath
     // and project the points back into screen coordinates
     const projected = points.map(
         point => point.map((coord, idx) => Math.trunc(coord / scale[idx]))
@@ -148,7 +148,7 @@ const Layer = ({ viewport, shape, scale }) => {
     return (
         <Placemat ref={me} shape={shape}>
             {/* join the points with a line */}
-            <Path points={projected} />
+            <Path points={projected} closed={closed} />
             {/* add their labels */}
             <Labels positions={projected} values={points} />
             {/* and draw markers for them */}
