@@ -36,7 +36,7 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         # ask to make the tile and return it
         return dataset.render(channel=channel, zoom=zoom, origin=origin, shape=shape)
 
-    def profile(self, data, points, encoding):
+    def profile(self, data, points, closed, encoding):
         """
         Sample {dataset} along a path defined by {points}
         """
@@ -45,7 +45,7 @@ class Panel(qed.shells.command, family="qed.cli.ux"):
         # look up the dataset
         dataset = self.dataset(name=data)
         # get the profile
-        profile = dataset.profile(points=points)
+        profile = dataset.profile(points=points, closed=closed)
         # form the file name
         filename = f"{dataset.pyre_name}.{encoding}"
 

@@ -138,9 +138,9 @@ class Dispatcher:
             # encode it
             encoded = urllib.parse.quote(filename)
             # decorate it
-            response.headers[
-                "Content-disposition"
-            ] = f'attachment; filename="{filename}"; filename*={encoded}'
+            response.headers["Content-disposition"] = (
+                f'attachment; filename="{filename}"; filename*={encoded}'
+            )
             # grab a channel
             chnl = journal.debug("qed.ux.dispatch")
             # show me
@@ -179,12 +179,20 @@ class Dispatcher:
         url = request.url
         # extract the query part
         _, query = url.split("?")
+        # split the query
+        tokens = query.split("&")
+        # the first one is the closed path indicator
+        tag, closed = tokens[0].split("=")
+        # check
+        if tag == "closed":
+            # and parse
+            closed = closed == "true"
         # points are separated by "&", coordinates by ","
-        points = tuple(tuple(map(int, point.split(","))) for point in query.split("&"))
+        points = tuple(tuple(map(int, point.split(","))) for point in tokens[1:])
 
         # generate the profile along with a suggestion for the download name
         filename, profile = self.panel.profile(
-            data=data, points=points, encoding=encoding
+            data=data, points=points, closed=closed, encoding=encoding
         )
 
         # get the document factory
