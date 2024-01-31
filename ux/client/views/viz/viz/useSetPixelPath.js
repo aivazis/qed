@@ -9,8 +9,8 @@ import React from 'react'
 
 // local
 // context
-import { Context } from './context'
-import { useClearPixelPathSelection } from './useClearPixelPathSelection'
+import { Context, pixelPathDefault } from './context'
+import { useSetPixelPathSelection } from './useSetPixelPathSelection'
 import { useDatasetShape } from './useDatasetShape'
 
 
@@ -21,10 +21,25 @@ export const useSetPixelPath = (viewport = null) => {
     // normalize the viewport
     viewport ??= activeViewport
     // make a handler that clears the selection to use when removing a point from the path
-    const clear = useClearPixelPathSelection(viewport)
+    const { clear: clearSelection } = useSetPixelPathSelection(viewport)
     // and get the active dataset shape and origin
     const { origin, shape } = useDatasetShape(viewport)
 
+
+    // make a handler that clears the current selection
+    const clear = () => {
+        // reset the selection to an empty set
+        setPixelPath(old => {
+            // make a copy
+            const paths = [...old]
+            // clear out the one that corresponds to {viewport}
+            paths[viewport] = pixelPathDefault()
+            // and return the new pile
+            return paths
+        })
+        // all done
+        return
+    }
 
     // make a handler that adds a point to the pile
     // the optional {pos} adds the point {p} before the supplied position, otherwise the point is
@@ -50,7 +65,7 @@ export const useSetPixelPath = (viewport = null) => {
         // update the list
         setPixelPath(old => {
             // clear the selection; removing a point scrambles the node indices...
-            clear(node)
+            clearSelection(node)
             // make a copy of the whole pile
             const pile = [...old]
             // get the portion that corresponds to this {viewport}
@@ -168,7 +183,7 @@ export const useSetPixelPath = (viewport = null) => {
     }
 
     // and return the handlers
-    return { add, adjust, displace, nudge, remove, split, toggle }
+    return { clear, add, adjust, displace, nudge, remove, split, toggle }
 }
 
 

@@ -19,6 +19,21 @@ export const useSetPixelPathSelection = (viewport) => {
     // normalize the viewport
     viewport ??= activeViewport
 
+    // make a handler that clears the current selection
+    const clear = () => {
+        // reset the selection to an empty set
+        setPixelPathSelection(old => {
+            // make a copy
+            const table = [...old]
+            // replace the entry for {viewport} with an empty set
+            table[viewport] = new Set()
+            // and return the new pile
+            return table
+        })
+        // all done
+        return
+    }
+
     // make a handler that manages the current selection in single node mode
     const select = idx => {
         // reset the selection to contain just my node
@@ -133,7 +148,7 @@ export const useSetPixelPathSelection = (viewport) => {
     }
 
     // and return the handlers
-    return { deselect, select, selectContiguous, toggle, toggleMultinode }
+    return { clear, deselect, select, selectContiguous, toggle, toggleMultinode }
 }
 
 
