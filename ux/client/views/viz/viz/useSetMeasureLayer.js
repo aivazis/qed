@@ -23,42 +23,42 @@ export const useSetMeasureLayer = viewport => {
     const { clear: clearPixelPathSelection } = useSetPixelPathSelection(viewport)
 
     // a handler that ses the visibility of the measure layer
-    const set = value => {
+    const set = (value, port = viewport) => {
         // toggle
         setMeasureLayer(old => {
             // make a copy of the measure layer status table
             const table = [...old]
             // adjust the entry that corresponds to this viewport
-            table[viewport] = value
+            table[port] = value
             // and return the new table
             return table
         })
 
         // on toggle, clear the pixel path
-        clearPixelPath()
+        clearPixelPath(port)
         // and the selection
-        clearPixelPathSelection()
+        clearPixelPathSelection(port)
 
         // all done
         return
     }
 
     // a handler that toggles whether the measure layer is visible
-    const toggle = () => {
+    const toggle = (port = viewport) => {
         // toggle
         setMeasureLayer(old => {
             // make a copy of the measure layer status table
             const table = [...old]
             // toggle the entry that corresponds to this viewport
-            table[viewport] = !table[viewport]
+            table[port] = !table[port]
             // and return the new table
             return table
         })
 
         // on toggle, clear the pixel path
-        clearPixelPath()
+        clearPixelPath(port)
         // and the selection
-        clearPixelPathSelection()
+        clearPixelPathSelection(port)
 
         // all done
         return
