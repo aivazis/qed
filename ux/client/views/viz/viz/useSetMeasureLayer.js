@@ -12,6 +12,7 @@ import React from 'react'
 import { Context } from './context'
 import { useSetPixelPath } from './useSetPixelPath'
 import { useSetPixelPathSelection } from './useSetPixelPathSelection'
+import { useSetSyncedAspect } from './useSyncAspect'
 
 
 // toggle the measure layer over this viewport
@@ -21,6 +22,8 @@ export const useSetMeasureLayer = viewport => {
     // make handlers that clear the pixel path and the selection
     const { clear: clearPixelPath } = useSetPixelPath(viewport)
     const { clear: clearPixelPathSelection } = useSetPixelPathSelection(viewport)
+    // and one that mutates the sync table
+    const sync = useSetSyncedAspect()
 
     // a handler that ses the visibility of the measure layer
     const set = (value, port = viewport) => {
@@ -30,7 +33,14 @@ export const useSetMeasureLayer = viewport => {
             const table = [...old]
             // adjust the entry that corresponds to this viewport
             table[port] = value
-            // and return the new table
+            // if we are disabling the measure layer
+            if (value === false) {
+                // make handler that also clears path from the sync table
+                const path = sync(port, "path")
+                // and invoke it
+                path(false)
+            }
+            // all done; return the new table
             return table
         })
 
@@ -51,7 +61,16 @@ export const useSetMeasureLayer = viewport => {
             const table = [...old]
             // toggle the entry that corresponds to this viewport
             table[port] = !table[port]
-            // and return the new table
+
+            // if we are disabling the measure layer
+            if (table[port] === false) {
+                // make handler that also clears path from the sync table
+                const path = sync(port, "path")
+                // and invoke it
+                path(false)
+            }
+
+            // all done; return the new table
             return table
         })
 
