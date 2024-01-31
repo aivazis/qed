@@ -20,7 +20,7 @@ export const useToggleSyncedAspect = () => {
     const { setSynced } = React.useContext(Context)
     // and the measure layer control
     const { set } = useSetMeasureLayer()
-    // and return it
+    // make a handler factory and return it
     return (viewport, aspect) => () => {
         // update the sync table
         setSynced(old => {
@@ -43,7 +43,9 @@ export const useToggleSyncedAspect = () => {
 export const useSetSyncedAspect = () => {
     // grab the setter
     const { setSynced } = React.useContext(Context)
-    // and return it
+    // and the measure layer control
+    const { set } = useSetMeasureLayer()
+    // make a handler factory and return it
     return (viewport, aspect) => value => {
         // update the sync table
         setSynced(old => {
@@ -51,7 +53,12 @@ export const useSetSyncedAspect = () => {
             const clone = [...old]
             // flip the {aspect} of the viewport
             clone[viewport][aspect] = value
-            // and return the new state
+            // if we are turning on path sync
+            if (aspect === "path" && value === true) {
+                // turn on the measure layer for this viewport
+                set(true, viewport)
+            }
+            // return the new state
             return clone
         })
     }
