@@ -18,12 +18,10 @@ import { useSetSyncedAspect } from './useSyncAspect'
 // toggle the measure layer over this viewport
 export const useSetMeasureLayer = viewport => {
     // grab the measure layer mutator from context
-    const { setMeasureLayer } = React.useContext(Context)
+    const { setMeasureLayer, setSynced } = React.useContext(Context)
     // make handlers that clear the pixel path and the selection
     const { clear: clearPixelPath } = useSetPixelPath(viewport)
     const { clear: clearPixelPathSelection } = useSetPixelPathSelection(viewport)
-    // and one that mutates the sync table
-    const sync = useSetSyncedAspect()
 
     // a handler that ses the visibility of the measure layer
     const set = (value, port = viewport) => {
@@ -33,13 +31,6 @@ export const useSetMeasureLayer = viewport => {
             const table = [...old]
             // adjust the entry that corresponds to this viewport
             table[port] = value
-            // if we are disabling the measure layer
-            if (value === false) {
-                // make handler that also clears path from the sync table
-                const path = sync(port, "path")
-                // and invoke it
-                path(false)
-            }
             // all done; return the new table
             return table
         })
@@ -48,6 +39,19 @@ export const useSetMeasureLayer = viewport => {
         clearPixelPath(port)
         // and the selection
         clearPixelPathSelection(port)
+
+        // if we are turning off the measure layer
+        if (value === false) {
+            // we clear path syncing
+            setSynced(old => {
+                // make a copy of the old state
+                const pile = old.map(sync => ({ ...sync }))
+                // clear the path sync of my {port}
+                pile[port].path = false
+                // and return the new state
+                return pile
+            })
+        }
 
         // all done
         return
@@ -55,21 +59,16 @@ export const useSetMeasureLayer = viewport => {
 
     // a handler that toggles whether the measure layer is visible
     const toggle = (port = viewport) => {
+        // the new value of the flag
+        let value
         // toggle
         setMeasureLayer(old => {
             // make a copy of the measure layer status table
             const table = [...old]
             // toggle the entry that corresponds to this viewport
             table[port] = !table[port]
-
-            // if we are disabling the measure layer
-            if (table[port] === false) {
-                // make handler that also clears path from the sync table
-                const path = sync(port, "path")
-                // and invoke it
-                path(false)
-            }
-
+            // remember the new value
+            value = table[port]
             // all done; return the new table
             return table
         })
@@ -78,6 +77,19 @@ export const useSetMeasureLayer = viewport => {
         clearPixelPath(port)
         // and the selection
         clearPixelPathSelection(port)
+
+        // if we turned off the measure layer
+        if (value === false) {
+            // we also clear path syncing
+            setSynced(old => {
+                // make a copy of the old state
+                const pile = old.map(sync => ({ ...sync }))
+                // clear the path sync of my {port}
+                pile[port].path = false
+                // and return the new state
+                return pile
+            })
+        }
 
         // all done
         return
