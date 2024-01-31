@@ -33,7 +33,12 @@ export const Profile = () => {
         // encode the points
         const points = pixelPath.points.map(p => `${p[0]},${p[1]}`).join("&")
         // form the url and return it
-        return ["profile", encoding, dataset.name].join("/") + '?' + points
+        return (
+            ["profile", encoding, dataset.name].join("/")
+            + '?'
+            + `closed=${pixelPath.closed}&`
+            + points
+        )
     }
 
     // render the points
