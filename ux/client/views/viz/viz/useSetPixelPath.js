@@ -29,19 +29,19 @@ export const useSetPixelPath = (viewport = null) => {
     const synced = useSynced()
 
     // make a handler that clears the current selection
-    const clear = () => {
+    const clear = (target = viewport) => {
         // reset the selection to an empty set
         setPixelPath(old => {
             // make a copy
             const paths = [...old]
-            // clear out the one that corresponds to {viewport}
-            paths[viewport] = pixelPathDefault()
+            // clear out the one that corresponds to {target}
+            paths[target] = pixelPathDefault()
             // if i'm path synced
-            if (synced[viewport].path) {
+            if (synced[target].path) {
                 // go through the table
                 synced.forEach((entry, port) => {
                     // if this is my entry
-                    if (port === viewport) {
+                    if (port === target) {
                         // leave me alone
                         return
                     }
