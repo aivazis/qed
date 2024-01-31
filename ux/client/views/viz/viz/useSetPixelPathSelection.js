@@ -20,13 +20,13 @@ export const useSetPixelPathSelection = (viewport) => {
     viewport ??= activeViewport
 
     // make a handler that clears the current selection
-    const clear = () => {
+    const clear = (port = viewport) => {
         // reset the selection to an empty set
         setPixelPathSelection(old => {
             // make a copy
             const table = [...old]
-            // replace the entry for {viewport} with an empty set
-            table[viewport] = new Set()
+            // replace the entry for {port} with an empty set
+            table[port] = new Set()
             // and return the new pile
             return table
         })
