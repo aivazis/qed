@@ -63,6 +63,24 @@ export const useSetPixelPath = (viewport = null) => {
         return
     }
 
+    // make a handler that copies the pixel path from one viewport to another
+    const copy = (src, dst) => {
+        // update the list
+        setPixelPath(old => {
+            // make a copy of the whole pile
+            const pile = [...old]
+            // adjust the destination entry
+            pile[dst] = {
+                closed: pile[src].closed,
+                points: pile[src].points.map(p => [...p])
+            }
+            // and return the new pile
+            return pile
+        })
+        // all done
+        return
+    }
+
     // make a handler that adds a point to the pile
     // the optional {pos} adds the point {p} before the supplied position, otherwise the point is
     // pushed to the end
@@ -383,7 +401,7 @@ export const useSetPixelPath = (viewport = null) => {
     }
 
     // and return the handlers
-    return { clear, add, adjust, displace, nudge, remove, split, toggle }
+    return { clear, copy, add, adjust, displace, nudge, remove, split, toggle }
 }
 
 
