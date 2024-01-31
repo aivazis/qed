@@ -111,7 +111,7 @@ export const useSetPixelPath = (viewport = null) => {
         // update the list
         setPixelPath(old => {
             // clear the selection; removing a point scrambles the node indices...
-            clearSelection(node)
+            clearSelection()
             // make a copy of the whole pile
             const pile = [...old]
             // get the portion that corresponds to this {viewport}
