@@ -10,12 +10,16 @@ import React from 'react'
 // local
 // context
 import { Context } from './context'
+// hooks
+import { useSetMeasureLayer } from './useSetMeasureLayer'
 
 
 // build a handler that toggles the specified entry in the sync table
 export const useToggleSyncedAspect = () => {
-    // grab the setter
+    // grab the sync table setter
     const { setSynced } = React.useContext(Context)
+    // and the measure layer control
+    const { set } = useSetMeasureLayer()
     // and return it
     return (viewport, aspect) => () => {
         // update the sync table
@@ -24,7 +28,12 @@ export const useToggleSyncedAspect = () => {
             const clone = old.map(sync => ({ ...sync }))
             // flip the {aspect} of the viewport
             clone[viewport][aspect] = !old[viewport][aspect]
-            // and return the new state
+            // if we are turning on path sync
+            if (aspect === "path" && clone[viewport][aspect] === true) {
+                // turn on the measure layer for this viewport
+                set(true, viewport)
+            }
+            // return the new state
             return clone
         })
     }
