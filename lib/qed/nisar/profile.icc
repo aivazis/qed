@@ -4,9 +4,7 @@
 // (c) 1998-2024 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_profile_icc)
-#error this file contains implementation details for qed::nisar::profile
-#else
+#pragma once
 
 
 // collect statistics on a tile
@@ -18,12 +16,19 @@ qed::nisar::profile(
     // the layout
     const datatype_t & datatype,
     // the points
-    const native::points_t & path) -> native::values_t<typename sourceT::value_type>
+    const native::points_t & path,
+    // the closed path indicator
+    bool closed) -> native::values_t<typename sourceT::value_type>
 {
+    // type aliases
+    using index_t = typename sourceT::index_type;
+    using shape_t = typename sourceT::shape_type;
+    using value_t = typename sourceT::value_type;
+
     // make a channel
     auto channel = pyre::journal::debug_t("qed.datasets.profile");
     // make a container for the answer
-    native::values_t<typename sourceT::value_type> values;
+    native::values_t<value_t> values;
 
     // if there are no points in the path
     if (path.size() == 0) {
@@ -31,116 +36,95 @@ qed::nisar::profile(
         return values;
     }
 
-    // if there is only one point in the path
-    if (path.size() == 1) {
-        // get the point
-        const native::points_t::value_type & p = path[0];
-
-        // copy the hdf5 data
-        // we read from
-        hsize_t readFrom[2] = { static_cast<hsize_t>(std::get<0>(p)),
-                                static_cast<hsize_t>(std::get<1>(p)) };
-        // the shape of a pixel
-        hsize_t count[2] = { 1, 1 };
-        // get the dataspace of the dataset
-        auto readSpace = dataset.getSpace();
-        // select the hyperslab that corresponds to the pixel we want to extract
-        readSpace.selectHyperslab(H5S_SELECT_SET, count, readFrom);
-        // make a dataspace for the destination
-        auto writeSpace = dataspace_t(2, count);
-        // make room for the value
-        typename sourceT::value_type value;
-        // transfer
-        dataset.read(&value, datatype, writeSpace, readSpace);
-
-        // make a tuple
-        auto entry = std::make_tuple(std::get<0>(p), std::get<1>(p), value);
-        // push it
-        values.push_back(entry);
-        // and done
-        return values;
-    }
-
-    // at this point, it guaranteed that there are at least two points in the path, so we can
-    // process line segments
-    for (auto it = path.cbegin(); it != path.cend() - 1; ++it) {
-        // unpack the tail of the segment
-        auto tail = typename sourceT::index_type(
-            // 0-axis: lines
-            std::get<0>(*it),
-            // 1-axis: samples
-            std::get<1>(*it));
-        // and the head
-        auto head = typename sourceT::index_type(
-            // 0-axis: lines
-            std::get<0>(*(it + 1)),
-            // 1-axis: samples
-            std::get<1>(*(it + 1)));
-
-        // compute the origin of the bounding box
-        auto origin = typename sourceT::index_type(
-            // along the 0-axis
-            std::min(tail[0], head[0]),
-            // along the 1-axis
-            std::min(tail[1], head[1]));
-        // and its shape
-        auto shape = typename sourceT::shape_type(
-            // along the 0-axis
-            std::abs(tail[0] - head[0]) + 1,
-            // along the 1-axis
-            std::abs(tail[1] - head[1]) + 1);
-
-        // we operate at zoom level 0
-        auto strides = sourceT::index_type::one();
-
-        // show me
-        channel
-            // segment
-            << "segment: (" << tail << ") -> (" << head << ")"
-            << pyre::journal::newline
-            // origin
-            << "  origin: (" << origin << ")"
-            << pyre::journal::newline
-            // shape
-            << "  shape: (" << shape << ")"
-            << pyre::journal::newline
-            // flush
-            << pyre::journal::endl(__HERE__);
-
-        // read the data
-        auto source = pyre::h5::read<sourceT>(dataset, datatype, origin, shape, strides);
-
-        // compute the pixel separation; make sure it is a floating point number
-        // so we don't do integer arithmetic until it's time
-        double sep = std::max(shape[0], shape[1]);
-
-        channel << "data:" << pyre::journal::newline;
-        // go through them
-        for (int i = 0; i < sep; ++i) {
-            // interpolate
-            int dx = std::round(i / sep * (head[0] - tail[0]));
-            int dy = std::round(i / sep * (head[1] - tail[1]));
-            // to compute the index shift to this pixel
-            typename sourceT::index_type shift { dx, dy };
-            // get the value
-            auto data = source[tail - origin + shift];
-            // build the index in the raster space
-            typename sourceT::index_type idx = tail + shift;
-            channel << "  data[" << idx << "] = " << data << pyre::journal::newline;
-            // make a tuple
-            auto entry = std::make_tuple(idx[0], idx[1], data);
-            // push it and get the next pixel
-            values.push_back(entry);
+    // if there are at least two points in the path
+    if (path.size() > 1) {
+        // make a container of segments
+        auto segments = native::segments_t();
+        // go through the points
+        for (auto it = path.cbegin(); it != path.cend() - 1; ++it) {
+            // form a segment from the current point and the next one and add it to the pile
+            segments.emplace_back(*it, *(it + 1));
         }
+        // if the path is closed
+        if (closed) {
+            // add a segment from the last point back to the first
+            segments.emplace_back(path.back(), path.front());
+        }
+        // now, go through the segments
+        for (auto & segment : segments) {
+            // unpack
+            auto & [ptail, phead] = segment;
+            // convert the points into (line, sample) indices
+            auto tail = index_t(std::get<0>(ptail), std::get<1>(ptail));
+            auto head = index_t(std::get<0>(phead), std::get<1>(phead));
+            // compute the origin of the segment bounding box
+            auto origin = index_t(std::min(tail[0], head[0]), std::min(tail[1], head[1]));
+            // and its shape
+            auto shape = shape_t(std::abs(tail[0] - head[0] + 1), std::abs(tail[1] - head[1] + 1));
+            // we operate at zoom level 0
+            auto strides = index_t::one();
 
-        channel << pyre::journal::endl(__HERE__);
+            // show me
+            channel
+                // segment
+                << "segment: (" << tail << ") -> (" << head << ")"
+                << pyre::journal::newline
+                // origin
+                << "  origin: (" << origin << ")"
+                << pyre::journal::newline
+                // shape
+                << "  shape: (" << shape << ")"
+                << pyre::journal::newline
+                // flush
+                << pyre::journal::endl(__HERE__);
+
+            // read the data
+            auto data = pyre::h5::read<sourceT>(dataset, datatype, origin, shape, strides);
+            // compute the pixel separation; make sure it's a floating point number so we don't do
+            // integer arithmetic prematurely
+            double sep = std::max(shape[0], shape[1]);
+            // the pixel separation determines the number of data samples
+            for (int pxl = 0; pxl < sep; ++pxl) {
+                // interpolate
+                int dx = std::round(pxl / sep * (head[0] - tail[0]));
+                int dy = std::round(pxl / sep * (head[1] - tail[1]));
+                // to compute the index shift to this pixel
+                auto shift = index_t(dx, dy);
+                // read the value
+                auto value = data[tail - origin + shift];
+                // build the index in the raster space
+                auto idx = index_t(tail + shift);
+                // and record an entry in the result
+                values.emplace_back(idx[0], idx[1], value);
+            }
+        }
     }
+
+    // get the last point on the path
+    auto & last = closed ? path.front() : path.back();
+    // we read from
+    hsize_t readFrom[2] = {
+        static_cast<hsize_t>(std::get<0>(last)),
+        static_cast<hsize_t>(std::get<1>(last)),
+    };
+    // the shape of a pixel
+    hsize_t count[2] = { 1, 1 };
+    // get the dataspace of the dataset
+    auto readSpace = dataset.getSpace();
+    // select the hyperslab that corresponds to the pixel we want to extract
+    readSpace.selectHyperslab(H5S_SELECT_SET, count, readFrom);
+    // make a dataspace for the destination
+    auto writeSpace = dataspace_t(2, count);
+    // make room for the value
+    value_t value;
+    // transfer
+    dataset.read(&value, datatype, writeSpace, readSpace);
+    // and build the last entry
+    values.emplace_back(std::get<0>(last), std::get<1>(last), value);
 
     // all done
     return values;
 }
 
-
-#endif
 
 // end of file

@@ -4,8 +4,7 @@
 // (c) 1998-2024 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_profile_h)
-#define qed_nisar_profile_h
+#pragma once
 
 
 // decorators
@@ -18,15 +17,13 @@ namespace qed::nisar {
         // the data layout
         const datatype_t & datatype,
         // the points
-        const native::points_t &) -> native::values_t<typename sourceT::value_type>;
+        const native::points_t &,
+        // the closed path indicator
+        bool closed = false) -> native::values_t<typename sourceT::value_type>;
 }
 
 
 // pull in the implementations
-#define qed_nisar_profile_icc
 #include "profile.icc"
-#undef qed_nisar_profile_icc
-
-#endif
 
 // end of file
