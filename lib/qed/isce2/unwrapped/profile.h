@@ -4,8 +4,7 @@
 // (c) 1998-2024 all rights reserved
 
 // code guard
-#if !defined(qed_isce2_unwrapped_profile_h)
-#define qed_isce2_unwrapped_profile_h
+#pragma once
 
 
 // decorators
@@ -15,6 +14,11 @@ namespace qed::isce2::unwrapped {
     using point_t = std::tuple<int, int>;
     // a path has a bunch of these
     using points_t = std::vector<point_t>;
+
+    // line segments
+    using segment_t = std::tuple<point_t, point_t>;
+    // containers of segments
+    using segments_t = std::vector<segment_t>;
 
     // the profile record has the incoming pixel location and my amplitude/phase pair
     template <class valueT>
@@ -30,15 +34,14 @@ namespace qed::isce2::unwrapped {
         // the source
         const sourceT & source,
         // the points
-        const points_t &) -> values_t<typename sourceT::value_type>;
+        const points_t &,
+        // the closed path indicator
+        bool closed = false) -> values_t<typename sourceT::value_type>;
 }
 
 
 // pull in the implementations
-#define qed_isce2_unwrapped_profile_icc
 #include "profile.icc"
-#undef qed_isce2_unwrapped_profile_icc
 
-#endif
 
 // end of file

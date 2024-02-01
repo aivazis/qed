@@ -4,9 +4,7 @@
 // (c) 1998-2024 all rights reserved
 
 // code guard
-#if !defined(qed_isce2_unwrapped_profile_icc)
-#error this file contains implementation details for qed::isce2::unwrapped::profile
-#else
+#pragma once
 
 
 // collect statistics on a tile
@@ -16,9 +14,12 @@ qed::isce2::unwrapped::profile(
     // the data source
     const sourceT & source,
     // the points
-    const points_t & path) -> values_t<typename sourceT::value_type>
+    const points_t & path,
+    // the closed path indicator
+    bool closed) -> values_t<typename sourceT::value_type>
 {
     // type aliases
+    using index_t = typename sourceT::index_type;
     using rec_t = value_t<typename sourceT::value_type>;
     using recs_t = values_t<typename sourceT::value_type>;
 
@@ -31,67 +32,63 @@ qed::isce2::unwrapped::profile(
         return values;
     }
 
-    // if there is only one point in the path
-    if (path.size() == 1) {
-        // unpack the point
-        auto [line, sample] = path[0];
-        // we have to convert this into two indices by injecting the channel index
-        // one to get the amplitude
-        auto amplitude = source[{ line, 0, sample }];
-        // and another to get the phase
-        auto phase = source[{ line, 1, sample }];
-
-        // build the result
-        rec_t value { line, sample, amplitude, phase };
-        // add it to the pile
-        values.push_back(value);
-
-        // and done
-        return values;
-    }
-
-    // at this point, it is guaranteed that there are at least two points in the path, so we can
-    // process line segments
-    for (auto it = path.cbegin(); it != path.cend() - 1; ++it) {
-        // unpack the tail
-        auto [tailLine, tailSample] = *it;
-        // and the head
-        auto [headLine, headSample] = *(it + 1);
-
-        // compute the deltas
-        auto deltaLine = std::abs(tailLine - headLine) + 1;
-        auto deltaSample = std::abs(tailSample - headSample) + 1;
-
-        // compute the pixel distance between the tail and the head
-        double sep = std::max(deltaLine, deltaSample);
-
-        // one pixel at a time
-        for (int i = 0; i < sep; ++i) {
-            // interpolate to form the offset of the current pixel from {tail}
-            // this is why {sep} is a double...
-            int dLine = std::round(i / sep * (headLine - tailLine));
-            int dSample = std::round(i / sep * (headSample - tailSample));
-            // form the address of the current pixel
-            auto pixelLine = tailLine + dLine;
-            auto pixelSample = tailSample + dSample;
-
-            // get the amplitude
-            auto amplitude = source[{ pixelLine, 0, pixelSample }];
-            // and the phase
-            auto phase = source[{ pixelLine, 1, pixelSample }];
-
-            // assemble this record
-            rec_t value { pixelLine, pixelSample, amplitude, phase };
-            // push onto the result and move on
-            values.push_back(value);
+    // if there are at least two points in the path
+    if (path.size() > 1) {
+        // make a container of segments
+        auto segments = segments_t();
+        // go through the points
+        for (auto it = path.cbegin(); it != path.cend() - 1; ++it) {
+            // form a segment from the current point and the next one and add it to the pile
+            segments.emplace_back(*it, *(it + 1));
+        }
+        // if the path is closed
+        if (closed) {
+            // add a segment from the last point back to the first
+            segments.emplace_back(path.back(), path.front());
+        }
+        // now, go through the segments
+        for (auto & segment : segments) {
+            // unpack the segment
+            auto & [tail, head] = segment;
+            // unpack the points
+            auto [tailLine, tailSample] = tail;
+            auto [headLine, headSample] = head;
+            // compute the shape of the bounding box
+            auto deltaLine = std::abs(tailLine - headLine) + 1;
+            auto deltaSample = std::abs(tailSample - headSample) + 1;
+            // compute the pixel separation; make sure it's a double so we don't do integer
+            // arithmetic until it's time
+            double sep = std::max(deltaLine, deltaSample);
+            // the pixel separation determines the number of data samples
+            for (int pxl = 0; pxl < sep; ++pxl) {
+                // interpolate
+                int dLine = std::round(pxl / sep * (headLine - tailLine));
+                int dSample = std::round(pxl / sep * (headSample - tailSample));
+                // form the address of the current pixel
+                auto pixelLine = tailLine + dLine;
+                auto pixelSample = tailSample + dSample;
+                // get the values
+                auto amplitude = source[index_t(pixelLine, 0, pixelSample)];
+                auto phase = source[index_t(pixelLine, 1, pixelSample)];
+                // and record an entry in the result
+                values.emplace_back(pixelLine, pixelSample, amplitude, phase);
+            }
         }
     }
+
+    // get the last point on the path
+    auto & last = closed ? path.front() : path.back();
+    // unpack
+    auto [line, sample] = last;
+    // get the values
+    auto amplitude = source[index_t(line, 0, sample)];
+    auto phase = source[index_t(line, 1, sample)];
+    // and build the last entry
+    values.emplace_back(line, sample, amplitude, phase);
 
     // all done
     return values;
 }
 
-
-#endif
 
 // end of file
