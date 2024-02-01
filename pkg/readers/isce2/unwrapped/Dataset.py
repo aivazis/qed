@@ -76,12 +76,14 @@ class Dataset(
         # all done
         return
 
-    def profile(self, points):
+    def profile(self, points, closed=False):
         """
         Sample my data along the path defined by {points}
         """
         # ask my data manager to build a profile
-        profile = qed.libqed.isce2.unwrapped.profile(self.data, points)
+        profile = qed.libqed.isce2.unwrapped.profile(
+            source=self.data, points=points, closed=closed
+        )
         # and return it
         return profile
 
