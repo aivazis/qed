@@ -12,7 +12,6 @@ import React from 'react'
 import { Context } from './context'
 import { useSetPixelPath } from './useSetPixelPath'
 import { useSetPixelPathSelection } from './useSetPixelPathSelection'
-import { useSetSyncedAspect } from './useSyncAspect'
 
 
 // toggle the measure layer over this viewport
