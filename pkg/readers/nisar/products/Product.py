@@ -81,13 +81,16 @@ class Product(
         # all done
         return
 
-    def profile(self, points):
+    def profile(self, points, closed=False):
         """
         Sample my data along the path defined by {points}
         """
         # ask my data manager to build a profile
         profile = qed.libqed.nisar.profile(
-            source=self.data.dataset, datatype=self.datatype.htype, points=points
+            source=self.data.dataset,
+            datatype=self.datatype.htype,
+            points=points,
+            closed=closed,
         )
         # and return it
         return profile
