@@ -21,7 +21,7 @@ qed::py::isce2::interferogram::profile(py::module & m)
         // the handler
         &qed::native::profile<mapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "points"_a,
+        "source"_a, "points"_a, "closed"_a,
         // the docstring
         "collect values from a dataset along a path");
 
@@ -31,7 +31,7 @@ qed::py::isce2::interferogram::profile(py::module & m)
         // the handler
         &qed::native::profile<mapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "points"_a,
+        "source"_a, "points"_a, "closed"_a = false,
         // the docstring
         "collect values from a dataset along a path");
 

@@ -21,7 +21,7 @@ qed::py::native::profile(py::module & m)
         // the handler
         &qed::native::profile<mapgrid_t<char>>,
         // the signature
-        "source"_a, "points"_a,
+        "source"_a, "points"_a, "closed"_a = false,
         // the docstring
         "collect values from a dataset along a path");
 
@@ -31,7 +31,7 @@ qed::py::native::profile(py::module & m)
         // the handler
         &qed::native::profile<mapgrid_t<int8_t>>,
         // the signature
-        "source"_a, "points"_a,
+        "source"_a, "points"_a, "closed"_a = false,
         // the docstring
         "collect values from a dataset along a path");
 
@@ -41,7 +41,7 @@ qed::py::native::profile(py::module & m)
         // the handler
         &qed::native::profile<mapgrid_t<int16_t>>,
         // the signature
-        "source"_a, "points"_a,
+        "source"_a, "points"_a, "closed"_a = false,
         // the docstring
         "collect values from a dataset along a path");
 
@@ -51,7 +51,7 @@ qed::py::native::profile(py::module & m)
         // the handler
         &qed::native::profile<mapgrid_t<int32_t>>,
         // the signature
-        "source"_a, "points"_a,
+        "source"_a, "points"_a, "closed"_a = false,
         // the docstring
         "collect values from a dataset along a path");
 
@@ -61,7 +61,7 @@ qed::py::native::profile(py::module & m)
         // the handler
         &qed::native::profile<mapgrid_t<int64_t>>,
         // the signature
-        "source"_a, "points"_a,
+        "source"_a, "points"_a, "closed"_a = false,
         // the docstring
         "collect values from a dataset along a path");
 
@@ -71,7 +71,7 @@ qed::py::native::profile(py::module & m)
         // the handler
         &qed::native::profile<mapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "points"_a,
+        "source"_a, "points"_a, "closed"_a = false,
         // the docstring
         "collect values from a dataset along a path");
 
@@ -81,7 +81,7 @@ qed::py::native::profile(py::module & m)
         // the handler
         &qed::native::profile<mapgrid_t<std::complex<double>>>,
         // the signature
-        "source"_a, "points"_a,
+        "source"_a, "points"_a, "closed"_a = false,
         // the docstring
         "collect values from a dataset along a path");
 

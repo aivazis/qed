@@ -21,7 +21,7 @@ qed::py::nisar::profile(py::module & m)
         // the handler
         &qed::nisar::profile<heapgrid_t<std::complex<float>>>,
         // the signature
-        "source"_a, "datatype"_a, "points"_a,
+        "source"_a, "datatype"_a, "points"_a, "closed"_a = false,
         // the docstring
         "collect values from a dataset along a path");
 

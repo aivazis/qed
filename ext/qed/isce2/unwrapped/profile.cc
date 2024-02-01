@@ -21,7 +21,7 @@ qed::py::isce2::unwrapped::profile(py::module & m)
         // the handler
         &qed::isce2::unwrapped::profile<mapgrid_t<float, 3>>,
         // the signature
-        "source"_a, "points"_a,
+        "source"_a, "points"_a, "closed"_a,
         // the docstring
         "collect values from a dataset along a path");
 
@@ -31,7 +31,7 @@ qed::py::isce2::unwrapped::profile(py::module & m)
         // the handler
         &qed::isce2::unwrapped::profile<mapgrid_t<double, 3>>,
         // the signature
-        "source"_a, "points"_a,
+        "source"_a, "points"_a, "closed"_a = false,
         // the docstring
         "collect values from a dataset along a path");
 
