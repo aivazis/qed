@@ -12,7 +12,7 @@ import styled from 'styled-components'
 // hooks
 import { useViews } from '../../viz/useViews'
 import { useSynced } from '../../viz/useSynced'
-import { useToggleSyncedAspect, useSetSyncedAspect } from '../../viz/useSyncAspect'
+import { useSyncAspect } from '../../viz/useSyncAspect'
 // components
 import { Cell } from './cell'
 import { Channel } from './channel'
@@ -28,9 +28,7 @@ export const Body = () => {
     // get the sync state of all the viewports
     const synced = useSynced()
     // build the toggle factory
-    const toggle = useToggleSyncedAspect()
-    // and the setter factory
-    const update = useSetSyncedAspect()
+    const { toggle, update } = useSyncAspect()
     // render
     return (
         <Container>

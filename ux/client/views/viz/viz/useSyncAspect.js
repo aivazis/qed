@@ -14,13 +14,14 @@ import { Context } from './context'
 import { useSetPixelPath } from './useSetPixelPath'
 
 // build a handler that toggles the specified entry in the sync table
-export const useToggleSyncedAspect = () => {
+export const useSyncAspect = () => {
     // grab the sync table setter
     const { setSynced, setMeasureLayer } = React.useContext(Context)
     // and the handler that copies pixel paths
     const { copy } = useSetPixelPath()
+
     // make a handler factory and return it
-    return (viewport, aspect) => () => {
+    const toggle = (viewport, aspect) => () => {
         // the new value of the aspect
         let value
         // and a path synced viewport
@@ -59,14 +60,9 @@ export const useToggleSyncedAspect = () => {
         // all done
         return
     }
-}
 
-// build a handler that sets the specified entry in the sync table to a specific value
-export const useSetSyncedAspect = () => {
-    // grab the setter
-    const { setSynced } = React.useContext(Context)
     // make a handler factory and return it
-    return (viewport, aspect) => value => {
+    const update = (viewport, aspect) => value => {
         // a path synced viewport
         let src
         // update the sync table
@@ -101,6 +97,9 @@ export const useSetSyncedAspect = () => {
         // all done
         return
     }
+
+    // all done
+    return { toggle, update }
 }
 
 
