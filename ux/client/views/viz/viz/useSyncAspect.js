@@ -114,6 +114,13 @@ export const useSyncAspect = () => {
         setSynced(old => {
             // get the state of the opinionated viewport
             value = old[viewport][aspect]
+            // check whether the entire table shares this value
+            const consensus = old.every(entry => entry[aspect] == value)
+            // if we have consensus
+            if (consensus) {
+                // toggle
+                value = !value
+            }
             // find a viewport that is path synced and save it, in case we are updating {path}
             src = old.findIndex(port => port.path)
             // make a copy of the old state and force the new {aspect} value on everybody
