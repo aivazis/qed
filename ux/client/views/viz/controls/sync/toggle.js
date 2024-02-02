@@ -52,7 +52,7 @@ const Button = styled.div`
 
 // the  button
 const ActiveButton = styled(Button)`
-    border-color: (0deg, 0%, 40%);
+    border-color: hsl(0deg, 0%, 40%);
 `
 
 const SelectedButton = styled(Button)`
