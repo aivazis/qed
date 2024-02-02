@@ -17,19 +17,10 @@ export const Toggle = ({ state, toggle, force }) => {
         evt.stopPropagation()
         // and quash any side effects
         evt.preventDefault()
+        // check the status of the <Alt> key
+        const { altKey } = evt
         // flip the state
-        toggle()
-        // all done
-        return
-    }
-    // build the event handler for forcing my state
-    const sync = evt => {
-        // stop this event from bubbling up
-        evt.stopPropagation()
-        // and quash any side effects
-        evt.preventDefault()
-        // flip the state
-        force()
+        altKey ? force() : toggle()
         // all done
         return
     }
@@ -37,8 +28,6 @@ export const Toggle = ({ state, toggle, force }) => {
     const behaviors = {
         // on click, toggle my state
         onClick: flip,
-        // on double click, force my state on everybody
-        onDoubleClick: sync,
     }
     // mix my paint
     const Control = state ? SelectedButton : ActiveButton;
