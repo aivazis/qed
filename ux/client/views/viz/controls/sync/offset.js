@@ -9,25 +9,25 @@ import React from 'react'
 import styled from 'styled-components'
 
 // local
+// hooks
+import { useSynced } from '../../viz/useSynced'
+import { useSyncAspect } from '../../viz/useSyncAspect'
+// components
 import { Cell } from './cell'
 import { Coordinate } from './coordinate'
 
+
 // the channel sync control
-export const Offset = ({ offset, update }) => {
-    // build the state toggle
-    const adjust = (axis, value) => {
-        // cast the value to an int
-        const coord = parseInt(value)
-        // if this fails
-        if (isNaN(coord)) {
-            // bail
-            return
-        }
-        // adjust the correct entry and set the state
-        update({ ...offset, [axis]: coord })
-        // all done
-        return
-    }
+export const Offset = ({ viewport }) => {
+    // get the sync state of all the viewports
+    const synced = useSynced()
+    // get the sync handler factory
+    const { update } = useSyncAspect()
+
+    // get the offset
+    const offset = synced[viewport].offset
+    // build the handler
+    const adjust = update(viewport, "offset")
     // render
     return (
         <Housing>

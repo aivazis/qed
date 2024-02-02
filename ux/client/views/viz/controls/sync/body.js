@@ -11,8 +11,6 @@ import styled from 'styled-components'
 // locals
 // hooks
 import { useViews } from '../../viz/useViews'
-import { useSynced } from '../../viz/useSynced'
-import { useSyncAspect } from '../../viz/useSyncAspect'
 // components
 import { Cell } from './cell'
 import { Channel } from './channel'
@@ -25,25 +23,19 @@ import { Zoom } from './zoom'
 export const Body = () => {
     // get the set of views
     const { views } = useViews()
-    // get the sync state of all the viewports
-    const synced = useSynced()
-    // build the toggle factory
-    const { toggle, update } = useSyncAspect()
     // render
     return (
         <Container>
             {views.map(({ dataset, channel }, viewport) => {
-                // get the sync state of the viewport
-                const sync = synced[viewport]
                 // render
                 return (
                     <Viewport key={`${dataset.name}:${viewport}`}>
                         <Dataset>{dataset.name}</Dataset>
-                        <Channel state={sync.channel} toggle={toggle(viewport, "channel")} />
-                        <Zoom state={sync.zoom} toggle={toggle(viewport, "zoom")} />
-                        <Scroll state={sync.scroll} toggle={toggle(viewport, "scroll")} />
-                        <Path state={sync.path} toggle={toggle(viewport, "path")} />
-                        <Offset offset={sync.offset} update={update(viewport, "offset")} />
+                        <Channel viewport={viewport} />
+                        <Zoom viewport={viewport} />
+                        <Scroll viewport={viewport} />
+                        <Path viewport={viewport} />
+                        <Offset viewport={viewport} />
                     </Viewport>
                 )
             })}

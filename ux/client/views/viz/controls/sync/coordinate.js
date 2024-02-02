@@ -16,9 +16,14 @@ export const Coordinate = ({ className, point, axis, adjust }) => {
     // on input
     const update = evt => {
         // get the new value
-        let offset = evt.target.value
+        const coord = parseInt(evt.target.value)
+        // if the conversion fails
+        if (isNaN(coord)) {
+            // bail
+            return
+        }
         // and set it
-        adjust(axis, offset)
+        adjust({ ...point, [axis]: coord })
         // all done
         return
     }
