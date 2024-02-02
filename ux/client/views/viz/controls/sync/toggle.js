@@ -52,7 +52,13 @@ const Button = styled.div`
 
 // the  button
 const ActiveButton = styled(Button)`
-    border-color: hsl(0deg, 0%, 40%);
+    & {
+        border-color: hsl(0deg, 0%, 40%);
+    }
+
+    &:hover {
+        border-color: hsl(28deg, 90%, 45%);
+    }
 `
 
 const SelectedButton = styled(Button)`
