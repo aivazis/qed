@@ -38,7 +38,7 @@ const Entry = styled.div`
     display: flex;
     align-items: end;
     height: 1.2em;
-    margin: 0.0rem 0.0rem 0.0rem 0.0rem;
+    margin: 0.0rm;
     padding: 0.0rem 0.0rem 0.25rem 0.0rem;
 `
 
