@@ -22,11 +22,13 @@ import { Zoom } from './zoom'
 // the body of the sync control table
 export const Body = () => {
     // get the set of views
-    const { views } = useViews()
+    const { views, activeViewport } = useViews()
     // render
     return (
         <Container>
             {views.map(({ dataset, channel }, viewport) => {
+                // pick the dataset styling
+                const Dataset = (viewport == activeViewport) ? SelectedDataset : ActiveDataset
                 // render
                 return (
                     <Viewport key={`${dataset.name}:${viewport}`}>
@@ -55,15 +57,14 @@ const Viewport = styled.tr`
     vertical-align: middle;
 `
 
-// the viewport
-const Index = styled(Cell)`
-    text-align: right;
-`
-
 // the dataset
-const Dataset = styled(Cell)`
+const ActiveDataset = styled(Cell)`
     text-align: left;
     overflow: auto;
+`
+
+const SelectedDataset = styled(ActiveDataset)`
+    color: hsl(28deg, 90%, 55%);
 `
 
 
