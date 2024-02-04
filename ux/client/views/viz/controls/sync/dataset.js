@@ -60,6 +60,8 @@ export const Dataset = ({ viewport, children }) => {
 
 // the styles
 const ActiveDataset = styled(Cell)`
+    font-family: inconsolata;
+    font-size: 110%;
     text-align: left;
     overflow: auto;
     cursor: pointer;

@@ -12,7 +12,7 @@ import React from 'react'
 import { useSynced } from '../../viz/useSynced'
 import { useSyncAspect } from '../../viz/useSyncAspect'
 // components
-import { Cell } from './cell'
+import { Control } from './control'
 import { Toggle } from './toggle'
 
 // the path sync control
@@ -23,12 +23,12 @@ export const Path = ({ viewport }) => {
     const { toggle, force } = useSyncAspect()
     // render
     return (
-        <Cell>
+        <Control>
             <Toggle
                 state={synced[viewport].path}
                 toggle={toggle(viewport, "path")}
                 force={force(viewport, "path")} />
-        </Cell>
+        </Control>
     )
 }
 

@@ -12,7 +12,7 @@ import React from 'react'
 import { useSynced } from '../../viz/useSynced'
 import { useSyncAspect } from '../../viz/useSyncAspect'
 // components
-import { Cell } from './cell'
+import { Control } from './control'
 import { Toggle } from './toggle'
 
 // the zoom sync control
@@ -23,12 +23,12 @@ export const Zoom = ({ viewport }) => {
     const { toggle, force } = useSyncAspect()
     // render
     return (
-        <Cell>
+        <Control>
             <Toggle
                 state={synced[viewport].zoom}
                 toggle={toggle(viewport, "zoom")}
                 force={force(viewport, "zoom")} />
-        </Cell>
+        </Control>
     )
 }
 
