@@ -37,7 +37,7 @@ export const Delete = ({ idx }) => {
 
     // render
     return (
-        <Button size={10} behaviors={behaviors}>
+        <Button size={12} behaviors={behaviors}>
             <X />
         </Button>
     )

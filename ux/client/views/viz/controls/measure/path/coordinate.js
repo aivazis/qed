@@ -89,7 +89,7 @@ const Base = styled.input`
     outline: none;
     cursor: pointer;
     font-family: inconsolata;
-    font-size: 100%;
+    font-size: 110%;
     width: 3.0rem;
     text-align: end;
     background-color: hsl(0deg, 0%, 7%);
