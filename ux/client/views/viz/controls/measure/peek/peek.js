@@ -84,10 +84,6 @@ const Panel = () => {
             <Header>
                 {/* the label */}
                 <Title>peek</Title>
-                {/* the mouse coordinates */}
-                <Coordinate>{pixel[0]}</Coordinate>
-                x
-                <Coordinate>{pixel[1]}</Coordinate>
             </Header>
             {/* the reps */}
             {value.map(({ channel, reps }) => (
@@ -116,12 +112,6 @@ const Title = styled.span`
     margin: 0.0rem 0.0rem 0.1rem 0.0rem;
     cursor: default;
     color: hsl(0deg, 0%, 75%);
-`
-
-const Coordinate = styled.span`
-    font-family: inconsolata;
-    cursor: default;
-    padding: 0.0rem 0.25rem;
 `
 
 
