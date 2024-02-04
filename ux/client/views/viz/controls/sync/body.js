@@ -56,15 +56,5 @@ const Viewport = styled.tr`
     vertical-align: middle;
 `
 
-// the dataset
-const ActiveDataset = styled(Cell)`
-    text-align: left;
-    overflow: auto;
-`
-
-const SelectedDataset = styled(ActiveDataset)`
-    color: hsl(28deg, 90%, 55%);
-`
-
 
 // end of file
