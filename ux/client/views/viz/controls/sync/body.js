@@ -12,7 +12,6 @@ import styled from 'styled-components'
 // hooks
 import { useViews } from '../../viz/useViews'
 // components
-import { Cell } from './cell'
 import { Dataset } from './dataset'
 import { Channel } from './channel'
 import { Offset } from './offset'
