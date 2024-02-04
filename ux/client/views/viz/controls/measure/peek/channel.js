@@ -35,40 +35,36 @@ export const Channel = ({ channel, reps }) => {
 
 // the container
 const Entry = styled.div`
+    display: flex;
+    align-items: end;
+    height: 1.2em;
+    margin: 0.0rem 0.0rem 0.0rem 0.0rem;
+    padding: 0.0rem 0.0rem 0.25rem 0.0rem;
 `
 
-const Label = styled.span`
-    display: inline-block;
+const Label = styled.div`
     font-family: rubik-light;
     width: 4.0rem;
     text-align: end;
     text-transform: uppercase;
-    padding: 0.0rem 0.0rem 0.25rem 0.0rem;
-    margin: 0.0rem 0.0rem 0.1rem 0.0rem;
     cursor: default;
 `
 
-const Value = styled.span`
-    display: inline-block;
+const Value = styled.div`
     font-family: inconsolata;
-    cursor: default;
-    width: 3.25rem;
+    font-size: 110%;
+    width: 6.0rem;
     text-align: end;
-    padding: 0.0rem;
     overflow: clip;
-    padding: 0.0rem 0.0rem 0.0rem 0.5rem;
     cursor: default;
 `
 
 // the state control
-const Button = styled.button`
+const Button = styled.div`
     & {
         cursor: pointer;
         font-family: rubik-light;
         text-align: start;
-        color: inherit;
-        background-color: transparent;
-        border: 0 transparent;
         margin: 0.0rem;
         padding: 0.0rem 0.0rem 0.0rem 0.5rem;
     }
