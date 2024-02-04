@@ -25,7 +25,11 @@ class ChannelValue(graphene.ObjectType):
         """
         # extract the value
         value = context["rep"]
-        # and render
+        # if it's a string
+        if isinstance(value, str):
+            # leave it alone
+            return value
+        # otherwise, render it and return it
         return f"{value:10.4g}"
 
 
