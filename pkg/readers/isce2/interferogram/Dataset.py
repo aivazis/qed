@@ -66,7 +66,7 @@ class Dataset(
         Build a family of value representations at the given {pixel}
         """
         # build the cursor rep
-        yield "cursor", [(f"{pixel}", "pixels")]
+        yield "cursor", [(f"{pixel}", "pixel")]
 
         # get my data type
         cell = self.cell
