@@ -29,8 +29,7 @@ export const Button = ({ size = 12, behaviors, children, ...rest }) => {
 }
 
 
-const Mark = styled.span`
-    display: inline-block;
+const Mark = styled.div`
     width: 2.0rem;
     text-align: end;
 `

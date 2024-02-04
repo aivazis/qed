@@ -42,8 +42,12 @@ export const Point = ({ idx, point, last }) => {
 
 // the container
 const Box = styled.div`
+    display: flex;
+    align-items: end;
     font-family: inconsolata;
-    padding: 0.2rem 0.0rem;
+    height: 1.2em;
+    margin: 0em;
+    padding: 0.125rem 0.0rem;
 `
 
 
