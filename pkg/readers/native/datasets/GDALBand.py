@@ -70,6 +70,9 @@ class GDALBand(
         # and the value of the {pixel}
         _, _, value = self.profile(points=[pixel])[0]
 
+        # build the cursor rep
+        yield "cursor", [(f"{pixel}", "pixels")]
+
         # go through the channels marked as special by my data type
         for name in cell.summary:
             # get the corresponding channel
