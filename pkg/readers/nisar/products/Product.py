@@ -64,6 +64,9 @@ class Product(
         """
         Build a family of value representations at the given {pixel}
         """
+        # generate cursor information
+        yield from self.cursor(pixel=pixel)
+
         # get my data type
         cell = self.cell
         # my channels
@@ -94,6 +97,15 @@ class Product(
         )
         # and return it
         return profile
+
+    def cursor(self, pixel):
+        """
+        Render information about the cursor position
+        """
+        # build the cursor rep
+        yield "cursor", [(f"{pixel}", "pixel")]
+        # all done
+        return
 
     def render(self, channel, zoom, origin, shape):
         """
