@@ -65,6 +65,9 @@ class Dataset(
         """
         Build a family of value representations at the given {pixel}
         """
+        # build the cursor rep
+        yield "cursor", [(f"{pixel}", "pixels")]
+
         # get the pixel value
         _, _, amplitude, phase = self.profile(points=[pixel])[0]
 
