@@ -108,8 +108,10 @@ export const useSyncAspect = () => {
     const force = (viewport, aspect) => () => {
         // the new value of the aspect
         let value
+        // the set of viewports whose measure layer must be turned on
+        let measured = []
         // and a path synced viewport
-        let src
+        let src = -1
         // update the sync table
         setSynced(old => {
             // get the state of the opinionated viewport
@@ -121,10 +123,19 @@ export const useSyncAspect = () => {
                 // toggle
                 value = !value
             }
-            // find a viewport that is path synced and save it, in case we are updating {path}
-            src = old.findIndex(port => port.path)
+            // if we are path syncing
+            if (aspect === "path") {
+                // find a viewport that is path synced and save it, in case we are updating {path}
+                src = old.findIndex(port => port.path)
+                // if there isn't one
+                if (src < 0) {
+                    // use the active viewport
+                    src = viewport
+                }
+            }
+            // if there were no path synced
             // make a copy of the old state and force the new {aspect} value on everybody
-            return old.map(entry => {
+            return old.map((entry, port) => {
                 // make a copy of the entry
                 const clone = {
                     channel: entry.channel,
@@ -134,6 +145,11 @@ export const useSyncAspect = () => {
                     offset: { ...entry.offset },
                     // and override the specified aspect
                     [aspect]: value
+                }
+                // if we are turning on {path} syncing and this entry wasn't synced before
+                if (aspect === "path" && value === true && entry.path == false) {
+                    // add it to the pile of viewports whose measured layer must be turned on
+                    measured.push(port)
                 }
                 // hand off the new pile
                 return clone
@@ -145,16 +161,23 @@ export const useSyncAspect = () => {
             setMeasureLayer(old => {
                 // make a copy
                 const pile = [...old]
-                // adjust the entry for this viewport
-                pile[viewport] = true
+                // adjust the entry for all viewports on the {measure} pile
+                measured.forEach(port => {
+                    // by turning on their measured layer
+                    pile[port] = true
+                    // all done
+                    return
+                })
                 // and return the bew pile
                 return pile
             })
-            // if we have a path synced viewport
-            if (src >= 0) {
-                // copy its pixel path
-                copy(src, viewport)
-            }
+            // go through all ports that were previously not path synced
+            measured.forEach(port => {
+                // and adjust their path
+                copy(src, port)
+                // all done
+                return
+            })
         }
         // all done
         return
