@@ -13,6 +13,7 @@ import styled from 'styled-components'
 import { useViews } from '../../viz/useViews'
 // components
 import { Cell } from './cell'
+import { Dataset } from './dataset'
 import { Channel } from './channel'
 import { Offset } from './offset'
 import { Path } from './path'
@@ -22,17 +23,15 @@ import { Zoom } from './zoom'
 // the body of the sync control table
 export const Body = () => {
     // get the set of views
-    const { views, activeViewport } = useViews()
+    const { views } = useViews()
     // render
     return (
         <Container>
             {views.map(({ dataset, channel }, viewport) => {
-                // pick the dataset styling
-                const Dataset = (viewport == activeViewport) ? SelectedDataset : ActiveDataset
                 // render
                 return (
                     <Viewport key={`${dataset.name}:${viewport}`}>
-                        <Dataset>{dataset.name}</Dataset>
+                        <Dataset viewport={viewport}>{dataset.name}</Dataset>
                         <Channel viewport={viewport} />
                         <Zoom viewport={viewport} />
                         <Scroll viewport={viewport} />
