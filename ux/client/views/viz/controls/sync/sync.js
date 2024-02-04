@@ -34,7 +34,6 @@ export const Sync = () => {
 const Housing = styled.table`
     margin: 1.0em auto ;
     padding: 1.0em 0.0em ;
-    font-family: inconsolata;
     color: hsl(0deg, 0%, 50%);
     margin: 0.0rem 0.5rem 0.5rem 0.5rem;
 `

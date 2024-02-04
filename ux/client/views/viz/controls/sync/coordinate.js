@@ -52,13 +52,10 @@ export const Coordinate = ({ className, point, axis, adjust }) => {
 // the base entry
 const Base = styled.input`
     display: inline-block;
-    font-size: 110%;
     appearance: textfield;
     outline: none;
     cursor: pointer;
-    font-family: inconsolata;
-    font-size: 100%;
-    width: 2.5em;
+    width: 4.0em;
     background-color: hsl(0deg, 0%, 7%);
     padding: 0.0rem;
     border: 0 transparent;

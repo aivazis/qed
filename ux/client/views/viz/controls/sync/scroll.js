@@ -12,7 +12,7 @@ import React from 'react'
 import { useSynced } from '../../viz/useSynced'
 import { useSyncAspect } from '../../viz/useSyncAspect'
 // components
-import { Cell } from './cell'
+import { Control } from './control'
 import { Toggle } from './toggle'
 
 // the scroll sync control
@@ -23,12 +23,12 @@ export const Scroll = ({ viewport }) => {
     const { toggle, force } = useSyncAspect()
     // render
     return (
-        <Cell>
+        <Control>
             <Toggle
                 state={synced[viewport].scroll}
                 toggle={toggle(viewport, "scroll")}
                 force={force(viewport, "scroll")} />
-        </Cell>
+        </Control>
     )
 }
 

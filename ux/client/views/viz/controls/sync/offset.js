@@ -38,7 +38,10 @@ export const Offset = ({ viewport }) => {
 }
 
 const Housing = styled(Cell)`
-    min-width: 6em;
+    font-family: inconsolata;
+    font-size: 110%;
+    width: 7.5em;
+    min-width: 7.5em;
 `
 
 const Line = styled(Coordinate)`
