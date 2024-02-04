@@ -26,7 +26,7 @@ export const Body = () => {
     // render
     return (
         <Container>
-            {views.map(({ dataset, channel }, viewport) => {
+            {views.map(({ dataset }, viewport) => {
                 // render
                 return (
                     <Viewport key={`${dataset.name}:${viewport}`}>
