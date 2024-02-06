@@ -47,18 +47,24 @@ export const Print = ({ viewport }) => {
     const zoomedShape = shape.map((extent, idx) => extent / scale[idx])
 
     // make my handler
-    const print = () => {
+    const print = evt => {
+        // get the state of the alt key
+        const { altKey } = evt
         // get viewer placemat
         const placemat = viewports[viewport]
         // measure it
         const box = placemat.getBoundingClientRect()
 
         // get the current scroll position
-        const left = Math.trunc(placemat.scrollLeft)
-        const top = Math.trunc(placemat.scrollTop)
+        const left = altKey ? 0 : Math.trunc(placemat.scrollLeft)
+        const top = altKey ? 0 : Math.trunc(placemat.scrollTop)
         // clip the extents to the raster shape
-        const width = Math.trunc(Math.min(box.width, zoomedShape[1] - left))
-        const height = Math.trunc(Math.min(box.height, zoomedShape[0] - top))
+        const width = Math.trunc(
+            altKey ? zoomedShape[1] : Math.min(box.width, zoomedShape[1] - left)
+        )
+        const height = Math.trunc(
+            altKey ? zoomedShape[0] : Math.min(box.height, zoomedShape[0] - top)
+        )
 
         // form the tile
         const tile = `${top}x${left}+${height}x${width}`
