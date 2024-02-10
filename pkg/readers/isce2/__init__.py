@@ -9,5 +9,8 @@ from .interferogram import int
 from .RSLC import RSLC as rslc
 from .unwrapped import unw
 
+# the metadata parser
+from .xml import parse as metadata
+
 
 # end of file
