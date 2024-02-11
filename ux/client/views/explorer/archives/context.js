@@ -25,7 +25,7 @@ export const Provider = ({ archive, children }) => {
 
 // the context
 export const Context = React.createContext(
-    // the default value clients see when accessing the context outside a provide
+    // the default value clients see when accessing the context outside a provider
     {
         // the data archive
         archive: null,
