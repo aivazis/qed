@@ -13,7 +13,7 @@ import { Selector as Archive } from '../archive'
 import { Selector as Reader } from '../reader'
 
 
-// the decorator of a {dataset} tab
+// the decorator of an {explorer} tab
 export const Selector = ({ viewport, view }) => {
     // unpack the view
     const { archive, reader } = view
