@@ -26,6 +26,7 @@ class Archive(graphene.ObjectType):
     id = graphene.ID()
     name = graphene.String()
     uri = graphene.String()
+    readers = graphene.List(graphene.String)
 
     # the resolvers
     @staticmethod
@@ -51,6 +52,14 @@ class Archive(graphene.ObjectType):
         """
         # convert the archive URI into a string
         return f"{archive.uri}"
+
+    @staticmethod
+    def resolve_readers(archive, *_):
+        """
+        Get the supported readers
+        """
+        # convert the archive URI into a string
+        return archive.readers
 
 
 # end of file
