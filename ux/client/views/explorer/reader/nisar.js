@@ -53,7 +53,7 @@ export const NISAR = ({ view, setType, hide }) => {
         <Panel>
             <Form>
                 <Body>
-                    <Type value="nisar" update={setType} />
+                    <Type value="nisar" update={setType} readers={view.reader.readers} />
                     <Products value={form.product} update={update} />
                     <Name value={form.name} update={update} />
                 </Body>

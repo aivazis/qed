@@ -49,7 +49,7 @@ export const GDAL = ({ view, setType, hide }) => {
         <Panel>
             <Form>
                 <Body>
-                    <Type value="gdal" update={setType} />
+                    <Type value="gdal" update={setType} readers={view.reader.readers} />
                     <Name value={form.name} update={update} />
                 </Body>
             </Form>

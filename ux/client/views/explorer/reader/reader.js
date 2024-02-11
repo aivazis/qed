@@ -24,8 +24,10 @@ import { NISAR } from './nisar'
 
 // the form
 export const Reader = ({ view, viewport }) => {
+    // get the supported readers
+    const supported = view.reader.readers
     // make room for the reader type
-    const [type, setType] = React.useState(null)
+    const [type, setType] = React.useState(supported.length == 1 ? supported[0] : null)
     // make a handler that collapses this viewport
     const hide = useCollapseViewport(viewport)
     // build a selector with the generic signature
@@ -53,7 +55,7 @@ export const Reader = ({ view, viewport }) => {
             <Panel>
                 <Form>
                     <Body>
-                        <Type value={type} update={update} />
+                        <Type value={type} update={update} readers={supported} />
                     </Body>
                 </Form>
                 <DisabledConnect />
