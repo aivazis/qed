@@ -23,6 +23,7 @@ export const Provider = ({ children }) => {
                 id
                 name
                 uri
+                readers
             }
         }`,
         qed
