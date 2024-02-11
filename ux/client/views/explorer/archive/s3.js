@@ -99,7 +99,6 @@ export const S3 = ({ view, setType, hide }) => {
             },
             // updater
             updater: store => {
-                console.log("updater")
                 // get the root field of the query result
                 const payload = store.getRootField("connectArchive")
                 // ask for the new archive
@@ -115,7 +114,6 @@ export const S3 = ({ view, setType, hide }) => {
             },
             // when done
             onCompleted: data => {
-                console.log("completed: ", data)
                 // clear the error
                 setError(null)
                 // remove the form from the view
@@ -125,7 +123,6 @@ export const S3 = ({ view, setType, hide }) => {
             },
             // if something went wrong
             onError: error => {
-                console.log("error: ", error)
                 // clear the form
                 update("profile", "")
                 update("region", "")
@@ -184,6 +181,7 @@ const connectMutation = graphql`
                 id
                 name
                 uri
+                readers
             }
         }
     }
