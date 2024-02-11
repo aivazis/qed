@@ -12,10 +12,11 @@ import { graphql, useMutation } from 'react-relay/hooks'
 // components
 import { Panel } from './panel'
 import { Cancel, DisabledConnect, EnabledConnect } from './buttons'
-import { Type } from './type'
 import { Name } from './name'
+import { Product } from './product'
 import { Shape } from './shape'
-import { Form, Body, Field, Values, Error, enumValue } from '../form'
+import { Type } from './type'
+import { Form, Body, Field, Values, Error } from '../form'
 
 
 // associate a native reader with a given data product
@@ -163,35 +164,16 @@ export const Cells = ({ value, update }) => {
     return (
         <Field name="data type" value={value} tip="select the reader type">
             <Values>
-                <Cell name="char" rep="char" current={value} select={select} />
-                <Cell name="int16" rep="int16" current={value} select={select} />
-                <Cell name="int32" rep="int32" current={value} select={select} />
-                <Cell name="int64" rep="int64" current={value} select={select} />
-                <Cell name="real32" rep="real32" current={value} select={select} />
-                <Cell name="real64" rep="real64" current={value} select={select} />
-                <Cell name="complex64" rep="complex64" current={value} select={select} />
-                <Cell name="complex128" rep="complex128" current={value} select={select} />
+                <Product name="char" rep="char" current={value} select={select} />
+                <Product name="int16" rep="int16" current={value} select={select} />
+                <Product name="int32" rep="int32" current={value} select={select} />
+                <Product name="int64" rep="int64" current={value} select={select} />
+                <Product name="real32" rep="real32" current={value} select={select} />
+                <Product name="real64" rep="real64" current={value} select={select} />
+                <Product name="complex64" rep="complex64" current={value} select={select} />
+                <Product name="complex128" rep="complex128" current={value} select={select} />
             </Values>
         </Field>
-    )
-}
-
-
-// the product type field
-const Cell = ({ name, rep, current, select }) => {
-    // assemble the behaviors
-    const behaviors = {
-        onClick: select(rep)
-    }
-    // deduce my state
-    const state = current === rep ? "selected" : "enabled"
-    // pick a field selector based on my state
-    const Selector = enumValue(state)
-    // and render it
-    return (
-        <Selector {...behaviors}>
-            {name}
-        </Selector>
     )
 }
 

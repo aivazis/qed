@@ -12,9 +12,10 @@ import { graphql, useMutation } from 'react-relay/hooks'
 // components
 import { Panel } from './panel'
 import { Cancel, DisabledConnect, EnabledConnect } from './buttons'
-import { Type } from './type'
 import { Name } from './name'
-import { Form, Body, Field, Values, Error, enumValue } from '../form'
+import { Product } from './product'
+import { Type } from './type'
+import { Form, Body, Field, Values, Error } from '../form'
 
 
 // associate a NISAR reader with a given data product
@@ -166,25 +167,6 @@ export const Products = ({ value, update }) => {
                 <Product name="gcov" rep="gcov" current={value} select={select} />
             </Values>
         </Field>
-    )
-}
-
-
-// the product type field
-const Product = ({ name, rep, current, select }) => {
-    // assemble the behaviors
-    const behaviors = {
-        onClick: select(rep)
-    }
-    // deduce my state
-    const state = current === rep ? "selected" : "enabled"
-    // pick a field selector based on my state
-    const Selector = enumValue(state)
-    // and render it
-    return (
-        <Selector {...behaviors}>
-            {name}
-        </Selector>
     )
 }
 
