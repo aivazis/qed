@@ -35,7 +35,7 @@ export const useConnectReader = (setForm, hide) => {
         return
     }
     // set up the reader connector
-    const connect = spec => () => {
+    const makeConnector = spec => () => {
         // if there is already a pending operation
         if (isInFlight) {
             // skip this update
@@ -95,7 +95,7 @@ export const useConnectReader = (setForm, hide) => {
     }
 
     // return the handlers
-    return { error, update, connect, cancel }
+    return { error, update, makeConnector, cancel }
 }
 
 
