@@ -20,8 +20,11 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
     uri.default = qed.primitives.uri(scheme="file", address=qed.primitives.path.cwd())
     uri.doc = "the location of the archive"
 
+    # constants
+    readers = ("nisar",)
+
     # interface
-    def getContents(self, uri):
+    def contents(self, uri):
         """
         Retrieve my contents at {path}
         """

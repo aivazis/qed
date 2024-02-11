@@ -26,8 +26,11 @@ class Local(
     all.default = False
     all.doc = "do not ignore entries that start with '.'"
 
+    # constants
+    readers = "nisar", "isce2", "gdal", "native"
+
     # interface
-    def getContents(self, uri):
+    def contents(self, uri):
         """
         Retrieve my contents at {path}
         """
