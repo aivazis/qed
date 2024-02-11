@@ -63,6 +63,7 @@ export const useSelectDataset = ({ name, uri }) => {
                 name,
                 uri,
                 archive: archive.uri,
+                readers: archive.readers,
             }
         }, spot)
         // and activate that viewport
