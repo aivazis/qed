@@ -57,7 +57,7 @@ export const Native = ({ view, setType, hide }) => {
         <Panel>
             <Form>
                 <Body>
-                    <Type value="native" update={setType} />
+                    <Type value="native" update={setType} readers={view.reader.readers} />
                     <Name value={form.name} update={update} />
                     <Shape lines={form.lines} samples={form.samples} update={update} />
                     <Cells value={form.cell} update={update} />

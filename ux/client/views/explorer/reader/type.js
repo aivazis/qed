@@ -12,7 +12,7 @@ import React from 'react'
 import { Field, Values, enumValue } from '../form'
 
 // the reader type selector
-export const Type = ({ value, update }) => {
+export const Type = ({ value, update, readers }) => {
     // make a handler that sets the reader type
     const select = type => {
         // build the selector
@@ -27,10 +27,11 @@ export const Type = ({ value, update }) => {
     return (
         <Field name="type" value={value} tip="select the reader type">
             <Values>
-                <Option name="nisar" rep="nisar" current={value} select={select} />
-                <Option name="isce2" rep="isce2" current={value} select={select} />
-                <Option name="gdal" rep="gdal" current={value} select={select} />
-                <Option name="native" rep="native" current={value} select={select} />
+                {readers.map(reader => (
+                    <Option
+                        key={reader}
+                        name={reader} rep={reader} current={value} select={select} />
+                ))}
             </Values>
         </Field>
     )
