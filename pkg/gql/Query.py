@@ -6,6 +6,7 @@
 
 # externals
 import graphene
+import importlib
 
 # support
 import qed
@@ -19,6 +20,9 @@ from .QED import QED
 
 # archive contents
 from .Item import Item
+
+# product metadata
+from .Metadata import Metadata
 
 # dataset samples
 from .Sample import Sample
@@ -40,6 +44,13 @@ class Query(graphene.ObjectType):
     # directory contents
     contents = graphene.List(
         Item, required=True, archive=graphene.String(), path=graphene.String()
+    )
+    # dataset auto discovery
+    discover = graphene.Field(
+        Metadata,
+        archive=graphene.String(),
+        uri=graphene.String(),
+        module=graphene.String(),
     )
     # samples
     sample = graphene.Field(
@@ -82,7 +93,63 @@ class Query(graphene.ObjectType):
         # identify the archive
         manager = panel.archives[archive]
         # ask it for its contents
-        return manager.getContents(uri=qed.primitives.uri.parse(path))
+        return manager.contents(uri=qed.primitives.uri.parse(path))
+
+    # product metadata
+    @staticmethod
+    def resolve_discover(root, info, archive, uri, module, **kwds):
+        """
+        Generate a list with the contents of a directory
+        """
+        # grab the panel
+        panel = info.context["panel"]
+        # assemble the metadata resolution context
+        context = {
+            "archive": archive,
+            "uri": uri,
+            "module": module,
+            "metadata": None,
+        }
+        # attempt to
+        try:
+            # get the metadata factory
+            metadata = importlib.import_module(module).metadata(uri=uri)
+        # if twe have a bad module
+        except ImportError as error:
+            # make a channel
+            channel = journal.error("qed.gql.discover")
+            # complain
+            channel.line(f"'{module}' not found")
+            channel.indent()
+            channel.line(f"{error}")
+            channel.line(f"while attempting to discover metadata")
+            channel.line(f"for dataset '{uri}'")
+            channel.line(f"in archive '{archive}'")
+            channel.outdent()
+            # flush
+            channel.log()
+            # bail
+            return context
+        # if the module doesn't support metadata discover
+        except AttributeError as error:
+            # make a channel
+            channel = journal.error("qed.gql.discover")
+            # complain
+            channel.line(f"'{module}' does not support metadata discovery")
+            channel.indent()
+            channel.line(f"{error}")
+            channel.line(f"while attempting to discover metadata")
+            channel.line(f"for dataset '{uri}'")
+            channel.line(f"in archive '{archive}'")
+            channel.outdent()
+            # flush
+            channel.log()
+            # bail
+            return context
+        # if all goes well, attach the metadata to the context
+        context["metadata"] = metadata
+        # and hand it to the resolver
+        return context
 
     # samples
     def resolve_sample(root, info, dataset, line, sample, **kwds):
