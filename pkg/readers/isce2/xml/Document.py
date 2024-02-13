@@ -34,11 +34,11 @@ class Document(pyre.xml.document):
     value = pyre.xml.element(tag="value", handler=value)
 
     # metamethods
-    def __init__(self, **kwds):
+    def __init__(self, metadata, **kwds):
         # chain up
         super().__init__(**kwds)
         # initialize my contents
-        self.dom = None
+        self.dom = metadata
         # all done
         return
 

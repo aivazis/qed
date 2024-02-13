@@ -3,24 +3,40 @@
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # (c) 1998-2024 all rights reserved
 
+# externals
+import pyre
+import pyre.xml
+
+# document parts
+from .Document import Document as document
+from .Metadata import Metadata
+
 
 # parser
 def parse(uri):
     """
     Parse the metadata for a data product and return its configuration
     """
-    # get the XML parsing support from {pyre}
-    import pyre.xml
-
-    # get the XML document factory
-    from .Document import Document as document
-
-    # open the document stream
-    stream = open(uri, mode="r")
+    # build the metadata object
+    metadata = Metadata()
+    # cast and attach the dataset uri
+    metadata.uri = uri
+    # form the file name; no S3 support here
+    data = pyre.primitives.path(metadata.uri.address)
+    # get its size and attach it
+    metadata.bytes = data.stat().st_size
+    # form the auxiliary file name
+    aux = data.withName(name=data.name + ".xml")
+    # if it doesn't exist
+    if not aux.exists():
+        # this is as far as we can go
+        return metadata
+    # otherwise, open the companion file
+    stream = open(aux, mode="r")
     # make an XML parser
     parser = pyre.xml.newReader()
     # parse and return the result
-    return parser.read(stream=stream, document=document())
+    return parser.read(stream=stream, document=document(metadata=metadata))
 
 
 # end of file
