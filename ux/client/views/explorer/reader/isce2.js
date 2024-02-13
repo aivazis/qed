@@ -10,6 +10,7 @@ import React from 'react'
 // local
 // hooks
 import { useConnectReader } from './useConnectReader'
+import { useProductMetadataLoader, useQueryProductMetadata } from './useFetchProductMetadata'
 // components
 import { Panel } from './panel'
 import { Cancel, DisabledConnect, EnabledConnect } from './buttons'
@@ -20,25 +21,60 @@ import { Type } from './type'
 import { Form, Body, Field, Values, Error } from '../form'
 
 
-// associate a ISCE2 reader with a given data product
+// associate an ISCE2 reader with a given data product
 export const ISCE2 = ({ view, setType, hide }) => {
+    // preload the metadata query
+    const [qref, getMetadata] = useProductMetadataLoader()
+    // schedule the fetch; once, at mount time
+    React.useEffect(() => {
+        // variables
+        const variables = {
+            archive: view.reader.archive, module: "qed.readers.isce2", uri: view.reader.uri
+        }
+        // options
+        const options = { fetchPolicy: "store-and-network" }
+        // fetch
+        getMetadata(variables, options)
+        // all done
+        return
+    }, [])
+    // if the data is not available yet
+    if (qref === null) {
+        // bail
+        return
+    }
+
+    // render
+    return (
+        <Spec qref={qref} view={view} setType={setType} hide={hide} />
+    )
+}
+
+
+// the panel
+const Spec = ({ qref, view, setType, hide }) => {
+    // unpack the product metadata
+    const {
+        uri, cells = 0, product = null, shape = null,
+    } = useQueryProductMetadata(qref)
     // set up my state
     const [form, setForm] = React.useState({
         // the pyre name of the reader
         name: "",
         // the data product
-        product: "",
+        product: product ?? "",
         // its shape
-        lines: "",
-        samples: "",
+        lines: shape ? shape[0] : "",
+        samples: shape ? shape[1] : "",
     })
+    console.log(form)
     // get the reader connection support
-    const { error, update, makeConnector, cancel } = useConnectReader(setForm, hide)
+    const { error, update, makeConnector, cancel } = useConnectReader(setForm, hide, cells)
     // build the payload
     const spec = {
         reader: `isce2.${form.product}`,
         name: form.name,
-        uri: view.reader.uri,
+        uri,
         lines: form.lines,
         samples: form.samples,
         cell: null,
@@ -57,7 +93,7 @@ export const ISCE2 = ({ view, setType, hide }) => {
         <Panel>
             <Form>
                 <Body>
-                    <Type value="isce2" update={setType} />
+                    <Type value="isce2" update={setType} readers={view.reader.readers} />
                     <Products value={form.product} update={update} />
                     <Name value={form.name} update={update} />
                     <Shape lines={form.lines} samples={form.samples} update={update} />
@@ -87,7 +123,7 @@ export const Products = ({ value, update }) => {
     return (
         <Field name="product" value={value} tip="select the reader type">
             <Values>
-                <Product name="slc" rep="rslc" current={value} select={select} />
+                <Product name="slc" rep="slc" current={value} select={select} />
                 <Product name="int" rep="int" current={value} select={select} />
                 <Product name="unw" rep="unw" current={value} select={select} />
             </Values>
