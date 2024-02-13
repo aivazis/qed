@@ -20,6 +20,8 @@ type Query {
 
   # retrieve the contents of a data archive
   contents(archive: String!, path: String!): [Item]
+  # attempt to guess as much about a dataset as possible
+  discover(archive: String!, uri: String!, module: String!) : ProductMetadata
   # collect data values as represented by the available channels at a particular pixel
   sample(dataset: ID, line: Int!, sample: Int!): Sample!
   # describe the visualization pipeline for the specified {channel} of a {dataset}
@@ -55,6 +57,8 @@ type Archive implements Node {
   name: String!
   # its uri
   uri: String!
+  # the supported readers
+  readers: [String!]!
 }
 
 # archive contents
@@ -67,6 +71,24 @@ type Item implements Node {
   uri: String!
   # a marker for directories
   isFolder: Boolean!
+}
+
+# product metadata
+type ProductMetadata implements Node {
+  # id
+  id: ID!
+  # the product uri
+  uri: String!
+  # product type
+  product: String
+  # the size of the data product in bytes; float because int is 32 bit
+  bytes: Float
+  # the number of cells in the data product; float because int is 32 bit
+  cells: Float
+  # shape
+  shape: [Int]
+  # data type
+  type: String
 }
 
 # readers
