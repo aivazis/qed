@@ -6,16 +6,16 @@
 
 # support
 import qed
+
 # superclass
 from .. import native
 
 
-# the RSLC reader; RSLCs contain one {complex64} dataset
-class RSLC(native.flat, family="qed.readers.isce2.rslc"):
+# the SLC reader; SLCs contain one {complex64} dataset
+class SLC(native.flat, family="qed.readers.isce2.slc"):
     """
-    The reader of RSLC files
+    The reader of SLC files
     """
-
 
     # public data
     cell = qed.protocols.datatype()
