@@ -15,13 +15,25 @@ class Metadata(pyre.component, family="qed.readers.isce2.metadata"):
     """
 
     # properties
+    # the name of the dataset
+    uri = pyre.properties.uri(default=None)
+    # type and description
     product = pyre.properties.str(default=None)
     description = pyre.properties.str(default=None)
+    # the uri of the companion file with the metadata
+    aux = pyre.properties.uri(default=None)
+    # product size in bytes
+    bytes = pyre.properties.int(default=None)
+    # shape
     width = pyre.properties.int(default=None)
     height = pyre.properties.int(default=None)
+    # number of bands
     bands = pyre.properties.int(default=None)
+    # the interleaving scheme
     interleaving = pyre.properties.str(default=None)
+    # the cell type
     type = pyre.properties.str(default=None)
+    # the encoding scheme
     endian = pyre.properties.str(default=None)
 
     # the isce2 version

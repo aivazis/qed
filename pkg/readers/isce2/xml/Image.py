@@ -39,9 +39,8 @@ class Image(Node):
         """
         Attach the product metadata to the document
         """
-        # build the object we decorate
-        metadata = Metadata()
-
+        # retrieve the object we decorate
+        metadata = parent.dom
         # go through the entries in the property map
         for src, dst in self.map.items():
             # and attempt to
@@ -65,8 +64,6 @@ class Image(Node):
                 continue
             # if all goes well, store the value
             setattr(metadata, dst, value)
-        # attach the metadata to my parent
-        parent.dom = metadata
         # all done
         return
 
