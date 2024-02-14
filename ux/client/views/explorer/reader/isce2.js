@@ -55,21 +55,42 @@ export const ISCE2 = ({ view, setType, hide }) => {
 const Spec = ({ qref, view, setType, hide }) => {
     // unpack the product metadata
     const {
-        uri, cells = 0, product = null, shape = null,
+        uri, product, bytes, cells, shape,
     } = useQueryProductMetadata(qref)
+    // the map of product types to their data type size
+    const sizeof = {
+        slc: 8,
+        int: 8,
+        unw: 8,
+    }
     // set up my state
-    const [form, setForm] = React.useState({
-        // the pyre name of the reader
-        name: "",
-        // the data product
-        product: product ?? "",
-        // its shape
-        lines: shape ? shape[0] : "",
-        samples: shape ? shape[1] : "",
+    const [form, setForm] = React.useState(() => {
+        // unpack the shape
+        const [lines, samples] = shape ?? ["", ""]
+        // the size of the data product, in cells
+        let size = cells
+        // if it's trivial and we have enough information to compute it
+        if (size == null && product) {
+            // as the size in bytes divided by the data type size
+            size = bytes / sizeof[product]
+        }
+        // build the form initializer and return it
+        return {
+            name: "",
+            // the data product
+            product,
+            // its shape
+            lines, samples,
+            // the dataset size
+            bytes,
+            // the number of cells,
+            cells: size,
+            // the type map
+            sizeof,
+        }
     })
-    console.log(form)
     // get the reader connection support
-    const { error, update, makeConnector, cancel } = useConnectReader(setForm, hide, cells)
+    const { error, update, makeConnector, cancel } = useConnectReader(setForm, hide)
     // build the payload
     const spec = {
         reader: `isce2.${form.product}`,
