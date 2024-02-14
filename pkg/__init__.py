@@ -33,6 +33,7 @@ from pyre import (
     units,
     timers,
     weaver,
+    xml,
     # hdf5 support
     h5,
     # bindings of things
