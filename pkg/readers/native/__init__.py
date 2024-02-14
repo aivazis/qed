@@ -5,7 +5,7 @@
 
 
 # support
-from qed import foundry
+import qed
 
 # publish
 from . import channels
@@ -16,7 +16,7 @@ from .Flat import Flat as flat
 
 
 # make one
-@foundry(tip="a reader for all formats supported by GDAL")
+@qed.foundry(tip="a reader for all formats supported by GDAL")
 def gdal():
     # carefully
     try:
@@ -30,6 +30,25 @@ def gdal():
     __doc__ = GDAL.__doc__
     # and return it
     return GDAL
+
+
+# metadata factory
+def metadata(uri):
+    """
+    Build a metadata object
+    """
+    # instantiate the object
+    metadata = qed.readers.metadata()
+    # attach the uri
+    metadata.uri = uri
+    # if the product is local
+    if metadata.uri.scheme == "file":
+        # form the path
+        path = qed.primitives.path(metadata.uri.address)
+        # grab the file size and add it to the pile
+        metadata.bytes = path.stat().st_size
+    # that's all we know, for now
+    return metadata
 
 
 # end of file
