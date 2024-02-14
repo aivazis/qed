@@ -38,14 +38,14 @@ export const useConnectReader = (setForm, hide, cells) => {
                 // compute the guess
                 const samples = clone.cells / value
                 // adjust the samples
-                clone.samples = Number.isFinite(samples) ? samples : ""
+                clone.samples = Number.isFinite(samples) ? samples.toString() : ""
             }
             // if we are setting the samples and we know the number of cells in the product
             if (field === "samples" && clone.cells > 0) {
                 // compute the guess
                 const lines = clone.cells / value
                 // adjust the lines
-                clone.lines = Number.isFinite(lines) ? lines : ""
+                clone.lines = Number.isFinite(lines) ? lines.toString() : ""
             }
             // hand it off
             return clone
