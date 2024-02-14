@@ -7,11 +7,8 @@
 # support
 import journal
 
-# base
+# superclass
 from .Node import Node
-
-# my parts
-from .Metadata import Metadata
 
 
 # the data product
