@@ -25,6 +25,12 @@ def parse(uri):
     data = pyre.primitives.path(metadata.uri.address)
     # get its size and attach it
     metadata.bytes = data.stat().st_size
+    # grab its suffix, and skip the dot
+    suffix = data.suffix[1:]
+    # if the suffix corresponds to a known product type
+    if suffix in supported:
+        # use it as the product type guess
+        metadata.product = suffix
     # form the auxiliary file name
     aux = data.withName(name=data.name + ".xml")
     # if it doesn't exist
@@ -37,6 +43,10 @@ def parse(uri):
     parser = pyre.xml.newReader()
     # parse and return the result
     return parser.read(stream=stream, document=document(metadata=metadata))
+
+
+# the set of known dataset suffixes
+supported = ["slc", "int", "unw"]
 
 
 # end of file
