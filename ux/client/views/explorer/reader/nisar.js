@@ -10,6 +10,7 @@ import React from 'react'
 // local
 // hooks
 import { useConnectReader } from './useConnectReader'
+import { useProductMetadataLoader, useQueryProductMetadata } from './useFetchProductMetadata'
 // components
 import { Panel } from './panel'
 import { Cancel, DisabledConnect, EnabledConnect } from './buttons'
@@ -21,12 +22,44 @@ import { Form, Body, Field, Values, Error } from '../form'
 
 // associate a NISAR reader with a given data product
 export const NISAR = ({ view, setType, hide }) => {
+    // preload the metadata query
+    const [qref, getMetadata] = useProductMetadataLoader()
+    // schedule the fetch; once, at mount time
+    React.useEffect(() => {
+        // variables
+        const variables = {
+            archive: view.reader.archive, module: "qed.readers.nisar", uri: view.reader.uri
+        }
+        // options
+        const options = { fetchPolicy: "store-and-network" }
+        // fetch
+        getMetadata(variables, options)
+        // all done
+        return
+    }, [])
+    // if the data is not available yet
+    if (qref === null) {
+        // bail
+        return
+    }
+
+    // render
+    return (
+        <Spec qref={qref} view={view} setType={setType} hide={hide} />
+    )
+}
+
+const Spec = ({ qref, view, setType, hide }) => {
+    // unpack the product metadata
+    const {
+        uri, product,
+    } = useQueryProductMetadata(qref)
     // set up my state
     const [form, setForm] = React.useState({
         // the pyre name of the reader
         name: "",
         // the data product
-        product: "",
+        product,
     })
     // get the reader connection support
     const { error, update, makeConnector, cancel } = useConnectReader(setForm, hide)
@@ -34,7 +67,7 @@ export const NISAR = ({ view, setType, hide }) => {
     const spec = {
         reader: `nisar.${form.product}`,
         name: form.name,
-        uri: view.reader.uri,
+        uri,
         lines: null,
         samples: null,
         cell: null,
