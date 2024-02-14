@@ -80,13 +80,18 @@ class Metadata(graphene.ObjectType):
         """
         # unpack my context
         metadata = context["metadata"]
-        # if none is available
+        # if no metadata is available
         if metadata is None:
             # bail
             return None
         # otherwise, extract the shape
         width = metadata.width
         height = metadata.height
+        # if either dimension is unknown
+        if width is None or height is None:
+            # bail
+            return None
+        # otherwise, compute the number of cells and return it
         return width * height
 
     @staticmethod
@@ -96,13 +101,18 @@ class Metadata(graphene.ObjectType):
         """
         # unpack my context
         metadata = context["metadata"]
-        # if none is available
+        # if no metadata is available
         if metadata is None:
             # bail
             return None
         # otherwise, extract the shape
         width = metadata.width
         height = metadata.height
+        # if either dimension is unknown
+        if width is None or height is None:
+            # bail
+            return None
+        # otherwise, form the shape and return it
         return height, width
 
 
