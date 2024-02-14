@@ -28,15 +28,24 @@ export const useConnectReader = (setForm, hide, cells) => {
                 // with the value of the given field replaced with the new one
                 [field]: value,
             }
+            // if we are setting the type
+            if (field === "type") {
+                // we now know the number of cells
+                clone.cells = clone.bytes / clone.sizeof[value]
+            }
             // if we are setting the lines and we know the number of cells in the product
-            if (cells > 0 && field === "lines") {
+            if (field === "lines" && clone.cells > 0) {
+                // compute the guess
+                const samples = clone.cells / value
                 // adjust the samples
-                clone["samples"] = Math.trunc(cells / value)
+                clone.samples = Number.isFinite(samples) ? samples : ""
             }
             // if we are setting the samples and we know the number of cells in the product
-            if (cells > 0 && field === "samples") {
-                // adjust the samples
-                clone["lines"] = Math.trunc(cells / value)
+            if (field === "samples" && clone.cells > 0) {
+                // compute the guess
+                const lines = clone.cells / value
+                // adjust the lines
+                clone.lines = Number.isFinite(lines) ? lines : ""
             }
             // hand it off
             return clone
