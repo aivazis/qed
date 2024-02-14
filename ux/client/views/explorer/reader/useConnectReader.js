@@ -29,7 +29,7 @@ export const useConnectReader = (setForm, hide, cells) => {
                 [field]: value,
             }
             // if we are setting the type
-            if (field === "type") {
+            if (field === "product") {
                 // we now know the number of cells
                 clone.cells = clone.bytes / clone.sizeof[value]
             }
