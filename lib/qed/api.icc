@@ -1,0 +1,41 @@
+// -*- C++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2024 all rights reserved
+
+// code guard
+#pragma once
+
+
+// the shape guess generator
+auto
+qed::api::factor(long product, long aspect) -> pairs_t
+{
+    // make a pile
+    auto guesses = pairs_t();
+
+    // compute a lower bound for the square root of {product}
+    long sqrt = std::sqrt(product);
+    // go through the possible guesses
+    for (long op1 = 2; op1 <= sqrt; ++op1) {
+        // if {op1} is not a divisor of {product}
+        if (product % op1) {
+            // move on
+            continue;
+        }
+        // otherwise, divide to get the other operand
+        auto op2 = product / op1;
+        // if we have an {aspect} ratio constrain and this pair violates it
+        if (aspect > 0 && op2 / op1 > aspect) {
+            // ignore it
+            continue;
+        }
+        // if we get this far, we have a guess; add it to the pile
+        guesses.emplace_back(op1, op2);
+    }
+    // all done
+    return guesses;
+}
+
+// end of file
