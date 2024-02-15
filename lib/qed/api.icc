@@ -34,6 +34,27 @@ qed::api::factor(long product, long aspect) -> pairs_t
         // if we get this far, we have a guess; add it to the pile
         guesses.emplace_back(op1, op2);
     }
+
+    // now, let's symmetrize the {guesses}
+    // first, make sure {guesses} doesn't relocate during the update
+    guesses.reserve(2 * guesses.size());
+    // point to the last guess
+    auto anchor = guesses.rbegin();
+    // unpack it
+    auto [op1, op2] = *anchor;
+    // if they are equal
+    if (op1 == op2) {
+        // skip this pair so we don't double count it
+        anchor = std::next(anchor);
+    }
+    // march toward the beginning
+    for (auto cursor = anchor; cursor != guesses.rend(); ++cursor) {
+        // get the current pair
+        auto [op1, op2] = *cursor;
+        // flip it and add it to the back
+        guesses.emplace_back(op2, op1);
+    }
+
     // all done
     return guesses;
 }
