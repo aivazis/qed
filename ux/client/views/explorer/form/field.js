@@ -22,7 +22,7 @@ export const Field = ({ name, value, tip, required = true, children }) => {
                 {required && invalid && <Required>*</Required>}
                 {name}
             </Prompt>
-            <Separator>:</Separator>
+            <Separator>{name && ":"}</Separator>
             {children}
         </Row>
     )
