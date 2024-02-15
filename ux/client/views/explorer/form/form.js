@@ -16,6 +16,7 @@ import { theme } from '~/palette'
 // styled elements
 export const Form = styled.table`
     table-layout: fixed;
+    width: 100%;
 `
 
 export const Header = styled.thead``
@@ -34,7 +35,7 @@ export const Prompt = styled.td`
     font-family: "rubik-light";
     text-align: right;
     text-transform: uppercase;
-    width: 8.0em;
+    width: 10.0em;
     min-width: 8.0em;
     max-width: 8.0em;
 `
