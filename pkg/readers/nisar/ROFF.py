@@ -55,9 +55,9 @@ class ROFF(H5):
                 # move on
                 continue
             # get the product group
-            slc = getattr(sar, self.tag)
+            roff = getattr(sar, self.tag)
             # and the group with the swaths
-            swaths = slc.swaths
+            swaths = roff.swaths
             # get the list of frequencies for this band
             frequencies = sar.identification.listOfFrequencies
             # go through them
@@ -69,7 +69,7 @@ class ROFF(H5):
                 # sometimes the product lies
                 except AttributeError:
                     # so grab a channel
-                    channel = journal.warning("qed.nisar.rslc")
+                    channel = journal.warning("qed.nisar.roff")
                     # and complain
                     channel.line(f"while exploring '{name}'")
                     channel.line(
@@ -90,7 +90,7 @@ class ROFF(H5):
                         # if this polarization dataset doesn't exist
                     except AttributeError:
                         # so grab a channel
-                        channel = journal.warning("qed.nisar.rslc")
+                        channel = journal.warning("qed.nisar.roff")
                         # and complain
                         channel.line(f"while exploring '{name}'")
                         channel.line(

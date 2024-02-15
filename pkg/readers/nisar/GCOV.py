@@ -70,9 +70,9 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                 # move on
                 continue
             # get the product group
-            slc = getattr(sar, self.tag)
+            gcov = getattr(sar, self.tag)
             # and the group with the grids
-            grids = slc.grids
+            grids = gcov.grids
             # get the list of frequencies for this band
             frequencies = sar.identification.listOfFrequencies
             # go through them
@@ -84,7 +84,7 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                 # sometimes the product lies
                 except AttributeError:
                     # so grab a channel
-                    channel = journal.warning("qed.nisar.rslc")
+                    channel = journal.warning("qed.nisar.gcov")
                     # and complain
                     channel.line(f"while exploring '{name}'")
                     channel.line(
@@ -107,7 +107,7 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                     # if not there
                     except AttributeError:
                         # so grab a channel
-                        channel = journal.warning("qed.nisar.rslc")
+                        channel = journal.warning("qed.nisar.gcov")
                         # and complain
                         channel.line(f"while exploring '{name}'")
                         channel.line(f"no '{term}' in the '{frequency}' grid")

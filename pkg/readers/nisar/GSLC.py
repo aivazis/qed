@@ -61,9 +61,9 @@ class GSLC(H5, family="qed.readers.nisar.gslc"):
                 # move on
                 continue
             # get the product group
-            slc = getattr(sar, self.tag)
+            gslc = getattr(sar, self.tag)
             # and the group with the grids
-            grids = slc.grids
+            grids = gslc.grids
             # get the list of frequencies for this band
             frequencies = sar.identification.listOfFrequencies
             # go through them
@@ -75,7 +75,7 @@ class GSLC(H5, family="qed.readers.nisar.gslc"):
                 # sometimes the product lies
                 except AttributeError:
                     # so grab a channel
-                    channel = journal.warning("qed.nisar.rslc")
+                    channel = journal.warning("qed.nisar.gslc")
                     # and complain
                     channel.line(f"while exploring '{name}'")
                     channel.line(
@@ -96,7 +96,7 @@ class GSLC(H5, family="qed.readers.nisar.gslc"):
                     # if not there
                     except AttributeError:
                         # so grab a channel
-                        channel = journal.warning("qed.nisar.rslc")
+                        channel = journal.warning("qed.nisar.gslc")
                         # and complain
                         channel.line(f"while exploring '{name}'")
                         channel.line(

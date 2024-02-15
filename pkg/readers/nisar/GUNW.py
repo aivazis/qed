@@ -54,9 +54,9 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 # move on
                 continue
             # get the product group
-            slc = getattr(sar, self.tag)
+            gunw = getattr(sar, self.tag)
             # and the group with the grids
-            grids = slc.grids
+            grids = gunw.grids
             # get the list of frequencies for this band
             frequencies = sar.identification.listOfFrequencies
             # go through them
@@ -68,7 +68,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 # sometimes the product lies
                 except AttributeError:
                     # so grab a channel
-                    channel = journal.warning("qed.nisar.rslc")
+                    channel = journal.warning("qed.nisar.gunw")
                     # and complain
                     channel.line(f"while exploring '{name}'")
                     channel.line(
@@ -89,7 +89,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                     # if not there
                     except AttributeError:
                         # so grab a channel
-                        channel = journal.warning("qed.nisar.rslc")
+                        channel = journal.warning("qed.nisar.gunw")
                         # and complain
                         channel.line(f"while exploring '{name}'")
                         channel.line(

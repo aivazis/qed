@@ -54,9 +54,9 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                 # move on
                 continue
             # get the product group
-            slc = getattr(sar, self.tag)
+            runw = getattr(sar, self.tag)
             # and the group with the swaths
-            swaths = slc.swaths
+            swaths = runw.swaths
             # get the list of frequencies for this band
             frequencies = sar.identification.listOfFrequencies
             # go through them
@@ -68,7 +68,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                 # sometimes the product lies
                 except AttributeError:
                     # so grab a channel
-                    channel = journal.warning("qed.nisar.rslc")
+                    channel = journal.warning("qed.nisar.runw")
                     # and complain
                     channel.line(f"while exploring '{name}'")
                     channel.line(
@@ -89,7 +89,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                     # if not there
                     except AttributeError:
                         # so grab a channel
-                        channel = journal.warning("qed.nisar.rslc")
+                        channel = journal.warning("qed.nisar.runw")
                         # and complain
                         channel.line(f"while exploring '{name}'")
                         channel.line(

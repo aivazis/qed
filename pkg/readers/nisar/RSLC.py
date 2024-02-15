@@ -61,9 +61,9 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
                 # move on
                 continue
             # get the product group
-            slc = getattr(sar, self.tag)
+            rslc = getattr(sar, self.tag)
             # and the group with the swaths
-            swaths = slc.swaths
+            swaths = rslc.swaths
             # get the list of frequencies for this band
             frequencies = sar.identification.listOfFrequencies
             # go through them
