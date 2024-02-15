@@ -19,6 +19,8 @@ namespace qed::py {
     // exceptions
     void exceptions(py::module &);
 
+    // top level function
+    void api(py::module &);
     // version info
     void version(py::module &);
 
