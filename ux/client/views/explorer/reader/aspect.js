@@ -32,7 +32,7 @@ export const Aspect = ({ aspect, update }) => {
     return (
         <Row>
             <Prompt title="restrict shape guesses to ones with aspect ratio less than this">
-                max aspect
+                max aspect ratio
             </Prompt>
             <Separator>:</Separator>
             <Value>
