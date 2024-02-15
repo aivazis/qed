@@ -10,7 +10,7 @@ import { graphql, useMutation } from 'react-relay/hooks'
 
 
 // build the handlers necessary to connect a new reader
-export const useConnectReader = (setForm, hide, cells) => {
+export const useConnectReader = (setForm, hide) => {
     // error placeholder
     const [error, setError] = React.useState(null)
     // build the mutation request
@@ -31,7 +31,9 @@ export const useConnectReader = (setForm, hide, cells) => {
             // if we are setting the type
             if (field === "product" && clone.bytes && clone.sizeof) {
                 // we now know the number of cells
-                clone.cells = clone.bytes / clone.sizeof[value]
+                const cells = clone.bytes / clone.sizeof[value]
+                // update the form
+                clone.cells = cells.toString()
             }
             // if we are setting the lines and we know the number of cells in the product
             if (field === "lines" && clone.cells > 0) {
