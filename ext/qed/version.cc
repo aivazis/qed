@@ -21,8 +21,12 @@ qed::py::version(py::module & m)
     m.attr("libVersion") = qed::version::version();
 
     // the version of the bindings
-    m.attr("extVersion") = qed::version::version_t { qed::version::major, qed::version::minor,
-                                                     qed::version::micro, qed::version::revision };
+    m.attr("extVersion") = qed::version::version_t {
+        qed::version::major,
+        qed::version::minor,
+        qed::version::micro,
+        qed::version::revision,
+    };
 
     // all done
     return;
