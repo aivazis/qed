@@ -14,6 +14,7 @@ import { useProductMetadataLoader, useQueryProductMetadata } from './useFetchPro
 // components
 import { Panel } from './panel'
 import { Cancel, DisabledConnect, EnabledConnect } from './buttons'
+import { Guesses } from './guesses'
 import { Name } from './name'
 import { Product } from './product'
 import { Shape } from './shape'
@@ -84,9 +85,11 @@ const Spec = ({ qref, view, setType, hide }) => {
             // the dataset size
             bytes,
             // the number of cells,
-            cells: size,
+            cells: size?.toString(),
             // the type map
             sizeof,
+            // the max aspect ratio for shape guesses
+            aspect: "5",
         }
     })
     // get the reader connection support
@@ -118,6 +121,12 @@ const Spec = ({ qref, view, setType, hide }) => {
                     <Products value={form.product} update={update} />
                     <Name value={form.name} update={update} />
                     <Shape lines={form.lines} samples={form.samples} update={update} />
+                    {form.cells &&
+                        <Guesses
+                            size={form.cells} aspect={form.aspect}
+                            lines={form.lines} samples={form.samples}
+                            update={update} />
+                    }
                 </Body>
             </Form>
             <Connect connect={connect} />
