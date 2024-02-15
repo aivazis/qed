@@ -55,9 +55,9 @@ class GOFF(H5):
                 # move on
                 continue
             # get the product group
-            slc = getattr(sar, self.tag)
+            goff = getattr(sar, self.tag)
             # and the group with the grids
-            grids = slc.grids
+            grids = goff.grids
             # get the list of frequencies for this band
             frequencies = sar.identification.listOfFrequencies
             # go through them
@@ -69,7 +69,7 @@ class GOFF(H5):
                 # sometimes the product lies
                 except AttributeError:
                     # so grab a channel
-                    channel = journal.warning("qed.nisar.rslc")
+                    channel = journal.warning("qed.nisar.goff")
                     # and complain
                     channel.line(f"while exploring '{name}'")
                     channel.line(
@@ -90,7 +90,7 @@ class GOFF(H5):
                     # if this polarization dataset doesn't exist
                     except AttributeError:
                         # grab a channel
-                        channel = journal.warning("qed.nisar.rslc")
+                        channel = journal.warning("qed.nisar.goff")
                         # and complain
                         channel.line(f"while exploring '{name}'")
                         channel.line(
