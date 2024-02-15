@@ -12,22 +12,13 @@ import importlib
 import qed
 import journal
 
-# server version tag
-from .Version import Version
-
-# the session manager
-from .QED import QED
-
-# archive contents
+# types
 from .Item import Item
-
-# product metadata
 from .Metadata import Metadata
-
-# dataset samples
+from .QED import QED
 from .Sample import Sample
-
-# visualization pipeline controls
+from .Shape import Shape
+from .Version import Version
 from .VizPipeline import VizPipeline
 
 
@@ -38,9 +29,10 @@ class Query(graphene.ObjectType):
     """
 
     # the known queries
+    # server version info
+    version = graphene.Field(Version, required=True)
     # the session manager
     qed = graphene.Field(QED)
-
     # directory contents
     contents = graphene.List(
         Item, required=True, archive=graphene.String(), path=graphene.String()
@@ -58,8 +50,10 @@ class Query(graphene.ObjectType):
     )
     # visualization pipeline
     viz = graphene.Field(VizPipeline, dataset=graphene.ID(), channel=graphene.String())
-    # server version info
-    version = graphene.Field(Version, required=True)
+    # generation of shape guesses from a raster size
+    guessShape = graphene.Field(
+        graphene.List(Shape), size=graphene.String(), aspect=graphene.String()
+    )
 
     # the resolvers
     # the session manager
@@ -152,6 +146,7 @@ class Query(graphene.ObjectType):
         return context
 
     # samples
+    @staticmethod
     def resolve_sample(root, info, dataset, line, sample, **kwds):
         """
         Sample a dataset at a specified pixel
@@ -170,6 +165,7 @@ class Query(graphene.ObjectType):
         return context
 
     # the viz controls
+    @staticmethod
     def resolve_viz(root, info, dataset, channel, **kwds):
         """
         Build a representation of the visualization controls
@@ -188,7 +184,24 @@ class Query(graphene.ObjectType):
         # and hand it to the resolver
         return context
 
+    # shape guesses
+    @staticmethod
+    def resolve_guessShape(root, info, size, aspect, **kwds):
+        """
+        Generate a list of guess for the shape of a raster
+        """
+        # cast the inputs
+        size = int(size)
+        aspect = int(aspect)
+        # factorize
+        for lines, samples in qed.libqed.factor(product=size, aspect=aspect):
+            # and build a guess
+            yield {"lines": lines, "samples": samples}
+        # all done
+        return
+
     # version
+    @staticmethod
     def resolve_version(root, info):
         """
         Build and return the server version
