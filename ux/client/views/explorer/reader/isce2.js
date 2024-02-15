@@ -80,7 +80,7 @@ const Spec = ({ qref, view, setType, hide }) => {
             // the data product
             product,
             // its shape
-            lines, samples,
+            lines: lines.toString(), samples: samples.toString(),
             // the dataset size
             bytes,
             // the number of cells,
@@ -96,8 +96,8 @@ const Spec = ({ qref, view, setType, hide }) => {
         reader: `isce2.${form.product}`,
         name: form.name,
         uri,
-        lines: form.lines,
-        samples: form.samples,
+        lines: form.lines.toString(),
+        samples: form.samples.toString(),
         cell: null,
     }
     // use it to build the connector
