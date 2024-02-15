@@ -24,8 +24,8 @@ export const Guesses = ({ size, aspect, lines, samples, update }) => {
     React.useEffect(() => {
         // variables
         const variables = {
-            size,
-            aspect,
+            size: size || "0",
+            aspect: aspect || "0",
         }
         // options
         const options = { fetchPolicy: "store-and-network" }
