@@ -20,6 +20,8 @@ PYBIND11_MODULE(qed, m)
     qed::py::opaque(m);
     // register the exception types
     qed::py::exceptions(m);
+    // the api
+    qed::py::api(m);
     // version info
     qed::py::version(m);
 
