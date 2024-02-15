@@ -88,8 +88,12 @@ class Product(
         """
         Sample my data along the path defined by {points}
         """
-        # ask my data manager to build a profile
-        profile = qed.libqed.nisar.profile(
+        # resolve the name of the profile maker
+        name = f"profile{self.cell.tag}"
+        # look it up
+        factory = getattr(qed.libqed.nisar, name)
+        # ask it to build a profile
+        profile = factory(
             source=self.data.dataset,
             datatype=self.datatype.htype,
             points=points,
