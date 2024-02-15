@@ -27,6 +27,20 @@ class UNW(Product, family="qed.datasets.nisar.products.unw"):
     # the in-memory data layout of NISAR unwrapped interferograms
     datatype = qed.h5.memtypes.float32
 
+    # interface
+    def peek(self, pixel):
+        """
+        Build a family of value representations at the given {pixel}
+        """
+        # generate cursor information
+        yield from self.cursor(pixel=pixel)
+        # get the value of the {pixel}
+        _, _, value = self.profile(points=[pixel])[0]
+        # make it available
+        yield "phase", [(value, "")]
+        # all done
+        return
+
     # implementation details
     def _retrieveChannels(self):
         """
