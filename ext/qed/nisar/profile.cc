@@ -17,7 +17,18 @@ qed::py::nisar::profile(py::module & m)
     // bindings for HDF5 sources
     m.def(
         // the name of the function
-        "profile",
+        "profileFloat",
+        // the handler
+        &qed::nisar::profile<heapgrid_t<float>>,
+        // the signature
+        "source"_a, "datatype"_a, "points"_a, "closed"_a = false,
+        // the docstring
+        "collect values from a dataset along a path");
+
+    // bindings for HDF5 sources
+    m.def(
+        // the name of the function
+        "profileComplexFloat",
         // the handler
         &qed::nisar::profile<heapgrid_t<std::complex<float>>>,
         // the signature
