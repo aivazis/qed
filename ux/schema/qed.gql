@@ -27,6 +27,8 @@ type Query {
   # describe the visualization pipeline for the specified {channel} of a {dataset}
   # so the client can render controls to manipulate its configuration
   viz(dataset: ID, channel: String!): VisualizationPipeline!
+  # generate candidate shapes given the size of a raster
+  guessShape(size: String! aspect: String!): [Shape]
 }
 
 
@@ -182,6 +184,12 @@ type ValueController implements Node {
 
 # put them all together
 union Controller = RangeController | ValueController
+
+# raster shape
+type Shape {
+  lines: String!
+  samples: String!
+}
 
 
 # mutations
