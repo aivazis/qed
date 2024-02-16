@@ -12,6 +12,9 @@ from .Char import Char as char
 from .Int16 import Int16 as int16
 from .Int32 import Int32 as int32
 from .Int64 import Int64 as int64
+from .UInt16 import UInt16 as uint16
+from .UInt32 import UInt32 as uint32
+from .UInt64 import UInt64 as uint64
 
 # real numbers
 from .Float import Float as float32
@@ -25,5 +28,10 @@ from .ComplexDouble import ComplexDouble as complex128
 real32 = float32
 real64 = float64
 
+# gdal
+# NYI: cint16, cint32
+byte = char
+cfloat32 = complex64
+cfloat64 = complex128
 
 # end of file
