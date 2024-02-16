@@ -10,10 +10,10 @@ import qed
 from .Document import Document as document
 
 
-# parser
-def parse(uri):
+# high level metadata extractor
+def metadata(uri):
     """
-    Parse the metadata for a data product and return its configuration
+    Given the {uri} of a data product, extract the metadata from its auxiliary file
     """
     # build the metadata object
     metadata = qed.readers.metadata()
@@ -36,6 +36,32 @@ def parse(uri):
         # this is as far as we can go
         return metadata
     # otherwise, open the companion file
+    stream = open(aux, mode="r")
+    # make an XML parser
+    parser = qed.xml.newReader()
+    # parse and return the result
+    return parser.read(stream=stream, document=document(metadata=metadata))
+
+
+# low level parser of the auxiliary file
+def parse(uri):
+    """
+    Parse the auxiliary of a data product and return the metadata
+    """
+    # coerce the input into a uri
+    uri = qed.primitives.uri.parse(uri)
+    # extract its address and turn it into a path
+    aux = qed.primitives.path(uri.address)
+    # form the product uri
+    product = uri.clone()
+    # by stripping the trailing suffix from the auxiliary file path
+    product.address = aux.withSuffix()
+
+    # build the metadata object
+    metadata = qed.readers.metadata()
+    # attach the product uri
+    metadata.uri = product
+    # open the companion file
     stream = open(aux, mode="r")
     # make an XML parser
     parser = qed.xml.newReader()

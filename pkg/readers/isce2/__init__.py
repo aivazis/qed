@@ -11,7 +11,7 @@ from .interferogram import int
 from .unwrapped import unw
 
 # the metadata parser
-from .xml import parse as metadata
+from .xml import metadata, parse
 
 # reader aliases
 rslc = slc
