@@ -16,6 +16,7 @@ import { Panel } from './panel'
 import { Cancel, DisabledConnect, EnabledConnect } from './buttons'
 import { Guesses } from './guesses'
 import { Name } from './name'
+import { Preview } from './preview'
 import { Product } from './product'
 import { Shape } from './shape'
 import { Type } from './type'
@@ -132,6 +133,11 @@ const Spec = ({ qref, view, setType, hide }) => {
             <Connect connect={connect} />
             <Cancel onClick={cancel}>cancel</Cancel>
             {error && <Error>{error}</Error>}
+            {form.product && form.lines && form.samples &&
+                <Preview
+                    reader={`isce2.${form.product}`} uri={uri}
+                    lines={form.lines} samples={form.samples} />
+            }
         </Panel>
     )
 }
