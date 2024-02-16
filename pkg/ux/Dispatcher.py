@@ -5,9 +5,11 @@
 
 
 # externals
+import functools
 import re
 import signal
 import urllib
+import uuid
 
 # support
 import journal
@@ -84,6 +86,44 @@ class Dispatcher:
         return
 
     # handlers
+    def preview(self, server, match, **kwds):
+        """
+        Build a preview of a dataset
+        """
+        # unpack
+        reader = match.group("preview_reader").split(".")
+        uri = match.group("preview_uri")
+        cell = match.group("preview_cell")
+        shape = tuple(map(int, match.group("preview_shape").split(",")))
+        zoom = int(match.group("preview_zoom"))
+        view = tuple(map(int, match.group("preview_view").split(",")))
+
+        # set up the reader configuration
+        config = {
+            "name": str(uuid.uuid1()),
+            "uri": uri,
+            "shape": shape,
+        }
+        # if {cell} is non-trivial
+        if cell:
+            # add it to the pile
+            config["cell"] = cell
+
+        # get the reader factory
+        cls = functools.reduce(getattr, reader, qed.readers)
+        # instantiate it
+        reader = cls(**config)
+        # get its first dataset
+        data = reader.datasets[0]
+        # pick a channel
+        channel = tuple(data.channels.keys())[0]
+        # render the tile
+        tile = data.render(
+            channel=channel, zoom=(zoom, zoom), origin=(0, 0), shape=view
+        )
+        # and send it to the client
+        return server.documents.BMP(server=server, bmp=memoryview(tile))
+
     def data(self, server, match, **kwds):
         """
         Handle a data request
@@ -279,6 +319,25 @@ class Dispatcher:
                         r"(?P<data_channel>\w+)",
                         rf"(?P<data_zoom>{zoom})",
                         rf"(?P<data_tile>(?P<data_origin>{origin})\+(?P<data_shape>{shape}))",
+                    ]
+                )
+                + ")",
+                # the preview generator
+                r"/(?P<preview>preview\?"
+                + "&".join(
+                    [
+                        # the reader
+                        r"reader=(?P<preview_reader>[^&]+)",
+                        # the uri
+                        r"uri=(?P<preview_uri>[^&]+)",
+                        # the data types
+                        r"cell=(?P<preview_cell>[^&]*)",
+                        # the shape
+                        r"shape=(?P<preview_shape>[^&]+)",
+                        # the zoom level
+                        r"zoom=(?P<preview_zoom>[^&]+)",
+                        # the view shape
+                        r"view=(?P<preview_view>[^&]+)",
                     ]
                 )
                 + ")",
