@@ -56,7 +56,7 @@ class Metadata(graphene.ObjectType):
         if metadata is None:
             # bail
             return None
-        # otherwise, extract the file size in bytes and return it
+        # otherwise, extract the product type
         return metadata.product
 
     @staticmethod
