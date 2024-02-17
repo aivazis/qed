@@ -36,8 +36,8 @@ export const Prompt = styled.td`
     text-align: right;
     text-transform: uppercase;
     width: 10.0em;
-    min-width: 8.0em;
-    max-width: 8.0em;
+    min-width: 10.0em;
+    max-width: 12.0em;
 `
 
 export const Separator = styled.td`
