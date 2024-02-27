@@ -6,8 +6,10 @@
 
 # externals
 import sys
+
 # support
 import qed
+
 # my superclass
 from .Specification import Specification
 
@@ -18,7 +20,6 @@ class Datatype(Specification, family="qed.datatypes"):
     The datatype metadata
     """
 
-
     # public data
     byteswap = qed.properties.bool()
     byteswap.doc = "control whether byte swapping is necessary"
@@ -28,7 +29,6 @@ class Datatype(Specification, family="qed.datatypes"):
 
     tile = qed.properties.tuple(schema=qed.properties.int())
     tile.doc = "the preferred shape of dataset subsets"
-
 
     # value processing hooks
     # the byte order is indicated by a single character prefix that must be stripped before
@@ -51,15 +51,15 @@ class Datatype(Specification, family="qed.datatypes"):
         # chain up
         return super().pyre_convert(value=value, **kwds)
 
-
     @classmethod
     def pyre_instantiate(cls, spec, component, name, locator):
         """
         Invoke the {component} constructor to build a new instance
         """
         # chain up to build the {datatype} instance
-        instance = super().pyre_instantiate(spec=spec,
-                                           component=component, name=name, locator=locator)
+        instance = super().pyre_instantiate(
+            spec=spec, component=component, name=name, locator=locator
+        )
 
         # if the {spec} is a string
         if isinstance(spec, str):
@@ -71,36 +71,41 @@ class Datatype(Specification, family="qed.datatypes"):
         # return
         return instance
 
-
     # implementation details
     # the type alias table
     aliases = {
         # bytes
         "c": "qed.datatypes.char",
         "char": "qed.datatypes.char",
-
-        # integer types
+        # signed integers
+        "i1": "qed.datatypes.int8",
+        "int8": "qed.datatypes.int8",
         "i2": "qed.datatypes.int16",
         "int16": "qed.datatypes.int16",
-
         "i4": "qed.datatypes.int32",
         "int32": "qed.datatypes.int32",
-
         "i8": "qed.datatypes.int64",
         "int64": "qed.datatypes.int64",
-
+        # unsigned integers
+        "u1": "qed.datatypes.uint8",
+        "uint8": "qed.datatypes.uint8",
+        "u2": "qed.datatypes.uint16",
+        "uint16": "qed.datatypes.uint16",
+        "u4": "qed.datatypes.uint32",
+        "uint32": "qed.datatypes.uint32",
+        "u8": "qed.datatypes.uint64",
+        "uint64": "qed.datatypes.uint64",
         # single precision numbers
         "r4": "qed.datatypes.real32",
-        "real32": "qed.datatypes.real32",
-
+        "real32": "qed.datatypes.float",
+        "float32": "qed.datatypes.float",
         # double precision numbers
-        "r8": "qed.datatypes.real64",
-        "real64": "qed.datatypes.real64",
-
+        "r8": "qed.datatypes.double",
+        "real64": "qed.datatypes.double",
+        "float64": "qed.datatypes.double",
         # single precision complex numbers
         "c8": "qed.datatypes.complex64",
         "complex64": "qed.datatypes.complex64",
-
         # double precision complex numbers
         "c16": "qed.datatypes.complex128",
         "complex128": "qed.datatypes.complex128",
