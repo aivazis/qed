@@ -34,24 +34,75 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     datasets.doc = "the list of datasets to display"
     datasets.aliases = {"ds"}
 
+    # the reader to use for all datasets that don't specify one
+    reader = qed.properties.str()
+    reader.default = None
+    reader.doc = "the reader to use when opening datasets"
+
     # individual metadata, used to assemble a default layout
     cell = qed.protocols.datatype()
     cell.default = None
     cell.doc = "the format string that specifies the type of the dataset payload"
 
     origin = qed.properties.tuple(schema=qed.properties.int())
-    origin.default = None
+    origin.default = (0, 0)
     origin.doc = "the smallest possible index"
 
     shape = qed.properties.tuple(schema=qed.properties.int())
     shape.default = None
     shape.doc = "the shape of the dataset"
 
-    # the reader to use for all datasets that don't specify one
-    reader = qed.protocols.reader()
-    reader.default = None
-    reader.doc = "the component that understands the data encoding of a dataset"
+    # shorthands for selecting the cell type
+    # the aliases provide {mdx} compatibility
+    uint8 = qed.properties.bool(default=False)
+    uint8.aliases = {"byte", "b1", "u1"}
+    uint8.doc = "set the cell type to an unsigned 8-bit integer"
 
+    uint16 = qed.properties.bool(default=False)
+    uint16.aliases = {"byte2", "b2", "u2"}
+    uint16.doc = "set the cell type to an unsigned 16-bit integer"
+
+    uint32 = qed.properties.bool(default=False)
+    uint32.aliases = {"u4"}
+    uint32.doc = "set the cell type to an unsigned 32-bit integer"
+
+    uint64 = qed.properties.bool(default=False)
+    uint64.aliases = {"u8"}
+    uint64.doc = "set the cell type to an unsigned 64-bit integer"
+
+    int8 = qed.properties.bool(default=False)
+    int8.aliases = {"i1", "integer*1"}
+    int8.doc = "set the cell type to an 8-bit integer"
+
+    int16 = qed.properties.bool(default=False)
+    int16.aliases = {"i2", "integer*2"}
+    int16.doc = "set the cell type to a 16-bit integer"
+
+    int32 = qed.properties.bool(default=False)
+    int32.aliases = {"i4", "integer*4"}
+    int32.doc = "set the cell type to a 32-bit integer"
+
+    int64 = qed.properties.bool(default=False)
+    int64.aliases = {"i8", "integer*8"}
+    int64.doc = "set the cell type to a 64-bit integer"
+
+    float32 = qed.properties.bool(default=False)
+    float32.aliases = {"r4", "real*4"}
+    float32.doc = "set the cell type to a 32-bit float"
+
+    float64 = qed.properties.bool(default=False)
+    float64.aliases = {"r8", "real*8"}
+    float64.doc = "set the cell type to a 64-bit float"
+
+    complex64 = qed.properties.bool(default=False)
+    complex64.aliases = {"c8", "complex*8"}
+    complex64.doc = "set the cell type to a 64-bit complex"
+
+    complex128 = qed.properties.bool(default=False)
+    complex128.aliases = {"c16", "complex*16"}
+    complex128.doc = "set the cell type to a 32-bit complex"
+
+    # journal control; useful until journal is once again configurable
     logfile = qed.properties.path()
     logfile.default = None
     logfile.doc = "file that captures all journal output"
@@ -68,6 +119,50 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         return
 
     # pyre framework hooks
+    def pyre_configured(self, **kwds):
+        """
+        Hook invoked when the app configuration is complete
+        """
+        # chain up and pass on any configuration errors
+        yield from super().pyre_configured()
+
+        # process the cell by running a competition among all the ways it could be specified
+        # first, collect my type traits in a pile
+        types = [
+            "uint8",
+            "uint16",
+            "uint32",
+            "uint64",
+            "int8",
+            "int16",
+            "int32",
+            "int64",
+            "float32",
+            "float64",
+            "complex64",
+            "complex128",
+        ]
+        # find the ones that are active
+        active = [name for name in types if getattr(self, name)]
+        # sort the list
+        ranked = sorted(
+            # include {cell} in the pile so we know where it stands
+            active + ["cell"],
+            # the key is the trait priority
+            key=lambda name: self.pyre_inventory.getTraitPriority(
+                self.pyre_trait(name)
+            ),
+        )
+        # the winner is
+        winner = ranked[-1]
+        # if it's not and explicit cell assignment
+        if winner != "cell":
+            # override
+            self.cell = winner
+
+        # all done
+        return
+
     # support for the help system
     def pyre_banner(self):
         """
@@ -158,6 +253,8 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
 
     # private data
     _ux = None  # the UX manager
+
+    _typemap = {}
 
 
 # end of file
