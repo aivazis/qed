@@ -54,22 +54,10 @@ class ConnectReader(graphene.Mutation):
         if cell:
             # add it to the pile
             args["cell"] = cell
-
-        # make a channel
-        channel = journal.info("qed.gql.connect")
-        channel.line(f"{reader=}")
-        channel.line(f"{name=}")
-        channel.line(f"{uri=}")
-        channel.line(f"{lines=}, {samples=}")
-        channel.line(f"{cell=}")
-        channel.log()
-
         # resolve the {reader} into a factory
         factory = qed.protocols.reader.pyre_resolveSpecification(spec=reader)
-        channel.log(f"{factory=}")
         # instantiate
         source = factory(**args)
-        channel.log(f"{source=}")
         # get the panel
         panel = info.context["panel"]
         # add the new source to the panel
