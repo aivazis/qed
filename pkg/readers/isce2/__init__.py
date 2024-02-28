@@ -4,14 +4,14 @@
 # (c) 1998-2024 all rights reserved
 
 
+# the metadata parser
+from .xml import metadata, parse
+
 # publish the readers
 from .Auto import Auto as auto
 from .SLC import SLC as slc
 from .interferogram import int
 from .unwrapped import unw
-
-# the metadata parser
-from .xml import metadata, parse
 
 # reader aliases
 rslc = slc
