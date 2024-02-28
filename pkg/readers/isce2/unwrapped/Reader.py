@@ -122,6 +122,7 @@ class Reader(
                 # generate a list of possible shapes
                 channel.line(f"while attempting to load '{self.uri.address}'")
                 channel.line(f"missing shape information; here are some possibilities")
+                channel.line(f"as lines x samples")
                 channel.indent()
                 # generate some options
                 for lines, samples in qed.libqed.factor(
@@ -130,6 +131,9 @@ class Reader(
                     # and show them
                     channel.line(f"{lines} x {samples}")
                 channel.outdent()
+                channel.line(
+                    f"please use '--lines' or '--samples' to provide the dataset shape"
+                )
                 # flush
                 channel.log()
 
