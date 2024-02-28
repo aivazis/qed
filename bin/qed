@@ -19,11 +19,22 @@ journal.firewall("qed.ux.dispatch").fatal = False
 # get the package
 import qed
 
-# build an app instance
-app = qed.shells.qed(name="qed.app")
-# and run it
-status = app.run()
-# pass its exit status on to the shell
+# attempt to
+try:
+    # build an app instance
+    app = qed.shells.qed(name="qed.app")
+    # and invoke it
+    status = app.run()
+# if something goes wrong while configuring the application and its parts
+except qed.shells.qed.ConfigurationError:
+    # the error must have been reported already; bail
+    raise SystemExit(1)
+# if the application reports an error through the journal
+except journal.ApplicationError:
+    # we already have a report; bail
+    raise SystemExit(1)
+
+# if all goes well, pass the app exit status on to the shell
 raise SystemExit(status)
 
 
