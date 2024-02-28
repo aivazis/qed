@@ -15,5 +15,8 @@ class ComplexDouble(Complex, family="qed.datatypes.complex128"):
     floating point numbers
     """
 
+    # size
+    bytes = 16
+
 
 # end of file

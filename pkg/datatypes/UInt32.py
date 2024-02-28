@@ -14,5 +14,8 @@ class UInt32(Integer, family="qed.datatypes.uint32"):
     The specification for four byte unsigned integers
     """
 
+    # size
+    bytes = 4
+
 
 # end of file

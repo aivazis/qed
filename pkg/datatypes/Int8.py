@@ -14,5 +14,8 @@ class Int8(Integer, family="qed.datatypes.int8"):
     The specification for one byte integers
     """
 
+    # size
+    bytes = 1
+
 
 # end of file

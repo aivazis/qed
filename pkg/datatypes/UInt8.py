@@ -14,5 +14,8 @@ class UInt8(Integer, family="qed.datatypes.uint8"):
     The specification for one byte unsigned integers
     """
 
+    # size
+    bytes = 1
+
 
 # end of file

@@ -14,5 +14,8 @@ class Int16(Integer, family="qed.datatypes.int16"):
     The specification for two byte integers
     """
 
+    # size
+    bytes = 2
+
 
 # end of file
