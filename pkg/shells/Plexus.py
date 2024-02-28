@@ -35,8 +35,8 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     datasets.aliases = {"ds"}
 
     # the reader to use for all datasets that don't specify one
-    reader = qed.properties.str()
-    reader.default = None
+    reader = qed.properties.str(default=None)
+    reader.aliases = {"r"}
     reader.doc = "the reader to use when opening datasets"
 
     # individual metadata, used to assemble a default layout
@@ -51,6 +51,15 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     shape = qed.properties.tuple(schema=qed.properties.int())
     shape.default = None
     shape.doc = "the shape of the dataset"
+
+    # shorthands for specifying shape parts
+    lines = qed.properties.int(default=None)
+    lines.aliases = {"rows", "lines", "l"}
+    lines.doc = "set the vertical dimension of the dataset"
+
+    samples = qed.properties.int(default=None)
+    samples.aliases = {"cols", "columns", "s"}
+    samples.doc = "set the horizontal dimension of the dataset"
 
     # shorthands for selecting the cell type
     # the aliases provide {mdx} compatibility
@@ -107,6 +116,32 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     logfile.default = None
     logfile.doc = "file that captures all journal output"
 
+    # interface
+    @pyre.export
+    def main(self, *args, **kwds):
+        """
+        The plexus main entry point interprets the first non-configurational command line argument
+        as the name of an action to perform
+        """
+        # grab my command line arguments
+        argv = self.argv
+        # attempt to
+        try:
+            # get the name of the command
+            name = next(argv)
+        # if there aren't any
+        except StopIteration:
+            # we will deal with this case later; it is important to do as little as possible
+            # here so we can exit the exception block quickly and cleanly
+            pass
+        # if there is something to invoke
+        else:
+            # do it
+            return self.pyre_invoke(action=name, argv=argv)
+
+        # otherwise, just show the help screen
+        return self.help()
+
     # metamethods
     def __init__(self, **kwds):
         # chain up
@@ -126,39 +161,12 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         # chain up and pass on any configuration errors
         yield from super().pyre_configured()
 
-        # process the cell by running a competition among all the ways it could be specified
-        # first, collect my type traits in a pile
-        types = [
-            "uint8",
-            "uint16",
-            "uint32",
-            "uint64",
-            "int8",
-            "int16",
-            "int32",
-            "int64",
-            "float32",
-            "float64",
-            "complex64",
-            "complex128",
-        ]
-        # find the ones that are active
-        active = [name for name in types if getattr(self, name)]
-        # sort the list
-        ranked = sorted(
-            # include {cell} in the pile so we know where it stands
-            active + ["cell"],
-            # the key is the trait priority
-            key=lambda name: self.pyre_inventory.getTraitPriority(
-                self.pyre_trait(name)
-            ),
-        )
-        # the winner is
-        winner = ranked[-1]
-        # if it's not and explicit cell assignment
-        if winner != "cell":
-            # override
-            self.cell = winner
+        # sort out my cell configuration, since it has multiple way do being set
+        yield from self._configureCell()
+        # configure my shape
+        yield from self._configureShape()
+        # load any datasets from the command line
+        yield from self._loadDatasets()
 
         # all done
         return
@@ -251,10 +259,186 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         # otherwise, ask the dispatcher to do its thing
         return ux.dispatch(plexus=self, server=server, request=request)
 
-    # private data
-    _ux = None  # the UX manager
+    # implementation detail
+    def _configureCell(self):
+        """
+        Resolve the configuration of my cell type
+        """
+        # process the cell by running a competition among all the ways it could be specified
+        # first, collect my type traits in a pile
+        types = [
+            "uint8",
+            "uint16",
+            "uint32",
+            "uint64",
+            "int8",
+            "int16",
+            "int32",
+            "int64",
+            "float32",
+            "float64",
+            "complex64",
+            "complex128",
+        ]
+        # find the ones that are active
+        active = [name for name in types if getattr(self, name)]
+        # sort the list
+        ranked = sorted(
+            # include {cell} in the pile so we know where it stands
+            active + ["cell"],
+            # the key is the trait priority
+            key=lambda name: self.pyre_inventory.getTraitPriority(
+                self.pyre_trait(name)
+            ),
+        )
+        # the winner is
+        winner = ranked[-1]
+        # if it's not an explicit cell assignment
+        if winner != "cell":
+            # override
+            self.cell = winner
+        # return with no configuration errors
+        return []
 
-    _typemap = {}
+    def _configureShape(self):
+        """
+        Resolve the configuration of my shape
+        """
+        # initialize my shape candidate
+        shape = list(self.shape) if self.shape else [0, 0]
+        # get the priority of the shape setting
+        shapePriority = self.pyre_inventory.getTraitPriority(self.pyre_trait("shape"))
+        # get the number of lines
+        lines = self.lines
+        # if it's non-trivial
+        if lines:
+            # get its priority
+            linesPriority = self.pyre_inventory.getTraitPriority(
+                self.pyre_trait("lines")
+            )
+            # if it's greater than shape's
+            if linesPriority > shapePriority:
+                # override
+                shape[0] = lines
+        # get the number of samples
+        samples = self.samples
+        # if it's non-trivial
+        if samples:
+            # get its priority
+            samplesPriority = self.pyre_inventory.getTraitPriority(
+                self.pyre_trait("samples")
+            )
+            # if it's greater than shape's
+            if samplesPriority > shapePriority:
+                # override
+                shape[1] = samples
+        # if the resulting shape has a non-trivial entry
+        if shape[0] or shape[1]:
+            # store it
+            self.shape = shape
+        # all done
+        return []
+
+    def _loadDatasets(self):
+        """
+        Load datasets from the command line
+        """
+        # get the command line
+        argv = tuple(
+            command.command for command in self.pyre_configurator.consumeCommands()
+        )
+        # get all  the documented actions
+        actions = self.pyre_action.pyre_documentedActions(plexus=self)
+        # collect their names
+        names = tuple(name for _, name, _, _ in actions)
+        # if the first command line argument is an action
+        if argv and argv[0] in names:
+            # go no further; let the action handle the command line
+            return
+        # otherwise, interpret the arguments as files to read; but to do that, i need a reader
+        reader = self.reader
+        # if i don't have one
+        if not reader:
+            # make a channel
+            channel = journal.error("qed.cli")
+            # complain
+            channel.line(f"while attempting to load '{argv[0]}'")
+            channel.line(f"no registered reader")
+            channel.line(f"please specify the reader using the '--reader' option")
+            # flush
+            channel.log()
+            # complain
+            yield f"unknown reader; please specify one using '--reader'"
+            # and bail
+            return
+        # we have a setting; attempt to
+        try:
+            # resolve the reader
+            factory = qed.protocols.reader.pyre_resolveSpecification(spec=reader)
+        # if not
+        except self.ResolutionError as error:
+            # make a channel
+            channel = journal.error("qed.cli")
+            # complain
+            channel.line(f"unknown reader '{self.reader}'")
+            channel.line(f"while attempting to resolve the dataset reader")
+            # flush
+            channel.log()
+            # complain
+            yield f"could not resolve '{reader}'"
+            # and bail
+            return
+        # go through the arguments
+        for uri in argv:
+            # prep the reader configuration
+            args = {
+                "name": self._datasetName(),
+                "uri": uri,
+            }
+            # if i have a non-trivial cell
+            if self.cell:
+                # add it to the pile
+                args["cell"] = self.cell
+            # if i have a non-trivial shape
+            if self.shape:
+                # add it to the pile
+                args["shape"] = self.shape
+            # attempt to
+            try:
+                # instantiate the reader
+                reader = factory(**args)
+            # if anything goes wrong
+            except Exception as error:
+                # make a channel
+                channel = journal.warning("qed.cli")
+                # complain
+                channel.line(f"could not load datasets from '{uri}'")
+                channel.line(f"while processing the command line")
+                channel.line(f"got: {error}")
+                # flush
+                channel.log()
+                # complain
+                yield f"could not instantiate '{reader}'"
+                # and move on
+                continue
+            # if all goes well, register the reader
+            self.datasets.append(reader)
+        # clear out
+        # all done
+        return
+
+    def _datasetName(self):
+        """
+        Build a nickname for a new dataset
+        """
+        # increment the counter
+        self._ds += 1
+        # make a name and return it
+        return f"qed_{self._ds:02}"
+
+    # private data
+    _ds = 0
+    _ux = None  # the UX manager
 
 
 # end of file
