@@ -14,5 +14,8 @@ class UInt16(Integer, family="qed.datatypes.uint16"):
     The specification for two byte unsigned integers
     """
 
+    # size
+    bytes = 2
+
 
 # end of file

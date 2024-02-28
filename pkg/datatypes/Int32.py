@@ -14,5 +14,8 @@ class Int32(Integer, family="qed.datatypes.int32"):
     The specification for four byte integers
     """
 
+    # size
+    bytes = 4
+
 
 # end of file

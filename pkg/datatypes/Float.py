@@ -14,5 +14,8 @@ class Float(Real, family="qed.datatypes.real32"):
     The specification for single precision floating point numbers
     """
 
+    # size
+    bytes = 4
+
 
 # end of file

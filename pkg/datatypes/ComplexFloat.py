@@ -15,5 +15,8 @@ class ComplexFloat(Complex, family="qed.datatypes.complex64"):
     floating point numbers
     """
 
+    # size
+    bytes = 8
+
 
 # end of file

@@ -14,5 +14,8 @@ class Double(Real, family="qed.datatypes.real64"):
     The specification for double precision floating point numbers
     """
 
+    # size
+    bytes = 8
+
 
 # end of file

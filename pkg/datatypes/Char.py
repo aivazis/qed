@@ -14,5 +14,8 @@ class Char(Integer, family="qed.datatypes.Char"):
     The specification for one byte integers
     """
 
+    # size
+    bytes = 1
+
 
 # end of file

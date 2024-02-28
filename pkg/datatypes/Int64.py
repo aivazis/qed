@@ -14,5 +14,8 @@ class Int64(Integer, family="qed.datatypes.int64"):
     The specification for eight byte integers
     """
 
+    # size
+    bytes = 8
+
 
 # end of file
