@@ -347,6 +347,10 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         argv = tuple(
             command.command for command in self.pyre_configurator.consumeCommands()
         )
+        # if there are no command line arguments
+        if not argv:
+            # nothing to do here
+            return
         # get all  the documented actions
         actions = self.pyre_action.pyre_documentedActions(plexus=self)
         # collect their names
