@@ -22,7 +22,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
     profile.doc = "the access credentials"
 
     region = qed.properties.str()
-    region.default = "eu-central-1"
+    region.default = None
     region.doc = "the AWS region where the bucket is hosted"
 
     bucket = qed.properties.str()
@@ -159,8 +159,14 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         region = self.region
         bucket = self.bucket
         key = self.key
+        # assemble the authority
+        authority = "@".join(filter(None, (profile, region)))
+        # and the address
+        address = "/".join(filter(None, (bucket, key)))
         # build the uri
-        uri = f"s3://{profile}@{region}/{bucket}/{key}"
+        uri = qed.primitives.uri(
+            scheme="s3", authority=authority, address=f"/{address}"
+        )
         # make a reader
         reader = self._newReader(uri=uri)
 
