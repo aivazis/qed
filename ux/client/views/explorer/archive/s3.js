@@ -31,13 +31,13 @@ export const S3 = ({ view, setType, hide }) => {
         // the nickname of the archive; get's used to generate the name of the component
         name: "",
         // the connection profile with the AWS credentials
-        profile: "default",
+        profile: "",
         // the AWS region
         region: "",
         // the name of the bucket
         bucket: "",
         // the path
-        path: "",
+        path: "/",
     })
     // get the view mutator
     const decorate = useSetActiveView()
