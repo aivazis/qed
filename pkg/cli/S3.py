@@ -46,7 +46,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
 
     # interface
     @qed.export(tip="create an S3 bucket")
-    def create(self, plexus, **kwds):
+    def create(self, **kwds):
         """
         Create an S3 bucket
         """
@@ -65,10 +65,26 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         return 0
 
     @qed.export(tip="upload a file to an S3 bucket")
-    def upload(self, plexus, **kwds):
+    def upload(self, argv, **kwds):
         """
         Upload a file to an S3 bucket
         """
+        # if the user didn't supply a file to upload
+        if not argv:
+            # make a channel
+            channel = journal.error("qed.s3.upload")
+            # complain
+            channel.line("please specify a file to upload")
+            channel.line("usage:")
+            channel.indent()
+            channel.line(
+                "qed s3 --profile=<name> --bucket=<bucket> --key=<key> <filename>"
+            )
+            channel.outdent()
+            # flush
+            channel.log()
+            # and bail, in case errors aren't fatal
+            return 1
         # unpack  my state
         profile = self.profile
         bucket = self.bucket
@@ -83,7 +99,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         return 0
 
     @qed.export(tip="download a file from an S3 bucket")
-    def download(self, plexus, **kwds):
+    def download(self, argv, **kwds):
         """
         Upload a file to an S3 bucket
         """
@@ -91,15 +107,25 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         profile = self.profile
         bucket = self.bucket
         key = self.key
+        # if the user supplied a destination filename
+        if argv:
+            # extract it
+            dst = argv[0]
+        # otherwise
+        else:
+            # convert the key into a path
+            path = qed.primitives.path(key)
+            # and use the final segment as the local filename
+            dst = path.name
         # start a session
         s3 = boto3.Session(profile_name=profile).client("s3")
         # download
-        s3.download_file(bucket, key, key)
+        s3.download_file(bucket, key, dst)
         # all done
         return 0
 
     @qed.export(tip="delete a file from an S3 bucket")
-    def delete(self, plexus, **kwds):
+    def delete(self, **kwds):
         """
         Delete a file from an S3 bucket
         """
@@ -115,7 +141,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         return 0
 
     @qed.export(tip="list the contents of an S3 bucket")
-    def ls(self, plexus, **kwds):
+    def ls(self, **kwds):
         """
         List the contents of an S3 bucket
         """
