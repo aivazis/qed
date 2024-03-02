@@ -124,23 +124,13 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         as the name of an action to perform
         """
         # grab my command line arguments
-        argv = self.argv
-        # attempt to
-        try:
-            # get the name of the command
-            name = next(argv)
-        # if there aren't any
-        except StopIteration:
-            # we will deal with this case later; it is important to do as little as possible
-            # here so we can exit the exception block quickly and cleanly
-            pass
-        # if there is something to invoke
-        else:
-            # do it
-            return self.pyre_invoke(action=name, argv=argv)
-
-        # otherwise, just show the help screen
-        return self.help()
+        argv = tuple(self.argv)
+        # if there is nothing to invoke
+        if not argv:
+            # just show the help screen
+            return self.help()
+        # otherwise, interpret the argument as a command and invoke it
+        return self.pyre_invoke(action=argv[0], argv=argv[1:])
 
     # metamethods
     def __init__(self, **kwds):
@@ -344,22 +334,23 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         Load datasets from the command line
         """
         # get the command line
-        argv = tuple(
-            command.command for command in self.pyre_configurator.consumeCommands()
-        )
+        argv = tuple(self.argv)
         # if there are no command line arguments
         if not argv:
             # nothing to do here
             return
-        # get all  the documented actions
-        actions = self.pyre_action.pyre_documentedActions(plexus=self)
-        # collect their names
-        names = tuple(name for _, name, _, _ in actions)
+        # get the name of all documented actions
+        names = tuple(name for _, name, _, _ in self.pyre_documentedActions())
         # if the first command line argument is an action
         if argv and argv[0] in names:
             # go no further; let the action handle the command line
             return
-        # otherwise, interpret the arguments as files to read; but to do that, i need a reader
+        # otherwise, interpret all command line arguments arguments as files to read
+        # consume the command line so we bypass the panel dispatch in {main}
+        argv = tuple(
+            command.command for command in self.pyre_configurator.consumeCommands()
+        )
+        # i need a reader
         reader = self.reader
         # if i don't have one
         if not reader:
