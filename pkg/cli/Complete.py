@@ -20,7 +20,6 @@ class Complete(qed.shells.command, family="qed.cli.complete"):
     line = qed.properties.str()
     line.doc = "the partial command line"
 
-
     # administrative
     @qed.export(tip="generate completions candidates from a partial command line")
     def main(self, plexus, argv, **kwds):
@@ -28,7 +27,7 @@ class Complete(qed.shells.command, family="qed.cli.complete"):
         Suggest possible completions for the partial argument list
         """
         # ask the plexus for the names of all public actions
-        actions = plexus.pyre_action.pyre_documentedActions(plexus=plexus)
+        actions = plexus.pyre_documentedActions()
         # collect their names
         names = tuple(name for _, name, _, _ in actions)
 
