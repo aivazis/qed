@@ -85,6 +85,8 @@ class S3(qed.shells.command, family="qed.cli.s3"):
             channel.log()
             # and bail, in case errors aren't fatal
             return 1
+        # otherwise, grab the filename
+        filename = argv.pop(0)
         # unpack  my state
         profile = self.profile
         bucket = self.bucket
@@ -92,7 +94,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         # start a session
         s3 = boto3.Session(profile_name=profile).client("s3")
         # get the file
-        with open(f"{key}", mode="rb") as stream:
+        with open(filename, mode="rb") as stream:
             # upload
             s3.upload_fileobj(stream, bucket, key)
         # all done
@@ -110,7 +112,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         # if the user supplied a destination filename
         if argv:
             # extract it
-            dst = argv[0]
+            dst = argv.pop(0)
         # otherwise
         else:
             # convert the key into a path
