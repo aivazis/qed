@@ -178,23 +178,34 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         return 0
 
     @qed.export(tip="read the entire structure of a data product")
-    def explore(self, **kwds):
+    def explore(self, argv, **kwds):
         """
         Read the entire structure of a data product
         """
-        # unpack  my state
-        profile = self.profile
-        region = self.region
-        bucket = self.bucket
-        key = self.key
-        # assemble the authority
-        authority = "@".join(filter(None, (profile, region)))
-        # and the address
-        address = "/".join(filter(None, (bucket, key)))
-        # build the uri
-        uri = qed.primitives.uri(
-            scheme="s3", authority=authority, address=f"/{address}"
-        )
+        # make a channel
+        channel = journal.info("qed.s3.explore")
+
+        # if there is a uri on the command line
+        if argv:
+            # grab it
+            uri = qed.primitives.uri.parse(argv.pop(0))
+        # otherwise build it from my state
+        else:
+            # unpack  my state
+            profile = self.profile
+            region = self.region
+            bucket = self.bucket
+            key = self.key
+            # assemble the authority
+            authority = "@".join(filter(None, (profile, region)))
+            # and the address
+            address = "/".join(filter(None, (bucket, key)))
+            # build the uri
+            uri = qed.primitives.uri(
+                scheme="s3", authority=authority, address=f"/{address}"
+            )
+        # show me
+        channel.log(f"opening {uri}")
         # make a reader
         reader = self._newReader(uri=uri)
 
@@ -207,8 +218,6 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         # stop the time
         timer.stop()
 
-        # make a channel
-        channel = journal.info("qed.s3.app.read")
         # report
         channel.line(f"in {timer.sec()} sec")
         # and flush
