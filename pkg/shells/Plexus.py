@@ -116,22 +116,6 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     logfile.default = None
     logfile.doc = "file that captures all journal output"
 
-    # interface
-    @pyre.export
-    def main(self, *args, **kwds):
-        """
-        The plexus main entry point interprets the first non-configurational command line argument
-        as the name of an action to perform
-        """
-        # grab my command line arguments
-        argv = tuple(self.argv)
-        # if there is nothing to invoke
-        if not argv:
-            # just show the help screen
-            return self.help()
-        # otherwise, interpret the argument as a command and invoke it
-        return self.pyre_invoke(action=argv[0], argv=argv[1:])
-
     # metamethods
     def __init__(self, **kwds):
         # chain up
