@@ -18,7 +18,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
 
     # user configurable state
     profile = qed.properties.str()
-    profile.default = "parasim"
+    profile.default = None
     profile.doc = "the access credentials"
 
     region = qed.properties.str()
@@ -137,9 +137,11 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         # push in
         channel.indent()
         # go through the contents
-        for key in response.get("Contents", []):
+        for record in response.get("Contents", []):
+            # get the file name
+            name = record["Key"]
             # show me
-            channel.line(f"{key}")
+            channel.line(f"{name}")
         # pull out
         channel.outdent()
         # and flush
