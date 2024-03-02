@@ -13,7 +13,7 @@ import qed
 # declaration
 class S3(qed.shells.command, family="qed.cli.s3"):
     """
-    Measure data access performance
+    Utilities for exploring S3 buckets
     """
 
     # user configurable state
