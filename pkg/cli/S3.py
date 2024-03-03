@@ -93,7 +93,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
             # open the file and extract the toke
             token = open(path, mode="r").read()
         # access the security token service
-        sts = boto3.Session(profile_name=self.profile).client("sts")
+        sts = boto3.Session(profile_name=self.profile).client(service_name="sts")
         # assume the role
         role = sts.assume_role_with_web_identity(
             RoleArn=arn, RoleSessionName="assume-role", WebIdentityToken=token
