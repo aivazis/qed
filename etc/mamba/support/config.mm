@@ -15,6 +15,7 @@ gsl.dir := $(sys.prefix)
 # hdf5
 hdf5.version := 1.15.0
 hdf5.dir := ${sys.prefix}
+hdf5.parallel := off
 
 # libpq
 libpq.version := 16.1
