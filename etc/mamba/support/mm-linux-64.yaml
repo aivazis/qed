@@ -17,6 +17,8 @@ mm:
   prefix: "{pyre.environ.CONDA_PREFIX}"
   # the location of the temporary intermediate build products
   bldroot: "{pyre.environ.HOME}/tmp/builds/mm/{pyre.environ.CONDA_DEFAULT_ENV}"
+  # the installation location of the python packages
+  pycPrefix: "lib/python@PYTHON_VERSION@/site-packages"
 
   # misc
   # the name of GNU make
