@@ -16,10 +16,12 @@ dependencies:
   - automake
   - nodejs
   - libtool
+  - curl
   - fftw
   - gsl
   - hdf5
   - libpq
+  - openssl
   - pip
   - setuptools
   - boto3
