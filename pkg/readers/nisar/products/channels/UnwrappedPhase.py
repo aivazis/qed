@@ -26,28 +26,13 @@ class UnwrappedPhase(Channel, family="qed.channels.isce2.int.phase"):
     brightness.doc = "the brightness"
 
     # interface
-    def autotune(self, stats, **kwds):
+    def autotune(self, **kwds):
         # chain up
         super().autotune(**kwds)
-
-        # get π
-        π = math.pi
-        # extract the high phase
-        high = stats[1]
-        # filter out NaNs
-        if math.isnan(high):
-            # and replace them with something reasonable
-            high = 2 * π
-        # round up to the next multiple of 2π
-        max = 2 * π * (int(high / (2 * π)) + 1)
-        # adjust my range
-        self.phase.min = 0
-        self.phase.low = 0
-        self.phase.max = max
-        self.phase.high = high
+        # notify my range
+        self.phase.autotune(**kwds)
         # and my brightness
         self.brightness.value = 0.5
-
         # all done
         return
 
