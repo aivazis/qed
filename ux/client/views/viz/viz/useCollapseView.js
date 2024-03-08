@@ -108,7 +108,7 @@ export const useCollapseView = () => {
             // if this leaves us with nothing
             if (table.length === 0) {
                 // reinitialize
-                return [...pixelPathDefault()]
+                return [pixelPathDefault()]
             }
             // and return the new table
             return table
@@ -122,7 +122,7 @@ export const useCollapseView = () => {
             // if this leaves us with nothing
             if (table.length === 0) {
                 // reinitialize
-                return [...pixelPathSelectionDefault()]
+                return [pixelPathSelectionDefault()]
             }
             // and return the new table
             return table
