@@ -70,13 +70,13 @@ export const Zoom = ({ min = -4, max = 4 }) => {
     // slider configuration
     const xSlider = {
         value: zoom.horizontal, setValue: setHorizontalZoom,
-        min, max, major, minor,
+        min, max, major, minor, precision: 0,
         direction: "row", labels: "top", arrows: "bottom", markers: true,
         height: ils / 2, width: ils,
     }
     const ySlider = {
         value: zoom.vertical, setValue: setVerticalZoom,
-        min, max, major, minor,
+        min, max, major, minor, precision: 0,
         direction: "column", flipped: true, labels: "right", arrows: "left", markers: true,
         height: ils, width: ils / 2,
     }
