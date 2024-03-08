@@ -29,12 +29,29 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
         Retrieve my contents at {path}
         """
         # get my uri
-        uri = str(self.uri)
-        # if it doesn't end in a slash
-        if not uri.endswith("/"):
-            # make sure it does
-            uri = f"{uri}/"
-
+        uri = self.uri
+        # unpack the server info
+        region, _, profile, _ = uri.server
+        # if the {profile} is trivial
+        if not profile:
+            # set it to {default}
+            profile = "default"
+        # get the profile configuration
+        config = self.pyre_user.aws.profile(name=profile)
+        # if the {region} is trivial
+        if not region:
+            # ask the profile
+            region = config.get("region", "")
+        # reassemble the authority
+        authority = f"{profile}@{region}"
+        # get the address
+        address = uri.address
+        # ensure the address ends with a slash
+        if not address.endswith("/"):
+            # by adding the missing slash
+            address = f"{address}/"
+        # assemble the canonical prefix of my contents
+        prefix = qed.primitives.uri(scheme="s3", authority=authority, address=address)
         # get my contents
         contents = self._contents
         # if i haven't retrieved them before
@@ -44,9 +61,11 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
             # and populate the cache
             self._contents = contents
             # make a channel
-            channel = journal.debug("qed.archives.s3")
+            channel = journal.info("qed.archives.s3")
             # sign on
-            channel.line(f"{self.uri}:")
+            channel.line(f"retrieving the contents of '{self.uri}'")
+            channel.line(f"prefix: {prefix}")
+            channel.line(f"contents:")
             # show me the contents
             channel.indent()
             channel.report(report=contents)
@@ -54,7 +73,7 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
             # and flush
             channel.log()
         # don't do more, for now
-        return list((key, f"{uri}{key}", False) for key in contents)
+        return list((key, f"{prefix}{key}", False) for key in contents)
 
     # metamethods
     def __init__(self, **kwds):
