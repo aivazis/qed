@@ -4,9 +4,6 @@
 # (c) 1998-2024 all rights reserved
 
 
-# external
-import math
-
 # support
 import qed
 
@@ -52,7 +49,7 @@ class LinearRange(Controller, family="qed.controllers.linearrange"):
         self.min = mean - 2 * spread
         # similarly
         self.high = high
-        # use the opposite for the low end
+        # use the opposite for the high end
         self.max = mean + 2 * spread
         # all done
         return
