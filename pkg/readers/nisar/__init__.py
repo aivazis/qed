@@ -36,6 +36,22 @@ def metadata(uri):
     data = qed.h5.read(uri=uri)
     # set the product type
     metadata.product = data.science.LSAR.identification.productType.lower()
+    # attempt to
+    try:
+        # get the product version
+        metadata.version = data.science.LSAR.identification.productVersion
+    # if something goes wrong
+    except AttributeError:
+        # no worries
+        pass
+    # attempt to
+    try:
+        # get the product specification version
+        metadata.spec = data.science.LSAR.identification.productSpecificationVersion
+    # if something goes wrong
+    except AttributeError:
+        # no worries
+        pass
     # that's all we know, for now
     return metadata
 
