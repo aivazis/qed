@@ -36,8 +36,10 @@ class Metadata(pyre.component, family="qed.readers.isce2.metadata"):
     # the encoding scheme
     endian = pyre.properties.str(default=None)
 
-    # the isce2 version
+    # the product version
     version = pyre.properties.str(default=None)
+    # the product specification version
+    spec = pyre.properties.str(default=None)
 
 
 # end of file
