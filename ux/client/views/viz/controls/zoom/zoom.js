@@ -70,7 +70,7 @@ export const Zoom = ({ min = -4, max = 4 }) => {
     // slider configuration
     const xSlider = {
         value: zoom.horizontal, setValue: setHorizontalZoom,
-        min, max, major, minor, precision: 0,
+        min, max, major, minor, tickPrecision: 0, markerPrecision: 1,
         direction: "row", labels: "top", arrows: "bottom", markers: true,
         height: ils / 2, width: ils,
     }
