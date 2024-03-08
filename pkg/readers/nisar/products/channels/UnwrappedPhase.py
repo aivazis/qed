@@ -60,19 +60,16 @@ class UnwrappedPhase(Channel, family="qed.channels.isce2.int.phase"):
         """
         Compute the phase of a {pixel}
         """
-        # get the value as angle in radians in [-π, π]
-        # N.B.: the range interval is closed thanks to the peculiarities of {atan2}
-        value = pixel  # cmath.phase(pixel) / cmath.pi
+        # get π
+        π = math.pi
+        # get the value of the phase, in radians per the spec
+        value = pixel
+        # project to π radians
+        value = value / π
 
         # project
         # in π radians
         yield value, "π radians"
-
-        # transform to [0, 2π]
-        if value < 0:
-            # by adding a whole cycle to negative values
-            value += 2
-
         # in degrees in [0, 360]
         yield 180 * value, "degrees"
         # in cycles, in [0,1]
