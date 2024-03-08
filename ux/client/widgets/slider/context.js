@@ -24,6 +24,8 @@ export const Provider = ({ config, children }) => {
     const { height, width } = config
     // extract the controller limits and tick marks
     const { min, max, major = [], minor = [] } = config
+    // the label display precision
+    const { precision = 1 } = config
 
     // my unit cell, in intrinsic coordinates
     const cell = 10
@@ -198,6 +200,8 @@ export const Provider = ({ config, children }) => {
         height, width,
         // the limits and tick marks
         min, max, major, minor,
+        // the display precision of labels
+        precision,
 
         // my unit cell
         cell,
@@ -255,6 +259,8 @@ export const Context = React.createContext(
         height: null, width: null,
         // the limits and tick marks
         min: null, max: null, major: null, minor: null,
+        // the display precision of labels
+        precision: null,
 
         // my unit cell
         cell: null,

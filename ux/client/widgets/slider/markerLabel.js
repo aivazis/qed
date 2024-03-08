@@ -16,7 +16,7 @@ import { useConfig } from './useConfig'
 // render a single label at the marker position
 export const MarkerLabel = ({ value }) => {
     // unpack the geometry
-    const { enabled, markers, markerLabelPosition } = useConfig()
+    const { enabled, markers, markerLabelPosition, precision } = useConfig()
 
     // if the client does not want the value label
     if (!markers) {
@@ -30,7 +30,7 @@ export const MarkerLabel = ({ value }) => {
     // render
     return (
         <Label {...markerLabelPosition(value)} >
-            {value.toFixed(1)}
+            {value.toFixed(precision)}
         </Label>
     )
 }
