@@ -22,7 +22,7 @@ export const File = ({ name, uri }) => {
     const paint = paintFile(state)
     // render
     return (
-        <div style={paint} onClick={selector}>
+        <div style={paint} onClick={selector} title={uri}>
             {name}
         </div>
     )
