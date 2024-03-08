@@ -33,6 +33,8 @@ class ConnectArchive(graphene.Mutation):
         """
         Add a new archive to the pile
         """
+        # make a channel
+        channel = journal.info("qed.archives.connect")
         # grab the panel
         panel = info.context["panel"]
         # get the collection of archives
@@ -43,6 +45,8 @@ class ConnectArchive(graphene.Mutation):
             return None
         # parse it
         uri = qed.primitives.uri.parse(uri, scheme="file")
+        # show me
+        channel.log(f"connecting to archive {uri}")
         # if this is a local archive
         if uri.scheme == "file":
             # mount it

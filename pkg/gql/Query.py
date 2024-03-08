@@ -104,6 +104,16 @@ class Query(graphene.ObjectType):
             "module": module,
             "metadata": None,
         }
+        # make a channel
+        channel = journal.info("qed.gsl.discover")
+        # show me
+        channel.line(f"retrieving metadata for '{uri}'")
+        channel.indent()
+        channel.line(f"archive: {archive}")
+        channel.line(f"module: {module}")
+        channel.outdent()
+        # flush
+        channel.log()
         # attempt to
         try:
             # get the metadata factory
@@ -140,6 +150,25 @@ class Query(graphene.ObjectType):
             channel.log()
             # bail
             return context
+        # show me
+        channel.line("metadata:")
+        channel.indent()
+        channel.line(f"uri: {metadata.uri}")
+        channel.line(f"product: {metadata.product}")
+        channel.line(f"description: {metadata.description}")
+        channel.line(f"auxiliary file: {metadata.aux}")
+        channel.line(f"size: {metadata.bytes}")
+        channel.line(f"width: {metadata.width}")
+        channel.line(f"height: {metadata.height}")
+        channel.line(f"bands: {metadata.bands}")
+        channel.line(f"interleaving: {metadata.interleaving}")
+        channel.line(f"type: {metadata.type}")
+        channel.line(f"endian: {metadata.endian}")
+        channel.line(f"version: {metadata.version}")
+        channel.line(f"spec: {metadata.spec}")
+        channel.outdent()
+        # flush
+        channel.log()
         # if all goes well, attach the metadata to the context
         context["metadata"] = metadata
         # and hand it to the resolver
