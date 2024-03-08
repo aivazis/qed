@@ -16,7 +16,7 @@ import { useConfig } from './useConfig'
 // render a single label
 export const Label = ({ tick, value = null, setValue = null }) => {
     // unpack the geometry
-    const { enabled, arrows, labels, labelPosition, precision } = useConfig()
+    const { enabled, arrows, labels, labelPosition, tickPrecision } = useConfig()
 
     // check whether my value is the currently chosen one
     const selected = tick === value
@@ -47,7 +47,7 @@ export const Label = ({ tick, value = null, setValue = null }) => {
     // render
     return (
         <Label {...labelPosition(tick)} {...behaviors} >
-            {tick.toFixed(precision)}
+            {tick.toFixed(tickPrecision)}
         </Label>
     )
 }
