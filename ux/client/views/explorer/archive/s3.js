@@ -37,7 +37,7 @@ export const S3 = ({ view, setType, hide }) => {
         // the name of the bucket
         bucket: "",
         // the path
-        path: "/",
+        path: "",
     })
     // get the view mutator
     const decorate = useSetActiveView()
@@ -64,10 +64,10 @@ export const S3 = ({ view, setType, hide }) => {
         const region = (field == "region") ? value : form.region
         const bucket = (field == "bucket") ? value : form.bucket
         const path = (field == "path") ? value : form.path
-        // form the authority portion of the URI
+        // form the authority portion of the uri
         const authority = (profile.length > 0) ? `${profile}@${region}` : region
         // update the uri of the archive in the current view
-        view.archive.uri = `s3://${authority}/${bucket}${path}`
+        view.archive.uri = `s3://${authority}/${bucket}/${path}`
         // and set it
         decorate(view)
         // all done
@@ -85,10 +85,10 @@ export const S3 = ({ view, setType, hide }) => {
         const region = form.region
         const bucket = form.bucket
         const path = form.path
-        // form the authority portion of the URI
-        const authority = (profile.length > 0) ? `${profile}@${region}` : region
+        // form the authority portion of the uri
+        const authority = profile.length > 0 ? `${profile}@${region}` : region
         // update the uri of the archive in the current view
-        const uri = `s3://${authority}/${bucket}${path}`
+        const uri = `s3://${authority}/${bucket}/${path}`
         // send the mutation to the server
         request({
             // input
@@ -123,12 +123,8 @@ export const S3 = ({ view, setType, hide }) => {
             },
             // if something went wrong
             onError: error => {
-                // clear the form
-                update("profile", "")
-                update("region", "")
-                update("bucket", "")
-                update("path", "")
-                // and now record the error
+                // leave the form alone, since we don't know what's wrong, yet
+                // record the error
                 setError(error)
                 // all done
                 return
