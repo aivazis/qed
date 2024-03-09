@@ -1,0 +1,30 @@
+# -*- pyre -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2024 all rights reserved
+
+
+# the archive
+qed.native: .
+
+# the dataset
+d16:
+    uri: "{qed.native}/c16.dat"
+    shape: 65, 65
+    cell: c16
+
+    # configuration of the visualization pipeline
+    data.complex.amplitude:
+        auto: no
+        min: -1.0
+        low: -0.5
+        high: 0.5
+        max: 1.0
+
+
+# attach it to the application
+datasets:
+    - native.flat#d16
+
+
+# end of file
