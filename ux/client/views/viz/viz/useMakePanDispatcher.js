@@ -43,7 +43,7 @@ export const useMakePanDispatcher = () => {
             // get the sync state
             const sync = synced[i]
             // if i bumped into myself or a viewport that isn't synced
-            if (i === idx || !sync.scroll) {
+            if (i === idx || !sync?.scroll) {
                 // move on
                 return
             }
@@ -54,6 +54,8 @@ export const useMakePanDispatcher = () => {
             // all done
             return
         })
+        // all done
+        return
     }
 
     // make a pile of semaphores
