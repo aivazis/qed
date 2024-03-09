@@ -76,7 +76,7 @@ export const Zoom = ({ min = -4, max = 4 }) => {
     }
     const ySlider = {
         value: zoom.vertical, setValue: setVerticalZoom,
-        min, max, major, minor, precision: 0,
+        min, max, major, minor, tickPrecision: 0, markerPrecision: 1,
         direction: "column", flipped: true, labels: "right", arrows: "left", markers: true,
         height: ils, width: ils / 2,
     }
