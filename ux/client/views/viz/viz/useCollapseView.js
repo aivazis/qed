@@ -128,8 +128,9 @@ export const useCollapseView = () => {
             return table
         })
 
-        // if this is the active viewport
-        if (viewport == activeViewport) {
+        // if the active viewport has collapsed ot the active viewport is after the collapsed one on
+        // the pile
+        if (viewport <= activeViewport) {
             // activate the previous one
             setActiveViewport(Math.max(viewport - 1, 0))
         }
