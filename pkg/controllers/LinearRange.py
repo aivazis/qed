@@ -31,12 +31,23 @@ class LinearRange(Controller, family="qed.controllers.linearrange"):
     max.doc = "the largest possible value"
 
     # interface
-    def autotune(self, stats, **kwds):
+    def updateRange(self, low, high):
+        """
+        Update my state with new values for the range
+        """
+        # update my state
+        self.low = low
+        self.high = high
+        # and let the caller know
+        return True
+
+    # helpers
+    def _autotune(self, stats, **kwds):
         """
         Use the {stats} gathered on a data sample to adjust the range configuration
         """
         # chain up
-        super().autotune(stats=stats, **kwds)
+        super()._autotune(stats=stats, **kwds)
 
         # unpack the stats
         low, mean, high = stats
@@ -53,16 +64,6 @@ class LinearRange(Controller, family="qed.controllers.linearrange"):
         self.max = mean + 2 * spread
         # all done
         return
-
-    def updateRange(self, low, high):
-        """
-        Update my state with new values for the range
-        """
-        # update my state
-        self.low = low
-        self.high = high
-        # and let the caller know
-        return True
 
     # constants
     tag = "range"

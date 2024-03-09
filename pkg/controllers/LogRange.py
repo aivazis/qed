@@ -34,12 +34,24 @@ class LogRange(Controller, family="qed.controllers.logrange"):
     max.doc = "the largest possible value"
 
     # interface
-    def autotune(self, stats, **kwds):
+    def updateRange(self, low, high):
+        """
+        Update my state with new values for the range
+        """
+        # update my state
+        self.low = low
+        self.high = high
+
+        # and let the caller know
+        return True
+
+    # helpers
+    def _autotune(self, stats, **kwds):
         """
         Use the {stats} gathered on a data sample to adjust the range configuration
         """
         # chain up
-        super().autotune(stats=stats, **kwds)
+        super()._autotune(stats=stats, **kwds)
 
         # unpack the stats
         low, mean, high = stats
@@ -63,17 +75,6 @@ class LogRange(Controller, family="qed.controllers.logrange"):
 
         # all done
         return
-
-    def updateRange(self, low, high):
-        """
-        Update my state with new values for the range
-        """
-        # update my state
-        self.low = low
-        self.high = high
-
-        # and let the caller know
-        return True
 
     # constants
     tag = "range"
