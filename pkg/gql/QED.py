@@ -38,7 +38,7 @@ class QED(graphene.ObjectType):
 
     # resolvers
     @staticmethod
-    def resolve_id(panel, info, **kwds):
+    def resolve_id(store, info, **kwds):
         """
         Make an id
         """
@@ -46,20 +46,22 @@ class QED(graphene.ObjectType):
         return "QED"
 
     # data archives
-    def resolve_archives(panel, info, **kwds):
+    @staticmethod
+    def resolve_archives(store, info, **kwds):
         """
         Generate a sequence of known data archives
         """
         # hand off the pile of archives to the resolver
-        return tuple(panel.archives.values())
+        return tuple(store.archives)
 
-    # datasets
-    def resolve_readers(panel, info, **kwds):
+    # readers
+    @staticmethod
+    def resolve_readers(store, info, **kwds):
         """
         Generate a list of all known dataset readers
         """
         # get the registered readers and return them
-        return tuple(panel.readers.values())
+        return tuple(store.readers)
 
 
 # end of file

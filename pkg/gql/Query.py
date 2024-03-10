@@ -62,10 +62,10 @@ class Query(graphene.ObjectType):
         """
         Get the session layout
         """
-        # grab the panel
-        panel = info.context["panel"]
+        # grab the store
+        store = info.context["store"]
         # and pass it on
-        return panel
+        return store
 
     # directory contents
     @staticmethod
