@@ -33,11 +33,13 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
         super().autotune(**kwds)
         # notify my amplitude
         self.amplitude.autotune(**kwds)
-        # adjust my range
-        self.phase.min = 0
-        self.phase.low = 0
-        self.phase.max = 1
-        self.phase.high = 1
+        # if i'm supposed to
+        if self.phase.auto:
+            # adjust my range
+            self.phase.min = 0
+            self.phase.low = 0
+            self.phase.max = 1
+            self.phase.high = 1
         # all done
         return
 

@@ -29,13 +29,17 @@ class Phase(Channel, family="qed.channels.isce2.int.phase"):
     def autotune(self, **kwds):
         # chain up
         super().autotune(**kwds)
-        # adjust my range
-        self.phase.min = 0
-        self.phase.low = 0
-        self.phase.max = 1
-        self.phase.high = 1
-        # and my brightness
-        self.brightness.value = 0.5
+        # if i'm supposed to
+        if self.phase.auto:
+            # adjust my range
+            self.phase.min = 0
+            self.phase.low = 0
+            self.phase.max = 1
+            self.phase.high = 1
+        # if 'im supposed to
+        if self.brightness.auto:
+            # adjust my brightness
+            self.brightness.value = 0.5
         # all done
         return
 
