@@ -32,10 +32,14 @@ class Amplitude(Channel, family="qed.channels.isce2.int.amplitude"):
         # chain up
         super().autotune(**kwds)
 
-        # set my scale
-        self.scale.value = 0.5
-        # and my exponent
-        self.exponent.value = 0.3
+        # if i'm supposed to
+        if self.scale.auto:
+            # set my scale
+            self.scale.value = 0.5
+        # if i'm supposed to
+        if self.exponent.auto:
+            # adjust my exponent
+            self.exponent.value = 0.3
         # record the mean amplitude
         self.mean = stats[0][1]
 

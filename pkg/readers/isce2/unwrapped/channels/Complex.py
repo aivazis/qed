@@ -38,25 +38,30 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
         # chain up
         super().autotune(**kwds)
 
-        # get π
-        π = cmath.pi
-
-        # set my scale
-        self.scale.value = 0.5
-        # and my exponent
-        self.exponent.value = 0.3
+        # if i'm supposed to
+        if self.scale.auto:
+            # set my scale
+            self.scale.value = 0.5
+        # if i'm supposed to
+        if self.exponent.auto:
+            # adjust my exponent
+            self.exponent.value = 0.3
         # record the mean amplitude
         self.mean = stats[0][1]
 
-        # extract the high phase
-        high = stats[1][2]
-        # round up to the next multiple of 2π
-        max = 2 * π * (int(high / (2 * π)) + 1)
-        # adjust my range
-        self.phase.min = 0
-        self.phase.low = 0
-        self.phase.max = max
-        self.phase.high = high
+        # if i'm supposed to
+        if self.phase.auto:
+            # get π
+            π = cmath.pi
+            # extract the high phase
+            high = stats[1][2]
+            # round up to the next multiple of 2π
+            max = 2 * π * (int(high / (2 * π)) + 1)
+            # adjust my range
+            self.phase.min = 0
+            self.phase.low = 0
+            self.phase.max = max
+            self.phase.high = high
 
         # all done
         return
