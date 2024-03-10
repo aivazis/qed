@@ -79,8 +79,15 @@ class Dispatcher:
             name=name, spec=spec, plexus=plexus, docroot=docroot, globalAliases=True
         )
 
+        # build the application store
+        self.store = qed.ux.store(
+            name=f"{plexus.pyre_name}.store",
+            plexus=plexus,
+            docroot=docroot,
+            globalAliases=True,
+        )
         # instantiate the {GraphQL} handler
-        self.gql = GraphQL(panel=self.panel)
+        self.gql = GraphQL(plexus=plexus, dispatcher=self, store=self.store)
 
         # all done
         return
@@ -206,7 +213,7 @@ class Dispatcher:
         Handle a {graphql} request
         """
         # delegate to my {graphql} handler
-        return self.gql.respond(dispatcher=self, panel=self.panel, **kwds)
+        return self.gql.respond(panel=self.panel, **kwds)
 
     def profile(self, server, match, request, **kwds):
         """

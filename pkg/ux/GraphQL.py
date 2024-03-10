@@ -14,8 +14,12 @@ import qed
 
 # the {graphql} request handler
 class GraphQL:
+    """
+    The resolver of graphql queries and mutations
+    """
+
     # interface
-    def respond(self, plexus, dispatcher, panel, server, request, **kwds):
+    def respond(self, panel, server, request, **kwds):
         """
         Resolve the {query} and generate a response for the client
         """
@@ -38,8 +42,6 @@ class GraphQL:
         # make a fresh copy of my context
         context = dict(self.context)
         # decorate with the info for this request
-        context["plexus"] = plexus
-        context["dispatcher"] = dispatcher
         context["panel"] = panel
         context["server"] = server
         context["request"] = request
@@ -88,14 +90,17 @@ class GraphQL:
         return server.documents.JSON(server=server, value=doc)
 
     # metamethods
-    def __init__(self, panel, **kwds):
+    def __init__(self, plexus, dispatcher, store, **kwds):
         # chain up
         super().__init__(**kwds)
         # load my schema and attach it
         self.schema = qed.gql.schema
         # initialize the execution context
         self.context = {
-            "nameserver": panel.pyre_nameserver,
+            "plexus": plexus,
+            "dispatcher": dispatcher,
+            "store": store,
+            "nameserver": store.pyre_nameserver,
         }
         # make sure my error channel is not fatal
         journal.error("qed.ux.graphql").fatal = False
