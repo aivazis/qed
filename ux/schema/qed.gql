@@ -46,7 +46,7 @@ type QED implements Node {
   id: ID!
   # the connected data archives
   archives: [Archive]
-  # the connected datasets
+  # the connected readers
   readers: [Reader]
 }
 
@@ -104,7 +104,7 @@ type Reader implements Node {
   api: String!
   # the set of dataset selectors and their legal values
   selectors: [Selectors]!
-  # the actual dataset contained in the source
+  # the actual datasets contained in the source
   datasets: [Dataset]!
 }
 
@@ -115,7 +115,7 @@ type Dataset implements Node {
   id: ID!
   name: ID!
   # metadata
-  channels: [String!]!
+  channels: [Channel]!
   datatype: String!
   selector: [Selector]!
   shape: [Int!]!
@@ -123,6 +123,14 @@ type Dataset implements Node {
   tile: [Int!]!
 }
 
+# channel
+type Channel implements Node {
+  # ids
+  id: ID!
+  name: ID!
+  # data
+  controllers: [Controller]!
+}
 
 # selectors
 type Selectors {
