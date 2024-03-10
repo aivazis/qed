@@ -140,7 +140,9 @@ const connectMutation = graphql`
                         name
                         value
                     }
-                    channels
+                    channels {
+                        name
+                    }
                     shape
                     origin
                     tile
