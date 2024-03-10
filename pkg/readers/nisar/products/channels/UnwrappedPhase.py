@@ -31,8 +31,10 @@ class UnwrappedPhase(Channel, family="qed.channels.isce2.int.phase"):
         super().autotune(**kwds)
         # notify my range
         self.phase.autotune(**kwds)
-        # and my brightness
-        self.brightness.value = 0.5
+        # if my brightness needs autotuning
+        if self.brightness.auto:
+            # adjust it to the middle of the scale
+            self.brightness.value = 0.5
         # all done
         return
 

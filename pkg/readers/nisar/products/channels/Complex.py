@@ -36,13 +36,17 @@ class Complex(Channel, family="qed.channels.nisar.complex"):
         super().autotune(**kwds)
         # notify my range
         self.amplitude.autotune(**kwds)
-        # adjust my range
-        self.phase.min = 0
-        self.phase.low = 0
-        self.phase.max = 1
-        self.phase.high = 1
-        # and my saturation
-        self.saturation.value = 1
+        # if i'm supposed to
+        if self.phase.auto:
+            # adjust my range
+            self.phase.min = 0
+            self.phase.low = 0
+            self.phase.max = 1
+            self.phase.high = 1
+        # if 'im supposed to
+        if self.saturation.auto:
+            # adjust my saturation
+            self.saturation.value = 1
         # all done
         return
 
