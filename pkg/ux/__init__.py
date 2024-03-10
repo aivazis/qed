@@ -11,6 +11,7 @@ def dispatcher(**kwds):
     """
     # get the dispatcher
     from .Dispatcher import Dispatcher
+
     # instantiate and return
     return Dispatcher(**kwds)
 
@@ -22,8 +23,13 @@ def panel(**kwds):
     """
     # get the factory
     from .Panel import Panel
+
     # instantiate and return
     return Panel(**kwds)
+
+
+# the application store
+from .Store import Store as store
 
 
 # end of file
