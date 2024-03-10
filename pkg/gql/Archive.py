@@ -58,7 +58,7 @@ class Archive(graphene.ObjectType):
         """
         Get the supported readers
         """
-        # convert the archive URI into a string
+        # extract the supported readers
         return archive.readers
 
 
