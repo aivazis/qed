@@ -25,6 +25,8 @@ const Image = styled.img`
     /* extent */
     width: ${props => props.shape[1]}px;
     height: ${props => props.shape[0]}px;
+    /* when zooming */
+    image-rendering: pixelated;
 `
 
 
