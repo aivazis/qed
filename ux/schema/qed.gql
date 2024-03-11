@@ -128,8 +128,10 @@ type Channel implements Node {
   # ids
   id: ID!
   name: ID!
-  # data
+  # the viz pipeline controllers
   controllers: [Controller]!
+  # and its view state
+  view: ChannelView
 }
 
 # selectors
@@ -192,6 +194,47 @@ type ValueController implements Node {
 
 # put them all together
 union Controller = RangeController | ValueController
+
+type ChannelView implements Node {
+  id: ID!
+  name: ID!
+  measure: ChannelMeasure
+  sync: ChannelSync
+  zoom: ChannelZoom
+}
+
+type ChannelMeasure implements Node {
+  id: ID!
+  name: ID!
+  active: Boolean
+  path: [Pixel]
+  closed: Boolean
+  selection: [Int]
+}
+
+type ChannelSync implements Node {
+  id: ID!
+  name: ID!
+  channel: Boolean
+  zoom: Boolean
+  scroll: Boolean
+  path: Boolean
+  offsets: Pixel
+}
+
+type ChannelZoom implements Node {
+  id: ID!
+  name: ID!
+  horizontal: Int
+  vertical: Int
+  coupled: Boolean
+}
+
+# pixel
+type Pixel {
+  x: Int
+  y: Int
+}
 
 # raster shape
 type Shape {
