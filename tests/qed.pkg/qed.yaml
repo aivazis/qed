@@ -60,6 +60,21 @@ d16:
             low: 10
             high: 90
             max: 100
+        view:
+            measure:
+                active: yes
+                closed: yes
+                path: [[100,100], [500,500]]
+                selection: [1]
+            sync:
+                channel: yes
+                zoom: no
+                scroll: no
+                path: yes
+            zoom:
+                coupled: no
+                horizontal: -1
+                vertical: -2
 
 
 # attach it to the application
