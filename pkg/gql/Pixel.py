@@ -24,7 +24,6 @@ class Pixel(graphene.ObjectType):
         """
         Grab the x coordinate
         """
-        print(pixel)
         # easy enough
         return pixel[1]
 
