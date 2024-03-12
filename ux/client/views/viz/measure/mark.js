@@ -14,8 +14,8 @@ import { useEvent } from '~/hooks'
 
 // local
 // hooks
-import { usePixelPathSelection } from '../viz/usePixelPathSelection'
-import { useSetPixelPathSelection } from '../viz/useSetPixelPathSelection'
+import { usePixelPathSelection } from '../../main/usePixelPathSelection'
+import { useSetPixelPathSelection } from '../../main/useSetPixelPathSelection'
 import { useStartMoving } from './useStartMoving'
 
 

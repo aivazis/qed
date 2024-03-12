@@ -15,9 +15,9 @@ import { Badge } from '~/widgets'
 
 // locals
 // hooks
-import { useGetViewportSync } from '../viz/useGetViewportSync'
-import { useToggleViewportSync } from '../viz/useToggleViewportSync'
-import { useSyncAllViewports } from '../viz/useSyncAllViewports'
+import { useGetViewportSync } from '../../main/useGetViewportSync'
+import { useToggleViewportSync } from '../../main/useToggleViewportSync'
+import { useSyncAllViewports } from '../../main/useSyncAllViewports'
 // styles
 import styles from './styles'
 

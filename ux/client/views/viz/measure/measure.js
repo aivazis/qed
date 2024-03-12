@@ -19,9 +19,9 @@ import { SVG } from '~/widgets'
 import { Provider } from './context'
 // hooks
 import { useMoving } from './useMoving'
-import { usePixelPath } from '../viz/usePixelPath'
-import { usePixelPathSelection } from '../viz/usePixelPathSelection'
-import { useSetPixelPath } from '../viz/useSetPixelPath'
+import { usePixelPath } from '../../main/usePixelPath'
+import { usePixelPathSelection } from '../../main/usePixelPathSelection'
+import { useSetPixelPath } from '../../main/useSetPixelPath'
 import { useStopMoving } from './useStopMoving'
 // components
 import { Labels } from './labels'

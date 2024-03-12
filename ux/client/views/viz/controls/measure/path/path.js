@@ -11,7 +11,7 @@ import styled from 'styled-components'
 
 // local
 // hooks
-import { usePixelPath } from '../../../viz/usePixelPath'
+import { usePixelPath } from '../../../../main/usePixelPath'
 // components
 import { Profile } from './profile'
 import { Point } from './point'

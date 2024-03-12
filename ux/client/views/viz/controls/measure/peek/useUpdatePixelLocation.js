@@ -13,9 +13,9 @@ import { fetchQuery, useRelayEnvironment } from 'react-relay'
 import { Context } from './context'
 // hooks
 import { pixelValueQuery } from './useGetPixelValue'
-import { useGetZoomLevel } from '../../../viz/useGetZoomLevel'
-import { usePixelPath } from '../../../viz/usePixelPath'
-import { usePixelPathSelection } from '../../../viz/usePixelPathSelection'
+import { useGetZoomLevel } from '../../../../main/useGetZoomLevel'
+import { usePixelPath } from '../../../../main/usePixelPath'
+import { usePixelPathSelection } from '../../../../main/usePixelPathSelection'
 
 
 // the code below looks tricky because it is trying to avoid suspending component rendering

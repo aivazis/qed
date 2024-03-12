@@ -9,7 +9,7 @@ import React from 'react'
 
 // local
 // hooks
-import { useDatasetShape } from '../../../viz/useDatasetShape'
+import { useDatasetShape } from '../../../../main/useDatasetShape'
 
 
 // the provider factory

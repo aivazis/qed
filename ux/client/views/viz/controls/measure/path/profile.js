@@ -10,8 +10,8 @@ import styled from 'styled-components'
 
 // locals
 // hooks
-import { useGetView } from '../../../viz/useGetView'
-import { usePixelPath } from '../../../viz/usePixelPath'
+import { useGetView } from '../../../../main/useGetView'
+import { usePixelPath } from '../../../../main/usePixelPath'
 
 
 // the container of the {measure} actions

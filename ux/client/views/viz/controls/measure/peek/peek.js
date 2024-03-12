@@ -15,7 +15,7 @@ import { Provider } from './context'
 // hooks
 import { useGetPixelValue } from './useGetPixelValue'
 import { useUpdatePixelLocation } from './useUpdatePixelLocation'
-import { useViewports } from '../../../viz/useViewports'
+import { useViewports } from '../../../../main/useViewports'
 // components
 import { Channel } from './channel'
 import { Minimap } from './minimap'

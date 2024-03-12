@@ -19,6 +19,7 @@ export const useFetchQED = () => {
         // the options
         { fetchPolicy: "network-only" }
     )
+    console.log(qed)
     // and return it
     return qed
 }
@@ -30,6 +31,95 @@ query useFetchQEDQuery {
     qed {
         # metadata
         id
+        archives {
+            id
+            name
+            uri
+            readers
+        }
+        readers {
+            id
+            name
+            uri
+            api
+            selectors {
+                name
+                values
+            }
+            datasets {
+                id
+                name
+                channels {
+                    id
+                    name
+                    controllers {
+                        __typename
+                        ... on Node {
+                            id
+                        }
+                        ... on RangeController {
+                            slot
+                            min
+                            max
+                            low
+                            high
+                        }
+                        ... on ValueController {
+                            id
+                            slot
+                            min
+                            max
+                            value
+
+                        }
+                    }
+                    view {
+                        id
+                        name
+                        measure {
+                            id
+                            name
+                            active
+                            path {
+                                x
+                                y
+                            }
+                            closed
+                            selection
+                        }
+                        sync {
+                            id
+                            name
+                            channel
+                            zoom
+                            scroll
+                            path
+                            offsets {
+                                x
+                                y
+                            }
+                        }
+                        zoom {
+                            id
+                            name
+                            horizontal
+                            vertical
+                            coupled
+                        }
+                    }
+                }
+                datatype
+                selector {
+                    name
+                    value
+                }
+                shape
+                origin
+                tile
+            }
+        }
+
+
         # the connected data archives
         ...context_archives
         # and data readers

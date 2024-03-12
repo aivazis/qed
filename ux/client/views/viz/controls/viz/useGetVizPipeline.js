@@ -9,7 +9,7 @@ import { graphql, useLazyLoadQuery } from 'react-relay'
 
 // local
 // hooks
-import { useGetView } from '../../viz/useGetView'
+import { useGetView } from '../../../main/useGetView'
 
 
 // get the visualization pipeline of the current {dataset} {channel}

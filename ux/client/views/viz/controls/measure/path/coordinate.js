@@ -10,9 +10,9 @@ import styled from 'styled-components'
 
 // local
 // hooks
-import { useDatasetShape } from '../../../viz/useDatasetShape'
-import { usePixelPathSelection } from '../../../viz/usePixelPathSelection'
-import { useSetPixelPath } from '../../../viz/useSetPixelPath'
+import { useDatasetShape } from '../../../../main/useDatasetShape'
+import { usePixelPathSelection } from '../../../../main/usePixelPathSelection'
+import { useSetPixelPath } from '../../../../main/useSetPixelPath'
 
 
 // a interactive entry with a coordinate of a point

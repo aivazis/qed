@@ -9,8 +9,8 @@ import React from 'react'
 
 // local
 // hooks
-import { useSynced } from '../../viz/useSynced'
-import { useSyncAspect } from '../../viz/useSyncAspect'
+import { useSynced } from '../../../main/useSynced'
+import { useSyncAspect } from '../../../main/useSyncAspect'
 // components
 import { Control } from './control'
 import { Toggle } from './toggle'

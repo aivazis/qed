@@ -16,10 +16,10 @@ import { theme } from '~/palette'
 
 // local
 // hooks
-import { useCenterViewport } from '../../../viz/useCenterViewport'
-import { useGetZoomLevel } from '../../../viz/useGetZoomLevel'
-import { usePixelPathSelection } from '../../../viz/usePixelPathSelection'
-import { useSetPixelPathSelection } from '../../../viz/useSetPixelPathSelection'
+import { useCenterViewport } from '../../../../main/useCenterViewport'
+import { useGetZoomLevel } from '../../../../main/useGetZoomLevel'
+import { usePixelPathSelection } from '../../../../main/usePixelPathSelection'
+import { useSetPixelPathSelection } from '../../../../main/useSetPixelPathSelection'
 // components
 import { Button } from './button'
 

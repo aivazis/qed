@@ -11,7 +11,7 @@ import React from 'react'
 // context
 import { Context } from './context'
 // hooks
-import { useVisualize } from '../viz/useVisualize'
+import { useVisualize } from '../../main/useVisualize'
 
 
 // make a handler that updates the view with the current reader context

@@ -15,7 +15,7 @@ import { Tray } from '~/widgets'
 
 // locals
 // hooks
-import { useMeasureLayer } from '../../viz/useMeasureLayer'
+import { useMeasureLayer } from '../../../main/useMeasureLayer'
 // components
 import { Path } from './path'
 import { Peek } from './peek'

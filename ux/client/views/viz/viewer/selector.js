@@ -9,7 +9,7 @@ import React from 'react'
 
 // locals
 // hooks
-import { useViews } from '../viz/useViews'
+import { useViews } from '../../main/useViews'
 // styles
 import styles from './styles'
 
