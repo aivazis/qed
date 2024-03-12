@@ -97,7 +97,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
                 # build the name of the view
                 viewName = f"{channelName}.view"
                 # construct the view
-                view = Channel(name=viewName)
+                view = Channel(name=viewName, channel=channel)
                 # add it to the map
                 self._channels[channelName] = view
 
