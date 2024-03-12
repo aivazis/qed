@@ -9,8 +9,8 @@ import React from 'react'
 
 // locals
 // hooks
-import { usePixelPathSelection } from '../../../viz/usePixelPathSelection'
-import { useSetPixelPath } from '../../../viz/useSetPixelPath'
+import { usePixelPathSelection } from '../../../../main/usePixelPathSelection'
+import { useSetPixelPath } from '../../../../main/useSetPixelPath'
 import { useUpdatePixelLocation } from './useUpdatePixelLocation'
 // components
 import { Arrow } from './arrow'

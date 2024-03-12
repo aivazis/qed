@@ -11,7 +11,7 @@ import { useFragment } from 'react-relay/hooks'
 
 // local
 // hooks
-import { useGetView } from '../viz/useGetView'
+import { useGetView } from '../../main/useGetView'
 
 
 // the provider factory

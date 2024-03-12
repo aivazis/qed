@@ -16,8 +16,8 @@ import { Badge } from '~/widgets'
 
 // local
 // hooks
-import { useViews } from '../viz/useViews'
-import { useCollapseView } from '../viz/useCollapseView'
+import { useViews } from '../../main/useViews'
+import { useCollapseView } from '../../main/useCollapseView'
 // styles
 import { disconnect as paintDisconnect } from './styles'
 

@@ -14,11 +14,11 @@ import { Mosaic } from '~/widgets'
 
 // locals
 // hooks
-import { useCenterViewport } from '../viz/useCenterViewport'
-import { useGetTileURI } from '../viz/useGetTileURI'
-import { useGetZoomLevel } from '../viz/useGetZoomLevel'
-import { useMeasureLayer } from '../viz/useMeasureLayer'
-import { useViewports } from '../viz/useViewports'
+import { useCenterViewport } from '../../main/useCenterViewport'
+import { useGetTileURI } from '../../main/useGetTileURI'
+import { useGetZoomLevel } from '../../main/useGetZoomLevel'
+import { useMeasureLayer } from '../../main/useMeasureLayer'
+import { useViewports } from '../../main/useViewports'
 // components
 import { Measure } from '../measure'
 

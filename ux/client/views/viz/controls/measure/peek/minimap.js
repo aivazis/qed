@@ -16,9 +16,9 @@ import { SVG } from '~/widgets'
 
 // local
 // hooks
-import { useDatasetShape } from '../../../viz/useDatasetShape'
-import { useGetTileURI } from '../../../viz/useGetTileURI'
-import { usePixelPathSelection } from '../../../viz/usePixelPathSelection'
+import { useDatasetShape } from '../../../../main/useDatasetShape'
+import { useGetTileURI } from '../../../../main/useGetTileURI'
+import { usePixelPathSelection } from '../../../../main/usePixelPathSelection'
 // components
 import { Down } from './down'
 import { Left } from './left'
@@ -32,7 +32,7 @@ export const Minimap = ({ point }) => {
     // get the node selection, if any
     const selection = usePixelPathSelection()
     // form the base tile uri at zoom level 0, suitable for the minimap
-    const tileURI = useGetTileURI({ zoomLevel: { horizontal: 0, vertical: 0 }})
+    const tileURI = useGetTileURI({ zoomLevel: { horizontal: 0, vertical: 0 } })
     // get the active dataset extent
     const { origin, shape } = useDatasetShape()
 

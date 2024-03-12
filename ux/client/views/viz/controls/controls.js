@@ -14,7 +14,7 @@ import { Header } from '~/widgets'
 
 // locals
 // hooks
-import { useGetView } from '../viz/useGetView'
+import { useGetView } from '../../main/useGetView'
 // components
 import { Measure } from './measure'
 import { Sync } from './sync'

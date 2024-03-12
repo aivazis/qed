@@ -10,7 +10,7 @@ import styled from 'styled-components'
 
 // locals
 // hooks
-import { useViews } from '../../viz/useViews'
+import { useViews } from '../../../main/useViews'
 // components
 import { Dataset } from './dataset'
 import { Channel } from './channel'

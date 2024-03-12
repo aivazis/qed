@@ -15,7 +15,7 @@ import { Slider, SVG } from '~/widgets'
 
 // local
 // hooks
-import { useSetVizSession } from '../../viz/useSetVizSession'
+import { useSetVizSession } from '../../../main/useSetVizSession'
 
 
 // amplitude controller

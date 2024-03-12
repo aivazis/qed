@@ -10,8 +10,8 @@ import styled from 'styled-components'
 
 // local
 // hooks
-import { usePixelPath } from '../../../viz/usePixelPath'
-import { useSetPixelPath } from '../../../viz/useSetPixelPath'
+import { usePixelPath } from '../../../../main/usePixelPath'
+import { useSetPixelPath } from '../../../../main/useSetPixelPath'
 // components
 import { Button } from './button'
 

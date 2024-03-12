@@ -10,8 +10,8 @@ import styled from 'styled-components'
 
 // local
 // hooks
-import { useSynced } from '../../viz/useSynced'
-import { useSyncAspect } from '../../viz/useSyncAspect'
+import { useSynced } from '../../../main/useSynced'
+import { useSyncAspect } from '../../../main/useSyncAspect'
 // components
 import { Cell } from './cell'
 import { Coordinate } from './coordinate'

@@ -14,7 +14,7 @@ import { Spacer } from '~/widgets'
 
 // locals
 // hooks
-import { useViews } from '../viz/useViews'
+import { useViews } from '../../main/useViews'
 // components
 import { Collapse } from './collapse'
 import { Measure } from './measure'

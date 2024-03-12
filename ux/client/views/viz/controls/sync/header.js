@@ -10,8 +10,8 @@ import styled from 'styled-components'
 
 // local
 // hooks
-import { useSyncAspect } from '../../viz/useSyncAspect'
-import { useViews } from '../../viz/useViews'
+import { useSyncAspect } from '../../../main/useSyncAspect'
+import { useViews } from '../../../main/useViews'
 
 
 // the sync control table header

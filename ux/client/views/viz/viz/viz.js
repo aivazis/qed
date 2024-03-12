@@ -19,10 +19,10 @@ import { Flex } from '~/widgets'
 // context
 import { Provider } from './context'
 // hooks
-import { useViews } from './useViews'
-import { useSetActiveViewport } from './useSetActiveViewport'
-import { useInitializeViewports } from './useInitializeViewports'
-import { useMakePanDispatcher } from './useMakePanDispatcher'
+import { useViews } from '../../main/useViews'
+import { useSetActiveViewport } from '../../main/useSetActiveViewport'
+import { useInitializeViewports } from '../../main/useInitializeViewports'
+import { useMakePanDispatcher } from '../../main/useMakePanDispatcher'
 // components
 import { Viewer } from '../viewer'
 // paint

@@ -10,8 +10,8 @@ import styled from 'styled-components'
 
 // locals
 // hooks
-import { useViews } from '../../viz/useViews'
-import { useSetActiveViewport } from '../../viz/useSetActiveViewport'
+import { useViews } from '../../../main/useViews'
+import { useSetActiveViewport } from '../../../main/useSetActiveViewport'
 // components
 import { Cell } from './cell'
 
