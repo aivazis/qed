@@ -55,7 +55,7 @@ Z`
 
 
 // render the shape
-const shape = ({ style }) => {
+export const Data = ({ style }) => {
     // mix my paint
     const ico = { ...styles.icon, ...style?.icon }
 
@@ -64,10 +64,6 @@ const shape = ({ style }) => {
         <path d={data} style={ico} />
     )
 }
-
-
-// publish
-export default shape
 
 
 // end of file
