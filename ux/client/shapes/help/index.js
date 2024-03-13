@@ -102,7 +102,7 @@ Z
 
 
 // render the shape
-const shape = ({ style }) => {
+export const Help = ({ style }) => {
     // mix my paint
     const ico = { ...styles.icon, ...style?.icon }
 
@@ -111,10 +111,6 @@ const shape = ({ style }) => {
         <path d={info} style={ico} />
     )
 }
-
-
-// publish
-export default shape
 
 
 // end of file

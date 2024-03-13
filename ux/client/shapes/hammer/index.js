@@ -39,7 +39,7 @@ Z`
 
 
 // render the shape
-const shape = ({ style }) => {
+export const Hammer = ({ style }) => {
     // mix my paint
     const ico = { ...styles.icon, ...style?.icon }
 
@@ -48,10 +48,6 @@ const shape = ({ style }) => {
         <path d={hammer} style={ico} />
     )
 }
-
-
-// publish
-export default shape
 
 
 // end of file
