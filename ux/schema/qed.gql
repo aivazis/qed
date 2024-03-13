@@ -255,7 +255,9 @@ type Mutation {
   # updates to the viz pipeline
   resetRangeController(controller: RangeControllerInput!): RangeControllerInfo!
   updateRangeController(range: RangeControllerRangeInput!): RangeControllerInfo!
-  updateValueController(value: ValueControllerInput!): ValueControllerInfo!
+
+  resetValueController(controller: ValueControllerInput!): ValueControllerInfo!
+  updateValueController(value: ValueControllerValueInput!): ValueControllerInfo!
 }
 
 
@@ -295,7 +297,7 @@ input RangeControllerInput {
   slot: String!
 }
 
-# the range input payload
+# the update range input payload
 input RangeControllerRangeInput {
   # the dataset
   dataset: ID!
@@ -316,8 +318,18 @@ type RangeControllerInfo {
 
 
 # support for updating value controllers
-# the input payload
+# the reset input payload
 input ValueControllerInput {
+  # the dataset
+  dataset: ID!
+  # the channel
+  channel: String!
+  # the controller name
+  slot: String!
+}
+
+# the update value input payload
+input ValueControllerValueInput {
   # the dataset
   dataset: ID!
   # the channel
