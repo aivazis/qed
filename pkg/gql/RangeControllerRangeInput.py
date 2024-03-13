@@ -8,10 +8,10 @@
 import graphene
 
 
-# the payload of the reset of the state of a controller
-class RangeControllerInput(graphene.InputObjectType):
+# the payload for an update to the range of a controller
+class RangeControllerRangeInput(graphene.InputObjectType):
     """
-    The payload for a ranged controller reset
+    The payload for a ranged controller update
     """
 
 
@@ -20,6 +20,9 @@ class RangeControllerInput(graphene.InputObjectType):
     channel = graphene.ID()
 
     slot = graphene.String(required=True)
+
+    low = graphene.Float(required=True)
+    high = graphene.Float(required=True)
 
 
 # end of file

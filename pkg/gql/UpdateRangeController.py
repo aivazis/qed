@@ -7,8 +7,10 @@
 # externals
 import graphene
 import uuid
+
 # the input payload
-from .RangeControllerInput import RangeControllerInput
+from .RangeControllerRangeInput import RangeControllerRangeInput
+
 # the result types
 from .RangeController import RangeController
 
@@ -19,16 +21,13 @@ class UpdateRangeController(graphene.Mutation):
     Update the value range of a ranged controller
     """
 
-
     # inputs
     class Arguments:
         # the update context
-        range = RangeControllerInput(required=True)
-
+        range = RangeControllerRangeInput(required=True)
 
     # the result is always a range controller
     controller = graphene.Field(RangeController)
-
 
     # the range controller mutator
     def mutate(root, info, range):
@@ -62,7 +61,7 @@ class UpdateRangeController(graphene.Mutation):
 
         # build the context for the response resolution
         context = {
-            "controller" : {
+            "controller": {
                 "controller": controller,
                 "trait": trait,
                 "session": session,
