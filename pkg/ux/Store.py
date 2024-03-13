@@ -35,7 +35,14 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         return self._datasets.values()
 
     # interface
-    def channelView(self, name):
+    def dataset(self, name):
+        """
+        Look up the dataset by name
+        """
+        # easy enough
+        return self._datasets.get(name)
+
+    def channel(self, name):
         """
         Look up the channel view by name
         """
