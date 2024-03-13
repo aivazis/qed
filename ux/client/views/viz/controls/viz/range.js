@@ -11,11 +11,13 @@ import styled from 'styled-components'
 
 // project
 // widgets
-import { Range, SVG } from '~/widgets'
+import { Range, Spacer, SVG } from '~/widgets'
 
 // local
 // hooks
 import { useSetVizSession } from '../../../main/useSetVizSession'
+// components
+import { Reset } from './reset'
 
 
 // amplitude controller
@@ -114,6 +116,8 @@ export const RangeController = props => {
         <>
             <Header>
                 <Title>{slot}</Title>
+                <Spacer />
+                <Reset />
             </Header>
             <Housing height={opt.height} width={opt.width}>
                 <Controller enabled={true} {...opt} />
@@ -123,9 +127,27 @@ export const RangeController = props => {
 }
 
 
-// the range mutation
+// the mutation that resets the controller state
+const resetRangeMutation = graphql`
+mutation rangeResetControllerMutation($controller: RangeControllerInput!) {
+    resetRangeController(controller: $controller) {
+        controller {
+            id
+            # get my new session id
+            session
+            # refresh my parameters
+            min
+            max
+            low
+            high
+        }
+
+    }
+}`
+
+// the mutation  that updates the controller state
 const updateRangeMutation = graphql`
-mutation rangeMutation($info: RangeControllerInput!) {
+mutation rangeUpdateControllerMutation($info: RangeControllerRangeInput!) {
     updateRangeController(range: $info) {
         controller {
             id
@@ -144,28 +166,33 @@ mutation rangeMutation($info: RangeControllerInput!) {
 // styling
 // the section header
 const Header = styled.div`
-    margin: 0.5rem 1.0rem 0.25rem 1.0rem;
+height: 1.5rem;
+margin: 0.5rem 0.0rem 0.25rem 1.0rem;
+// for my children
+display: flex;
+flex - direction: row;
+align - items: center;
 `
 
 // the title
 const Title = styled.span`
-    display: inline-block;
-    font-family: rubik-light;
-    width: 2.5rem;
-    padding: 0.0rem 0.0rem 0.25rem 0.0rem;
-    cursor: default;
-    color: hsl(0deg, 0%, 75%);
+display: inline - block;
+font - family: rubik - light;
+width: 2.5rem;
+padding: 0.0rem 0.0rem 0.25rem 0.0rem;
+cursor: default ;
+color: hsl(0deg, 0 %, 75 %);
 `
 
 // the controller housing
 const Housing = styled(SVG)`
-    margin: 0.25rem auto;
-    /* border: 1px solid hsl(0deg, 0%, 10%); */
+margin: 0.25rem auto;
+/* border: 1px solid hsl(0deg, 0%, 10%); */
 `
 
 // the controller
 const Controller = styled(Range)`
-`
+    `
 
 
 // end of file
