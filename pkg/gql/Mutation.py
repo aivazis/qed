@@ -12,6 +12,9 @@ from .ConnectArchive import ConnectArchive
 from .DisconnectArchive import DisconnectArchive
 from .ConnectReader import ConnectReader
 from .DisconnectReader import DisconnectReader
+
+from .ResetRangeController import ResetRangeController
+from .ResetValueController import ResetValueController
 from .UpdateRangeController import UpdateRangeController
 from .UpdateValueController import UpdateValueController
 
@@ -29,9 +32,13 @@ class Mutation(graphene.ObjectType):
     connectReader = ConnectReader.Field()
     disconnectReader = DisconnectReader.Field()
 
-    # updates to ranged controllers
+    # updates to viz controllers
     updateRangeController = UpdateRangeController.Field()
     updateValueController = UpdateValueController.Field()
+
+    # resetting of viz controller state
+    resetRangeController = ResetRangeController.Field()
+    resetValueController = ResetValueController.Field()
 
 
 # end of file
