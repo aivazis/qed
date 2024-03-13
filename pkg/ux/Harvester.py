@@ -17,28 +17,28 @@ class Harvester:
         Generate a sequence of (fully qualified trait name, trait value) for all properties
         in the configuration tree anchored at {component}
         """
-        # get the component name
-        context = component.pyre_name
+        # initialize the pile
+        configuration = {}
         # go through the {component} properties
         for property in component.pyre_properties():
-            # get the property name
+            # get the name of the property
             name = property.name
-            # form the fully qualified name
-            address = f"{context}.{name}"
             # get the value
             value = getattr(component, name)
-            # and return the pair
-            yield address, value
+            # and store it
+            configuration[property.name] = value
 
-        # no go through the parts
+        # now, go through the parts
         for facility in component.pyre_facilities():
-            # get the value
-            implementation = getattr(component, facility.name)
-            # and get it to render its configuration
-            yield from self.harvest(component=implementation)
+            # get the name of the facility
+            name = facility.name
+            # get the implementation
+            implementation = getattr(component, name)
+            # and harvest its configuration
+            configuration[name] = self.harvest(component=implementation)
 
         # all done
-        return
+        return configuration
 
     # metamethods
     def __init__(self, **kwds):

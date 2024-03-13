@@ -35,9 +35,9 @@ class Channel(qed.component, family="qed.ux.channels.channel"):
         harvester = Harvester()
 
         # remember my configuration so we can restore it on demand
-        self.viewConfiguration = dict(harvester.harvest(component=self))
+        self.viewConfiguration = harvester.harvest(component=self)
         # repeat for the visualization pipeline configuration
-        self.vizConfiguration = dict(harvester.harvest(component=channel))
+        self.vizConfiguration = harvester.harvest(component=channel)
 
         # all done
         return
