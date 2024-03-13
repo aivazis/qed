@@ -145,7 +145,7 @@ mutation rangeResetControllerMutation($controller: RangeControllerInput!) {
     }
 }`
 
-// the mutation  that updates the controller state
+// the mutation that updates the controller state
 const updateRangeMutation = graphql`
 mutation rangeUpdateControllerMutation($info: RangeControllerRangeInput!) {
     updateRangeController(range: $info) {
@@ -166,33 +166,33 @@ mutation rangeUpdateControllerMutation($info: RangeControllerRangeInput!) {
 // styling
 // the section header
 const Header = styled.div`
-height: 1.5rem;
-margin: 0.5rem 0.0rem 0.25rem 1.0rem;
-// for my children
-display: flex;
-flex - direction: row;
-align - items: center;
+    height: 1.5rem;
+    margin: 0.5rem 0.0rem 0.25rem 1.0rem;
+    // for my children
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 `
 
 // the title
 const Title = styled.span`
-display: inline - block;
-font - family: rubik - light;
-width: 2.5rem;
-padding: 0.0rem 0.0rem 0.25rem 0.0rem;
-cursor: default ;
-color: hsl(0deg, 0 %, 75 %);
+    display: inline - block;
+    font-family: rubik-light;
+    width: 2.5rem;
+    padding: 0.0rem 0.0rem 0.25rem 0.0rem;
+    cursor: default ;
+    color: hsl(0deg, 0%, 75%);
 `
 
 // the controller housing
 const Housing = styled(SVG)`
-margin: 0.25rem auto;
-/* border: 1px solid hsl(0deg, 0%, 10%); */
+    margin: 0.25rem auto;
+    /* border: 1px solid hsl(0deg, 0%, 10%); */
 `
 
 // the controller
 const Controller = styled(Range)`
-    `
+`
 
 
 // end of file
