@@ -6,41 +6,49 @@
 
 // get colors
 import { theme, wheel } from '~/palette'
-// and the base styles
-import styles from '../styles'
 
 
-// common paint for my badges, in normal form
-const badge = {
+// paint
+const reset = {
     // the icon container
     badge: {
         base: {
             // for me
             flex: "0 0 auto",
             padding: "0.0rem 0.5rem",
-            cursor: "pointer",
+            justifySelf: "end",
             // for my children
             display: "flex",
             alignItems: "center",
         },
-        disabled: {},
-        enabled: {},
+        disabled: {
+            cursor: "default",
+        },
+        enabled: {
+            cursor: "pointer",
+        },
         selected: {},
-        available: {},
+        available: {
+            cursor: "pointer",
+        },
     },
 
     // for the shape container
     shape: {
         base: {},
-        disabled: {},
-        enabled: {
+        disabled: {
             // dim it a bit
-            strokeOpacity: 0.5,
             fillOpacity: 0.5,
+            strokeOpacity: 0.5,
+        },
+        enabled: {
+            // full brightness
+            strokeOpacity: 1.0,
+            fillOpacity: 1.0,
         },
         selected: {},
         available: {
-            // full intensity
+            // full brightness
             strokeOpacity: 1.0,
             fillOpacity: 1.0,
         },
@@ -48,63 +56,46 @@ const badge = {
 
     // for the icon main features
     icon: {
-        base: {},
-        disabled: {},
-        enabled: {},
+        base: {
+            fill: "none",
+        },
+        disabled: {
+            // pick a color
+            stroke: wheel.gray.aluminum,
+        },
+        enabled: {
+            // pick a color
+            stroke: wheel.gray.aluminum,
+        },
         selected: {},
-        available: {},
+        available: {
+            // pick a color
+            stroke: theme.page.name,
+
+        },
     },
 
     // for the icon decoration
     decoration: {
-        base: {},
-        disabled: {},
-        enabled: {},
-        selected: {},
-        available: {},
-    },
-}
-
-
-// the button that resets the state
-const reset = {
-    // inherit
-    ...badge,
-
-    badge: {
-        ...badge.badge,
         base: {
-            ...badge.badge.base,
-            // for me
-            justifySelf: "end",
+            stroke: "none",
+        },
+        disabled: {
+            // pick a color
+            fill: wheel.gray.aluminum,
+        },
+        enabled: {
+            // pick a color
+            fill: wheel.gray.aluminum,
+
+        },
+        selected: {},
+        available: {
+            // pick a color
+            fill: theme.page.name,
+
         },
     },
-
-    icon: {
-        ...badge.icon,
-        selected: {
-            ...badge.icon.selected,
-            stroke: theme.page.name,
-        },
-        available: {
-            ...badge.icon.available,
-            stroke: theme.page.name,
-        },
-    },
-
-    decoration: {
-        ...badge.decoration,
-        selected: {
-            ...badge.decoration.selected,
-            stroke: "none",
-            fill: theme.page.name,
-        },
-        available: {
-            ...badge.decoration.available,
-            stroke: "none",
-            fill: theme.page.name,
-        },
-    }
 }
 
 
