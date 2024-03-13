@@ -7,8 +7,10 @@
 # externals
 import graphene
 import uuid
+
 # the input payload
-from .ValueControllerInput import ValueControllerInput
+from .ValueControllerValueInput import ValueControllerValueInput
+
 # the result types
 from .ValueController import ValueController
 
@@ -19,16 +21,13 @@ class UpdateValueController(graphene.Mutation):
     Update the value of a controller
     """
 
-
     # inputs
     class Arguments:
         # the update context
-        value = ValueControllerInput(required=True)
-
+        value = ValueControllerValueInput(required=True)
 
     # the result is always a value controller
     controller = graphene.Field(ValueController)
-
 
     # the value controller mutator
     def mutate(root, info, value):
@@ -61,7 +60,7 @@ class UpdateValueController(graphene.Mutation):
 
         # build the context for the response resolution
         context = {
-            "controller" : {
+            "controller": {
                 "controller": controller,
                 "trait": trait,
                 "session": session,
