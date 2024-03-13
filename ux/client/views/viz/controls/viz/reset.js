@@ -18,16 +18,32 @@ import styles from './styles'
 
 
 // reset the state of a controller
-export const Reset = () => {
+export const Reset = ({ reset, enabled }) => {
+
+    // build the handler
+    const click = evt => {
+        // stop this event from bubbling up
+        evt.stopPropagation()
+        // and quash any side effects
+        evt.preventDefault()
+        // reset the state
+        reset()
+        // all done
+        return
+    }
     // assemble the controllers to hand my {badge}
     const behaviors = {
+        onClick: click,
     }
+
+    // deduce my state
+    const state = enabled ? "enabled" : "disabled"
 
     // mix my paint
     const paint = styles.reset
     // and render
     return (
-        <Badge size={32} state="enabled" behaviors={behaviors} style={paint} >
+        <Badge size={24} state={state} behaviors={behaviors} style={paint} >
             <Icon />
         </Badge>
     )
