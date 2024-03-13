@@ -11,11 +11,13 @@ import styled from 'styled-components'
 
 // project
 // widgets
-import { Slider, SVG } from '~/widgets'
+import { Slider, Spacer, SVG } from '~/widgets'
 
 // local
 // hooks
 import { useSetVizSession } from '../../../main/useSetVizSession'
+// components
+import { Reset } from './reset'
 
 
 // amplitude controller
@@ -110,6 +112,8 @@ export const ValueController = props => {
         <>
             <Header>
                 <Title>{slot}</Title>
+                <Spacer />
+                <Reset />
             </Header>
             <Housing height={opt.height} width={opt.width}>
                 <Controller enabled={true} {...opt} />
@@ -139,7 +143,12 @@ mutation valueMutation($info: ValueControllerInput!) {
 // styling
 // the section header
 const Header = styled.div`
-    margin: 0.5rem 1.0rem 0.25rem 1.0rem;
+    height: 1.5rem;
+    margin: 0.5rem 0.0rem 0.25rem 1.0rem;
+    // for my children
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 `
 
 // the title
