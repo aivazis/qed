@@ -11,11 +11,11 @@ import styles from './styles'
 
 
 const arc = `
-   M 100 500 A 400 400 0 1 1 500 900
+   M 200 500 A 300 300 0 1 1 500 800
 `
 
 const arrow = `
-   M 100 575 l 100 -100 l -200 0 Z
+   M 200 600 l 150 -150 l -300 0 Z
 `
 
 // render the shape
