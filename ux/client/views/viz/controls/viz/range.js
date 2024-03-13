@@ -35,12 +35,18 @@ export const RangeController = props => {
     `, props.configuration)
     // unpack
     const { slot, min, max, low, high } = configuration
-    // initialize my local values of the range
+    // initialize my range
     const [range, setRange] = React.useState([low, high])
+    // and my extent
+    const [extent, setExtent] = React.useState([min, max])
+    // my state
+    const [modified, setModified] = React.useState(false)
     // make a handler that can update the session id of a view
     const setSession = useSetVizSession()
     // build the range mutator
-    const [updateRange, isInFlight] = useMutation(updateRangeMutation)
+    const [updateRange, updateIsInFlight] = useMutation(updateRangeMutation)
+    // and the state reset
+    const [resetRange, resetIsInFlight] = useMutation(resetRangeMutation)
     // set up the tick marks
     const major = [min, (max + min) / 2, max]
 
@@ -60,6 +66,41 @@ export const RangeController = props => {
         return
     }
 
+    // build the state reset
+    const reset = () => {
+        // if there is a pending reset
+        if (resetIsInFlight) {
+            // nothing to do
+            return
+        }
+        // otherwise, send the mutation to the server
+        resetRange({
+            // input
+            variables: {
+                controller: {
+                    dataset: props.dataset,
+                    channel: props.channel,
+                    slot,
+                }
+            },
+            // when done
+            onCompleted: data => {
+                // unpack
+                const { min, low, high, max, session } = data.resetRangeController.controller
+                // set my range
+                setRange([low, high])
+                // and my limits
+                setExtent([min, max])
+                // indicate i'm at my defaults
+                setModified(false)
+                // and set the session in the active view
+                setSession(session)
+                // all done
+                return
+            }
+        })
+    }
+
     // build the value updater to hand to the controller
     // this is built in the style of {react} state updates: the controller invokes this
     // and passes it as an argument a function that expects the current range and return
@@ -70,9 +111,9 @@ export const RangeController = props => {
         // update my state
         setRange([newLow, newHigh])
         // update the stats
-        monitor(isInFlight)
+        monitor(updateIsInFlight)
         // if there is a pending mutation
-        if (isInFlight) {
+        if (updateIsInFlight) {
             // skip the update
             return
         }
@@ -90,6 +131,8 @@ export const RangeController = props => {
             },
             // when done
             onCompleted: data => {
+                // indicate i'm at modified away from my defaults
+                setModified(true)
                 // get the session
                 const session = data.updateRangeController.controller.session
                 // and set it in the active view
@@ -117,7 +160,7 @@ export const RangeController = props => {
             <Header>
                 <Title>{slot}</Title>
                 <Spacer />
-                <Reset />
+                <Reset reset={reset} enabled={modified} />
             </Header>
             <Housing height={opt.height} width={opt.width}>
                 <Controller enabled={true} {...opt} />
