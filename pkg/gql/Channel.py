@@ -75,7 +75,7 @@ class Channel(graphene.ObjectType):
         # get the store from context
         store = info.context["store"]
         # look up my view
-        view = store.channelView(name=channel.pyre_name)
+        view = store.channel(name=channel.pyre_name)
         # and pass it on
         return view
 
