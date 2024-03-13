@@ -253,7 +253,8 @@ type Mutation {
   disconnectReader(uri: String!): ReaderInfo!
 
   # updates to the viz pipeline
-  updateRangeController(range: RangeControllerInput!): RangeControllerInfo!
+  resetRangeController(controller: RangeControllerInput!): RangeControllerInfo!
+  updateRangeController(range: RangeControllerRangeInput!): RangeControllerInfo!
   updateValueController(value: ValueControllerInput!): ValueControllerInfo!
 }
 
@@ -284,8 +285,18 @@ type ReaderInfo {
 
 
 # support for updating range controllers
-# the input payload
+# the reset input payload
 input RangeControllerInput {
+  # the dataset
+  dataset: ID!
+  # the channel
+  channel: String!
+  # the controller name
+  slot: String!
+}
+
+# the range input payload
+input RangeControllerRangeInput {
   # the dataset
   dataset: ID!
   # the channel
