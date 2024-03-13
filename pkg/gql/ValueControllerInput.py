@@ -20,7 +20,5 @@ class ValueControllerInput(graphene.InputObjectType):
 
     slot = graphene.String(required=True)
 
-    value = graphene.Float(required=True)
-
 
 # end of file
