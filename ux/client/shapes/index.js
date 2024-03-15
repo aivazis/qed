@@ -8,6 +8,7 @@
 export { Camera } from './camera'
 export { Chevron } from './chevron'
 export { Data } from './data'
+export { Download } from './download'
 export { Eye } from './eye'
 export { Flame } from './flame'
 export { Gear } from './gear'
