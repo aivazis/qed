@@ -12,8 +12,8 @@ import style from '~/shapes/styles'
 
 
 // the shape color
-const ink = "hsl(0deg, 100%, 50%)"
-const paint = "hsl(0deg, 100%, 50%)"
+const ink = theme.page.danger
+const paint = theme.page.danger
 
 // publish
 export default {

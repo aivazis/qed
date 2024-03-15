@@ -12,8 +12,8 @@ import style from '~/shapes/styles'
 
 
 // the shape color
-const tray = "hsl(0deg, 0%, 60%)"
-const arrow = "hsl(0deg, 100%, 60%)"
+const tray = theme.page.normal
+const arrow = theme.page.normal
 
 // publish
 export default {

@@ -8,7 +8,7 @@
 import { theme } from '~/palette'
 
 // the text color
-const paint = theme.page.name
+const paint = theme.page.highlight
 
 // publish
 export default {
