@@ -10,7 +10,7 @@ import styled from 'styled-components'
 
 // project
 // widgets
-import { SVG, Slider, Tray } from '~/widgets'
+import { SVG, Slider, Spacer, Tray } from '~/widgets'
 
 // locals
 // hooks
@@ -20,12 +20,16 @@ import { useSetZoomLevel } from '../../../main/useSetZoomLevel'
 // components
 import { Lock } from './lock'
 import { Minimap } from './minimap'
+import { Reset } from './reset'
+import { Save } from './save'
 
 
 //  display the zoom control
 export const Zoom = ({ min = -4, max = 4 }) => {
     // set the scale
     const ils = 200
+    // my state
+    const [modified, setModified] = React.useState(false)
     // the lock button state
     const [lock, setLock] = React.useState(true)
     // look up the zoom level of the active viewport
@@ -51,6 +55,8 @@ export const Zoom = ({ min = -4, max = 4 }) => {
         const level = { horizontal: value, vertical: lock ? value : zoom.vertical }
         // and set it
         setZoom(level)
+        // mark me as modified
+        setModified(true)
         // all done
         return
     }
@@ -60,6 +66,8 @@ export const Zoom = ({ min = -4, max = 4 }) => {
         const level = { vertical: value, horizontal: lock ? value : zoom.horizontal }
         // and set it
         setZoom(level)
+        // mark me as modified
+        setModified(true)
         // all done
         return
     }
@@ -84,11 +92,24 @@ export const Zoom = ({ min = -4, max = 4 }) => {
     const width = 340
     const height = 290
 
+    // setup the reset action
+    const reset = () => {
+        // clear the flag
+        setModified(false)
+        // all done
+        return
+    }
+
     // mix my paint
     const state = enabled ? "enabled" : "disabled"
     // and render
     return (
         <Tray title="zoom" initially={true} state={state} scale={0.5}>
+            <Header>
+                <Spacer />
+                <Save save={reset} enabled={modified} />
+                <Reset reset={reset} enabled={modified} />
+            </Header>
             {/* the control housing */}
             <Housing height={height} width={width}>
                 {/* the vertical slider */}
@@ -112,6 +133,16 @@ export const Zoom = ({ min = -4, max = 4 }) => {
     )
 }
 
+
+// the section header
+const Header = styled.div`
+    height: 1.5rem;
+    margin: 0.5rem 0.0rem 0.25rem 1.0rem;
+    // for my children
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+`
 
 // the slider housing
 const Housing = styled(SVG)`
