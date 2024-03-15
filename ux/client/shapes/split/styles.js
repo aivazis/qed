@@ -5,14 +5,14 @@
 
 
 // get colors
-import { wheel } from '~/palette'
+import { theme } from '~/palette'
 
 // the base style
 import style from '~/shapes/styles'
 
 
 // the shape color
-const ink = "hsl(0deg, 0%, 90%)"
+const ink = theme.page.bright
 
 // publish
 export default {

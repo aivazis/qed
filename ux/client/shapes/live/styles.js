@@ -12,9 +12,9 @@ import style from '~/shapes/styles'
 
 
 // the shape color
-const ink = "hsl(0deg, 0%, 90%)"
+const ink = theme.page.bright
 const paint = theme.page.background
-const badge = "hsl(0deg, 0%, 15%, 1)"
+const badge = theme.page.normal
 
 // paint mixer
 const live = (client) => ({

@@ -12,7 +12,7 @@ import style from '~/shapes/styles'
 
 
 // the shape color
-const ink = "hsl(0deg, 0%, 60%)"
+const ink = theme.page.bright
 
 // publish
 export default {
