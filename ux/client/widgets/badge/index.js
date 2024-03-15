@@ -11,7 +11,7 @@ import { badge as paintBadge } from './styles'
 
 
 // a button with an SVG image as content
-export const Badge = ({ size, state, behaviors, style, children }) => {
+export const Badge = ({ size, state, behaviors, style, children, ...options }) => {
     // make local state for the extra styling of the badge and the shape necessary when
     // questioning whether the activity is available
     const [polish, setPolish] = React.useState(false)
@@ -54,7 +54,7 @@ export const Badge = ({ size, state, behaviors, style, children }) => {
     const paint = paintBadge({ state, client: style, polish })
     // and render
     return (
-        <div style={paint.badge} {...controls}>
+        <div {...options} style={paint.badge} {...controls}>
             <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width={size} height={size} >
                 <g transform={shrink} style={paint.shape} >
                     {React.cloneElement(React.Children.only(children), { style: paint })}
