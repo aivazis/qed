@@ -5,7 +5,9 @@
 
 
 # externals
+import csv
 import functools
+import io
 import re
 import signal
 import urllib
@@ -74,11 +76,6 @@ class Dispatcher:
         spec = "ux"
         # use the spec to build a name for my panel
         name = f"{plexus.pyre_name}.{spec}"
-        # make an instance of the application engine
-        self.panel = qed.ux.panel(
-            name=name, spec=spec, plexus=plexus, docroot=docroot, globalAliases=True
-        )
-
         # build the application store
         self.store = qed.ux.store(
             name=f"{plexus.pyre_name}.store",
@@ -136,7 +133,7 @@ class Dispatcher:
         Handle a data request
         """
         # unpack
-        data = match.group("data_dataset")
+        name = match.group("data_dataset")
         channel = match.group("data_channel")
         zoomSpec = match.group("data_zoom")
         zoom = tuple(map(int, zoomSpec.split("x")))
@@ -144,14 +141,10 @@ class Dispatcher:
         origin = tuple(map(int, match.group("data_origin").split("x")))
         shape = tuple(map(int, match.group("data_shape").split("x")))
 
-        # attempt to
-        try:
-            # process the request
-            tile = self.panel.tile(
-                data=data, channel=channel, zoom=zoom, origin=origin, shape=shape
-            )
-        # if anything goes wrong while looking up the data sources
-        except KeyError:
+        # get the dataset
+        dataset = self.store.dataset(name=name)
+        # if the store doesn't have it
+        if not dataset:
             # we have a bug
             chnl = journal.firewall("qed.ux.dispatch")
             # complain
@@ -160,13 +153,19 @@ class Dispatcher:
             chnl.log()
             # let the client know
             return server.responses.NotFound(server=server)
+        # attempt to
+        try:
+            # ask the dataset for the tile
+            tile = dataset.render(
+                channel=channel, zoom=zoom, origin=origin, shape=shape
+            )
         # if anything else goes wrong
         except Exception as error:
             # we have a problem
             chnl = journal.error("qed.ux.dispatch")
             # show me
             chnl.line(str(error))
-            chnl.line(f"while fetching a tile of '{channel}' from '{data}'")
+            chnl.line(f"while fetching a tile of '{channel}' from '{name}'")
             chnl.line(f"with shape {shape} at {origin}")
             chnl.line(f"at zoom level {zoom}")
             # and flush
@@ -179,7 +178,7 @@ class Dispatcher:
             # build the response
             response = server.documents.BMP(server=server, bmp=memoryview(tile))
             # get the dataset name
-            dataname = self.panel.dataset(data).pyre_name
+            dataname = dataset.pyre_name
             # suggest a file name, in case the user wants to save the tile
             filename = f"{dataname}.{channel}.{zoomSpec}.{spec}.bmp"
             # encode it
@@ -213,15 +212,15 @@ class Dispatcher:
         Handle a {graphql} request
         """
         # delegate to my {graphql} handler
-        return self.gql.respond(panel=self.panel, **kwds)
+        return self.gql.respond(store=self.store, **kwds)
 
     def profile(self, server, match, request, **kwds):
         """
         Handle a request for a dataset profile
         """
         # unpack
-        data = match.group("profile_dataset")
-        encoding = match.group("profile_format")
+        name = match.group("profile_dataset")
+        encoding = match.group("profile_format").lower()
         # the url contains the points of interest
         url = request.url
         # extract the query part
@@ -237,15 +236,21 @@ class Dispatcher:
         # points are separated by "&", coordinates by ","
         points = tuple(tuple(map(int, point.split(","))) for point in tokens[1:])
 
-        # generate the profile along with a suggestion for the download name
-        filename, profile = self.panel.profile(
-            data=data, points=points, closed=closed, encoding=encoding
-        )
+        # get the dataset
+        dataset = self.store.dataset(name=name)
+        # get the profile
+        profile = dataset.profile(points=points, closed=closed)
+        # form the file name
+        filename = f"{dataset.pyre_name}.{encoding}"
 
+        # get the document factory
+        encoder = getattr(self, f"_profile{encoding.upper()}")
+        # encode
+        stream = encoder(dataset=dataset, profile=profile)
         # get the document factory
         document = getattr(server.documents, encoding)
         # build the response
-        response = document(server=server, value=profile)
+        response = document(server=server, value=stream)
         # decorate it
         response.headers["Content-disposition"] = f'attachment; filename="{filename}"'
         # and send it off
@@ -303,6 +308,35 @@ class Dispatcher:
         uri = "/ux/{0.pyre_namespace}.html".format(plexus)
         # open the document and serve it
         return server.documents.File(uri=uri, server=server, application=plexus)
+
+    # profile encoders
+    def _profileCSV(self, dataset, profile):
+        """
+        Encode the {dataset} {profile} as CSV
+        """
+        # grab the important dataset channels
+        channels = tuple(dataset.summary())
+        # make a buffer so {csv} has someplace to write into
+        buffer = io.StringIO()
+        # make a writer
+        writer = csv.writer(buffer)
+
+        # get the headers
+        headers = ("line", "sample") + tuple(channel.tag for channel in channels)
+        # write them
+        writer.writerow(headers)
+
+        # go through the entries in the {profile}
+        for entry in profile:
+            # unpack
+            line, sample, *pixel = entry
+            # build the channel specific representations
+            reps = tuple(channel.eval(*pixel) for channel in channels)
+            # and record each one
+            writer.writerow((line, sample) + reps)
+
+        # all done
+        return buffer.getvalue()
 
     # private data
     # recognizer fragments

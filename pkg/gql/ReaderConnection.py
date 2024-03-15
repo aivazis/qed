@@ -30,10 +30,10 @@ class ReaderConnection(graphene.relay.Connection):
         """
         Count the number of readers
         """
-        # get the panel
-        panel = info.context["panel"]
+        # get the store
+        store = info.context["store"]
         # get the number of registered {readers}
-        return len(panel.readers)
+        return len(store.readers)
 
 
 # end of file

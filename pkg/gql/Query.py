@@ -82,10 +82,10 @@ class Query(graphene.ObjectType):
         #     kwds: contains the variable bindings for this query resolution
         #
 
-        # grab the panel
-        panel = info.context["panel"]
+        # grab the store
+        store = info.context["store"]
         # identify the archive
-        manager = panel.archives[archive]
+        manager = store.archive(uri=archive)
         # ask it for its contents
         return manager.contents(uri=qed.primitives.uri.parse(path))
 
@@ -95,8 +95,6 @@ class Query(graphene.ObjectType):
         """
         Generate a list with the contents of a directory
         """
-        # grab the panel
-        panel = info.context["panel"]
         # assemble the metadata resolution context
         context = {
             "archive": archive,
@@ -180,10 +178,10 @@ class Query(graphene.ObjectType):
         """
         Sample a dataset at a specified pixel
         """
-        # grab the panel
-        panel = info.context["panel"]
+        # grab the store
+        store = info.context["store"]
         # resolve the dataset
-        dataset = panel.dataset(name=dataset)
+        dataset = store.dataset(name=dataset)
         # assemble the sample resolution context
         context = {
             "dataset": dataset,
@@ -199,10 +197,10 @@ class Query(graphene.ObjectType):
         """
         Build a representation of the visualization controls
         """
-        # get the panel
-        panel = info.context["panel"]
+        # get the store
+        store = info.context["store"]
         # resolve the dataset
-        dataset = panel.dataset(name=dataset)
+        dataset = store.dataset(name=dataset)
         # and the channel
         channel = dataset.channel(name=channel)
         # assemble the resolution context

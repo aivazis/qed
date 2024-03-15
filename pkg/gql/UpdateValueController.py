@@ -41,11 +41,11 @@ class UpdateValueController(graphene.Mutation):
         newValue = value["value"]
 
         # build the resolution context
-        # grab the panel
-        panel = info.context["panel"]
+        # grab the store
+        store = info.context["store"]
 
         # get the dataset
-        dataset = panel.dataset(name=dataset)
+        dataset = store.dataset(name=dataset)
         # ask it for the channel
         channel = dataset.channel(name=channel)
         # ask it for its controller

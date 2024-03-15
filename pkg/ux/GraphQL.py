@@ -19,7 +19,7 @@ class GraphQL:
     """
 
     # interface
-    def respond(self, panel, server, request, **kwds):
+    def respond(self, store, server, request, **kwds):
         """
         Resolve the {query} and generate a response for the client
         """
@@ -42,7 +42,7 @@ class GraphQL:
         # make a fresh copy of my context
         context = dict(self.context)
         # decorate with the info for this request
-        context["panel"] = panel
+        context["store"] = store
         context["server"] = server
         context["request"] = request
 

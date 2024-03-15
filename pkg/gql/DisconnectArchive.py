@@ -32,12 +32,12 @@ class DisconnectArchive(graphene.Mutation):
         """
         Remove an archive from the pile
         """
-        # grab the panel
-        panel = info.context["panel"]
-        # get the collection of archives
-        archives = panel.archives
+        # grab the store
+        store = info.context["store"]
+        # get the archive
+        archive = store.archive(uri=uri)
         # if the {uri} is not already connected
-        if uri not in archives:
+        if not archive:
             # we have a bug
             channel = journal.firewall("qed.gql.disconnect")
             # complain
@@ -47,10 +47,8 @@ class DisconnectArchive(graphene.Mutation):
             channel.log()
             # bail, just in case firewall aren't fatal
             return None
-        # if it is, get it
-        archive = archives[uri]
         # remove it from the pile
-        del archives[uri]
+        store.disconnectArchive(uri=uri)
         # put it in the mutation resolution context
         context = {"archive": archive}
         # and resolve the mutation
