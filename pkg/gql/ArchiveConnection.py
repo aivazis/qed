@@ -31,10 +31,10 @@ class ArchiveConnection(graphene.relay.Connection):
         """
         Count the number of data archives
         """
-        # get the panel
-        panel = info.context["panel"]
+        # get the store
+        store = info.context["store"]
         # get the number of registered data archives
-        return len(panel.archives)
+        return store.archiveCount()
 
 
 # end of file

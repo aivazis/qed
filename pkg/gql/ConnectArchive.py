@@ -35,15 +35,15 @@ class ConnectArchive(graphene.Mutation):
         """
         # make a channel
         channel = journal.info("qed.archives.connect")
-        # grab the panel
-        panel = info.context["panel"]
-        # get the collection of archives
-        archives = panel.archives
+        # grab the store
+        store = info.context["store"]
+        # check for an existing archive
+        archive = store.archive(uri=uri)
         # if the {uri} is already connected
-        if uri in archives:
+        if uri:
             # bail
             return None
-        # parse it
+        # otherwise, parse the uri
         uri = qed.primitives.uri.parse(uri, scheme="file")
         # show me
         channel.log(f"connecting to archive {uri}")
@@ -60,7 +60,7 @@ class ConnectArchive(graphene.Mutation):
             # is an error
             return None
         # add the new one to the pile
-        archives[str(uri)] = archive
+        store.connectArchive(archive=archive)
         # make a resolution context
         context = {
             "archive": archive,

@@ -4,18 +4,6 @@
 # (c) 1998-2024 all rights reserved
 
 
-# the app engine
-def panel(**kwds):
-    """
-    The application engine
-    """
-    # get the factory
-    from .Panel import Panel
-
-    # instantiate and return
-    return Panel(**kwds)
-
-
 # the dispatcher
 from .Dispatcher import Dispatcher as dispatcher
 

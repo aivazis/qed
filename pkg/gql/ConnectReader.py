@@ -58,14 +58,14 @@ class ConnectReader(graphene.Mutation):
         factory = qed.protocols.reader.pyre_resolveSpecification(spec=reader)
         # instantiate
         source = factory(**args)
-        # get the panel
-        panel = info.context["panel"]
-        # add the new source to the panel
-        panel.readers[uri] = source
+        # get the store
+        store = info.context["store"]
+        # add the new source to the store
+        store.connectReader(reader=source)
         # now, go through its datasets
         for dataset in source.datasets:
             # and add each one to the dataset registry
-            panel.datasets[dataset.pyre_name] = dataset
+            store.connectDataset(dataset=dataset)
         # make a resolution context
         context = {"reader": source}
         # and resolve the mutation
