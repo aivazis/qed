@@ -29,7 +29,7 @@ export const Refresh = ({ style }) => {
         <g>
             <path style={ico} d={arc} />
             <path style={dec} d={arrow} />
-            <circle style={dec} cx="500" cy="500" r="100" />
+            <circle style={dec} cx="500" cy="500" r="75" />
         </g>
     )
 }
