@@ -9,7 +9,7 @@ import React from 'react'
 
 // project
 // shapes
-import { Data } from '~/shapes'
+import { Data as Icon } from '~/shapes'
 
 // locals
 // styles
@@ -25,7 +25,7 @@ export const Blank = ({ behaviors }) => {
         <section style={blank.placeholder} {...behaviors} >
             <svg style={blank.icon} version="1.1" xmlns="http://www.w3.org/2000/svg">
                 <g transform="scale(0.3)" fill="#f37f19" stroke="none">
-                    <Data style={blank.shape} />
+                    <Icon style={blank.shape} />
                 </g>
             </svg>
         </section>
