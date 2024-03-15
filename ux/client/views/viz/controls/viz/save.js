@@ -9,7 +9,7 @@ import React from 'react'
 
 // project
 // shapes
-import { Refresh as Icon } from '~/shapes'
+import { Download as Icon } from '~/shapes'
 // widgets
 import { Badge } from '~/widgets'
 
@@ -17,8 +17,8 @@ import { Badge } from '~/widgets'
 import styles from './styles'
 
 
-// reset the state of a controller
-export const Reset = ({ reset, enabled }) => {
+// save the state of a controller
+export const Save = ({ save, enabled }) => {
 
     // build the handler
     const click = evt => {
@@ -26,8 +26,8 @@ export const Reset = ({ reset, enabled }) => {
         evt.stopPropagation()
         // and quash any side effects
         evt.preventDefault()
-        // reset the state
-        reset()
+        // save the state
+        save()
         // all done
         return
     }
@@ -40,11 +40,11 @@ export const Reset = ({ reset, enabled }) => {
     const state = enabled ? "enabled" : "disabled"
 
     // mix my paint
-    const paint = styles.reset
+    const paint = styles.save
     // and render
     return (
-        <Badge size={24} state={state} behaviors={behaviors} style={paint}
-            title="reset the values to their defaults"
+        <Badge size={16} state={state} behaviors={behaviors} style={paint}
+            title="save the current values as the default"
         >
             <Icon />
         </Badge>
