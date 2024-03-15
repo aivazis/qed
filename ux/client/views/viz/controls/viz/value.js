@@ -18,6 +18,7 @@ import { Slider, Spacer, SVG } from '~/widgets'
 import { useSetVizSession } from '../../../main/useSetVizSession'
 // components
 import { Reset } from './reset'
+import { Save } from './save'
 
 
 // amplitude controller
@@ -155,6 +156,7 @@ export const ValueController = props => {
             <Header>
                 <Title>{slot}</Title>
                 <Spacer />
+                <Save save={reset} enabled={modified} />
                 <Reset reset={reset} enabled={modified} />
             </Header>
             <Housing height={opt.height} width={opt.width}>
