@@ -9,10 +9,10 @@ import React from 'react'
 import styled from 'styled-components'
 
 // project
-// theme
-import { theme } from '~/palette'
 // widgets
 import { Spacer } from '~/widgets'
+// colors
+import { theme } from '~/palette'
 
 // locals
 // components
@@ -97,8 +97,8 @@ export const Header = styled.div`
     padding: 0.25rem 0.5rem 0.25rem 0.5rem;
     cursor: pointer;
     /* colors */
-    color: var(--header-color, ${props => theme.page.bright});
-    background-color: var(--header-background, ${props => theme.page.relief});
+    color: var(--header-color, ${() => theme.page.bright});
+    background-color: var(--header-background, ${() => theme.page.relief});
     /* don't stretch me */
     flex: 0;
 
@@ -108,7 +108,7 @@ export const Header = styled.div`
 `
 
 export const SelectedHeader = styled(Header)`
-    background-color: var(--header-selected, ${props => theme.page.active});
+    background-color: var(--header-selected, ${() => theme.page.active});
 `
 
 // the title
@@ -121,16 +121,16 @@ export const Title = styled.span`
 `
 
 export const SelectedTitle = styled(Title)`
-    color: ${theme.page.name};
+    color: ${() => theme.page.name};
 `
 
 // the busy indicator
 export const Busy = styled.div`
     width: 1.0em;
     height: 1.0em;
-    border: 3px solid ${props => theme.page.norma};
+    border: 3px solid ${() => theme.page.normal};
     border-radius: 50%;
-    border-top: 3px solid ${props => theme.page.normal};
+    border-top: 3px solid ${() => theme.page.normal};
     animation: busy 1s linear infinite;
 `
 
