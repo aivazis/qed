@@ -11,6 +11,7 @@ channels:
 dependencies:
   - python
   - git
+  - clang
   - gfortran
   - make
   - automake
@@ -28,6 +29,7 @@ dependencies:
   - graphene
   - numpy
   - pybind11
+  - ruamel
   - yaml
   - ipython
   - jupyter_client
