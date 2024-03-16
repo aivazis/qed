@@ -8,6 +8,9 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// colors
+import { theme } from "~/palette"
 
 // mark a point
 export const Labels = ({ positions, values }) => {
@@ -50,7 +53,7 @@ const Mat = styled.text`
             font-size: 14px;
             text-anchor: middle;
             fill: none;
-            stroke: hsl(0deg, 0%, 10%);
+            stroke: ${() => theme.page.relief};
             stroke-width: 8;
             `
 

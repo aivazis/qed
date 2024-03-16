@@ -8,9 +8,11 @@
 import React from 'react'
 import styled from 'styled-components'
 
-//project
+// project
 // hooks
 import { useEvent } from '~/hooks'
+// colors
+import { theme } from "~/palette"
 
 // local
 // hooks
@@ -111,9 +113,9 @@ export const Mark = ({ viewport, idx, at }) => {
 }
 
 
-// placemat
+// place mat
 const Mat = styled.circle`
-    fill: hsl(0deg, 0%, 10%, 0.75);
+    fill: ${(() => theme.page.shaded)};
     stroke: none;
 `
 
@@ -121,26 +123,26 @@ const Mat = styled.circle`
 // the event capture area
 const EnabledHighlight = styled.circle`
     & {
-        fill: hsl(0deg, 0%, 0%, 0);
+        fill: ${() => theme.page.transparent};
         stroke: none;
         cursor: pointer;
     }
 
     &:hover {
-        stroke: hsl(28deg, 90%, 55%);
+        stroke: ${() => theme.page.highlight};
         stroke-width: 1;
     }
 
     &:active {
-        stroke: hsl(28deg, 90%, 55%);
+        stroke: ${() => theme.page.highlight};
         stroke-width: 1;
     }
 `
 
 // a selected node has a special capture
 const SelectedHighlight = styled.circle`
-    fill: hsl(0deg, 0%, 0%, 0);
-    stroke: hsl(28deg, 90%, 35%);
+    fill: ${() => theme.page.transparent};
+    stroke${() => theme.page.highlight};
     stroke-width: 2;
     cursor: pointer;
 `
@@ -148,7 +150,7 @@ const SelectedHighlight = styled.circle`
 // node
 const Ring = styled.circle`
     fill: none;
-    stroke: hsl(28deg, 90%, 55%);
+    stroke: ${() => theme.page.highlight};
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
 `
@@ -163,7 +165,7 @@ const crosshairs = `
 
 const Crosshairs = styled.path`
     fill: none;
-    stroke: hsl(28deg, 90%, 55%);
+    stroke: ${() => theme.page.highlight};
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
 `
