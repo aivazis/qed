@@ -279,15 +279,14 @@ export const Minimap = ({ ils, shape, zoom }) => {
 
 // the helpers
 const Placemat = styled.rect`
-    fill: hsl(0deg, 0%, 7%);
-
-    stroke: hsl(0deg, 0%, 20%);
+    fill: ${() => theme.page.background};
+    stroke: ${() => theme.page.selected};
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
 `
 
 const Viewport = styled.rect`
-    fill: hsl(0deg, 0%, 0%, 0%);
+    fill: ${() => theme.page.transparent};
 
     stroke: ${theme.page.name};
     stroke-width: 1;
@@ -297,7 +296,7 @@ const Viewport = styled.rect`
 `
 
 const Data = styled.rect`
-    fill: hsl(0deg, 0%, 15%);
+    fill: ${() => theme.page.active};
 `
 
 // end of file

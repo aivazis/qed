@@ -8,6 +8,10 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// colors
+import { theme } from "~/palette"
+
 //  display the zoom controller lock
 export const Lock = ({ lock, toggle }) => {
     // set up my behaviors
@@ -23,15 +27,15 @@ export const Lock = ({ lock, toggle }) => {
 }
 
 
-// the  button
+// the button
 const ActiveButton = styled.circle`
-    stroke: hsl(0deg, 0%, 40%);
+    stroke: ${() => theme.page.normal};
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
 `
 
 const SelectedButton = styled.circle`
-    fill: hsl(28deg, 90%, 45%);
+    fill: ${() => theme.page.highlight};
 `
 
 
