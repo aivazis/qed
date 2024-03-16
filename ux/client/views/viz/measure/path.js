@@ -8,6 +8,9 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// colors
+import { theme } from "~/palette"
 
 // mark a point
 export const Path = ({ points, closed }) => {
@@ -36,7 +39,7 @@ export const Path = ({ points, closed }) => {
 // the mat
 const Mat = styled.path`
     fill: none;
-    stroke: hsl(0deg, 0%, 10%, 0.75);
+    stroke: ${() => theme.page.relief};
     stroke-width: 8;
     vector-effect: non-scaling-stroke;
 `
@@ -45,7 +48,7 @@ const Mat = styled.path`
 // the path
 const Line = styled.path`
     fill: none;
-    stroke: hsl(28deg, 90%, 55%);
+    stroke: ${() => theme.page.highlight};
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
 `
