@@ -8,6 +8,10 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// colors
+import { theme } from "~/palette"
+
 
 // a table of the points on the {measure} layer of the active viewport
 export const Title = () => {
@@ -35,7 +39,6 @@ const Name = styled.span`
     vertical-align: bottom;
     padding: 0.0rem 0.0rem 0.25rem 0.0rem;
     margin: 0.0rem 0.0rem 0.1rem 0.0rem;
-    // color: hsl(0deg, 0%, 75%);
     cursor: default;
 `
 

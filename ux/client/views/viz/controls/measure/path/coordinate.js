@@ -8,6 +8,9 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+import { theme } from "~/palette"
+
 // local
 // hooks
 import { useDatasetShape } from '../../../../main/useDatasetShape'
@@ -92,36 +95,36 @@ const Base = styled.input`
     font-size: 110%;
     width: 3.0rem;
     text-align: end;
-    background-color: hsl(0deg, 0%, 7%);
+    background-color: ${props => theme.page.background};
     padding: 0.0rem 0.25rem 0.0rem 0.0rem;
     border: 0 transparent;
 `
 
 const Enabled = styled(Base)`
     & {
-        color: hsl(0deg, 0%, 40%);
+        color: ${() => theme.page.normal};
     }
 
     &:active{
-        color: hsl(0deg, 0%, 60%);
+        color: ${() => theme.page.bright};
     }
 
     &:focus{
-        color: hsl(0deg, 0%, 60%);
+        color: ${() => theme.page.bright};
     }
 
     &:invalid {
-        color: hsl(0deg, 50%, 50%);
+        color: ${() => theme.page.danger};
     }
 
     &::selection {
-        color: hsl(0deg, 0%, 60%);
-        background-color: hsl(0deg, 0%, 20%);
+        color: ${() => theme.page.bright};
+        background-color:${() => theme.page.selected};
     }
 `
 
 const Selected = styled(Base)`
-    color: hsl(28deg, 90%, 55%);
+    color: ${() => theme.page.highlight};
 `
 
 

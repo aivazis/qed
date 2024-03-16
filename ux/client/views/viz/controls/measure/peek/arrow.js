@@ -8,6 +8,10 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// colors
+import { theme } from "~/palette"
+
 // an arrow
 export const Arrow = ({ placement, path, behaviors }) => {
     // render
@@ -23,16 +27,16 @@ export const Arrow = ({ placement, path, behaviors }) => {
 // the container
 const Container = styled.g`
     & {
-       fill: hsl(28deg, 90%, 25%);
+       fill: ${() => theme.page.highlight};
        stroke: none;
     }
 
     &:hover {
-       fill: hsl(28deg, 90%, 45%);
+       fill: ${() => theme.page.highlight};
     }
 
     &:active {
-       fill: hsl(28deg, 90%, 45%);
+       fill: ${() => theme.page.highlight};
     }
 `
 
@@ -44,7 +48,7 @@ const Shape = styled.path`
 // its placemat
 const Placemat = styled.path`
     fill: none;
-    stroke: hsl(0deg, 0%, 10%);
+    stroke: ${() => theme.page.relief};
     stroke-width: 5;
     vector-effect: non-scaling-stroke;
 `
