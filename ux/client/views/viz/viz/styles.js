@@ -3,6 +3,9 @@
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 // (c) 1998-2024 all rights reserved
 
+// project
+// colors
+import { theme } from "~/palette"
 
 // the flex container
 const flex = {
@@ -10,13 +13,13 @@ const flex = {
     box: {
         flex: "1 1 100%",
         minWidth: "800px", // DO NOT REMOVE THIS; IT FORCES flex TO LOOK AT THE WIDTH OF THE PANEL
-        backgroundColor: "hsl(0deg, 0%, 10%)",
+        backgroundColor: theme.page.relief,
     },
 
     // individual panels
     panel: {
         // styling
-        backgroundColor: "hsl(0deg, 0%, 5%, 1)",
+        backgroundColor: theme.page.background,
         // for my children
         display: "flex",
         flexDirection: "column",
@@ -40,7 +43,7 @@ const activityPanels = {
         // inherit
         ...flex.panel,
         // make it stand out a bit
-        backgroundColor: "hsl(0deg, 0%, 7%, 1)",
+        backgroundColor: theme.page.shaded,
         // shut flex down for this panel
         flex: "0 0 auto",
         // and set up the preferred initial width
@@ -57,7 +60,7 @@ const activityPanels = {
 
     header: {
         // make it stand out a bit
-        backgroundColor: "hsl(0deg, 0%, 7%, 1)",
+        backgroundColor: theme.page.shaded,
     },
 }
 
