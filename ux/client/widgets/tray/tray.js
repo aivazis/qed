@@ -97,8 +97,8 @@ export const Header = styled.div`
     padding: 0.25rem 0.5rem 0.25rem 0.5rem;
     cursor: pointer;
     /* colors */
-    color: var(--header-color, hsl(0deg, 0%, 60%, 1));
-    background-color: var(--header-background, hsl(0deg, 0%, 12%, 1));
+    color: var(--header-color, ${props => theme.page.bright});
+    background-color: var(--header-background, ${props => theme.page.relief});
     /* don't stretch me */
     flex: 0;
 
@@ -108,7 +108,7 @@ export const Header = styled.div`
 `
 
 export const SelectedHeader = styled(Header)`
-    background-color: var(--header-selected, hsl(0deg, 0%, 17%, 1));
+    background-color: var(--header-selected, ${props => theme.page.active});
 `
 
 // the title
@@ -128,9 +128,9 @@ export const SelectedTitle = styled(Title)`
 export const Busy = styled.div`
     width: 1.0em;
     height: 1.0em;
-    border: 3px solid hsl(0deg, 0%, 30%, 1);
+    border: 3px solid ${props => theme.page.norma};
     border-radius: 50%;
-    border-top: 3px solid hsl(0deg, 0%, 40%, 1);
+    border-top: 3px solid ${props => theme.page.normal};
     animation: busy 1s linear infinite;
 `
 

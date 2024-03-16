@@ -13,7 +13,7 @@ export default {
     // styling the overall container
     box: {
         // paint
-        backgroundColor: "hsl(0deg, 0%, 12%)",
+        backgroundColor: theme.page.relief,
 
         // for my children
         display: "flex",

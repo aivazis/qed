@@ -8,6 +8,10 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// colors
+import { theme } from "~/palette"
+
 // local
 // hooks
 import { useConfig } from './useConfig'
@@ -47,12 +51,12 @@ const Base = styled.text`
 
 
 const Disabled = styled(Base)`
-    fill: hsl(0deg, 0%, 20%);
+    fill: ${props => theme.page.dim};
 `
 
 
 const Enabled = styled(Base)`
-    fill: hsl(0deg, 0%, 40%);
+    fill: ${props => theme.page.normal};
 `
 
 

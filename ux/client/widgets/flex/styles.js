@@ -7,6 +7,8 @@
 // get colors
 import { theme } from '~/palette'
 
+// the separator
+const separatorBackground = "hsl(0deg, 0%, 15%, 0.5)"
 
 // publish
 export default {
@@ -31,7 +33,7 @@ export default {
         rule: {
             flex: "0 0 auto",
             overflow: "visible",
-            backgroundColor: "hsl(0deg, 0%, 15%, 0.5)",
+            backgroundColor: separatorBackground,
             zIndex: 1,
         },
 
@@ -58,7 +60,7 @@ export default {
 
         // make it stand out
         color: theme.page.name,
-        backgroundColor: "hsl(0, 20%, 7%)",
+        backgroundColor: theme.page.dim,
     },
 }
 
