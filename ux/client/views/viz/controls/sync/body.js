@@ -20,7 +20,7 @@ import { Scroll } from './scroll'
 import { Zoom } from './zoom'
 
 // the body of the sync control table
-export const Body = () => {
+export const Body = ({ mark }) => {
     // get the set of views
     const { views } = useViews()
     // render
@@ -31,11 +31,11 @@ export const Body = () => {
                 return (
                     <Viewport key={`${dataset.name}:${viewport}`}>
                         <Dataset viewport={viewport}>{dataset.name}</Dataset>
-                        <Channel viewport={viewport} />
-                        <Zoom viewport={viewport} />
-                        <Scroll viewport={viewport} />
-                        <Path viewport={viewport} />
-                        <Offset viewport={viewport} />
+                        <Channel viewport={viewport} mark={mark} />
+                        <Zoom viewport={viewport} mark={mark} />
+                        <Scroll viewport={viewport} mark={mark} />
+                        <Path viewport={viewport} mark={mark} />
+                        <Offset viewport={viewport} mark={mark} />
                     </Viewport>
                 )
             })}

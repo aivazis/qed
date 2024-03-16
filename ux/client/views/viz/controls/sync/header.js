@@ -15,7 +15,7 @@ import { useViews } from '../../../main/useViews'
 
 
 // the sync control table header
-export const Header = () => {
+export const Header = ({ mark }) => {
     // get the set of views
     const { activeViewport } = useViews()
     // get the sync handler factories
@@ -33,6 +33,8 @@ export const Header = () => {
                 evt.preventDefault()
                 // update the entire column based on the state of the active viewport
                 update()
+                // mark the control as modified
+                mark()
                 // all done
                 return
             }
