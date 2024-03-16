@@ -29,7 +29,7 @@ dependencies:
   - graphene
   - numpy
   - pybind11
-  - ruamel
+  - ruamel.yaml
   - yaml
   - ipython
   - jupyter_client
