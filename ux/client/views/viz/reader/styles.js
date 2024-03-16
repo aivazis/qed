@@ -83,7 +83,7 @@ const channel = (state, polish) => ({
 
 const mark = {
     fontFamily: "inconsolata",
-    color: "hsl(0deg, 100%, 50%)",
+    color: theme.page.normal,
     padding: "0.0em 0.25em 0.0em 0.0em",
     verticalAlign: "baseline",
 }
