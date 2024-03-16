@@ -8,6 +8,10 @@
 import React from "react"
 import styled from 'styled-components'
 
+// project
+// colors
+import { theme } from "~/palette"
+
 // local
 // hooks
 import { useConfig } from "./useConfig"
@@ -58,21 +62,21 @@ const Base = styled.path`
 
 
 const Disabled = styled(Base)`
-    stroke: hsl(0deg, 0%, 20%);
+    stroke: ${props => theme.page.dim};
 `
 
 
 const Enabled = styled(Base)`
     & {
-        stroke: hsl(0deg, 0%, 40%);
+        stroke: ${props => theme.page.normal};
     }
 
     &:hover {
-        stroke: hsl(28deg, 90%, 55%);
+        stroke: ${props => theme.page.highlight};
     }
 
     &:active {
-        stroke: hsl(28deg, 90%, 55%);
+        stroke: ${props => theme.page.highlight};
     }
 `
 

@@ -9,6 +9,10 @@ import React from "react"
 import styled from 'styled-components'
 import { useConfig } from "./useConfig"
 
+// project
+// colors
+import { theme } from "~/palette"
+
 // local
 // hooks
 import { useMine } from "./useMine"
@@ -50,12 +54,12 @@ const Base = styled.path`
 
 
 const Disabled = styled(Base)`
-    stroke: hsl(0deg, 0%, 20%);
+    stroke: ${theme.page.dim};
 `
 
 
 const Enabled = styled(Base)`
-    stroke: hsl(0deg, 0%, 40%);
+    stroke: ${theme.page.normal};
 `
 
 

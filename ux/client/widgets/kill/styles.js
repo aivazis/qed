@@ -25,7 +25,7 @@ export default {
 
     // the shape
     shape: {
-        fill: "hsl(0deg, 90%, 53%)",
+        fill: theme.page.danger,
         stroke: "none",
     },
 }

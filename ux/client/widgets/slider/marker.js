@@ -8,6 +8,10 @@
 import React from "react"
 import styled from 'styled-components'
 
+// project
+// colors
+import { theme } from "~/palette"
+
 // local
 // hooks
 import { useConfig } from "./useConfig"
@@ -49,8 +53,8 @@ export const Marker = ({ value, id = 0, ...rest }) => {
 // styling
 // when disabled
 const Disabled = styled.path`
-    fill: hsl(0deg, 0%, 20%);
-    stroke: hsl(0deg, 0%, 20%);
+    fill: ${props => theme.page.dim};
+    stroke: ${props => theme.page.dim};
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
 `
@@ -59,21 +63,21 @@ const Disabled = styled.path`
 // when enabled
 const Enabled = styled.path`
     & {
-        fill: hsl(0deg, 0%, 40%);
-        stroke: hsl(0deg, 0%, 40%);
+        fill: ${props => theme.page.normal};
+        stroke: ${props => theme.page.normal};
         stroke-width: 2;
         vector-effect: non-scaling-stroke;
         cursor: pointer;
     }
 
     &:hover {
-        fill: hsl(28deg, 90%, 55%);
-        stroke: hsl(28deg, 90%, 55%);
+        fill: ${props => theme.page.highlight};
+        stroke: ${props => theme.page.highlight};
     }
 
     &:active {
-        fill: hsl(28deg, 90%, 55%);
-        stroke: hsl(28deg, 90%, 55%);
+        fill: ${props => theme.page.highlight};
+        stroke: ${props => theme.page.highlight};
     }
 `
 

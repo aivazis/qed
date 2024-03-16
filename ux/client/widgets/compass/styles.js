@@ -7,6 +7,8 @@
 // get colors
 import { theme } from '~/palette'
 
+// pick a highlight
+const red = "hsl(0deg,50%,20%)"
 
 // publish
 export default {
@@ -15,7 +17,7 @@ export default {
 
     north: {
         // stroke
-        stroke: "hsl(0deg,0%,20%)",
+        stroke: theme.page.dim,
         // exclude the stroke from any transforms
         vectorEffect: "non-scaling-stroke",
 
@@ -25,7 +27,7 @@ export default {
 
     east: {
         // stroke
-        stroke: "hsl(0deg,0%,20%)",
+        stroke: theme.page.dim,
         // exclude the stroke from any transforms
         vectorEffect: "non-scaling-stroke",
 
@@ -35,7 +37,7 @@ export default {
 
     needle: {
         // stroke
-        stroke: "hsl(0deg,50%,20%)",
+        stroke: red,
         // exclude the stroke from any transforms
         vectorEffect: "non-scaling-stroke",
 
@@ -50,7 +52,7 @@ export default {
         vectorEffect: "non-scaling-stroke",
 
         // fill
-        fill: "hsl(0deg,50%,20%)",
+        fill: red,
         fillOpacity: "1",
     },
 }

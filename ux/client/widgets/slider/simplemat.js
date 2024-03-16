@@ -11,6 +11,8 @@ import styled from 'styled-components'
 // project
 // hooks
 import { useEvent } from '~/hooks'
+// colors
+import { theme } from "~/palette"
 
 // locals
 // hooks
@@ -105,10 +107,10 @@ export const Simplemat = ({ setValue, children, ...rest }) => {
 
 // styling
 const Rect = styled.rect`
-    fill: hsl(0deg, 0%, 7%);
+    fill: ${props => theme.page.shaded};
 
     &:active {
-        stroke: hsl(0deg, 0%, 20%);
+        stroke: ${props => theme.page.pale};
         stroke-width: 1;
         vector-effect: non-scaling-stroke;
     }
