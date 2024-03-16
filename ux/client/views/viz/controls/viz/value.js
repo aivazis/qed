@@ -12,6 +12,8 @@ import styled from 'styled-components'
 // project
 // widgets
 import { Slider, Spacer, SVG } from '~/widgets'
+// colors
+import { theme } from "~/palette"
 
 // local
 // hooks
@@ -217,13 +219,12 @@ const Title = styled.span`
     width: 2.5rem;
     padding: 0.0rem 0.0rem 0.25rem 0.0rem;
     cursor: default;
-    color: hsl(0deg, 0%, 75%);
+    color: ${() => theme.page.bright};
 `
 
 // the controller housing
 const Housing = styled(SVG)`
     margin: 0.25rem auto;
-    /* border: 1px solid hsl(0deg, 0%, 10%); */
 `
 
 // the controller
