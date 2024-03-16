@@ -5,7 +5,7 @@
 
 
 // get colors
-import { theme, wheel } from '~/palette'
+import { theme } from '~/palette'
 
 
 // paint
@@ -61,16 +61,16 @@ const reset = {
         },
         disabled: {
             // pick a color
-            stroke: wheel.gray.aluminum,
+            stroke: theme.page.dim,
         },
         enabled: {
             // pick a color
-            stroke: wheel.gray.aluminum,
+            stroke: theme.page.normal,
         },
         selected: {},
         available: {
             // pick a color
-            stroke: theme.page.name,
+            stroke: theme.page.highlight,
 
         },
     },
@@ -82,17 +82,17 @@ const reset = {
         },
         disabled: {
             // pick a color
-            fill: wheel.gray.aluminum,
+            fill: theme.page.dim,
         },
         enabled: {
             // pick a color
-            fill: wheel.gray.aluminum,
+            fill: theme.page.normal,
 
         },
         selected: {},
         available: {
             // pick a color
-            fill: theme.page.name,
+            fill: theme.page.highlight,
 
         },
     },
@@ -150,11 +150,11 @@ const save = {
         },
         disabled: {
             // pick a color
-            stroke: wheel.gray.aluminum,
+            stroke: theme.page.dim,
         },
         enabled: {
             // pick a color
-            stroke: wheel.gray.aluminum,
+            stroke: theme.page.normal,
         },
         selected: {},
         available: {
@@ -171,17 +171,17 @@ const save = {
         },
         disabled: {
             // pick a color
-            fill: wheel.gray.aluminum,
+            fill: theme.page.dim,
         },
         enabled: {
             // pick a color
-            fill: wheel.gray.aluminum,
+            fill: theme.page.normal,
 
         },
         selected: {},
         available: {
             // pick a color
-            fill: theme.page.name,
+            fill: theme.page.highlight,
 
         },
     },
