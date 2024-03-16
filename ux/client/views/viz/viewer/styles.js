@@ -17,6 +17,7 @@ const viewer = {
     box: {
         ...styles.meta.box,
         fontSize: "60%",
+        color: theme.page.normal,
     },
     entry: {
         ...styles.meta.entry,
@@ -30,6 +31,7 @@ const viewer = {
     },
     value: {
         ...styles.meta.value,
+        color: theme.page.bright,
     },
 }
 
