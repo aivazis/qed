@@ -20,13 +20,15 @@ const meta = {
     // for each row
     entry: {},
     // the name of the attribute
-    attribute: {},
+    attribute: {
+        color: theme.page.normal,
+    },
     // the separator
     separator: {},
     // the value of the attribute
     value: {
         fontFamily: "inconsolata",
-        color: wheel.gray.aluminum,
+        color: theme.page.bright,
     },
 }
 
