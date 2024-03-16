@@ -8,6 +8,10 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// colors
+import { theme } from "~/palette"
+
 // locals
 // hooks
 import { useGetView } from '../../../../main/useGetView'
@@ -54,7 +58,7 @@ export const Profile = () => {
 
 // the container
 const Box = styled.div`
-    color: hsl(0deg, 0%, 50%);
+    color: ${() => theme.page.normal};
     padding: 0.5rem 0.0rem 0.0rem 0.0rem;
 `
 
@@ -67,16 +71,16 @@ const Action = styled.span`
 
     & a {
         font-family: inconsolata;
-        color: hsl(0deg, 0%, 60%);
+        color: ${() => theme.page.bright};
     }
 
     & a:active {
-        color: hsl(28deg, 90%, 55%);
+        color: ${() => theme.page.highlight};
 
     }
 
     & a:hover {
-        color: hsl(28deg, 90%, 55%);
+        color: ${() => theme.page.highlight};
 
     }
 `

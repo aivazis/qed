@@ -8,6 +8,9 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+import { theme } from "~/palette"
+
 // local
 // hooks
 import { usePixelPath } from '../../../../main/usePixelPath'
@@ -40,13 +43,13 @@ export const Close = () => {
 }
 
 const Closed = styled.circle`
-    fill: hsl(0deg, 0%, 60%);
+    fill: ${props => theme.page.bright};
 `
 
 const Open = styled.circle`
     fill: none;
 
-    stroke: hsl(0deg, 0%, 60%);
+    stroke: ${props => theme.page.bright};
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
 `

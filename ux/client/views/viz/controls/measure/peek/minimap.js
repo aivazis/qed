@@ -13,6 +13,9 @@ import styled from 'styled-components'
 import { Target } from '~/shapes'
 // widgets
 import { SVG } from '~/widgets'
+// colors
+import { theme } from "~/palette"
+
 
 // local
 // hooks
@@ -87,14 +90,14 @@ export const Minimap = ({ point }) => {
     // style the {target} shape
     const target = {
         icon: {
-            stroke: "hsl(28deg, 90%, 25%)",
+            stroke: theme.page.highlight,
             strokeWidth: "3",
         }
     }
     // and its placemat
     const placemat = {
         icon: {
-            stroke: "hsl(0deg, 0%, 10%)",
+            stroke: theme.page.relief,
             strokeWidth: "7",
             vectorEffect: "non-scaling-stroke",
         }
@@ -126,9 +129,9 @@ const Box = styled.div`
     position: relative;
     width: 256px;
     height: 256px;
-    background-color: hsl(0deg, 0%, 10%);
+    background-color: ${() => theme.page.shaded};
     margin: 0.5rem auto;
-    border: 2px solid hsl(28deg, 30%, 25%);
+    border: 2px solid ${() => theme.page.highlight};
 `
 
 const Data = styled.img`

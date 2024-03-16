@@ -8,6 +8,10 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// colors
+import { theme } from "~/palette"
+
 
 // display the channel specific representation of a pixel value
 export const Channel = ({ channel, reps }) => {
@@ -40,6 +44,7 @@ const Entry = styled.div`
     height: 1.2em;
     margin: 0.0rm;
     padding: 0.0rem 0.0rem 0.25rem 0.0rem;
+    color: ${() => theme.page.normal};
 `
 
 const Label = styled.div`
@@ -70,13 +75,13 @@ const Button = styled.div`
     }
 
     &:active {
-        color: hsl(28deg, 90%, 55%);
-        border: 1 solid hsl(0deg, 0%, 40%);
+        color: ${() => theme.page.highlight};
+        border: 1 solid ${() => theme.page.normal};
     }
 
     &:hover {
-        color: hsl(28deg, 90%, 55%);
-        border: 1 solid hsl(0deg, 0%, 40%);
+        color: ${() => theme.page.highlight};
+        border: 1 solid ${() => theme.page.normal};
     }
 `
 

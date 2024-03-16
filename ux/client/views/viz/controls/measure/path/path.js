@@ -8,6 +8,9 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// colors
+import { theme } from "~/palette"
 
 // local
 // hooks
@@ -51,7 +54,7 @@ export const Path = () => {
 
 // the container
 const Box = styled.div`
-    color: hsl(0deg, 0%, 50%);
+    color: ${() => theme.page.normal};
     margin: 0.0rem 1.0rem 0.5rem 1.0rem;
 `
 

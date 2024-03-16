@@ -86,7 +86,7 @@ export const Focus = ({ idx, point }) => {
     // mix paint for my shape
     const paint = {
         icon: {
-            stroke: selected ? theme.page.name : "hsl(0deg, 0%, 60%)",
+            stroke: selected ? theme.page.name : theme.page.bright,
         },
     }
 
