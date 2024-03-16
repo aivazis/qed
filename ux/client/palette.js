@@ -42,10 +42,24 @@ const wheel = {
 const dark = {
     // the page
     page: {
+        transparent: "hsl(0deg, 0%, 0%, 0%)",
         background: "hsl(0deg, 0%, 5%)",
+        shaded: "hsl(0deg, 0%, 7%)",
+        relief: "hsl(0deg, 0%, 12%)",
+        active: "hsl(0deg, 0%, 17%)",
+        selected: "hsl(0deg, 0%, 20%)",
         // contents
         name: "hsl(28deg, 90%, 55%)",
         appversion: "hsl(0deg, 0%, 25%)",
+        //
+        bright: "hsl(0deg, 0%, 90%)",
+        normal: "hsl(0deg, 0%, 70%)",
+        dim: "hsl(0deg, 0%, 50%)",
+        pale: "hsl(0deg, 0%, 20%)",
+        //
+        highlight: "hsl(28deg, 90%, 55%)",
+        //
+        danger: "hsl(0deg, 100%, 50%)",
     },
 
     header: {
