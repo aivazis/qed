@@ -37,7 +37,7 @@ const viewer = {
 // the viewer tab
 const tab = state => ({
     // styling
-    backgroundColor: state === "selected" ? "hsl(0deg, 0%, 12%)" : "hsl(0deg, 0%, 10%)",
+    backgroundColor: state === "selected" ? theme.page.shaded : theme.page.relief,
     // for me
     flex: "0 0 auto",
     height: "1.6rem",
@@ -100,10 +100,10 @@ const selectorPaint = {
     selected: {
         box: {},
         name: {
-            color: theme.page.name,
+            color: theme.page.highlight,
         },
         selector: {
-            color: theme.page.name,
+            color: theme.page.highlight,
         },
         separator: {
             color: wheel.gray.concrete,
@@ -191,11 +191,11 @@ const measure = {
         ...badge.icon,
         selected: {
             ...badge.icon.selected,
-            stroke: theme.page.name,
+            stroke: theme.page.highlight,
         },
         available: {
             ...badge.icon.available,
-            stroke: theme.page.name,
+            stroke: theme.page.highlight,
         },
     },
 }
@@ -219,11 +219,11 @@ const split = {
         ...badge.icon,
         selected: {
             ...badge.icon.selected,
-            stroke: theme.page.name,
+            stroke: theme.page.highlight,
         },
         available: {
             ...badge.icon.available,
-            stroke: theme.page.name,
+            stroke: theme.page.highlight,
         },
     },
 }
@@ -248,11 +248,11 @@ const sync = {
         ...badge.icon,
         selected: {
             ...badge.icon.selected,
-            stroke: theme.page.name,
+            stroke: theme.page.highlight,
         },
         available: {
             ...badge.icon.available,
-            stroke: theme.page.name,
+            stroke: theme.page.highlight,
         },
     },
 
@@ -261,12 +261,12 @@ const sync = {
 
         selected: {
             ...badge.decoration.selected,
-            fill: theme.page.name,
-            stroke: theme.page.name,
+            fill: theme.page.highlight,
+            stroke: theme.page.highlight,
         },
         available: {
             ...badge.decoration.available,
-            stroke: theme.page.name,
+            stroke: theme.page.highlight,
         },
     }
 }
@@ -291,7 +291,7 @@ const print = {
         ...badge.icon,
         available: {
             ...badge.icon.available,
-            stroke: theme.page.name,
+            stroke: theme.page.highlight,
         },
     },
 
@@ -299,7 +299,7 @@ const print = {
         ...badge.decoration,
         available: {
             ...badge.decoration.available,
-            stroke: theme.page.name,
+            stroke: theme.page.highlight,
         },
     }
 }
@@ -330,7 +330,7 @@ const blank = {
     shape: {
         icon: {
             // stroke
-            stroke: theme.page.name,
+            stroke: theme.page.highlight,
             strokeWidth: 3,
             // fill
             fill: "none",

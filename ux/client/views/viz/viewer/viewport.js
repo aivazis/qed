@@ -11,6 +11,8 @@ import styled from 'styled-components'
 // project
 // widgets
 import { Mosaic } from '~/widgets'
+// colors
+import { theme } from "~/palette"
 
 // locals
 // hooks
@@ -101,7 +103,7 @@ const Box = styled.div`
     min-width: 300px;
     min-height: 300px;
     margin: 0.25rem 0.5rem 0.5rem 0.5rem;
-    border: 2px solid hsl(28deg, 30%, 25%);
+    border: 2px solid ${() => theme.page.highlight};
     background-color: hsl(28deg, 30%, 5%);
 `
 
