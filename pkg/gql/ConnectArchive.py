@@ -40,7 +40,11 @@ class ConnectArchive(graphene.Mutation):
         # check for an existing archive
         archive = store.archive(uri=uri)
         # if the {uri} is already connected
-        if uri:
+        if archive:
+            # make a channel
+            channel = journal.warning("qed.gql.connect")
+            # issue a warning
+            channel.log(f"archive '{uri}' is already connected")
             # bail
             return None
         # otherwise, parse the uri
@@ -57,10 +61,20 @@ class ConnectArchive(graphene.Mutation):
             archive = qed.archives.s3(name=name, uri=uri)
         # anything else
         else:
-            # is an error
+            # make a channel
+            channel = journal.error("qed.gql.connect")
+            # complain
+            channel.line(f"unknown scheme '{uri.shceme}'")
+            channel.indent()
+            channel.line(f"while attempting to connect to '{uri}'")
+            # flush
+            channel.log()
+            # and bail, in case errors aren't fatal
             return None
-        # add the new one to the pile
+        # add the new archive to the pile
         store.connectArchive(archive=archive)
+        # report
+        channel.log(f"connected to '{uri}'")
         # make a resolution context
         context = {
             "archive": archive,
