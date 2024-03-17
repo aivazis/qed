@@ -78,7 +78,6 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
         # mount my s3 filesystem
         self.fs = qed.filesystem.s3(root=self.uri).discover()
 
-        # show me
         # make an explorer
         explorer = qed.filesystem.treeExplorer()
         # make a channel
