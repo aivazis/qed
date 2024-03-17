@@ -32,7 +32,7 @@ class Local(
     # interface
     def contents(self, uri):
         """
-        Retrieve my contents at {path}
+        Retrieve my contents at {uri}
         """
         # get my root
         root = self.fs
