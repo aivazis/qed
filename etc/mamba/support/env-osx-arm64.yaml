@@ -12,12 +12,14 @@ dependencies:
   - python
   - git
   - clang
+  - clangxx
   - gfortran
   - make
   - automake
   - nodejs
   - libtool
   - curl
+  - awscli
   - fftw
   - gsl
   - hdf5

@@ -19,6 +19,7 @@ dependencies:
   - nodejs
   - libtool
   - curl
+  - awscli
   - fftw
   - gsl
   - hdf5
