@@ -104,7 +104,9 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
         # the bucket is the root
         bucket = address[1]
         # get the contents
-        response = s3.list_objects_v2(Bucket=bucket)
+        response = s3.list_objects_v2(
+            Bucket=bucket, MaxKeys=10000, Prefix="/".join(address[2:])
+        )
         # retrieve the contents
         contents = response.get("Contents", [])
         # make a list of the keys and return them
