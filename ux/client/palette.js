@@ -58,6 +58,7 @@ const dark = {
         pale: "hsl(0deg, 0%, 20%)",
         //
         highlight: "hsl(28deg, 90%, 55%)",
+        viewportBorder: "hsl(28deg, 90%, 55%, 30%)",
         //
         danger: "hsl(0deg, 100%, 50%)",
     },

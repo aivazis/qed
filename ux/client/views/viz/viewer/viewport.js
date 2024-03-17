@@ -103,7 +103,7 @@ const Box = styled.div`
     min-width: 300px;
     min-height: 300px;
     margin: 0.25rem 0.5rem 0.5rem 0.5rem;
-    border: 2px solid ${() => theme.page.highlight};
+    border: 2px solid ${() => theme.page.viewportBorder};
     background-color: hsl(28deg, 30%, 5%);
 `
 
