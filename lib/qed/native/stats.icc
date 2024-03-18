@@ -4,9 +4,7 @@
 // (c) 1998-2024 all rights reserved
 
 // code guard
-#if !defined(qed_native_stats_icc)
-#error this file contains implementation details for qed::native::stats
-#else
+#pragma once
 
 
 // collect statistics on a grid tile
@@ -37,13 +35,34 @@ qed::native::collectStatistics(
     // my counters
     int samples = 0;
     double sum = 0.0;
+
+    // get a seed
+    double seed = std::numeric_limits<double>::quiet_NaN();
+    // by looking through the data
+    for (auto value : source) {
+        // compute the magnitude
+        double r = std::abs(value);
+        // the first non-nan
+        if (!std::isnan(r)) {
+            // is good enough; remember it
+            seed = r;
+            // and bail
+            break;
+        }
+    }
+
     // my stats
-    double min = 0, mean = 0, max = 0;
+    double min = seed, mean = seed, max = seed;
 
     // go through the data
     for (auto z : source) {
         // compute the magnitude
         double r = std::abs(z);
+        // if this is a nan
+        if (std::isnan(r)) {
+            // don't let it pollute our sample
+            continue;
+        }
         // update the stats
         min = std::min(min, r);
         max = std::max(max, r);
@@ -52,11 +71,18 @@ qed::native::collectStatistics(
         ++samples;
     }
 
+    // make a channel
+    auto channel = pyre::journal::info_t("qed.isce2.unwrapped");
+    channel
+        // show me
+        << "min: " << min << ", mean: " << (sum / samples) << ", max: "
+        << max
+        // flush
+        << pyre::journal::endl(__HERE__);
+
     // all done
     return { min, sum / samples, max };
 }
 
-
-#endif
 
 // end of file
