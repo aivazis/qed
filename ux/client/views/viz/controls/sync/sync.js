@@ -11,6 +11,8 @@ import styled from 'styled-components'
 // project
 // widgets
 import { Spacer, Tray } from '~/widgets'
+// colors
+import { theme } from '~/palette'
 
 // locals
 // components
@@ -68,7 +70,7 @@ const Controls = styled.div`
 const Housing = styled.table`
     margin: 1.0em auto ;
     padding: 1.0em 0.0em ;
-    color: hsl(0deg, 0%, 50%);
+    color: ${() => theme.page.normal};
     margin: 0.0rem 0.5rem 0.5rem 0.5rem;
 `
 

@@ -8,6 +8,10 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// colors
+import { theme } from '~/palette'
+
 // local
 // hooks
 import { useSyncAspect } from '../../../main/useSyncAspect'
@@ -78,7 +82,7 @@ const ActiveColumn = styled(Column)`
     }
 
     &:hover {
-        color: hsl(28deg, 90%, 45%);
+        color: ${() => theme.page.highlight};
     }
 `
 

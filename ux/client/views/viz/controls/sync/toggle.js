@@ -8,6 +8,9 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// colors
+import { theme } from '~/palette'
 
 //  a toggle
 export const Toggle = ({ state, toggle, force }) => {
@@ -53,17 +56,17 @@ const Button = styled.div`
 // the  button
 const ActiveButton = styled(Button)`
     & {
-        border-color: hsl(0deg, 0%, 40%);
+        border-color: ${() => theme.page.normal};
     }
 
     &:hover {
-        border-color: hsl(28deg, 90%, 45%);
+        border-color: ${() => theme.page.highlight};
     }
 `
 
 const SelectedButton = styled(Button)`
-    background-color: hsl(28deg, 90%, 45%);
-    border-color: hsl(28deg, 90%, 45%);
+    background-color: ${() => theme.page.highlight};
+    border-color: ${() => theme.page.highlight};
 `
 
 
