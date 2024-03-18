@@ -71,15 +71,6 @@ qed::native::collectStatistics(
         ++samples;
     }
 
-    // make a channel
-    auto channel = pyre::journal::info_t("qed.isce2.unwrapped");
-    channel
-        // show me
-        << "min: " << min << ", mean: " << (sum / samples) << ", max: "
-        << max
-        // flush
-        << pyre::journal::endl(__HERE__);
-
     // all done
     return { min, sum / samples, max };
 }
