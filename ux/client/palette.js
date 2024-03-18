@@ -52,13 +52,13 @@ const dark = {
         name: "hsl(28deg, 90%, 55%)",
         appversion: "hsl(0deg, 0%, 25%)",
         //
-        bright: "hsl(0deg, 0%, 90%)",
-        normal: "hsl(0deg, 0%, 70%)",
-        dim: "hsl(0deg, 0%, 50%)",
-        pale: "hsl(0deg, 0%, 20%)",
+        bright: "hsl(0deg, 0%, 70%)",
+        normal: "hsl(0deg, 0%, 50%)",
+        dim: "hsl(0deg, 0%, 40%)",
+        pale: "hsl(0deg, 0%, 30%)",
         //
         highlight: "hsl(28deg, 90%, 55%)",
-        viewportBorder: "hsl(28deg, 90%, 55%, 30%)",
+        viewportBorder: "hsl(28deg, 90%, 55%, 50%)",
         //
         danger: "hsl(0deg, 100%, 50%)",
     },
