@@ -21,12 +21,15 @@ import { useGetTileURI } from '../../main/useGetTileURI'
 import { useGetZoomLevel } from '../../main/useGetZoomLevel'
 import { useMeasureLayer } from '../../main/useMeasureLayer'
 import { useViewports } from '../../main/useViewports'
+import { useViews } from '../../main/useViews'
 // components
 import { Measure } from '../measure'
 
 
 // export the data viewport
 export const Viewport = ({ viewport, view, registrar, ...rest }) => {
+    // get the active view
+    const { activeViewport } = useViews()
     // get the pile of registered {viewports}; i'm at {viewport}
     const { viewports } = useViewports()
     // get the state of the measuring layer
@@ -79,9 +82,12 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
         onDoubleClick: center,
     }
 
+    // compute my state
+    const active = activeViewport === viewport
+
     // and render; don't forget to use the zoomed raster shape
     return (
-        <Box ref={registrar} {...controllers} {...rest} >
+        <Box ref={registrar} $state={active} {...controllers} {...rest} >
             {/* the data tiles */}
             <View uri={uri}
                 origin={origin} shape={shape} tile={tile}
@@ -103,7 +109,7 @@ const Box = styled.div`
     min-width: 300px;
     min-height: 300px;
     margin: 0.25rem 0.5rem 0.5rem 0.5rem;
-    border: 2px solid ${() => theme.page.viewportBorder};
+    border: 1px solid ${props => props.$state ? theme.page.viewportBorder : theme.page.active};
     background-color: hsl(28deg, 30%, 5%);
 `
 
