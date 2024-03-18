@@ -16,7 +16,7 @@ import { Control } from './control'
 import { Toggle } from './toggle'
 
 // the zoom sync control
-export const Zoom = ({ viewport }) => {
+export const Zoom = ({ viewport, mark }) => {
     // get the sync state of all the viewports
     const synced = useSynced()
     // get the sync handler factories
@@ -26,6 +26,7 @@ export const Zoom = ({ viewport }) => {
         <Control>
             <Toggle
                 state={synced[viewport].zoom}
+                mark={mark}
                 toggle={toggle(viewport, "zoom")}
                 force={force(viewport, "zoom")} />
         </Control>

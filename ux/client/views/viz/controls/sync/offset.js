@@ -18,7 +18,7 @@ import { Coordinate } from './coordinate'
 
 
 // the channel sync control
-export const Offset = ({ viewport }) => {
+export const Offset = ({ viewport, mark }) => {
     // get the sync state of all the viewports
     const synced = useSynced()
     // get the sync handler factory
@@ -27,7 +27,14 @@ export const Offset = ({ viewport }) => {
     // get the offset
     const offset = synced[viewport].offset
     // build the handler
-    const adjust = update(viewport, "offset")
+    const adjust = () => {
+        // mark
+        mark()
+        // update
+        update(viewport, "offset")
+        // and done
+        return
+    }
     // render
     return (
         <Housing>
