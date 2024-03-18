@@ -13,7 +13,7 @@ import styled from 'styled-components'
 import { theme } from '~/palette'
 
 //  a toggle
-export const Toggle = ({ state, toggle, force }) => {
+export const Toggle = ({ state, mark, toggle, force }) => {
     // build the event handler for flipping my state
     const flip = evt => {
         // stop this event from bubbling up
@@ -22,6 +22,8 @@ export const Toggle = ({ state, toggle, force }) => {
         evt.preventDefault()
         // check the status of the <Alt> key
         const { altKey } = evt
+        // mark
+        mark()
         // flip the state
         altKey ? force() : toggle()
         // all done

@@ -16,7 +16,7 @@ import { Control } from './control'
 import { Toggle } from './toggle'
 
 // the scroll sync control
-export const Scroll = ({ viewport }) => {
+export const Scroll = ({ viewport, mark }) => {
     // get the sync state of all the viewports
     const synced = useSynced()
     // get the sync handler factories
@@ -26,6 +26,7 @@ export const Scroll = ({ viewport }) => {
         <Control>
             <Toggle
                 state={synced[viewport].scroll}
+                mark={mark}
                 toggle={toggle(viewport, "scroll")}
                 force={force(viewport, "scroll")} />
         </Control>

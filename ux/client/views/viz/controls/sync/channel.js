@@ -16,7 +16,7 @@ import { Control } from './control'
 import { Toggle } from './toggle'
 
 // the channel sync control
-export const Channel = ({ viewport }) => {
+export const Channel = ({ viewport, mark }) => {
     // get the sync state of all the viewports
     const synced = useSynced()
     // get the sync handler factories
@@ -26,6 +26,7 @@ export const Channel = ({ viewport }) => {
         <Control>
             <Toggle
                 state={synced[viewport].channel}
+                mark={mark}
                 toggle={toggle(viewport, "channel")}
                 force={force(viewport, "channel")} />
         </Control>

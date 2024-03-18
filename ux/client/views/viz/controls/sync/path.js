@@ -16,7 +16,7 @@ import { Control } from './control'
 import { Toggle } from './toggle'
 
 // the path sync control
-export const Path = ({ viewport }) => {
+export const Path = ({ viewport, mark }) => {
     // get the sync state of all the viewports
     const synced = useSynced()
     // get the sync handler factories
@@ -26,6 +26,7 @@ export const Path = ({ viewport }) => {
         <Control>
             <Toggle
                 state={synced[viewport].path}
+                mark={mark}
                 toggle={toggle(viewport, "path")}
                 force={force(viewport, "path")} />
         </Control>
