@@ -4,9 +4,7 @@
 // (c) 1998-2024 all rights reserved
 
 // code guard
-#if !defined(qed_isce2_unwrapped_stats_icc)
-#error this file contains implementation details for qed::isce2::unwrapped::stats
-#else
+#pragma once
 
 
 // collect statistics on a tile
@@ -18,13 +16,27 @@ qed::isce2::unwrapped::stats(
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
-    typename sourceT::shape_type tile) -> native::stats_t
+    typename sourceT::shape_type shape) -> native::stats_t
 {
-    // compute the statistics and pass them on
-    return native::collectStatistics(source.box(origin, tile));
+    // my counters
+    int samples = 0;
+    double sum = 0.0;
+    // my stats
+    double min = source[0], mean = source[0], max = source[0];
+
+    // go through the data
+    for (double z : source.box(origin, shape)) {
+        // update the stats
+        min = std::min(min, z);
+        max = std::max(max, z);
+        // update the counters
+        sum += z;
+        ++samples;
+    }
+
+    // all done
+    return { min, sum / samples, max };
 }
 
-
-#endif
 
 // end of file
