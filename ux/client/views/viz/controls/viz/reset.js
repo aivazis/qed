@@ -19,7 +19,6 @@ import styles from './styles'
 
 // reset the state of a controller
 export const Reset = ({ reset, enabled }) => {
-
     // build the handler
     const click = evt => {
         // stop this event from bubbling up
