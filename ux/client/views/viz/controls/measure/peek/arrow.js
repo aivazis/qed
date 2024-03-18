@@ -27,16 +27,16 @@ export const Arrow = ({ placement, path, behaviors }) => {
 // the container
 const Container = styled.g`
     & {
-       fill: ${() => theme.page.highlight};
+       fill: ${() => theme.page.viewportBorder};
        stroke: none;
     }
 
     &:hover {
-       fill: ${() => theme.page.highlight};
+       fill: ${() => theme.page.viewportBorder};
     }
 
     &:active {
-       fill: ${() => theme.page.highlight};
+       fill: ${() => theme.page.viewportBorder};
     }
 `
 

@@ -90,7 +90,7 @@ export const Minimap = ({ point }) => {
     // style the {target} shape
     const target = {
         icon: {
-            stroke: theme.page.highlight,
+            stroke: theme.page.viewportBorder,
             strokeWidth: "3",
         }
     }
@@ -131,7 +131,7 @@ const Box = styled.div`
     height: 256px;
     background-color: ${() => theme.page.shaded};
     margin: 0.5rem auto;
-    border: 2px solid ${() => theme.page.highlight};
+    border: 1px solid ${() => theme.page.viewportBorder};
 `
 
 const Data = styled.img`
