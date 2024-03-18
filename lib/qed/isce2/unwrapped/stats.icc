@@ -21,11 +21,30 @@ qed::isce2::unwrapped::stats(
     // my counters
     int samples = 0;
     double sum = 0.0;
+
+    // get a seed
+    double seed = std::numeric_limits<double>::quiet_NaN();
+    // by looking through the data
+    for (double value : source.box(origin, shape)) {
+        // for the first non-nan
+        if (!std::isnan(value)) {
+            // when we find one, store it
+            seed = value;
+            // and bail
+            break;
+        }
+    }
+
     // my stats
-    double min = source[0], mean = source[0], max = source[0];
+    double min = seed, mean = seed, max = seed;
 
     // go through the data
     for (double z : source.box(origin, shape)) {
+        // if this is a nan
+        if (std::isnan(z)) {
+            // don't let it pollute our sample
+            continue;
+        }
         // update the stats
         min = std::min(min, z);
         max = std::max(max, z);
@@ -33,6 +52,15 @@ qed::isce2::unwrapped::stats(
         sum += z;
         ++samples;
     }
+
+    // make a channel
+    auto channel = pyre::journal::info_t("qed.isce2.unwrapped");
+    channel
+        // show me
+        << "min: " << min << ", mean: " << (sum / samples) << ", max: "
+        << max
+        // flush
+        << pyre::journal::endl(__HERE__);
 
     // all done
     return { min, sum / samples, max };
