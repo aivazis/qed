@@ -196,12 +196,12 @@ class Dataset(
         # go through my two channels
         for channel in range(2):
             # inject the index of the {channel} into the center index
-            center = qed.libpyre.grid.Index3D(index=(center[0], channel, center[1]))
+            origin = qed.libpyre.grid.Index3D(index=(center[0], channel, center[1]))
             # extend the tile shape
-            tile = qed.libpyre.grid.Shape3D(shape=(tile[0], 1, tile[1]))
+            shape = qed.libpyre.grid.Shape3D(shape=(tile[0], 1, tile[1]))
             # compute the stats
             channelStats = qed.libqed.isce2.unwrapped.stats(
-                source=data, origin=center, shape=tile
+                source=data, origin=origin, shape=shape
             )
             # and add them to the pile
             stats.append(channelStats)
