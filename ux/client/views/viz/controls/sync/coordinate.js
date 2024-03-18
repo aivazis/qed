@@ -8,6 +8,10 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// colors
+import { theme } from '~/palette'
+
 
 // an interactive entry with a pixel offset
 export const Coordinate = ({ className, point, axis, adjust }) => {
@@ -56,36 +60,36 @@ const Base = styled.input`
     outline: none;
     cursor: pointer;
     width: 4.0em;
-    background-color: hsl(0deg, 0%, 7%);
+    background-color: ${() => theme.page.shaded};
     padding: 0.0rem;
     border: 0 transparent;
 `
 
 const Enabled = styled(Base)`
     & {
-        color: hsl(0deg, 0%, 40%);
+        color: ${() => theme.page.normal};
     }
 
     &:active{
-        color: hsl(0deg, 0%, 60%);
+        color: ${() => theme.page.bright};
     }
 
     &:focus{
-        color: hsl(0deg, 0%, 60%);
+        color: ${() => theme.page.bright};
     }
 
     &:invalid {
-        color: hsl(0deg, 50%, 50%);
+        color: ${() => theme.page.danger};
     }
 
     &::selection {
-        color: hsl(0deg, 0%, 60%);
-        background-color: hsl(0deg, 0%, 20%);
+        color: ${() => theme.page.bright};
+        background-color: ${() => theme.page.selected}
     }
 `
 
 const Selected = styled(Base)`
-    color: hsl(28deg, 90%, 55%);
+    color: ${() => theme.page.highlight};
 `
 
 

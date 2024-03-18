@@ -8,6 +8,10 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// colors
+import { theme } from '~/palette'
+
 // locals
 // hooks
 import { useViews } from '../../../main/useViews'
@@ -68,7 +72,7 @@ const ActiveDataset = styled(Cell)`
 `
 
 const SelectedDataset = styled(ActiveDataset)`
-    color: hsl(28deg, 90%, 55%);
+    color: ${() => theme.page.highlight};
     cursor: default;
 `
 
