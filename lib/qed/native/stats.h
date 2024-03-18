@@ -4,8 +4,7 @@
 // (c) 1998-2024 all rights reserved
 
 // code guard
-#if !defined(qed_native_stats_h)
-#define qed_native_stats_h
+#pragma once
 
 
 // decorators
@@ -30,10 +29,7 @@ namespace qed::native {
 
 
 // pull in the implementations
-#define qed_native_stats_icc
 #include "stats.icc"
-#undef qed_native_stats_icc
 
-#endif
 
 // end of file

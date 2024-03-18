@@ -11,6 +11,8 @@
 
 // STL
 #include <algorithm>
+#include <cmath>
+#include <limits>
 #include <tuple>
 #include <vector>
 
