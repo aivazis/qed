@@ -4,8 +4,7 @@
 // (c) 1998-2024 all rights reserved
 
 // code guard
-#if !defined(qed_isce2_unwrapped_stats_h)
-#define qed_isce2_unwrapped_stats_h
+#pragma once
 
 
 // decorators
@@ -23,10 +22,7 @@ namespace qed::isce2::unwrapped {
 
 
 // pull in the implementations
-#define qed_isce2_unwrapped_stats_icc
 #include "stats.icc"
-#undef qed_isce2_unwrapped_stats_icc
 
-#endif
 
 // end of file
