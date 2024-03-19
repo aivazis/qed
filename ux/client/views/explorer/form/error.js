@@ -13,8 +13,14 @@ export const Error = ({ children }) => {
     // render
     return (
         <Box>
-            <Mark>!!&nbsp;</Mark>
-            <Message>{children}</Message>
+            {React.Children.map(children, (child, idx) => {
+                return (
+                    <React.Fragment key={idx}>
+                        <Mark>!!&nbsp;</Mark>
+                        <Message>{child}</Message>
+                    </React.Fragment>
+                )
+            })}
         </Box>
     )
 }
