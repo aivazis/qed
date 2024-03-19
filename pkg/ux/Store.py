@@ -291,7 +291,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
                 # sign on
                 channel.line(f"channel: {chn}")
                 # go through the controllers
-                channel.line(f"controllers: {chn}")
+                channel.line(f"controllers:")
                 for controller, trait in chn.controllers():
                     channel.indent()
                     channel.line(f"controller: {controller}")
