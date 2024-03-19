@@ -70,7 +70,6 @@ query useFetchQEDQuery {
                             min
                             max
                             value
-
                         }
                     }
                     view {
