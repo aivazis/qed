@@ -101,8 +101,6 @@ export const Local = ({ view, setType, hide }) => {
             },
             // if something went wrong
             onError: error => {
-                // clear the form
-                update("path", "")
                 // and now record the error
                 setError(error)
                 // all done
