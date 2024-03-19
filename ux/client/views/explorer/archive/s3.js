@@ -123,7 +123,6 @@ export const S3 = ({ view, setType, hide }) => {
             },
             // if something went wrong
             onError: error => {
-                // leave the form alone, since we don't know what's wrong, yet
                 // record the error
                 setError(error)
                 // all done
