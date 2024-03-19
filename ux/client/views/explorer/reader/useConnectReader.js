@@ -141,7 +141,62 @@ const connectMutation = graphql`
                         value
                     }
                     channels {
+                        id
                         name
+                        controllers {
+                            __typename
+                            ... on Node {
+                                id
+                            }
+                            ... on RangeController {
+                                slot
+                                min
+                                max
+                                low
+                                high
+                            }
+                            ... on ValueController {
+                                id
+                                slot
+                                min
+                                max
+                                value
+                            }
+                        }
+                        view {
+                            id
+                            name
+                            measure {
+                                id
+                                name
+                                active
+                                path {
+                                    x
+                                    y
+                                }
+                                closed
+                                selection
+                            }
+                            sync {
+                                id
+                                name
+                                channel
+                                zoom
+                                scroll
+                                path
+                                offsets {
+                                    x
+                                    y
+                                }
+                            }
+                            zoom {
+                                id
+                                name
+                                horizontal
+                                vertical
+                                coupled
+                            }
+                        }
                     }
                     shape
                     origin
