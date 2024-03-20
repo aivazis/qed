@@ -31,7 +31,7 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
         # get my root
         root = self.fs
         # lookup its location
-        location = root.location
+        location = root.location()
         # get the target address
         path = qed.primitives.path(uri.address)
         # project it onto my prefix
@@ -84,7 +84,7 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
         channel = journal.info("qed.archives.s3")
         # show me
         channel.report(
-            report=explorer.explore(node=self.fs, label=self.fs.location.address)
+            report=explorer.explore(node=self.fs, label=self.fs.location().address)
         )
         # flush
         channel.log()
