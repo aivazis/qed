@@ -142,6 +142,8 @@ export const S3 = ({ view, setType, hide }) => {
         // all done
         return
     }
+    // show me: this seems to cause trouble, so let's debug it
+    console.log(`******* ERROR: ${error}`)
     // determine whether i have enough information to make the connection
     const ready = (!isInFlight && (form.name !== null) && (form.name.length))
     // use this to figure out which button to render
