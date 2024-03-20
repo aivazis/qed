@@ -17,7 +17,7 @@ export const Error = ({ children }) => {
                 return (
                     <React.Fragment key={idx}>
                         <Mark>!!&nbsp;</Mark>
-                        <Message>{child}</Message>
+                        <Message>{child.toString()}</Message>
                     </React.Fragment>
                 )
             })}
