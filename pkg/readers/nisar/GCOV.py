@@ -114,6 +114,7 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                         # flush
                         channel.log()
                         # and move on
+                        continue
                     # generate a name for the dataset
                     name = f"{self.pyre_name}.{band}.{frequency}.{term}"
                     # build its selector
