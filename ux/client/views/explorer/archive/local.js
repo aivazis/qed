@@ -12,6 +12,7 @@ import { graphql, useMutation } from 'react-relay/hooks'
 // hooks
 import { useSetActiveView } from '../explorer/useSetActiveView'
 // components
+import { Busy } from './busy'
 import { Panel } from './panel'
 import { EnabledConnect, DisabledConnect, Cancel } from './buttons'
 import { TypeSelector } from './type'
@@ -121,6 +122,7 @@ export const Local = ({ view, setType, hide }) => {
     }
     // determine whether i have enough information to make the connection
     const ready = (
+        !isInFlight &&
         form.name !== null && form.name.length &&
         form.path !== null && form.path.length
     )
@@ -137,8 +139,9 @@ export const Local = ({ view, setType, hide }) => {
                 </Body>
             </Form>
             <Connect connect={connect} />
-            <Cancel onClick={cancel}>cancel</Cancel>
+            {!isInFlight && <Cancel onClick={cancel}>cancel</Cancel>}
             {error && <Error>{error}</Error>}
+            {isInFlight && <Busy />}
         </Panel>
     )
 }
