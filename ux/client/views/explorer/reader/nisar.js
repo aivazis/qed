@@ -50,10 +50,11 @@ export const NISAR = ({ view, setType, hide }) => {
 }
 
 const Spec = ({ qref, view, setType, hide }) => {
+    // there is occasional magical trouble here; let's proceed carefully
+    // extract the payload
+    const payload = useQueryProductMetadata(qref)
     // unpack the product metadata
-    const {
-        uri, product,
-    } = useQueryProductMetadata(qref)
+    const { uri, product } = payload
     // set up my state
     const [form, setForm] = React.useState({
         // the pyre name of the reader
