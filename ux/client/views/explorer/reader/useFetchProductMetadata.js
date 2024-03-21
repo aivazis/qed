@@ -34,12 +34,8 @@ export const useProductMetadataLoader = () => {
 
 // use the preloaded query
 export const useQueryProductMetadata = (qref) => {
-    // show me
-    console.log("product metadata: qref: ", qref)
     // get the payload
     const payload = usePreloadedQuery(query, qref)
-    // and again
-    console.log("product metadata: payload: ", payload)
     // unpack the query result
     const { discover } = payload
     // and return it
