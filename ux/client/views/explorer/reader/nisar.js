@@ -94,7 +94,7 @@ const Spec = ({ qref, view, setType, hide }) => {
             </Form>
             <Connect connect={connect} />
             <Cancel onClick={cancel}>cancel</Cancel>
-            {error && <Error>{error}</Error>}
+            {error && <Error errors={error} />}
         </Panel>
     )
 }

@@ -9,15 +9,17 @@ import React from 'react'
 import styled from 'styled-components'
 
 // render an error message
-export const Error = ({ children }) => {
+export const Error = ({ errors }) => {
+    // normalize the errors into an array of strings
+    const msgs = (Array.isArray(errors) ? errors : [errors]).map(error => error?.toString())
     // render
     return (
         <Box>
-            {React.Children.map(children, (child, idx) => {
+            {msgs.map((msg, idx) => {
                 return (
                     <React.Fragment key={idx}>
                         <Mark>!!&nbsp;</Mark>
-                        <Message>{child.toString()}</Message>
+                        <Message>{msg}</Message>
                     </React.Fragment>
                 )
             })}
