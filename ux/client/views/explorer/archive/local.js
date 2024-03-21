@@ -140,7 +140,7 @@ export const Local = ({ view, setType, hide }) => {
             </Form>
             <Connect connect={connect} />
             {!isInFlight && <Cancel onClick={cancel}>cancel</Cancel>}
-            {error && <Error>{error}</Error>}
+            {error && <Error errors={error} />}
             {isInFlight && <Busy />}
         </Panel>
     )
