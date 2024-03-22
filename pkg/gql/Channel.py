@@ -29,6 +29,7 @@ class Channel(graphene.ObjectType):
     # my fields
     id = graphene.ID()
     name = graphene.ID()
+    tag = graphene.String()
     controllers = graphene.List(Controller)
     view = graphene.Field(ChannelView)
 
@@ -47,7 +48,7 @@ class Channel(graphene.ObjectType):
         Get the name of the channel
         """
         # easy enough
-        return channel.tag
+        return channel.pyre_name
 
     @staticmethod
     def resolve_controllers(channel, *_):
