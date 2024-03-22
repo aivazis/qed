@@ -22,8 +22,6 @@ export const useVisualize = () => {
 
     // make the handler
     const visualize = (view, viewport = activeViewport) => {
-        // show me
-        console.log(`main.useVisualize: setting view in ${viewport}:`, view)
         // if there is already a pending operation
         if (pending) {
             // nothing to do
