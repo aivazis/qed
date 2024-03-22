@@ -10,6 +10,7 @@ import journal
 
 # my parts
 from .Channel import Channel
+from .View import View
 
 
 # the server side of the application store
@@ -34,9 +35,46 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # easy enough
         return self._datasets.values()
 
+    @property
+    def views(self):
+        # easy enough
+        return self._views
+
     # interface
+    # view management
+    def collapseView(self, viewport):
+        """
+        Remove {view} from the list of active views
+        """
+        # get my views
+        views = self._views
+        # pop the indicated one
+        views.pop(viewport)
+        # if the pile of views is now empty
+        if not views:
+            # add the blank view to it
+            views.append(self._blank)
+        # all done
+        return views
+
+    def splitView(self, viewport):
+        """
+        Remove {view} from the list of active views
+        """
+        # get my views
+        views = self._views
+        # grab the view in {viewport}
+        view = views[viewport]
+        # make a copy of {viewport}
+        views.insert(viewport + 1, view)
+        # all done
+        return views
+
     # count
     def archiveCount(self):
+        """
+        Get the number of connected archives
+        """
         # easy enough
         return len(self._archives)
 
@@ -241,11 +279,11 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # store it
         self._channels = channels
 
-        # build my viewports
-        self._viewports = {}
-
-        # show me
-        # self.pyre_dump()
+        # make a trivial view
+        self._blank = View(name=f"{self.pyre_name}.blank")
+        # initialize my views, a list of {channel} instances that are currently
+        # on display
+        self._views = [self._blank]
 
         # all done
         return
