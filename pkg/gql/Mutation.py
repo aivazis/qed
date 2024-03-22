@@ -8,15 +8,18 @@
 import graphene
 
 # the mutations
+# view management
 from .CollapseView import CollapseView
 from .SplitView import SplitView
+from .UpdateView import UpdateView
 
-
+# explorer
 from .ConnectArchive import ConnectArchive
 from .DisconnectArchive import DisconnectArchive
 from .ConnectReader import ConnectReader
 from .DisconnectReader import DisconnectReader
 
+# visualization pipeline controls
 from .ResetRangeController import ResetRangeController
 from .ResetValueController import ResetValueController
 from .UpdateRangeController import UpdateRangeController
@@ -32,6 +35,7 @@ class Mutation(graphene.ObjectType):
     # view management
     collapseView = CollapseView.Field()
     splitView = SplitView.Field()
+    updateView = UpdateView.Field()
 
     # data archive connection management
     connectArchive = ConnectArchive.Field()
