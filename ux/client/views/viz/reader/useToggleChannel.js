@@ -12,15 +12,15 @@ import React from 'react'
 import { Context } from './context'
 
 
-// toggle the specified {channel} as the selected one
-export const useToggleChannel = (value) => {
+// toggle the specified {client} channel as the selected one
+export const useToggleChannel = client => {
     // grab the channel ref
     const { channel } = React.useContext(Context)
 
     // make the toggle
     const toggle = () => {
         // flip the channel selection
-        channel.current = channel.current === value ? null : value
+        channel.current = channel.current?.tag === client.tag ? null : client
         // all done
         return
     }

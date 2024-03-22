@@ -28,7 +28,7 @@ export const Channel = ({ channel }) => {
     const [polish, setPolish] = React.useState(false)
 
     // initialize my state
-    const state = activeReader && (activeChannel === channel) ? "selected" : "enabled"
+    const state = activeReader && (activeChannel?.tag === channel.tag) ? "selected" : "enabled"
 
     // make a handler that toggles me as the value of my {axis}
     const toggle = () => {
@@ -77,7 +77,7 @@ export const Channel = ({ channel }) => {
     // and render
     return (
         <div style={paint} {...behaviors} >
-            {channel}
+            {channel.tag}
         </div>
     )
 }

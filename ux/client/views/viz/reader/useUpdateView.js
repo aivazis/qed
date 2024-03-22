@@ -58,12 +58,12 @@ export const useUpdateView = () => {
                     // if the dataset has only one channel
                     if (dataset.current.channels.length === 1) {
                         // select it
-                        channel.current = dataset.current.channels[0].name
+                        channel.current = dataset.current.channels[0]
                     }
-                    // get the current dataset channel names
-                    const names = dataset.current.channels.map(channel => channel.name)
-                    // if the current value of the channel is not among the valid choices
-                    if (!names.includes(channel.current)) {
+                    // get the current dataset channel tags
+                    const tags = dataset.current.channels.map(channel => channel.tag)
+                    // if the tag value of the current channel is not among the valid choices
+                    if (!tags.includes(channel.current?.tag)) {
                         // reset it; it must be a left over from a previous selection,
                         // so force the user to make a new choice
                         channel.current = null
