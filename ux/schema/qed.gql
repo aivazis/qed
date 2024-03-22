@@ -141,6 +141,7 @@ type Channel implements Node {
   # ids
   id: ID!
   name: ID!
+  tag: String!
   # the viz pipeline controllers
   controllers: [Controller]!
   # and its view state
@@ -261,6 +262,7 @@ type Mutation {
   # viewports
   collapseView(viewport: Int!): ViewInfo!
   splitView(viewport: Int!): ViewInfo!
+  updateView(viewport: Int!, reader: String, dataset: String, channel: String): ViewInfo!
 
   # data archive connections
   connectArchive(name: String!, uri: String!): ArchiveInfo!
@@ -277,20 +279,21 @@ type Mutation {
 }
 
 # viewport management
+# the response payload
 type ViewInfo {
   # the contents of the active viewports
   views: [View]
 }
 
 # support for connecting and disconnecting data archives
-# the output payload
+# the response payload
 type ArchiveInfo {
   # the new archive
   archive: Archive
 }
 
 # support for connecting and disconnecting data readers
-# the input payload
+# the request payload
 input ReaderInput {
   reader: String!
   name: String!
@@ -300,7 +303,7 @@ input ReaderInput {
   cell: String
 }
 
-# the output payload
+# the response payload
 type ReaderInfo {
   # the new archive
   reader: Reader
@@ -308,7 +311,7 @@ type ReaderInfo {
 
 
 # support for updating range controllers
-# the reset input payload
+# the reset request payload
 input RangeControllerInput {
   # the dataset
   dataset: ID!
@@ -318,7 +321,7 @@ input RangeControllerInput {
   slot: String!
 }
 
-# the update range input payload
+# the update range request payload
 input RangeControllerRangeInput {
   # the dataset
   dataset: ID!
@@ -331,7 +334,7 @@ input RangeControllerRangeInput {
   high: Float!
 }
 
-# the output payload
+# the response payload
 type RangeControllerInfo {
   # the updated controller
   controller: RangeController!
@@ -339,7 +342,7 @@ type RangeControllerInfo {
 
 
 # support for updating value controllers
-# the reset input payload
+# the reset request payload
 input ValueControllerInput {
   # the dataset
   dataset: ID!
@@ -349,7 +352,7 @@ input ValueControllerInput {
   slot: String!
 }
 
-# the update value input payload
+# the update value request payload
 input ValueControllerValueInput {
   # the dataset
   dataset: ID!
@@ -361,7 +364,7 @@ input ValueControllerValueInput {
   value: Float!
 }
 
-# the output payload
+# the response payload
 type ValueControllerInfo {
   # the updated controller
   controller: ValueController!
