@@ -19,7 +19,6 @@ export const useFetchQED = () => {
         // the options
         { fetchPolicy: "network-only" }
     )
-    console.log(qed)
     // and return it
     return qed
 }
@@ -31,6 +30,218 @@ query useFetchQEDQuery {
     qed {
         # metadata
         id
+        views {
+            id
+            name
+            reader {
+                id
+                name
+                uri
+                api
+                selectors {
+                    name
+                    values
+                }
+                datasets {
+                    id
+                    name
+                    datatype
+                    selector {
+                        name
+                        value
+                    }
+                    shape
+                    origin
+                    tile
+                    channels {
+                        id
+                        name
+                        tag
+                        controllers {
+                            __typename
+                            ... on Node {
+                                id
+                            }
+                            ... on RangeController {
+                                slot
+                                min
+                                max
+                                low
+                                high
+                            }
+                            ... on ValueController {
+                                id
+                                slot
+                                min
+                                max
+                                value
+                            }
+                        }
+                        view {
+                            id
+                            name
+                            measure {
+                                id
+                                name
+                                active
+                                path {
+                                    x
+                                    y
+                                }
+                                closed
+                                selection
+                            }
+                            sync {
+                                id
+                                name
+                                channel
+                                zoom
+                                scroll
+                                path
+                                offsets {
+                                    x
+                                    y
+                                }
+                            }
+                            zoom {
+                                id
+                                name
+                                horizontal
+                                vertical
+                                coupled
+                            }
+                        }
+                    }
+                }
+            }
+            dataset {
+                id
+                name
+                datatype
+                selector {
+                    name
+                    value
+                }
+                channels {
+                    id
+                    name
+                    tag
+                    controllers {
+                        __typename
+                        ... on Node {
+                            id
+                        }
+                        ... on RangeController {
+                            slot
+                            min
+                            max
+                            low
+                            high
+                        }
+                        ... on ValueController {
+                            id
+                            slot
+                            min
+                            max
+                            value
+                        }
+                    }
+                    view {
+                        id
+                        name
+                        measure {
+                            id
+                            name
+                            active
+                            path {
+                                x
+                                y
+                            }
+                            closed
+                            selection
+                        }
+                        sync {
+                            id
+                            name
+                            channel
+                            zoom
+                            scroll
+                            path
+                            offsets {
+                                x
+                                y
+                            }
+                        }
+                        zoom {
+                            id
+                            name
+                            horizontal
+                            vertical
+                            coupled
+                        }
+                    }
+                }
+            }
+            channel {
+                id
+                name
+                tag
+                controllers {
+                    __typename
+                    ... on Node {
+                        id
+                    }
+                    ... on RangeController {
+                        slot
+                        min
+                        max
+                        low
+                        high
+                    }
+                    ... on ValueController {
+                        id
+                        slot
+                        min
+                        max
+                        value
+                    }
+                }
+                view {
+                    id
+                    name
+                    measure {
+                        id
+                        name
+                        active
+                        path {
+                            x
+                            y
+                        }
+                        closed
+                        selection
+                    }
+                    sync {
+                        id
+                        name
+                        channel
+                        zoom
+                        scroll
+                        path
+                        offsets {
+                            x
+                            y
+                        }
+                    }
+                    zoom {
+                        id
+                        name
+                        horizontal
+                        vertical
+                        coupled
+                    }
+                }
+            }
+        }
         archives {
             id
             name
@@ -49,6 +260,14 @@ query useFetchQEDQuery {
             datasets {
                 id
                 name
+                datatype
+                selector {
+                    name
+                    value
+                }
+                shape
+                origin
+                tile
                 channels {
                     id
                     name
@@ -107,14 +326,6 @@ query useFetchQEDQuery {
                         }
                     }
                 }
-                datatype
-                selector {
-                    name
-                    value
-                }
-                shape
-                origin
-                tile
             }
         }
 
