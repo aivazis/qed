@@ -86,8 +86,16 @@ class Query(graphene.ObjectType):
         store = info.context["store"]
         # identify the archive
         manager = store.archive(uri=archive)
-        # ask it for its contents
-        return manager.contents(uri=qed.primitives.uri.parse(path))
+        # attempt to
+        try:
+            # ask it for its contents
+            return manager.contents(uri=qed.primitives.uri.parse(path))
+        # if anything goes wrong
+        except journal.ApplicationError:
+            # swallow
+            pass
+        # all done
+        return []
 
     # product metadata
     @staticmethod
