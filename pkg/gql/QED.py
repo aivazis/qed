@@ -17,6 +17,7 @@ from .Node import Node
 # my parts
 from .Archive import Archive
 from .Reader import Reader
+from .View import View
 
 
 # the singleton
@@ -33,6 +34,7 @@ class QED(graphene.ObjectType):
     # metadata
     id = graphene.ID(required=True)
     # my parts
+    views = graphene.List(View)
     archives = graphene.List(Archive)
     readers = graphene.List(Reader)
 
@@ -45,14 +47,27 @@ class QED(graphene.ObjectType):
         # easy enough
         return "QED"
 
+    # views
+    @staticmethod
+    def resolve_views(store, info, **kwds):
+        """
+        Generate a sequence of the active views
+        """
+        # hand off the views to the resolver
+        yield from store.views
+        # all done
+        return
+
     # data archives
     @staticmethod
     def resolve_archives(store, info, **kwds):
         """
         Generate a sequence of known data archives
         """
-        # hand off the pile of archives to the resolver
-        return tuple(store.archives)
+        # hand off the archives to the resolver
+        yield from store.archives
+        # all done
+        return
 
     # readers
     @staticmethod
@@ -60,8 +75,10 @@ class QED(graphene.ObjectType):
         """
         Generate a list of all known dataset readers
         """
-        # get the registered readers and return them
-        return tuple(store.readers)
+        # hand off the registered readers to the resolver
+        yield from store.readers
+        # all done
+        return
 
 
 # end of file
