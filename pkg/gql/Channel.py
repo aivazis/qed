@@ -38,7 +38,7 @@ class Channel(graphene.ObjectType):
         """
         Get the {channel} id
         """
-        # splice together the {family} and {name} of the {reader}
+        # splice together the {family} and {name} of the {channel}
         return f"{channel.pyre_family()}:{channel.pyre_name}"
 
     @staticmethod
