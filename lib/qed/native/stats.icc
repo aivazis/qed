@@ -50,6 +50,11 @@ qed::native::collectStatistics(
             break;
         }
     }
+    // if the {seed} is NaN after all this
+    if (std::isnan(seed)) {
+        // nothing to do but return some nominal values and hope for the best
+        return { 0.0, 0.5, 1.0 };
+    }
 
     // my stats
     double min = seed, mean = seed, max = seed;
