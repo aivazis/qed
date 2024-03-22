@@ -20,10 +20,10 @@ import { useSplitView } from '../../main/useSplitView'
 import styles from './styles'
 
 
-// split a {view} into two
+// split a {viewport} into two
 export const Split = ({ viewport }) => {
     // grab the hook that splits a {view}
-    const splitView = useSplitView(viewport)
+    const splitView = useSplitView()
     // turn it into a handler that splits this {view}
     const split = (evt) => {
         // stop this event from bubbling up
@@ -31,7 +31,7 @@ export const Split = ({ viewport }) => {
         // and quash any side effects
         evt.preventDefault()
         // manage the {view} state
-        splitView()
+        splitView(viewport)
         // all done
         return
     }
