@@ -26,6 +26,9 @@ from .Channel import Channel as channel
 # and their controllers
 from .Controller import Controller as controller
 
+# details about mounted viewports
+from .View import View as view
+
 # ux state
 from . import ux
 
