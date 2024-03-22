@@ -28,6 +28,7 @@ export const Provider = (props) => {
                 values
             }
             datasets {
+                id
                 name
                 datatype
                 selector {
@@ -36,7 +37,7 @@ export const Provider = (props) => {
                 }
                 channels {
                     id
-                    name
+                    tag
                 }
                 shape
                 origin
@@ -59,7 +60,7 @@ export const Provider = (props) => {
     // get the active view
     const view = useGetView()
     // if i'm the active reader
-    if (view?.reader?.name === reader.name) {
+    if (view?.reader?.id === reader.id) {
         // mark me as active
         active.current = true
         // if the view has a dataset
@@ -104,7 +105,7 @@ export const Provider = (props) => {
         // if it only has one channel
         if (dataset.current.channels.length == 1) {
             // make it the current one
-            channel.current = dataset.current.channels[0].name
+            channel.current = dataset.current.channels[0]
         }
     }
     // otherwise

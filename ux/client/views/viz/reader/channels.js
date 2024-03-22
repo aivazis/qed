@@ -45,7 +45,7 @@ export const Channels = ({ children }) => {
     return (
         <Meta.Entry attribute={label} style={channelStyle}>
             {children.map(channel => (
-                <Channel key={channel.id} channel={channel.name} />
+                <Channel key={channel.id} channel={channel} />
             ))}
         </Meta.Entry>
     )
