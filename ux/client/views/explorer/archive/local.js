@@ -68,18 +68,26 @@ export const Local = ({ view, setType, hide }) => {
             // skip this update
             return
         }
-        // otherwise, send the mutation to the server
+        // otherwise, collect the current state
+        const name = form.name
+        const path = form.path
+        // send the mutation to the server
         request({
             // input
             variables: {
                 // the payload
-                name: `local:${form.name}`,
-                uri: `file:${form.path}`,
+                name: `local:${name}`,
+                uri: `file:${path}`,
             },
             // updater
             updater: store => {
                 // get the root field of the query result
                 const payload = store.getRootField("connectArchive")
+                // if it's trivial
+                if (!payload) {
+                    // raise an issue
+                    throw new Error("could not connect to the data archive")
+                }
                 // ask for the new archive
                 const archive = payload.getLinkedRecord("archive")
                 // get the session manager
@@ -102,8 +110,12 @@ export const Local = ({ view, setType, hide }) => {
             },
             // if something went wrong
             onError: error => {
-                // and now record the error
-                setError(error)
+                // record the error
+                setError([
+                    `got: ${error}`,
+                    `while connecting to the data archive '${name}'`,
+                    `at '${path}'`,
+                ])
                 // all done
                 return
             }
