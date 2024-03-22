@@ -72,6 +72,11 @@ export const useConnectReader = (setForm, hide) => {
             updater: store => {
                 // get the root field of the query result
                 const payload = store.getRootField("connectReader")
+                // if it's trivial
+                if (!payload) {
+                    // raise an issue
+                    throw new Error("could not find any datasets")
+                }
                 // ask for the new reader
                 const reader = payload.getLinkedRecord("reader")
                 // get the session manager
@@ -85,7 +90,7 @@ export const useConnectReader = (setForm, hide) => {
             },
             // when done
             onCompleted: data => {
-                // clear the error
+                // clear any errors
                 setError(null)
                 // remove the form from view
                 hide()
@@ -94,10 +99,13 @@ export const useConnectReader = (setForm, hide) => {
             },
             // if something went wrong
             onError: error => {
-                // clear the product type; do this first because the update clears the error state
-                update("product", "")
-                // and now record the error
-                setError(error)
+                // record the error
+                setError([
+                    `got: ${error}`,
+                    `while opening the data product '${spec.name}'`,
+                    `at '${spec.uri}'`,
+                    `using the '${spec.reader}' reader`
+                ])
                 // all done
                 return
             }
