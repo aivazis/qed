@@ -31,9 +31,9 @@ class View(graphene.ObjectType):
     id = graphene.ID(required=True)
     name = graphene.ID(required=True)
     # my parts
-    reader = graphene.List(Reader)
-    dataset = graphene.List(Dataset)
-    channel = graphene.List(Channel)
+    reader = graphene.Field(Reader)
+    dataset = graphene.Field(Dataset)
+    channel = graphene.Field(Channel)
 
     # resolvers
     @staticmethod
