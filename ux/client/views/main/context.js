@@ -26,8 +26,6 @@ export const Provider = ({ children }) => {
     // that knows its positioning in the flex container
     const viewportRegistrar = idx => ref => viewports.current[idx] = ref
 
-    // the set of known views; it starts out with one empty view
-    const [views, setViews] = React.useState([emptyView()])
     // the active view is an index into the set of {views}
     const [activeViewport, setActiveViewport] = React.useState(0)
     // a table with the sync status of the current viewports
@@ -51,8 +49,6 @@ export const Provider = ({ children }) => {
         activityPanel, setActivityPanel,
         // the set of active viewports (actually, the {mosaic} placemats)
         viewports, viewportRegistrar,
-        // the known views
-        views, setViews,
         // the active view
         activeViewport, setActiveViewport,
         // synced views
@@ -91,9 +87,6 @@ export const Context = React.createContext(
         // the registrar
         viewportRegistrar: () => { throw new Error(complaint) },
 
-        // the known views
-        views: null,
-        setViews: () => { throw new Error(complaint) },
         // the active view
         activeViewport: null,
         setActiveViewport: () => { throw new Error(complaint) },

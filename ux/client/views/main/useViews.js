@@ -14,10 +14,10 @@ import { Context } from './context'
 
 // access to the registered views
 export const useViews = () => {
-    // grab the list of {views} from context
-    const { views, activeViewport } = React.useContext(Context)
-    // and return it
-    return { views, activeViewport }
+    // grab the store and the active viewport from context
+    const { qed, activeViewport } = React.useContext(Context)
+    // extract the active views and return them along with the active viewport
+    return { views: qed.views, activeViewport }
 }
 
 
