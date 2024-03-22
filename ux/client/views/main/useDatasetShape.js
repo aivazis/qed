@@ -22,7 +22,7 @@ export const useDatasetShape = (viewport) => {
     // if there is no registered dataset in {viewport}
     if (dataset === null) {
         // bail
-        return { origin: null, shape: null }
+        return { name: null, origin: null, shape: null }
     }
 
     // extract the dataset origin and shape
