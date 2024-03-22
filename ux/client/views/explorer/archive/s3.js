@@ -82,6 +82,7 @@ export const S3 = ({ view, setType, hide }) => {
             return
         }
         // otherwise, collect the current state
+        const name = form.name
         const profile = form.profile
         const region = form.region
         const bucket = form.bucket
@@ -95,13 +96,18 @@ export const S3 = ({ view, setType, hide }) => {
             // input
             variables: {
                 // the payload
-                name: `s3:${form.name}`,
+                name: `s3:${name}`,
                 uri,
             },
             // updater
             updater: store => {
                 // get the root field of the query result
                 const payload = store.getRootField("connectArchive")
+                // if it's trivial
+                if (!payload) {
+                    // raise an issue
+                    throw new Error("could not connect to the data archive")
+                }
                 // ask for the new archive
                 const archive = payload.getLinkedRecord("archive")
                 // get the session manager
@@ -125,7 +131,11 @@ export const S3 = ({ view, setType, hide }) => {
             // if something went wrong
             onError: error => {
                 // record the error
-                setError(error)
+                setError([
+                    `got: ${error}`,
+                    `while connecting to the data archive '${name}'`,
+                    `at '${uri}'`,
+                ])
                 // all done
                 return
             }
