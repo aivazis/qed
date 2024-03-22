@@ -44,12 +44,25 @@ type Version {
 type QED implements Node {
   # the id
   id: ID!
+  # the visible viewports
+  views: [View]
   # the connected data archives
   archives: [Archive]
   # the connected readers
   readers: [Reader]
 }
 
+
+# viewports
+type View implements Node {
+  # ids
+  id: ID!
+  name: ID!
+  # info
+  reader: Reader
+  dataset: Dataset
+  channel: Channel
+}
 
 # archives
 type Archive implements Node {
@@ -245,6 +258,10 @@ type Shape {
 
 # mutations
 type Mutation {
+  # viewports
+  collapseView(viewport: Int!): ViewInfo!
+  splitView(viewport: Int!): ViewInfo!
+
   # data archive connections
   connectArchive(name: String!, uri: String!): ArchiveInfo!
   disconnectArchive(uri: String!): ArchiveInfo!
@@ -255,11 +272,15 @@ type Mutation {
   # updates to the viz pipeline
   resetRangeController(controller: RangeControllerInput!): RangeControllerInfo!
   updateRangeController(range: RangeControllerRangeInput!): RangeControllerInfo!
-
   resetValueController(controller: ValueControllerInput!): ValueControllerInfo!
   updateValueController(value: ValueControllerValueInput!): ValueControllerInfo!
 }
 
+# viewport management
+type ViewInfo {
+  # the contents of the active viewports
+  views: [View]
+}
 
 # support for connecting and disconnecting data archives
 # the output payload
