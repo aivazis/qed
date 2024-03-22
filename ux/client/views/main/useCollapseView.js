@@ -5,142 +5,90 @@
 
 
 // externals
-import React from 'react'
+import { graphql, useMutation } from 'react-relay/hooks'
 
 // local
-// context
-import {
-    Context,
-    emptyView, syncedDefault, zoomDefault,
-    measureDefault, pixelPathDefault, pixelPathSelectionDefault,
-} from './context'
+// hooks
+import { useViewports } from './useViewports'
 
 
 // remove a viewport
 export const useCollapseView = () => {
-    // grab the list of {views} from context
-    const {
-        // the active viewport
-        activeViewport,
-        // mutators
-        setActiveViewport, setViews, setSynced, setZoom,
-        setMeasureLayer, setPixelPath, setPixelPathSelection,
-        // the ref with the base zoom levels
-        baseZoom,
-    } = React.useContext(Context)
+    // get the active viewport
+    const { activeViewport, setActiveViewport } = useViewports()
+    // collapsing a view mutates the server side application store
+    const [request, pending] = useMutation(collapseMutation)
+
     // make a handler that removes a viewport
-    const collapseView = viewport => {
-        // adjust the view
-        setViews(old => {
-            // make a copy of the old state
-            const clone = [...old]
-            // adjust the entry specified by the caller
-            clone.splice(viewport, 1)
-            // if i'm left with an empty pile
-            if (clone.length === 0) {
-                // reinitialize
-                return [emptyView()]
-            }
-            // and hand off the new state
-            return clone
-        })
-
-        // remove its flag from the sync table
-        setSynced(old => {
-            // make a copy of the old table
-            const table = [...old]
-            // remove the status of the current view
-            table.splice(viewport, 1)
-            // if i'm left with an empty pile
-            if (table.length === 0) {
-                // reinitialize
-                return [syncedDefault]
-            }
-            // return the new table
-            return table
-        })
-
-        // remove its zoom level from the table
-        setZoom(old => {
-            // make a copy of the old table
-            const table = [...old]
-            // remove the zoom level of the current view
-            table.splice(viewport, 1)
-            // if i'm left with an empty pile
-            if (table.length === 0) {
-                // reinitialize
-                return [zoomDefault]
-            }
-            // otherwise, return the new table
-            return table
-        })
-
-        // maintain the base zoom level table
-        const bz = baseZoom.current
-        // remove the entry for the current view
-        bz.splice(viewport, 1)
-        // if this leaves us with an empty table
-        if (bz.length == 0) {
-            // reinitialize
-            baseZoom.current = [zoomDefault]
+    const collapse = viewport => {
+        // if there is already a pending operation
+        if (pending) {
+            // nothing to do
+            return
         }
-
-        // remove the measure layer status of the collapsing viewport
-        setMeasureLayer(old => {
-            // make a copy
-            const table = [...old]
-            // remove the marker for the collapsing viewport
-            table.splice(viewport, 1)
-            // if this leaves us with nothing
-            if (table.length === 0) {
-                // reinitialize
-                return [measureDefault]
+        // otherwise, send the mutation to the server
+        request({
+            // input
+            variables: {
+                // the payload
+                viewport
+            },
+            // update the store
+            updater: store => {
+                // get the root field of the mutation result
+                const response = store.getRootField("collapseView")
+                // ask for the list of views
+                const updated = response.getLinkedRecords("views")
+                // if it's trivial
+                if (updated === null) {
+                    // something went wrong at the server; not much more to do
+                    return
+                }
+                // get the remote store
+                const qed = store.get("QED")
+                // attach the updated pile
+                qed.setLinkedRecords(updated, "views")
+                // all done
+                return
+            },
+            // when the request is complete
+            onCompleted: data => {
+                // if the active viewport has collapsed or the active viewport is after the
+                // collapsed one on the pile
+                if (viewport <= activeViewport) {
+                    // activate the previous one
+                    setActiveViewport(Math.max(viewport - 1, 0))
+                }
+                // all done
+                return
+            },
+            // if something goes wrong
+            onError: error => {
+                // show me
+                console.log(`views.main.useCollapseView: ERROR while collapsing ${viewport}:`, error)
+                // all done
+                return
             }
-            // and return the new table
-            return table
         })
-        // make an empty pixel path for it
-        setPixelPath(old => {
-            // make a copy of the current state
-            const table = [...old]
-            // remove the pixel path of the collapsing view
-            table.splice(viewport, 1)
-            // if this leaves us with nothing
-            if (table.length === 0) {
-                // reinitialize
-                return [pixelPathDefault()]
-            }
-            // and return the new table
-            return table
-        })
-        // and an empty path selection
-        setPixelPathSelection(old => {
-            // make a copy of the current state
-            const table = [...old]
-            // remove the pixel path of the collapsing view
-            table.splice(viewport, 1)
-            // if this leaves us with nothing
-            if (table.length === 0) {
-                // reinitialize
-                return [pixelPathSelectionDefault()]
-            }
-            // and return the new table
-            return table
-        })
-
-        // if the active viewport has collapsed ot the active viewport is after the collapsed one on
-        // the pile
-        if (viewport <= activeViewport) {
-            // activate the previous one
-            setActiveViewport(Math.max(viewport - 1, 0))
-        }
-
         // all done
         return
     }
+
     // and return it
-    return collapseView
+    return collapse
 }
+
+
+// the mutation that collapses a viewport
+const collapseMutation = graphql`
+    mutation useCollapseViewMutation($viewport: Int!) {
+        collapseView(viewport: $viewport) {
+            views {
+                id
+            }
+        }
+    }
+`
 
 
 // end of file
