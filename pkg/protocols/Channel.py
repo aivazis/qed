@@ -6,12 +6,10 @@
 
 # support
 import qed
-# my superclass
-from .Producer import Producer
 
 
 # the workflow
-class Channel(Producer, family="qed.channels"):
+class Channel(qed.protocol, family="qed.channels"):
     """
     A channel is a visualization workflow
     """
