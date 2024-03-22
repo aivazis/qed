@@ -17,10 +17,11 @@ export const Error = ({ errors }) => {
         <Box>
             {msgs.map((msg, idx) => {
                 return (
-                    <React.Fragment key={idx}>
-                        <Mark>!!&nbsp;</Mark>
+                    <Entry key={idx}>
+                        <Mark>!!</Mark>
+                        &nbsp;
                         <Message>{msg}</Message>
-                    </React.Fragment>
+                    </Entry>
                 )
             })}
         </Box>
@@ -33,6 +34,14 @@ const Box = styled.div`
     font-family: inconsolata;
     font-size: large;
     margin: 1rem;
+`
+
+const Entry = styled.div`
+    display: flex;
+    flex-direction: row;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    line-height: 150%;
 `
 
 const Mark = styled.span`
