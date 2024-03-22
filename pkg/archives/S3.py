@@ -44,7 +44,7 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
         # if it doesn't exist
         except root.NotFoundError as error:
             # make a channel
-            channel = journal.warning("qed.archives.s3")
+            channel = journal.error("qed.archives.s3")
             # complain
             channel.line(f"could not find '{uri}'")
             channel.line(f"while exploring '{location}'")
