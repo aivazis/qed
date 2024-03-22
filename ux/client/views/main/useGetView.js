@@ -14,12 +14,12 @@ import { Context } from './context'
 
 // hook to pull the dataset readers out the outlet context
 export const useGetView = viewport => {
-    // grab the {views} and the index of the {activeViewport}
-    const { activeViewport, views } = React.useContext(Context)
+    // grab the state of the remote store and te atcive viewport
+    const { qed, activeViewport } = React.useContext(Context)
     // normalize the viewport
     viewport ??= activeViewport
     // make a copy of the view and return it
-    return { ...views[viewport] }
+    return { ...qed.views[viewport] }
 }
 
 
