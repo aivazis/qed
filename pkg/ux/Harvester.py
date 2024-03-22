@@ -40,15 +40,5 @@ class Harvester:
         # all done
         return configuration
 
-    # metamethods
-    def __init__(self, **kwds):
-        # chain up
-        super().__init__(**kwds)
-        # initialize the component context; used to record owner information for
-        # component hierarchies
-        self.context = None
-        # all done
-        return
-
 
 # end of file
