@@ -8,6 +8,10 @@
 import graphene
 
 # the mutations
+from .CollapseView import CollapseView
+from .SplitView import SplitView
+
+
 from .ConnectArchive import ConnectArchive
 from .DisconnectArchive import DisconnectArchive
 from .ConnectReader import ConnectReader
@@ -24,6 +28,10 @@ class Mutation(graphene.ObjectType):
     """
     The resting place for mutations
     """
+
+    # view management
+    collapseView = CollapseView.Field()
+    splitView = SplitView.Field()
 
     # data archive connection management
     connectArchive = ConnectArchive.Field()
