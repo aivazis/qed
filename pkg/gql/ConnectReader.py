@@ -30,6 +30,7 @@ class ConnectReader(graphene.Mutation):
     reader = graphene.Field(Reader)
 
     # the range controller mutator
+    @staticmethod
     def mutate(root, info, spec):
         """
         Add a new reader to the pile
