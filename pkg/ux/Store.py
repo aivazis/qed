@@ -4,6 +4,9 @@
 # (c) 1998-2024 all rights reserved
 
 
+# external
+import uuid
+
 # support
 import qed
 import journal
@@ -70,6 +73,37 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return views
 
+    def updateView(self, viewport, reader, dataset, channel):
+        """
+        Update the view in {viewport}
+        """
+        # lookup the reader
+        reader = self.reader(uri=reader) if reader else None
+        # look up the dataset
+        dataset = self.dataset(name=dataset) if dataset else None
+        # if there is a channel
+        if channel:
+            # ask it for its channel
+            channel = dataset.channels[channel]
+            # get the name of the channel
+            channelName = channel.pyre_name
+            # build the view name
+            viewName = f"{channelName}.view"
+        # if not
+        else:
+            # build a trivial configuration
+            config = None
+            # and a random name
+            viewName = str(uuid.uuid1())
+        # build the view
+        view = View(name=viewName, reader=reader, dataset=dataset, channel=channel)
+        # get my views
+        views = self._views
+        # replace the one at {viewport}
+        views[viewport] = view
+        # all done
+        return views
+
     # count
     def archiveCount(self):
         """
@@ -115,7 +149,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # add it to the pile
         self._archives[str(archive.uri)] = archive
         # all done
-        return
+        return archive
 
     def connectReader(self, reader):
         """
@@ -124,7 +158,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # add it to the pile
         self._readers[str(reader.uri)] = reader
         # all done
-        return
+        return reader
 
     def connectDataset(self, dataset):
         """
@@ -137,13 +171,13 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             # ge the name of the channel
             channelName = channel.pyre_name
             # build the name of the view
-            viewName = f"{channelName}.view"
+            viewName = f"{channelName}.config"
             # construct the view
             view = Channel(name=viewName, channel=channel)
             # add it to the map
             self._channels[channelName] = view
         # all done
-        return
+        return dataset
 
     # deletions
     def disconnectArchive(self, uri):
@@ -268,10 +302,10 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         for dataset in datasets.values():
             # and each of their channels
             for channel in dataset.channels.values():
-                # ge the name of the channel
+                # get the name of the channel
                 channelName = channel.pyre_name
                 # build the name of the view
-                viewName = f"{channelName}.view"
+                viewName = f"{channelName}.config"
                 # construct the view
                 view = Channel(name=viewName, channel=channel)
                 # add it to the map
