@@ -83,7 +83,7 @@ const channel = (state, polish) => ({
 
 const mark = {
     fontFamily: "inconsolata",
-    color: theme.page.normal,
+    color: theme.page.danger,
     padding: "0.0em 0.25em 0.0em 0.0em",
     verticalAlign: "baseline",
 }
@@ -152,6 +152,7 @@ const axisPaint = {
     entry: {},
     attribute: {
         width: "8.0em",
+        minWidth: "8.0em",
     },
     separator: {},
     value: {},
