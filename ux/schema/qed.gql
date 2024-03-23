@@ -269,7 +269,7 @@ type Mutation {
   disconnectArchive(uri: String!): ArchiveInfo!
   # reader connections
   connectReader(spec: ReaderInput!): ReaderInfo!
-  disconnectReader(uri: String!): ReaderInfo!
+  disconnectReader(name: String!): ReaderInfo!
 
   # updates to the viz pipeline
   resetRangeController(controller: RangeControllerInput!): RangeControllerInfo!
