@@ -14,7 +14,7 @@ from .View import View
 
 
 # remove a view from the pile
-class UpdateView(graphene.Mutation):
+class Split(graphene.Mutation):
     """
     Remove a view
     """
@@ -23,25 +23,20 @@ class UpdateView(graphene.Mutation):
     class Arguments:
         # the update context
         viewport = graphene.Int(required=True)
-        reader = graphene.String(required=False)
-        dataset = graphene.String(required=False)
-        channel = graphene.String(required=False)
 
     # the result is the new list of views
     views = graphene.List(View)
 
     # the range controller mutator
     @staticmethod
-    def mutate(root, info, viewport, reader, dataset, channel):
+    def mutate(root, info, viewport):
         """
         Remove a reader from the pile
         """
         # get the store
         store = info.context["store"]
         # ask it to split the view
-        views = store.updateView(
-            viewport=viewport, reader=reader, dataset=dataset, channel=channel
-        )
+        views = store.splitView(viewport=viewport)
         # form the mutation resolution context
         context = {"views": views}
         # and resolve the mutation
