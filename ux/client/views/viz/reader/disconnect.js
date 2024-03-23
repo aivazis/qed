@@ -23,7 +23,7 @@ import { disconnect as paintDisconnect } from './styles'
 
 
 // control to disconnect a data reader
-export const Disconnect = ({ uri }) => {
+export const Disconnect = ({ name }) => {
     // get the current views
     const { views } = useViews()
     // and build the handler that collapses them
@@ -46,7 +46,7 @@ export const Disconnect = ({ uri }) => {
             // input
             variables: {
                 // the payload
-                uri
+                name
             },
             // update the store
             updater: store => {
@@ -78,7 +78,7 @@ export const Disconnect = ({ uri }) => {
                 // go through the views
                 const viewports = views.map((view, viewport) => {
                     // and get the list of viewports that show datasets that belong to this reader
-                    return view.reader?.uri == uri ? viewport : null
+                    return view.reader?.name == name ? viewport : null
                 }).filter(
                     // filter out the nulls
                     viewport => viewport !== null
@@ -117,8 +117,8 @@ export const Disconnect = ({ uri }) => {
 
 // the mutation that disconnects an archive
 const disconnectMutation = graphql`
-    mutation disconnectReaderMutation($uri: String!) {
-        disconnectReader(uri: $uri) {
+    mutation disconnectReaderMutation($name: String!) {
+        disconnectReader(name: $name) {
             reader {
                 id
             }

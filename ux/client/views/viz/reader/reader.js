@@ -47,9 +47,7 @@ const Panel = () => {
     const update = useUpdateView()
 
     // unpack the reader
-    const { id, uri, selectors } = reader
-    // parse the reader id; ignore the {family} name that is not used here
-    const [, name] = id.split(":")
+    const { name, uri, selectors } = reader
     // if i have a valid dataset selection, grab its channels
     const channels = dataset?.channels ?? []
 
@@ -66,7 +64,7 @@ const Panel = () => {
         onClick: update,
     }
     // build my controls
-    const Controls = <Disconnect uri={uri} />
+    const Controls = <Disconnect name={name} />
 
     // mix my paint
     const paint = styles.reader(state)
