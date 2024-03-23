@@ -18,7 +18,7 @@ import { useGetView } from '../../main/useGetView'
 export const Provider = (props) => {
     // extract the data
     const reader = useFragment(graphql`
-        fragment context_reader on Reader {
+        fragment context_viz_connected_reader on Reader {
             id
             name
             uri
