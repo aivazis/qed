@@ -14,7 +14,7 @@ from .View import View
 
 
 # remove a view from the pile
-class SplitView(graphene.Mutation):
+class Collapse(graphene.Mutation):
     """
     Remove a view
     """
@@ -35,8 +35,8 @@ class SplitView(graphene.Mutation):
         """
         # get the store
         store = info.context["store"]
-        # ask it to split the view
-        views = store.splitView(viewport=viewport)
+        # ask it to collapse the view
+        views = store.collapseView(viewport=viewport)
         # form the mutation resolution context
         context = {"views": views}
         # and resolve the mutation

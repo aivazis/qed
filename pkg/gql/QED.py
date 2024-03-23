@@ -17,7 +17,7 @@ from .Node import Node
 # my parts
 from .Archive import Archive
 from .Reader import Reader
-from .View import View
+from . import views
 
 
 # the singleton
@@ -34,7 +34,7 @@ class QED(graphene.ObjectType):
     # metadata
     id = graphene.ID(required=True)
     # my parts
-    views = graphene.List(View)
+    views = graphene.List(views.view)
     archives = graphene.List(Archive)
     readers = graphene.List(Reader)
 

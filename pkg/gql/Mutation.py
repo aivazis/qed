@@ -9,9 +9,7 @@ import graphene
 
 # the mutations
 # view management
-from .CollapseView import CollapseView
-from .SplitView import SplitView
-from .UpdateView import UpdateView
+from . import views
 
 # explorer
 from .ConnectArchive import ConnectArchive
@@ -33,9 +31,9 @@ class Mutation(graphene.ObjectType):
     """
 
     # view management
-    viewCollapse = CollapseView.Field()
-    sewSplit = SplitView.Field()
-    viewUpdate = UpdateView.Field()
+    viewCollapse = views.collapse.Field()
+    sewSplit = views.split.Field()
+    viewUpdate = views.update.Field()
 
     # data archive connection management
     connectArchive = ConnectArchive.Field()

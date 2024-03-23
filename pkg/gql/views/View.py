@@ -8,12 +8,12 @@
 import graphene
 
 # my interface
-from .Node import Node
+from ..Node import Node
 
 # my parts
-from .Channel import Channel
-from .Dataset import Dataset
-from .Reader import Reader
+from ..Channel import Channel
+from ..Dataset import Dataset
+from ..Reader import Reader
 
 
 # the type
