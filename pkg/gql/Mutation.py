@@ -33,9 +33,9 @@ class Mutation(graphene.ObjectType):
     """
 
     # view management
-    collapseView = CollapseView.Field()
-    splitView = SplitView.Field()
-    updateView = UpdateView.Field()
+    viewCollapse = CollapseView.Field()
+    sewSplit = SplitView.Field()
+    viewUpdate = UpdateView.Field()
 
     # data archive connection management
     connectArchive = ConnectArchive.Field()
