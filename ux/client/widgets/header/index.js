@@ -16,7 +16,7 @@ import styles from './styles'
 
 
 // a widget that can act as a header or a title
-export const Header = ({ title, controls = null, style }) => {
+export const Header = ({ title, children, style }) => {
     // mix my styles
     const headerStyle = { ...styles, ...style }
 
@@ -25,7 +25,7 @@ export const Header = ({ title, controls = null, style }) => {
         <div style={headerStyle} >
             {title}
             <Spacer />
-            {controls}
+            {children}
         </div>
     )
 }
