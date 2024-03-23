@@ -32,7 +32,7 @@ export const Error = ({ errors }) => {
 // the container
 const Box = styled.div`
     font-family: inconsolata;
-    font-size: large;
+    font-size: medium;
     margin: 1rem;
 `
 
