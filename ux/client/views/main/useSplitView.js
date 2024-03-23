@@ -36,7 +36,7 @@ export const useSplitView = () => {
             // update the store
             updater: store => {
                 // get the root field of the mutation result
-                const response = store.getRootField("splitView")
+                const response = store.getRootField("viewSplit")
                 // ask for the list of views
                 const updated = response.getLinkedRecords("views")
                 // if it's trivial
@@ -75,7 +75,7 @@ export const useSplitView = () => {
 // the mutation that splits a viewport
 const splitMutation = graphql`
     mutation useSplitViewMutation($viewport: Int!) {
-        splitView(viewport: $viewport) {
+        viewSplit(viewport: $viewport) {
             views {
                 id
             }

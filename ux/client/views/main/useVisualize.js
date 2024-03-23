@@ -40,7 +40,7 @@ export const useVisualize = () => {
             // update the store
             updater: store => {
                 // get the root field of the mutation result
-                const response = store.getRootField("updateView")
+                const response = store.getRootField("viewUpdate")
                 // ask for the list of views
                 const updated = response.getLinkedRecords("views")
                 //if it's trivial
@@ -76,7 +76,7 @@ const visualizeMutation = graphql`
     mutation useVisualizeMutation(
         $viewport: Int!, $reader: String, $dataset: String, $channel: String
     ) {
-        updateView(reader: $reader, dataset: $dataset, channel: $channel, viewport: $viewport) {
+        viewUpdate(reader: $reader, dataset: $dataset, channel: $channel, viewport: $viewport) {
             views {
                 id
                 name
