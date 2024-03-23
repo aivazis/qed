@@ -22,33 +22,32 @@ class DisconnectReader(graphene.Mutation):
     # inputs
     class Arguments:
         # the update context
-        uri = graphene.String(required=True)
+        name = graphene.String(required=True)
 
     # the result is the disconnected reader
     reader = graphene.Field(Reader)
 
     # the range controller mutator
-    def mutate(root, info, uri):
+    def mutate(root, info, name):
         """
         Remove a reader from the pile
         """
         # get the store
         store = info.context["store"]
-        # resolve the reader
-        reader = store.reader(uri=uri)
+        reader = store.reader(name=name)
         # if it's not there
         if not reader:
             # we have a bug
             channel = journal.firewall("qed.gql.disconnect")
             # complain
-            channel.line(f"while attempting to disconnect '{uri}")
+            channel.line(f"while attempting to disconnect '{name}")
             channel.line(f"the URI does not correspond to a connected product reader")
             # flush
             channel.log()
             # bail, just in case firewall aren't fatal
             return None
         # remove it from the pile
-        store.disconnectReader(reader=uri)
+        store.disconnectReader(name=name)
         # go through its datasets
         for dataset in reader.datasets:
             # and remove each one from the dataset registry
