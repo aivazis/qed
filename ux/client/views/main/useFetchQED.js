@@ -242,96 +242,10 @@ query useFetchQEDQuery {
                 }
             }
         }
-        archives {
-            id
-            name
-            uri
-            readers
-        }
-        readers {
-            id
-            name
-            uri
-            api
-            selectors {
-                name
-                values
-            }
-            datasets {
-                id
-                name
-                datatype
-                selector {
-                    name
-                    value
-                }
-                shape
-                origin
-                tile
-                channels {
-                    id
-                    name
-                    controllers {
-                        __typename
-                        ... on Node {
-                            id
-                        }
-                        ... on RangeController {
-                            slot
-                            min
-                            max
-                            low
-                            high
-                        }
-                        ... on ValueController {
-                            id
-                            slot
-                            min
-                            max
-                            value
-                        }
-                    }
-                    view {
-                        id
-                        name
-                        measure {
-                            id
-                            name
-                            active
-                            path {
-                                x
-                                y
-                            }
-                            closed
-                            selection
-                        }
-                        sync {
-                            id
-                            name
-                            channel
-                            zoom
-                            scroll
-                            path
-                            offsets {
-                                x
-                                y
-                            }
-                        }
-                        zoom {
-                            id
-                            name
-                            horizontal
-                            vertical
-                            coupled
-                        }
-                    }
-                }
-            }
-        }
-
 
         # the connected data archives
         ...context_archives
+
         # and data readers
         ...context_viz_connected_readers
     }
