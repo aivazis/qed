@@ -7,6 +7,9 @@
 // external
 import React from 'react'
 
+// project
+import { ErrorBoundary } from '~/boundary'
+
 // local
 // hooks
 import { useConnectReader } from './useConnectReader'
@@ -45,40 +48,15 @@ export const NISAR = ({ view, setType, hide }) => {
 
     // render
     return (
-        <Spec qref={qref} view={view} setType={setType} hide={hide} />
+        <ErrorBoundary fallback={<ProblemReport view={view} setType={setType} />}>
+            <Spec qref={qref} view={view} setType={setType} hide={hide} />
+        </ErrorBoundary>
     )
 }
 
 const Spec = ({ qref, view, setType, hide }) => {
-    // the query result
-    let payload = null
-    // attempt
-    try {
-        // extract the payload
-        payload = useQueryProductMetadata(qref)
-    } catch (error) {
-        // get the readers
-        const readers = view.reader.readers.filter(reader => reader !== "nisar")
-        // something went wrong, most likely this is not a nisar h5 file
-        const msg = [
-            `the file '${view.reader.uri}'`,
-            `does not appear to be a NISAR standard product`,
-            `please select a different reader for this file`,
-            `or choose a different file to display from the panel on left`,
-        ]
-        return (
-            <Panel>
-                <Error errors={msg} />
-                <Form>
-                    <Body>
-                        <Type value="" update={setType} readers={readers} />
-                    </Body>
-                </Form>
-            </Panel>
-        )
-    }
-    // if all went well, unpack the product metadata
-    const { uri, product } = payload
+    // unpack the product metadata
+    const { uri, product } = useQueryProductMetadata(qref)
     // set up my state
     const [form, setForm] = React.useState({
         // the pyre name of the reader
@@ -119,6 +97,28 @@ const Spec = ({ qref, view, setType, hide }) => {
             <Connect connect={connect} />
             <Cancel onClick={cancel}>cancel</Cancel>
             {error && <Error errors={error} />}
+        </Panel>
+    )
+}
+
+const ProblemReport = ({ view, setType }) => {
+    // get the readers
+    const readers = view.reader.readers.filter(reader => reader !== "nisar")
+    // something went wrong, most likely this is not a nisar h5 file
+    const msg = [
+        `the file '${view.reader.uri}'`,
+        `does not appear to be a NISAR standard product`,
+        `please select a different reader for this file`,
+        `or choose a different file to display from the panel on left`,
+    ]
+    return (
+        <Panel>
+            <Error errors={msg} />
+            <Form>
+                <Body>
+                    <Type value="" update={setType} readers={readers} />
+                </Body>
+            </Form>
         </Panel>
     )
 }

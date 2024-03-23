@@ -7,6 +7,9 @@
 // external
 import React from 'react'
 
+// project
+import { ErrorBoundary } from '~/boundary'
+
 // local
 // hooks
 import { useConnectReader } from './useConnectReader'
@@ -48,42 +51,17 @@ export const Native = ({ view, setType, hide }) => {
 
     // render
     return (
-        <Spec qref={qref} view={view} setType={setType} hide={hide} />
+        <ErrorBoundary fallback={<ProblemReport view={view} setType={setType} />}>
+            <Spec qref={qref} view={view} setType={setType} hide={hide} />
+        </ErrorBoundary>
     )
 }
 
 
 // the panel
 const Spec = ({ qref, view, setType, hide }) => {
-    // the query result
-    let payload = null
-    // attempt
-    try {
-        // extract the payload
-        payload = useQueryProductMetadata(qref)
-    } catch (error) {
-        // get the readers
-        const readers = view.reader.readers.filter(reader => reader !== "native")
-        // something went wrong, most likely this is not a nisar h5 file
-        const msg = [
-            `the file '${view.reader.uri}'`,
-            `does not appear to be a readable flat binary data product`,
-            `please select a different reader for this file`,
-            `or choose a different file to display from the panel on left`,
-        ]
-        return (
-            <Panel>
-                <Error errors={msg} />
-                <Form>
-                    <Body>
-                        <Type value="" update={setType} readers={readers} />
-                    </Body>
-                </Form>
-            </Panel>
-        )
-    }
-    // if all went well, unpack the product metadata
-    const { uri, product, bytes, cells, shape } = payload
+    // unpack the product metadata
+    const { uri, product, bytes, cells, shape } = useQueryProductMetadata(qref)
     // build the map of product types to their data type size
     const sizeof = {
         char: 1,
@@ -203,5 +181,26 @@ export const Cells = ({ value, update }) => {
     )
 }
 
+const ProblemReport = ({ view, setType }) => {
+    // get the readers
+    const readers = view.reader.readers.filter(reader => reader !== "native")
+    // something went wrong, most likely this is not a nisar h5 file
+    const msg = [
+        `the file '${view.reader.uri}'`,
+        `does not appear to be a readable flat binary data product`,
+        `please select a different reader for this file`,
+        `or choose a different file to display from the panel on left`,
+    ]
+    return (
+        <Panel>
+            <Error errors={msg} />
+            <Form>
+                <Body>
+                    <Type value="" update={setType} readers={readers} />
+                </Body>
+            </Form>
+        </Panel>
+    )
+}
 
 // end of file
