@@ -243,9 +243,10 @@ query useFetchQEDQuery {
             }
         }
 
+        # the active views for dataset selection by {viz/reader}
+        ...context_viz_reader_views
         # the connected data archives
         ...context_archives
-
         # and data readers
         ...context_viz_connected_readers
     }
