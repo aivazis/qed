@@ -34,6 +34,11 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         return self._readers.values()
 
     @property
+    def selections(self):
+        # easy enough
+        return self._selections.values()
+
+    @property
     def datasets(self):
         # easy enough
         return self._datasets.values()
@@ -78,7 +83,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         Update the view in {viewport}
         """
         # lookup the reader
-        reader = self.reader(uri=reader) if reader else None
+        reader = self.reader(name=reader) if reader else None
         # look up the dataset
         dataset = self.dataset(name=dataset) if dataset else None
         # if there is a channel
@@ -91,8 +96,6 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             viewName = f"{channelName}.view"
         # if not
         else:
-            # build a trivial configuration
-            config = None
             # and a random name
             viewName = str(uuid.uuid1())
         # build the view
@@ -101,6 +104,21 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         views = self._views
         # replace the one at {viewport}
         views[viewport] = view
+        # all done
+        return views
+
+    def selectReader(self, viewport, name):
+        """
+        Locate a reader by {name} and activate it in {viewport}
+        """
+        # get my views
+        views = self._views
+        # look up the reader selections
+        selections = self.selection(name=name)
+        # show me
+        selections.pyre_dump()
+        # install them in the view
+        views[viewport] = selections
         # all done
         return views
 
@@ -120,12 +138,19 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # easy enough
         return self._archives.get(uri)
 
-    def reader(self, uri):
+    def reader(self, name):
         """
-        Look up a reader by its {uri}
+        Look up a reader by its {name}
         """
         # easy enough
-        return self._readers.get(uri)
+        return self._readers.get(name)
+
+    def selection(self, name):
+        """
+        Look up the selections of a reader by its {name}
+        """
+        # easy enough
+        return self._selections.get(name)
 
     def dataset(self, name):
         """
@@ -155,8 +180,16 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         Register the {reader}
         """
-        # add it to the pile
-        self._readers[str(reader.uri)] = reader
+        # add it to the pile of readers
+        self._readers[reader.pyre_name] = reader
+        # make a selection for it
+        self._selections[reader.pyre_name] = View(
+            name=f"{reader.pyre_name}.selections", reader=reader
+        )
+        # go through its datasets
+        for dataset in reader.datasets:
+            # and connect them to the store
+            self.connectDataset(dataset=dataset)
         # all done
         return reader
 
@@ -168,16 +201,25 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         self._datasets[dataset.pyre_name] = dataset
         # go through its channels
         for channel in dataset.channels.values():
-            # ge the name of the channel
-            channelName = channel.pyre_name
-            # build the name of the view
-            viewName = f"{channelName}.config"
-            # construct the view
-            view = Channel(name=viewName, channel=channel)
-            # add it to the map
-            self._channels[channelName] = view
+            # and connect them to the store
+            self.connectChannel(channel=channel)
         # all done
         return dataset
+
+    def connectChannel(self, channel):
+        """
+        Register the {channel}
+        """
+        # get the name of the channel
+        channelName = channel.pyre_name
+        # build the name of the view
+        viewName = f"{channelName}.config"
+        # construct the view
+        view = Channel(name=viewName, channel=channel)
+        # add it to my map
+        self._channels[channelName] = view
+        # all done
+        return channel
 
     # deletions
     def disconnectArchive(self, uri):
@@ -200,25 +242,46 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return
 
-    def disconnectReader(self, reader):
+    def disconnectReader(self, name):
         """
         Remove the archive from the store
         """
-        # attempt to
+        # get the reader
+        reader = self.reader(name=name)
+        # if it's not there
+        if not reader:
+            # we have a bug
+            channel = journal.firewall("qed.gql.disconnect")
+            # complain
+            channel.line(f"while attempting to remove '{name}")
+            channel.line(f"the name does not correspond to a connected product reader")
+            # flush
+            channel.log()
+            # and bail, in case firewalls aren't fatal
+            return
+        # go through its datasets
+        for dataset in reader.datasets:
+            # and disconnect them
+            self.disconnectDataset(name=dataset.pyre_name)
+        # now, remove it from the store
+        del self._readers[name]
+        # and
         try:
-            # remove the reader
-            del self._readers[reader]
+            # its selections
+            del self._selections[name]
         # if it's not there
         except KeyError:
             # we have a bug
             channel = journal.firewall("qed.gql.disconnect")
             # complain
-            channel.line(f"while attempting to remove '{reader}")
+            channel.line(f"while attempting to the selections for '{name}")
             channel.line(f"the name does not correspond to a connected product reader")
             # flush
             channel.log()
+            # and bail, just in case firewalls aren't fatal
+            return reader
         # all done
-        return
+        return reader
 
     def disconnectDataset(self, name):
         """
@@ -231,94 +294,82 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             # we have a bug
             channel = journal.firewall("qed.gql.disconnect")
             # complain
-            channel.line(f"while attempting to remove '{name}")
+            channel.line(f"while attempting to disconnect the dataset '{name}")
             channel.line(f"the name does not correspond to a registered dataset")
             # flush
             channel.log()
             # and bail
             return
-
-        # remove it from the registry
-        del self._datasets[name]
-
         # go through its channels
         for channel in dataset.channels.values():
-            # ge the name of the channel
-            channelName = channel.pyre_name
-            # nd remove it form the registry
-            del self._channels[channelName]
-        # that's all there is to do
-        return
+            # and disconnect them
+            self.disconnectChannel(name=channel.pyre_name)
+        # remove it from the registry
+        del self._datasets[name]
+        # all done
+        return dataset
+
+    def disconnectChannel(self, name):
+        """
+        Remove the channel from the store
+        """
+        # look it up
+        channel = self.channel(name=name)
+        # if it's not there
+        if not channel:
+            # we have a bug
+            channel = journal.firewall("qed.gql.disconnect")
+            # complain
+            channel.line(f"while attempting to disconnect the channel f'{name}")
+            channel.line(f"the name does not correspond to a known dataset channel")
+            # flush
+            channel.log()
+            # and bail, just in case firewalls aren't fatal
+            return
+        # remove it form the registry
+        del self._channels[name]
+        # all done
+        return channel
 
     # metamethods
     def __init__(self, plexus, docroot, **kwds):
         # chain up
         super().__init__(plexus=plexus, spec="store", **kwds)
-
         # save the root of the document
         self._docroot = docroot
-        # build my map of
-        self._archives = {
-            # uri -> archive
-            f"{archive.uri}": archive
-            # for all connected archives
-            for archive in plexus.archives
-        }
-
-        # build a map of normalized uris to readers
-        readers = {}
-        # by going through the pile in the {plexus}
-        for reader in plexus.datasets:
-            # get the uri
-            uri = reader.uri.clone()
-            # normalize the scheme
-            if uri.scheme is None:
-                # by interpreting its absence as a local file
-                uri.scheme = "file"
-            # if the reader is managing a local file
-            if uri.scheme == "file":
-                # convert its address to an absolute path
-                uri.address = qed.primitives.path(uri.address).resolve()
-            # register this reader
-            readers[f"{uri}"] = reader
-        # store my map of readers
-        self._readers = readers
-
-        # build my map of
-        datasets = {
-            # name -> dataset state
-            f"{dataset.pyre_name}": dataset
-            # for all known readers
-            for reader in readers.values()
-            # for all datasets supported by each reader
-            for dataset in reader.datasets
-        }
-        # store it
-        self._datasets = datasets
-
-        # make a map for the dataset chanel viewable state
-        channels = {}
-        # go through the datasets
-        for dataset in datasets.values():
-            # and each of their channels
-            for channel in dataset.channels.values():
-                # get the name of the channel
-                channelName = channel.pyre_name
-                # build the name of the view
-                viewName = f"{channelName}.config"
-                # construct the view
-                view = Channel(name=viewName, channel=channel)
-                # add it to the map
-                channels[channelName] = view
-        # store it
-        self._channels = channels
-
+        # map: archive uris -> archives
+        self._archives = {}
+        # map: reader names -> readers
+        self._readers = {}
+        # map: reader names -> dataset/channel selection
+        self._selections = {}
+        # map: dataset name -> dataset
+        self._datasets = {}
+        # map: channel names -> channels
+        self._channels = {}
         # make a trivial view
         self._blank = View(name=f"{self.pyre_name}.blank")
-        # initialize my views, a list of {channel} instances that are currently
-        # on display
+        # initialize my views, a list of {channel} instances that are currently on display
         self._views = [self._blank]
+        # now, load the readers that {plexus} harvested from the configuration files
+        self.loadPersistentReaders(plexus=plexus)
+        # all done
+        return
 
+    # implementation details
+    # initialization from the plexus configuration
+    def loadPersistentReaders(self, plexus):
+        """
+        Transfer information from the plexus
+        """
+        # go through the registered archives
+        for archive in plexus.archives:
+            # and connect them to the store
+            self.connectArchive(archive=archive)
+        # go through the registered readers
+        for reader in plexus.datasets:
+            # and connect them to the store
+            self.connectReader(reader=reader)
         # all done
         return
 
@@ -347,7 +398,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # my readers
         channel.line("readers:")
         channel.indent()
-        channel.report(self._readers.keys())
+        channel.report(reader.uri for reader in self._readers.values())
         channel.outdent()
 
         # my datasets
