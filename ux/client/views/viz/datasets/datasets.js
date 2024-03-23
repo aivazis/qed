@@ -31,7 +31,7 @@ export const Datasets = () => {
             <Header title="datasets" style={styles.header} />
             {/* go through the readers and render them */}
             {readers.map(reader => (
-                <Reader key={reader.name} reader={reader} />
+                <Reader key={reader.id} reader={reader} />
             ))}
         </>
     )
