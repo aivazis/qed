@@ -34,24 +34,8 @@ class DisconnectReader(graphene.Mutation):
         """
         # get the store
         store = info.context["store"]
-        reader = store.reader(name=name)
-        # if it's not there
-        if not reader:
-            # we have a bug
-            channel = journal.firewall("qed.gql.disconnect")
-            # complain
-            channel.line(f"while attempting to disconnect '{name}")
-            channel.line(f"the URI does not correspond to a connected product reader")
-            # flush
-            channel.log()
-            # bail, just in case firewall aren't fatal
-            return None
         # remove it from the pile
-        store.disconnectReader(name=name)
-        # go through its datasets
-        for dataset in reader.datasets:
-            # and remove each one from the dataset registry
-            store.disconnectDataset(name=dataset.pyre_name)
+        reader = store.disconnectReader(name=name)
         # form the mutation resolution context
         context = {"reader": reader}
         # and resolve the mutation

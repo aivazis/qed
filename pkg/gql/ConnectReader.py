@@ -63,10 +63,6 @@ class ConnectReader(graphene.Mutation):
         store = info.context["store"]
         # add the new source to the store
         store.connectReader(reader=source)
-        # now, go through its datasets
-        for dataset in source.datasets:
-            # and add each one to the dataset registry
-            store.connectDataset(dataset=dataset)
         # make a resolution context
         context = {"reader": source}
         # and resolve the mutation
