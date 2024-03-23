@@ -260,9 +260,9 @@ type Shape {
 # mutations
 type Mutation {
   # viewports
-  collapseView(viewport: Int!): ViewInfo!
-  splitView(viewport: Int!): ViewInfo!
-  updateView(viewport: Int!, reader: String, dataset: String, channel: String): ViewInfo!
+  viewCollapse(viewport: Int!): ViewInfo!
+  viewSplit(viewport: Int!): ViewInfo!
+  viewUpdate(viewport: Int!, reader: String, dataset: String, channel: String): ViewInfo!
 
   # data archive connections
   connectArchive(name: String!, uri: String!): ArchiveInfo!
