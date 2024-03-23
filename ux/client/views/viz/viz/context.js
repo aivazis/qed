@@ -22,7 +22,6 @@ export const Provider = ({ children }) => {
         fragment context_readers on QED {
             readers {
                 id
-                name
                 # and whatever else readers need
                 ...context_reader
             }
