@@ -32,7 +32,7 @@ class Mutation(graphene.ObjectType):
 
     # view management
     viewCollapse = views.collapse.Field()
-    sewSplit = views.split.Field()
+    viewSplit = views.split.Field()
     viewUpdate = views.update.Field()
 
     # data archive connection management
