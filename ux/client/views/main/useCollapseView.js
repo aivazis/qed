@@ -36,7 +36,7 @@ export const useCollapseView = () => {
             // update the store
             updater: store => {
                 // get the root field of the mutation result
-                const response = store.getRootField("collapseView")
+                const response = store.getRootField("viewCollapse")
                 // ask for the list of views
                 const updated = response.getLinkedRecords("views")
                 // if it's trivial
@@ -82,7 +82,7 @@ export const useCollapseView = () => {
 // the mutation that collapses a viewport
 const collapseMutation = graphql`
     mutation useCollapseViewMutation($viewport: Int!) {
-        collapseView(viewport: $viewport) {
+        viewCollapse(viewport: $viewport) {
             views {
                 id
             }
