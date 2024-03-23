@@ -55,11 +55,37 @@ export const ISCE2 = ({ view, setType, hide }) => {
 
 // the panel
 const Spec = ({ qref, view, setType, hide }) => {
-    // unpack the product metadata
-    const {
-        uri, product, bytes, cells, shape,
-    } = useQueryProductMetadata(qref)
-    // the map of product types to their data type size
+    // the query result
+    let payload = null
+    // attempt
+    try {
+        // extract the payload
+        payload = useQueryProductMetadata(qref)
+    } catch (error) {
+        // get the readers
+        const readers = view.reader.readers.filter(reader => reader !== "isce2")
+        // something went wrong, most likely this is not a nisar h5 file
+        const msg = [
+            `the file '${view.reader.uri}'`,
+            `does not appear to be a supported ISCE2 product`,
+            `please select a different reader for this file`,
+            `or choose a different file to display from the panel on left`,
+        ]
+        return (
+            <Panel>
+                <Error errors={msg} />
+                <Form>
+                    <Body>
+                        <Type value="" update={setType} readers={readers} />
+                    </Body>
+                </Form>
+            </Panel>
+        )
+    }
+
+    // if all went well, unpack the product metadata
+    const { uri, product, bytes, cells, shape, } = payload
+    // build the map of product types to their data type size
     const sizeof = {
         slc: 8,
         int: 8,
