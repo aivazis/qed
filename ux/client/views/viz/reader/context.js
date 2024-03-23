@@ -22,7 +22,6 @@ export const Provider = (props) => {
             id
             name
             uri
-            api
             selectors {
                 name
                 values
@@ -30,7 +29,6 @@ export const Provider = (props) => {
             datasets {
                 id
                 name
-                datatype
                 selector {
                     name
                     value
@@ -39,17 +37,17 @@ export const Provider = (props) => {
                     id
                     tag
                 }
-                shape
-                origin
-                tile
             }
         }`,
         props.reader
     )
 
+    // get the active view
+    const view = useGetView()
+
     // set up my state
     // am i the active reader?
-    const active = React.useRef(false)
+    const active = view?.reader?.id == reader.id
     // my selected dataset
     const dataset = React.useRef(null)
     // the selector
@@ -57,12 +55,8 @@ export const Provider = (props) => {
     // and my channel selection
     const channel = React.useRef(null)
 
-    // get the active view
-    const view = useGetView()
     // if i'm the active reader
-    if (view?.reader?.id === reader.id) {
-        // mark me as active
-        active.current = true
+    if (active) {
         // if the view has a dataset
         if (view.dataset) {
             // it must be mine
@@ -74,8 +68,6 @@ export const Provider = (props) => {
             channel.current = view.channel
         }
     } else {
-        // mark me as inactive
-        active.current = false
         // if i only have one dataset, pick it
         const myDataset = reader.datasets.length == 1 ? reader.datasets[0] : null
         // and use it to initialize my dataset of choice
