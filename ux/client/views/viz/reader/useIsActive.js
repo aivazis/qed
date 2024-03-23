@@ -14,10 +14,10 @@ import { Context } from './context'
 
 // access to the viewport sync registry
 export const useIsActive = () => {
-    // grab the activation state ref
+    // grab the activation state
     const { active } = React.useContext(Context)
-    // and return its current value
-    return active.current
+    // and return it
+    return active
 }
 
 
