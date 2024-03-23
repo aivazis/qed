@@ -123,7 +123,7 @@ class Query(graphene.ObjectType):
         # attempt to
         try:
             # get the metadata factory
-            metadata = importlib.import_module(module).metadata(uri=uri)
+            factory = importlib.import_module(module).metadata
         # if twe have a bad module
         except ImportError as error:
             # make a channel
@@ -156,6 +156,27 @@ class Query(graphene.ObjectType):
             channel.log()
             # bail
             return context
+        # attempt to
+        try:
+            # load the metadata
+            metadata = factory(uri=uri)
+        # if anything goes wrong
+        except Exception as error:
+            # make a channel
+            channel = journal.error("qed.gql.discover")
+            # complain
+            channel.line(f"'{module}' does not recognize this file")
+            channel.indent()
+            channel.line(f"{error}")
+            channel.line(f"while attempting to discover metadata")
+            channel.line(f"for dataset '{uri}'")
+            channel.line(f"in archive '{archive}'")
+            channel.outdent()
+            # flush
+            channel.log()
+            # bail
+            return context
+
         # show me
         channel.line("metadata:")
         channel.indent()
