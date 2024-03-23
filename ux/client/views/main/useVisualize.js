@@ -33,7 +33,7 @@ export const useVisualize = () => {
             variables: {
                 // the payload
                 viewport: viewport,
-                reader: view?.reader?.uri || null,
+                reader: view?.reader?.name || null,
                 dataset: view?.dataset?.name || null,
                 channel: view?.channel?.tag || null,
             },
