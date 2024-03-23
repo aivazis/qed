@@ -154,7 +154,10 @@ const axisPaint = {
         width: "8.0em",
         minWidth: "8.0em",
     },
-    separator: {},
+    separator: {
+        width: "0.5em",
+        minWidth: "0.5em",
+    },
     value: {},
 }
 
