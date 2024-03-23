@@ -19,11 +19,11 @@ export const Provider = ({ children }) => {
     const qed = useQED()
     // ask it for all known data readers and attach them as read-only state
     const { readers } = useFragment(graphql`
-        fragment context_readers on QED {
+        fragment context_viz_connected_readers on QED {
             readers {
                 id
                 # and whatever else readers need
-                ...context_reader
+                ...context_viz_connected_reader
             }
         }`,
         qed

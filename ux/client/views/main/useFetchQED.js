@@ -333,7 +333,7 @@ query useFetchQEDQuery {
         # the connected data archives
         ...context_archives
         # and data readers
-        ...context_readers
+        ...context_viz_connected_readers
     }
 }`
 
