@@ -11,12 +11,50 @@ import { useFragment } from 'react-relay/hooks'
 
 // local
 // hooks
-import { useGetView } from '../../main/useGetView'
+import { useViewports } from '../../main'
+import { useQED } from '../../main'
 
 
 // the provider factory
-export const Provider = (props) => {
-    // extract the data
+export const Provider = props => {
+    // get the active viewport
+    const { activeViewport } = useViewports()
+    // get the session manager
+    const qed = useQED()
+    // extract the view information
+    const { views } = useFragment(graphql`
+        fragment context_viz_reader_views on QED {
+            views {
+                id
+                reader {
+                    id
+                    name
+                    uri
+                }
+                dataset {
+                    id
+                    name
+                    selector {
+                        name
+                        value
+                    }
+                    channels {
+                        id
+                        tag
+                    }
+                }
+                channel {
+                    id
+                    tag
+                }
+            }
+        }`,
+        qed
+    )
+    // get the active view
+    const view = views[activeViewport]
+
+    // extract the reader information
     const reader = useFragment(graphql`
         fragment context_viz_connected_reader on Reader {
             id
@@ -41,9 +79,6 @@ export const Provider = (props) => {
         }`,
         props.reader
     )
-
-    // get the active view
-    const view = useGetView()
 
     // set up my state
     // am i the active reader?
