@@ -32,17 +32,17 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
         "polarization": ["HH", "HV", "VH", "VV"],
     }
 
-    # metamethods
-    def __init__(self, name, **kwds):
+    # implementation details
+    def _loadDatasets(self):
+        """
+        Discover the available datasets
+        """
         # make a timer that measures the layout discovery time
         discovery = qed.timers.wall(f"qed.profiler.discovery.{name}")
         # and another that measures the amount of time it takes to collect statistics
         stats = qed.timers.wall(f"qed.profiler.stats.{name}")
-
         # start the discovery timer
         discovery.start()
-        # chain up
-        super().__init__(name=name, **kwds)
 
         # grab the data product
         product = self.product
