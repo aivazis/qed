@@ -37,17 +37,21 @@ export const useSplitView = () => {
             updater: store => {
                 // get the root field of the mutation result
                 const response = store.getRootField("viewSplit")
-                // ask for the list of views
-                const updated = response.getLinkedRecords("views")
+                // ask for the view
+                const view = response.getLinkedRecord("view")
                 // if it's trivial
-                if (updated === null) {
+                if (view === null) {
                     // something went wrong at the server; not much more to do
                     return
                 }
                 // get the remote store
                 const qed = store.get("QED")
-                // attach the updated pile
-                qed.setLinkedRecords(updated, "views")
+                // get the views
+                const views = qed.getLinkedRecords("views")
+                // attach the new view
+                qed.setLinkedRecords(views.toSpliced(viewport + 1, 0, view), "views")
+                // all done
+                return
             },
             // when the request is complete
             onCompleted: data => {
@@ -76,7 +80,7 @@ export const useSplitView = () => {
 const splitMutation = graphql`
     mutation useSplitViewMutation($viewport: Int!) {
         viewSplit(viewport: $viewport) {
-            views {
+            view {
                 id
             }
         }

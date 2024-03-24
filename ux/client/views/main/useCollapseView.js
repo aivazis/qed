@@ -37,17 +37,26 @@ export const useCollapseView = () => {
             updater: store => {
                 // get the root field of the mutation result
                 const response = store.getRootField("viewCollapse")
-                // ask for the list of views
-                const updated = response.getLinkedRecords("views")
+                // ask for the view
+                const view = response.getLinkedRecord("view")
                 // if it's trivial
-                if (updated === null) {
+                if (views === null) {
                     // something went wrong at the server; not much more to do
                     return
                 }
                 // get the remote store
                 const qed = store.get("QED")
-                // attach the updated pile
-                qed.setLinkedRecords(updated, "views")
+                // get the views
+                const views = qed.getLinkedRecords("views")
+                // if there is only one existing view
+                if (views.length == 1) {
+                    // the server sent us a blank one to use
+                    qed.setLinkedRecords([view], "views")
+                    // all done
+                    return
+                }
+                // otherwise, drop the view at {viewport}
+                qed.setLinkedRecords(views.toSpliced(viewport, 1), "views")
                 // all done
                 return
             },
@@ -83,7 +92,7 @@ export const useCollapseView = () => {
 const collapseMutation = graphql`
     mutation useCollapseViewMutation($viewport: Int!) {
         viewCollapse(viewport: $viewport) {
-            views {
+            view {
                 id
             }
         }
