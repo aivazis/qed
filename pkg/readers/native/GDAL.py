@@ -66,8 +66,10 @@ class GDAL(
             self.datasets.append(band)
         # remember the data product
         self.product = dataset
-        # and update the selectors
+        # update the selectors
         self.selectors["raster"] = bands
+        # and build the availability map
+        self.available["raster"] = bands
         # all done
         return
 
