@@ -287,8 +287,8 @@ type PersistInfo {
 # viewport management
 # the response payload
 type ViewInfo {
-  # the contents of the active viewports
-  views: [View]
+  # the id of the view
+  view: View
 }
 
 # support for connecting and disconnecting data archives
