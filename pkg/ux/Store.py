@@ -370,6 +370,9 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         for reader in plexus.datasets:
             # and connect them to the store
             self.connectReader(reader=reader)
+        # clear out the plexus state
+        plexus.archives = []
+        plexus.datasets = []
         # all done
         return
 
