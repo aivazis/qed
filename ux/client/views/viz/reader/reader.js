@@ -18,7 +18,7 @@ import { Provider } from './context'
 import { useReader } from './useReader'
 import { useIsActive } from './useIsActive'
 import { useDataset } from './useDataset'
-import { useUpdateView } from './useUpdateView'
+import { useSelectReader } from './useSelectReader'
 // components
 import { Axis } from './axis'
 import { Channels } from './channels'
@@ -44,7 +44,7 @@ const Panel = () => {
     // the selected dataset, if any
     const dataset = useDataset()
     // get the view update
-    const update = useUpdateView()
+    const select = useSelectReader()
 
     // unpack the reader
     const { name, uri, selectors } = reader
@@ -58,10 +58,21 @@ const Panel = () => {
     // - {selected} iff in {view}, which is checked as part of my {context} initialization
     const state = active ? "selected" : "enabled"
 
+    // turn select into an event handler
+    const selectReader = evt => {
+        // stop this event from bubbling up
+        evt.stopPropagation()
+        // quash the default behavior
+        evt.preventDefault()
+        // modify the server side store
+        select()
+        // all done
+        return
+    }
     // set up my behaviors
     const behaviors = {
         // click to select
-        onClick: update,
+        onClick: selectReader,
     }
     // build my controls
     const Controls = <Disconnect name={name} />
