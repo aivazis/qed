@@ -25,7 +25,7 @@ class Split(graphene.Mutation):
         viewport = graphene.Int(required=True)
 
     # the result is the new list of views
-    views = graphene.List(View)
+    view = graphene.Field(View)
 
     # the range controller mutator
     @staticmethod
@@ -36,9 +36,9 @@ class Split(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to split the view
-        views = store.splitView(viewport=viewport)
+        view = store.splitView(viewport=viewport)
         # form the mutation resolution context
-        context = {"views": views}
+        context = {"view": view}
         # and resolve the mutation
         return context
 

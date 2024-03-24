@@ -25,7 +25,7 @@ class Collapse(graphene.Mutation):
         viewport = graphene.Int(required=True)
 
     # the result is the new list of views
-    views = graphene.List(View)
+    view = graphene.Field(View)
 
     # the range controller mutator
     @staticmethod
@@ -36,9 +36,9 @@ class Collapse(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to collapse the view
-        views = store.collapseView(viewport=viewport)
+        view = store.collapseView(viewport=viewport)
         # form the mutation resolution context
-        context = {"views": views}
+        context = {"view": view}
         # and resolve the mutation
         return context
 

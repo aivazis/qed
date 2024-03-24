@@ -28,7 +28,7 @@ class Update(graphene.Mutation):
         channel = graphene.String(required=False)
 
     # the result is the new list of views
-    views = graphene.List(View)
+    view = graphene.Field(View)
 
     # the range controller mutator
     @staticmethod
@@ -39,11 +39,11 @@ class Update(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to split the view
-        views = store.updateView(
+        view = store.updateView(
             viewport=viewport, reader=reader, dataset=dataset, channel=channel
         )
         # form the mutation resolution context
-        context = {"views": views}
+        context = {"view": view}
         # and resolve the mutation
         return context
 
