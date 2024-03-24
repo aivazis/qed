@@ -57,13 +57,15 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # get my views
         views = self._views
         # pop the indicated one
-        views.pop(viewport)
+        view = views.pop(viewport)
         # if the pile of views is now empty
         if not views:
-            # add the blank view to it
+            # use the blank view
+            view = self._blank
+            # add it to the pile
             views.append(self._blank)
         # all done
-        return views
+        return view
 
     def splitView(self, viewport):
         """
@@ -76,7 +78,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # make a copy of {viewport}
         views.insert(viewport + 1, view)
         # all done
-        return views
+        return view
 
     def updateView(self, viewport, reader, dataset, channel):
         """
@@ -105,7 +107,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # replace the one at {viewport}
         views[viewport] = view
         # all done
-        return views
+        return view
 
     def selectReader(self, viewport, name):
         """
