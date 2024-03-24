@@ -14,10 +14,10 @@ import { Context } from './context'
 
 // access to the viewport sync registry
 export const useSelector = () => {
-    // grab the selector ref
+    // grab the selector
     const { selector } = React.useContext(Context)
-    // and return its current value
-    return selector.current
+    // and return it
+    return selector
 }
 
 

@@ -14,10 +14,10 @@ import { Context } from './context'
 
 // access to the currently selected dataset
 export const useDataset = () => {
-    // grab the dataset ref
+    // grab the dataset
     const { dataset } = React.useContext(Context)
-    // and return its current value
-    return dataset.current
+    // and return it
+    return dataset
 }
 
 
