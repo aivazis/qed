@@ -18,21 +18,21 @@ class Selector(graphene.ObjectType):
     name = graphene.String()
     value = graphene.String()
 
-
     # the resolvers
+    @staticmethod
     def resolve_name(selector, *_):
         """
         Get the {selector} name
         """
-        # ask relay
+        # the name is the first value of the pair
         return selector[0]
 
-
+    @staticmethod
     def resolve_value(selector, *_):
         """
         Get the {selector} value
         """
-        # ask
+        # the name is the second value of the pair
         return selector[1]
 
 
