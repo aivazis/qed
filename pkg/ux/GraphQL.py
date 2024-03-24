@@ -5,11 +5,12 @@
 
 
 # externals
-import journal
 import json
+import traceback
 
 # support
 import qed
+import journal
 
 
 # the {graphql} request handler
@@ -81,8 +82,12 @@ class GraphQL:
             channel = journal.warning("qed.ux.graphql")
             # go through the errors
             for error in result.errors:
-                # and report each one
-                channel.line(str(error))
+                # get the original error
+                original = error.original_error
+                # format each line of the traceback
+                for entry in traceback.format_exception(original):
+                    # and report it
+                    channel.report(report=entry.splitlines())
             # flush
             channel.log()
 
