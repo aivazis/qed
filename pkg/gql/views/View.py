@@ -14,6 +14,7 @@ from ..Node import Node
 from ..Channel import Channel
 from ..Dataset import Dataset
 from ..Reader import Reader
+from ..Selector import Selector
 
 
 # the type
@@ -34,6 +35,7 @@ class View(graphene.ObjectType):
     reader = graphene.Field(Reader)
     dataset = graphene.Field(Dataset)
     channel = graphene.Field(Channel)
+    selections = graphene.List(Selector)
 
     # resolvers
     @staticmethod
@@ -47,10 +49,18 @@ class View(graphene.ObjectType):
     @staticmethod
     def resolve_name(view, info, **kwds):
         """
-        Make an id
+        Make a name
         """
         # easy enough
         return view.pyre_name
+
+    @staticmethod
+    def resolve_selections(view, info, **kwds):
+        """
+        Resolve the table of selector candidates
+        """
+        # easy enough
+        return view.selections.items()
 
 
 # end of file
