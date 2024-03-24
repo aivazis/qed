@@ -41,17 +41,19 @@ export const useVisualize = () => {
             updater: store => {
                 // get the root field of the mutation result
                 const response = store.getRootField("viewUpdate")
-                // ask for the list of views
-                const updated = response.getLinkedRecords("views")
+                // ask for the view
+                const view = response.getLinkedRecord("view")
                 //if it's trivial
-                if (updated == null) {
+                if (view == null) {
                     // something went wrong at the server; bail, for now
                     return
                 }
                 // if all is good, get the remote store
                 const qed = store.get("QED")
-                // attach the updated pile
-                qed.setLinkedRecords(updated, "views")
+                // get the views
+                const views = qed.getLinkedRecords("views")
+                // replace the view at {viewport} with the new one
+                qed.setLinkedRecords(views.toSpliced(viewport, 1, view), "views")
                 // all done
                 return
             },
@@ -77,217 +79,9 @@ const visualizeMutation = graphql`
         $viewport: Int!, $reader: String, $dataset: String, $channel: String
     ) {
         viewUpdate(reader: $reader, dataset: $dataset, channel: $channel, viewport: $viewport) {
-            views {
+            view {
                 id
                 name
-                reader {
-                    id
-                    name
-                    uri
-                    api
-                    selectors {
-                        name
-                        values
-                    }
-                    datasets {
-                        id
-                        name
-                        datatype
-                        selector {
-                            name
-                            value
-                        }
-                        shape
-                        origin
-                        tile
-                        channels {
-                            id
-                            name
-                            tag
-                            controllers {
-                                __typename
-                                ... on Node {
-                                    id
-                                }
-                                ... on RangeController {
-                                    slot
-                                    min
-                                    max
-                                    low
-                                    high
-                                }
-                                ... on ValueController {
-                                    id
-                                    slot
-                                    min
-                                    max
-                                    value
-                                }
-                            }
-                            view {
-                                id
-                                name
-                                measure {
-                                    id
-                                    name
-                                    active
-                                    path {
-                                        x
-                                        y
-                                    }
-                                    closed
-                                    selection
-                                }
-                                sync {
-                                    id
-                                    name
-                                    channel
-                                    zoom
-                                    scroll
-                                    path
-                                    offsets {
-                                        x
-                                        y
-                                    }
-                                }
-                                zoom {
-                                    id
-                                    name
-                                    horizontal
-                                    vertical
-                                    coupled
-                                }
-                            }
-                        }
-                    }
-                }
-                dataset {
-                    id
-                    name
-                    datatype
-                    selector {
-                        name
-                        value
-                    }
-                    channels {
-                        id
-                        name
-                        tag
-                        controllers {
-                            __typename
-                            ... on Node {
-                                id
-                            }
-                            ... on RangeController {
-                                slot
-                                min
-                                max
-                                low
-                                high
-                            }
-                            ... on ValueController {
-                                id
-                                slot
-                                min
-                                max
-                                value
-                            }
-                        }
-                        view {
-                            id
-                            name
-                            measure {
-                                id
-                                name
-                                active
-                                path {
-                                    x
-                                    y
-                                }
-                                closed
-                                selection
-                            }
-                            sync {
-                                id
-                                name
-                                channel
-                                zoom
-                                scroll
-                                path
-                                offsets {
-                                    x
-                                    y
-                                }
-                            }
-                            zoom {
-                                id
-                                name
-                                horizontal
-                                vertical
-                                coupled
-                            }
-                        }
-                    }
-                }
-                channel {
-                    id
-                    name
-                    tag
-                    controllers {
-                        __typename
-                        ... on Node {
-                            id
-                        }
-                        ... on RangeController {
-                            slot
-                            min
-                            max
-                            low
-                            high
-                        }
-                        ... on ValueController {
-                            id
-                            slot
-                            min
-                            max
-                            value
-                        }
-                    }
-                    view {
-                        id
-                        name
-                        measure {
-                            id
-                            name
-                            active
-                            path {
-                                x
-                                y
-                            }
-                            closed
-                            selection
-                        }
-                        sync {
-                            id
-                            name
-                            channel
-                            zoom
-                            scroll
-                            path
-                            offsets {
-                                x
-                                y
-                            }
-                        }
-                        zoom {
-                            id
-                            name
-                            horizontal
-                            vertical
-                            coupled
-                        }
-                    }
-                }
             }
         }
     }
