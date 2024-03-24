@@ -263,6 +263,7 @@ type Mutation {
   viewCollapse(viewport: Int!): ViewInfo!
   viewSplit(viewport: Int!): ViewInfo!
   viewUpdate(viewport: Int!, reader: String, dataset: String, channel: String): ViewInfo!
+  viewSelectReader(viewport: Int!, reader: String!): ViewInfo!
   viewPersist(dummy: ID): PersistInfo
 
   # data archive connections
