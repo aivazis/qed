@@ -18,23 +18,12 @@ export const Provider = ({ children }) => {
     // get the session manager
     const qed = useQED()
     // ask it for all known data readers and attach them as read-only state
-    const { readers } = useFragment(graphql`
-        fragment context_viz_connected_readers on QED {
-            readers {
-                id
-                # and whatever else readers need
-                ...context_viz_connected_reader
-            }
-        }`,
-        qed
-    )
-
+    const { readers } = useFragment(contextGetReadersFragment, qed)
     // build the initial context value
     const context = {
         // the data sources
         readers,
     }
-
     // provide for my children
     return (
         <Context.Provider value={context}>
@@ -52,6 +41,18 @@ export const Context = React.createContext(
         readers: [],
     }
 )
+
+
+// the fragments
+export const contextGetReadersFragment = graphql`
+    fragment contextGetReadersFragment on QED {
+        readers {
+            id
+            # and whatever else readers need
+            ...contextGetReaderFragment
+        }
+    }
+`
 
 
 // the error message to show consumers that are not nested within a provider
