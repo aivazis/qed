@@ -115,8 +115,10 @@ type Reader implements Node {
   uri: String!
   # the prefix of the data request url
   api: String!
-  # the set of dataset selectors and their legal values
+  # the catalog of dataset selectors and their legal values
   selectors: [Selectors]!
+  # the catalog of dataset selectors and their available values
+  available: [Selectors]!
   # the actual datasets contained in the source
   datasets: [Dataset]!
 }
