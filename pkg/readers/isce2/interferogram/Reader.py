@@ -74,6 +74,8 @@ class Reader(
 
         # add the dataset to the pile
         self.datasets.append(dataset)
+        # build my availability map
+        self.available = {}
 
         # all done
         return
