@@ -24,41 +24,31 @@ export const Provider = props => {
     const { views } = useFragment(contextGetViewsFragment, qed)
     // get the active view
     const view = views[activeViewport]
-    // extract the reader information
+
+    // extract the description of this reader
     const reader = useFragment(contextGetReaderFragment, props.reader)
-
-    // set up my state
-    // am i the active reader?
+    // am i the reader in the active viewport?
     const active = view?.reader?.id == reader.id
-    // my selected dataset
-    const dataset = React.useRef(null)
-    // the selector
-    const selector = React.useRef(new Map())
-    // and my channel selection
-    const channel = React.useRef(null)
+    // if i'm the active reader, the dataset in the view is mine
+    const dataset = active ? view.dataset : (
+        // i also know my dataset if there is only possible choice
+        reader.datasets.length == 1 ? reader.datasets[0] : null
+    )
+    // if i'm the active reader, the channel in the view is mine
+    const channel = active ? view.channel : (
+        // i also know my channel if i have a dataset and it only has one channel
+        dataset?.channels.length == 1 ? dataset.channels[0].tag : null
+    )
 
-    // if i'm the active reader
-    if (active) {
-        // if the view has a dataset
-        if (view.dataset) {
-            // it must be mine
-            dataset.current = view.dataset
-        }
-        // if the view has a channel
-        if (view.channel) {
-            // it's my channel
-            channel.current = view.channel
-        }
-    } else {
-        // if i only have one dataset, pick it
-        const myDataset = reader.datasets.length == 1 ? reader.datasets[0] : null
-        // and use it to initialize my dataset of choice
-        dataset.current = myDataset
-        // reset my selector
-        selector.current = new Map()
-        // and my channel
-        channel.current = null
-    }
+
+    // MGA: FIXME
+    // the selector
+    const selector = new Map()
+
+    // let's figure out the set of values for each selector among the available datasets
+    const candidates = new Map(reader.selectors.map(selector => [selector.name, new Set()]))
+
+    /*
 
     // let's figure out the set of values for each selector among the available datasets
     const candidates = new Map(reader.selectors.map(selector => [selector.name, new Set()]))
@@ -93,6 +83,7 @@ export const Provider = props => {
             }
         })
     }
+    */
 
     // assemble the context value
     const context = {

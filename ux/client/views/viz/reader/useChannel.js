@@ -14,10 +14,10 @@ import { Context } from './context'
 
 // access to the viewport sync registry
 export const useChannel = () => {
-    // grab the channel ref
+    // grab the channel
     const { channel } = React.useContext(Context)
-    // and return its current value
-    return channel.current
+    // and return it
+    return channel
 }
 
 
