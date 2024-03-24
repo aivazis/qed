@@ -36,11 +36,6 @@ export const Save = ({ enabled = true }) => {
             variables: {
                 // the payload
                 dummy: null
-            },
-            onCompleted: data => {
-                console.log(data)
-                // all done
-                return
             }
         })
         // all done
