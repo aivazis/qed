@@ -82,6 +82,8 @@ const splitMutation = graphql`
         viewSplit(viewport: $viewport) {
             view {
                 id
+                # and whatever the readers need
+                ...contextGetViewFragment
             }
         }
     }
