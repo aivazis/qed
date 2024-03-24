@@ -14,7 +14,6 @@ import { useFragment } from 'react-relay/hooks'
 import { useViewports } from '../../main'
 import { useQED } from '../../main'
 
-
 // the provider factory
 export const Provider = props => {
     // get the active viewport
@@ -22,63 +21,11 @@ export const Provider = props => {
     // get the session manager
     const qed = useQED()
     // extract the view information
-    const { views } = useFragment(graphql`
-        fragment context_viz_reader_views on QED {
-            views {
-                id
-                reader {
-                    id
-                    name
-                    uri
-                }
-                dataset {
-                    id
-                    name
-                    selector {
-                        name
-                        value
-                    }
-                    channels {
-                        id
-                        tag
-                    }
-                }
-                channel {
-                    id
-                    tag
-                }
-            }
-        }`,
-        qed
-    )
+    const { views } = useFragment(contextGetViewsFragment, qed)
     // get the active view
     const view = views[activeViewport]
-
     // extract the reader information
-    const reader = useFragment(graphql`
-        fragment context_viz_connected_reader on Reader {
-            id
-            name
-            uri
-            selectors {
-                name
-                values
-            }
-            datasets {
-                id
-                name
-                selector {
-                    name
-                    value
-                }
-                channels {
-                    id
-                    tag
-                }
-            }
-        }`,
-        props.reader
-    )
+    const reader = useFragment(contextGetReaderFragment, props.reader)
 
     // set up my state
     // am i the active reader?
@@ -191,6 +138,94 @@ export const Context = React.createContext(
     }
 )
 
+
+// the fragments
+// the information necessary for selecting which datasets to visualize
+export const contextGetViewsFragment = graphql`
+    fragment contextGetViewsFragment on QED {
+        views {
+            id
+            name
+            reader {
+                id
+                name
+                uri
+            }
+            dataset {
+                id
+                name
+                selector {
+                    name
+                    value
+                }
+                channels {
+                    id
+                    tag
+                }
+            }
+            channel {
+                id
+                tag
+            }
+        }
+    }
+`
+
+// the information necessary of manipulating the set of viewable panels
+// must get at least as much as it takes to feed the dataset selection
+export const contextGetViewFragment = graphql`
+    fragment contextGetViewFragment on View {
+        id
+        name
+        reader {
+            id
+            name
+            uri
+        }
+        dataset {
+            id
+            name
+            selector {
+                name
+                value
+            }
+            channels {
+                id
+                tag
+            }
+        }
+        channel {
+            id
+            tag
+        }
+    }
+`
+
+// the information necessary for populating individual entries in the reader sections
+// of the dataset panel; {datasets} get the full array; here we extract individual entries
+export const contextGetReaderFragment = graphql`
+    fragment contextGetReaderFragment on Reader {
+        id
+        name
+        uri
+        selectors {
+            name
+            values
+        }
+        datasets {
+            id
+            name
+            selector {
+                name
+                value
+            }
+            channels {
+                id
+                tag
+            }
+        }
+    }
+`
 
 // the error message to show consumers that are not nested within a provider
 const complaint = "while accessing the 'viewport' context: no provider"
