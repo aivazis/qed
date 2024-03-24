@@ -34,6 +34,7 @@ class Mutation(graphene.ObjectType):
     viewCollapse = views.collapse.Field()
     viewSplit = views.split.Field()
     viewUpdate = views.update.Field()
+    viewSelectReader = views.selectReader.Field()
     viewPersist = views.persist.Field()
 
     # data archive connection management
