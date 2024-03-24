@@ -35,9 +35,11 @@ class Reader(graphene.ObjectType):
     uri = graphene.String()
     api = graphene.String()
     selectors = graphene.List(Selectors)
+    available = graphene.List(Selectors)
     datasets = graphene.List(Dataset)
 
     # the resolvers
+    @staticmethod
     def resolve_id(reader, *_):
         """
         Get the {reader} id
@@ -45,6 +47,7 @@ class Reader(graphene.ObjectType):
         # splice together the {family} and {name} of the {reader}
         return f"{reader.pyre_family()}:{reader.pyre_name}"
 
+    @staticmethod
     def resolve_name(reader, *_):
         """
         Get the {reader} name
@@ -52,6 +55,7 @@ class Reader(graphene.ObjectType):
         # return the {pyre_id} of the {reader}
         return reader.pyre_name
 
+    @staticmethod
     def resolve_uri(reader, *_):
         """
         Get the path to the file
@@ -59,6 +63,7 @@ class Reader(graphene.ObjectType):
         # resolve the uri
         return str(reader.uri)
 
+    @staticmethod
     def resolve_api(reader, *_):
         """
         Get the entry point for data requests
@@ -66,12 +71,21 @@ class Reader(graphene.ObjectType):
         # requests are resolved against {data}
         return "data"
 
+    @staticmethod
     def resolve_selectors(reader, *_):
         """
         Build a list of the selector names and their allowed values
         """
         return reader.selectors.items()
 
+    @staticmethod
+    def resolve_available(reader, *_):
+        """
+        Build a list of the selector names and their available values
+        """
+        return reader.available.items()
+
+    @staticmethod
     def resolve_datasets(reader, *_):
         """
         Build a list of the available datasets
