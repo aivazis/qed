@@ -24,7 +24,30 @@ export const useFetchQED = () => {
 }
 
 
-// query all known data archives
+const query = graphql`
+    query useFetchQEDQuery {
+        qed {
+            # the server side store id
+            id
+            # the connected data archives
+            ...context_archives
+            # data reader information for populating the panel of datasets
+            ...contextGetReadersFragment
+            # the active views for dataset selection by {viz/reader}
+            ...contextGetViewsFragment
+
+            # temporary: feed the {viz} panel the minimum required
+            # until it gets its own fragment
+            views {
+                id
+            }
+        }
+    }
+`
+
+/*
+// the full structure of the server side store
+// here to help with copy-paste
 const query = graphql`
 query useFetchQEDQuery {
     qed {
@@ -242,15 +265,8 @@ query useFetchQEDQuery {
                 }
             }
         }
-
-        # the active views for dataset selection by {viz/reader}
-        ...context_viz_reader_views
-        # the connected data archives
-        ...context_archives
-        # and data readers
-        ...context_viz_connected_readers
     }
 }`
-
+*/
 
 // end of file
