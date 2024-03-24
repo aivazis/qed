@@ -82,6 +82,8 @@ const visualizeMutation = graphql`
             view {
                 id
                 name
+                # and whatever the readers need
+                ...contextGetViewFragment
             }
         }
     }
