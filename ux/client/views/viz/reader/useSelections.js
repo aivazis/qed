@@ -13,11 +13,11 @@ import { Context } from './context'
 
 
 // access to the viewport sync registry
-export const useSelector = () => {
+export const useSelections = () => {
     // grab the selector
-    const { selector } = React.useContext(Context)
+    const { selections } = React.useContext(Context)
     // and return it
-    return selector
+    return selections
 }
 
 
