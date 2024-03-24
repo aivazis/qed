@@ -109,20 +109,18 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return view
 
-    def selectReader(self, viewport, name):
+    def selectReader(self, viewport: int, name: str):
         """
         Locate a reader by {name} and activate it in {viewport}
         """
-        # get my views
-        views = self._views
         # look up the reader selections
-        selections = self.selection(name=name)
+        selection = self.selection(name=name)
         # show me
-        selections.pyre_dump()
+        selection.pyre_dump()
         # install them in the view
-        views[viewport] = selections
+        self._views[viewport] = selection
         # all done
-        return views
+        return selection
 
     # count
     def archiveCount(self):
