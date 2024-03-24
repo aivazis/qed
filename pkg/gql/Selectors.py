@@ -18,21 +18,21 @@ class Selectors(graphene.ObjectType):
     name = graphene.String()
     values = graphene.List(graphene.String)
 
-
     # the resolvers
+    @staticmethod
     def resolve_name(selector, *_):
         """
         Get the {selector} name
         """
-        # the name if the first element of the pair
+        # the name is the first element of the pair
         return selector[0]
 
-
+    @staticmethod
     def resolve_values(selector, *_):
         """
         Get the allowed {selector} values
         """
-        # the value if the second element of the pair
+        # the value is the second element of the pair
         return selector[1]
 
 
