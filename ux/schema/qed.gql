@@ -263,6 +263,7 @@ type Mutation {
   viewCollapse(viewport: Int!): ViewInfo!
   viewSplit(viewport: Int!): ViewInfo!
   viewUpdate(viewport: Int!, reader: String, dataset: String, channel: String): ViewInfo!
+  viewPersist(dummy: ID): PersistInfo
 
   # data archive connections
   connectArchive(name: String!, uri: String!): ArchiveInfo!
@@ -276,6 +277,11 @@ type Mutation {
   updateRangeController(range: RangeControllerRangeInput!): RangeControllerInfo!
   resetValueController(controller: ValueControllerInput!): ValueControllerInfo!
   updateValueController(value: ValueControllerValueInput!): ValueControllerInfo!
+}
+
+type PersistInfo {
+  # the store id
+  id: ID
 }
 
 # viewport management

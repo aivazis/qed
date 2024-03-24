@@ -16,6 +16,7 @@ import { Header } from '~/widgets'
 import { useReaders } from '../viz/useReaders'
 // components
 import { Reader } from '../reader'
+import { Save } from './save'
 // styles
 import styles from './styles'
 
@@ -28,7 +29,9 @@ export const Datasets = () => {
     return (
         <>
             {/* the title of the panel */}
-            <Header title="datasets" style={styles.header} />
+            <Header title="datasets" style={styles.header} >
+                <Save />
+            </Header>
             {/* go through the readers and render them */}
             {readers.map(reader => (
                 <Reader key={reader.id} reader={reader} />
