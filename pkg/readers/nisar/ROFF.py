@@ -34,10 +34,11 @@ class ROFF(H5):
         "axis": ["alongTrack", "slantRange"],
     }
 
-    # metamethods
-    def __init__(self, name, **kwds):
-        # chain up
-        super().__init__(name=name, **kwds)
+    # implementation details
+    def _loadDatasets(self):
+        """
+        Discover the available datasets
+        """
         # grab the data product
         product = self.product
         # grab my selectors

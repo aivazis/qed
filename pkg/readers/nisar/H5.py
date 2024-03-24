@@ -4,6 +4,9 @@
 # (c) 1998-2024 all rights reserved
 
 
+# externals
+import collections
+
 # support
 import qed
 
@@ -46,8 +49,30 @@ class H5(qed.flow.factory, implements=qed.protocols.reader):
             fapl.setPageBufferSize(page=size, meta=50, raw=50)
         # open my file
         self.product = qed.h5.reader(uri=self.uri, fapl=fapl).read()
+
+        # load the datasets
+        self._loadDatasets()
+        # and build the build the selector availability map
+        self.available = self._checkAvailability()
+
         # all done
         return
+
+    # implementation details
+    def _checkAvailability(self):
+        """
+        Build a map with the available values of each selector
+        """
+        # initialize the map
+        available = collections.defaultdict(set)
+        # go through my datasets
+        for dataset in self.datasets:
+            # and their selectors
+            for axis, coordinate in dataset.selector.items():
+                # and add the {coordinate} as a possible value of {axis}
+                available[axis].add(coordinate)
+        # all done
+        return available
 
 
 # end of file
