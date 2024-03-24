@@ -38,9 +38,9 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
         Discover the available datasets
         """
         # make a timer that measures the layout discovery time
-        discovery = qed.timers.wall(f"qed.profiler.discovery.{name}")
+        discovery = qed.timers.wall(f"qed.profiler.discovery.{self.pyre_name}")
         # and another that measures the amount of time it takes to collect statistics
-        stats = qed.timers.wall(f"qed.profiler.stats.{name}")
+        stats = qed.timers.wall(f"qed.profiler.stats.{self.pyre_name}")
         # start the discovery timer
         discovery.start()
 
