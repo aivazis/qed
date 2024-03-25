@@ -73,23 +73,44 @@ class GraphQL:
 
         # assemble the resulting document
         doc = {"data": result.data}
+
         # in addition, if something went wrong
         if result.errors:
-            # inform the client; pick the first error, since it doesn't seem that the client
-            # can get the whole list in a usable way
-            doc["errors"] = [{"message": str(result.errors[0].original_error)}]
-            # make a channel
+            # make a pile
+            messages = []
+            # and a channel
             channel = journal.warning("qed.ux.graphql")
             # go through the errors
             for error in result.errors:
+                # split it
+                lines = str(error).splitlines()
+                # report the {graphql} error
+                channel.line(f"graphql:")
+                channel.indent()
+                channel.report(report=lines)
+                channel.outdent()
+                # add the error to the pile
+                messages.extend(lines)
                 # get the original error
                 original = error.original_error
-                # format each line of the traceback
-                for entry in traceback.format_exception(original):
-                    # and report it
-                    channel.report(report=entry.splitlines())
-            # flush
-            channel.log()
+                # if it is non-trivial
+                if original:
+                    # report it
+                    channel.line(f"python:")
+                    channel.indent()
+                    # format each line of the traceback
+                    for entry in traceback.format_exception(original):
+                        # split
+                        lines = entry.splitlines()
+                        # report it
+                        channel.report(report=lines)
+                        # and add it to the message pile
+                        messages.extend(lines)
+                    channel.outdent()
+                # flush
+                channel.log()
+            # finally, add the error report to the document
+            doc["errors"] = [{"message": "\n".join(messages)}]
 
         # encode it using JSON and serve it
         return server.documents.JSON(server=server, value=doc)
