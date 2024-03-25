@@ -265,7 +265,6 @@ type Mutation {
   # viewports
   viewCollapse(viewport: Int!): ViewInfo!
   viewSplit(viewport: Int!): ViewInfo!
-  viewUpdate(viewport: Int!, reader: String, dataset: String, channel: String): ViewInfo!
   viewSelectReader(viewport: Int!, reader: String!): ViewInfo!
   viewToggleCoordinate(selection: ViewSelectorInput!): ViewInfo!
   viewToggleChannel(selection: ViewSelectorInput!): ViewInfo!
