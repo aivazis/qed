@@ -267,8 +267,8 @@ type Mutation {
   viewSplit(viewport: Int!): ViewInfo!
   viewUpdate(viewport: Int!, reader: String, dataset: String, channel: String): ViewInfo!
   viewSelectReader(viewport: Int!, reader: String!): ViewInfo!
-  viewToggleCoordinate(viewport: Int!, selection: ViewSelectorInput!): ViewInfo!
-  viewToggleChannel(viewport: Int!, selection: ViewSelectorInput!): ViewInfo!
+  viewToggleCoordinate(selection: ViewSelectorInput!): ViewInfo!
+  viewToggleChannel(selection: ViewSelectorInput!): ViewInfo!
   viewPersist(dummy: ID): PersistInfo
 
   # data archive connections
@@ -293,6 +293,8 @@ type PersistInfo {
 # viewport management
 # request payloads
 input ViewSelectorInput {
+  # the viewport
+  viewport: Int!
   # the reader
   reader: String!
   # the selector; axis or channel name
