@@ -11,6 +11,8 @@ from .Collapse import Collapse as collapse
 from .Persist import Persist as persist
 from .SelectReader import SelectReader as selectReader
 from .Split import Split as split
+from .ToggleChannel import ToggleChannel as toggleChannel
+from .ToggleCoordinate import ToggleCoordinate as toggleCoordinate
 from .Update import Update as update
 
 # end of file
