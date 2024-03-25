@@ -115,12 +115,86 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         # look up the reader selections
         selection = self.selection(name=name)
-        # show me
-        selection.pyre_dump()
-        # install them in the view
+        # resolve
+        selection.resolve()
+        # and install in the view
         self._views[viewport] = selection
         # all done
         return selection
+
+    def toggleChannel(self, viewport: int, reader: str, tag: str):
+        """
+        Toggle the value of the {coordinate} of {axis} in {viewport}
+        """
+        # get the view
+        view = self._views[viewport]
+        # if it's not the correct reader
+        if view.reader.pyre_name != reader:
+            # get the correct view
+            view = self.selectReader(viewport=viewport, name=reader)
+            # and activate it
+            self._views[viewport] = view
+
+        # get the dataset
+        dataset = view.dataset
+        # if i don't have on
+        if not dataset:
+            # we have a bug
+            firewall = journal.firewall("qed.us.store")
+            # complain
+            firewall.line(f"no dataset present in viewport {viewport}")
+            firewall.line(f"while attempting to toggle the '{tag}' channel")
+            firewall.line(f"of {view.reader}")
+            # flush
+            firewall.log()
+            # and bail, just in case firewalls aren't fatal
+            return view
+        # get the view channel
+        current = view.channel
+        # if the view doesn't have a channel or it does and it's not this one
+        if not current or current.tag != tag:
+            # get the channel from teh dataset
+            channel = dataset.channels[tag]
+            # replace the channel with this one
+            view.channel = channel
+        # otherwise
+        else:
+            # clear the channel selection
+            view.channel = None
+
+        # N.B.:
+        #   toggling the channel never upsets the dataset solution
+        #   so there is no reason to resolve the view
+
+        # all done
+        return view
+
+    def toggleCoordinate(self, viewport: int, reader: str, axis: str, coordinate: str):
+        """
+        Toggle the value of the {coordinate} of {axis} in {viewport}
+        """
+        # get the view
+        view = self._views[viewport]
+        # if it's not the correct reader
+        if view.reader != reader:
+            # get the correct view
+            view = self.selectReader(viewport=viewport, name=reader)
+            # and activate it
+            self._views[viewport] = view
+        # get the current value of the axis
+        current = view.selections.get(axis)
+        # if the value is trivial or something else
+        if not current or current != coordinate:
+            # set {coordinate} as the value
+            view.selections[axis] = coordinate
+        # otherwise
+        else:
+            # clear it
+            del view.selections[axis]
+        # resolve the view
+        view.resolve()
+        # all done
+        return view
 
     # count
     def archiveCount(self):
