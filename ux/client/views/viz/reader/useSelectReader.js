@@ -44,7 +44,7 @@ export const useSelectReader = () => {
             updater: store => {
                 // get the root field of the mutation result
                 const response = store.getRootField("viewSelectReader")
-                // ask for the list of views
+                // ask for the view
                 const view = response.getLinkedRecord("view")
                 // if it's trivial
                 if (view === null) {
