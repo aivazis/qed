@@ -16,7 +16,7 @@ from .View import View
 # remove a view from the pile
 class Persist(graphene.Mutation):
     """
-    Remove a view
+    Persist the current reader configuration
     """
 
     # inputs

@@ -24,7 +24,7 @@ class Collapse(graphene.Mutation):
         # the update context
         viewport = graphene.Int(required=True)
 
-    # the result is the new list of views
+    # the result is view that was removed from the pile
     view = graphene.Field(View)
 
     # the range controller mutator

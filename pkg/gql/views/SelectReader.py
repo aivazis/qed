@@ -16,7 +16,7 @@ from .View import View
 # remove a view from the pile
 class SelectReader(graphene.Mutation):
     """
-    Remove a view
+    Place a reader in a viewport
     """
 
     # inputs
@@ -25,7 +25,7 @@ class SelectReader(graphene.Mutation):
         viewport = graphene.Int(required=True)
         reader = graphene.String(required=False)
 
-    # the result is the new list of views
+    # the result is the updated view
     view = graphene.Field(View)
 
     # the range controller mutator

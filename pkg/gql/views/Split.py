@@ -16,7 +16,7 @@ from .View import View
 # remove a view from the pile
 class Split(graphene.Mutation):
     """
-    Remove a view
+    Split the current viewport
     """
 
     # inputs
@@ -24,7 +24,7 @@ class Split(graphene.Mutation):
         # the update context
         viewport = graphene.Int(required=True)
 
-    # the result is the new list of views
+    # the result is the new view that was added in the pile
     view = graphene.Field(View)
 
     # the range controller mutator
