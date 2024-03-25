@@ -17,10 +17,12 @@ import { Viewport } from './viewport'
 
 // export the data viewer
 export const Viewer = ({ viewport, view, registrar }) => {
+    // show me
+    console.log(`viz.viewer: view`, view)
     // unpack the view
     const { reader, dataset, channel } = view
     // check for the trivial cases
-    if (!reader || !dataset || !channel) {
+    if (true || !reader || !dataset || !channel) {
         // to show a blank panel
         return (
             <>

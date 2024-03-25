@@ -80,35 +80,6 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return view
 
-    def updateView(self, viewport, reader, dataset, channel):
-        """
-        Update the view in {viewport}
-        """
-        # lookup the reader
-        reader = self.reader(name=reader) if reader else None
-        # look up the dataset
-        dataset = self.dataset(name=dataset) if dataset else None
-        # if there is a channel
-        if channel:
-            # ask it for its channel
-            channel = dataset.channels[channel]
-            # get the name of the channel
-            channelName = channel.pyre_name
-            # build the view name
-            viewName = f"{channelName}.view"
-        # if not
-        else:
-            # and a random name
-            viewName = str(uuid.uuid1())
-        # build the view
-        view = View(name=viewName, reader=reader, dataset=dataset, channel=channel)
-        # get my views
-        views = self._views
-        # replace the one at {viewport}
-        views[viewport] = view
-        # all done
-        return view
-
     def selectReader(self, viewport: int, name: str):
         """
         Locate a reader by {name} and activate it in {viewport}
