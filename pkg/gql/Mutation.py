@@ -35,6 +35,8 @@ class Mutation(graphene.ObjectType):
     viewSplit = views.split.Field()
     viewUpdate = views.update.Field()
     viewSelectReader = views.selectReader.Field()
+    viewToggleCoordinate = views.toggleCoordinate.Field()
+    viewToggleChannel = views.toggleChannel.Field()
     viewPersist = views.persist.Field()
 
     # data archive connection management
