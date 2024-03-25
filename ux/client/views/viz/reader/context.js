@@ -23,7 +23,7 @@ export const Provider = props => {
     // extract the view information
     const { views } = useFragment(contextGetViewsFragment, qed)
     // get the active view
-    const view = views[activeViewport]
+    const view = useFragment(contextGetViewFragment, views[activeViewport])
 
     // extract the description of this reader
     const reader = useFragment(contextGetReaderFragment, props.reader)
@@ -39,66 +39,29 @@ export const Provider = props => {
         // i also know my channel if i have a dataset and it only has one channel
         dataset?.channels.length == 1 ? dataset.channels[0].tag : null
     )
-
-
-    // MGA: FIXME
-    // the selector
-    const selector = new Map()
-
-    // let's figure out the set of values for each selector among the available datasets
-    const candidates = new Map(reader.selectors.map(selector => [selector.name, new Set()]))
-
-    /*
-
-    // let's figure out the set of values for each selector among the available datasets
-    const candidates = new Map(reader.selectors.map(selector => [selector.name, new Set()]))
-    // go through the datasets
-    reader.datasets.forEach(dataset => {
-        dataset.selector.forEach(({ name, value }) => {
-            candidates.get(name).add(value)
-        })
-    })
-
-    // if there is a dataset choice
-    if (dataset.current) {
-        // use it to initialize my selector
-        selector.current = new Map(
-            // by going through its coordinate settings and flattening them into key/value pairs
-            dataset.current.selector.map(({ name, value }) => [name, value])
-        )
-        // if it only has one channel
-        if (dataset.current.channels.length == 1) {
-            // make it the current one
-            channel.current = dataset.current.channels[0]
-        }
-    }
-    // otherwise
-    else {
-        // now, go through the histogram
-        candidates.forEach((values, name) => {
-            // if we have a selector key that only shows up with one specific value
-            if (values.size == 1) {
-                // select it
-                selector.current.set(name, [...values][0])
-            }
-        })
-    }
-    */
+    // convert the table of available selectors into a map (name -> available values)
+    const available = new Map(
+        reader.available.map(selector => [selector.name, new Set(selector.values)])
+    )
+    // convert the user selections into a (axis -> value) map
+    const selections = new Map(
+        view.selections.map(selection => [selection.name, selection.value])
+    )
 
     // assemble the context value
     const context = {
         // my details, as harvested from the server
         reader,
-        // my state
-        active,
         // the dataset
         dataset,
-        // the selector
-        selector,
         // the channel
         channel,
-        // the table of possible choices
-        candidates,
+        // my state
+        active,
+        // the table of possible choices for each selector axis
+        available,
+        // the current set of user choices
+        selections,
     }
 
     // provide for my children
@@ -135,34 +98,12 @@ export const Context = React.createContext(
 export const contextGetViewsFragment = graphql`
     fragment contextGetViewsFragment on QED {
         views {
-            id
-            name
-            reader {
-                id
-                name
-                uri
-            }
-            dataset {
-                id
-                name
-                selector {
-                    name
-                    value
-                }
-                channels {
-                    id
-                    tag
-                }
-            }
-            channel {
-                id
-                tag
-            }
+            ...contextGetViewFragment
         }
     }
 `
 
-// the information necessary of manipulating the set of viewable panels
+// the information necessary for manipulating the set of viewable panels
 // must get at least as much as it takes to feed the dataset selection
 export const contextGetViewFragment = graphql`
     fragment contextGetViewFragment on View {
@@ -189,6 +130,10 @@ export const contextGetViewFragment = graphql`
             id
             tag
         }
+        selections {
+            name
+            value
+        }
     }
 `
 
@@ -200,6 +145,10 @@ export const contextGetReaderFragment = graphql`
         name
         uri
         selectors {
+            name
+            values
+        }
+        available {
             name
             values
         }

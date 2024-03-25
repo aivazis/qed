@@ -16,7 +16,7 @@ import { Meta } from '~/widgets'
 import { Coordinate } from './coordinate'
 // hooks
 import { useIsActive } from './useIsActive'
-import { useSelector } from './useSelector'
+import { useSelections } from './useSelections'
 // styles
 import styles from './styles'
 
@@ -26,7 +26,7 @@ export const Axis = ({ axis, children }) => {
     // get the selection status of my reader
     const active = useIsActive()
     // the current selector
-    const selector = useSelector()
+    const selector = useSelections()
 
     // a mark is required if my reader is the active one and the selector has no value for me
     const mark = active && !selector.get(axis)
