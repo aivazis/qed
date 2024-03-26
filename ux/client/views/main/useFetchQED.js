@@ -32,7 +32,7 @@ const query = graphql`
             # the connected data archives
             ...context_archives
             # reader information for populating the panel of datasets
-            ...datasetsGetReadersFragment
+            ...readersGetReadersFragment
             # reader information for disconnecting readers from the panel
             ...disconnectReaderViewsFragment
             # information for rendering the viewport

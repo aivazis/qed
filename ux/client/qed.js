@@ -32,7 +32,7 @@ import {
     // data archives
     Explorer, Archives,
     // datasets
-    Viz, Controls, Datasets,
+    Viz, Controls, Readers,
     // the main page
     Main,
     // boilerplate
@@ -67,7 +67,7 @@ const QEDApp = ({ base }) => {
                 {/* datasets */}
                 <Route element={<Viz />} >
                     <Route path="controls" element={<Controls />} />
-                    <Route index element={<Datasets />} />
+                    <Route index element={<Readers />} />
                 </Route>
             </Route>
 
