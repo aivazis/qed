@@ -6,18 +6,19 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay/hooks'
 // routing
 import { Outlet } from 'react-router-dom'
 
 // project
 // hooks
+import { useQED } from '../../main'
 import { useActivityPanel } from '~/views'
 // widgets
 import { Flex } from '~/widgets'
 
 // local
 // hooks
-import { useViews } from '../../main/useViews'
 import { useSetActiveViewport } from '../../main/useSetActiveViewport'
 import { useInitializeViewports } from '../../main/useInitializeViewports'
 import { useMakePanDispatcher } from '../../main/useMakePanDispatcher'
@@ -31,8 +32,10 @@ import styles from './styles'
 export const Viz = () => {
     // the state of the activity panel
     const { activityPanel } = useActivityPanel()
-    // the set of known views
-    const { views } = useViews()
+    // get the session manager
+    const qed = useQED()
+    // ask it for all known data readers and attach them as read-only state
+    const { views } = useFragment(vizGetViewsFragment, qed)
     // initialize my pile of viewports and get the ref registrar
     // viewport initialization happens on every render, but so does viewport registration
     const { viewportRegistrar } = useInitializeViewports()
@@ -79,5 +82,17 @@ export const Viz = () => {
         </Flex.Box>
     )
 }
+
+
+// my fragment
+const vizGetViewsFragment = graphql`
+    fragment vizGetViewsFragment on QED {
+        views {
+            id
+            # plus whatever else viewers need
+        }
+    }
+`
+
 
 // end of file
