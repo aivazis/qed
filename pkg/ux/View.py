@@ -84,6 +84,22 @@ class View(qed.component, family="qed.views.view", implements=qed.protocols.view
                 firewall.log()
                 # and bail, just in case firewalls aren't fatal
                 return self
+        # get the channel
+        channel = self.channel
+        # if we were able to find a dataset and we have a channel selection
+        if dataset and channel:
+            # it may be left over from a previous interaction; gingerly
+            try:
+                # look up the channel of the solution that has the same tag
+                candidate = dataset.channel(channel.tag)
+            # if the solution doesn't have a channel by this tag
+            except KeyError:
+                # reset the channel
+                self.channel = None
+            # if all went well
+            else:
+                # attach the candidate
+                self.channel = candidate
         # all done
         return self
 
