@@ -18,10 +18,8 @@ export const Provider = props => {
     const { activeViewport } = useViewports()
     // get the session manager
     const qed = useQED()
-    // extract the view information
-    const { views } = useFragment(contextGetViewsFragment, qed)
     // get the active view
-    const view = useFragment(contextGetViewFragment, views[activeViewport])
+    const view = useFragment(contextReaderGetViewFragment, qed.views[activeViewport])
 
     // extract the description of this reader
     const reader = useFragment(contextGetReaderFragment, props.reader)
@@ -92,19 +90,10 @@ export const Context = React.createContext(
 
 
 // the fragments
-// the information necessary for selecting which datasets to visualize
-export const contextGetViewsFragment = graphql`
-    fragment contextGetViewsFragment on QED {
-        views {
-            ...contextGetViewFragment
-        }
-    }
-`
-
 // the information necessary for manipulating the set of viewable panels
 // must get at least as much as it takes to feed the dataset selection
-export const contextGetViewFragment = graphql`
-    fragment contextGetViewFragment on View {
+export const contextReaderGetViewFragment = graphql`
+    fragment contextReaderGetViewFragment on View {
         id
         name
         reader {
