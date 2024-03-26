@@ -96,6 +96,17 @@ export const Disconnect = ({ name }) => {
                 )
                 // all done
                 return
+            },
+            onError: errors => {
+                // send the error to the console
+                console.error(
+                    `viz.reader.disconnect: ERROR while disconnecting '${reader.name}'`
+                )
+                console.group()
+                console.log(errors)
+                console.groupEnd()
+                // all done
+                return
             }
         })
         // all done
