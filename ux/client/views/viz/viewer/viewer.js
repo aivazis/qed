@@ -37,7 +37,6 @@ export const Viewer = ({ viewport, view, registrar }) => {
             <Tab viewport={viewport} view={view} />
             {/* identifying metadata; most of it is debugging information */}
             <Info viewport={viewport} view={view} />
-
             {/* the viewport */}
             <Viewport viewport={viewport} view={view} registrar={registrar} />
         </>
