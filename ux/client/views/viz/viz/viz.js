@@ -16,8 +16,6 @@ import { useActivityPanel } from '~/views'
 import { Flex } from '~/widgets'
 
 // local
-// context
-import { Provider } from './context'
 // hooks
 import { useViews } from '../../main/useViews'
 import { useSetActiveViewport } from '../../main/useSetActiveViewport'
@@ -31,17 +29,6 @@ import styles from './styles'
 
 // export the view
 export const Viz = () => {
-    // set up the context provider and embed my panel
-    return (
-        <Provider>
-            <Panel />
-        </Provider>
-    )
-}
-
-
-// my panel
-const Panel = () => {
     // the state of the activity panel
     const { activityPanel } = useActivityPanel()
     // the set of known views
