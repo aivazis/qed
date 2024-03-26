@@ -5,7 +5,7 @@
 
 
 // export the view
-export { Datasets } from './datasets'
+export { Readers } from './readers'
 
 
 // end of file

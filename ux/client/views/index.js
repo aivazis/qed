@@ -10,7 +10,7 @@ export { Main, useActivityPanel } from './main'
 // data archives
 export { Explorer, Archives } from './explorer'
 // datasets
-export { Viz, Controls, Datasets } from './viz'
+export { Viz, Controls, Readers } from './viz'
 // the status bar
 export { Status } from './status'
 

@@ -23,11 +23,11 @@ import styles from './styles'
 
 
 // export the activity panel
-export const Datasets = () => {
+export const Readers = () => {
     // get the session manager
     const qed = useQED()
     // ask it for all known data readers and attach them as read-only state
-    const { readers } = useFragment(datasetsGetReadersFragment, qed)
+    const { readers } = useFragment(readersGetReadersFragment, qed)
     // render
     return (
         <>
@@ -44,8 +44,8 @@ export const Datasets = () => {
 }
 
 // the fragments
-const datasetsGetReadersFragment = graphql`
-    fragment datasetsGetReadersFragment on QED {
+const readersGetReadersFragment = graphql`
+    fragment readersGetReadersFragment on QED {
         readers {
             id
             # and whatever else readers need

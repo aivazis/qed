@@ -8,7 +8,7 @@
 export { Viz } from './viz'
 // and the activity specific panels so the main page can use them as outlets
 export { Controls } from './controls'
-export { Datasets } from './datasets'
+export { Readers } from './readers'
 
 
 // end of file
