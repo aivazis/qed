@@ -32,7 +32,7 @@ export const Viewer = ({ viewport, view, registrar }) => {
         )
     }
 
-    // otherwise,  render
+    // otherwise, render
     return (
         <>
             {/* the title bar with the dataset description and the controls */}
