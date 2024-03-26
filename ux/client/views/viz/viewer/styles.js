@@ -39,7 +39,7 @@ const viewer = {
 // the viewer tab
 const tab = state => ({
     // styling
-    backgroundColor: state === "selected" ? theme.page.shaded : theme.page.relief,
+    backgroundColor: state === "selected" ? theme.page.relief : theme.page.shaded,
     // for me
     flex: "0 0 auto",
     height: "1.6rem",
