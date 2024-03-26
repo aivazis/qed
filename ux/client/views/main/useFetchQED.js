@@ -35,13 +35,13 @@ const query = graphql`
             ...contextGetReadersFragment
             # reader information for disconnecting readers from the panel
             ...disconnectReaderViewsFragment
-            # the active views for dataset selection by {viz/reader}
-            ...contextGetViewsFragment
 
             # temporary: feed the {viz} panel the minimum required
             # until it gets its own fragment
             views {
                 id
+                # info for dataset selection by {viz/reader}
+                ...contextReaderGetViewFragment
             }
         }
     }

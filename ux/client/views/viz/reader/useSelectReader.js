@@ -88,7 +88,7 @@ const selectReaderMutation = graphql`
             view {
                 id
                 # and get whatever readers need
-                ...contextGetViewFragment
+                ...contextReaderGetViewFragment
             }
         }
     }

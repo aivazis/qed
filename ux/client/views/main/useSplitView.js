@@ -83,7 +83,7 @@ const splitMutation = graphql`
             view {
                 id
                 # and whatever the readers need
-                ...contextGetViewFragment
+                ...contextReaderGetViewFragment
             }
         }
     }
