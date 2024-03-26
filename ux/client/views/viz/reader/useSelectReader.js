@@ -66,6 +66,11 @@ export const useSelectReader = () => {
                     `viz.reader.useSelectReader: ERROR while selecting '${reader.name}':`,
                     error
                 )
+                console.group()
+                console.log(errors)
+                console.groupEnd()
+                // all done
+                return
             }
         })
         // all done
