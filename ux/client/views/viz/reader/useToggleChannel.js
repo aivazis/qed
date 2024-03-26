@@ -67,7 +67,7 @@ export const useToggleChannel = (channel) => {
             onError: errors => {
                 // send the error to the console
                 console.error(
-                    `viz.reader.useToggleCoordinate: ERROR while toggling '${axis}:${coordinate}'`
+                    `viz.reader.useToggleChannel: ERROR while toggling '${axis}:${coordinate}'`
                 )
                 console.group()
                 console.log(errors)
