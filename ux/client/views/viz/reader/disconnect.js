@@ -6,7 +6,7 @@
 
 // external
 import React from 'react'
-import { graphql, useMutation } from 'react-relay/hooks'
+import { graphql, useFragment, useMutation } from 'react-relay/hooks'
 
 // project
 // shapes
@@ -16,7 +16,7 @@ import { Badge } from '~/widgets'
 
 // local
 // hooks
-import { useViews } from '../../main/useViews'
+import { useQED } from '../../main'
 import { useCollapseView } from '../../main/useCollapseView'
 // styles
 import { disconnect as paintDisconnect } from './styles'
@@ -24,8 +24,10 @@ import { disconnect as paintDisconnect } from './styles'
 
 // control to disconnect a data reader
 export const Disconnect = ({ name }) => {
-    // get the current views
-    const { views } = useViews()
+    // get the session manager
+    const qed = useQED()
+    // extract the view information
+    const { views } = useFragment(disconnectReaderGetViewsFragment, qed)
     // and build the handler that collapses them
     const collapse = useCollapseView()
     // build the mutation request
@@ -94,6 +96,10 @@ export const Disconnect = ({ name }) => {
                         return viewport
                     }
                 )
+                // report
+                console.group(`viz.reader.disconnect:`)
+                console.log(`disconnecting '${name}' collapsed [${viewports}]`)
+                console.groupEnd()
                 // all done
                 return
             },
@@ -129,13 +135,24 @@ export const Disconnect = ({ name }) => {
 // the mutation that disconnects an archive
 const disconnectMutation = graphql`
     mutation disconnectReaderMutation($name: String!) {
-        disconnectReader(name: $name) {
+                    disconnectReader(name: $name) {
             reader {
-                id
-            }
-        }
-    }
-`
+                            id
+                        }
+                    }
+                }
+                `
+
+// information about views
+const disconnectReaderGetViewsFragment = graphql`
+    fragment disconnectReaderViewsFragment on QED {
+        views {
+            reader {
+                            name
+                        }
+                    }
+                }
+                `
 
 
 // end of file

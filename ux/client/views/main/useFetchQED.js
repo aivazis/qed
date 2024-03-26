@@ -31,8 +31,10 @@ const query = graphql`
             id
             # the connected data archives
             ...context_archives
-            # data reader information for populating the panel of datasets
+            # reader information for populating the panel of datasets
             ...contextGetReadersFragment
+            # reader information for disconnecting readers from the panel
+            ...disconnectReaderViewsFragment
             # the active views for dataset selection by {viz/reader}
             ...contextGetViewsFragment
 
