@@ -6,14 +6,15 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay/hooks'
 
 // project
 // widgets
 import { Header } from '~/widgets'
+// hooks
+import { useQED } from '../../main'
 
 // locals
-// hooks
-import { useReaders } from '../viz/useReaders'
 // components
 import { Reader } from '../reader'
 import { Save } from './save'
@@ -23,8 +24,10 @@ import styles from './styles'
 
 // export the activity panel
 export const Datasets = () => {
-    // get the readers
-    const readers = useReaders()
+    // get the session manager
+    const qed = useQED()
+    // ask it for all known data readers and attach them as read-only state
+    const { readers } = useFragment(datasetsGetReadersFragment, qed)
     // render
     return (
         <>
@@ -40,5 +43,15 @@ export const Datasets = () => {
     )
 }
 
+// the fragments
+const datasetsGetReadersFragment = graphql`
+    fragment datasetsGetReadersFragment on QED {
+        readers {
+            id
+            # and whatever else readers need
+            ...contextGetReaderFragment
+        }
+    }
+`
 
 // end of file

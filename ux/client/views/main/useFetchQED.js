@@ -32,12 +32,12 @@ const query = graphql`
             # the connected data archives
             ...context_archives
             # reader information for populating the panel of datasets
-            ...contextGetReadersFragment
+            ...datasetsGetReadersFragment
             # reader information for disconnecting readers from the panel
             ...disconnectReaderViewsFragment
+            # information for rendering the viewport
+            # ...contextVizGetViewsFragment
 
-            # temporary: feed the {viz} panel the minimum required
-            # until it gets its own fragment
             views {
                 id
                 # info for dataset selection by {viz/reader}
