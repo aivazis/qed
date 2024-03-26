@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay/hooks'
 
 // project
 // widgets
@@ -13,9 +14,9 @@ import { Meta } from '~/widgets'
 
 // locals
 // hooks
+import { useViewports } from '../../main'
 import { useGetTileURI } from '../../main/useGetTileURI'
 import { useGetZoomLevel } from '../../main/useGetZoomLevel'
-import { useViewports } from '../../main/useViewports'
 // styles
 import styles from './styles'
 
@@ -32,9 +33,8 @@ export const Info = ({ viewport, view }) => {
     const base = useGetTileURI({ viewport })
     // get the viewport registry
     const { viewports } = useViewports()
-
     // unpack the view
-    const { reader, dataset } = view
+    const { reader, dataset } = useFragment(infoViewerGetViewFragment, view)
     // extract the relevant metadata
     const { name: readerName, id, uri } = reader
     const { name: datasetName, datatype, shape, origin, tile } = dataset
@@ -130,6 +130,24 @@ export const Info = ({ viewport, view }) => {
         </Meta.Table>
     )
 }
+
+
+// my fragment
+const infoViewerGetViewFragment = graphql`
+    fragment infoViewerGetViewFragment on View {
+        reader {
+            id
+            name
+            uri
+        }
+        dataset {
+            datatype
+            shape
+            origin
+            tile
+        }
+    }
+`
 
 
 // end of file

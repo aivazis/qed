@@ -6,10 +6,11 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay/hooks'
 
 // locals
 // hooks
-import { useViews } from '../../main/useViews'
+import { useViewports } from '../../main'
 // styles
 import styles from './styles'
 
@@ -17,12 +18,11 @@ import styles from './styles'
 // remove a {viewport} from the {viz} panel
 export const Selector = ({ viewport, view }) => {
     // get the active view
-    const { activeViewport } = useViews()
-
+    const { activeViewport } = useViewports()
     // unpack the view
-    const { reader, dataset, channel } = view
+    const { reader, dataset, channel } = useFragment(selectorViewerGetViewFragment, view)
     // get the name of the reader
-    const [_, name] = reader.id.split(":")
+    const name = reader?.name
     // and the dataset selector
     const selector = dataset?.selector ?? []
 
@@ -45,10 +45,29 @@ export const Selector = ({ viewport, view }) => {
                 </React.Fragment>
             ))}
             {/* the channel name */}
-            <span style={paint.selector}>{channel}</span>
+            <span style={paint.selector}>{channel.tag}</span>
         </span>
     )
 }
+
+
+// my fragment
+const selectorViewerGetViewFragment = graphql`
+    fragment selectorViewerGetViewFragment on View {
+        reader {
+            name
+        }
+        dataset {
+            selector {
+                name
+                value
+            }
+        }
+        channel {
+            tag
+        }
+    }
+`
 
 
 // end of file

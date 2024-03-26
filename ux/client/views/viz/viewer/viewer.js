@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay/hooks'
 
 // locals
 // components
@@ -17,12 +18,10 @@ import { Viewport } from './viewport'
 
 // export the data viewer
 export const Viewer = ({ viewport, view, registrar }) => {
-    // show me
-    console.log(`viz.viewer: view`, view)
     // unpack the view
-    const { reader, dataset, channel } = view
+    const { reader, dataset, channel } = useFragment(viewerGetViewFragment, view)
     // check for the trivial cases
-    if (true || !reader || !dataset || !channel) {
+    if (!reader || !dataset || !channel) {
         // to show a blank panel
         return (
             <>
@@ -31,7 +30,6 @@ export const Viewer = ({ viewport, view, registrar }) => {
             </>
         )
     }
-
     // otherwise, render
     return (
         <>
@@ -45,6 +43,23 @@ export const Viewer = ({ viewport, view, registrar }) => {
         </>
     )
 }
+
+
+// my fragment
+const viewerGetViewFragment = graphql`
+    fragment viewerGetViewFragment on View {
+        id
+        reader {
+            id
+        }
+        dataset {
+            id
+        }
+        channel {
+            id
+        }
+    }
+`
 
 
 // end of file

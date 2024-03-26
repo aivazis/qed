@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay/hooks'
 import styled from 'styled-components'
 
 // project
@@ -16,22 +17,19 @@ import { theme } from "~/palette"
 
 // locals
 // hooks
+import { useViewports } from '../../main'
 import { useCenterViewport } from '../../main/useCenterViewport'
 import { useGetTileURI } from '../../main/useGetTileURI'
 import { useGetZoomLevel } from '../../main/useGetZoomLevel'
 import { useMeasureLayer } from '../../main/useMeasureLayer'
-import { useViewports } from '../../main/useViewports'
-import { useViews } from '../../main/useViews'
 // components
 import { Measure } from '../measure'
 
 
 // export the data viewport
 export const Viewport = ({ viewport, view, registrar, ...rest }) => {
-    // get the active view
-    const { activeViewport } = useViews()
     // get the pile of registered {viewports}; i'm at {viewport}
-    const { viewports } = useViewports()
+    const { activeViewport, viewports } = useViewports()
     // get the state of the measuring layer
     const measure = useMeasureLayer(viewport)
     // get he viewport zoom level
@@ -42,7 +40,8 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     const uri = useGetTileURI({ viewport })
 
     // get my view info
-    const { dataset, session } = view
+    const { dataset, session } = useFragment(viewportViewerGetViewFragment, view)
+    console.error(`NYI: session:`, session)
     // and unpack what i need
     const { shape, origin, tile } = dataset
 
@@ -150,6 +149,19 @@ const shouldRender = (prev, next) => {
 
 // and a wrapper over the styled {Mosaic}
 const View = React.memo(DataTiles, shouldRender)
+
+
+// my fragment
+const viewportViewerGetViewFragment = graphql`
+    fragment viewportViewerGetViewFragment on View {
+        dataset {
+            datatype
+            shape
+            origin
+            tile
+        }
+    }
+`
 
 
 // end of file

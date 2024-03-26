@@ -89,7 +89,12 @@ const vizGetViewsFragment = graphql`
     fragment vizGetViewsFragment on QED {
         views {
             id
-            # plus whatever else viewers need
+            # plus what viewers and their parts need
+            ...viewerGetViewFragment
+            ...infoViewerGetViewFragment
+            ...selectorViewerGetViewFragment
+            ...viewportViewerGetViewFragment
+
         }
     }
 `
