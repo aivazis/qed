@@ -36,7 +36,7 @@ const query = graphql`
             # reader information for disconnecting readers from the panel
             ...disconnectReaderViewsFragment
             # information for rendering the viewport
-            # ...contextVizGetViewsFragment
+            ...vizGetViewsFragment
 
             views {
                 id
