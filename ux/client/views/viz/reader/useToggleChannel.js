@@ -72,6 +72,8 @@ export const useToggleChannel = (channel) => {
                 console.group()
                 console.log(errors)
                 console.groupEnd()
+                // all done
+                return
             }
         })
         // all done
