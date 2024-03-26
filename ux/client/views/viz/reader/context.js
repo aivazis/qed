@@ -6,13 +6,11 @@
 
 // externals
 import React from 'react'
-import { graphql } from 'relay-runtime'
-import { useFragment } from 'react-relay/hooks'
+import { graphql, useFragment } from 'react-relay/hooks'
 
 // local
 // hooks
-import { useViewports } from '../../main'
-import { useQED } from '../../main'
+import { useQED, useViewports } from '../../main'
 
 // the provider factory
 export const Provider = props => {
