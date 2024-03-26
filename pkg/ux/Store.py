@@ -80,14 +80,16 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return view
 
-    def selectReader(self, viewport: int, name: str):
+    def selectReader(self, viewport: int, name: str, resolve=True):
         """
         Locate a reader by {name} and activate it in {viewport}
         """
         # look up the reader selections
         selection = self.selection(name=name)
-        # resolve
-        selection.resolve()
+        # unless the caller has asked not
+        if resolve:
+            # attempt to fully resolve the view
+            selection.resolve()
         # and install in the view
         self._views[viewport] = selection
         # all done
@@ -98,14 +100,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         Toggle the value of the {coordinate} of {axis} in {viewport}
         """
         # get the view
-        view = self._views[viewport]
-        # if it's not the correct reader
-        if view.reader.pyre_name != reader:
-            # get the correct view
-            view = self.selectReader(viewport=viewport, name=reader)
-            # and activate it
-            self._views[viewport] = view
-
+        view = self.selectReader(viewport=viewport, name=reader)
         # get the dataset
         dataset = view.dataset
         # if i don't have on
@@ -145,13 +140,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         Toggle the value of the {coordinate} of {axis} in {viewport}
         """
         # get the view
-        view = self._views[viewport]
-        # if it's not the correct reader
-        if view.reader != reader:
-            # get the correct view
-            view = self.selectReader(viewport=viewport, name=reader)
-            # and activate it
-            self._views[viewport] = view
+        view = self.selectReader(viewport=viewport, name=reader, resolve=False)
         # get the current value of the axis
         current = view.selections.get(axis)
         # if the value is trivial or something else
