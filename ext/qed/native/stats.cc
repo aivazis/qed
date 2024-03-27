@@ -69,6 +69,27 @@ qed::py::native::stats(py::module & m)
         // the name of the function
         "stats",
         // the handler
+        &qed::native::stats<mapgrid_t<float>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a,
+        // the docstring
+        "collect statistics on a subset of a dataset");
+
+    // bindings for {mapgrid_t} sources
+    m.def(
+        // the name of the function
+        "stats",
+        // the handler
+        &qed::native::stats<mapgrid_t<double>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a,
+        // the docstring
+        "collect statistics on a subset of a dataset");
+
+    m.def(
+        // the name of the function
+        "stats",
+        // the handler
         &qed::native::stats<mapgrid_t<std::complex<float>>>,
         // the signature
         "source"_a, "origin"_a, "shape"_a,
