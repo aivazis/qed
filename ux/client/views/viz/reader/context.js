@@ -16,10 +16,8 @@ import { useViewports } from '../../main'
 export const Provider = props => {
     // get the active viewport
     const { activeViewport } = useViewports()
-    // get the session manager
-    const qed = props.qed
     // get the active view
-    const view = useFragment(contextReaderGetViewFragment, qed.views[activeViewport])
+    const view = useFragment(contextReaderGetViewFragment, props.views[activeViewport])
 
     // extract the description of this reader
     const reader = useFragment(contextGetReaderFragment, props.reader)
