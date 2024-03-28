@@ -26,7 +26,7 @@ export const useViewports = () => {
     }
 
     // and return its current pile
-    return { activeViewport, activate, viewports: viewports.current }
+    return { activeViewport, setActiveViewport, viewports: viewports.current, activate }
 }
 
 
