@@ -12,7 +12,6 @@ import { Outlet } from 'react-router-dom'
 
 // project
 // hooks
-import { useQED } from '../../main'
 import { useActivityPanel } from '~/views'
 // widgets
 import { Flex } from '~/widgets'
@@ -29,16 +28,14 @@ import styles from './styles'
 
 
 // export the view
-export const Viz = () => {
+export const Viz = ({ qed }) => {
     // the state of the activity panel
     const { activityPanel } = useActivityPanel()
-    // get the session manager
-    const qed = useQED()
     // ask it for all known data readers and attach them as read-only state
     const { views } = useFragment(vizGetViewsFragment, qed)
     // initialize my pile of viewports and get the ref registrar
     // viewport initialization happens on every render, but so does viewport registration
-    const { viewportRegistrar } = useInitializeViewports()
+    const { viewportRegistrar } = useInitializeViewports(views)
     // build the scroll handler dispatch for my viewports
     const dispatch = useMakePanDispatcher()
     // get the view activator

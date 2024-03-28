@@ -7,14 +7,8 @@
 // externals
 import React from 'react'
 
-// local
-// hooks
-import { useFetchQED } from './useFetchQED'
-
 // the provider factory
 export const Provider = ({ children }) => {
-    // get the session
-    const qed = useFetchQED()
     // setup the activity panel flag
     const [activityPanel, setActivityPanel] = React.useState(true)
 
@@ -43,8 +37,6 @@ export const Provider = ({ children }) => {
 
     // build the current value of the context
     const context = {
-        // the session
-        qed,
         // the activity panel state flag and its mutator
         activityPanel, setActivityPanel,
         // the set of active viewports (actually, the {mosaic} placemats)
@@ -76,8 +68,6 @@ export const Provider = ({ children }) => {
 export const Context = React.createContext(
     // the default value that consumers see when accessing the context outside a provider
     {
-        // the session
-        qed: null,
         // the activity panel state and its mutator
         activityPanel: null,
         setActivityPanel: () => { throw new Error(complaint) },

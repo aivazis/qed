@@ -16,16 +16,13 @@ import { Badge } from '~/widgets'
 
 // local
 // hooks
-import { useQED } from '../../main'
 import { useCollapseView } from '../../main/useCollapseView'
 // styles
 import { disconnect as paintDisconnect } from './styles'
 
 
 // control to disconnect a data reader
-export const Disconnect = ({ name }) => {
-    // get the session manager
-    const qed = useQED()
+export const Disconnect = ({ qed, name }) => {
     // extract the view information
     const { views } = useFragment(disconnectReaderGetViewsFragment, qed)
     // and build the handler that collapses them

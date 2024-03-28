@@ -8,14 +8,9 @@
 import React from "react"
 import { graphql, useFragment } from 'react-relay/hooks'
 
-// project
-// hooks
-import { useQED } from '../../main'
 
 // the provider factory
-export const Provider = ({ children }) => {
-    // get the session manager
-    const qed = useQED()
+export const Provider = ({ qed, children }) => {
     // ask it for all known data archives and attach them as read-only state
     const { archives } = useFragment(graphql`
         fragment context_archives on QED {

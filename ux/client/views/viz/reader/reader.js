@@ -28,15 +28,15 @@ import styles from './styles'
 
 
 // turn the panel into a context provider and publish
-export const Reader = props => (
-    <Provider {...props}>
-        <Panel />
-    </Provider>
+export const Reader = ({ qed, ...props }) => (
+    <Provider qed={qed} {...props}>
+        <Panel qed={qed} />
+    </Provider >
 )
 
 
 // display the datasets associated with this reader
-const Panel = () => {
+const Panel = ({ qed }) => {
     // get my details
     const reader = useReader()
     // my state marker
@@ -75,7 +75,7 @@ const Panel = () => {
         onClick: selectReader,
     }
     // build my controls
-    const Controls = <Disconnect name={name} />
+    const Controls = <Disconnect qed={qed} name={name} />
 
     // mix my paint
     const paint = styles.reader(state)
