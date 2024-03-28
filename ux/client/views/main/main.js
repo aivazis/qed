@@ -40,10 +40,10 @@ const Panel = () => {
 
 
 // turn the panel into a context provider
-export const Main = () => {
+export const Main = ({ qed }) => {
     // set up the context provider
     return (
-        <Provider >
+        <Provider qed={qed}>
             <Panel />
         </Provider>
     )

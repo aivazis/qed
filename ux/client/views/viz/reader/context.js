@@ -10,14 +10,14 @@ import { graphql, useFragment } from 'react-relay/hooks'
 
 // local
 // hooks
-import { useQED, useViewports } from '../../main'
+import { useViewports } from '../../main'
 
 // the provider factory
 export const Provider = props => {
     // get the active viewport
     const { activeViewport } = useViewports()
     // get the session manager
-    const qed = useQED()
+    const qed = props.qed
     // get the active view
     const view = useFragment(contextReaderGetViewFragment, qed.views[activeViewport])
 

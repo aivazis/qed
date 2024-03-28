@@ -24,6 +24,7 @@ import 'lazysizes/plugins/native-loading/ls.native-loading'
 
 // locals
 // context
+import { Provider, useQED } from './context'
 import { environment } from './environment'
 // components
 import { ErrorBoundary } from './boundary'
@@ -47,27 +48,29 @@ const QEDApp = ({ base }) => {
     // most urls render the normal ui, but
     // - /stop: the user clicked on the "kill the server" action; show a "close this window" page
     // - /loading: shown while the app is fetching itself from the server
-
+    //
     // see the discussion in <Root> about how hosting complexities affect the app routes
 
+    // get the server side store
+    const qed = useQED()
     // render
     return (
         <Routes >
             {/* the app */}
-            <Route path="/" element={<Main />} >
+            <Route path="/" element={<Main qed={qed} />} >
                 {/* specific activities */}
                 <Route path="about" element={<NYI base={base} />} />
                 <Route path="help" element={<NYI base={base} />} />
 
                 {/* data archives */}
-                <Route element={<Explorer />}>
-                    <Route path="explore" element={<Archives />} />
+                <Route element={<Explorer qed={qed} />}>
+                    <Route path="explore" element={<Archives qed={qed} />} />
                 </Route>
 
                 {/* datasets */}
-                <Route element={<Viz />} >
-                    <Route path="controls" element={<Controls />} />
-                    <Route index element={<Readers />} />
+                <Route element={<Viz qed={qed} />} >
+                    <Route path="controls" element={<Controls qed={qed} />} />
+                    <Route index element={<Readers qed={qed} />} />
                 </Route>
             </Route>
 
@@ -106,7 +109,9 @@ const Root = () => {
             <ErrorBoundary fallback={<Dead base={base} />}>
                 <Suspense fallback={< Loading />}>
                     <Router basename={base}>
-                        <QEDApp base={base} />
+                        <Provider>
+                            <QEDApp base={base} />
+                        </Provider>
                     </Router>
                 </Suspense>
             </ErrorBoundary>

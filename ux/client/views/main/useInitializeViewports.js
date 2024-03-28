@@ -13,11 +13,11 @@ import { Context } from './context'
 
 
 // storage for the refs to the {mosaic} placemats that frame the visible part of the data
-export const useInitializeViewports = () => {
+export const useInitializeViewports = views => {
     // grab the remote store and the array of refs from my context
-    const { qed, viewports, viewportRegistrar } = React.useContext(Context)
+    const { viewports, viewportRegistrar } = React.useContext(Context)
     // initialize the array
-    viewports.current = new Array(qed.views.length).fill(null)
+    viewports.current = new Array(views.length).fill(null)
     // and publish
     return { viewports: viewports.current, viewportRegistrar }
 }

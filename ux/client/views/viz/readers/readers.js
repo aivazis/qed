@@ -11,8 +11,6 @@ import { graphql, useFragment } from 'react-relay/hooks'
 // project
 // widgets
 import { Header } from '~/widgets'
-// hooks
-import { useQED } from '../../main'
 
 // locals
 // components
@@ -23,9 +21,7 @@ import styles from './styles'
 
 
 // export the activity panel
-export const Readers = () => {
-    // get the session manager
-    const qed = useQED()
+export const Readers = ({ qed }) => {
     // ask it for all known data readers and attach them as read-only state
     const { readers } = useFragment(readersGetReadersFragment, qed)
     // render
@@ -37,7 +33,7 @@ export const Readers = () => {
             </Header>
             {/* go through the readers and render them */}
             {readers.map(reader => (
-                <Reader key={reader.id} reader={reader} />
+                <Reader key={reader.id} qed={qed} reader={reader} />
             ))}
         </>
     )
