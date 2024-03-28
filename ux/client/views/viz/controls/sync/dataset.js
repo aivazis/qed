@@ -14,7 +14,7 @@ import { theme } from '~/palette'
 
 // locals
 // hooks
-import { useViewports } from '~/views/main/useViews'
+import { useViewports } from '~/views/main'
 import { useSetActiveViewport } from '~/views/main/useSetActiveViewport'
 // components
 import { Cell } from './cell'
