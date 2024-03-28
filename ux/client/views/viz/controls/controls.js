@@ -25,7 +25,7 @@ import styles from './styles'
 
 
 // export the activity panel
-export const Controls = () => {
+export const Controls = ({ qed }) => {
     // unpack the active view
     const { dataset, channel } = useGetView()
     // disable some trays if either dataset or channel are trivial
@@ -43,7 +43,7 @@ export const Controls = () => {
             {/* visualization pipeline controls */}
             {enabled && <Viz />}
             {/* viewport synchronization controls */}
-            {enabled && <Sync />}
+            {enabled && <Sync qed={qed} />}
         </React.Suspense>
     )
 }

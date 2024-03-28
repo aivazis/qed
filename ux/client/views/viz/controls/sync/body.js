@@ -9,8 +9,6 @@ import React from 'react'
 import styled from 'styled-components'
 
 // locals
-// hooks
-import { useViews } from '../../../main/useViews'
 // components
 import { Dataset } from './dataset'
 import { Channel } from './channel'
@@ -20,9 +18,14 @@ import { Scroll } from './scroll'
 import { Zoom } from './zoom'
 
 // the body of the sync control table
-export const Body = ({ mark }) => {
-    // get the set of views
-    const { views } = useViews()
+export const Body = ({ qed, mark }) => {
+    // MGA: FIXME
+    console.group(`views.viz.viz.controls.sync.body: FIREWALL`)
+    console.log(` -*- NEEDS FRAGMENT TO EXTRACT dataset -*-`)
+    console.groupEnd()
+    // get the set of views; NEEDS FRAGMENT
+    const { views } = qed
+
     // render
     return (
         <Container>

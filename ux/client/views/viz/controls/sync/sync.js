@@ -22,7 +22,7 @@ import { Reset } from './reset'
 import { Save } from './save'
 
 // the sync control
-export const Sync = () => {
+export const Sync = ({ qed }) => {
     // my state
     const [modified, setModified] = React.useState(false)
 
@@ -51,7 +51,7 @@ export const Sync = () => {
             </Controls>
             <Housing>
                 <Header mark={mark} />
-                <Body mark={mark} />
+                <Body qed={qed} mark={mark} />
             </Housing>
         </Tray>
     )
