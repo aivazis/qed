@@ -37,12 +37,6 @@ const query = graphql`
             ...disconnectReaderViewsFragment
             # information for rendering the viewport
             ...vizGetViewsFragment
-
-            views {
-                id
-                # info for dataset selection by {viz/reader}
-                ...contextReaderGetViewFragment
-            }
         }
     }
 `

@@ -23,7 +23,7 @@ import styles from './styles'
 // export the activity panel
 export const Readers = ({ qed }) => {
     // ask it for all known data readers and attach them as read-only state
-    const { readers } = useFragment(readersGetReadersFragment, qed)
+    const { readers, views } = useFragment(readersGetReadersFragment, qed)
     // render
     return (
         <>
@@ -33,7 +33,7 @@ export const Readers = ({ qed }) => {
             </Header>
             {/* go through the readers and render them */}
             {readers.map(reader => (
-                <Reader key={reader.id} qed={qed} reader={reader} />
+                <Reader key={reader.id} reader={reader} qed={qed} views={views} />
             ))}
         </>
     )
@@ -46,6 +46,9 @@ const readersGetReadersFragment = graphql`
             id
             # and whatever else readers need
             ...contextGetReaderFragment
+        }
+        views {
+            ...contextReaderGetViewFragment
         }
     }
 `

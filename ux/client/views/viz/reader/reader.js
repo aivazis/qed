@@ -29,7 +29,7 @@ import styles from './styles'
 
 // turn the panel into a context provider and publish
 export const Reader = ({ qed, ...props }) => (
-    <Provider qed={qed} {...props}>
+    <Provider {...props}>
         <Panel qed={qed} />
     </Provider >
 )
