@@ -16,7 +16,7 @@ import { Badge } from '~/widgets'
 
 // local
 // hooks
-import { useCollapseView } from '../../main/useCollapseView'
+import { useCollapseView } from '../viz/useCollapseView'
 // styles
 import { disconnect as paintDisconnect } from './styles'
 

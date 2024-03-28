@@ -9,7 +9,7 @@ import styled from 'styled-components'
 
 // project
 // hooks
-import { useViewports } from '../../../main/useViewports'
+import { useViewports } from '~/views/viz'
 // style
 import { theme } from '~/palette'
 

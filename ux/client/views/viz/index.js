@@ -11,4 +11,8 @@ export { Controls } from './controls'
 export { Readers } from './readers'
 
 
+// hooks
+export { useViewports, useCenterViewport } from './viz'
+
+
 // end of file

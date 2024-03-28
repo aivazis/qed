@@ -9,7 +9,7 @@ import { graphql, useMutation } from 'react-relay/hooks'
 
 // project
 // hooks
-import { useViewports } from '../../main'
+import { useViewports } from '~/views/viz'
 
 // local
 // hooks

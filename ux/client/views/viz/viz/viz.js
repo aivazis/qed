@@ -17,29 +17,38 @@ import { useActivityPanel } from '~/views'
 import { Flex } from '~/widgets'
 
 // local
+// context
+import { VizProvider } from './context'
 // hooks
-import { useSetActiveViewport } from '../../main/useSetActiveViewport'
-import { useInitializeViewports } from '../../main/useInitializeViewports'
-import { useMakePanDispatcher } from '../../main/useMakePanDispatcher'
+import { useViewports } from './useViewports'
+import { useInitializeViewports } from './useInitializeViewports'
+import { useMakePanDispatcher } from './useMakePanDispatcher'
 // components
 import { Viewer } from '../viewer'
 // paint
 import styles from './styles'
 
 
-// export the view
-export const Viz = ({ qed }) => {
-    // the state of the activity panel
-    const { activityPanel } = useActivityPanel()
-    // ask it for all known data readers and attach them as read-only state
+// turn my panel into a context provider and publish it
+export const Viz = ({ qed }) => (
+    <VizProvider>
+        <VizPanel qed={qed} />
+    </VizProvider>
+)
+
+// the flex panel factory
+const VizPanel = ({ qed }) => {
+    // ask the server side store for all known data readers and attach them as read-only state
     const { views } = useFragment(vizGetViewsFragment, qed)
     // initialize my pile of viewports and get the ref registrar
     // viewport initialization happens on every render, but so does viewport registration
     const { viewportRegistrar } = useInitializeViewports(views)
     // build the scroll handler dispatch for my viewports
-    const dispatch = useMakePanDispatcher()
+    const { dispatch } = useMakePanDispatcher()
     // get the view activator
-    const activate = useSetActiveViewport()
+    const { activate } = useViewports()
+    // get the state of the activity panel
+    const { activityPanel } = useActivityPanel()
 
     // mix my paint
     // make a copy of the activity panel paint
@@ -59,7 +68,7 @@ export const Viz = ({ qed }) => {
             {views.map((view, viewport) => {
                 // make a registrar for this {viewport}
                 const registrar = viewportRegistrar(viewport)
-                // assemble the behaviors
+                // assemble the behaviors by invoking the handler factories
                 const behaviors = {
                     onClick: activate(viewport),
                     onScrollCapture: dispatch(viewport),

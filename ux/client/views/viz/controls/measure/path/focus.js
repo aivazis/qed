@@ -14,9 +14,12 @@ import { Target } from '~/shapes'
 // styles
 import { theme } from '~/palette'
 
+// project
+// hooks
+import { useCenterViewport } from '~/views/viz'
+
 // local
 // hooks
-import { useCenterViewport } from '../../../../main/useCenterViewport'
 import { useGetZoomLevel } from '../../../../main/useGetZoomLevel'
 import { usePixelPathSelection } from '../../../../main/usePixelPathSelection'
 import { useSetPixelPathSelection } from '../../../../main/useSetPixelPathSelection'

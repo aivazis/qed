@@ -16,8 +16,17 @@ import { Context } from './context'
 export const useViewports = () => {
     // grab the array of refs from my context
     const { activeViewport, setActiveViewport, viewports } = React.useContext(Context)
+
+    // make a handler that activates a viewport
+    const activate = viewport => () => {
+        // activate the viewport
+        setActiveViewport(viewport)
+        // all done
+        return
+    }
+
     // and return its current pile
-    return { activeViewport, setActiveViewport, viewports: viewports.current }
+    return { activeViewport, activate, viewports: viewports.current }
 }
 
 

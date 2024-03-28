@@ -12,16 +12,6 @@ export const Provider = ({ children }) => {
     // setup the activity panel flag
     const [activityPanel, setActivityPanel] = React.useState(true)
 
-    // initialize the set of viewports; this is where the refs of the mosaic placemats live
-    // which are needed for the implementation of the shared camera
-    const viewports = React.useRef([])
-    // the ref registrar gets called by react when the placemat ref is created; ours just update
-    // the corresponding entry in the array of {viewports}; each panel gets its own registrar
-    // that knows its positioning in the flex container
-    const viewportRegistrar = idx => ref => viewports.current[idx] = ref
-
-    // the active view is an index into the set of {views}
-    const [activeViewport, setActiveViewport] = React.useState(0)
     // a table with the sync status of the current viewports
     const [synced, setSynced] = React.useState([syncedDefault])
     // a table with the zoom levels of the current viewports
@@ -39,10 +29,6 @@ export const Provider = ({ children }) => {
     const context = {
         // the activity panel state flag and its mutator
         activityPanel, setActivityPanel,
-        // the set of active viewports (actually, the {mosaic} placemats)
-        viewports, viewportRegistrar,
-        // the active view
-        activeViewport, setActiveViewport,
         // synced views
         synced, setSynced,
         // zoom levels
@@ -72,14 +58,6 @@ export const Context = React.createContext(
         activityPanel: null,
         setActivityPanel: () => { throw new Error(complaint) },
 
-        // the set of active viewports (actually, the {mosaic} placemats)
-        viewports: null,
-        // the registrar
-        viewportRegistrar: () => { throw new Error(complaint) },
-
-        // the active view
-        activeViewport: null,
-        setActiveViewport: () => { throw new Error(complaint) },
         // indicators of whether views are synced to the shared camera
         synced: null,
         setSynced: () => { throw new Error(complaint) },
@@ -99,8 +77,6 @@ export const Context = React.createContext(
     }
 )
 
-// the empty view template
-export const emptyView = () => ({ reader: null, dataset: null, channel: null, session: "" })
 // the default synced state
 export const syncedDefault = {
     channel: false, zoom: false, scroll: false, path: false,

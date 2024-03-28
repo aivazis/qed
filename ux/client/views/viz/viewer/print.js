@@ -12,13 +12,14 @@ import React from 'react'
 import { Camera as Shape } from '~/shapes'
 // widgets
 import { Badge } from '~/widgets'
+// hooks
+import { useViewports } from '~/views/viz'
 
 // locals
 // hooks
 import { useGetTileURI } from '../../main/useGetTileURI'
 import { useGetView } from '../../main/useGetView'
 import { useGetZoomLevel } from '../../main/useGetZoomLevel'
-import { useViewports } from '../../main/useViewports'
 // styles
 import styles from './styles'
 

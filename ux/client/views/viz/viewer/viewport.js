@@ -14,11 +14,11 @@ import styled from 'styled-components'
 import { Mosaic } from '~/widgets'
 // colors
 import { theme } from "~/palette"
+// hooks
+import { useViewports, useCenterViewport } from '~/views/viz'
 
 // locals
 // hooks
-import { useViewports } from '../../main'
-import { useCenterViewport } from '../../main/useCenterViewport'
 import { useGetTileURI } from '../../main/useGetTileURI'
 import { useGetZoomLevel } from '../../main/useGetZoomLevel'
 import { useMeasureLayer } from '../../main/useMeasureLayer'

@@ -10,7 +10,7 @@ import { graphql, useFragment } from 'react-relay/hooks'
 
 // locals
 // hooks
-import { useViewports } from '../../main'
+import { useViewports } from '~/views/viz'
 // styles
 import styles from './styles'
 
