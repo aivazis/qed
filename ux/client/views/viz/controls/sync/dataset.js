@@ -14,15 +14,15 @@ import { theme } from '~/palette'
 
 // locals
 // hooks
-import { useViews } from '../../../main/useViews'
-import { useSetActiveViewport } from '../../../main/useSetActiveViewport'
+import { useViewports } from '~/views/main/useViews'
+import { useSetActiveViewport } from '~/views/main/useSetActiveViewport'
 // components
 import { Cell } from './cell'
 
 // the body of the sync control table
 export const Dataset = ({ viewport, children }) => {
     // get the active viewport
-    const { activeViewport } = useViews()
+    const { activeViewport } = useViewports()
     // and the active viewport selector
     const activate = useSetActiveViewport()
 

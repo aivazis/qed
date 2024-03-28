@@ -14,14 +14,14 @@ import { theme } from '~/palette'
 
 // local
 // hooks
-import { useSyncAspect } from '../../../main/useSyncAspect'
-import { useViews } from '../../../main/useViews'
+import { useViewports } from '~/views/main'
+import { useSyncAspect } from '~/views/main/useSyncAspect'
 
 
 // the sync control table header
 export const Header = ({ mark }) => {
     // get the set of views
-    const { activeViewport } = useViews()
+    const { activeViewport } = useViewports()
     // get the sync handler factories
     const { force } = useSyncAspect()
     // a behavior factory
