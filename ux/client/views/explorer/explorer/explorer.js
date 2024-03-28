@@ -26,10 +26,10 @@ import { Viewer } from './viewer'
 import { activityPanels as panelPaint, flex as flexPaint } from './styles'
 
 // export the context provider
-export const Explorer = () => {
+export const Explorer = ({ qed }) => {
     // set up the context provider
     return (
-        <Provider>
+        <Provider qed={qed}>
             <Panel />
         </Provider>
     )
