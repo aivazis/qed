@@ -14,7 +14,7 @@ import { Meta } from '~/widgets'
 
 // locals
 // hooks
-import { useViewports } from '../../main'
+import { useViewports } from '~/views/viz'
 import { useGetTileURI } from '../../main/useGetTileURI'
 import { useGetZoomLevel } from '../../main/useGetZoomLevel'
 // styles

@@ -13,7 +13,7 @@ import { Spacer } from '~/widgets'
 
 // locals
 // hooks
-import { useViewports } from '../../main'
+import { useViewports } from '~/views/viz'
 // components
 import { Collapse } from './collapse'
 import { Measure } from './measure'

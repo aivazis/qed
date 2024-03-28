@@ -14,7 +14,7 @@ import { theme } from '~/palette'
 
 // local
 // hooks
-import { useViewports } from '~/views/main'
+import { useViewports } from '~/views/viz'
 import { useSyncAspect } from '~/views/main/useSyncAspect'
 
 

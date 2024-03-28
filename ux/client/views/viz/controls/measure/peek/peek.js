@@ -16,9 +16,9 @@ import { theme } from "~/palette"
 // context
 import { Provider } from './context'
 // hooks
+import { useViewports } from '~/views/viz'
 import { useGetPixelValue } from './useGetPixelValue'
 import { useUpdatePixelLocation } from './useUpdatePixelLocation'
-import { useViewports } from '../../../../main/useViewports'
 // components
 import { Channel } from './channel'
 import { Minimap } from './minimap'

@@ -15,7 +15,7 @@ import { Badge } from '~/widgets'
 
 // locals
 // hooks
-import { useSplitView } from '../../main/useSplitView'
+import { useSplitView } from '../viz/useSplitView'
 // styles
 import styles from './styles'
 

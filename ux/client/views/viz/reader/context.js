@@ -10,7 +10,7 @@ import { graphql, useFragment } from 'react-relay/hooks'
 
 // local
 // hooks
-import { useViewports } from '../../main'
+import { useViewports } from '~/views/viz'
 
 // the provider factory
 export const Provider = props => {

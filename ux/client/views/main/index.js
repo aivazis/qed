@@ -8,7 +8,6 @@
 export { Main } from './main'
 // and the hooks
 export { useActivityPanel } from './useActivityPanel'
-export { useViewports } from './useViewports'
 
 
 // end of file

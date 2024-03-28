@@ -6,7 +6,7 @@
 
 // local
 // hooks
-import { useSynced } from './useSynced'
+import { useSynced } from '~/views/main/useSynced'
 import { useViewports } from './useViewports'
 
 
@@ -64,7 +64,7 @@ export const useMakePanDispatcher = () => {
     const dispatch = idx => evt => pan(evt, idx)
 
     // and return it
-    return dispatch
+    return { dispatch }
 }
 
 
