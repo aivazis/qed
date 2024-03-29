@@ -271,6 +271,9 @@ type Mutation {
   viewToggleChannel(selection: ViewSelectorInput!): ViewInfo!
   viewPersist(dummy: ID): PersistInfo
 
+  # dataset view state
+  datasetToggleMeasureLayer(dataset: String!): DatasetMeasureInfo!
+
   # data archive connections
   connectArchive(name: String!, uri: String!): ArchiveInfo!
   disconnectArchive(uri: String!): ArchiveInfo!
@@ -307,6 +310,12 @@ input ViewSelectorInput {
 type ViewInfo {
   # the id of the view
   view: View
+}
+
+# the measure layer state response payload
+type DatasetMeasureInfo {
+  # the id of the view
+  measure: DatasetMeasure
 }
 
 # support for connecting and disconnecting data archives
