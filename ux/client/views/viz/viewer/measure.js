@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay/hooks'
 
 // project
 // shapes
@@ -15,27 +16,30 @@ import { Badge } from '~/widgets'
 
 // locals
 // hooks
-import { useMeasureLayer } from '../../main/useMeasureLayer'
-import { useSetMeasureLayer } from '../../main/useSetMeasureLayer'
+import { useToggleMeasureLayer } from '../measure'
 // styles
 import styles from './styles'
 
 
 // split a {view} into two
-export const Measure = ({ viewport }) => {
-    // get the current measure layer state
-    const selected = useMeasureLayer(viewport)
+export const Measure = ({ viewport, view }) => {
+    // get the dataset in this view
+    const { dataset } = useFragment(measureViewerGetMeasureLayerStateFragment, view)
+    // unpack its measure layer state
+    const selected = dataset.view.measure.active
+
     // grab the measure layer toggle from context
-    const { toggle } = useSetMeasureLayer(viewport)
+    const { toggle } = useToggleMeasureLayer()
     // turn it into a handler
     const measure = evt => {
         // stop this event from bubbling up
         evt.stopPropagation()
         // toggle
-        toggle(viewport)
+        toggle(dataset.name)
         // all done
         return
     }
+
     // assemble my controllers
     const behaviors = {
         onClick: measure
@@ -51,6 +55,20 @@ export const Measure = ({ viewport }) => {
         </Badge>
     )
 }
+
+// my fragment
+const measureViewerGetMeasureLayerStateFragment = graphql`
+    fragment measureViewerGetMeasureLayerStateFragment on View {
+        dataset {
+            name
+            view {
+                measure {
+                    active
+                }
+            }
+        }
+    }
+`
 
 
 // end of file
