@@ -30,6 +30,7 @@ class ResetRangeController(graphene.Mutation):
     controller = graphene.Field(RangeController)
 
     # the range controller mutator
+    @staticmethod
     def mutate(root, info, controller):
         """
         Reset the range of a controller

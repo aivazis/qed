@@ -30,6 +30,7 @@ class ResetValueController(graphene.Mutation):
     controller = graphene.Field(ValueController)
 
     # the value controller mutator
+    @staticmethod
     def mutate(root, info, controller):
         """
         Reset the value of a controller

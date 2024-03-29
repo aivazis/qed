@@ -29,6 +29,7 @@ class ConnectArchive(graphene.Mutation):
     archive = graphene.Field(Archive)
 
     # the range controller mutator
+    @staticmethod
     def mutate(root, info, name, uri):
         """
         Add a new archive to the pile

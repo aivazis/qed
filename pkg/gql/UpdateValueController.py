@@ -30,6 +30,7 @@ class UpdateValueController(graphene.Mutation):
     controller = graphene.Field(ValueController)
 
     # the value controller mutator
+    @staticmethod
     def mutate(root, info, value):
         """
         Update the value of a controller

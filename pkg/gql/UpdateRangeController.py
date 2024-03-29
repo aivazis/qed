@@ -30,6 +30,7 @@ class UpdateRangeController(graphene.Mutation):
     controller = graphene.Field(RangeController)
 
     # the range controller mutator
+    @staticmethod
     def mutate(root, info, range):
         """
         Update the range of a controller

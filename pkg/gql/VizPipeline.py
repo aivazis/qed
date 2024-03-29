@@ -6,6 +6,7 @@
 
 # externals
 import graphene
+
 # individual controls
 from .Controller import Controller
 
@@ -21,8 +22,8 @@ class VizPipeline(graphene.ObjectType):
     channel = graphene.ID()
     controllers = graphene.List(Controller)
 
-
     # resolvers
+    @staticmethod
     def resolve_dataset(context, info, **kwds):
         """
         Extract the name of the dataset
@@ -32,7 +33,7 @@ class VizPipeline(graphene.ObjectType):
         # and return its name
         return dataset.pyre_name
 
-
+    @staticmethod
     def resolve_channel(context, info, **kwds):
         """
         Extract the name of the channel
@@ -42,7 +43,7 @@ class VizPipeline(graphene.ObjectType):
         # and return its name
         return channel.tag
 
-
+    @staticmethod
     def resolve_controllers(context, info, **kwds):
         """
         Extract the necessary controllers from the dataset channel

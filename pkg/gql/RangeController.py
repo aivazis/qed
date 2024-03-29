@@ -6,6 +6,7 @@
 
 # externals
 import graphene
+
 # my interface
 from .Node import Node
 
@@ -16,12 +17,10 @@ class RangeController(graphene.ObjectType):
     A controller that captures a range of values
     """
 
-
     # {graphene} metadata
     class Meta:
         # register my interface
-        interfaces = Node,
-
+        interfaces = (Node,)
 
     # my fields
     id = graphene.ID()
@@ -34,15 +33,15 @@ class RangeController(graphene.ObjectType):
     low = graphene.Float()
     high = graphene.Float()
 
-
     # resolvers
+    @staticmethod
     def resolve_id(context, *_):
         # extract the controller
         controller = context["controller"]
         # form the controller id
         return controller.pyre_name
 
-
+    @staticmethod
     def resolve_slot(context, *_):
         """
         Resolve the slot managed by this controller
@@ -52,7 +51,7 @@ class RangeController(graphene.ObjectType):
         # easy enough
         return trait.name
 
-
+    @staticmethod
     def resolve_min(context, *_):
         """
         Resolve the minimum value of the range
@@ -62,7 +61,7 @@ class RangeController(graphene.ObjectType):
         # easy enough
         return controller.min
 
-
+    @staticmethod
     def resolve_max(context, *_):
         """
         Resolve the maximum value of the range
@@ -72,7 +71,7 @@ class RangeController(graphene.ObjectType):
         # easy enough
         return controller.max
 
-
+    @staticmethod
     def resolve_low(context, *_):
         """
         Resolve the low end of the range
@@ -82,7 +81,7 @@ class RangeController(graphene.ObjectType):
         # easy enough
         return controller.low
 
-
+    @staticmethod
     def resolve_high(context, *_):
         """
         Resolve the high end of the range
