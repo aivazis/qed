@@ -82,8 +82,10 @@ const splitMutation = graphql`
         viewSplit(viewport: $viewport) {
             view {
                 id
-                # and whatever the readers need
+                # whatever the readers need
                 ...contextReaderGetViewFragment
+                # for the measure layer control
+                ...measureViewerGetMeasureLayerStateFragment
             }
         }
     }

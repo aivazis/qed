@@ -101,6 +101,8 @@ const vizGetViewsFragment = graphql`
             ...selectorViewerGetViewFragment
             ...viewportViewerGetViewFragment
 
+            # for the measure control
+            ...measureViewerGetMeasureLayerStateFragment
         }
     }
 `
