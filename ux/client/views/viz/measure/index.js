@@ -7,5 +7,8 @@
 // export the view
 export { Measure } from './measure'
 
+// and the hooks
+export { useToggleMeasureLayer } from './useToggleMeasureLayer'
+
 
 // end of file
