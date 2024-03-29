@@ -11,6 +11,9 @@ import graphene
 # view management
 from . import views
 
+# datasets and their views
+from . import dataset
+
 # explorer
 from .ConnectArchive import ConnectArchive
 from .DisconnectArchive import DisconnectArchive
@@ -37,6 +40,9 @@ class Mutation(graphene.ObjectType):
     viewToggleCoordinate = views.toggleCoordinate.Field()
     viewToggleChannel = views.toggleChannel.Field()
     viewPersist = views.persist.Field()
+
+    # dataset view state
+    datasetToggleMeasureLayer = dataset.toggleMeasureLayer.Field()
 
     # data archive connection management
     connectArchive = ConnectArchive.Field()
