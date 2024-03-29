@@ -10,6 +10,7 @@ import graphene
 # my fields
 from .Channel import Channel
 from .Selector import Selector
+from .DatasetView import DatasetView
 
 
 # my node type
@@ -28,6 +29,8 @@ class Dataset(graphene.ObjectType):
     shape = graphene.List(graphene.Int)
     origin = graphene.List(graphene.Int)
     tile = graphene.List(graphene.Int)
+
+    view = graphene.Field(DatasetView)
 
     # resolvers
     @staticmethod
@@ -68,6 +71,18 @@ class Dataset(graphene.ObjectType):
         Flatten the selector
         """
         return dataset.selector.items()
+
+    @staticmethod
+    def resolve_view(dataset, info, *_):
+        """
+        Get the dataset view
+        """
+        # get the store from context
+        store = info.context["store"]
+        # look up my view
+        view = store.datasetView(name=dataset.pyre_name)
+        # and pass it on
+        return view
 
 
 # end of file

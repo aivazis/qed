@@ -11,7 +11,6 @@ import graphene
 from .Node import Node
 
 # my fields
-from .ChannelView import ChannelView
 from .Controller import Controller
 
 
@@ -31,7 +30,6 @@ class Channel(graphene.ObjectType):
     name = graphene.ID()
     tag = graphene.String()
     controllers = graphene.List(Controller)
-    view = graphene.Field(ChannelView)
 
     # resolvers
     @staticmethod
@@ -67,18 +65,6 @@ class Channel(graphene.ObjectType):
             yield context
         # all done
         return
-
-    @staticmethod
-    def resolve_view(channel, info, *_):
-        """
-        Get the channel view
-        """
-        # get the store from context
-        store = info.context["store"]
-        # look up my view
-        view = store.channel(name=channel.pyre_name)
-        # and pass it on
-        return view
 
 
 # end of file
