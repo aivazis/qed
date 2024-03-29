@@ -137,6 +137,8 @@ type Dataset implements Node {
   shape: [Int!]!
   origin: [Int!]!
   tile: [Int!]!
+  # and its view state
+  view: DatasetView
 }
 
 # channel
@@ -147,8 +149,6 @@ type Channel implements Node {
   tag: String!
   # the viz pipeline controllers
   controllers: [Controller]!
-  # and its view state
-  view: ChannelView
 }
 
 # selectors
@@ -212,15 +212,16 @@ type ValueController implements Node {
 # put them all together
 union Controller = RangeController | ValueController
 
-type ChannelView implements Node {
+# viewport properties that are persisted with datasets
+type DatasetView implements Node {
   id: ID!
   name: ID!
-  measure: ChannelMeasure
-  sync: ChannelSync
-  zoom: ChannelZoom
+  measure: DatasetMeasure
+  sync: DatasetSync
+  zoom: DatasetZoom
 }
 
-type ChannelMeasure implements Node {
+type DatasetMeasure implements Node {
   id: ID!
   name: ID!
   active: Boolean
@@ -229,7 +230,7 @@ type ChannelMeasure implements Node {
   selection: [Int]
 }
 
-type ChannelSync implements Node {
+type DatasetSync implements Node {
   id: ID!
   name: ID!
   channel: Boolean
@@ -239,7 +240,7 @@ type ChannelSync implements Node {
   offsets: Pixel
 }
 
-type ChannelZoom implements Node {
+type DatasetZoom implements Node {
   id: ID!
   name: ID!
   horizontal: Int
