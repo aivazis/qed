@@ -15,7 +15,7 @@ from .Pixel import Pixel
 
 
 # my node type
-class ChannelZoom(graphene.ObjectType):
+class DatasetMeasure(graphene.ObjectType):
     """
     The store managed state of a dataset channel
     """
@@ -29,26 +29,27 @@ class ChannelZoom(graphene.ObjectType):
     id = graphene.ID()
     name = graphene.ID()
 
-    horizontal = graphene.Int()
-    vertical = graphene.Int()
-    coupled = graphene.Boolean()
+    active = graphene.Boolean()
+    path = graphene.List(Pixel)
+    closed = graphene.Boolean()
+    selection = graphene.List(graphene.Int)
 
     # resolvers
     @staticmethod
-    def resolve_id(zoom, *_):
+    def resolve_id(measure, *_):
         """
-        Get the {zoom} id
+        Get the {measure} id
         """
         # splice together the {family} and {name} of the {reader}
-        return f"{zoom.pyre_family()}:{zoom.pyre_name}"
+        return f"{measure.pyre_family()}:{measure.pyre_name}"
 
     @staticmethod
-    def resolve_name(zoom, *_):
+    def resolve_name(measure, *_):
         """
-        Get the name of the {zoom}
+        Get the name of the {measure}
         """
         # easy enough
-        return zoom.pyre_name
+        return measure.pyre_name
 
 
 # end of file

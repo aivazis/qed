@@ -11,13 +11,15 @@ import graphene
 from .Node import Node
 
 # my parts
-from .Pixel import Pixel
+from .DatasetMeasure import DatasetMeasure
+from .DatasetSync import DatasetSync
+from .DatasetZoom import DatasetZoom
 
 
 # my node type
-class ChannelMeasure(graphene.ObjectType):
+class DatasetView(graphene.ObjectType):
     """
-    The store managed state of a dataset channel
+    The store managed state of a dataset
     """
 
     # {graphene} metadata
@@ -28,28 +30,26 @@ class ChannelMeasure(graphene.ObjectType):
     # my fields
     id = graphene.ID()
     name = graphene.ID()
-
-    active = graphene.Boolean()
-    path = graphene.List(Pixel)
-    closed = graphene.Boolean()
-    selection = graphene.List(graphene.Int)
+    measure = graphene.Field(DatasetMeasure)
+    sync = graphene.Field(DatasetSync)
+    zoom = graphene.Field(DatasetZoom)
 
     # resolvers
     @staticmethod
-    def resolve_id(measure, *_):
+    def resolve_id(view, *_):
         """
-        Get the {measure} id
+        Get the {view} id
         """
         # splice together the {family} and {name} of the {reader}
-        return f"{measure.pyre_family()}:{measure.pyre_name}"
+        return f"{view.pyre_family()}:{view.pyre_name}"
 
     @staticmethod
-    def resolve_name(measure, *_):
+    def resolve_name(view, *_):
         """
-        Get the name of the {measure}
+        Get the name of the view
         """
         # easy enough
-        return measure.pyre_name
+        return view.pyre_name
 
 
 # end of file
