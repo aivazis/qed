@@ -4,6 +4,9 @@
 # (c) 1998-2024 all rights reserved
 
 
+# the ux state of datasets
+from .Dataset import Dataset as dataset
+
 # the ux state of visualization workflows
 from .Channel import Channel as channel
 
