@@ -17,30 +17,19 @@ class Channel(qed.component, family="qed.ux.channels.channel"):
     The state of a channel view
     """
 
-    # configurable state
-    measure = qed.protocols.ux.measure()
-    measure.doc = "the measure layer indicator"
-
-    sync = qed.protocols.ux.sync()
-    sync.doc = "my sync table"
-
-    zoom = qed.protocols.ux.zoom()
-    zoom.doc = "the zoom level"
-
     # metamethods
     def __init__(self, channel, **kwds):
         # chain up
         super().__init__(**kwds)
-        # make a harvester
-        harvester = Harvester()
-
-        # remember my configuration so we can restore it on demand
-        self.viewConfiguration = harvester.harvest(component=self)
-        # repeat for the visualization pipeline configuration
-        self.vizConfiguration = harvester.harvest(component=channel)
+        # remember the visualization pipeline configuration so we can restore it on demand
+        self.vizConfiguration = self.harvester.harvest(component=channel)
 
         # all done
         return
+
+    # singleton
+    # the state harvester
+    harvester = Harvester()
 
 
 # end of file
