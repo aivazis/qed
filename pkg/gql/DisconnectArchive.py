@@ -28,6 +28,7 @@ class DisconnectArchive(graphene.Mutation):
     archive = graphene.Field(Archive)
 
     # the range controller mutator
+    @staticmethod
     def mutate(root, info, uri):
         """
         Remove an archive from the pile

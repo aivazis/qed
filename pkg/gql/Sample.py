@@ -6,6 +6,7 @@
 
 # externals
 import graphene
+
 # the pixel values as represented by each channel
 from .ChannelRep import ChannelRep
 
@@ -20,8 +21,8 @@ class Sample(graphene.ObjectType):
     pixel = graphene.List(graphene.Int)
     value = graphene.List(ChannelRep)
 
-
     # resolvers
+    @staticmethod
     def resolve_value(context, info, **kwds):
         """
         Get the value of a dataset at the specified location
@@ -42,7 +43,7 @@ class Sample(graphene.ObjectType):
         # all done
         return
 
-
+    @staticmethod
     def resolve_pixel(context, info, **kwds):
         """
         Get the value of a dataset at the specified location

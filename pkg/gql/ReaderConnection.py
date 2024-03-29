@@ -26,6 +26,7 @@ class ReaderConnection(graphene.relay.Connection):
     count = graphene.Int()
 
     # resolvers
+    @staticmethod
     def resolve_count(connection, info, *_):
         """
         Count the number of readers

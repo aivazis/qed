@@ -28,6 +28,7 @@ class DisconnectReader(graphene.Mutation):
     reader = graphene.Field(Reader)
 
     # the range controller mutator
+    @staticmethod
     def mutate(root, info, name):
         """
         Remove a reader from the pile

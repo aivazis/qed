@@ -6,6 +6,7 @@
 
 # externals
 import graphene
+
 # the channel value projections
 from .ChannelValue import ChannelValue
 
@@ -20,8 +21,8 @@ class ChannelRep(graphene.ObjectType):
     channel = graphene.String()
     reps = graphene.List(ChannelValue)
 
-
     # resolvers
+    @staticmethod
     def resolve_reps(context, info, **kwds):
         """
         Unpack the channel value representations

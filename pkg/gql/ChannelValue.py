@@ -19,6 +19,7 @@ class ChannelValue(graphene.ObjectType):
     units = graphene.String()
 
     # resolvers
+    @staticmethod
     def resolve_rep(context, info, **kwds):
         """
         Generate the representation of the value
