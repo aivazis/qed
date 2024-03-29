@@ -13,6 +13,7 @@ import journal
 
 # my parts
 from .Channel import Channel
+from .Dataset import Dataset
 from .View import View
 
 
@@ -193,12 +194,19 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # easy enough
         return self._datasets.get(name)
 
-    def channel(self, name):
+    def datasetView(self, name):
+        """
+        Look up the dataset view by name
+        """
+        # easy enough
+        return self._datasetViews.get(name)
+
+    def channelView(self, name):
         """
         Look up the channel view by name
         """
         # easy enough
-        return self._channels.get(name)
+        return self._channelViews.get(name)
 
     # connections
     def connectArchive(self, archive):
@@ -231,8 +239,16 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         Register the {dataset}
         """
-        # add it to the pile
-        self._datasets[dataset.pyre_name] = dataset
+        # get the dataset name
+        datasetName = dataset.pyre_name
+        # add the dataset to the pile
+        self._datasets[datasetName] = dataset
+        # build the name a store for its view options
+        viewName = f"{datasetName}.config"
+        # construct the view
+        view = Dataset(name=viewName)
+        # add it to my map
+        self._datasetViews[datasetName] = view
         # go through its channels
         for channel in dataset.channels.values():
             # and connect them to the store
@@ -251,7 +267,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # construct the view
         view = Channel(name=viewName, channel=channel)
         # add it to my map
-        self._channels[channelName] = view
+        self._channelViews[channelName] = view
         # all done
         return channel
 
@@ -338,6 +354,8 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         for channel in dataset.channels.values():
             # and disconnect them
             self.disconnectChannel(name=channel.pyre_name)
+        # disconnect its view
+        del self._datasetViews[name]
         # remove it from the registry
         del self._datasets[name]
         # all done
@@ -345,10 +363,10 @@ class Store(qed.shells.command, family="qed.cli.ux"):
 
     def disconnectChannel(self, name):
         """
-        Remove the channel from the store
+        Remove the channel view from the store
         """
         # look it up
-        channel = self.channel(name=name)
+        channel = self.channelView(name=name)
         # if it's not there
         if not channel:
             # we have a bug
@@ -361,7 +379,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             # and bail, just in case firewalls aren't fatal
             return
         # remove it form the registry
-        del self._channels[name]
+        del self._channelViews[name]
         # all done
         return channel
 
@@ -379,8 +397,10 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         self._selections = {}
         # map: dataset name -> dataset
         self._datasets = {}
+        # map: dataset name -> dataset view options
+        self._datasetViews = {}
         # map: channel names -> channels
-        self._channels = {}
+        self._channelViews = {}
         # make a trivial view
         self._blank = View(name=f"{self.pyre_name}.blank")
         # initialize my views, a list of {channel} instances that are currently on display
@@ -460,7 +480,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
                     channel.outdent()
                     channel.outdent()
                 # get the view
-                view = self._channels[chn.pyre_name]
+                view = self._channelViews[chn.pyre_name]
                 # show me the view state
                 channel.line(f"view: {view}")
                 channel.indent()
