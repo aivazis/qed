@@ -33,6 +33,9 @@ class Flat(
     selectors.default = {}
     selectors.doc = "a map of selector names to their allowed values"
 
+    selections = qed.properties.kv()
+    selections = "a key value store of preferred values for selectors"
+
     datasets = qed.properties.list(schema=qed.protocols.dataset.output())
     datasets.doc = "the list of data sets provided by the reader"
 
