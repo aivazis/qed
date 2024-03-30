@@ -27,6 +27,9 @@ class H5(qed.flow.factory, implements=qed.protocols.reader):
     selectors = qed.protocols.selectors()
     selectors.doc = "a map of selector names to their allowed values"
 
+    selections = qed.properties.kv()
+    selections = "a key value store of preferred values for selectors"
+
     pages = qed.properties.int()
     pages.default = None
     pages.doc = "the number of 4K pages in the aggregation cache"
