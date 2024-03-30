@@ -73,6 +73,10 @@ class GDAL(
         self.selectors["raster"] = bands
         # and build the availability map
         self.available["raster"] = bands
+        # if there is only one available band
+        if len(bands) == 1:
+            # force this selection
+            self.selections["raster"] = 0
         # all done
         return
 

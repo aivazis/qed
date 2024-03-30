@@ -74,6 +74,12 @@ class H5(qed.flow.factory, implements=qed.protocols.reader):
             for axis, coordinate in dataset.selector.items():
                 # and add the {coordinate} as a possible value of {axis}
                 available[axis].add(coordinate)
+        # now, go through the options
+        for axis, options in available.items():
+            # if there is only one option
+            if len(options) == 1:
+                # force this selection
+                self.selections[axis], *_ = options
         # all done
         return available
 
