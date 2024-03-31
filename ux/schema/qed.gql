@@ -273,9 +273,8 @@ type Mutation {
   viewToggleCoordinate(selection: ViewSelectorInput!): ViewInfo!
   viewToggleChannel(selection: ViewSelectorInput!): ViewInfo!
   viewPersist(dummy: ID): PersistInfo
-
   # dataset view state
-  datasetToggleMeasureLayer(viewport: Int!, reader: String!): DatasetMeasureInfo!
+  viewToggleMeasureLayer(viewport: Int!, reader: String!): DatasetMeasureInfo!
 
   # data archive connections
   connectArchive(name: String!, uri: String!): ArchiveInfo!
