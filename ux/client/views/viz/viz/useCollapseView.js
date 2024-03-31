@@ -94,6 +94,8 @@ const collapseMutation = graphql`
         viewCollapse(viewport: $viewport) {
             view {
                 id
+                # for dataset selection
+                ...contextReaderGetViewFragment
             }
         }
     }
