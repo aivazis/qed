@@ -152,9 +152,16 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # and ask it to select the named reader
         return port.selectSource(source=source)
 
-    def datasetView(self, dataset):
-        # all done
-        return
+    def toggleChannel(self, viewport, source, tag):
+        """
+        Toggle the value of {channel}
+        """
+        # locate the source
+        source = self.source(name=source)
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # and delegate
+        return port.toggleChannel(source=source, tag=tag)
 
     def toggleCoordinate(self, viewport, source, axis, coordinate):
         """
@@ -167,16 +174,18 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # and delegate
         return port.toggleCoordinate(source=source, axis=axis, coordinate=coordinate)
 
-    def toggleChannel(self, viewport, source, tag):
+    def toggleMeasure(self, viewport, source):
         """
-        Toggle the value of {channel}
+        Toggle the measure layer state on {viewport}
         """
         # locate the source
         source = self.source(name=source)
         # get the viewport configuration
         port = self._viewports[viewport]
         # and delegate
-        return port.toggleChannel(source=source, tag=tag)
+        view = port.toggleMeasure(source=source)
+        # return the measure configuration
+        return view.measure
 
     # metamethods
     def __init__(self, plexus, docroot, **kwds):

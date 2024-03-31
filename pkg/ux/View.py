@@ -73,7 +73,16 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # solve the selection
         self.resolve()
         # all done
-        return
+        return self
+
+    def toggleMeasure(self):
+        """
+        Toggle the measure layer state
+        """
+        # toggle the active flag
+        self.measure.active ^= True
+        # all done
+        return self
 
     # state resolution
     def resolve(self):
