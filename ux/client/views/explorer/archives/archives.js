@@ -29,7 +29,9 @@ export const Archives = () => {
     return (
         <>
             {/* the title of the panel */}
-            <Header title="data archives" style={headerPaint} controls={<Connect />} />
+            <Header title="data archives" style={headerPaint}>
+                <Connect />
+            </Header>
             {/* go through the repositories and render them */}
             {archives.map(archive => (
                 <Archive key={archive.name} archive={archive} />
