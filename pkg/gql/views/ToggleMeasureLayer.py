@@ -10,7 +10,7 @@ import journal
 
 
 # the result types
-from ..DatasetMeasure import DatasetMeasure
+from .Measure import Measure
 
 
 # remove a view from the pile
@@ -25,7 +25,7 @@ class ToggleMeasureLayer(graphene.Mutation):
         dataset = graphene.String(required=True)
 
     # the result is the new measure layer object
-    measure = graphene.Field(DatasetMeasure)
+    measure = graphene.Field(Measure)
 
     # the range controller mutator
     @staticmethod

@@ -13,5 +13,6 @@ from .SelectReader import SelectReader as selectReader
 from .Split import Split as split
 from .ToggleChannel import ToggleChannel as toggleChannel
 from .ToggleCoordinate import ToggleCoordinate as toggleCoordinate
+from .ToggleMeasureLayer import ToggleMeasureLayer as toggleMeasureLayer
 
 # end of file

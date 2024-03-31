@@ -38,14 +38,14 @@ class ToggleCoordinate(graphene.Mutation):
         """
         # unpack the selector
         viewport = selection.viewport
-        reader = selection.reader
+        source = selection.reader
         axis = selection.selector
         coordinate = selection.value
         # get the store
         store = info.context["store"]
         # ask it to set the reader of the {viewport}
         view = store.toggleCoordinate(
-            viewport=viewport, reader=reader, axis=axis, coordinate=coordinate
+            viewport=viewport, source=source, axis=axis, coordinate=coordinate
         )
         # form the mutation resolution context
         context = {"view": view}
