@@ -24,14 +24,14 @@ import styles from './styles'
 // split a {view} into two
 export const Measure = ({ viewport, view }) => {
     // get the dataset in this view
-    const { dataset } = useFragment(measureViewerGetMeasureLayerStateFragment, view)
+    const { dataset, measure } = useFragment(measureViewerGetMeasureLayerStateFragment, view)
     // unpack its measure layer state
-    const selected = dataset.view.measure.active
+    const selected = measure.active
 
     // grab the measure layer toggle from context
     const { toggle } = useToggleMeasureLayer()
     // turn it into a handler
-    const measure = evt => {
+    const toggleMeasure = evt => {
         // stop this event from bubbling up
         evt.stopPropagation()
         // toggle
@@ -42,7 +42,7 @@ export const Measure = ({ viewport, view }) => {
 
     // assemble my controllers
     const behaviors = {
-        onClick: measure
+        onClick: toggleMeasure
     }
     // deduce my state
     const state = selected ? "selected" : "enabled"
@@ -61,11 +61,9 @@ const measureViewerGetMeasureLayerStateFragment = graphql`
     fragment measureViewerGetMeasureLayerStateFragment on View {
         dataset {
             name
-            view {
-                measure {
-                    active
-                }
-            }
+        }
+        measure {
+            active
         }
     }
 `
