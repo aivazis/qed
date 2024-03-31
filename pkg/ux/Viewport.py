@@ -59,6 +59,17 @@ class Viewport(
         # all done
         return self.view()
 
+    def toggleMeasure(self, source):
+        """
+        Toggle {coordinate}
+        """
+        # activate the {source}
+        view = self._selectSource(source=source)
+        # and delegate
+        view.toggleMeasure()
+        # all done
+        return self.view()
+
     def clone(self):
         """
         Make a copy of me
