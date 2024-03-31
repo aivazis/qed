@@ -180,17 +180,20 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             reader=self.reader,
             dataset=self.dataset,
             channel=self.channel,
-            measure=self.measure,
-            sync=self.sync,
-            zoom=self.zoom,
+            selections=dict(self.selections),
+            measure=self.measure.clone(),
+            sync=self.sync.clone(),
+            zoom=self.zoom.clone(),
         )
 
     # metamethods
-    def __init__(self, reader=None, dataset=None, channel=None, **kwds):
+    def __init__(
+        self, reader=None, dataset=None, channel=None, selections=None, **kwds
+    ):
         # chain up
         super().__init__(**kwds)
         # prime my selections
-        self.selections = reader.selections if reader is not None else {}
+        self.selections = selections or (reader and dict(reader.selections)) or {}
         # build my state
         self.reader = reader
         self.dataset = dataset
