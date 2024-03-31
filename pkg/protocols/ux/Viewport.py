@@ -9,7 +9,7 @@ import qed
 
 
 # the protocol
-class Viewport(qed.protocol, family="qed.viewports"):
+class Viewport(qed.protocol, family="qed.ux.viewports"):
     """
     Detailed information about the contents of a viewport
     """
