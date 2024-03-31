@@ -60,13 +60,11 @@ export const useSelectReader = () => {
                 // all done
                 return
             },
-            onError: error => {
+            onError: errors => {
                 // show me
-                console.log(
-                    `viz.reader.useSelectReader: ERROR while selecting '${reader.name}':`,
-                    error
-                )
+                console.log(`viz.reader.useSelectReader:`)
                 console.group()
+                console.log(`ERROR while selecting '${reader.name}':`)
                 console.log(errors)
                 console.groupEnd()
                 // all done
