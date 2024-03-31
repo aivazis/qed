@@ -28,7 +28,7 @@ class H5(qed.flow.factory, implements=qed.protocols.reader):
     selectors.doc = "a map of selector names to their allowed values"
 
     selections = qed.properties.kv()
-    selections = "a key value store of preferred values for selectors"
+    selections.doc = "a key value store of preferred values for selectors"
 
     pages = qed.properties.int()
     pages.default = None
@@ -74,12 +74,16 @@ class H5(qed.flow.factory, implements=qed.protocols.reader):
             for axis, coordinate in dataset.selector.items():
                 # and add the {coordinate} as a possible value of {axis}
                 available[axis].add(coordinate)
+        # now, get my selections
+        selections = self.selections
         # now, go through the options
         for axis, options in available.items():
             # if there is only one option
             if len(options) == 1:
-                # force this selection
-                self.selections[axis], *_ = options
+                # get the setting
+                option, *_ = options
+                # and select it
+                selections[axis] = option
         # all done
         return available
 
