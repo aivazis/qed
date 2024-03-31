@@ -23,8 +23,8 @@ import styles from './styles'
 
 // split a {view} into two
 export const Measure = ({ viewport, view }) => {
-    // get the dataset in this view
-    const { dataset, measure } = useFragment(measureViewerGetMeasureLayerStateFragment, view)
+    // get the reader and measure layer in this view
+    const { reader, measure } = useFragment(measureViewerGetMeasureLayerStateFragment, view)
     // unpack its measure layer state
     const selected = measure.active
 
@@ -35,7 +35,7 @@ export const Measure = ({ viewport, view }) => {
         // stop this event from bubbling up
         evt.stopPropagation()
         // toggle
-        toggle(dataset.name)
+        toggle(viewport, reader.name)
         // all done
         return
     }
@@ -59,7 +59,7 @@ export const Measure = ({ viewport, view }) => {
 // my fragment
 const measureViewerGetMeasureLayerStateFragment = graphql`
     fragment measureViewerGetMeasureLayerStateFragment on View {
-        dataset {
+        reader {
             name
         }
         measure {
