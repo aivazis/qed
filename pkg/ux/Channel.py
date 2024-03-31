@@ -22,8 +22,7 @@ class Channel(qed.component, family="qed.ux.channels.channel"):
         # chain up
         super().__init__(**kwds)
         # remember the visualization pipeline configuration so we can restore it on demand
-        self.vizConfiguration = self.harvester.harvest(component=channel)
-
+        self.configuration = self.harvester.harvest(component=channel)
         # all done
         return
 

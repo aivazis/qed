@@ -4,17 +4,15 @@
 # (c) 1998-2024 all rights reserved
 
 
-# external
-import uuid
-
 # support
 import qed
 import journal
+import uuid
 
 # my parts
-from .Channel import Channel
-from .Dataset import Dataset
-from .View import View
+from .DataArchives import DataArchives
+from .DataSources import DataSources
+from .Viewport import Viewport
 
 
 # the server side of the application store
@@ -23,365 +21,162 @@ class Store(qed.shells.command, family="qed.cli.ux"):
     The application state as known to the server
     """
 
-    # read-only access to my contents
+    # interface
+    # archives
     @property
     def archives(self):
-        # easy enough
-        return self._archives.values()
-
-    @property
-    def readers(self):
-        # easy enough
-        return self._readers.values()
-
-    @property
-    def selections(self):
-        # easy enough
-        return self._selections.values()
-
-    @property
-    def datasets(self):
-        # easy enough
-        return self._datasets.values()
-
-    @property
-    def views(self):
-        # easy enough
-        return self._views
-
-    # interface
-    # view management
-    def collapseView(self, viewport):
         """
-        Remove {view} from the list of active views
+        Retrieve the sequence of registered archives
         """
-        # get my views
-        views = self._views
-        # pop the indicated one
-        view = views.pop(viewport)
-        # if the pile of views is now empty
-        if not views:
-            # use the blank view
-            view = self._blank
-            # add it to the pile
-            views.append(self._blank)
-        # all done
-        return view
+        # delegate
+        return self._dataArchives.archives()
 
-    def splitView(self, viewport):
-        """
-        Remove {view} from the list of active views
-        """
-        # get my views
-        views = self._views
-        # grab the view in {viewport}
-        view = views[viewport]
-        # make a copy of {viewport}
-        views.insert(viewport + 1, view)
-        # all done
-        return view
-
-    def selectReader(self, viewport: int, name: str, resolve=True):
-        """
-        Locate a reader by {name} and activate it in {viewport}
-        """
-        # look up the reader selections
-        selection = self.selection(name=name)
-        # unless the caller has asked not
-        if resolve:
-            # attempt to fully resolve the view
-            selection.resolve()
-        # and install in the view
-        self._views[viewport] = selection
-        # all done
-        return selection
-
-    def toggleChannel(self, viewport: int, reader: str, tag: str):
-        """
-        Toggle the value of the {coordinate} of {axis} in {viewport}
-        """
-        # get the view
-        view = self.selectReader(viewport=viewport, name=reader)
-        # get the dataset
-        dataset = view.dataset
-        # if i don't have on
-        if not dataset:
-            # we have a bug
-            firewall = journal.firewall("qed.us.store")
-            # complain
-            firewall.line(f"no dataset present in viewport {viewport}")
-            firewall.line(f"while attempting to toggle the '{tag}' channel")
-            firewall.line(f"of {view.reader}")
-            # flush
-            firewall.log()
-            # and bail, just in case firewalls aren't fatal
-            return view
-        # get the view channel
-        current = view.channel
-        # if the view doesn't have a channel or it does and it's not this one
-        if not current or current.tag != tag:
-            # get the channel from teh dataset
-            channel = dataset.channels[tag]
-            # replace the channel with this one
-            view.channel = channel
-        # otherwise
-        else:
-            # clear the channel selection
-            view.channel = None
-
-        # N.B.:
-        #   toggling the channel never upsets the dataset solution
-        #   so there is no reason to resolve the view
-
-        # all done
-        return view
-
-    def toggleCoordinate(self, viewport: int, reader: str, axis: str, coordinate: str):
-        """
-        Toggle the value of the {coordinate} of {axis} in {viewport}
-        """
-        # get the view
-        view = self.selectReader(viewport=viewport, name=reader, resolve=False)
-        # get the current value of the axis
-        current = view.selections.get(axis)
-        # if the value is trivial or something else
-        if not current or current != coordinate:
-            # set {coordinate} as the value
-            view.selections[axis] = coordinate
-        # otherwise
-        else:
-            # clear it
-            del view.selections[axis]
-        # resolve the view
-        view.resolve()
-        # all done
-        return view
-
-    # count
-    def archiveCount(self):
-        """
-        Get the number of connected archives
-        """
-        # easy enough
-        return len(self._archives)
-
-    # searches
     def archive(self, uri):
         """
-        Look up an archive by its {uri}
+        Retrieve an archive given its {uri}
         """
         # easy enough
-        return self._archives.get(uri)
+        return self._dataArchives.archive(uri=uri)
 
-    def reader(self, name):
+    def nArchives(self):
         """
-        Look up a reader by its {name}
+        Return the number of connected archives
         """
         # easy enough
-        return self._readers.get(name)
+        return len(self._dataArchives)
 
-    def selection(self, name):
-        """
-        Look up the selections of a reader by its {name}
-        """
-        # easy enough
-        return self._selections.get(name)
-
-    def dataset(self, name):
-        """
-        Look up the dataset by name
-        """
-        # easy enough
-        return self._datasets.get(name)
-
-    def datasetView(self, name):
-        """
-        Look up the dataset view by name
-        """
-        # easy enough
-        return self._datasetViews.get(name)
-
-    def channelView(self, name):
-        """
-        Look up the channel view by name
-        """
-        # easy enough
-        return self._channelViews.get(name)
-
-    # connections
     def connectArchive(self, archive):
         """
-        Register {archive}
+        Connect a new archive
         """
-        # add it to the pile
-        self._archives[str(archive.uri)] = archive
-        # all done
-        return archive
+        # delegate to my archive store
+        return self._dataArchives.addArchive(archive=archive)
 
-    def connectReader(self, reader):
-        """
-        Register the {reader}
-        """
-        # add it to the pile of readers
-        self._readers[reader.pyre_name] = reader
-        # make a selection for it
-        self._selections[reader.pyre_name] = View(
-            name=f"{reader.pyre_name}.selections", reader=reader
-        )
-        # go through its datasets
-        for dataset in reader.datasets:
-            # and connect them to the store
-            self.connectDataset(dataset=dataset)
-        # all done
-        return reader
-
-    def connectDataset(self, dataset):
-        """
-        Register the {dataset}
-        """
-        # get the dataset name
-        datasetName = dataset.pyre_name
-        # add the dataset to the pile
-        self._datasets[datasetName] = dataset
-        # build the name a store for its view options
-        viewName = f"{datasetName}.config"
-        # construct the view
-        view = Dataset(name=viewName)
-        # add it to my map
-        self._datasetViews[datasetName] = view
-        # go through its channels
-        for channel in dataset.channels.values():
-            # and connect them to the store
-            self.connectChannel(channel=channel)
-        # all done
-        return dataset
-
-    def connectChannel(self, channel):
-        """
-        Register the {channel}
-        """
-        # get the name of the channel
-        channelName = channel.pyre_name
-        # build the name of the view
-        viewName = f"{channelName}.config"
-        # construct the view
-        view = Channel(name=viewName, channel=channel)
-        # add it to my map
-        self._channelViews[channelName] = view
-        # all done
-        return channel
-
-    # deletions
     def disconnectArchive(self, uri):
         """
-        Remove the archive from the store
+        Disconnect an archive
         """
-        # attempt to
-        try:
-            # remove the archive
-            del self._archives[uri]
-        # if it's not there
-        except KeyError:
-            # we have a bug
-            channel = journal.firewall("qed.gql.disconnect")
-            # complain
-            channel.line(f"while attempting to disconnect '{uri}")
-            channel.line(f"the URI does not correspond to a connected data archive")
-            # flush
-            channel.log()
+        # delegate to my archive store
+        return self._dataArchives.removeArchive(uri=uri)
+
+    # readers
+    @property
+    def sources(self):
+        """
+        Retrieve the sequence of registered readers
+        """
+        # delegate
+        yield from self._dataSources.sources()
         # all done
         return
 
-    def disconnectReader(self, name):
+    def source(self, name):
         """
-        Remove the archive from the store
+        Retrieve an reader given its {name}
         """
-        # get the reader
-        reader = self.reader(name=name)
-        # if it's not there
-        if not reader:
-            # we have a bug
-            channel = journal.firewall("qed.gql.disconnect")
-            # complain
-            channel.line(f"while attempting to remove '{name}")
-            channel.line(f"the name does not correspond to a connected product reader")
-            # flush
-            channel.log()
-            # and bail, in case firewalls aren't fatal
-            return
-        # go through its datasets
-        for dataset in reader.datasets:
-            # and disconnect them
-            self.disconnectDataset(name=dataset.pyre_name)
-        # now, remove it from the store
-        del self._readers[name]
-        # and
-        try:
-            # its selections
-            del self._selections[name]
-        # if it's not there
-        except KeyError:
-            # we have a bug
-            channel = journal.firewall("qed.gql.disconnect")
-            # complain
-            channel.line(f"while attempting to the selections for '{name}")
-            channel.line(f"the name does not correspond to a connected product reader")
-            # flush
-            channel.log()
-            # and bail, just in case firewalls aren't fatal
-            return reader
-        # all done
-        return reader
+        # easy enough
+        return self._dataSources.source(name=name)
 
-    def disconnectDataset(self, name):
+    def nSources(self):
         """
-        Remove the archive from the store
+        Return the number of connected readers
         """
-        # get the dataset
-        dataset = self.dataset(name)
-        # if it's not there
-        if not dataset:
-            # we have a bug
-            channel = journal.firewall("qed.gql.disconnect")
-            # complain
-            channel.line(f"while attempting to disconnect the dataset '{name}")
-            channel.line(f"the name does not correspond to a registered dataset")
-            # flush
-            channel.log()
-            # and bail
-            return
-        # go through its channels
-        for channel in dataset.channels.values():
-            # and disconnect them
-            self.disconnectChannel(name=channel.pyre_name)
-        # disconnect its view
-        del self._datasetViews[name]
-        # remove it from the registry
-        del self._datasets[name]
-        # all done
-        return dataset
+        # easy enough
+        return len(self._dataSources)
 
-    def disconnectChannel(self, name):
+    def connectSource(self, source):
         """
-        Remove the channel view from the store
+        Connect a new data source
         """
-        # look it up
-        channel = self.channelView(name=name)
-        # if it's not there
-        if not channel:
-            # we have a bug
-            channel = journal.firewall("qed.gql.disconnect")
-            # complain
-            channel.line(f"while attempting to disconnect the channel f'{name}")
-            channel.line(f"the name does not correspond to a known dataset channel")
-            # flush
-            channel.log()
-            # and bail, just in case firewalls aren't fatal
-            return
-        # remove it form the registry
-        del self._channelViews[name]
+        # delegate to my source store
+        return self._dataSources.addSource(source=source)
+
+    def disconnectSource(self, name):
+        """
+        Disconnect a data source
+        """
+        # delegate to my source store
+        return self._dataSources.removeSource(name=name)
+
+    # views
+    @property
+    def viewports(self):
+        """
+        Retrieve the sequence of current views
+        """
+        # go through my pile of views
+        yield from self._viewports
         # all done
-        return channel
+        return
+
+    def collapseViewport(self, viewport):
+        """
+        Collapse the indicated {viewport}
+        """
+        # get my viewports
+        viewports = self._viewports
+        # pop the indicated one
+        port = viewports.pop(viewport)
+        # if the pile of viewports is now empty
+        if not viewports:
+            # make a new onw
+            port = Viewport(name=str(uuid.uuid1()))
+            # add it to the pile
+            viewports.append(port)
+        # all done
+        return port.view()
+
+    def splitViewport(self, viewport):
+        """
+        Split the indicated {viewport}
+        """
+        # get my viewports
+        viewports = self._viewports
+        # grab the view in {viewport}
+        view = viewports[viewport]
+        # make a copy of it
+        clone = view.clone()
+        # add it to the pile
+        viewports.insert(viewport + 1, clone)
+        # and return it
+        return clone.view()
+
+    def selectSource(self, viewport, name):
+        """
+        Prepare {viewport} to display the source given its {name}
+        """
+        # locate the source
+        source = self.source(name=name)
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # and ask it to select the named reader
+        return port.selectSource(source=source)
+
+    def datasetView(self, dataset):
+        # all done
+        return
+
+    def toggleCoordinate(self, viewport, source, axis, coordinate):
+        """
+        Toggle the value of {coordinate}
+        """
+        # locate the source
+        source = self.source(name=source)
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # and delegate
+        return port.toggleCoordinate(source=source, axis=axis, coordinate=coordinate)
+
+    def toggleChannel(self, viewport, source, tag):
+        """
+        Toggle the value of {channel}
+        """
+        # locate the source
+        source = self.source(name=source)
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # and delegate
+        return port.toggleChannel(source=source, tag=tag)
 
     # metamethods
     def __init__(self, plexus, docroot, **kwds):
@@ -389,46 +184,45 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         super().__init__(plexus=plexus, spec="store", **kwds)
         # save the root of the document
         self._docroot = docroot
-        # map: archive uris -> archives
-        self._archives = {}
-        # map: reader names -> readers
-        self._readers = {}
-        # map: reader names -> dataset/channel selection
-        self._selections = {}
-        # map: dataset name -> dataset
-        self._datasets = {}
-        # map: dataset name -> dataset view options
-        self._datasetViews = {}
-        # map: channel names -> channels
-        self._channelViews = {}
-        # make a trivial view
-        self._blank = View(name=f"{self.pyre_name}.blank")
-        # initialize my views, a list of {channel} instances that are currently on display
-        self._views = [self._blank]
-        # now, load the readers that {plexus} harvested from the configuration files
-        self.loadPersistentReaders(plexus=plexus)
+        # map: name -> data archive
+        self._dataArchives = self._loadPersistentArchives(plexus)
+        # map: name -> data source
+        self._dataSources = self._loadPersistentSources(plexus)
+        # my viewports: start out with one
+        self._viewports = [Viewport(name=str(uuid.uuid1()))]
         # all done
         return
 
     # implementation details
-    # initialization from the plexus configuration
-    def loadPersistentReaders(self, plexus):
+    def _loadPersistentArchives(self, plexus):
         """
-        Transfer information from the plexus
+        Transfer the persistent data sources and their datasets from the plexus
         """
-        # go through the registered archives
+        # build the map
+        archives = DataArchives()
+        # go through the plexus sources
         for archive in plexus.archives:
-            # and connect them to the store
-            self.connectArchive(archive=archive)
-        # go through the registered readers
-        for reader in plexus.datasets:
-            # and connect them to the store
-            self.connectReader(reader=reader)
-        # clear out the plexus state
+            # and connect them
+            archives.addArchive(archive=archive)
+        # clear out the plexus pile
         plexus.archives = []
+        # all done
+        return archives
+
+    def _loadPersistentSources(self, plexus):
+        """
+        Transfer the persistent data sources and their datasets from the plexus
+        """
+        # build the map
+        sources = DataSources()
+        # go through the plexus sources
+        for reader in plexus.datasets:
+            # and connect them
+            sources.addSource(source=reader)
+        # clear out the plexus pile
         plexus.datasets = []
         # all done
-        return
+        return sources
 
     # debugging support
     def pyre_dump(self):
@@ -449,69 +243,19 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # my archives
         channel.line("archives:")
         channel.indent()
-        channel.report(self._archives.keys())
+        channel.report(archive.uri for archive in self._dataArchives.archives())
         channel.outdent()
 
         # my readers
         channel.line("readers:")
         channel.indent()
-        channel.report(reader.uri for reader in self._readers.values())
-        channel.outdent()
-
-        # my datasets
-        channel.line("datasets:")
-        channel.indent()
-        # go through the datasets
-        for dataset in self._datasets.values():
-            channel.line(f"{dataset}")
-            channel.indent()
-            channel.line(f"uri: {dataset.uri}")
-            # go through the channels
-            for chn in dataset.channels.values():
-                # sign on
-                channel.line(f"channel: {chn}")
-                # go through the controllers
-                channel.line(f"controllers:")
-                for controller, trait in chn.controllers():
-                    channel.indent()
-                    channel.line(f"controller: {controller}")
-                    channel.indent()
-                    channel.report(controller.pyre_dump())
-                    channel.outdent()
-                    channel.outdent()
-                # get the view
-                view = self._channelViews[chn.pyre_name]
-                # show me the view state
-                channel.line(f"view: {view}")
-                channel.indent()
-                channel.line(f"measure: {view.measure}")
-                channel.indent()
-                channel.line(f"active: {view.measure.active}")
-                channel.line(f"path: {view.measure.path}")
-                channel.line(f"closed: {view.measure.closed}")
-                channel.line(f"selection: {view.measure.selection}")
-                channel.outdent()
-                channel.line(f"sync: {view.sync}")
-                channel.indent()
-                channel.line(f"channel: {view.sync.channel}")
-                channel.line(f"zoom: {view.sync.zoom}")
-                channel.line(f"scroll: {view.sync.scroll}")
-                channel.line(f"path: {view.sync.path}")
-                channel.line(f"offsets: {view.sync.offsets}")
-                channel.outdent()
-                channel.line(f"zoom: {view.zoom}")
-                channel.indent()
-                channel.line(f"coupled: {view.zoom.coupled}")
-                channel.line(f"horizontal: {view.zoom.horizontal}")
-                channel.line(f"vertical: {view.zoom.vertical}")
-                channel.outdent()
-                channel.outdent()
-            channel.outdent()
+        channel.report(reader.uri for reader in self._dataSources.sources())
         channel.outdent()
 
         # flush
-        channel.outdent()
         channel.log()
+        # all done
+        return
 
 
 # end of file
