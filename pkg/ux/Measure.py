@@ -6,6 +6,7 @@
 
 # support
 import qed
+import uuid
 
 
 # the sync control
@@ -32,6 +33,22 @@ class Measure(
     selection = qed.properties.list(schema=qed.properties.int())
     selection.default = []
     selection.doc = "the indices of the selected points"
+
+    # support
+    def clone(self):
+        """
+        Make a copy
+        """
+        # make a nae
+        name = str(uuid.uuid1())
+        # build a new instance and return it
+        return type(self)(
+            name=name,
+            active=self.active,
+            path=list(self.path),
+            closed=self.closed,
+            selection=list(self.selection),
+        )
 
 
 # end of file
