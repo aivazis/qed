@@ -74,19 +74,27 @@ class Viewport(
         """
         Make a copy of me
         """
+        # get my view
+        view = self._view
         # make a name for the clone
         name = str(uuid.uuid1())
-        # easy enough
-        return type(self)(name=name, view=self._view.clone())
+        # build the new instance
+        clone = type(self)(name=name, view=view.clone())
+        # select my reader
+        clone.selectSource(source=view.reader)
+        # and return the clone
+        return clone
 
     # metamethods
     def __init__(self, view=None, **kwds):
         # chain up
         super().__init__(**kwds)
+        # normalize the view
+        view = view or View(name=str(uuid.uuid1()))
         # initialize my view
-        self._view = view or View(name=str(uuid.uuid1()))
-        # and my cache of other selections
-        self._cache = {}
+        self._view = view
+        # and my selection cache
+        self._cache = {view.reader and view.reader.pyre_name: view}
         # all done
         return
 
