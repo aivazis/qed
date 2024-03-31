@@ -34,7 +34,7 @@ class ArchiveConnection(graphene.relay.Connection):
         # get the store
         store = info.context["store"]
         # get the number of registered data archives
-        return store.archiveCount()
+        return store.nArchives()
 
 
 # end of file

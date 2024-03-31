@@ -36,7 +36,7 @@ class DisconnectReader(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # remove it from the pile
-        reader = store.disconnectReader(name=name)
+        reader = store.disconnectSource(name=name)
         # form the mutation resolution context
         context = {"reader": reader}
         # and resolve the mutation

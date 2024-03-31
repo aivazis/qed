@@ -62,7 +62,7 @@ class ConnectReader(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # add the new source to the store
-        store.connectReader(reader=source)
+        store.connectSource(source=source)
         # make a resolution context
         context = {"reader": source}
         # and resolve the mutation
