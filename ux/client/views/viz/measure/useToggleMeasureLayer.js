@@ -49,7 +49,7 @@ export const useToggleMeasureLayer = () => {
 // the mutation that toggles the measure layer state
 const toggleMeasureLayerMutation = graphql`
     mutation useToggleMeasureLayerMutation($viewport: Int!, $reader: String!) {
-        datasetToggleMeasureLayer(viewport: $viewport, reader: $reader) {
+        viewToggleMeasureLayer(viewport: $viewport, reader: $reader) {
             measure{
                 active
             }
