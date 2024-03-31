@@ -14,7 +14,7 @@ export const useToggleMeasureLayer = () => {
     const [request, pending] = useMutation(toggleMeasureLayerMutation)
 
     // make a handler that toggles the layer state
-    const toggle = dataset => {
+    const toggle = (viewport, reader) => {
         // if there is already a pending operation
         if (pending) {
             // nothing to do
@@ -25,7 +25,8 @@ export const useToggleMeasureLayer = () => {
             // input
             variables: {
                 // the payload
-                dataset
+                viewport,
+                reader
             },
             onError: errors => {
                 // send the error to the console
@@ -47,8 +48,8 @@ export const useToggleMeasureLayer = () => {
 
 // the mutation that toggles the measure layer state
 const toggleMeasureLayerMutation = graphql`
-    mutation useToggleMeasureLayerMutation($dataset: String!) {
-        datasetToggleMeasureLayer(dataset: $dataset) {
+    mutation useToggleMeasureLayerMutation($viewport: Int!, $reader: String!) {
+        datasetToggleMeasureLayer(viewport: $viewport, reader: $reader) {
             measure{
                 active
             }
