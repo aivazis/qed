@@ -96,6 +96,7 @@ class GraphQL:
                 # if it is non-trivial
                 if original:
                     # report it
+                    channel.line()
                     channel.line(f"python:")
                     channel.indent()
                     # format each line of the traceback
