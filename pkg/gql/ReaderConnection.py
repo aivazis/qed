@@ -34,7 +34,7 @@ class ReaderConnection(graphene.relay.Connection):
         # get the store
         store = info.context["store"]
         # get the number of registered {readers}
-        return len(store.readers)
+        return len(store.nReaders)
 
 
 # end of file

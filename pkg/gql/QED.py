@@ -54,7 +54,7 @@ class QED(graphene.ObjectType):
         Generate a sequence of the active views
         """
         # hand off the views to the resolver
-        yield from store.views
+        yield from (viewport.view() for viewport in store.viewports)
         # all done
         return
 
@@ -76,7 +76,7 @@ class QED(graphene.ObjectType):
         Generate a list of all known dataset readers
         """
         # hand off the registered readers to the resolver
-        yield from store.readers
+        yield from store.sources
         # all done
         return
 
