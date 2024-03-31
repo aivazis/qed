@@ -87,6 +87,8 @@ const selectReaderMutation = graphql`
                 id
                 # and get whatever readers need
                 ...contextReaderGetViewFragment
+                # for the measure layer control
+                ...measureViewerGetMeasureLayerStateFragment
             }
         }
     }
