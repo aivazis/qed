@@ -9,7 +9,7 @@ import qed
 
 
 # the protocol
-class View(qed.protocol, family="qed.views"):
+class View(qed.protocol, family="qed.ux.views"):
     """
     Detailed information about the contents of a mounted view
     """
