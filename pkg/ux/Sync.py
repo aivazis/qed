@@ -6,6 +6,7 @@
 
 # support
 import qed
+import uuid
 
 
 # the sync control
@@ -36,6 +37,23 @@ class Sync(qed.component, family="qed.ux.sync.sync", implements=qed.protocols.ux
     offsets.doc = (
         "relative offset to apply to this viewport when synchronized scrolling"
     )
+
+    # support
+    def clone(self):
+        """
+        Make a copy
+        """
+        # make a nae
+        name = str(uuid.uuid1())
+        # build a new instance and return it
+        return type(self)(
+            name=name,
+            channel=self.channel,
+            zoom=self.zoom,
+            scroll=self.scroll,
+            path=self.path,
+            offsets=tuple(self.offsets),
+        )
 
 
 # end of file
