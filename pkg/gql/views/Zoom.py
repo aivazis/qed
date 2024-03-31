@@ -8,11 +8,11 @@
 import graphene
 
 # my interface
-from .Node import Node
+from ..Node import Node
 
 
 # my node type
-class DatasetZoom(graphene.ObjectType):
+class Zoom(graphene.ObjectType):
     """
     The store managed state of a dataset
     """
