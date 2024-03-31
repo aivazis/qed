@@ -36,7 +36,7 @@ class Collapse(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to collapse the view
-        view = store.collapseView(viewport=viewport)
+        view = store.collapseViewport(viewport=viewport)
         # form the mutation resolution context
         context = {"view": view}
         # and resolve the mutation

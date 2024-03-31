@@ -40,13 +40,13 @@ class ToggleChannel(graphene.Mutation):
         # the viewport number
         viewport = selection.viewport
         # the name of the reader
-        reader = selection.reader
+        source = selection.reader
         # the channel tag
         tag = selection.value
         # get the store
         store = info.context["store"]
         # ask it to set the reader of the {viewport}
-        view = store.toggleChannel(viewport=viewport, reader=reader, tag=tag)
+        view = store.toggleChannel(viewport=viewport, source=source, tag=tag)
         # form the mutation resolution context
         context = {"view": view}
         # and resolve the mutation

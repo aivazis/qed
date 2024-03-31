@@ -37,7 +37,7 @@ class SelectReader(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to set the reader of the {viewport}
-        view = store.selectReader(viewport=viewport, name=reader)
+        view = store.selectSource(viewport=viewport, name=reader)
         # form the mutation resolution context
         context = {"view": view}
         # and resolve the mutation

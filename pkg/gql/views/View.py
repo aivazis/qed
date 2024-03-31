@@ -15,6 +15,9 @@ from ..Channel import Channel
 from ..Dataset import Dataset
 from ..Reader import Reader
 from ..Selector import Selector
+from .Measure import Measure
+from .Sync import Sync
+from .Zoom import Zoom
 
 
 # the type
@@ -31,11 +34,16 @@ class View(graphene.ObjectType):
     # metadata
     id = graphene.ID(required=True)
     name = graphene.ID(required=True)
-    # my parts
+    # dataset selection
+    selections = graphene.List(Selector)
+    # visualization pipeline
     reader = graphene.Field(Reader)
     dataset = graphene.Field(Dataset)
     channel = graphene.Field(Channel)
-    selections = graphene.List(Selector)
+    # dataset specific configuration
+    measure = graphene.Field(Measure)
+    sync = graphene.Field(Sync)
+    zoom = graphene.Field(Zoom)
 
     # resolvers
     @staticmethod

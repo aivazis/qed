@@ -36,7 +36,7 @@ class Split(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to split the view
-        view = store.splitView(viewport=viewport)
+        view = store.splitViewport(viewport=viewport)
         # form the mutation resolution context
         context = {"view": view}
         # and resolve the mutation
