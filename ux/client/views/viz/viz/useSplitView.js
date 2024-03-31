@@ -48,8 +48,10 @@ export const useSplitView = () => {
                 const qed = store.get("QED")
                 // get the views
                 const views = qed.getLinkedRecords("views")
+                // update
+                const updated = views.toSpliced(viewport + 1, 0, view)
                 // attach the new view
-                qed.setLinkedRecords(views.toSpliced(viewport + 1, 0, view), "views")
+                qed.setLinkedRecords(updated, "views")
                 // all done
                 return
             },
@@ -61,9 +63,13 @@ export const useSplitView = () => {
                 return
             },
             // if something goes wrong
-            onError: error => {
+            onError: errors => {
                 // show me
-                console.log(`views.main.useSplitView: ERROR while splitting ${viewport}:`, error)
+                console.log(`views.main.useSplitView:`)
+                console.group()
+                console.log(`ERROR while splitting ${viewport}:`)
+                console.log(errors)
+                console.groupEnd()
                 // all done
                 return
             }
