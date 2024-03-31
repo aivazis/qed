@@ -66,10 +66,9 @@ export const useToggleCoordinate = (axis, coordinate) => {
             },
             onError: errors => {
                 // send the error to the console
-                console.error(
-                    `viz.reader.useToggleCoordinate: ERROR while toggling '${axis}:${coordinate}'`
-                )
+                console.error(`viz.reader.useToggleCoordinate:`)
                 console.group()
+                console.error(`ERROR while toggling '${reader.name}:${axis}:${coordinate}'`)
                 console.log(errors)
                 console.groupEnd()
                 // all done
