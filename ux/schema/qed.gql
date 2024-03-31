@@ -58,11 +58,16 @@ type View implements Node {
   # ids
   id: ID!
   name: ID!
-  # info
+  # dataset selection
+  selections: [Selector]
+  # visualization pipeline
   reader: Reader
   dataset: Dataset
   channel: Channel
-  selections: [Selector]
+  # dataset specific viewing options
+  measure: DatasetMeasure
+  sync: DatasetSync
+  zoom: DatasetZoom
 }
 
 # archives
@@ -137,8 +142,6 @@ type Dataset implements Node {
   shape: [Int!]!
   origin: [Int!]!
   tile: [Int!]!
-  # and its view state
-  view: DatasetView
 }
 
 # channel
