@@ -8,6 +8,9 @@
 from .View import View as view
 from .Viewport import Viewport as viewport
 
+# the reader/dataset/channel selection configuration
+from .Selection import Selection as selection
+
 # the ux state of datasets
 from .Dataset import Dataset as dataset
 
