@@ -29,6 +29,7 @@ class Channel(graphene.ObjectType):
     id = graphene.ID()
     name = graphene.ID()
     tag = graphene.String()
+    session = graphene.String()
     controllers = graphene.List(Controller)
 
     # resolvers
