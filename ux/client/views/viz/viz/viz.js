@@ -40,13 +40,18 @@ export const Viz = ({ qed }) => (
 const VizPanel = ({ qed }) => {
     // ask the server side store for all known data readers and attach them as read-only state
     const { views } = useFragment(vizGetViewsFragment, qed)
+    console.log(views)
+
+    // extract an array with the scroll sync flag for each viewport
+    const synced = views.map(view => view.sync)
+
     // initialize my pile of viewports and get the ref registrar
     // viewport initialization happens on every render, but so does viewport registration
     const { viewportRegistrar } = useInitializeViewports(views)
+    // get the viewport information
+    const { activate, viewports } = useViewports()
     // build the scroll handler dispatch for my viewports
-    const { dispatch } = useMakePanDispatcher()
-    // get the view activator
-    const { activate } = useViewports()
+    const { dispatch } = useMakePanDispatcher({ viewports, synced })
     // get the state of the activity panel
     const { activityPanel } = useActivityPanel()
 
@@ -90,11 +95,23 @@ const VizPanel = ({ qed }) => {
 }
 
 
-// my fragment
+// my fragments
 const vizGetViewsFragment = graphql`
     fragment vizGetViewsFragment on QED {
         views {
+            # MGA:
+            # this is a copy-paste of my vizGetScrollSyncedViewsFragment
+            # is there a way to avoid this duplication?
             id
+            sync {
+                scroll
+                offsets {
+                    x
+                    y
+                }
+            }
+            # what i need for synced scrolling
+            ...vizGetScrollSyncedViewsFragment
             # plus what viewers and their parts need
             ...viewerGetViewFragment
             ...selectorViewerGetViewFragment
@@ -109,6 +126,19 @@ const vizGetViewsFragment = graphql`
             ...printViewerGetViewFragment
         }
     }
+`
+
+const vizGetScrollSyncedViewsFragment = graphql`
+   fragment vizGetScrollSyncedViewsFragment on View {
+        id
+        sync {
+            scroll
+            offsets {
+                x
+                y
+            }
+        }
+   }
 `
 
 

@@ -85,6 +85,8 @@ const selectReaderMutation = graphql`
         viewSelectReader(viewport: $viewport, reader: $reader) {
             view {
                 id
+                # for synchronized scrolling
+                ...vizGetScrollSyncedViewsFragment
                 # for the viewport
                 ...viewportViewerGetViewFragment
                 # for the info widget with the dataset metadata

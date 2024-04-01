@@ -4,19 +4,8 @@
 // (c) 1998-2024 all rights reserved
 
 
-// local
-// hooks
-import { useSynced } from '~/views/main/useSynced'
-import { useViewports } from './useViewports'
-
-
 // get the viewport position
-export const useMakePanDispatcher = () => {
-    // get the sync registry
-    const synced = useSynced()
-    // the pile of viewports
-    const { viewports } = useViewports()
-
+export const useMakePanDispatcher = ({ synced, viewports }) => {
     // make a handler that pans the shared camera and scrolls the synced viewports
     const pan = (evt, idx) => {
         // if i have a raised flag
@@ -50,7 +39,10 @@ export const useMakePanDispatcher = () => {
             // everybody else gets a bump on its semaphore
             ++semaphores[i]
             // and scrolls to my location
-            port.scroll(x + sync.offset.x - mySync.offset.x, y + sync.offset.y - mySync.offset.y)
+            port.scroll(
+                x + sync.offsets.x - mySync.offsets.x,
+                y + sync.offsets.y - mySync.offsets.y
+            )
             // all done
             return
         })
