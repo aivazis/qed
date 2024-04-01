@@ -84,6 +84,23 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
+    def measureAddAnchor(self, x, y, index):
+        """
+        Add an anchor to my measure path
+        """
+        # get the set of anchors
+        anchors = self.measure.path
+        # if there is a specific place to put this anchor
+        if index is not None:
+            # insert it
+            anchors.insert(index, (x, y))
+        # otherwise
+        else:
+            # add it at the end
+            anchors.append((x, y))
+        # all done
+        return self
+
     def setSync(self, aspect, value):
         """
         Toggle the {aspect} flag of my sync table

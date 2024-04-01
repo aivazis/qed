@@ -70,6 +70,17 @@ class Viewport(
         # all done
         return self.view()
 
+    def measureAddAnchor(self, x, y, index):
+        """
+        Add an anchor to my measure path
+        """
+        # get my active view
+        view = self._view
+        # and delegate
+        view.measureAddAnchor(x=x, y=y, index=index)
+        # all done
+        return view
+
     def setSync(self, aspect, value):
         """
         Toggle the scroll flag of my sync table
