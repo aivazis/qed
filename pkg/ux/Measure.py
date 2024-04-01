@@ -6,6 +6,7 @@
 
 # support
 import qed
+import journal
 import uuid
 
 
@@ -49,6 +50,39 @@ class Measure(
             closed=self.closed,
             selection=list(self.selection),
         )
+
+    # debugging support
+    def pyre_dump(self):
+        """
+        Render my state
+        """
+        # make a channel
+        channel = journal.info("qed.ux.measure")
+        # sign in
+        channel.line(f"measure: {self}")
+        # my contents
+        channel.indent()
+        channel.line(f"active: {self.active}")
+
+        path = self.path
+        if path:
+            channel.line(f"path: [")
+            channel.indent()
+            for point in self.path:
+                channel.line(f"{point}")
+            channel.line(f"]")
+            channel.outdent()
+        # otherwise
+        else:
+            channel.line(f"path: []")
+
+        channel.line(f"selection: {self.selection}")
+        channel.line(f"closed: {self.closed}")
+        channel.outdent()
+        # flush
+        channel.log()
+        # all done
+        return
 
 
 # end of file
