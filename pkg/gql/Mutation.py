@@ -31,16 +31,18 @@ class Mutation(graphene.ObjectType):
     """
 
     # view management
+    viewSelectReader = views.selectReader.Field()
     viewCollapse = views.collapse.Field()
     viewSplit = views.split.Field()
-    viewSelectReader = views.selectReader.Field()
-    viewToggleCoordinate = views.toggleCoordinate.Field()
     viewToggleChannel = views.toggleChannel.Field()
+    viewToggleCoordinate = views.toggleCoordinate.Field()
     viewPersist = views.persist.Field()
     # dataset view state
     viewToggleMeasureLayer = views.toggleMeasureLayer.Field()
     viewToggleScrollSync = views.toggleScrollSync.Field()
     viewToggleAllSync = views.toggleAllSync.Field()
+    # anchor management
+    viewAnchorAdd = views.anchorAdd.Field()
 
     # data archive connection management
     connectArchive = ConnectArchive.Field()
