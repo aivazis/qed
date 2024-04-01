@@ -150,6 +150,7 @@ type Channel implements Node {
   id: ID!
   name: ID!
   tag: String!
+  session: String!
   # the viz pipeline controllers
   controllers: [Controller]!
 }
