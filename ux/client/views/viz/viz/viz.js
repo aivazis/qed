@@ -97,10 +97,10 @@ const vizGetViewsFragment = graphql`
             id
             # plus what viewers and their parts need
             ...viewerGetViewFragment
-            ...infoViewerGetViewFragment
             ...selectorViewerGetViewFragment
             ...viewportViewerGetViewFragment
-
+            # for the info widget with the dataset metadata
+            ...infoViewerGetViewFragment
             # for the measure control
             ...measureViewerGetMeasureLayerStateFragment
             # for the sync control

@@ -11,36 +11,33 @@ import { graphql, useFragment } from 'react-relay/hooks'
 // project
 // widgets
 import { Meta } from '~/widgets'
-
-// locals
 // hooks
 import { useViewports } from '~/views/viz'
-import { useGetTileURI } from '../../main/useGetTileURI'
-import { useGetZoomLevel } from '../../main/useGetZoomLevel'
+
+// locals
+import { tileURI } from '.'
 // styles
 import styles from './styles'
 
 
 // export the data viewer
 export const Info = ({ viewport, view }) => {
-    // make room for the cursor position
-    const [location, setLocation] = React.useState({ x: 0, y: 0 })
-    // get the viewport zoom level
-    const viewportZoom = useGetZoomLevel(viewport)
-    // unpack
-    const zoom = [viewportZoom.vertical, viewportZoom.horizontal]
-    // assemble the data request URI
-    const base = useGetTileURI({ viewport })
+    // unpack the view
+    const { reader, dataset, channel, zoom } = useFragment(infoViewerGetViewFragment, view)
     // get the viewport registry
     const { viewports } = useViewports()
-    // unpack the view
-    const { reader, dataset } = useFragment(infoViewerGetViewFragment, view)
+    // make room for the cursor position
+    const [location, setLocation] = React.useState({ x: 0, y: 0 })
+
+    // assemble the data request URI
+    const base = tileURI({ reader, dataset, channel, zoom })
     // extract the relevant metadata
     const { name: readerName, id, uri } = reader
     const { name: datasetName, datatype, shape, origin, tile } = dataset
+    // unpack the zoom level
+    const level = [zoom.vertical, zoom.horizontal]
     // scale the shape to the current zoom level
-    const effectiveShape = shape.map((s, idx) => s / (2 ** -zoom[idx]))
-
+    const effectiveShape = shape.map((s, idx) => s / (2 ** -level[idx]))
     // build the handler of the mouse movement
     const track = evt => {
         // get the viewport, not whatever the mouse is over
@@ -72,13 +69,13 @@ export const Info = ({ viewport, view }) => {
         // get the active viewport ref
         const target = viewports[viewport]
         // install the tracker
-        target.addEventListener("mousemove", track)
+        target?.addEventListener("mousemove", track)
         // make an abort controller
         const controller = new AbortController()
         // and register a clean up
         return () => {
             // that removes the listeners
-            target.removeEventListener("mousemove", track)
+            target?.removeEventListener("mousemove", track)
             // and aborts any pending requests
             controller.abort()
             // all done
@@ -101,7 +98,7 @@ export const Info = ({ viewport, view }) => {
                 {shape.join(" x ")}
             </Meta.Entry>
             <Meta.Entry threshold={2} attribute="zoom level" style={paint}>
-                {zoom.join(" x ")}
+                {level.join(" x ")}
             </Meta.Entry>
             <Meta.Entry threshold={2} attribute="effective shape" style={paint}>
                 {effectiveShape.join(" x ")}
@@ -139,12 +136,21 @@ const infoViewerGetViewFragment = graphql`
             id
             name
             uri
+            api
         }
         dataset {
+            name
             datatype
             shape
             origin
             tile
+        }
+        channel {
+            tag
+        }
+        zoom {
+            horizontal
+            vertical
         }
     }
 `
