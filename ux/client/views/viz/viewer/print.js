@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay/hooks'
 
 // project
 // shapes
@@ -20,33 +21,28 @@ import { useViewports } from '~/views/viz'
 import { useGetTileURI } from '../../main/useGetTileURI'
 import { useGetView } from '../../main/useGetView'
 import { useGetZoomLevel } from '../../main/useGetZoomLevel'
+// the tile URI factory
+import { tileURI } from '.'
 // styles
 import styles from './styles'
 
 
 // control viewport synchronization with a shared camera
-export const Print = ({ viewport }) => {
+export const Print = ({ viewport, view }) => {
+    // extract my fragment from {view}
+    const { reader, dataset, channel, zoom } = useFragment(printViewerGetViewFragment, view)
     // make a ref for the download link
     const link = React.useRef()
-
     // get the pile of registered {viewports}; mine is at {viewport}
     const { viewports } = useViewports()
-    // get my view and extract my dataset
-    const { dataset } = useGetView(viewport)
-    // get the viewport zoom level
-    const viewportZoom = useGetZoomLevel(viewport)
-    // unpack
-    const zoom = [viewportZoom.vertical, viewportZoom.horizontal]
     // get uri to the tile api
-    const uri = useGetTileURI({ viewport })
-
-    // i actually need the shape of the raster
-    const { shape } = dataset
+    const uri = tileURI({ reader, dataset, channel, zoom })
     // convert the zoom level into a scale
-    const scale = zoom.map(level => 2 ** -level)
+    const scale = [zoom.vertical, zoom.horizontal].map(level => 2 ** -level)
+    // get the shape of the raster
+    const { shape } = dataset
     // compute the dimensions of the mosaic
     const zoomedShape = shape.map((extent, idx) => extent / scale[idx])
-
     // make my handler
     const print = evt => {
         // get the state of the alt key
@@ -96,6 +92,27 @@ export const Print = ({ viewport }) => {
         </a>
     )
 }
+
+
+// my fragment
+const printViewerGetViewFragment = graphql`
+    fragment printViewerGetViewFragment on View {
+        reader {
+            api
+        }
+        dataset {
+            name
+            shape
+        }
+        channel {
+            tag
+        }
+        zoom {
+            horizontal
+            vertical
+        }
+    }
+`
 
 
 // end of file

@@ -96,6 +96,8 @@ const toggleCoordinateMutation = graphql`
                 ...measureViewerGetMeasureLayerStateFragment
                 # for the sync control
                 ...syncViewerGetScrollSyncStateFragment
+                # for the print button
+                ...printViewerGetViewFragment
             }
         }
     }
