@@ -98,6 +98,14 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # delegate to my source store
         return self._dataSources.removeSource(name=name)
 
+    # datasets
+    def dataset(self, name):
+        """
+        Retrieve a dataset given its {name}
+        """
+        # delegate to my source catalog
+        return self._dataSources.dataset(name=name)
+
     # views
     @property
     def viewports(self):
