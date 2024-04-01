@@ -32,7 +32,7 @@ export const useToggleMeasureLayer = () => {
                 // send the error to the console
                 console.error(`viz.measure.useToggleMeasureLayer:`)
                 console.group()
-                console.log(`ERROR while toggling the '${dataset}' measure layer`)
+                console.log(`ERROR while toggling the measure layer in viewport ${viewport}`)
                 console.log(errors)
                 console.groupEnd()
                 // all done
