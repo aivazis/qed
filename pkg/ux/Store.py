@@ -195,6 +195,17 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # return the measure configuration
         return view.measure
 
+    def measureAddAnchor(self, viewport, x, y, index):
+        """
+        Add an anchor to the path of the measure layer of the current viewport
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # delegate
+        view = port.measureAddAnchor(x=x, y=y, index=index)
+        # all done
+        return view.measure
+
     def setSync(self, viewport, aspect):
         """
         Toggle the scroll flag of the sync table
