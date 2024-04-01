@@ -193,7 +193,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             # if there is only one channel
             if len(channels) == 1:
                 # grab it and select it
-                self.channel, *_ = channel.values()
+                self.channel, *_ = channels.values()
         # all done
         return self
 
