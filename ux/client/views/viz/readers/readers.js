@@ -51,6 +51,7 @@ const readersGetReadersFragment = graphql`
             ...contextReaderGetViewFragment
             ...measureViewerGetMeasureLayerStateFragment
             ...syncViewerGetScrollSyncStateFragment
+            ...printViewerGetViewFragment
         }
     }
 `
