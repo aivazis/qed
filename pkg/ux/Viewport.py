@@ -70,6 +70,35 @@ class Viewport(
         # all done
         return self.view()
 
+    def setSync(self, aspect, value):
+        """
+        Toggle the scroll flag of my sync table
+        """
+        # delegate to my active view
+        return self._view.setSync(aspect=aspect, value=value)
+
+    def toggleSync(self, source, aspect):
+        """
+        Toggle the scroll flag of my sync table
+        """
+        # activate the {source}
+        view = self._selectSource(source=source)
+        # and delegate
+        view.toggleSync(aspect=aspect)
+        # all done
+        return self.view()
+
+    def toggleScrollSync(self, source):
+        """
+        Toggle the scroll flag of my sync table
+        """
+        # activate the {source}
+        view = self._selectSource(source=source)
+        # and delegate
+        view.toggleScrollSync()
+        # all done
+        return view
+
     def clone(self):
         """
         Make a copy of me
