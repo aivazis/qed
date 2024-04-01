@@ -88,6 +88,8 @@ const splitMutation = graphql`
         viewSplit(viewport: $viewport) {
             view {
                 id
+                # for synchronized scrolling
+                ...vizGetScrollSyncedViewsFragment
                 # for the viewport
                 ...viewportViewerGetViewFragment
                 # for the info widget with the dataset metadata

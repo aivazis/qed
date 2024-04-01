@@ -90,6 +90,8 @@ const toggleChannelMutation = graphql`
         viewToggleChannel(selection: $selection) {
             view {
                 id
+                # for synchronized scrolling
+                ...vizGetScrollSyncedViewsFragment
                 # for the viewport
                 ...viewportViewerGetViewFragment
                 # for the info widget with the dataset metadata
