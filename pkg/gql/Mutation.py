@@ -39,6 +39,8 @@ class Mutation(graphene.ObjectType):
     viewPersist = views.persist.Field()
     # dataset view state
     viewToggleMeasureLayer = views.toggleMeasureLayer.Field()
+    viewToggleScrollSync = views.toggleScrollSync.Field()
+    viewToggleAllSync = views.toggleAllSync.Field()
 
     # data archive connection management
     connectArchive = ConnectArchive.Field()
