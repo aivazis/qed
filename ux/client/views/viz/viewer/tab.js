@@ -43,11 +43,11 @@ export const Tab = ({ viewport, view, behaviors }) => {
             {/* some blank space */}
             <Spacer />
             {/* the button that toggles the data layer */}
-            {view && <Measure viewport={viewport} />}
+            {view && <Measure viewport={viewport} view={view} />}
             {/* the button that toggles the sync status of the data viewport */}
-            {view && <Sync viewport={viewport} />}
+            {view && <Sync viewport={viewport} view={view} />}
             {/* the button that prints the viewport */}
-            {view && <Print viewport={viewport} />}
+            {view && <Print viewport={viewport} view={view} />}
             {/* the button that adds a new view to the {viz} panel */}
             <Split viewport={viewport} />
         </div>
