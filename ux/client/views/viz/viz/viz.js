@@ -103,6 +103,8 @@ const vizGetViewsFragment = graphql`
 
             # for the measure control
             ...measureViewerGetMeasureLayerStateFragment
+            # for the sync control
+            ...syncViewerGetScrollSyncStateFragment
         }
     }
 `
