@@ -17,10 +17,6 @@ import { Badge } from '~/widgets'
 import { useViewports } from '~/views/viz'
 
 // locals
-// hooks
-import { useGetTileURI } from '../../main/useGetTileURI'
-import { useGetView } from '../../main/useGetView'
-import { useGetZoomLevel } from '../../main/useGetZoomLevel'
 // the tile URI factory
 import { tileURI } from '.'
 // styles
