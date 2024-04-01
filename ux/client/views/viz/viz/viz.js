@@ -40,11 +40,8 @@ export const Viz = ({ qed }) => (
 const VizPanel = ({ qed }) => {
     // ask the server side store for all known data readers and attach them as read-only state
     const { views } = useFragment(vizGetViewsFragment, qed)
-    console.log(views)
-
     // extract an array with the scroll sync flag for each viewport
     const synced = views.map(view => view.sync)
-
     // initialize my pile of viewports and get the ref registrar
     // viewport initialization happens on every render, but so does viewport registration
     const { viewportRegistrar } = useInitializeViewports(views)
