@@ -85,6 +85,8 @@ const selectReaderMutation = graphql`
         viewSelectReader(viewport: $viewport, reader: $reader) {
             view {
                 id
+                # for the viewport
+                ...viewportViewerGetViewFragment
                 # for the info widget with the dataset metadata
                 ...infoViewerGetViewFragment
                 # whatever readers need

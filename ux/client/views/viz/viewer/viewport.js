@@ -18,38 +18,29 @@ import { theme } from "~/palette"
 import { useViewports, useCenterViewport } from '~/views/viz'
 
 // locals
-// hooks
-import { useGetTileURI } from '../../main/useGetTileURI'
-import { useGetZoomLevel } from '../../main/useGetZoomLevel'
-import { useMeasureLayer } from '../../main/useMeasureLayer'
+import { tileURI } from '.'
 // components
 import { Measure } from '../measure'
 
 
 // export the data viewport
 export const Viewport = ({ viewport, view, registrar, ...rest }) => {
+    // unpack the view
+    const {
+        reader, dataset, channel, measure, zoom
+    } = useFragment(viewportViewerGetViewFragment, view)
     // get the pile of registered {viewports}; i'm at {viewport}
     const { activeViewport, viewports } = useViewports()
-    // get the state of the measuring layer
-    const measure = useMeasureLayer(viewport)
-    // get he viewport zoom level
-    const zoom = useGetZoomLevel(viewport)
     // make a handler that centers my viewport
     const centerViewport = useCenterViewport(viewport)
     // get the base URI for tiles
-    const uri = useGetTileURI({ viewport })
-
-    // get my view info
-    const { dataset, session } = useFragment(viewportViewerGetViewFragment, view)
-    console.error(`NYI: session:`, session)
-    // and unpack what i need
+    const uri = tileURI({ reader, dataset, channel, zoom })
+    // unpack what i need from the dataset
     const { shape, origin, tile } = dataset
-
     // convert the zoom level into a scale
     const scale = [2 ** -zoom.vertical, 2 ** -zoom.horizontal]
     // compute the dimensions of the mosaic
     const zoomedShape = shape.map((extent, idx) => Math.trunc(extent / scale[idx]))
-
     // center the viewport at the cursor position
     const center = ({ clientX, clientY }) => {
         // get my placemat
@@ -91,9 +82,9 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
             <View uri={uri}
                 origin={origin} shape={shape} tile={tile}
                 zoom={[zoom.vertical, zoom.horizontal]}
-                session={session} />
+                session={channel.session} />
             {/* the measure layer */}
-            {measure && <Measure viewport={viewport} shape={zoomedShape} scale={scale} />}
+            {measure.active && <Measure viewport={viewport} shape={zoomedShape} scale={scale} />}
         </Box>
     )
 }
@@ -154,11 +145,28 @@ const View = React.memo(DataTiles, shouldRender)
 // my fragment
 const viewportViewerGetViewFragment = graphql`
     fragment viewportViewerGetViewFragment on View {
+        reader {
+            id
+            name
+            uri
+            api
+        }
         dataset {
-            datatype
+            name
             shape
             origin
             tile
+        }
+        channel {
+            tag
+            session
+        }
+        measure {
+            active
+        }
+        zoom {
+            horizontal
+            vertical
         }
     }
 `
