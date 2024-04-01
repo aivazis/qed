@@ -7,6 +7,7 @@
 from .View import View as view
 
 # the mutations
+from .AnchorAdd import AnchorAdd as anchorAdd
 from .Collapse import Collapse as collapse
 from .Persist import Persist as persist
 from .SelectReader import SelectReader as selectReader
