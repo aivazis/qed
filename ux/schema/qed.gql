@@ -275,6 +275,8 @@ type Mutation {
   viewPersist(dummy: ID): PersistInfo
   # dataset view state
   viewToggleMeasureLayer(viewport: Int!, reader: String!): DatasetMeasureInfo!
+  viewToggleScrollSync(viewport: Int!, reader: String!): DatasetSyncInfo!
+  viewToggleAllSync(viewport: Int!, reader: String!, aspect: String!): DatasetSyncInfos!
 
   # data archive connections
   connectArchive(name: String!, uri: String!): ArchiveInfo!
@@ -318,6 +320,18 @@ type ViewInfo {
 type DatasetMeasureInfo {
   # the id of the view
   measure: DatasetMeasure
+}
+
+# the sync state response payload
+type DatasetSyncInfo {
+  # the id of the view
+  sync: DatasetSync
+}
+
+# the sync state response payload
+type DatasetSyncInfos {
+  # the id of the view
+  sync: [DatasetSync]
 }
 
 # support for connecting and disconnecting data archives
