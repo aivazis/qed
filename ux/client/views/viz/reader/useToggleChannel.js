@@ -90,6 +90,8 @@ const toggleChannelMutation = graphql`
         viewToggleChannel(selection: $selection) {
             view {
                 id
+                # for the viewport
+                ...viewportViewerGetViewFragment
                 # for the info widget with the dataset metadata
                 ...infoViewerGetViewFragment
                 # whatever readers need

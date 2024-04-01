@@ -48,6 +48,7 @@ const readersGetReadersFragment = graphql`
             ...contextGetReaderFragment
         }
         views {
+            ...viewportViewerGetViewFragment
             ...contextReaderGetViewFragment
             ...measureViewerGetMeasureLayerStateFragment
             ...syncViewerGetScrollSyncStateFragment
