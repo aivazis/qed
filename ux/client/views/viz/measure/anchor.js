@@ -23,7 +23,7 @@ import { useAnchorToggleSelectionMulti } from './useAnchorToggleSelectionMulti'
 
 
 // mark a point
-export const Mark = ({ viewport, selection, idx, at }) => {
+export const Anchor = ({ viewport, selection, idx, at }) => {
     // make a ref for my client area
     const me = React.useRef(null)
     // record of the mouse position when the user clicks on me; this is used to detect
@@ -45,19 +45,23 @@ export const Mark = ({ viewport, selection, idx, at }) => {
 
     // movement
     const move = evt => {
-        // record the mouse position
-        setPosition([evt.clientX, evt.clientY])
-        // mark me as the initiator of the move
-        start()
-        // all done
-        return
-    }
-    // mark selection
-    const pick = evt => {
         // stop this event from bubbling up
         evt.stopPropagation()
         // and quash any side effects
         evt.preventDefault()
+        // record the mouse position
+        setPosition([evt.clientX, evt.clientY])
+        // mark me as the initiator of the move
+        start(idx)
+        // all done
+        return
+    }
+
+    // mark selection
+    const pick = evt => {
+        // N.B.:
+        //     don't prevent this event from bubbling up when this handler is tied to {moveup}
+        //     the parent watches for for it to terminate anchor dragging
         // if i've moved since clicked
         if (position[0] !== evt.clientX || position[1] != evt.clientY) {
             // do nothing
@@ -105,7 +109,7 @@ export const Mark = ({ viewport, selection, idx, at }) => {
 
     // render
     return (
-        <g ref={me} transform={`translate(${at[1]} ${at[0]})`}>
+        <g ref={me} transform={`translate(${at[0]} ${at[1]})`}>
             <Mat cx={0} cy={0} r="15" />
             <Ring cx={0} cy={0} r="7" />
             <Crosshairs d={crosshairs} />
