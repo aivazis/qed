@@ -18,6 +18,7 @@ from .ToggleMeasureLayer import ToggleMeasureLayer as toggleMeasureLayer
 from .ToggleScrollSync import ToggleScrollSync as toggleScrollSync
 from .ToggleAllSync import ToggleAllSync as toggleAllSync
 
+from .MeasureAnchorMove import MeasureAnchorMove as measureAnchorMove
 from .MeasureAnchorExtendSelection import (
     MeasureAnchorExtendSelection as measureAnchorExtendSelection,
 )
