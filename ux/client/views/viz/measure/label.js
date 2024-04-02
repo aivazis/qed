@@ -40,7 +40,7 @@ export const Label = ({ position, value }) => {
     return (
         <g>
             <Mat ref={mat} />
-            <Value ref={label} x={x} y={y + 35}>
+            <Value ref={label} x={x} y={y + 40}>
                 {dataY} &#x2715; {dataX}
             </Value>
         </g>
