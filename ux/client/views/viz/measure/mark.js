@@ -16,29 +16,30 @@ import { theme } from "~/palette"
 
 // local
 // hooks
-import { usePixelPathSelection } from '../../main/usePixelPathSelection'
-import { useSetPixelPathSelection } from '../../main/useSetPixelPathSelection'
-import { useStartMoving } from './useStartMoving'
+import { useAnchorDrag } from './useAnchorDrag'
+import { useAnchorExtendSelection } from './useAnchorExtendSelection'
+import { useAnchorToggleSelection } from './useAnchorToggleSelection'
+import { useAnchorToggleSelectionMulti } from './useAnchorToggleSelectionMulti'
 
 
 // mark a point
-export const Mark = ({ viewport, idx, at }) => {
+export const Mark = ({ viewport, selection, idx, at }) => {
     // make a ref for my client area
     const me = React.useRef(null)
     // record of the mouse position when the user clicks on me; this is used to detect
     // motion between mouse down and mouse up so that we can skip the selection toggles
     // when the mark is being moved around
     const [position, setPosition] = React.useState(null)
-
     // grab the moving flag mutator
-    const startMoving = useStartMoving(idx)
-    // grab the current selection
-    const selection = usePixelPathSelection(viewport)
-    // get the selection handler factory
-    const { selectContiguous, toggle, toggleMultinode } = useSetPixelPathSelection(viewport)
+    const { start } = useAnchorDrag()
+
+    // get the selection mutators
+    const { select } = useAnchorExtendSelection(viewport)
+    const { toggle } = useAnchorToggleSelection(viewport)
+    const { toggle: toggleMulti } = useAnchorToggleSelectionMulti(viewport)
 
     // deduce my state
-    const selected = selection.has(idx)
+    const selected = selection.includes(idx)
     // and use it to choose how to render the event capture area
     const Highlight = selected ? SelectedHighlight : EnabledHighlight
 
@@ -47,40 +48,41 @@ export const Mark = ({ viewport, idx, at }) => {
         // record the mouse position
         setPosition([evt.clientX, evt.clientY])
         // mark me as the initiator of the move
-        startMoving()
+        start()
         // all done
         return
     }
-
     // mark selection
     const pick = evt => {
+        // stop this event from bubbling up
+        evt.stopPropagation()
+        // and quash any side effects
+        evt.preventDefault()
         // if i've moved since clicked
         if (position[0] !== evt.clientX || position[1] != evt.clientY) {
             // do nothing
             return
         }
-
         // otherwise, grab the status of the modifiers
-        const { ctrlKey, shiftKey } = evt
-
+        const { altKey, shiftKey } = evt
         // if there is no modifier present
-        if (!ctrlKey && !shiftKey) {
+        if (!altKey && !shiftKey) {
             // select me in single node mode
             toggle(idx)
             // done
             return
         }
         // if <ctrl> is present
-        if (ctrlKey) {
+        if (altKey) {
             // toggle me in multinode mode
-            toggleMultinode(idx)
+            toggleMulti(idx)
             // done
             return
         }
         // if <shift> is present
         if (shiftKey) {
             // pick a range of nodes
-            selectContiguous(idx)
+            select(idx)
             // done
             return
         }
@@ -92,13 +94,13 @@ export const Mark = ({ viewport, idx, at }) => {
     // when the user clicks in my area
     useEvent({
         name: "mouseup", listener: pick, client: me,
-        triggers: [position, toggle, selectContiguous]
+        triggers: [position, select, toggle, toggleMulti]
     })
 
     // when the mouse button is pressed in my area
     useEvent({
         name: "mousedown", listener: move, client: me,
-        triggers: [startMoving]
+        triggers: [start]
     })
 
     // render
@@ -142,7 +144,7 @@ const EnabledHighlight = styled.circle`
 // a selected node has a special capture
 const SelectedHighlight = styled.circle`
     fill: ${() => theme.page.transparent};
-    stroke${() => theme.page.highlight};
+    stroke: ${() => theme.page.highlight};
     stroke-width: 2;
     cursor: pointer;
 `
