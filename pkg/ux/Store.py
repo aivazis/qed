@@ -214,7 +214,6 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         port = self._viewports[viewport]
         # delegate
         view = port.measureAnchorExtendSelection(index=index)
-        view.measure.pyre_dump()
         # all done
         return view.measure
 
@@ -226,7 +225,6 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         port = self._viewports[viewport]
         # delegate
         view = port.measureAnchorToggleSelection(index=index)
-        view.measure.pyre_dump()
         # all done
         return view.measure
 
@@ -238,7 +236,6 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         port = self._viewports[viewport]
         # delegate
         view = port.measureAnchorToggleSelectionMulti(index=index)
-        view.measure.pyre_dump()
         # all done
         return view.measure
 
