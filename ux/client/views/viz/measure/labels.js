@@ -12,6 +12,11 @@ import styled from 'styled-components'
 // colors
 import { theme } from "~/palette"
 
+
+// local
+// components
+import { Label } from './label'
+
 // mark a point
 export const Labels = ({ positions, values }) => {
     // check whether there are any labels to render
@@ -31,41 +36,13 @@ export const Labels = ({ positions, values }) => {
                 const key = `${dataY}x${dataX}`
                 // and render
                 return (
-                    <g key={key}>
-                        <Mat x={x} y={y + 35}>
-                            {dataY} &#x2715; {dataX}
-                        </Mat>
-                        <Value x={x} y={y + 35}>
-                            {dataY} &#x2715; {dataX}
-                        </Value>
-                    </g>
+                    <Label key={key} position={position} value={[dataY, dataX]} />
                 )
             })}
         </g>
     )
 }
 
-
-// individual labels
-// the placemat
-const Mat = styled.text`
-            font-family: inconsolata;
-            font-size: 14px;
-            text-anchor: middle;
-            fill: none;
-            stroke: ${() => theme.page.relief};
-            stroke-width: 8;
-            `
-
-// the value
-const Value = styled.text`
-            font-family: inconsolata;
-            font-size: 14px;
-            text-anchor: middle;
-            cursor: default;
-            stroke: none;
-            fill: hsl(28deg, 90%, 35%);
-            `
 
 
 // end of file
