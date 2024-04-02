@@ -25,7 +25,7 @@ class Pixel(graphene.ObjectType):
         Grab the x coordinate
         """
         # easy enough
-        return pixel[1]
+        return pixel[0]
 
     @staticmethod
     def resolve_y(pixel: tuple, *_):
@@ -33,7 +33,7 @@ class Pixel(graphene.ObjectType):
         Grab the y coordinate
         """
         # easy enough
-        return pixel[0]
+        return pixel[1]
 
 
 # end of file
