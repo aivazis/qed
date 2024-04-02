@@ -206,6 +206,42 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return view.measure
 
+    def measureAnchorExtendSelection(self, viewport, index):
+        """
+        Extend the anchor selection of {viewport} to the given {index}
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # delegate
+        view = port.measureAnchorExtendSelection(index=index)
+        view.measure.pyre_dump()
+        # all done
+        return view.measure
+
+    def measureAnchorToggleSelection(self, viewport, index):
+        """
+        Toggle {index} in the anchor selection in single node mode
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # delegate
+        view = port.measureAnchorToggleSelection(index=index)
+        view.measure.pyre_dump()
+        # all done
+        return view.measure
+
+    def measureAnchorToggleSelectionMulti(self, viewport, index):
+        """
+        Toggle {index} in the anchor selection in multinode mode
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # delegate
+        view = port.measureAnchorToggleSelectionMulti(index=index)
+        view.measure.pyre_dump()
+        # all done
+        return view.measure
+
     def setSync(self, viewport, aspect):
         """
         Toggle the scroll flag of the sync table

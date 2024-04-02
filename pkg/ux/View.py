@@ -4,10 +4,13 @@
 # (c) 1998-2024 all rights reserved
 
 
+# externals
+import bisect
+import uuid
+
 # support
 import qed
 import journal
-import uuid
 
 
 # the record of user choices that lead to a channel selection for a viewport
@@ -100,6 +103,69 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             anchors.append((x, y))
         # all done
         return self
+
+    def measureAnchorExtendSelection(self, index):
+        """
+        Extend the anchor selection to the given {index}
+        """
+        # get the current selection
+        current = self.measure.selection
+        # assuming the selection is always sorted, find the insertion point for {index}
+        spot = bisect.bisect_left(current, index)
+        # trim to that point
+        extended = current[:spot]
+        # deduce the starting value
+        start = extended[-1] + 1 if extended else 0
+        # extend to {index}
+        extended.extend(range(start, index + 1))
+        # and store
+        self.measure.selection = extended
+        # all done
+        return self
+
+    def measureAnchorToggleSelection(self, index):
+        """
+        Toggle {index} in single node mode
+        """
+        # get the current selection
+        current = self.measure.selection
+        # if {index} is the only selected node, clear the selection;
+        # otherwise, make a selection that includes just {index}
+        toggled = [] if current == [index] else [index]
+        # and store
+        self.measure.selection = toggled
+        # all done
+        return self
+
+    def measureAnchorToggleSelectionMulti(self, index):
+        """
+        Toggle {index} in multinode mode
+        """
+        # multinode toggle:
+        # - if selection is empty, make one with index in it
+        # - if selection non-empty and contains index, drop index from it
+        # - if selection non-empty and does not contain index, add index to it
+
+        # make a copy of the current selection
+        toggled = self.measure.selection
+        # look for a spot for {index}
+        spot = bisect.bisect_left(toggled, index)
+        # if its place is at the end of the selection
+        if spot == len(toggled):
+            # the selection does not contain {index}; append it
+            toggled.append(index)
+        # if the selection is not empty and contains {index}
+        elif toggled[spot] == index:
+            # drop it from the selection
+            toggled.pop(spot)
+        # finally, if the selection is on-empty and it doesn't contain {index}
+        else:
+            # insert it
+            toggled.insert(spot, index)
+        # store the new selection
+        self.measure.selection = toggled
+        # all done
+        return
 
     def setSync(self, aspect, value):
         """
