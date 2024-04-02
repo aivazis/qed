@@ -43,6 +43,11 @@ class Mutation(graphene.ObjectType):
     viewToggleAllSync = views.toggleAllSync.Field()
     # anchor management
     viewAnchorAdd = views.anchorAdd.Field()
+    viewMeasureAnchorExtendSelection = views.measureAnchorExtendSelection.Field()
+    viewMeasureAnchorToggleSelection = views.measureAnchorToggleSelection.Field()
+    viewMeasureAnchorToggleSelectionMulti = (
+        views.measureAnchorToggleSelectionMulti.Field()
+    )
 
     # data archive connection management
     connectArchive = ConnectArchive.Field()
