@@ -84,7 +84,9 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
                 zoom={[zoom.vertical, zoom.horizontal]}
                 session={channel.session} />
             {/* the measure layer */}
-            {measure.active && <Measure viewport={viewport} shape={zoomedShape} scale={scale} />}
+            {measure.active &&
+                <Measure viewport={viewport} view={view} shape={zoomedShape} scale={scale} />
+            }
         </Box>
     )
 }

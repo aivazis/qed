@@ -64,7 +64,7 @@ const Value = styled.text`
     cursor: default;
     stroke: none;
     fill: ${() => theme.page.highlight};
-    fill-opacity: 0.50;
+    fill-opacity: 0.70;
 `
 
 

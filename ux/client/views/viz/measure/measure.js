@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay/hooks'
 import styled from 'styled-components'
 
 // project
@@ -18,19 +19,17 @@ import { SVG } from '~/widgets'
 // context
 import { Provider } from './context'
 // hooks
-import { useMoving } from './useMoving'
-import { usePixelPath } from '../../main/usePixelPath'
-import { usePixelPathSelection } from '../../main/usePixelPathSelection'
-import { useSetPixelPath } from '../../main/useSetPixelPath'
-import { useStopMoving } from './useStopMoving'
+import { useAnchorAdd } from './useAnchorAdd'
+import { useAnchorDrag } from './useAnchorDrag'
+import { useAnchorMove } from './useAnchorMove'
 // components
+import { Anchor } from './anchor'
 import { Labels } from './labels'
-import { Mark } from './mark'
 import { Path } from './path'
 
 
 // the layer
-export const Measure = (props) => {
+export const Measure = props => {
     // set up my context and embed my panel
     return (
         <Provider>
@@ -41,40 +40,49 @@ export const Measure = (props) => {
 
 
 // the layer implementation
-const Layer = ({ viewport, shape, scale }) => {
+//
+// {scale} enables the conversion from zoomed screen coordinates to image coordinates
+//
+const Layer = ({ viewport, view, shape, scale }) => {
+    // unpack the {view}
+    const { measure } = useFragment(measureGetMeasureLayerFragment, view)
     // make a ref for my client area
     const me = React.useRef(null)
-    // get the path spec of the current viewport
-    const pixelPath = usePixelPath(viewport)
-    // and the handler that adds points to the profile
-    const { add: addPoint, displace } = useSetPixelPath(viewport)
-    // get the movement marker
-    const moving = useMoving()
-    // and its mutator
-    const stopMoving = useStopMoving()
-    // get the current selection
-    const selection = usePixelPathSelection(viewport)
+    // get anchor movement support
+    const { dragging, stop } = useAnchorDrag()
+    // the anchor interface
+    const { add } = useAnchorAdd(viewport)
+    // the anchor mover
+    const { move } = useAnchorMove(viewport)
 
-    // get the list of points on the profile
-    const { closed, points } = pixelPath
-    // and project the points back into screen coordinates
-    const projected = points.map(
-        point => point.map((coord, idx) => Math.trunc(coord / scale[idx]))
+    // unpack the measure layer info
+    const { path, selection, closed } = measure
+    // convert the path into an array of (lines, samples) pairs
+    const anchors = path.map(anchor => [anchor.x, anchor.y])
+    // project the points back into screen coordinates
+    const projected = anchors.map(
+        anchor => anchor.map((coord, idx) => Math.trunc(coord / scale[idx]))
     )
 
-    // add a point to the pile
+    // add an anchor to the pile
     const pick = evt => {
-        // check the status of the <Alt> key
+        // stop this event from bubbling up
+        evt.stopPropagation()
+        // and quash any side effects
+        evt.preventDefault()
+        // get the status of the <Alt> key
         const { altKey } = evt
-
-        // if <alt> is pressed
+        // if <Alt> is pressed
         if (altKey) {
-            // unpack the mouse coordinates relative to ULC of the client area
+            // unpack the pointer coordinates relative to the ULC of the client area
             const { offsetX, offsetY } = evt
             // scale and pack
-            const p = [scale[0] * offsetY, scale[1] * offsetX]
-            // add to my pile
-            addPoint(p)
+            const anchor = {
+                x: scale[1] * offsetX,
+                y: scale[0] * offsetY,
+            }
+            // add it to the pile
+            add(anchor)
             // all done
             return
         }
@@ -87,19 +95,23 @@ const Layer = ({ viewport, shape, scale }) => {
         return
     }
 
-    // move
-    const drag = ({ offsetX, offsetY }) => {
+    // move an anchor
+    const displace = evt => {
+        // stop this event from bubbling up
+        evt.stopPropagation()
+        // and quash any side effects
+        evt.preventDefault()
+        // unpack
+        const { offsetX, offsetY } = evt
         // if the moving indicator is in its trivial state
-        if (moving === null) {
+        if (dragging === null) {
             // bail
             return
         }
-        // compute the set of nodes we will displace
-        const nodes = selection.has(moving) ? [...selection] : [moving]
         // compute the displacement implied by the current position of the cursor
         const delta = {
-            x: scale[1] * offsetX - points[moving][1],
-            y: scale[0] * offsetY - points[moving][0],
+            x: scale[1] * offsetX - path[dragging].x,
+            y: scale[0] * offsetY - path[dragging].y,
         }
         // check for null displacement
         if (Math.abs(delta.x) < 1 && Math.abs(delta.y) < 1) {
@@ -107,15 +119,19 @@ const Layer = ({ viewport, shape, scale }) => {
             return
         }
         // if there is real work, displace the selection
-        displace({ nodes, delta })
+        move({ handle: dragging, delta })
         // all done
         return
     }
 
     // stop moving
-    const stop = evt => {
+    const drop = evt => {
+        // stop this event from bubbling up
+        evt.stopPropagation()
+        // and quash any side effects
+        evt.preventDefault()
         // clear the movement indicator
-        stopMoving()
+        stop()
         // all done
         return
     }
@@ -123,38 +139,42 @@ const Layer = ({ viewport, shape, scale }) => {
     // mouse event listeners
     // when the user clicks in my area
     useEvent({
-        name: "click", listener: pick, client: me,
-        triggers: [viewport, scale, addPoint]
+        name: "mouseup", listener: pick, client: me,
+        triggers: [viewport, scale, add]
     })
 
     // dragging happens when mouse move events are delivered
     useEvent({
-        name: "mousemove", listener: drag, client: me,
-        triggers: [viewport, scale, moving, points, selection, displace]
+        name: "mousemove", listener: displace, client: me,
+        triggers: [viewport, scale, dragging, path, selection, displace]
     })
 
     // dragging ends when the user lets go of the mouse button
     useEvent({
-        name: "mouseup", listener: stop, client: me,
-        triggets: [selection]
+        name: "mouseup", listener: drop, client: me,
+        triggers: [selection]
     })
     // or when the mouse leaves my client area
     useEvent({
-        name: "mouseleave", listener: stop, client: me,
+        name: "mouseleave", listener: drop, client: me,
         triggers: [selection]
     })
 
-    // and render
+    // render
     return (
         <Placemat ref={me} shape={shape}>
             {/* join the points with a line */}
             <Path points={projected} closed={closed} />
             {/* add their labels */}
-            <Labels positions={projected} values={points} />
+            <Labels positions={projected} values={anchors} />
             {/* and draw markers for them */}
             {projected.map((point, idx) => {
                 // render a circle
-                return <Mark key={idx} idx={idx} at={point} viewport={viewport} />
+                return (
+                    <Anchor key={idx}
+                        viewport={viewport} selection={selection} idx={idx} at={point}
+                    />
+                )
             })}
         </Placemat>
     )
@@ -170,5 +190,18 @@ const Placemat = styled(SVG)`
     height: ${props => props.shape[0]}px;
 `
 
+// my fragment
+const measureGetMeasureLayerFragment = graphql`
+    fragment measureGetMeasureLayerFragment on View {
+        measure {
+            closed
+            path {
+                x
+                y
+            }
+            selection
+        }
+    }
+`
 
 // end of file

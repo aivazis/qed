@@ -11,12 +11,12 @@ import React from 'react'
 // the provider factory
 export const Provider = ({ children }) => {
     // a flag that indicates that the user has started dragging a {mark}
-    const [moving, setMoving] = React.useState(null)
+    const [dragging, setDragging] = React.useState(null)
 
     // build the initial context value
     const context = {
         // movement indicator
-        moving, setMoving,
+        dragging, setDragging,
     }
 
     // provide from my children
@@ -33,8 +33,8 @@ export const Context = React.createContext(
     // the default value clients see when accessing the context outside a provider
     {
         // movement
-        moving: null,
-        setMoving: () => { throw new Error(complaint) },
+        dragging: null,
+        setDragging: () => { throw new Error(complaint) },
     }
 )
 
