@@ -81,6 +81,15 @@ class Viewport(
         # all done
         return view
 
+    def measureAnchorMove(self, handle, dx, dy):
+        """
+        Displace the anchor selection by ({dx}, {dy})
+        """
+        # get my active view
+        view = self._view
+        # and delegate
+        return view.measureAnchorMove(handle=handle, dx=dx, dy=dy)
+
     def measureAnchorExtendSelection(self, index):
         """
         Extend the anchor selection to the given {index}

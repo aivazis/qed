@@ -104,6 +104,32 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
+    def measureAnchorMove(self, handle, dx, dy):
+        """
+        Move the current selection by ({dx}, {dy})
+        """
+        # get the dataset shape; don't forget that it's (lines, samples)
+        shape = self.dataset.shape
+        # get the measure record
+        measure = self.measure
+        # get the set of anchors
+        anchors = measure.path
+        # get the selected anchors
+        selection = measure.selection
+        # figure out who gets moved
+        targets = selection if handle in selection else [handle]
+        # go though the selected anchors
+        for index in targets:
+            # get the anchor position
+            x, y = anchors[index]
+            # clip and update
+            x = min(shape[1], max(0, x + dx))
+            y = min(shape[0], max(0, y + dy))
+            # and store
+            anchors[index] = (x, y)
+        # all done
+        return self
+
     def measureAnchorExtendSelection(self, index):
         """
         Extend the anchor selection to the given {index}
