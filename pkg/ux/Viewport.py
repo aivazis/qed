@@ -81,6 +81,39 @@ class Viewport(
         # all done
         return view
 
+    def measureAnchorExtendSelection(self, index):
+        """
+        Extend the anchor selection to the given {index}
+        """
+        # get my active view
+        view = self._view
+        # delegate
+        view.measureAnchorExtendSelection(index=index)
+        # all done
+        return view
+
+    def measureAnchorToggleSelection(self, index):
+        """
+        Toggle {index} in the anchor selection in single node mode
+        """
+        # get my active view
+        view = self._view
+        # delegate
+        view.measureAnchorToggleSelection(index=index)
+        # all done
+        return view
+
+    def measureAnchorToggleSelectionMulti(self, index):
+        """
+        Toggle {index} in the anchor selection in multinode mode
+        """
+        # get my active view
+        view = self._view
+        # delegate
+        view.measureAnchorToggleSelectionMulti(index=index)
+        # all done
+        return view
+
     def setSync(self, aspect, value):
         """
         Toggle the scroll flag of my sync table
