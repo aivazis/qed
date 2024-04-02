@@ -92,6 +92,8 @@ const toggleCoordinateMutation = graphql`
                 id
                 # for synchronized scrolling
                 ...vizGetScrollSyncedViewsFragment
+                # for the measure layer
+                ...measureGetMeasureLayerFragment
                 # for the viewport
                 ...viewportViewerGetViewFragment
                 # for the info widget with the dataset metadata

@@ -34,7 +34,7 @@ export const useSelectReader = () => {
         }
         // otherwise, send the mutation to the server
         commit({
-            //input
+            // input
             variables: {
                 // the payload
                 viewport,
@@ -87,6 +87,8 @@ const selectReaderMutation = graphql`
                 id
                 # for synchronized scrolling
                 ...vizGetScrollSyncedViewsFragment
+                # for the measure layer
+                ...measureGetMeasureLayerFragment
                 # for the viewport
                 ...viewportViewerGetViewFragment
                 # for the info widget with the dataset metadata

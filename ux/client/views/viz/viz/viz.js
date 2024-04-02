@@ -109,7 +109,9 @@ const vizGetViewsFragment = graphql`
             }
             # what i need for synced scrolling
             ...vizGetScrollSyncedViewsFragment
-            # plus what viewers and their parts need
+            # for the measure layer
+            ...measureGetMeasureLayerFragment
+            # what viewers and their parts need
             ...viewerGetViewFragment
             ...selectorViewerGetViewFragment
             ...viewportViewerGetViewFragment
