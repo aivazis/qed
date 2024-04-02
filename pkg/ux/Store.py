@@ -206,6 +206,17 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return view.measure
 
+    def measureAnchorMove(self, viewport, handle, dx, dy):
+        """
+        Displace the current anchor selection of {viewport}
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # delegate
+        view = port.measureAnchorMove(handle=handle, dx=dx, dy=dy)
+        # all done
+        return view.measure
+
     def measureAnchorExtendSelection(self, viewport, index):
         """
         Extend the anchor selection of {viewport} to the given {index}
