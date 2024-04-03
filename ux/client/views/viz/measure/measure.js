@@ -97,10 +97,10 @@ const Layer = ({ viewport, view, shape, scale }) => {
 
     // move an anchor
     const displace = evt => {
-        // stop this event from bubbling up
-        evt.stopPropagation()
-        // and quash any side effects
-        evt.preventDefault()
+        // N.B.:
+        //   do NOT stop the propagation of this event
+        //   the {viewer} layer below {measure} uses it to keep track and display the
+        //   cursor location
         // unpack
         const { offsetX, offsetY } = evt
         // if the moving indicator is in its trivial state
