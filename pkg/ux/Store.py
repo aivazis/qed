@@ -349,10 +349,10 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         channel.line("qed store:")
         channel.indent()
         # show me the static assets
-        channel.line("static assets:")
-        channel.indent()
-        channel.report(self._docroot.dump())
-        channel.outdent()
+        # channel.line("static assets:")
+        # channel.indent()
+        # channel.report(self._docroot.dump())
+        # channel.outdent()
 
         # my archives
         channel.line("archives:")
