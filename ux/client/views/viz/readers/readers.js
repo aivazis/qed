@@ -7,6 +7,8 @@
 // externals
 import React from 'react'
 import { graphql, useFragment } from 'react-relay/hooks'
+// router
+import { useNavigate } from 'react-router-dom'
 
 // project
 // widgets
@@ -22,8 +24,21 @@ import styles from './styles'
 
 // export the activity panel
 export const Readers = ({ qed }) => {
-    // ask it for all known data readers and attach them as read-only state
+    // ask the server side store for all known data readers and views
     const { readers, views } = useFragment(readersGetReadersFragment, qed)
+    // get the navigation handler
+    const navigate = useNavigate()
+    // redirect
+    React.useEffect(() => {
+        // if there are no registered readers
+        if (readers.length == 0) {
+            // go to the archive page
+            navigate("explore")
+        }
+        // all done
+        return
+    }, [readers])
+
     // render
     return (
         <>
