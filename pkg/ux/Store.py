@@ -284,12 +284,26 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         super().__init__(plexus=plexus, spec="store", **kwds)
         # save the root of the document
         self._docroot = docroot
+        # build my registries
         # map: name -> data archive
-        self._dataArchives = self._loadPersistentArchives(plexus)
+        archives = self._loadPersistentArchives(plexus)
         # map: name -> data source
-        self._dataSources = self._loadPersistentSources(plexus)
+        sources = self._loadPersistentSources(plexus)
         # my viewports: start out with one
-        self._viewports = [Viewport(name=str(uuid.uuid1()))]
+        viewport = Viewport(name=str(uuid.uuid1()))
+
+        # if there is only one source
+        if len(sources) == 1:
+            # grab it
+            source = tuple(sources.sources())[0]
+            # and select it
+            viewport.selectSource(source=source)
+
+        # record my state
+        self._dataArchives = archives
+        self._dataSources = sources
+        self._viewports = [viewport]
+
         # all done
         return
 
