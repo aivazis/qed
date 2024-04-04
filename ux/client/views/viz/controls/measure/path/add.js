@@ -13,20 +13,20 @@ import { Plus } from '~/shapes'
 
 // local
 // hooks
-import { useSetPixelPath } from '../../../../main/useSetPixelPath'
+import { useAnchorSplit } from '~/views/viz/measure'
 // components
 import { Button } from './button'
 
 
 // insert a point to the path after the given one
-export const Add = ({ idx }) => {
+export const Add = ({ viewport, idx }) => {
     // get the path mutator that can split a segment in two
-    const { split } = useSetPixelPath()
+    const { split } = useAnchorSplit(viewport)
 
     // build the handler
     const add = () => {
         // split my node
-        split(idx)
+        split({ anchor: idx })
         // and done
         return
     }

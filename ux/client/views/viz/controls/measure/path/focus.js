@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay'
 import styled from 'styled-components'
 
 // project
@@ -20,26 +21,30 @@ import { useCenterViewport } from '~/views/viz'
 
 // local
 // hooks
-import { useGetZoomLevel } from '../../../../main/useGetZoomLevel'
-import { usePixelPathSelection } from '../../../../main/usePixelPathSelection'
 import { useSetPixelPathSelection } from '../../../../main/useSetPixelPathSelection'
 // components
 import { Button } from './button'
+import { useAnchorExtendSelection } from '~/views/viz/measure'
+import { useAnchorToggleSelection } from '~/views/viz/measure'
+import { useAnchorToggleSelectionMulti } from '~/views/viz/measure'
 
 
 // locate the given point on the viewport
-export const Focus = ({ idx, point }) => {
-    // get the zoom level of the active viewport
-    const zoom = useGetZoomLevel()
+export const Focus = ({ viewport, view, idx, point }) => {
+    // unpack the view
+    const { measure, zoom } = useFragment(focusMeasureGetMeasureLayerFragment, view)
     // the handler that centers the active viewport
     const center = useCenterViewport()
-    // the current point selection
-    const selection = usePixelPathSelection()
-    // and build a handler that selects nodes in single node mode
-    const { selectContiguous, toggle, toggleMultinode } = useSetPixelPathSelection()
+    // and build a handlers for the various selection modes
+    const { select } = useAnchorExtendSelection(viewport)
+    const { toggle } = useAnchorToggleSelection(viewport)
+    const { toggle: toggleMultinode } = useAnchorToggleSelectionMulti(viewport)
+
+    // get the current anchor selection
+    const { selection } = measure
 
     // deduce my state
-    const selected = selection.has(idx)
+    const selected = selection.includes(idx)
     // turn the zoom level into a scale
     const scale = [2 ** -zoom.vertical, 2 ** -zoom.horizontal]
 
@@ -49,10 +54,10 @@ export const Focus = ({ idx, point }) => {
         evt.stopPropagation()
 
         // check the status of the modifiers
-        const { ctrlKey, shiftKey } = evt
+        const { altKey, shiftKey } = evt
 
         // if there is no modifier present
-        if (!ctrlKey && !shiftKey) {
+        if (!altKey && !shiftKey) {
             // select me in single node mode
             toggle(idx)
             // and center the viewport on my point
@@ -62,7 +67,7 @@ export const Focus = ({ idx, point }) => {
         }
 
         // if <ctrl> is present
-        if (ctrlKey) {
+        if (altKey) {
             // toggle me in multinode mode
             toggleMultinode(idx)
             // done
@@ -72,7 +77,7 @@ export const Focus = ({ idx, point }) => {
         // if <shift> is present
         if (shiftKey) {
             // pick a range of nodes
-            selectContiguous(idx)
+            select(idx)
             // done
             return
         }
@@ -106,6 +111,20 @@ export const Focus = ({ idx, point }) => {
 const Control = styled(Button)`
     width: 1.5rem;
     text-align: end;
+`
+
+
+// the fragment
+const focusMeasureGetMeasureLayerFragment = graphql`
+    fragment focusMeasureGetMeasureLayerFragment on View {
+        measure {
+            selection
+        }
+        zoom {
+            horizontal
+            vertical
+        }
+    }
 `
 
 

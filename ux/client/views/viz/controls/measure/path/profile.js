@@ -6,41 +6,36 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay'
 import styled from 'styled-components'
 
 // project
 // colors
 import { theme } from "~/palette"
 
-// locals
-// hooks
-import { useGetView } from '../../../../main/useGetView'
-import { usePixelPath } from '../../../../main/usePixelPath'
 
-
-// the container of the {measure} actions
-export const Profile = () => {
-    // get the {dataset} in the active view; one is guaranteed to exist because
-    // we wouldn't be here otherwise
-    const { dataset } = useGetView()
-    // get the set of pixels on the profile path
-    const pixelPath = usePixelPath()
-
+// download the signal profile along the path
+export const Profile = ({ view }) => {
+    // unpack the view
+    const { dataset, measure } = useFragment(profileMeasureGetMeasureLayerFragment, view)
+    // get the name of the dataset
+    const { name } = dataset
+    // unpack the measure layer info
+    const { closed, path } = measure
     // if the path is empty
-    if (pixelPath.points.length === 0) {
+    if (path.length === 0) {
         // bail
         return null
     }
-
     // the profile uri
     const url = encoding => {
         // encode the points
-        const points = pixelPath.points.map(p => `${p[0]},${p[1]}`).join("&")
+        const points = path.map(p => `${p.y},${p.x}`).join("&")
         // form the url and return it
         return (
-            ["profile", encoding, dataset.name].join("/")
+            ["profile", encoding, name].join("/")
             + '?'
-            + `closed=${pixelPath.closed}&`
+            + `closed=${closed}&`
             + points
         )
     }
@@ -49,7 +44,7 @@ export const Profile = () => {
     return (
         <Box>
             <Action>
-                profile: <a download href={url("CSV")} value="profile.csv">CSV</a>
+                profile: <a download href={url("CSV")} value={`${name}.csv`}>CSV</a>
             </Action>
         </Box>
     )
@@ -82,6 +77,23 @@ const Action = styled.span`
     & a:hover {
         color: ${() => theme.page.highlight};
 
+    }
+`
+
+
+// the fragment
+const profileMeasureGetMeasureLayerFragment = graphql`
+    fragment profileMeasureGetMeasureLayerFragment on View {
+        dataset {
+            name
+        }
+        measure {
+            closed
+            path {
+                x
+                y
+            }
+        }
     }
 `
 

@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay'
 import styled from 'styled-components'
 
 // project
@@ -13,18 +14,19 @@ import { theme } from "~/palette"
 
 // local
 // hooks
-import { usePixelPath } from '../../../../main/usePixelPath'
-import { useSetPixelPath } from '../../../../main/useSetPixelPath'
+import { useToggleClosedPath } from '~/views/viz/measure'
 // components
 import { Button } from './button'
 
 
 // insert a point to the path after the given one
-export const Close = () => {
-    // get the pixel path of the active viewport
-    const pixelPath = usePixelPath()
-    // and the path mutator
-    const { toggle } = useSetPixelPath()
+export const Close = ({ viewport, view }) => {
+    // unpack the view
+    const { measure } = useFragment(closeMeasureGetMeasureLayerFragment, view)
+    // get the flag mutator
+    const { toggle } = useToggleClosedPath(viewport)
+    // get the current value of the flag
+    const closed = measure.closed
 
     // assemble the behaviors
     const behaviors = {
@@ -32,7 +34,7 @@ export const Close = () => {
     }
 
     // pick the representation based on the current state of the path
-    const Toggle = pixelPath.closed ? Closed : Open
+    const Toggle = closed ? Closed : Open
 
     // render
     return (
@@ -52,6 +54,16 @@ const Open = styled.circle`
     stroke: ${props => theme.page.bright};
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
+`
+
+
+// the fragment
+const closeMeasureGetMeasureLayerFragment = graphql`
+    fragment closeMeasureGetMeasureLayerFragment on View {
+        measure {
+            closed
+        }
+    }
 `
 
 
