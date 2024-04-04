@@ -280,6 +280,7 @@ type Mutation {
   viewToggleAllSync(viewport: Int!, reader: String!, aspect: String!): DatasetSyncInfos!
   # measure layer
   viewToggleMeasureLayer(viewport: Int!, reader: String!): DatasetMeasureInfo!
+  viewMeasureAnchorPlace(viewport: Int!, handle: Int!, x: Int!, y: Int!): DatasetMeasureInfo!
   viewMeasureAnchorMove(viewport: Int!, handle: Int!, dx: Int!, dy: Int!): DatasetMeasureInfo!
   viewMeasureAnchorExtendSelection(viewport: Int!, index: Int!): DatasetMeasureInfo!
   viewMeasureAnchorToggleSelection(viewport: Int!, index: Int!): DatasetMeasureInfo!
