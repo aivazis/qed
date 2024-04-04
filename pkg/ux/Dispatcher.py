@@ -248,7 +248,7 @@ class Dispatcher:
         # encode
         stream = encoder(dataset=dataset, profile=profile)
         # get the document factory
-        document = getattr(server.documents, encoding)
+        document = getattr(server.documents, encoding.upper())
         # build the response
         response = document(server=server, value=stream)
         # decorate it

@@ -143,6 +143,68 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
+    def measureAnchorRemove(self, anchor):
+        """
+        Remove an {anchor} from the pile
+        """
+        # get the measure record
+        measure = self.measure
+        # get the set of anchors
+        anchors = measure.path
+        # get the selected anchors
+        selection = measure.selection
+        # remove the anchor
+        anchors.pop(anchor)
+        # adjust the selection:
+        # - if the anchor is present in the selection it must be removed
+        # - anchor indices greater than anchor must be reduced by one
+        # find the insertion point
+        spot = bisect.bisect_left(selection, anchor)
+        # if it's not at the end of the list
+        if spot != len(selection):
+            # if {anchor} is present, it must be located at {spot}
+            present = selection[spot] == anchor
+            # if it's there
+            if present:
+                # drop it
+                selection.pop(spot)
+            # all downstream indices
+            for idx in range(spot, len(selection)):
+                # have to be reduce by one
+                selection[idx] -= 1
+        # all done
+        return self
+
+    def measureAnchorSplit(self, anchor):
+        """
+        Split in two the leg that starts at {anchor}
+        """
+        # get the measure record
+        measure = self.measure
+        # get the set of anchors
+        anchors = measure.path
+        # get the selected anchors
+        selection = measure.selection
+
+        # get the starting point
+        tail = anchors[anchor]
+        # and the end point
+        head = anchors[anchor + 1]
+        # interpolate to form the coordinates of the new point
+        point = tuple(int((h + t) / 2) for h, t in zip(head, tail))
+        # add it to the pile
+        anchors.insert(anchor + 1, point)
+
+        # adjust the selection:
+        # - if both the anchor and its successor are present in the selection, the new node is
+        #   also selected
+        # - every index in the selection after index has to be incremented by one
+        # find the insertion point
+        spot = bisect.bisect_left(selection, anchor)
+
+        # all done
+        return self
+
     def measureAnchorExtendSelection(self, index):
         """
         Extend the anchor selection to the given {index}
@@ -204,7 +266,16 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # store the new selection
         self.measure.selection = toggled
         # all done
-        return
+        return self
+
+    def measureToggleClosedPath(self):
+        """
+        Toggle the {closed} path flag
+        """
+        # toggle the value of the flag
+        self.measure.closed ^= True
+        # all done
+        return self
 
     def setSync(self, aspect, value):
         """
@@ -291,7 +362,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # if we were not able to identify the dataset
         if not dataset:
             # all done
-            return
+            return self
         # get the channel
         channel = self.channel
         # if we were able to find a dataset and we have a channel selection
@@ -378,7 +449,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # flush
         channel.log()
         # all done
-        return
+        return self
 
 
 # end of file

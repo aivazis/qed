@@ -228,6 +228,28 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return view.measure
 
+    def measureAnchorRemove(self, viewport, anchor):
+        """
+        Remove an anchor from the pile
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # delegate
+        view = port.measureAnchorRemove(anchor=anchor)
+        # all done
+        return view.measure
+
+    def measureAnchorSplit(self, viewport, anchor):
+        """
+        Split in two the leg that starts at an anchor
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # delegate
+        view = port.measureAnchorSplit(anchor=anchor)
+        # all done
+        return view.measure
+
     def measureAnchorExtendSelection(self, viewport, index):
         """
         Extend the anchor selection of {viewport} to the given {index}
@@ -258,6 +280,17 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         port = self._viewports[viewport]
         # delegate
         view = port.measureAnchorToggleSelectionMulti(index=index)
+        # all done
+        return view.measure
+
+    def measureToggleClosedPath(self, viewport):
+        """
+        Toggle the {closed} path flag
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # delegate
+        view = port.measureToggleClosedPath()
         # all done
         return view.measure
 
