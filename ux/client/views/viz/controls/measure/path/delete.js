@@ -13,20 +13,20 @@ import { X } from '~/shapes'
 
 // local
 // hooks
-import { useSetPixelPath } from '../../../../main/useSetPixelPath'
+import { useAnchorRemove } from '~/views/viz/measure'
 // components
 import { Button } from './button'
 
 
 // remove this point from the path
-export const Delete = ({ idx }) => {
+export const Delete = ({ viewport, idx }) => {
     // get the path mutator that can delete a point
-    const { remove } = useSetPixelPath()
+    const { remove } = useAnchorRemove(viewport)
 
     // build the handler
     const handler = () => {
         // remove the node from the path
-        remove(idx)
+        remove({ anchor: idx })
         // all done
         return
     }

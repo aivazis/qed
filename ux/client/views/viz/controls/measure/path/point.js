@@ -18,23 +18,23 @@ import { Focus } from './focus'
 
 
 // an entry from the table of the points on the {measure} layer of the active viewport
-export const Point = ({ idx, point, last }) => {
+export const Point = ({ viewport, view, idx, point, last }) => {
     // draw an entry of the {path} table
     return (
         <Box>
             {/* select this point*/}
-            <Focus idx={idx} point={point} />
+            <Focus viewport={viewport} view={view} idx={idx} point={point} />
 
             {/* coordinates */}
-            <Coordinate node={idx} axis={0} point={point} />
-            <Coordinate node={idx} axis={1} point={point} />
+            {<Coordinate viewport={viewport} view={view} node={idx} axis={"y"} point={point} />}
+            {<Coordinate viewport={viewport} view={view} node={idx} axis={"x"} point={point} />}
 
             {/* delete this point */}
-            <Delete idx={idx} />
+            {<Delete viewport={viewport} idx={idx} />}
             {/* place the control that adds a point after this one, unless its the last one */}
-            {idx != last && <Add idx={idx} />}
+            {idx != last && <Add viewport={viewport} idx={idx} />}
             {/* instead, the last point gets a control to close the path */}
-            {idx == last && <Close />}
+            {idx == last && <Close viewport={viewport} view={view} />}
         </Box>
     )
 }
