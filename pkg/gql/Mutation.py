@@ -45,11 +45,14 @@ class Mutation(graphene.ObjectType):
     viewAnchorAdd = views.anchorAdd.Field()
     viewMeasureAnchorPlace = views.measureAnchorPlace.Field()
     viewMeasureAnchorMove = views.measureAnchorMove.Field()
+    viewMeasureAnchorRemove = views.measureAnchorRemove.Field()
+    viewMeasureAnchorSplit = views.measureAnchorSplit.Field()
     viewMeasureAnchorExtendSelection = views.measureAnchorExtendSelection.Field()
     viewMeasureAnchorToggleSelection = views.measureAnchorToggleSelection.Field()
     viewMeasureAnchorToggleSelectionMulti = (
         views.measureAnchorToggleSelectionMulti.Field()
     )
+    viewMeasureToggleClosedPath = views.MeasureToggleClosedPath.Field()
 
     # data archive connection management
     connectArchive = ConnectArchive.Field()

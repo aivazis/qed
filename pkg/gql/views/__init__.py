@@ -20,6 +20,8 @@ from .ToggleAllSync import ToggleAllSync as toggleAllSync
 
 from .MeasureAnchorPlace import MeasureAnchorPlace as measureAnchorPlace
 from .MeasureAnchorMove import MeasureAnchorMove as measureAnchorMove
+from .MeasureAnchorRemove import MeasureAnchorRemove as measureAnchorRemove
+from .MeasureAnchorSplit import MeasureAnchorSplit as measureAnchorSplit
 from .MeasureAnchorExtendSelection import (
     MeasureAnchorExtendSelection as measureAnchorExtendSelection,
 )
@@ -29,5 +31,6 @@ from .MeasureAnchorToggleSelection import (
 from .MeasureAnchorToggleSelectionMulti import (
     MeasureAnchorToggleSelectionMulti as measureAnchorToggleSelectionMulti,
 )
+from .MeasureToggleClosedPath import MeasureToggleClosedPath as MeasureToggleClosedPath
 
 # end of file
