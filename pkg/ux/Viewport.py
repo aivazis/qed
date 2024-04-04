@@ -99,6 +99,24 @@ class Viewport(
         # and delegate
         return view.measureAnchorMove(handle=handle, dx=dx, dy=dy)
 
+    def measureAnchorRemove(self, anchor):
+        """
+        Remove an anchor from the pile
+        """
+        # get my active view
+        view = self._view
+        # and delegate
+        return view.measureAnchorRemove(anchor=anchor)
+
+    def measureAnchorSplit(self, anchor):
+        """
+        Split in two the leg that starts at {anchor}
+        """
+        # get my active view
+        view = self._view
+        # and delegate
+        return view.measureAnchorSplit(anchor=anchor)
+
     def measureAnchorExtendSelection(self, index):
         """
         Extend the anchor selection to the given {index}
@@ -129,6 +147,17 @@ class Viewport(
         view = self._view
         # delegate
         view.measureAnchorToggleSelectionMulti(index=index)
+        # all done
+        return view
+
+    def measureToggleClosedPath(self):
+        """
+        Toggle the {closed} path flag
+        """
+        # get my active view
+        view = self._view
+        # delegate
+        view.measureToggleClosedPath()
         # all done
         return view
 
