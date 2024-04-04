@@ -35,7 +35,7 @@ export const Label = ({ position, value }) => {
     // get the position of the marker
     const [x, y] = position
     // get the value; we show: line x sample
-    const [dataY, dataX] = value
+    const [dataX, dataY] = value
     // and render
     return (
         <g>
