@@ -24,10 +24,8 @@ export const useGetPixelValue = () => {
     // - on {refresh}, we adjust the {options} so queries get resolved from the store,
     //   which bypasses suspense
 
-    // get the data
-    const { sample } = useLazyLoadQuery(pixelValueQuery, variables, options)
-    // and return it
-    return sample
+    // get the data and return it
+    return useLazyLoadQuery(pixelValueQuery, variables, options)
 }
 
 
