@@ -10,9 +10,11 @@ export { Viz } from './viz'
 export { Controls } from './controls'
 export { Readers } from './readers'
 
-
 // hooks
 export { useViewports, useCenterViewport } from './viz'
+
+// functions
+export { tileURI } from './viewer'
 
 
 // end of file
