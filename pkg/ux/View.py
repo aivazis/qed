@@ -104,6 +104,19 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
+    def measureAnchorPlace(self, handle, x, y):
+        """
+        Place an existing anchor at the specific ({x}, {y}) location
+        """
+        # get the measure record
+        measure = self.measure
+        # get the set of anchors
+        anchors = measure.path
+        # and store
+        anchors[handle] = (x, y)
+        # all done
+        return self
+
     def measureAnchorMove(self, handle, dx, dy):
         """
         Move the current selection by ({dx}, {dy})
