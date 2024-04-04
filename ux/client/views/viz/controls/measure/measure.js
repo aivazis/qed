@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay'
 import styled from 'styled-components'
 
 // project
@@ -15,20 +16,17 @@ import { Tray } from '~/widgets'
 import { theme } from "~/palette"
 
 // locals
-// hooks
-import { useMeasureLayer } from '../../../main/useMeasureLayer'
 // components
 import { Path } from './path'
 import { Peek } from './peek'
 
 
 // display the {measure} layer controls
-export const Measure = () => {
+export const Measure = ({ view }) => {
     // get the {measure} layer status of the active {viewport}
-    const measureLayer = useMeasureLayer()
-
+    const { measure } = useFragment(measureControlsGetMeasureLayerStateFragment, view)
     // if the {measure} layer has not been activated
-    if (!measureLayer) {
+    if (!measure.active) {
         // nothing to show
         return null
     }
@@ -41,13 +39,13 @@ export const Measure = () => {
     return (
         <Tray title="measure" state="enabled" initially={true} scale={0.5}>
             {/* display pixel values */}
-            <Peek />
+            <Peek view={view} />
             {/* if the pixel path is empty, show a brief help message */}
             <Help>
                 use {stroke} to pick points on the active view
             </Help>
             {/* render the pixel path */}
-            <Path />
+            <Path view={view} />
         </Tray>
     )
 }
@@ -60,6 +58,16 @@ const Help = styled.p`
     font-style: italic;
     margin: 0.0rem 1.0rem 0.5rem 1.0rem;
     color: ${() => theme.page.normal}
+`
+
+
+// the fragment
+const measureControlsGetMeasureLayerStateFragment = graphql`
+    fragment measureControlsGetMeasureLayerStateFragment on View {
+        measure {
+            active
+        }
+    }
 `
 
 
