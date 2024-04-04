@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay'
 import styled from 'styled-components'
 
 // project
@@ -13,45 +14,42 @@ import { theme } from "~/palette"
 
 // local
 // hooks
-import { useDatasetShape } from '../../../../main/useDatasetShape'
-import { usePixelPathSelection } from '../../../../main/usePixelPathSelection'
-import { useSetPixelPath } from '../../../../main/useSetPixelPath'
+import { useAnchorPlace } from '~/views/viz/measure'
 
 
 // a interactive entry with a coordinate of a point
-export const Coordinate = ({ node, axis, point }) => {
+export const Coordinate = ({ viewport, view, node, point, axis }) => {
+    // unpack the view
+    const { dataset, measure } = useFragment(coordinateMeasureGetMeasureLayerFragment, view)
     // make a handler that can update the {axis} coordinate of my {node}
-    const { adjust } = useSetPixelPath()
-    // and get the active dataset shape and origin
-    const { origin, shape } = useDatasetShape()
-    // the current point selection
-    const selection = usePixelPathSelection()
+    const { place } = useAnchorPlace(viewport)
+    // get the active dataset shape and origin
+    const { origin, shape } = dataset
+    // and the selection
+    const { selection } = measure
 
-    // deduce my state
-    const selected = selection.has(node)
+    // figure the state of this anchor
+    const selected = selection.includes(node)
 
     // validate, clip and set the value
     const set = value => {
+        // convert {axis} to an {index}
+        const index = axis == "x" ? 1 : 0
         // set up the bounds
-        const min = origin[axis]
-        const max = origin[axis] + shape[axis] - 1
+        const min = origin[index]
+        const max = origin[index] + shape[index] - 1
         // if the value doesn't parse to a number
         if (isNaN(value)) {
             // set it to the minimum
             value = min
         }
-        // if it's smaller than the minimum possible
-        if (value < min) {
-            // clip it
-            value = min
-        }
-        // if it's larger than the maximum possible
-        if (value > max) {
-            // clip it
-            value = max
-        }
+        // clip the value
+        value = Math.max(min, Math.min(value, max))
+        // project to x and y
+        const x = axis == "x" ? value : point.x
+        const y = axis == "y" ? value : point.y
         // make the update
-        adjust({ node, axis, value })
+        place({ handle: node, position: { x, y } })
         // all done
         return
     }
@@ -95,7 +93,7 @@ const Base = styled.input`
     font-size: 110%;
     width: 3.0rem;
     text-align: end;
-    background-color: ${props => theme.page.background};
+    background-color: ${props => theme.page.shaded};
     padding: 0.0rem 0.25rem 0.0rem 0.0rem;
     border: 0 transparent;
 `
@@ -125,6 +123,20 @@ const Enabled = styled(Base)`
 
 const Selected = styled(Base)`
     color: ${() => theme.page.highlight};
+`
+
+
+// the fragment
+const coordinateMeasureGetMeasureLayerFragment = graphql`
+    fragment coordinateMeasureGetMeasureLayerFragment on View {
+        dataset {
+            origin
+            shape
+        }
+        measure {
+            selection
+        }
+    }
 `
 
 
