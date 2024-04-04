@@ -10,10 +10,13 @@ export { Measure } from './measure'
 // and the hooks
 export { useAnchorPlace } from './useAnchorPlace'
 export { useAnchorMove } from './useAnchorMove'
+export { useAnchorRemove } from './useAnchorRemove'
+export { useAnchorSplit } from './useAnchorSplit'
 export { useAnchorExtendSelection } from './useAnchorExtendSelection'
 export { useAnchorToggleSelection } from './useAnchorToggleSelection'
 export { useAnchorToggleSelectionMulti } from './useAnchorToggleSelectionMulti'
 export { useToggleMeasureLayer } from './useToggleMeasureLayer'
+export { useToggleClosedPath } from './useToggleClosedPath'
 
 
 // end of file
