@@ -8,6 +8,7 @@
 export { Measure } from './measure'
 
 // and the hooks
+export { useAnchorMove } from './useAnchorMove'
 export { useToggleMeasureLayer } from './useToggleMeasureLayer'
 
 
