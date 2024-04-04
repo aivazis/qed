@@ -9,39 +9,41 @@ import React from 'react'
 
 // locals
 // hooks
-import { usePixelPathSelection } from '../../../../main/usePixelPathSelection'
-import { useSetPixelPath } from '../../../../main/useSetPixelPath'
+import { useAnchorMove } from '~/views/viz/measure'
 import { useUpdatePixelLocation } from './useUpdatePixelLocation'
 // components
 import { Arrow } from './arrow'
 
 
 // nudge the selected {node} downwards
-export const Down = ({ node }) => {
+export const Down = ({ viewport, view, handle, deltas }) => {
     // pull info out of my context
-    const { nudge } = useUpdatePixelLocation()
-    // get the current pixel path selection
-    const nodes = usePixelPathSelection()
+    const { nudge } = useUpdatePixelLocation(view)
     // make me a handler that moves the current selection
-    const { displace } = useSetPixelPath()
+    const { move } = useAnchorMove(viewport)
 
     // make my handler
-    const move = evt => {
+    const bump = evt => {
         // unpack the event information
-        const { altKey } = evt
+        const { altKey, shiftKey } = evt
+        // encode the modifiers into an index
+        const index = (altKey ? 1 : 0) + (shiftKey ? 2 : 0)
         // pick a displacement
-        const value = altKey ? 5 : 1
+        const value = deltas[index]
         // nudge the pixel location
-        nudge({ dLine: value, dSample: 0 })
-        // and the selection, if any
-        displace({ nodes, delta: { x: 0, y: value } })
+        nudge({ dx: 0, dy: value })
+        // if there is a selection
+        if (handle != null) {
+            // update the server side store
+            move({ handle, delta: { x: 0, y: value } })
+        }
         // all done
         return
     }
 
     // make my controller
     const behaviors = {
-        onClick: move,
+        onClick: bump,
     }
 
     // render

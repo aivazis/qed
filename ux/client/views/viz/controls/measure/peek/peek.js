@@ -36,7 +36,7 @@ import { Minimap } from './minimap'
 export const Peek = (props) => {
     // set up my context and embed my panel
     return (
-        <Provider>
+        <Provider {...props}>
             <Panel {...props} />
         </Provider>
     )
@@ -44,13 +44,13 @@ export const Peek = (props) => {
 
 
 // the panel implementation
-const Panel = () => {
+const Panel = ({ view }) => {
     // get the viewport registry
     const { activeViewport, viewports } = useViewports()
     // get the pixel value
-    const sample = useGetPixelValue()
+    const { sample } = useGetPixelValue()
     // and the tracker
-    const { track } = useUpdatePixelLocation()
+    const { track } = useUpdatePixelLocation(view)
 
     // the query refresh that's invoked when the mouse moves to a new pixel
     // install a tracker on the active viewport
@@ -93,7 +93,7 @@ const Panel = () => {
                 <Channel key={channel} channel={channel} reps={reps} />
             ))}
             {/* draw the minimap */}
-            <Minimap point={pixel} />
+            <Minimap viewport={activeViewport} view={view} point={pixel} />
         </Box>
     )
 }

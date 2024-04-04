@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay/hooks'
 import { fetchQuery, useRelayEnvironment } from 'react-relay'
 
 // local
@@ -13,37 +14,32 @@ import { fetchQuery, useRelayEnvironment } from 'react-relay'
 import { Context } from './context'
 // hooks
 import { pixelValueQuery } from './useGetPixelValue'
-import { useGetZoomLevel } from '../../../../main/useGetZoomLevel'
-import { usePixelPath } from '../../../../main/usePixelPath'
-import { usePixelPathSelection } from '../../../../main/usePixelPathSelection'
-
 
 // the code below looks tricky because it is trying to avoid suspending component rendering
 // while the query is in flight and rendering again once the result is available because this
 // causes flicker
 
 // build handlers that update the pixel location
-export const useUpdatePixelLocation = () => {
+export const useUpdatePixelLocation = view => {
+    // get the current relay environment
+    const environment = useRelayEnvironment()
+    // unpack the view
+    const { dataset, zoom, measure } = useFragment(
+        useUpdatePixelLocationMeasureGetPixelLocationFragment, view
+    )
     // pull info out of my context
     const {
-        // dataset
-        origin, shape,
         // query state and info management
         loading, variables, setLoading, setVariables, setOptions,
     } = React.useContext(Context)
 
-    // get the current relay environment
-    const environment = useRelayEnvironment()
-
-    // get the zoom level of the active viewport
-    const zoom = useGetZoomLevel()
-    // get the set of pixels on the profile path
-    const pixelPath = usePixelPath()
-    // get the node selection
-    const selection = usePixelPathSelection()
+    // unpack the dataset
+    const { origin, shape } = dataset
+    // unpack the measure layer info
+    const { path: pixelPath, selection } = measure
 
     // build the handler that refreshes the query
-    const refresh = ({ line, sample }) => {
+    const refresh = ({ x, y }) => {
         // if the query is in flight
         if (loading) {
             // bail
@@ -53,7 +49,7 @@ export const useUpdatePixelLocation = () => {
         setLoading(true)
 
         // assemble the query variables
-        const queryVars = { ...variables, line, sample }
+        const queryVars = { ...variables, line: y, sample: x }
         // {fetchQuery} will update the {relay} store; this ensures that when {peek}
         // renders again, all the necessary data is already in place, and the rendering
         // will not suspend
@@ -87,12 +83,12 @@ export const useUpdatePixelLocation = () => {
     }
 
     // build a handler that adjust the current values of the variables and refreshes
-    const nudge = ({ dLine, dSample }) => {
+    const nudge = ({ dx, dy }) => {
         // compute the new location
-        const line = variables.line + dLine
-        const sample = variables.sample + dSample
+        const x = variables.sample + dx
+        const y = variables.line + dy
         // refresh
-        refresh({ line, sample })
+        refresh({ x, y })
         // all done
         return
     }
@@ -101,13 +97,13 @@ export const useUpdatePixelLocation = () => {
     // mouse location in the active view, or the select mark in the measure layer
     const track = evt => {
         // if the selection is not empty
-        if (selection.size > 0) {
+        if (selection.length > 0) {
             // decouple from the mouse; instead, get the index of the selected mark
             const mark = [...selection][0]
             // get the associated point
-            const point = pixelPath.points[mark]
+            const point = pixelPath[mark]
             // and use it as the query location
-            refresh({ line: point[0], sample: point[1] })
+            refresh({ y: point.y, x: point.x })
             // all done
             return
         }
@@ -136,7 +132,7 @@ export const useUpdatePixelLocation = () => {
         }
 
         // record the current mouse location; this triggers the {sample} query to refresh
-        refresh({ line: y, sample: x })
+        refresh({ x, y })
 
         // all done
         return
@@ -145,6 +141,28 @@ export const useUpdatePixelLocation = () => {
     // and return the pixel data and the location tracker
     return { nudge, refresh, track }
 }
+
+
+// the fragment
+const useUpdatePixelLocationMeasureGetPixelLocationFragment = graphql`
+    fragment useUpdatePixelLocationMeasureGetPixelLocationFragment on View {
+        dataset {
+            origin
+            shape
+        }
+        zoom {
+            horizontal
+            vertical
+        }
+        measure {
+            path {
+                x
+                y
+            }
+            selection
+        }
+    }
+`
 
 
 // end of file

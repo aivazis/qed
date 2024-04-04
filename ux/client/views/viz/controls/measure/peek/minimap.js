@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay/hooks'
 import styled from 'styled-components'
 
 // project
@@ -19,9 +20,7 @@ import { theme } from "~/palette"
 
 // local
 // hooks
-import { useDatasetShape } from '../../../../main/useDatasetShape'
-import { useGetTileURI } from '../../../../main/useGetTileURI'
-import { usePixelPathSelection } from '../../../../main/usePixelPathSelection'
+import { tileURI } from '~/views/viz'
 // components
 import { Down } from './down'
 import { Left } from './left'
@@ -29,15 +28,20 @@ import { Right } from './right'
 import { Up } from './up'
 
 
-
 // a table of the points on the {measure} layer of the active viewport
-export const Minimap = ({ point }) => {
-    // get the node selection, if any
-    const selection = usePixelPathSelection()
+export const Minimap = ({ viewport, view, point }) => {
+
+    // unpack the view
+    const { reader, dataset, channel, zoom, measure } = useFragment(
+        minimapControlsGetMeasureLayerStateFragment, view
+    )
     // form the base tile uri at zoom level 0, suitable for the minimap
-    const tileURI = useGetTileURI({ zoomLevel: { horizontal: 0, vertical: 0 } })
+    const uri = tileURI({ reader, dataset, channel, zoom })
+
     // get the active dataset extent
-    const { origin, shape } = useDatasetShape()
+    const { origin, shape } = dataset
+    // get the anchor selection
+    const { selection } = measure
 
     // we fetch a tile with shape
     const tile = [128, 128]
@@ -85,7 +89,7 @@ export const Minimap = ({ point }) => {
     // derive the tile rep
     const rep = `${anchor[0]}x${anchor[1]}+${tile[0]}x${tile[1]}`
     // assemble the data request URI
-    const base = [tileURI, rep].join("/")
+    const base = [uri, rep].join("/")
 
     // style the {target} shape
     const target = {
@@ -103,20 +107,25 @@ export const Minimap = ({ point }) => {
         }
     }
 
+    // deduce the magic anchor
+    const handle = (selection.length > 0) ? selection[0] : null
+    // build the displacement choices
+    const deltas = [1, 5, 10, 50]
+
     // render
     return (
         <Box>
             <Data src={base} />
             <Map>
                 <g transform={`translate(${delta[1]} ${delta[0]}) scale(${256 / 1000})`}>
-                    {/* the marker, visible only when there are selected markers */}
-                    {selection.size > 0 && <Target style={placemat} />}
-                    {selection.size > 0 && <Target style={target} />}
+                    {/* the marker, visible only when there are selected anchors */}
+                    {selection.length > 0 && <Target style={placemat} />}
+                    {selection.length > 0 && <Target style={target} />}
                     {/* verniers */}
-                    <Up />
-                    <Right />
-                    <Down />
-                    <Left />
+                    <Up viewport={viewport} view={view} handle={handle} deltas={deltas} />
+                    <Right viewport={viewport} view={view} handle={handle} deltas={deltas} />
+                    <Down viewport={viewport} view={view} handle={handle} deltas={deltas} />
+                    <Left viewport={viewport} view={view} handle={handle} deltas={deltas} />
                 </g>
             </Map>
         </Box>
@@ -145,6 +154,31 @@ const Map = styled(SVG)`
     left: 0px;
     width: 256px;
     height: 256px;
+`
+
+
+// the fragment
+const minimapControlsGetMeasureLayerStateFragment = graphql`
+    fragment minimapControlsGetMeasureLayerStateFragment on View {
+        reader {
+            api
+        }
+        dataset {
+            name
+            origin
+            shape
+        }
+        channel {
+            tag
+        }
+        measure {
+            selection
+        }
+        zoom {
+            horizontal
+            vertical
+        }
+    }
 `
 
 

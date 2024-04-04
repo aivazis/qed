@@ -6,24 +6,22 @@
 
 // external
 import React from 'react'
-
-// local
-// hooks
-import { useDatasetShape } from '../../../../main/useDatasetShape'
+import { graphql, useFragment } from 'react-relay'
 
 
 // the provider factory
-export const Provider = ({ children }) => {
-    // get the name and extent of its dataset
-    const { name: dataset, origin, shape } = useDatasetShape()
-
+export const Provider = ({ view, children }) => {
+    // unpack the view
+    const { dataset } = useFragment(contextPeekMeasureGetDatasetFragment, view)
+    // extract what i need
+    const { name, origin, shape } = dataset
     // query state management
     const [loading, setLoading] = React.useState(false)
     // query options
-    const [options, setOptions] = React.useState()
+    const [options, setOptions] = React.useState(null)
     // and query variables
     const [variables, setVariables] = React.useState({
-        dataset,
+        dataset: name,
         line: origin[0],
         sample: origin[1],
     })
@@ -31,7 +29,7 @@ export const Provider = ({ children }) => {
     // build the initial context value
     const context = {
         // record the dataset information
-        dataset, origin, shape,
+        dataset: name, origin, shape,
         // query state management
         loading, setLoading,
         // options
@@ -70,6 +68,18 @@ export const Context = React.createContext(
 
 // the error message that consumers see when accessing the context outside a provider
 const complaint = "while accessing the 'peek' context: no provider"
+
+
+// the fragment
+const contextPeekMeasureGetDatasetFragment = graphql`
+    fragment contextPeekMeasureGetDatasetFragment on View {
+        dataset {
+            name
+            origin
+            shape
+        }
+    }
+`
 
 
 // end of file
