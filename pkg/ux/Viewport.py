@@ -81,6 +81,15 @@ class Viewport(
         # all done
         return view
 
+    def measureAnchorPlace(self, handle, x, y):
+        """
+        Place an existing anchor at the specific ({x}, {y}) location
+        """
+        # get my active view
+        view = self._view
+        # and delegate
+        return view.measureAnchorPlace(handle=handle, x=x, y=y)
+
     def measureAnchorMove(self, handle, dx, dy):
         """
         Displace the anchor selection by ({dx}, {dy})

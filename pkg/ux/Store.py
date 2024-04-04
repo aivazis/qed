@@ -206,6 +206,17 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return view.measure
 
+    def measureAnchorPlace(self, viewport, handle, x, y):
+        """
+        Place an existing anchor at the specific ({x}, {y}) location
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # delegate
+        view = port.measureAnchorPlace(handle=handle, x=x, y=y)
+        # all done
+        return view.measure
+
     def measureAnchorMove(self, viewport, handle, dx, dy):
         """
         Displace the current anchor selection of {viewport}
