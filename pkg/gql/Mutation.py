@@ -37,10 +37,9 @@ class Mutation(graphene.ObjectType):
     viewToggleChannel = views.toggleChannel.Field()
     viewToggleCoordinate = views.toggleCoordinate.Field()
     viewPersist = views.persist.Field()
-    # dataset view state
+
+    # measure
     viewMeasureToggleLayer = views.measureToggleLayer.Field()
-    viewSyncToggleScroll = views.syncToggleScroll.Field()
-    viewToggleAllSync = views.toggleAllSync.Field()
     # anchor management
     viewMeasureAnchorAdd = views.measureAnchorAdd.Field()
     viewMeasureAnchorPlace = views.measureAnchorPlace.Field()
@@ -53,6 +52,12 @@ class Mutation(graphene.ObjectType):
         views.measureAnchorToggleSelectionMulti.Field()
     )
     viewMeasureToggleClosedPath = views.measureToggleClosedPath.Field()
+
+    # sync
+    viewSyncToggleViewport = views.syncToggleViewport.Field()
+    viewSyncToggleAll = views.syncToggleAll.Field()
+
+    # zoom
     viewZoomSetLevel = views.zoomSetLevel.Field()
     viewZoomToggleCoupled = views.zoomToggleCoupled.Field()
 

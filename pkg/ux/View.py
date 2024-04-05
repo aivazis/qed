@@ -277,7 +277,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
-    def setSync(self, aspect, value):
+    def syncSetAspect(self, aspect, value):
         """
         Toggle the {aspect} flag of my sync table
         """
@@ -286,23 +286,14 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
-    def toggleSync(self, aspect):
+    def syncToggleAspect(self, aspect):
         """
         Toggle the {aspect} flag of my sync table
         """
         # get the value
-        flag = getattr(self.scroll, aspect)
+        flag = getattr(self.sync, aspect)
         # flip and set it back
         setattr(self.sync, aspect, not flag)
-        # all done
-        return self
-
-    def syncToggleScroll(self):
-        """
-        Toggle the scroll flag of my sync table
-        """
-        # toggle the scroll flag
-        self.sync.scroll ^= True
         # all done
         return self
 

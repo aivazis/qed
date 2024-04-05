@@ -294,7 +294,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return view.measure
 
-    def setSync(self, viewport, aspect):
+    def syncToggleAll(self, viewport, aspect):
         """
         Toggle the scroll flag of the sync table
         """
@@ -303,22 +303,20 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # go through all my viewports
         for port in self._viewports:
             # and ask each one to set its {aspect} flag to the reference value
-            view = port.setSync(aspect=aspect, value=value)
+            view = port.syncSetAspect(aspect=aspect, value=value)
             # hand off its scroll table
             yield view.sync
         # all done
         return
 
-    def syncToggleScroll(self, viewport, source):
+    def syncToggleViewport(self, viewport, aspect):
         """
         Toggle the scroll flag of the sync table
         """
-        # locate the source
-        source = self.source(name=source)
         # get the viewport configuration
         port = self._viewports[viewport]
         # and delegate
-        view = port.syncToggleScroll(source=source)
+        view = port.syncToggleAspect(aspect=aspect)
         # return the measure configuration
         return view.sync
 

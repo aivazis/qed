@@ -161,34 +161,23 @@ class Viewport(
         # all done
         return view
 
-    def setSync(self, aspect, value):
+    def syncSetAspect(self, aspect, value):
         """
-        Toggle the scroll flag of my sync table
-        """
-        # delegate to my active view
-        return self._view.setSync(aspect=aspect, value=value)
-
-    def toggleSync(self, source, aspect):
-        """
-        Toggle the scroll flag of my sync table
+        Set the {aspect} flag of my sync table to {value}
         """
         # activate the {source}
-        view = self._selectSource(source=source)
+        view = self.view()
         # and delegate
-        view.toggleSync(aspect=aspect)
-        # all done
-        return self.view()
+        return view.syncSetAspect(aspect=aspect, value=value)
 
-    def syncToggleScroll(self, source):
+    def syncToggleAspect(self, aspect):
         """
-        Toggle the scroll flag of my sync table
+        Toggle the {aspect} flag of my sync table
         """
         # activate the {source}
-        view = self._selectSource(source=source)
+        view = self.view()
         # and delegate
-        view.syncToggleScroll()
-        # all done
-        return view
+        return view.syncToggleAspect(aspect=aspect)
 
     def zoomSetLevel(self, horizontal, vertical):
         """

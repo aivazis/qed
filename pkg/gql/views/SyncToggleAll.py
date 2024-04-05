@@ -14,7 +14,7 @@ from .Sync import Sync
 
 
 # remove a view from the pile
-class ToggleAllSync(graphene.Mutation):
+class SyncToggleAll(graphene.Mutation):
     """
     Toggle the state of the measure layer of a dataset
     """
@@ -23,7 +23,6 @@ class ToggleAllSync(graphene.Mutation):
     class Arguments:
         # the update context
         viewport = graphene.Int(required=True)
-        reader = graphene.String(required=True)
         aspect = graphene.String(required=True)
 
     # the result is the new measure layer object
@@ -31,14 +30,14 @@ class ToggleAllSync(graphene.Mutation):
 
     # the range controller mutator
     @staticmethod
-    def mutate(root, info, viewport, reader, aspect):
+    def mutate(root, info, viewport, aspect):
         """
         Remove a reader from the pile
         """
         # get the store
         store = info.context["store"]
         # ask it for the measure layer of the dataset view
-        sync = store.setSync(viewport=viewport, aspect=aspect)
+        sync = store.syncToggleAll(viewport=viewport, aspect=aspect)
         # form the mutation resolution context
         context = {"sync": sync}
         # and resolve the mutation

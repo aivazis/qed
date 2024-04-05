@@ -16,7 +16,8 @@ import { Badge } from '~/widgets'
 
 // locals
 // hooks
-import { useToggleScroll, useToggleAll } from './useSync'
+import { useSyncToggleAll } from './useSyncToggleAll'
+import { useSyncToggleViewport } from './useSyncToggleViewport'
 // styles
 import styles from './styles'
 
@@ -29,16 +30,20 @@ export const Sync = ({ viewport, view }) => {
     const isScrollSynced = sync.scroll
 
     // get the mutators
-    const { toggle: scroll } = useToggleScroll()
-    const { toggle: all } = useToggleAll()
+    const { toggle: toggleScrollAll } = useSyncToggleAll({
+        viewport, reader: reader.name, aspect: "scroll"
+    })
+    const { toggle: toggleScrollViewport } = useSyncToggleViewport({
+        viewport, reader: reader.name, aspect: "scroll"
+    })
     // turn the toggle into an event handler
-    const toggleScroll = evt => {
+    const toggleViewport = evt => {
         // stop this event from bubbling up
         evt.stopPropagation()
         // quash the default behavior
         evt.preventDefault()
         // flip the state of the scroll sync
-        scroll(viewport, reader.name)
+        toggleScrollViewport()
         // all done
         return
     }
@@ -49,7 +54,7 @@ export const Sync = ({ viewport, view }) => {
         // quash the default behavior
         evt.preventDefault()
         // flip the state of the scroll sync on all viewports
-        all(viewport, reader.name, "scroll")
+        toggleScrollAll()
         // all done
         return
     }
@@ -57,7 +62,7 @@ export const Sync = ({ viewport, view }) => {
     // my event handlers
     const behaviors = {
         // toggle the sync state on a single click
-        onClick: toggleScroll,
+        onClick: toggleViewport,
         // toggle all the scroll sync flags on a double click
         onDoubleClick: toggleAll,
     }
