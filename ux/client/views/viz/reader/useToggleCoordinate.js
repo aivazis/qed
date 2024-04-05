@@ -106,6 +106,8 @@ const toggleCoordinateMutation = graphql`
                 ...syncViewerGetScrollSyncStateFragment
                 # for the print button
                 ...printViewerGetViewFragment
+                # for the zoom control
+                ...zoomControlsGetZoomStateFragment
             }
         }
     }
