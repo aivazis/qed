@@ -14,7 +14,7 @@ from .Measure import Measure
 
 
 # add an anchor to the path
-class AnchorAdd(graphene.Mutation):
+class MeasureAnchorAdd(graphene.Mutation):
     """
     Remove a view
     """

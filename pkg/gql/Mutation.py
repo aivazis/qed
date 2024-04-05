@@ -42,7 +42,7 @@ class Mutation(graphene.ObjectType):
     viewToggleScrollSync = views.toggleScrollSync.Field()
     viewToggleAllSync = views.toggleAllSync.Field()
     # anchor management
-    viewAnchorAdd = views.anchorAdd.Field()
+    viewMeasureAnchorAdd = views.measureAnchorAdd.Field()
     viewMeasureAnchorPlace = views.measureAnchorPlace.Field()
     viewMeasureAnchorMove = views.measureAnchorMove.Field()
     viewMeasureAnchorRemove = views.measureAnchorRemove.Field()

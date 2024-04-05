@@ -268,7 +268,6 @@ type Shape {
 # mutations
 type Mutation {
   # viewports
-  viewAnchorAdd(viewport: Int!, x: Int!, y: Int!, index: Int): DatasetMeasureInfo!
   viewCollapse(viewport: Int!): ViewInfo!
   viewSplit(viewport: Int!): ViewInfo!
   viewSelectReader(viewport: Int!, reader: String!): ViewInfo!
@@ -279,11 +278,12 @@ type Mutation {
   viewToggleScrollSync(viewport: Int!, reader: String!): DatasetSyncInfo!
   viewToggleAllSync(viewport: Int!, reader: String!, aspect: String!): DatasetSyncInfos!
   # measure layer
-  viewMeasureAnchorPlace(viewport: Int!, handle: Int!, x: Int!, y: Int!): DatasetMeasureInfo!
+  viewMeasureAnchorAdd(viewport: Int!, x: Int!, y: Int!, index: Int): DatasetMeasureInfo!
+  viewMeasureAnchorExtendSelection(viewport: Int!, index: Int!): DatasetMeasureInfo!
   viewMeasureAnchorMove(viewport: Int!, handle: Int!, dx: Int!, dy: Int!): DatasetMeasureInfo!
+  viewMeasureAnchorPlace(viewport: Int!, handle: Int!, x: Int!, y: Int!): DatasetMeasureInfo!
   viewMeasureAnchorRemove(viewport: Int!, anchor: Int!): DatasetMeasureInfo!
   viewMeasureAnchorSplit(viewport: Int!, anchor: Int!): DatasetMeasureInfo!
-  viewMeasureAnchorExtendSelection(viewport: Int!, index: Int!): DatasetMeasureInfo!
   viewMeasureAnchorToggleSelection(viewport: Int!, index: Int!): DatasetMeasureInfo!
   viewMeasureAnchorToggleSelectionMulti(viewport: Int!, index: Int!): DatasetMeasureInfo!
   viewMeasureToggleLayer(viewport: Int!, reader: String!): DatasetMeasureInfo!
