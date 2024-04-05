@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay'
 import styled from 'styled-components'
 
 // project
@@ -14,9 +15,8 @@ import { SVG, Slider, Spacer, Tray } from '~/widgets'
 
 // locals
 // hooks
-import { useGetView } from '../../../main/useGetView'
-import { useGetZoomLevel } from '../../../main/useGetZoomLevel'
-import { useSetZoomLevel } from '../../../main/useSetZoomLevel'
+import { useSetLevel } from './useSetLevel'
+import { useToggleCoupled } from './useToggleCoupled'
 // components
 import { Lock } from './lock'
 import { Minimap } from './minimap'
@@ -25,36 +25,33 @@ import { Save } from './save'
 
 
 //  display the zoom control
-export const Zoom = ({ min = -4, max = 4 }) => {
-    // set the scale
-    const ils = 200
+export const Zoom = ({ viewport, view, min = -4, max = 4, ils = 200 }) => {
+    // unpack the view
+    const { reader, dataset, channel, zoom } = useFragment(zoomControlsGetZoomStateFragment, view)
     // my state
     const [modified, setModified] = React.useState(false)
-    // the lock button state
-    const [lock, setLock] = React.useState(true)
-    // look up the zoom level of the active viewport
-    const zoom = useGetZoomLevel()
+
+    // inspect the view components to initialize my state
+    const enabled = (reader && dataset && channel) ? true : false
     // make a handler that sets the zoom level
-    const setZoom = useSetZoomLevel()
-    // get the active view and unpack it
-    const { reader, dataset, channel } = useGetView()
+    const { set: setLevel } = useSetLevel(viewport)
+    // and another one that toggle the coupled flag
+    const { toggle } = useToggleCoupled(viewport)
 
     // make the zoom lock toggle
-    const toggle = () => {
-        // toggle the state
-        setLock(old => !old)
+    const toggleLock = () => {
+        // toggle the flag
+        toggle()
         // all done
         return
     }
-    // inspect the view components to initialize my state
-    const enabled = (reader && dataset && channel) ? true : false
 
     // adjust the horizontal zoom
     const setHorizontalZoom = value => {
         // build the new value
-        const level = { horizontal: value, vertical: lock ? value : zoom.vertical }
+        const level = { horizontal: value, vertical: zoom.coupled ? value : zoom.vertical }
         // and set it
-        setZoom(level)
+        setLevel(level)
         // mark me as modified
         setModified(true)
         // all done
@@ -63,9 +60,9 @@ export const Zoom = ({ min = -4, max = 4 }) => {
     // adjust the vertical zoom
     const setVerticalZoom = value => {
         // build the new value
-        const level = { vertical: value, horizontal: lock ? value : zoom.horizontal }
+        const level = { vertical: value, horizontal: zoom.coupled ? value : zoom.horizontal }
         // and set it
-        setZoom(level)
+        setLevel(level)
         // mark me as modified
         setModified(true)
         // all done
@@ -126,7 +123,7 @@ export const Zoom = ({ min = -4, max = 4 }) => {
                 </g>
                 {/* the lock */}
                 <g transform="translate(60 240)">
-                    <Lock lock={lock} toggle={toggle} />
+                    <Lock lock={zoom.coupled} toggle={toggleLock} />
                 </g>
             </Housing>
         </Tray>
@@ -152,5 +149,27 @@ const Housing = styled(SVG)`
 // the controllers
 const Controller = styled(Slider)`
 `
+
+// the fragment
+const zoomControlsGetZoomStateFragment = graphql`
+    fragment zoomControlsGetZoomStateFragment on View {
+        reader {
+            id
+        }
+        dataset {
+            id
+            shape
+        }
+        channel {
+            id
+        }
+        zoom {
+            coupled
+            horizontal
+            vertical
+        }
+    }
+`
+
 
 // end of file
