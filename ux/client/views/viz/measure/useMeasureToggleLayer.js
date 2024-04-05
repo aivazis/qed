@@ -9,9 +9,9 @@ import { graphql, useMutation } from 'react-relay/hooks'
 
 
 // toggle the state of the measure layer for a viewport
-export const useToggleMeasureLayer = () => {
+export const useMeasureToggleLayer = () => {
     // toggling the measure layer state mutates the server side store
-    const [request, pending] = useMutation(toggleMeasureLayerMutation)
+    const [request, pending] = useMutation(measureToggleLayerMutation)
 
     // make a handler that toggles the layer state
     const toggle = (viewport, reader) => {
@@ -30,7 +30,7 @@ export const useToggleMeasureLayer = () => {
             },
             onError: errors => {
                 // send the error to the console
-                console.error(`viz.measure.useToggleMeasureLayer:`)
+                console.error(`viz.measure.useMeasureToggleLayer:`)
                 console.group()
                 console.log(`ERROR while toggling the measure layer in viewport ${viewport}`)
                 console.log(errors)
@@ -47,9 +47,9 @@ export const useToggleMeasureLayer = () => {
 }
 
 // the mutation that toggles the measure layer state
-const toggleMeasureLayerMutation = graphql`
-    mutation useToggleMeasureLayerMutation($viewport: Int!, $reader: String!) {
-        viewToggleMeasureLayer(viewport: $viewport, reader: $reader) {
+const measureToggleLayerMutation = graphql`
+    mutation useMeasureToggleLayerMutation($viewport: Int!, $reader: String!) {
+        viewMeasureToggleLayer(viewport: $viewport, reader: $reader) {
             measure{
                 active
             }

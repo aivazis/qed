@@ -279,7 +279,6 @@ type Mutation {
   viewToggleScrollSync(viewport: Int!, reader: String!): DatasetSyncInfo!
   viewToggleAllSync(viewport: Int!, reader: String!, aspect: String!): DatasetSyncInfos!
   # measure layer
-  viewToggleMeasureLayer(viewport: Int!, reader: String!): DatasetMeasureInfo!
   viewMeasureAnchorPlace(viewport: Int!, handle: Int!, x: Int!, y: Int!): DatasetMeasureInfo!
   viewMeasureAnchorMove(viewport: Int!, handle: Int!, dx: Int!, dy: Int!): DatasetMeasureInfo!
   viewMeasureAnchorRemove(viewport: Int!, anchor: Int!): DatasetMeasureInfo!
@@ -287,6 +286,7 @@ type Mutation {
   viewMeasureAnchorExtendSelection(viewport: Int!, index: Int!): DatasetMeasureInfo!
   viewMeasureAnchorToggleSelection(viewport: Int!, index: Int!): DatasetMeasureInfo!
   viewMeasureAnchorToggleSelectionMulti(viewport: Int!, index: Int!): DatasetMeasureInfo!
+  viewMeasureToggleLayer(viewport: Int!, reader: String!): DatasetMeasureInfo!
   viewMeasureToggleClosedPath(viewport: Int!): DatasetMeasureInfo!
   viewZoomSetLevel(viewport: Int!, horizontal: Float!, vertical: Float!): DatasetZoomInfo!
   viewZoomToggleCoupled(viewport: Int!): DatasetZoomInfo!

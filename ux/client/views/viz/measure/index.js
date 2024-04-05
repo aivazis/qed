@@ -15,7 +15,7 @@ export { useAnchorSplit } from './useAnchorSplit'
 export { useAnchorExtendSelection } from './useAnchorExtendSelection'
 export { useAnchorToggleSelection } from './useAnchorToggleSelection'
 export { useAnchorToggleSelectionMulti } from './useAnchorToggleSelectionMulti'
-export { useToggleMeasureLayer } from './useToggleMeasureLayer'
+export { useMeasureToggleLayer } from './useMeasureToggleLayer'
 export { useToggleClosedPath } from './useToggleClosedPath'
 
 
