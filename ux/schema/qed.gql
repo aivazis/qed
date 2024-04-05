@@ -247,8 +247,8 @@ type DatasetSync implements Node {
 type DatasetZoom implements Node {
   id: ID!
   name: ID!
-  horizontal: Int
-  vertical: Int
+  horizontal: Float
+  vertical: Float
   coupled: Boolean
 }
 
@@ -288,6 +288,8 @@ type Mutation {
   viewMeasureAnchorToggleSelection(viewport: Int!, index: Int!): DatasetMeasureInfo!
   viewMeasureAnchorToggleSelectionMulti(viewport: Int!, index: Int!): DatasetMeasureInfo!
   viewMeasureToggleClosedPath(viewport: Int!): DatasetMeasureInfo!
+  viewZoomSetLevel(viewport: Int!, horizontal: Float!, vertical: Float!): DatasetZoomInfo!
+  viewZoomToggleCoupled(viewport: Int!): DatasetZoomInfo!
 
   # data archive connections
   connectArchive(name: String!, uri: String!): ArchiveInfo!
@@ -323,26 +325,32 @@ input ViewSelectorInput {
 
 # the response payload
 type ViewInfo {
-  # the id of the view
+  # the view settings
   view: View
 }
 
 # the measure layer state response payload
 type DatasetMeasureInfo {
-  # the id of the view
+  # the measure layer settings
   measure: DatasetMeasure
 }
 
 # the sync state response payload
 type DatasetSyncInfo {
-  # the id of the view
+  # the sync table
   sync: DatasetSync
 }
 
 # the sync state response payload
 type DatasetSyncInfos {
-  # the id of the view
+  # the sync tables
   sync: [DatasetSync]
+}
+
+# the measure layer state response payload
+type DatasetZoomInfo {
+  # the zoom settings
+  zoom: DatasetZoom
 }
 
 # support for connecting and disconnecting data archives
