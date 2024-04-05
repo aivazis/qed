@@ -14,7 +14,7 @@ from .Sync import Sync
 
 
 # remove a view from the pile
-class ToggleScrollSync(graphene.Mutation):
+class SyncToggleScroll(graphene.Mutation):
     """
     Toggle the state of the measure layer of a dataset
     """
@@ -37,7 +37,7 @@ class ToggleScrollSync(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it for the measure layer of the dataset view
-        sync = store.toggleScrollSync(viewport=viewport, source=reader)
+        sync = store.syncToggleScroll(viewport=viewport, source=reader)
         # form the mutation resolution context
         context = {"sync": sync}
         # and resolve the mutation

@@ -14,7 +14,7 @@ from .SelectReader import SelectReader as selectReader
 from .Split import Split as split
 from .ToggleChannel import ToggleChannel as toggleChannel
 from .ToggleCoordinate import ToggleCoordinate as toggleCoordinate
-from .ToggleScrollSync import ToggleScrollSync as toggleScrollSync
+from .SyncToggleScroll import SyncToggleScroll as syncToggleScroll
 from .ToggleAllSync import ToggleAllSync as toggleAllSync
 
 from .MeasureAnchorPlace import MeasureAnchorPlace as measureAnchorPlace

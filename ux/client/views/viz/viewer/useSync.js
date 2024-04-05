@@ -11,7 +11,7 @@ import { graphql, useMutation } from 'react-relay/hooks'
 // toggle the state of the measure layer for a viewport
 export const useToggleScroll = () => {
     // toggling the measure layer state mutates the server side store
-    const [request, pending] = useMutation(toggleScrollSyncMutation)
+    const [request, pending] = useMutation(syncToggleScrollMutation)
     // make a handler that toggles the layer state
     const toggle = (viewport, reader) => {
         // if there is already a pending operation
@@ -29,7 +29,7 @@ export const useToggleScroll = () => {
             },
             onError: errors => {
                 // send the error to the console
-                console.error(`viz.measure.useToggleScrollSync:`)
+                console.error(`viz.measure.useSyncToggleScroll:`)
                 console.group()
                 console.log(`ERROR while toggling the scroll sync status in viewport ${viewport}`)
                 console.log(errors)
@@ -86,9 +86,9 @@ export const useToggleAll = () => {
 }
 
 // the mutation that toggles the scroll sync state
-const toggleScrollSyncMutation = graphql`
-    mutation useSyncToggleScrollSyncMutation($viewport: Int!, $reader: String!) {
-        viewToggleScrollSync(viewport: $viewport, reader: $reader) {
+const syncToggleScrollMutation = graphql`
+    mutation useSyncSyncToggleScrollMutation($viewport: Int!, $reader: String!) {
+        viewSyncToggleScroll(viewport: $viewport, reader: $reader) {
             sync {
                 scroll
             }
