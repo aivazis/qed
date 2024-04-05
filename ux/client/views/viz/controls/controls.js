@@ -45,18 +45,14 @@ export const Controls = ({ qed }) => {
             <Header title="controls" style={styles.header} />
             {/* controls for the measuring layer */}
             {enabled && <Measure view={view} />}
+            {/* the controls common to all datasets */}
+            {enabled && <Zoom viewport={activeViewport} view={view} />}
         </React.Suspense>
     )
 
     // render
     return (
         <React.Suspense fallback={<Loading />}>
-            {/* the title of the panel */}
-            <Header title="controls" style={styles.header} />
-            {/* controls for the measuring layer */}
-            {enabled && <Measure />}
-            {/* the controls common to all datasets */}
-            {enabled && <Zoom />}
             {/* visualization pipeline controls */}
             {enabled && <Viz />}
             {/* viewport synchronization controls */}
@@ -102,6 +98,8 @@ const controlsGetDatasetAndChannelInViewFragment = graphql`
             ...closeMeasureGetMeasureLayerFragment
             # for downloading the signal along the measure path
             ...profileMeasureGetMeasureLayerFragment
+            # for the zoom control
+            ...zoomControlsGetZoomStateFragment
         }
     }
 `

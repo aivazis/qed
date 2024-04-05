@@ -14,7 +14,7 @@ from .Measure import Measure
 
 
 # remove a view from the pile
-class ToggleMeasureLayer(graphene.Mutation):
+class MeasureToggleLayer(graphene.Mutation):
     """
     Toggle the state of the measure layer of a dataset
     """

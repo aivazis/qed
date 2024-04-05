@@ -14,7 +14,6 @@ from .SelectReader import SelectReader as selectReader
 from .Split import Split as split
 from .ToggleChannel import ToggleChannel as toggleChannel
 from .ToggleCoordinate import ToggleCoordinate as toggleCoordinate
-from .ToggleMeasureLayer import ToggleMeasureLayer as toggleMeasureLayer
 from .ToggleScrollSync import ToggleScrollSync as toggleScrollSync
 from .ToggleAllSync import ToggleAllSync as toggleAllSync
 
@@ -25,6 +24,7 @@ from .MeasureAnchorSplit import MeasureAnchorSplit as measureAnchorSplit
 from .MeasureAnchorExtendSelection import (
     MeasureAnchorExtendSelection as measureAnchorExtendSelection,
 )
+from .MeasureToggleLayer import MeasureToggleLayer as measureToggleLayer
 from .MeasureAnchorToggleSelection import (
     MeasureAnchorToggleSelection as measureAnchorToggleSelection,
 )

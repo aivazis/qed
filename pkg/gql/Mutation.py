@@ -38,7 +38,7 @@ class Mutation(graphene.ObjectType):
     viewToggleCoordinate = views.toggleCoordinate.Field()
     viewPersist = views.persist.Field()
     # dataset view state
-    viewToggleMeasureLayer = views.toggleMeasureLayer.Field()
+    viewMeasureToggleLayer = views.measureToggleLayer.Field()
     viewToggleScrollSync = views.toggleScrollSync.Field()
     viewToggleAllSync = views.toggleAllSync.Field()
     # anchor management

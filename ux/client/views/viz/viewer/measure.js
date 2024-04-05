@@ -16,7 +16,7 @@ import { Badge } from '~/widgets'
 
 // locals
 // hooks
-import { useToggleMeasureLayer } from '../measure'
+import { useMeasureToggleLayer } from '../measure'
 // styles
 import styles from './styles'
 
@@ -29,7 +29,7 @@ export const Measure = ({ viewport, view }) => {
     const selected = measure.active
 
     // grab the measure layer toggle from context
-    const { toggle } = useToggleMeasureLayer()
+    const { toggle } = useMeasureToggleLayer()
     // turn it into a handler
     const toggleMeasure = evt => {
         // stop this event from bubbling up
