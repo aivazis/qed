@@ -306,6 +306,27 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
+    def zoomSetLevel(self, horizontal, vertical):
+        """
+        Set the zoom levels
+        """
+        # get the zoom
+        zoom = self.zoom
+        # set
+        zoom.horizontal = horizontal
+        zoom.vertical = vertical
+        # all done
+        return self
+
+    def zoomToggleCoupled(self):
+        """
+        Toggle the lock flag
+        """
+        # set
+        self.zoom.coupled ^= True
+        # all done
+        return self
+
     # state resolution
     def resolve(self):
         """

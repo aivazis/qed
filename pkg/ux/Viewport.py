@@ -190,6 +190,24 @@ class Viewport(
         # all done
         return view
 
+    def zoomSetLevel(self, horizontal, vertical):
+        """
+        Set the zoom levels
+        """
+        # get the view
+        view = self._view
+        # and delegate
+        return view.zoomSetLevel(horizontal=horizontal, vertical=vertical)
+
+    def zoomToggleCoupled(self):
+        """
+        Toggle the lock flag
+        """
+        # get the view
+        view = self._view
+        # and delegate
+        return view.zoomToggleCoupled()
+
     def clone(self):
         """
         Make a copy of me
