@@ -49,7 +49,7 @@ export const useAnchorToggleSelectionMulti = viewport => {
 }
 
 
-// the mutation that adds an anchor to the path
+// toggle the selection in multinode mode
 const useAnchorToggleSelectionMultiMutation = graphql`
     mutation useAnchorToggleSelectionMultiMutation($viewport: Int!, $index: Int!) {
         viewMeasureAnchorToggleSelectionMulti(viewport: $viewport, index: $index) {

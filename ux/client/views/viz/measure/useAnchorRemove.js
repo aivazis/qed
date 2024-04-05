@@ -49,7 +49,7 @@ export const useAnchorRemove = viewport => {
 }
 
 
-// the mutation that adds an anchor to the path
+// the mutation that deletes an anchor
 const useAnchorRemoveMutation = graphql`
     mutation useAnchorRemoveMutation($viewport: Int!, $anchor:  Int!) {
         viewMeasureAnchorRemove(viewport: $viewport, anchor: $anchor) {

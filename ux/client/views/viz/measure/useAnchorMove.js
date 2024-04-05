@@ -7,9 +7,9 @@
 // externals
 import { graphql, useMutation } from 'react-relay/hooks'
 
-// toggle the anchor selection in single node mode
+// displace an anchor by a delta
 export const useAnchorMove = viewport => {
-    // toggling the anchor selection mutates the server side store
+    // moving an anchor mutates the server side store
     const [commit, pending] = useMutation(useAnchorMoveMutation)
 
     // make the handler
@@ -52,7 +52,7 @@ export const useAnchorMove = viewport => {
 }
 
 
-// the mutation that adds an anchor to the path
+// the mutation that displaces an anchor
 const useAnchorMoveMutation = graphql`
     mutation useAnchorMoveMutation($viewport: Int!, $handle:  Int!, $dx: Int!, $dy: Int!) {
         viewMeasureAnchorMove(viewport: $viewport, handle: $handle, dx: $dx, dy: $dy) {

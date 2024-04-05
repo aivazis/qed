@@ -7,9 +7,9 @@
 // externals
 import { graphql, useMutation } from 'react-relay/hooks'
 
-// delete an existing anchor
+// add a new anchor halfway between two existing ones
 export const useAnchorSplit = viewport => {
-    // removing an anchor mutates the server side store
+    // adding an anchor mutates the server side store
     const [commit, pending] = useMutation(useAnchorSplitMutation)
 
     // make the handler
