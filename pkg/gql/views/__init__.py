@@ -14,9 +14,8 @@ from .SelectReader import SelectReader as selectReader
 from .Split import Split as split
 from .ToggleChannel import ToggleChannel as toggleChannel
 from .ToggleCoordinate import ToggleCoordinate as toggleCoordinate
-from .SyncToggleScroll import SyncToggleScroll as syncToggleScroll
-from .ToggleAllSync import ToggleAllSync as toggleAllSync
 
+# measure
 from .MeasureAnchorPlace import MeasureAnchorPlace as measureAnchorPlace
 from .MeasureAnchorMove import MeasureAnchorMove as measureAnchorMove
 from .MeasureAnchorRemove import MeasureAnchorRemove as measureAnchorRemove
@@ -33,6 +32,11 @@ from .MeasureAnchorToggleSelectionMulti import (
 )
 from .MeasureToggleClosedPath import MeasureToggleClosedPath as measureToggleClosedPath
 
+# sync
+from .SyncToggleViewport import SyncToggleViewport as syncToggleViewport
+from .SyncToggleAll import SyncToggleAll as syncToggleAll
+
+# zoom
 from .ZoomSetLevel import ZoomSetLevel as zoomSetLevel
 from .ZoomToggleCoupled import ZoomToggleCoupled as zoomToggleCoupled
 
