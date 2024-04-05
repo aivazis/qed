@@ -52,7 +52,9 @@ class Mutation(graphene.ObjectType):
     viewMeasureAnchorToggleSelectionMulti = (
         views.measureAnchorToggleSelectionMulti.Field()
     )
-    viewMeasureToggleClosedPath = views.MeasureToggleClosedPath.Field()
+    viewMeasureToggleClosedPath = views.measureToggleClosedPath.Field()
+    viewZoomSetLevel = views.zoomSetLevel.Field()
+    viewZoomToggleCoupled = views.zoomToggleCoupled.Field()
 
     # data archive connection management
     connectArchive = ConnectArchive.Field()
