@@ -31,6 +31,9 @@ from .MeasureAnchorToggleSelection import (
 from .MeasureAnchorToggleSelectionMulti import (
     MeasureAnchorToggleSelectionMulti as measureAnchorToggleSelectionMulti,
 )
-from .MeasureToggleClosedPath import MeasureToggleClosedPath as MeasureToggleClosedPath
+from .MeasureToggleClosedPath import MeasureToggleClosedPath as measureToggleClosedPath
+
+from .ZoomSetLevel import ZoomSetLevel as zoomSetLevel
+from .ZoomToggleCoupled import ZoomToggleCoupled as zoomToggleCoupled
 
 # end of file
