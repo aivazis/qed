@@ -6,18 +6,12 @@
 
 // externals
 import React from 'react'
-import styled from 'styled-components'
-
-// project
-// colors
-import { theme } from "~/palette"
-
 
 // local
 // components
 import { Label } from './label'
 
-// mark a point
+// the set of anchor labels
 export const Labels = ({ positions, values }) => {
     // check whether there are any labels to render
     if (positions.length === 0) {

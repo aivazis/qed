@@ -12,7 +12,7 @@ import styled from 'styled-components'
 // colors
 import { theme } from "~/palette"
 
-// mark a point
+// join to anchors with a line
 export const Path = ({ points, closed }) => {
     // check whether we have any points yet
     if (points.length === 0) {

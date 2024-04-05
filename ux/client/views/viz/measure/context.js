@@ -12,13 +12,11 @@ import React from 'react'
 export const Provider = ({ children }) => {
     // a flag that indicates that the user has started dragging a {mark}
     const [dragging, setDragging] = React.useState(null)
-
     // build the initial context value
     const context = {
         // movement indicator
         dragging, setDragging,
     }
-
     // provide from my children
     return (
         <Context.Provider value={context} >

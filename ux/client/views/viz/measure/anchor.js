@@ -60,8 +60,8 @@ export const Anchor = ({ viewport, selection, idx, at }) => {
     // mark selection
     const pick = evt => {
         // N.B.:
-        //     don't prevent this event from bubbling up when this handler is tied to {moveup}
-        //     the parent watches for for it to terminate anchor dragging
+        //     don't prevent this event from bubbling up when this handler is tied to {moveup};
+        //     the parent depends on the event reaching it to terminate anchor dragging
         // if i've moved since clicked
         if (position[0] !== evt.clientX || position[1] != evt.clientY) {
             // do nothing

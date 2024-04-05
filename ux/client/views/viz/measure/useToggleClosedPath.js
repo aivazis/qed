@@ -7,9 +7,9 @@
 // externals
 import { graphql, useMutation } from 'react-relay/hooks'
 
-// delete an existing anchor
+// toggle the closed path flag
 export const useToggleClosedPath = viewport => {
-    // removing an anchor mutates the server side store
+    // toggling the flag mutates the server side store
     const [commit, pending] = useMutation(useToggleClosedPathMutation)
 
     // make the handler
@@ -47,7 +47,7 @@ export const useToggleClosedPath = viewport => {
 }
 
 
-// the mutation that adds an anchor to the path
+// the mutation that toggles the closed path flag
 const useToggleClosedPathMutation = graphql`
     mutation useToggleClosedPathMutation($viewport: Int!) {
         viewMeasureToggleClosedPath(viewport: $viewport) {
