@@ -322,6 +322,28 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # return the measure configuration
         return view.sync
 
+    def zoomSetLevel(self, viewport, horizontal, vertical):
+        """
+        Set the zoom levels
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # and delegate
+        view = port.zoomSetLevel(horizontal=horizontal, vertical=vertical)
+        # return the measure configuration
+        return view.zoom
+
+    def zoomToggleCoupled(self, viewport):
+        """
+        Toggle the lock flag
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # and delegate
+        view = port.zoomToggleCoupled()
+        # return the measure configuration
+        return view.zoom
+
     # metamethods
     def __init__(self, plexus, docroot, **kwds):
         # chain up
