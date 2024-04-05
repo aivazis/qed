@@ -179,14 +179,14 @@ class Viewport(
         # all done
         return self.view()
 
-    def toggleScrollSync(self, source):
+    def syncToggleScroll(self, source):
         """
         Toggle the scroll flag of my sync table
         """
         # activate the {source}
         view = self._selectSource(source=source)
         # and delegate
-        view.toggleScrollSync()
+        view.syncToggleScroll()
         # all done
         return view
 

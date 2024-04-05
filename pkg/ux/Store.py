@@ -309,7 +309,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return
 
-    def toggleScrollSync(self, viewport, source):
+    def syncToggleScroll(self, viewport, source):
         """
         Toggle the scroll flag of the sync table
         """
@@ -318,7 +318,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # get the viewport configuration
         port = self._viewports[viewport]
         # and delegate
-        view = port.toggleScrollSync(source=source)
+        view = port.syncToggleScroll(source=source)
         # return the measure configuration
         return view.sync
 

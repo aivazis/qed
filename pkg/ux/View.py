@@ -297,7 +297,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
-    def toggleScrollSync(self):
+    def syncToggleScroll(self):
         """
         Toggle the scroll flag of my sync table
         """
