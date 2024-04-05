@@ -16,11 +16,11 @@ class Zoom(qed.component, family="qed.ux.zoom.zoom", implements=qed.protocols.ux
     """
 
     # user configurable state
-    horizontal = qed.properties.int()
+    horizontal = qed.properties.float()
     horizontal.default = 0
     horizontal.doc = "the horizontal zoom level"
 
-    vertical = qed.properties.int()
+    vertical = qed.properties.float()
     vertical.default = 0
     vertical.doc = "the vertical zoom level"
 
