@@ -15,10 +15,10 @@ class Zoom(qed.protocol, family="qed.ux.zoom"):
     """
 
     # user configurable state
-    horizontal = qed.properties.int()
+    horizontal = qed.properties.float()
     horizontal.doc = "the horizontal zoom level"
 
-    vertical = qed.properties.int()
+    vertical = qed.properties.float()
     vertical.doc = "the vertical zoom level"
 
     coupled = qed.properties.bool()
