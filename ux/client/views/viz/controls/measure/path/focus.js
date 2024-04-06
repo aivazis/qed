@@ -61,7 +61,7 @@ export const Focus = ({ viewport, view, idx, point }) => {
             // select me in single node mode
             toggle(idx)
             // and center the viewport on my point
-            center({ x: point[1] / scale[1], y: point[0] / scale[0] })
+            center({ x: point.x / scale[1], y: point.y / scale[0] })
             // done
             return
         }
