@@ -20,8 +20,6 @@ import { theme } from '~/palette'
 import { useCenterViewport } from '~/views/viz'
 
 // local
-// hooks
-import { useSetPixelPathSelection } from '../../../../main/useSetPixelPathSelection'
 // components
 import { Button } from './button'
 import { useAnchorExtendSelection } from '~/views/viz/measure'
