@@ -5,7 +5,7 @@
 
 
 # catalog of known data archives
-class DataArchives:
+class Archives:
     """
     A catalog of known data archives and their datasets
     """
