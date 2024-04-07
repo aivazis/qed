@@ -6,6 +6,7 @@
 
 # support
 import qed
+import journal
 import uuid
 
 
@@ -54,6 +55,27 @@ class Sync(qed.component, family="qed.ux.sync.sync", implements=qed.protocols.ux
             path=self.path,
             offsets=tuple(self.offsets),
         )
+
+    # debugging support
+    def pyre_dump(self):
+        """
+        Render my state
+        """
+        # make a channel
+        channel = journal.info("qed.ux.measure")
+        # sign in
+        channel.line(f"sync: {self}")
+        # my contents
+        channel.indent()
+        channel.line(f"channel: {self.channel}")
+        channel.line(f"path: {self.path}")
+        channel.line(f"scroll: {self.scroll}")
+        channel.line(f"zoom: {self.zoom}")
+        channel.outdent()
+        # flush
+        channel.log()
+        # all done
+        return
 
 
 # end of file
