@@ -29,12 +29,12 @@ class Zoom(qed.component, family="qed.ux.zoom.zoom", implements=qed.protocols.ux
     coupled.doc = "when activated, the two levels change together"
 
     # support
-    def clone(self):
+    def clone(self, name=None):
         """
         Make a copy
         """
-        # make a nae
-        name = str(uuid.uuid1())
+        # make a name, if necessary
+        name = str(uuid.uuid1()) if name is None else name
         # build a new instance and return it
         return type(self)(
             name=name,

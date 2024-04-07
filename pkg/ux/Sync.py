@@ -39,12 +39,12 @@ class Sync(qed.component, family="qed.ux.sync.sync", implements=qed.protocols.ux
     )
 
     # support
-    def clone(self):
+    def clone(self, name=None):
         """
         Make a copy
         """
-        # make a nae
-        name = str(uuid.uuid1())
+        # make a name, if necessary
+        name = str(uuid.uuid1()) if name is None else name
         # build a new instance and return it
         return type(self)(
             name=name,
