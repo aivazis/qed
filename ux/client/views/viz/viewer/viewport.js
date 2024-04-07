@@ -115,7 +115,7 @@ const DataTiles = styled(Mosaic)`
 
 // memoize it
 // we need a function that looks at {props} and decides whether the mosaic should render
-const shouldRender = (prev, next) => {
+const canSkipRender = (prev, next) => {
     // if the {session} has changed
     if (prev.session != next.session) {
         // render
@@ -141,7 +141,7 @@ const shouldRender = (prev, next) => {
 }
 
 // and a wrapper over the styled {Mosaic}
-const View = React.memo(DataTiles, shouldRender)
+const View = React.memo(DataTiles, canSkipRender)
 
 
 // my fragment
