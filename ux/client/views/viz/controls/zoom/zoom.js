@@ -15,6 +15,7 @@ import { SVG, Slider, Spacer, Tray } from '~/widgets'
 
 // locals
 // hooks
+import { useReset } from './useReset'
 import { useSetLevel } from './useSetLevel'
 import { useToggleCoupled } from './useToggleCoupled'
 // components
@@ -33,15 +34,29 @@ export const Zoom = ({ viewport, view, min = -4, max = 4, ils = 200 }) => {
 
     // inspect the view components to initialize my state
     const enabled = (reader && dataset && channel) ? true : false
-    // make a handler that sets the zoom level
+    // make a handler that resets the state to the persisted defaults
+    const { reset: restoreDefaults } = useReset(viewport)
+    // a handler that sets the zoom level
     const { set: setLevel } = useSetLevel(viewport)
     // and another one that toggle the coupled flag
     const { toggle } = useToggleCoupled(viewport)
+
+    // setup the reset action
+    const reset = () => {
+        // restore the default
+        restoreDefaults()
+        // clear the flag
+        setModified(false)
+        // all done
+        return
+    }
 
     // make the zoom lock toggle
     const toggleLock = () => {
         // toggle the flag
         toggle()
+        // mark me as modified
+        setModified(true)
         // all done
         return
     }
@@ -88,14 +103,6 @@ export const Zoom = ({ viewport, view, min = -4, max = 4, ils = 200 }) => {
     // set up the overall dimensions of the control
     const width = 340
     const height = 290
-
-    // setup the reset action
-    const reset = () => {
-        // clear the flag
-        setModified(false)
-        // all done
-        return
-    }
 
     // mix my paint
     const state = enabled ? "enabled" : "disabled"
