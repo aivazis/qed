@@ -12,7 +12,9 @@ from .Harvester import Harvester
 
 
 # the channel ux state
-class Channel(qed.component, family="qed.ux.channels.channel"):
+class Channel(
+    qed.component, family="qed.ux.channels.channel", implements=qed.protocols.ux.channel
+):
     """
     The state of a channel view
     """
