@@ -161,6 +161,15 @@ class Viewport(
         # all done
         return view
 
+    def measureReset(self):
+        """
+        Reset the state of the {measure} layer
+        """
+        # get my active view
+        view = self._view
+        # and delegate
+        return view.measureReset()
+
     def syncSetAspect(self, aspect, value):
         """
         Set the {aspect} flag of my sync table to {value}
@@ -179,6 +188,15 @@ class Viewport(
         # and delegate
         return view.syncToggleAspect(aspect=aspect)
 
+    def syncReset(self):
+        """
+        Reset the state of the {sync} table
+        """
+        # get my active view
+        view = self._view
+        # and delegate
+        return view.syncReset()
+
     def zoomSetLevel(self, horizontal, vertical):
         """
         Set the zoom levels
@@ -196,6 +214,15 @@ class Viewport(
         view = self._view
         # and delegate
         return view.zoomToggleCoupled()
+
+    def zoomReset(self):
+        """
+        Reset the state of the {zoom} info
+        """
+        # get my active view
+        view = self._view
+        # and delegate
+        return view.zoomReset()
 
     def clone(self):
         """
