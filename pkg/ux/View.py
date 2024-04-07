@@ -299,6 +299,27 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
+    def measureReset(self):
+        """
+        Reset the state of the measure configuration
+        """
+        # get my reader
+        reader = self.reader
+        # if i don't have on
+        if not reader:
+            # nothing more to do
+            return
+        # get my name
+        name = self.pyre_name
+        # get the reader name
+        sourceName = reader.pyre_name
+        # pull its configuration
+        config = Source(name=f"{sourceName}.view")
+        # clone the persistent state
+        self.measure.reset(defaults=config.measure)
+        # all done
+        return self
+
     def syncSetAspect(self, aspect, value):
         """
         Toggle the {aspect} flag of my sync table
@@ -316,6 +337,27 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         flag = getattr(self.sync, aspect)
         # flip and set it back
         setattr(self.sync, aspect, not flag)
+        # all done
+        return self
+
+    def syncReset(self):
+        """
+        Reset the state of the sync configuration
+        """
+        # get my reader
+        reader = self.reader
+        # if i don't have on
+        if not reader:
+            # nothing more to do
+            return
+        # get my name
+        name = self.pyre_name
+        # get the reader name
+        sourceName = reader.pyre_name
+        # pull its configuration
+        config = Source(name=f"{sourceName}.view")
+        # use it to adjust mine
+        self.sync.reset(defaults=config.sync)
         # all done
         return self
 
@@ -337,6 +379,27 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         """
         # set
         self.zoom.coupled ^= True
+        # all done
+        return self
+
+    def zoomReset(self):
+        """
+        Reset the state of the zoom configuration
+        """
+        # get my reader
+        reader = self.reader
+        # if i don't have on
+        if not reader:
+            # nothing more to do
+            return
+        # get my name
+        name = self.pyre_name
+        # get the reader name
+        sourceName = reader.pyre_name
+        # pull its configuration
+        config = Source(name=f"{sourceName}.view")
+        # use it to adjust mine
+        self.zoom.reset(defaults=config.zoom)
         # all done
         return self
 

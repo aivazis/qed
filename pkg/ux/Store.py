@@ -294,6 +294,17 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return view.measure
 
+    def measureReset(self, viewport):
+        """
+        Reset the state of the {measure} layer
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # delegate
+        view = port.measureReset()
+        # all done
+        return view.measure
+
     def syncToggleAll(self, viewport, aspect):
         """
         Toggle the scroll flag of the sync table
@@ -320,6 +331,17 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # return the measure configuration
         return view.sync
 
+    def syncReset(self, viewport):
+        """
+        Reset the state of the {sync} table
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # delegate
+        view = port.syncReset()
+        # all done
+        return view.sync
+
     def zoomSetLevel(self, viewport, horizontal, vertical):
         """
         Set the zoom levels
@@ -340,6 +362,17 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # and delegate
         view = port.zoomToggleCoupled()
         # return the measure configuration
+        return view.zoom
+
+    def zoomReset(self, viewport):
+        """
+        Reset the state of the {zoom} info
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # delegate
+        view = port.zoomReset()
+        # all done
         return view.zoom
 
     # metamethods
