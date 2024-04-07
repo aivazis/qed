@@ -56,6 +56,19 @@ class Sync(qed.component, family="qed.ux.sync.sync", implements=qed.protocols.ux
             offsets=tuple(self.offsets),
         )
 
+    def reset(self, defaults):
+        """
+        Reset my state to its {defaults}
+        """
+        # reset
+        self.channel = defaults.channel
+        self.zoom = defaults.zoom
+        self.scroll = defaults.scroll
+        self.path = defaults.path
+        self.offsets = defaults.offsets
+        # all done
+        return self
+
     # debugging support
     def pyre_dump(self):
         """
