@@ -24,13 +24,35 @@ export const Mosaic = ({ uri, origin, shape, tile, zoom, session }) => {
 
     // compute the zoomed shape using only the magnification
     const magShape = shape.map((s, idx) => Math.trunc(s / magnification[idx]))
+    // build the tiles
+    const tiles = mosaic(magShape, origin, tile)
     // compute the zoomed shape taking into account the entire zoom level
-    const zoomedShape = shape.map((s, idx) => Math.trunc(s / (2 ** -zoom[idx])))
+    const zoomedShape = tiles.reduce(
+        // the reducer
+        (shape, tile) => {
+            // unpack
+            const [[y, x], [height, width]] = tile
+            // we only care about the first row
+            if (y == 0) {
+                // distort and accumulate
+                shape["width"] += Math.trunc(width / distortion[1])
+            }
+            // and the first column
+            if (x == 0) {
+                // distort and accumulate
+                shape.height += Math.trunc(height / distortion[0])
+            }
+            // all done
+            return shape
+        },
+        // initial value
+        { height: 0, width: 0 }
+    )
 
     // render
     return (
         <Box shape={zoomedShape}>
-            {mosaic(magShape, origin, tile).map(spec => {
+            {tiles.map(spec => {
                 // unpack
                 const [origin, shape] = spec
                 // distort the shape
@@ -110,8 +132,8 @@ const Box = styled.div`
     flex-wrap: wrap;
 
     /* extent */
-    width: ${props => props.shape[1]}px;
-    height: ${props => props.shape[0]}px;
+    width: ${props => props.shape.width}px;
+    height: ${props => props.shape.height}px;
 `
 
 
