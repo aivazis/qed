@@ -44,6 +44,17 @@ class Zoom(qed.component, family="qed.ux.zoom.zoom", implements=qed.protocols.ux
             coupled=self.coupled,
         )
 
+    def reset(self, defaults):
+        """
+        Reset my state
+        """
+        # reset my state
+        self.coupled = defaults.coupled
+        self.horizontal = defaults.horizontal
+        self.vertical = defaults.vertical
+        # all done
+        return
+
     # debugging support
     def pyre_dump(self):
         """

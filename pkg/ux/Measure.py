@@ -51,6 +51,18 @@ class Measure(
             selection=list(self.selection),
         )
 
+    def reset(self, defaults):
+        """
+        Reset my state to its {defaults}
+        """
+        # reset
+        self.active = defaults.active
+        self.path = list(defaults.path)
+        self.closed = defaults.closed
+        self.selection = list(defaults.selection)
+        # all done
+        return self
+
     # debugging support
     def pyre_dump(self):
         """
