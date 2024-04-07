@@ -29,6 +29,7 @@ class Sync(graphene.ObjectType):
     id = graphene.ID()
     name = graphene.ID()
 
+    dirty = graphene.Boolean()
     channel = graphene.Boolean()
     zoom = graphene.Boolean()
     scroll = graphene.Boolean()

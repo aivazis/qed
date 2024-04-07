@@ -26,9 +26,10 @@ class Zoom(graphene.ObjectType):
     id = graphene.ID()
     name = graphene.ID()
 
+    dirty = graphene.Boolean()
+    coupled = graphene.Boolean()
     horizontal = graphene.Float()
     vertical = graphene.Float()
-    coupled = graphene.Boolean()
 
     # resolvers
     @staticmethod

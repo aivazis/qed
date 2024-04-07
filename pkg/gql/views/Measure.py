@@ -29,6 +29,7 @@ class Measure(graphene.ObjectType):
     id = graphene.ID()
     name = graphene.ID()
 
+    dirty = graphene.Boolean()
     active = graphene.Boolean()
     path = graphene.List(Pixel)
     closed = graphene.Boolean()
