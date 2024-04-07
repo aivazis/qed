@@ -53,6 +53,7 @@ const useResetZoomMutation = graphql`
     mutation useResetZoomMutation($viewport: Int!) {
         viewZoomReset(viewport: $viewport) {
             zoom {
+                dirty
                 coupled
                 horizontal
                 vertical

@@ -55,6 +55,7 @@ const useSetLevelZoomMutation = graphql`
     mutation useSetLevelZoomMutation($viewport: Int!, $horizontal: Float!, $vertical: Float!) {
         viewZoomSetLevel(viewport: $viewport, horizontal: $horizontal, vertical: $vertical) {
             zoom {
+                dirty
                 horizontal
                 vertical
             }
