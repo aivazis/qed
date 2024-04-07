@@ -31,13 +31,16 @@ from .MeasureAnchorToggleSelectionMulti import (
     MeasureAnchorToggleSelectionMulti as measureAnchorToggleSelectionMulti,
 )
 from .MeasureToggleClosedPath import MeasureToggleClosedPath as measureToggleClosedPath
+from .MeasureReset import MeasureReset as measureReset
 
 # sync
 from .SyncToggleViewport import SyncToggleViewport as syncToggleViewport
 from .SyncToggleAll import SyncToggleAll as syncToggleAll
+from .SyncReset import SyncReset as syncReset
 
 # zoom
 from .ZoomSetLevel import ZoomSetLevel as zoomSetLevel
 from .ZoomToggleCoupled import ZoomToggleCoupled as zoomToggleCoupled
+from .ZoomReset import ZoomReset as zoomReset
 
 # end of file
