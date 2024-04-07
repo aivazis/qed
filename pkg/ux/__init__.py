@@ -10,8 +10,9 @@ from .Dispatcher import Dispatcher as dispatcher
 # the application store
 from .Store import Store as store
 
-# channel view state
+# configurable state
 from .Channel import Channel as channel
+from .Source import Source as source
 
 # controls
 from .Measure import Measure as measure
