@@ -29,8 +29,6 @@ import { Save } from './save'
 export const Zoom = ({ viewport, view, min = -4, max = 4, ils = 200 }) => {
     // unpack the view
     const { reader, dataset, channel, zoom } = useFragment(zoomControlsGetZoomStateFragment, view)
-    // my state
-    const [modified, setModified] = React.useState(zoom.dirty)
 
     // inspect the view components to initialize my state
     const enabled = (reader && dataset && channel) ? true : false
@@ -45,8 +43,6 @@ export const Zoom = ({ viewport, view, min = -4, max = 4, ils = 200 }) => {
     const reset = () => {
         // restore the default
         restoreDefaults()
-        // clear the flag
-        setModified(false)
         // all done
         return
     }
@@ -55,8 +51,6 @@ export const Zoom = ({ viewport, view, min = -4, max = 4, ils = 200 }) => {
     const toggleLock = () => {
         // toggle the flag
         toggle()
-        // mark me as modified
-        setModified(true)
         // all done
         return
     }
@@ -67,8 +61,6 @@ export const Zoom = ({ viewport, view, min = -4, max = 4, ils = 200 }) => {
         const level = { horizontal: value, vertical: zoom.coupled ? value : zoom.vertical }
         // and set it
         setLevel(level)
-        // mark me as modified
-        setModified(true)
         // all done
         return
     }
@@ -78,8 +70,6 @@ export const Zoom = ({ viewport, view, min = -4, max = 4, ils = 200 }) => {
         const level = { vertical: value, horizontal: zoom.coupled ? value : zoom.horizontal }
         // and set it
         setLevel(level)
-        // mark me as modified
-        setModified(true)
         // all done
         return
     }
@@ -111,8 +101,8 @@ export const Zoom = ({ viewport, view, min = -4, max = 4, ils = 200 }) => {
         <Tray title="zoom" initially={true} state={state} scale={0.5}>
             <Header>
                 <Spacer />
-                <Save save={reset} enabled={modified} />
-                <Reset reset={reset} enabled={modified} />
+                <Save save={reset} enabled={false} />
+                <Reset reset={reset} enabled={zoom.dirty} />
             </Header>
             {/* the control housing */}
             <Housing height={height} width={width}>

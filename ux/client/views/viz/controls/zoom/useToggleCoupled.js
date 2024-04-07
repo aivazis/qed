@@ -52,6 +52,7 @@ const useToggleCoupledZoomMutation = graphql`
     mutation useToggleCoupledZoomMutation($viewport: Int!) {
         viewZoomToggleCoupled(viewport: $viewport) {
             zoom {
+                dirty
                 coupled
             }
         }
