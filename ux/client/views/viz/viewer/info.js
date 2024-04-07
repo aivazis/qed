@@ -36,8 +36,15 @@ export const Info = ({ viewport, view }) => {
     const { name: datasetName, datatype, shape, origin, tile } = dataset
     // unpack the zoom level
     const level = [zoom.vertical, zoom.horizontal]
+    // convert it into a scale
+    const scale = level.map(value => 2 ** -value)
+    // project the location to image coordinates
+    const pixel = {
+        x: location.x * scale[1],
+        y: location.y * scale[0]
+    }
     // scale the shape to the current zoom level
-    const effectiveShape = shape.map((s, idx) => s / (2 ** -level[idx]))
+    const effectiveShape = shape.map((s, idx) => s / scale[idx])
     // build the handler of the mouse movement
     const track = evt => {
         // get the viewport, not whatever the mouse is over
@@ -88,8 +95,11 @@ export const Info = ({ viewport, view }) => {
     // and render
     return (
         < Meta.Table min={0} initial={1} max={5} style={paint} >
+            <Meta.Entry threshold={1} attribute="pixel" style={paint}>
+                {`(${pixel.y}, ${pixel.x})`}
+            </Meta.Entry>
             <Meta.Entry threshold={1} attribute="cursor" style={paint}>
-                {location && `(${location.y}, ${location.x})`}
+                {`(${location.y}, ${location.x})`}
             </Meta.Entry>
             <Meta.Entry threshold={2} attribute="uri" style={paint}>
                 {uri}
