@@ -12,6 +12,11 @@ import uuid
 import qed
 import journal
 
+import qed.protocols
+
+# source configuration
+from .Source import Source
+
 
 # the record of user choices that lead to a channel selection for a viewport
 class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.ux.view):
@@ -20,6 +25,18 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
     """
 
     # configurable state
+    reader = qed.protocols.reader()
+    reader.doc = "my data source"
+
+    dataset = qed.protocols.dataset()
+    dataset.doc = "my dataset"
+
+    channel = qed.protocols.channel()
+    channel.doc = "my channel"
+
+    selections = qed.properties.kv()
+    selections.doc = "a key/value store of the user choices towards a dataset selection"
+
     measure = qed.protocols.ux.measure()
     measure.doc = "the measure layer indicator"
 
@@ -426,22 +443,43 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         )
 
     # metamethods
-    def __init__(
-        self, reader=None, dataset=None, channel=None, selections=None, **kwds
-    ):
+    def __init__(self, **kwds):
         # chain up
         super().__init__(**kwds)
-        # prime my selections
-        self.selections = selections or (reader and dict(reader.selections)) or {}
-        # build my state
-        self.reader = reader
-        self.dataset = dataset
-        self.channel = channel
-
         # resolve my state
         self.resolve()
         # all done
         return
+
+    # framework hooks
+    def pyre_configured(self, **kwds):
+        """
+        Adjust my configuration
+        """
+        # get my reader
+        reader = self.reader
+        # if i don't have on
+        if not reader:
+            # nothing more to do; report no errors
+            return []
+        # otherwise, get my selections
+        selections = self.selections
+        # if i don't have any
+        if len(selections) == 0:
+            # copy my reader's
+            selections.update(reader.selections)
+        # get my name
+        name = self.pyre_name
+        # get the reader name
+        sourceName = reader.pyre_name
+        # pull its configuration
+        config = Source(name=f"{sourceName}.view")
+        # clone the persistent state
+        self.measure = config.measure.clone(name=f"{name}.measure")
+        self.sync = config.sync.clone(name=f"{name}.sync")
+        self.zoom = config.zoom.clone(name=f"{name}.zoom")
+        # all done; report no errors
+        return []
 
     # debugging support
     def pyre_dump(self, channel=None):
