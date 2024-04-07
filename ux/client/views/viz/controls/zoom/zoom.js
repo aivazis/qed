@@ -30,7 +30,7 @@ export const Zoom = ({ viewport, view, min = -4, max = 4, ils = 200 }) => {
     // unpack the view
     const { reader, dataset, channel, zoom } = useFragment(zoomControlsGetZoomStateFragment, view)
     // my state
-    const [modified, setModified] = React.useState(false)
+    const [modified, setModified] = React.useState(zoom.dirty)
 
     // inspect the view components to initialize my state
     const enabled = (reader && dataset && channel) ? true : false
@@ -171,6 +171,7 @@ const zoomControlsGetZoomStateFragment = graphql`
             id
         }
         zoom {
+            dirty
             coupled
             horizontal
             vertical
