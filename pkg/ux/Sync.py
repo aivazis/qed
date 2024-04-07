@@ -66,6 +66,29 @@ class Sync(qed.component, family="qed.ux.sync.sync", implements=qed.protocols.ux
         self.scroll = defaults.scroll
         self.path = defaults.path
         self.offsets = defaults.offsets
+        # mark me as clean
+        self.dirty = False
+        # all done
+        return self
+
+    # metamethods
+    def __init__(self, **kwds):
+        # chain up
+        super().__init__(**kwds)
+        # initially, i'm clean
+        self.dirty = False
+        # all done
+        return
+
+    # framework hooks
+    def pyre_traitModified(self, **kwds):
+        """
+        Hook that gets invoked by the framework right after a trait value has been modified.
+        """
+        # chain up
+        super().pyre_traitModified(**kwds)
+        # mark me as dirty
+        self.dirty = True
         # all done
         return self
 
