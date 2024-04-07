@@ -285,12 +285,15 @@ type Mutation {
   viewMeasureAnchorToggleSelectionMulti(viewport: Int!, index: Int!): DatasetMeasureInfo!
   viewMeasureToggleLayer(viewport: Int!, reader: String!): DatasetMeasureInfo!
   viewMeasureToggleClosedPath(viewport: Int!): DatasetMeasureInfo!
+  viewMeasureReset(viewport: Int!): DatasetMeasureInfo!
   # sync
   viewSyncToggleAll(viewport: Int!, aspect: String!): DatasetSyncInfos!
   viewSyncToggleViewport(viewport: Int!, aspect: String!): DatasetSyncInfo!
+  viewSyncReset(viewport: Int!): DatasetSyncInfo!
   # zoom
   viewZoomSetLevel(viewport: Int!, horizontal: Float!, vertical: Float!): DatasetZoomInfo!
   viewZoomToggleCoupled(viewport: Int!): DatasetZoomInfo!
+  viewZoomReset(viewport: Int!): DatasetZoomInfo!
 
   # data archive connections
   connectArchive(name: String!, uri: String!): ArchiveInfo!
