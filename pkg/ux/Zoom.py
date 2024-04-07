@@ -6,6 +6,7 @@
 
 # support
 import qed
+import journal
 import uuid
 
 
@@ -42,6 +43,26 @@ class Zoom(qed.component, family="qed.ux.zoom.zoom", implements=qed.protocols.ux
             vertical=self.vertical,
             coupled=self.coupled,
         )
+
+    # debugging support
+    def pyre_dump(self):
+        """
+        Render my state
+        """
+        # make a channel
+        channel = journal.info("qed.ux.measure")
+        # sign in
+        channel.line(f"zoom: {self}")
+        # my contents
+        channel.indent()
+        channel.line(f"coupled: {self.coupled}")
+        channel.line(f"horizontal: {self.horizontal}")
+        channel.line(f"vertical: {self.vertical}")
+        channel.outdent()
+        # flush
+        channel.log()
+        # all done
+        return
 
 
 # end of file
