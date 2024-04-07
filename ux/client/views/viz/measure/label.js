@@ -30,7 +30,7 @@ export const Label = ({ position, value }) => {
         mat.current.setAttribute("height", Math.round(box.height) + 10)
         // all done
         return
-    }, [])
+    })
 
     // get the position of the marker
     const [x, y] = position
