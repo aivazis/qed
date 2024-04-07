@@ -40,8 +40,8 @@ export const Info = ({ viewport, view }) => {
     const scale = level.map(value => 2 ** -value)
     // project the location to image coordinates
     const pixel = {
-        x: location.x * scale[1],
-        y: location.y * scale[0]
+        x: Math.trunc(location.x * scale[1]),
+        y: Math.trunc(location.y * scale[0])
     }
     // scale the shape to the current zoom level
     const effectiveShape = shape.map((s, idx) => s / scale[idx])
