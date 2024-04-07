@@ -21,8 +21,13 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
 
     # configurable state
     measure = qed.protocols.ux.measure()
+    measure.doc = "the measure layer indicator"
+
     sync = qed.protocols.ux.sync()
+    sync.doc = "my sync table"
+
     zoom = qed.protocols.ux.zoom()
+    zoom.doc = "the zoom level"
 
     # interface
     def toggleSelection(self, key, value):
