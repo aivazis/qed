@@ -11,10 +11,8 @@ from .Viewport import Viewport as viewport
 # the reader/dataset/channel selection configuration
 from .Selection import Selection as selection
 
-# the ux state of datasets
-from .Dataset import Dataset as dataset
-
-# the ux state of visualization workflows
+# configurable state
+from .Source import Source as source
 from .Channel import Channel as channel
 
 # controls
