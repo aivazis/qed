@@ -14,7 +14,7 @@ from .Zoom import Zoom
 
 
 # the dataset ux state
-class Dataset(qed.protocol, family="qed.ux.datasets"):
+class Source(qed.protocol, family="qed.ux.sources"):
     """
     The state of a dataset view
     """
@@ -36,7 +36,7 @@ class Dataset(qed.protocol, family="qed.ux.datasets"):
         Pick a default implementation
         """
         # use the dataset base
-        return qed.ux.dataset
+        return qed.ux.source
 
 
 # end of file
