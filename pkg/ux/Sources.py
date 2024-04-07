@@ -5,7 +5,7 @@
 
 
 # a catalog of known data sources
-class DataSources:
+class Sources:
     """
     A catalog of known data sources and their datasets
     """

@@ -10,8 +10,8 @@ import journal
 import uuid
 
 # my parts
-from .DataArchives import DataArchives
-from .DataSources import DataSources
+from .Archives import Archives
+from .Sources import Sources
 from .Viewport import Viewport
 
 
@@ -377,7 +377,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         Transfer the persistent data sources and their datasets from the plexus
         """
         # build the map
-        archives = DataArchives()
+        archives = Archives()
         # go through the plexus sources
         for archive in plexus.archives:
             # and connect them
@@ -392,7 +392,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         Transfer the persistent data sources and their datasets from the plexus
         """
         # build the map
-        sources = DataSources()
+        sources = Sources()
         # go through the plexus sources
         for reader in plexus.datasets:
             # and connect them
