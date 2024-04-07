@@ -6,28 +6,26 @@
 
 // externals
 import React from 'react'
-import styled from 'styled-components'
+import { graphql, useFragment } from 'react-relay/hooks'
 
 // project
 // widgets
 import { Tray } from '~/widgets'
 
 // local
-// hooks
-import { useGetVizPipeline } from './useGetVizPipeline'
 // components
 import { RangeController } from './range'
 import { ValueController } from './value'
 
 
 //  the tray with the visualization pipeline controls
-export const Viz = () => {
-    // get the pipeline
-    const { dataset, channel, controllers } = useGetVizPipeline()
+export const Viz = ({ view }) => {
+    // unpack the view
+    const { dataset, channel } = useFragment(vizControlsGetViewFragment, view)
     // and render
     return (
         <Tray title="viz" state="enabled" initially={true} scale={0.5}>
-            {controllers.map(configuration => {
+            {channel.controllers.map(configuration => {
                 // unpack the controller configuration
                 const { slot, __typename: typename } = configuration
                 // look up the controller
@@ -35,7 +33,8 @@ export const Viz = () => {
                 // and render
                 return (
                     <Controller key={slot}
-                        dataset={dataset} channel={channel} configuration={configuration} />
+                        dataset={dataset.name} channel={channel.tag}
+                        configuration={configuration} />
                 )
             })}
         </Tray>
@@ -48,6 +47,33 @@ const registry = {
     RangeController,
     ValueController,
 }
+
+
+// the fragment
+const vizControlsGetViewFragment = graphql`
+    fragment vizControlsGetViewFragment on View {
+        dataset {
+            name
+        }
+        channel {
+            tag
+            controllers {
+                __typename
+                ... on Node {
+                   id
+                }
+                ... on RangeController {
+                    slot
+                    ...range_range
+                }
+                ... on ValueController {
+                    slot
+                    ...value_value
+                }
+            }
+        }
+    }
+`
 
 
 // end of file

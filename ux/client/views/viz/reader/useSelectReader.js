@@ -103,6 +103,8 @@ const selectReaderMutation = graphql`
                 ...printViewerGetViewFragment
                 # for the zoom control
                 ...zoomControlsGetZoomStateFragment
+                # for the viz control
+                ...vizControlsGetViewFragment
             }
         }
     }
