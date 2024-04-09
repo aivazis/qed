@@ -114,6 +114,22 @@ class Dataset(
         # as the only important channels
         return
 
+    def pipelines(self, context):
+        """
+        Build my standard visualization pipelines using the given naming {context}
+        """
+        # go through the default channels provided by my data type
+        # go through the registry
+        for channel in channelRegistry():
+            # instantiate a workflow
+            pipeline = channel(name=f"{context}.{channel.tag}")
+            # autotune
+            pipeline.autotune(stats=self.stats)
+            # and make it available
+            yield pipeline
+        # all done
+        return
+
     # metamethods
     def __init__(self, **kwds):
         # chain up
@@ -213,14 +229,10 @@ class Dataset(
         """
         Register my channels
         """
-        # go through the registry
-        for channel in channelRegistry():
-            # instantiate a workflow
-            pipeline = channel(name=f"{self.pyre_name}.{channel.tag}")
-            # autotune
-            pipeline.autotune(stats=self.stats)
-            # and register it
-            self.channels[channel.tag] = pipeline
+        # go through my pipelines
+        for pipeline in self.pipelines(context=self.pyre_name):
+            # and register them
+            self.channels[pipeline.tag] = pipeline
         # all done
         return
 
