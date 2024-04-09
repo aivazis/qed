@@ -11,11 +11,14 @@ import uuid
 # support
 import qed
 import journal
-
 import qed.protocols
 
-# source configuration
+# configuration stores
+from .Channel import Channel
 from .Source import Source
+
+# helpers
+from .Harvester import Harvester
 
 
 # the record of user choices that lead to a channel selection for a viewport
@@ -93,8 +96,10 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             self.channel = None
         # otherwise
         else:
-            # set it
-            self.channel = dataset.channel(tag)
+            # build its name
+            name = f"{self.pyre_name}.{dataset.pyre_name}.{tag}"
+            # look it up and set it
+            self.channel = self._pipelines[name]
         # solve the selection
         self.resolve()
         # all done
@@ -466,15 +471,18 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         if channel:
             # it may be left over from a previous interaction; gingerly
             try:
-                # look up the channel of the solution that has the same tag
-                candidate = dataset.channel(channel.tag)
+                # let's look up the channel of the solution that has the same tag
+                # build its name
+                name = f"{self.pyre_name}.{dataset.pyre_name}.{channel.tag}"
+                # and look it up
+                candidate = self._pipelines[name]
             # if the solution doesn't have a channel by this tag
             except KeyError:
                 # reset the channel
                 self.channel = None
             # if all went well
             else:
-                # attach the candidate
+                # install it
                 self.channel = candidate
         # if we have a dataset but no channel
         else:
@@ -482,8 +490,13 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             channels = dataset.channels
             # if there is only one channel
             if len(channels) == 1:
-                # grab it and select it
-                self.channel, *_ = channels.values()
+                # get it
+                candidate, *_ = channels.values()
+                # build the name by which i know this channel
+                name = f"{self.pyre_name}.{dataset.pyre_name}.{candidate.tag}"
+                # look it up and install it
+                self.channel = self._pipelines[name]
+
         # all done
         return self
 
@@ -498,17 +511,46 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             name=name,
             reader=self.reader,
             dataset=self.dataset,
-            channel=self.channel,
+            channel=None,
             selections=dict(self.selections),
             measure=self.measure.clone(),
             sync=self.sync.clone(),
             zoom=self.zoom.clone(),
         )
 
+    def pipelines(self):
+        """
+        Build a pipeline registry with all the channels of all my source datasets
+        """
+        # get my reader
+        reader = self.reader
+        # if it's trivial
+        if not reader:
+            # nothing to do
+            return {}
+        # otherwise, go through its datasets
+        for dataset in reader.datasets:
+            # form the namespace
+            namespace = f"{self.pyre_name}.{dataset.pyre_name}"
+            # build my pipelines
+            for pipeline in dataset.pipelines(context=namespace):
+                # get the reference configuration
+                reference = dataset.channel(name=pipeline.tag)
+                # mirror its configuration in my pipeline
+                self.harvester.configure(component=pipeline, reference=reference)
+                # hand off the configured pipeline
+                yield pipeline
+        # all done
+        return
+
     # metamethods
     def __init__(self, **kwds):
         # chain up
         super().__init__(**kwds)
+        # build my visualization pipeline registry
+        self._pipelines = {
+            pipeline.pyre_name: pipeline for pipeline in self.pipelines()
+        }
         # resolve my state
         self.resolve()
         # all done
@@ -568,6 +610,9 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         channel.log()
         # all done
         return self
+
+    # constants
+    harvester = Harvester()
 
 
 # end of file
