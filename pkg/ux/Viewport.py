@@ -247,8 +247,10 @@ class Viewport(
         view = view or View(name=str(uuid.uuid1()))
         # initialize my view
         self._view = view
-        # and my selection cache
-        self._cache = {view.reader and view.reader.pyre_name: view}
+        # my cache of views
+        self._views = {view.reader and view.reader.pyre_name: view}
+        # and my cache of visualization pipeline configurations
+        self._viz = {}
         # all done
         return
 
@@ -260,7 +262,7 @@ class Viewport(
         # get the source name
         name = source.pyre_name
         # get my cache
-        cache = self._cache
+        cache = self._views
         # look through my cache for stored settings
         view = cache.get(name)
         # if its not there
