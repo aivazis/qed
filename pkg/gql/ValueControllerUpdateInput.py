@@ -15,12 +15,14 @@ class ValueControllerUpdateInput(graphene.InputObjectType):
     """
 
     # the fields
-    dataset = graphene.ID()
+    viewport = graphene.Int()
     channel = graphene.ID()
 
-    slot = graphene.String(required=True)
+    controller = graphene.String(required=True)
 
+    min = graphene.Float(required=True)
     value = graphene.Float(required=True)
+    max = graphene.Float(required=True)
 
 
 # end of file

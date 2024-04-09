@@ -15,10 +15,9 @@ class RangeControllerResetInput(graphene.InputObjectType):
     """
 
     # the fields
-    dataset = graphene.ID()
-    channel = graphene.ID()
-
-    slot = graphene.String(required=True)
+    viewport = graphene.Int()
+    channel = graphene.String()
+    controller = graphene.String()
 
 
 # end of file

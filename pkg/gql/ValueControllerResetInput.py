@@ -8,17 +8,16 @@
 import graphene
 
 
-# the payload for an update to the range of a controller
+# the payload of the reset of the state of a controller
 class ValueControllerResetInput(graphene.InputObjectType):
     """
     The payload for a value controller reset
     """
 
     # the fields
-    dataset = graphene.ID()
-    channel = graphene.ID()
-
-    slot = graphene.String(required=True)
+    viewport = graphene.Int()
+    channel = graphene.String()
+    controller = graphene.String()
 
 
 # end of file
