@@ -150,7 +150,6 @@ type Channel implements Node {
   id: ID!
   name: ID!
   tag: String!
-  session: String!
   # the viz pipeline controllers
   controllers: [Controller]!
 }
@@ -196,7 +195,7 @@ type VisualizationPipeline {
 # controllers
 type RangeController implements Node {
   id: ID!
-  session: ID!
+  dirty: Boolean!
   slot: String!
   min: Float!
   max: Float!
@@ -206,7 +205,7 @@ type RangeController implements Node {
 
 type ValueController implements Node {
   id: ID!
-  session: ID!
+  dirty: Boolean!
   slot: String!
   min: Float!
   max: Float!
@@ -306,10 +305,10 @@ type Mutation {
   disconnectReader(name: String!): ReaderInfo!
 
   # updates to the viz pipeline
-  resetRangeController(controller: RangeControllerInput!): RangeControllerInfo!
-  updateRangeController(range: RangeControllerRangeInput!): RangeControllerInfo!
-  resetValueController(controller: ValueControllerInput!): ValueControllerInfo!
-  updateValueController(value: ValueControllerValueInput!): ValueControllerInfo!
+  resetRangeController(controller: RangeControllerResetInput!): RangeControllerInfo!
+  updateRangeController(range: RangeControllerUpdateInput!): RangeControllerInfo!
+  resetValueController(controller: ValueControllerResetInput!): ValueControllerInfo!
+  updateValueController(value: ValueControllerUpdateInput!): ValueControllerInfo!
 }
 
 type PersistInfo {
@@ -387,26 +386,28 @@ type ReaderInfo {
 
 # support for updating range controllers
 # the reset request payload
-input RangeControllerInput {
+input RangeControllerResetInput {
   # the dataset
-  dataset: ID!
+  viewport: Int!
   # the channel
   channel: String!
   # the controller name
-  slot: String!
+  controller: String!
 }
 
 # the update range request payload
-input RangeControllerRangeInput {
-  # the dataset
-  dataset: ID!
+input RangeControllerUpdateInput {
+  # the viewport
+  viewport: Int!
   # the channel
   channel: String!
   # the controller name
-  slot: String!
+  controller: String!
   # the parameters
+  min: Float!
   low: Float!
   high: Float!
+  max: Float!
 }
 
 # the response payload
@@ -418,25 +419,27 @@ type RangeControllerInfo {
 
 # support for updating value controllers
 # the reset request payload
-input ValueControllerInput {
+input ValueControllerResetInput {
   # the dataset
-  dataset: ID!
+  viewport: Int!
   # the channel
   channel: String!
   # the controller name
-  slot: String!
+  controller: String!
 }
 
 # the update value request payload
-input ValueControllerValueInput {
-  # the dataset
-  dataset: ID!
+input ValueControllerUpdateInput {
+  # the viewport
+  viewport: Int!
   # the channel
   channel: String!
   # the controller name
-  slot: String!
-  # the parameter
+  controller: String!
+  # the parameters
+  min: Float!
   value: Float!
+  max: Float!
 }
 
 # the response payload
