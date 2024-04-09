@@ -9,7 +9,7 @@ import graphene
 import uuid
 
 # the input payload
-from .ValueControllerValueInput import ValueControllerValueInput
+from .ValueControllerUpdateInput import ValueControllerUpdateInput
 
 # the result types
 from .ValueController import ValueController
@@ -24,7 +24,7 @@ class UpdateValueController(graphene.Mutation):
     # inputs
     class Arguments:
         # the update context
-        value = ValueControllerValueInput(required=True)
+        value = ValueControllerUpdateInput(required=True)
 
     # the result is always a value controller
     controller = graphene.Field(ValueController)

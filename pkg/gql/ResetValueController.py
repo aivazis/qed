@@ -9,7 +9,7 @@ import graphene
 import uuid
 
 # the input payload
-from .ValueControllerInput import ValueControllerInput
+from .ValueControllerResetInput import ValueControllerResetInput
 
 # the result types
 from .ValueController import ValueController
@@ -24,7 +24,7 @@ class ResetValueController(graphene.Mutation):
     # inputs
     class Arguments:
         # the reset context
-        controller = ValueControllerInput(required=True)
+        controller = ValueControllerResetInput(required=True)
 
     # the result is always a value controller
     controller = graphene.Field(ValueController)
