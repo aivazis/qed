@@ -120,6 +120,23 @@ class MemoryMap(
         # all done
         return
 
+    def pipelines(self, context):
+        """
+        Build my standard visualization pipelines using the given naming {context}
+        """
+        # go through the default channels provided by my data type
+        for channel in self.cell.channels:
+            # get the factory from my bindings
+            cls = getattr(qed.readers.native.channels, channel)
+            # instantiate it
+            pipeline = cls(name=f"{context}.{channel}")
+            # autotune it, if necessary
+            pipeline.autotune(stats=self.stats)
+            # and make it available
+            yield pipeline
+        # all done
+        return
+
     # metamethods
     def __init__(self, **kwds):
         # chain up
@@ -129,15 +146,9 @@ class MemoryMap(
         # get stats on a sample of my data
         self.stats = self._collectStatistics()
 
-        # go through the default channels provided my the data type
-        for channel in self.cell.channels:
-            # get the factory from my local context
-            cls = getattr(qed.readers.native.channels, channel)
-            # instantiate a workflow
-            pipeline = cls(name=f"{self.pyre_name}.{channel}")
-            # autotune it
-            pipeline.autotune(stats=self.stats)
-            # and register it
+        # build my default pipelines
+        for pipeline in self.pipelines(context=self.pyre_name):
+            # and register them
             self.channels[pipeline.tag] = pipeline
 
         # all done

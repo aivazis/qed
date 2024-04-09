@@ -141,6 +141,23 @@ class Product(
         # all done
         return
 
+    def pipelines(self, context):
+        """
+        Build my standard visualization pipelines using the given naming {context}
+        """
+        # go through the default channels provided by my data type
+        for channel in self._retrieveChannels():
+            # get the factory from my bindings
+            cls = getattr(channels, channel)
+            # instantiate it
+            pipeline = cls(name=f"{context}.{channel}")
+            # autotune it, if necessary
+            pipeline.autotune(stats=self.stats)
+            # and make it available
+            yield pipeline
+        # all done
+        return
+
     # metamethods
     def __init__(self, data, **kwds):
         # chain up
@@ -160,15 +177,9 @@ class Product(
         """
         Build the channel pipelines
         """
-        # go through the default channels of my cell type
-        for channel in self._retrieveChannels():
-            # get their factories
-            cls = getattr(channels, channel)
-            # instantiate a workflow for each one
-            pipeline = cls(name=f"{self.pyre_name}.{channel}")
-            # autotune it
-            pipeline.autotune(stats=self.stats)
-            # and register it
+        # build my default pipelines
+        for pipeline in self.pipelines(context=self.pyre_name):
+            # and register them
             self.channels[pipeline.tag] = pipeline
         # all done
         return
