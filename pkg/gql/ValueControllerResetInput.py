@@ -9,9 +9,9 @@ import graphene
 
 
 # the payload for an update to the range of a controller
-class ValueControllerValueInput(graphene.InputObjectType):
+class ValueControllerResetInput(graphene.InputObjectType):
     """
-    The payload for a value controller update
+    The payload for a value controller reset
     """
 
     # the fields
@@ -19,8 +19,6 @@ class ValueControllerValueInput(graphene.InputObjectType):
     channel = graphene.ID()
 
     slot = graphene.String(required=True)
-
-    value = graphene.Float(required=True)
 
 
 # end of file

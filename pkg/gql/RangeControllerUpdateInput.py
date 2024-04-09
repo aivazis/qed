@@ -9,20 +9,21 @@ import graphene
 
 
 # the payload for an update to the range of a controller
-class RangeControllerRangeInput(graphene.InputObjectType):
+class RangeControllerUpdateInput(graphene.InputObjectType):
     """
     The payload for a ranged controller update
     """
 
-
     # the fields
-    dataset = graphene.ID()
+    viewport = graphene.Int()
     channel = graphene.ID()
 
-    slot = graphene.String(required=True)
+    controller = graphene.String(required=True)
 
+    min = graphene.Float(required=True)
     low = graphene.Float(required=True)
     high = graphene.Float(required=True)
+    max = graphene.Float(required=True)
 
 
 # end of file

@@ -9,7 +9,7 @@ import graphene
 import uuid
 
 # the input payload
-from .RangeControllerRangeInput import RangeControllerRangeInput
+from .RangeControllerUpdateInput import RangeControllerUpdateInput
 
 # the result types
 from .RangeController import RangeController
@@ -24,7 +24,7 @@ class UpdateRangeController(graphene.Mutation):
     # inputs
     class Arguments:
         # the update context
-        range = RangeControllerRangeInput(required=True)
+        range = RangeControllerUpdateInput(required=True)
 
     # the result is always a range controller
     controller = graphene.Field(RangeController)
