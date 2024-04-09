@@ -14,7 +14,6 @@ import journal
 import qed.protocols
 
 # configuration stores
-from .Channel import Channel
 from .Source import Source
 
 # helpers

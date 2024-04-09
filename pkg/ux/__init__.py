@@ -11,7 +11,6 @@ from .Dispatcher import Dispatcher as dispatcher
 from .Store import Store as store
 
 # configurable state
-from .Channel import Channel as channel
 from .Source import Source as source
 
 # controls
