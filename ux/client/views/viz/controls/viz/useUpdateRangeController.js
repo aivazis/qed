@@ -25,7 +25,7 @@ export const useUpdateRangeController = ({ viewport, channel }) => {
         // and invoke it
         update(old => old + 1)
         // show me
-        console.log(`viz.useUpdateRangeController: served: ${served}, dropped: ${dropped}`)
+        // console.log(`viz.useUpdateRangeController: served: ${served}, dropped: ${dropped}`)
         // all done
         return
     }
@@ -82,9 +82,11 @@ export const useUpdateRangeController = ({ viewport, channel }) => {
 const useUpdateRangeControllerMutation = graphql`
 mutation useUpdateRangeControllerMutation($range: RangeControllerUpdateInput!) {
     updateRangeController(range: $range) {
+        view {
+            session
+        }
         controller {
             id
-            slot
             dirty
             min
             low
