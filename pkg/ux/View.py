@@ -370,8 +370,6 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         if not reader:
             # nothing more to do
             return
-        # get my name
-        name = self.pyre_name
         # get the reader name
         sourceName = reader.pyre_name
         # pull its configuration
