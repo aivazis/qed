@@ -34,6 +34,7 @@ from .MeasureToggleClosedPath import MeasureToggleClosedPath as measureToggleClo
 from .MeasureReset import MeasureReset as measureReset
 
 # sync
+from .SyncUpdateOffset import SyncUpdateOffset as syncUpdateOffset
 from .SyncToggleViewport import SyncToggleViewport as syncToggleViewport
 from .SyncToggleAll import SyncToggleAll as syncToggleAll
 from .SyncReset import SyncReset as syncReset
