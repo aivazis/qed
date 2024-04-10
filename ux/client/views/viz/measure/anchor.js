@@ -76,7 +76,7 @@ export const Anchor = ({ viewport, selection, idx, at }) => {
             // done
             return
         }
-        // if <ctrl> is present
+        // if <alt> is present
         if (altKey) {
             // toggle me in multinode mode
             toggleMulti(idx)
