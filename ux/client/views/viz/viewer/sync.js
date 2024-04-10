@@ -24,36 +24,32 @@ import styles from './styles'
 // control viewport synchronization with a shared camera
 export const Sync = ({ viewport, view }) => {
     // get the reader and sync status for this viewport
-    const { reader, sync } = useFragment(syncViewerGetScrollSyncStateFragment, view)
+    const { sync } = useFragment(syncViewerGetScrollSyncStateFragment, view)
     // unpack the scroll sync status
     const isScrollSynced = sync.scroll
 
     // get the mutators
-    const { toggle: toggleScrollAll } = useSyncToggleAll({
-        viewport, reader: reader.name, aspect: "scroll"
-    })
-    const { toggle: toggleScrollViewport } = useSyncToggleViewport({
-        viewport, reader: reader.name, aspect: "scroll"
-    })
+    const { toggle: toggleAll } = useSyncToggleAll()
+    const { toggle: toggleViewport } = useSyncToggleViewport()
     // turn the toggle into an event handler
-    const toggleViewport = evt => {
+    const toggleScrollViewport = evt => {
         // stop this event from bubbling up
         evt.stopPropagation()
         // quash the default behavior
         evt.preventDefault()
         // flip the state of the scroll sync
-        toggleScrollViewport()
+        toggleViewport({ viewport, aspect: "scroll" })
         // all done
         return
     }
     // turn the all sync into an event handler
-    const toggleAll = evt => {
+    const toggleScrollAll = evt => {
         // stop this event from bubbling up
         evt.stopPropagation()
         // quash the default behavior
         evt.preventDefault()
         // flip the state of the scroll sync on all viewports
-        toggleScrollAll()
+        toggleAll({ viewport, aspect: "scroll" })
         // all done
         return
     }
@@ -61,9 +57,9 @@ export const Sync = ({ viewport, view }) => {
     // my event handlers
     const behaviors = {
         // toggle the sync state on a single click
-        onClick: toggleViewport,
+        onClick: toggleScrollViewport,
         // toggle all the scroll sync flags on a double click
-        onDoubleClick: toggleAll,
+        onDoubleClick: toggleScrollAll,
     }
 
     // set my state
@@ -81,9 +77,6 @@ export const Sync = ({ viewport, view }) => {
 // my fragment
 const syncViewerGetScrollSyncStateFragment = graphql`
     fragment syncViewerGetScrollSyncStateFragment on View {
-        reader {
-            name
-        }
         sync {
             scroll
         }

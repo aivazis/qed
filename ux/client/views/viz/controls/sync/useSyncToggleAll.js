@@ -9,11 +9,11 @@ import { graphql, useMutation } from 'react-relay/hooks'
 
 
 // toggle the state of a sync aspect for all viewports
-export const useSyncToggleAll = ({ viewport, aspect }) => {
+export const useSyncToggleAll = () => {
     // toggling the measure layer state mutates the server side store
     const [request, pending] = useMutation(useSyncToggleAllMutation)
     // make a handler that toggles all flags of a given aspect
-    const toggle = () => {
+    const toggle = ({ viewport, aspect }) => {
         // if there is already a pending operation
         if (pending) {
             // nothing to do
@@ -39,7 +39,6 @@ export const useSyncToggleAll = ({ viewport, aspect }) => {
                 return
             }
         })
-
         // all done
         return
     }
