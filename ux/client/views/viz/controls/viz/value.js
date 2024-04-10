@@ -6,7 +6,7 @@
 
 // externals
 import React from 'react'
-import { graphql, useFragment, useMutation } from 'react-relay/hooks'
+import { graphql, useFragment } from 'react-relay/hooks'
 import styled from 'styled-components'
 
 // project
@@ -17,136 +17,62 @@ import { theme } from "~/palette"
 
 // local
 // hooks
-import { useSetVizSession } from '../../../main/useSetVizSession'
+import { useViewports } from '~/views/viz'
+import { useResetValueController } from './useResetValueController'
+import { useUpdateValueController } from './useUpdateValueController'
 // components
 import { Reset } from './reset'
 import { Save } from './save'
 
 
 // amplitude controller
-export const ValueController = props => {
-    // ask the store for the current configuration
-    const configuration = useFragment(graphql`
-        fragment value_value on ValueController {
-            id
-            slot
-            min
-            max
-            value
-        }
-    `, props.configuration)
-    // unpack
-    const { slot, min, max, value } = configuration
+export const ValueController = ({ channel, configuration }) => {
+    // unpack the controller configuration
+    const {
+        slot, dirty, min, value, max,
+    } = useFragment(valueVizGetControllerStateFragment, configuration)
+    // get the active viewport
+    const { activeViewport } = useViewports()
     // initialize my local value
     const [marker, setMarker] = React.useState(value)
     // and my extent
-    const [extent, setExtent] = React.useState([min, max])
-    // my state
-    const [modified, setModified] = React.useState(false)
-    // make a handler that can update the session id of a view
-    const setSession = useSetVizSession()
-    // build the value mutator
-    const [updateValue, updateIsInFlight] = useMutation(updateValueMutation)
-    // and the state reset
-    const [resetValue, resetIsInFlight] = useMutation(resetValueMutation)
+    const [extent, setExtent] = React.useState({ min, max })
+
+    // build the state reset handler
+    const { reset: defaults } = useResetValueController({ viewport: activeViewport, channel })
+    // build the update handler
+    const { update } = useUpdateValueController({ viewport: activeViewport, channel })
+
+    // the handler that sets the controller state
+    // this is built in the style of {react} state updates: the controller invokes this
+    // and passes it as an argument a function that expects the current value and returns
+    // the updated value
+    const set = value => {
+        // store it
+        setMarker(value)
+        // attempt to update the server side store
+        update({ controller: slot, value, extent })
+        // all done
+        return
+    }
+    // the handler that resets the controller state
+    const reset = () => {
+        // reset the server side store
+        defaults({ controller: slot, setMarker, setExtent })
+        // all done
+        return
+    }
+    // the handler that saves the controller state
+    const save = () => {
+        console.log(`viz.value: saving`)
+    }
+
     // set up the tick marks
     const major = [min, (min + max) / 2, max]
-
-    // leave this here, for now
-    // make some room for the performance stats
-    const [served, setServed] = React.useState(0)
-    const [dropped, setDropped] = React.useState(0)
-    // show me
-    console.log(`value: served: ${served}, dropped: ${dropped}, p: ${served / (served + dropped)}`)
-    // make a handler that updates them
-    const monitor = flag => {
-        // pick an updater
-        const update = flag ? setDropped : setServed
-        // and invoke it
-        update(old => old + 1)
-        // all done
-        return
-    }
-
-    // build the state reset
-    const reset = () => {
-        // if there is a pending reset
-        if (resetIsInFlight) {
-            // nothing to do
-            return
-        }
-        // otherwise, send the mutation to the server
-        resetValue({
-            // input
-            variables: {
-                controller: {
-                    dataset: props.dataset,
-                    channel: props.channel,
-                    slot,
-                }
-            },
-            // when done
-            onCompleted: data => {
-                // unpack
-                const { min, value, max, session } = data.resetValueController.controller
-                // set my value
-                setMarker(value)
-                // and my limits
-                setExtent([min, max])
-                // indicate i'm at my defaults
-                setModified(false)
-                // and set the session in the active view
-                setSession(session)
-                // all done
-                return
-            }
-        })
-    }
-
-    // build the value updater to hand to the controller
-    // this is built in the style of {react} state updates: the controller invokes this
-    // and passes it a function that expects the current value and returns the updated value
-    const setValue = newValue => {
-        // update my state
-        setMarker(newValue)
-        // update the delivery stats
-        monitor(updateIsInFlight)
-        // if there is a pending mutation
-        if (updateIsInFlight) {
-            // skip the update
-            return
-        }
-        // otherwise, send the new value to the server
-        updateValue({
-            // input
-            variables: {
-                info: {
-                    dataset: props.dataset,
-                    channel: props.channel,
-                    slot,
-                    value: newValue,
-                }
-            },
-            // when done
-            onCompleted: data => {
-                // indicate i'm at modified away from my defaults
-                setModified(true)
-                // get the session
-                const session = data.updateValueController.controller.session
-                // and set it in the active view
-                setSession(session)
-                // all done
-                return
-            }
-        })
-        // all done
-        return
-    }
-
     // controller configuration
     const opt = {
-        value: marker
-        , setValue,
+        value: marker,
+        setValue: set,
         min, max, major,
         direction: "row", labels: "bottom", arrows: "top", markers: true,
         height: 100, width: 250,
@@ -158,8 +84,8 @@ export const ValueController = props => {
             <Header>
                 <Title>{slot}</Title>
                 <Spacer />
-                <Save save={reset} enabled={modified} />
-                <Reset reset={reset} enabled={modified} />
+                <Save save={save} enabled={false} />
+                <Reset reset={reset} enabled={dirty} />
             </Header>
             <Housing height={opt.height} width={opt.width}>
                 <Controller enabled={true} {...opt} />
@@ -167,38 +93,6 @@ export const ValueController = props => {
         </>
     )
 }
-
-// the mutation that reset the controller state
-const resetValueMutation = graphql`
-mutation valueResetControllerMutation($controller: ValueControllerInput!) {
-    resetValueController(controller: $controller) {
-        controller {
-            id
-            # get my new session id
-            session
-            # refresh my parameters
-            min
-            max
-            value
-        }
-    }
-}`
-
-// the mutation that updates the controller state
-const updateValueMutation = graphql`
-mutation valueUpdateControllerMutation($info: ValueControllerValueInput!) {
-    updateValueController(value: $info) {
-        controller {
-            id
-            # get my new session id
-            session
-            # refresh my parameters
-            min
-            max
-            value
-        }
-    }
-}`
 
 
 // styling
@@ -230,6 +124,18 @@ const Housing = styled(SVG)`
 // the controller
 const Controller = styled(Slider)`
 `
+
+
+// the fragment
+const valueVizGetControllerStateFragment = graphql`
+    fragment valueVizGetControllerStateFragment on ValueController {
+        slot
+        dirty
+        min
+        value
+        max
+    }
+ `
 
 
 // end of file

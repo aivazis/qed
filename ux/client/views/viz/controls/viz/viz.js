@@ -21,7 +21,7 @@ import { ValueController } from './value'
 //  the tray with the visualization pipeline controls
 export const Viz = ({ view }) => {
     // unpack the view
-    const { dataset, channel } = useFragment(vizControlsGetViewFragment, view)
+    const { channel } = useFragment(vizControlsGetViewFragment, view)
     // and render
     return (
         <Tray title="viz" state="enabled" initially={true} scale={0.5}>
@@ -32,9 +32,7 @@ export const Viz = ({ view }) => {
                 const Controller = registry[typename]
                 // and render
                 return (
-                    <Controller key={slot}
-                        dataset={dataset.name} channel={channel.tag}
-                        configuration={configuration} />
+                    <Controller key={slot} channel={channel.name} configuration={configuration} />
                 )
             })}
         </Tray>
@@ -52,11 +50,8 @@ const registry = {
 // the fragment
 const vizControlsGetViewFragment = graphql`
     fragment vizControlsGetViewFragment on View {
-        dataset {
-            name
-        }
         channel {
-            tag
+            name
             controllers {
                 __typename
                 ... on Node {
@@ -64,11 +59,11 @@ const vizControlsGetViewFragment = graphql`
                 }
                 ... on RangeController {
                     slot
-                    ...range_range
+                    ...rangeVizGetControllerStateFragment
                 }
                 ... on ValueController {
                     slot
-                    ...value_value
+                    ...valueVizGetControllerStateFragment
                 }
             }
         }

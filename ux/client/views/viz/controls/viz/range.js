@@ -6,7 +6,7 @@
 
 // externals
 import React from 'react'
-import { graphql, useFragment, useMutation } from 'react-relay/hooks'
+import { graphql, useFragment } from 'react-relay/hooks'
 import styled from 'styled-components'
 
 // project
@@ -17,141 +17,66 @@ import { theme } from "~/palette"
 
 // local
 // hooks
-import { useSetVizSession } from '../../../main/useSetVizSession'
+import { useViewports } from '~/views/viz'
+import { useResetRangeController } from './useResetRangeController'
+import { useUpdateRangeController } from './useUpdateRangeController'
 // components
 import { Reset } from './reset'
 import { Save } from './save'
 
 
 // amplitude controller
-export const RangeController = props => {
-    // ask the store for the current configuration
-    const configuration = useFragment(graphql`
-        fragment range_range on RangeController {
-            id
-            slot
-            min
-            max
-            low
-            high
-        }
-    `, props.configuration)
-    // unpack
-    const { slot, min, max, low, high } = configuration
+export const RangeController = ({ channel, configuration }) => {
+    // unpack the controller configuration
+    const {
+        slot, dirty, min, low, high, max,
+    } = useFragment(rangeVizGetControllerStateFragment, configuration)
+    // get the active viewport
+    const { activeViewport } = useViewports()
     // initialize my range
-    const [range, setRange] = React.useState([low, high])
+    const [range, setRange] = React.useState({ low, high })
     // and my extent
-    const [extent, setExtent] = React.useState([min, max])
-    // my state
-    const [modified, setModified] = React.useState(false)
-    // make a handler that can update the session id of a view
-    const setSession = useSetVizSession()
-    // build the range mutator
-    const [updateRange, updateIsInFlight] = useMutation(updateRangeMutation)
-    // and the state reset
-    const [resetRange, resetIsInFlight] = useMutation(resetRangeMutation)
+    const [extent, setExtent] = React.useState({ min, max })
+
+    // build the state reset handler
+    const { reset: defaults } = useResetRangeController({ viewport: activeViewport, channel })
+    // build the update handler
+    const { update } = useUpdateRangeController({ viewport: activeViewport, channel })
+
+    // the handler that sets the controller state
+    // this is built in the style of {react} state updates: the controller invokes this
+    // and passes it as an argument a function that expects the current range and returns
+    // the updated value
+    const set = callback => {
+        // get the updated values
+        const [newLow, newHigh] = callback([range.low, range.high])
+        // make a new range
+        const newRange = { low: newLow, high: newHigh }
+        // store it
+        setRange(newRange)
+        // attempt to update the server side store
+        update({ controller: slot, range: newRange, extent })
+        // all done
+        return
+    }
+    // the handler that resets the controller state
+    const reset = () => {
+        // reset the server side store
+        defaults({ controller: slot, setRange, setExtent })
+        // all done
+        return
+    }
+    // the handler that saves the controller state
+    const save = () => {
+        console.log(`viz.range: saving`)
+    }
+
     // set up the tick marks
     const major = [min, (max + min) / 2, max]
-
-    // leave this here, for now
-    // make some room for the performance stats
-    const [served, setServed] = React.useState(0)
-    const [dropped, setDropped] = React.useState(0)
-    // show me
-    console.log(`range: served: ${served}, dropped: ${dropped}, p: ${served / (served + dropped)}`)
-    // make a handler that updates them
-    const monitor = flag => {
-        // pick an updater
-        const update = flag ? setDropped : setServed
-        // and invoke it
-        update(old => old + 1)
-        // all done
-        return
-    }
-
-    // build the state reset
-    const reset = () => {
-        // if there is a pending reset
-        if (resetIsInFlight) {
-            // nothing to do
-            return
-        }
-        // otherwise, send the mutation to the server
-        resetRange({
-            // input
-            variables: {
-                controller: {
-                    dataset: props.dataset,
-                    channel: props.channel,
-                    slot,
-                }
-            },
-            // when done
-            onCompleted: data => {
-                // unpack
-                const { min, low, high, max, session } = data.resetRangeController.controller
-                // set my range
-                setRange([low, high])
-                // and my limits
-                setExtent([min, max])
-                // indicate i'm at my defaults
-                setModified(false)
-                // and set the session in the active view
-                setSession(session)
-                // all done
-                return
-            }
-        })
-    }
-
-    // build the value updater to hand to the controller
-    // this is built in the style of {react} state updates: the controller invokes this
-    // and passes it as an argument a function that expects the current range and return
-    // the updated value
-    const setValue = f => {
-        // invoke the controller's updater to get the new range
-        const [newLow, newHigh] = f(range)
-        // update my state
-        setRange([newLow, newHigh])
-        // update the stats
-        monitor(updateIsInFlight)
-        // if there is a pending mutation
-        if (updateIsInFlight) {
-            // skip the update
-            return
-        }
-        // send it to the server
-        updateRange({
-            // input
-            variables: {
-                info: {
-                    dataset: props.dataset,
-                    channel: props.channel,
-                    slot,
-                    low: newLow,
-                    high: newHigh,
-                }
-            },
-            // when done
-            onCompleted: data => {
-                // indicate i'm at modified away from my defaults
-                setModified(true)
-                // get the session
-                const session = data.updateRangeController.controller.session
-                // and set it in the active view
-                setSession(session)
-                // all done
-                return
-            }
-        })
-
-        // all done
-        return
-    }
     // controller configuration
     const opt = {
-        value: range,
-        setValue,
+        value: [range.low, range.high],
+        setValue: set,
         min, max, major,
         direction: "row", labels: "bottom", arrows: "top", markers: true,
         height: 100, width: 250,
@@ -163,8 +88,8 @@ export const RangeController = props => {
             <Header>
                 <Title>{slot}</Title>
                 <Spacer />
-                <Save save={reset} enabled={modified} />
-                <Reset reset={reset} enabled={modified} />
+                <Save save={save} enabled={false} />
+                <Reset reset={reset} enabled={dirty} />
             </Header>
             <Housing height={opt.height} width={opt.width}>
                 <Controller enabled={true} {...opt} />
@@ -172,42 +97,6 @@ export const RangeController = props => {
         </>
     )
 }
-
-
-// the mutation that resets the controller state
-const resetRangeMutation = graphql`
-mutation rangeResetControllerMutation($controller: RangeControllerInput!) {
-    resetRangeController(controller: $controller) {
-        controller {
-            id
-            # get my new session id
-            session
-            # refresh my parameters
-            min
-            max
-            low
-            high
-        }
-
-    }
-}`
-
-// the mutation that updates the controller state
-const updateRangeMutation = graphql`
-mutation rangeUpdateControllerMutation($info: RangeControllerRangeInput!) {
-    updateRangeController(range: $info) {
-        controller {
-            id
-            # get my new session id
-            session
-            # refresh my parameters
-            min
-            max
-            low
-            high
-        }
-    }
-}`
 
 
 // styling
@@ -239,6 +128,19 @@ const Housing = styled(SVG)`
 // the controller
 const Controller = styled(Range)`
 `
+
+
+// the fragment
+const rangeVizGetControllerStateFragment = graphql`
+    fragment rangeVizGetControllerStateFragment on RangeController {
+        slot
+        dirty
+        min
+        low
+        high
+        max
+    }
+ `
 
 
 // end of file
