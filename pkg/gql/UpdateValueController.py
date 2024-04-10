@@ -12,6 +12,7 @@ import uuid
 from .ValueControllerUpdateInput import ValueControllerUpdateInput
 
 # the result types
+from .views.View import View
 from .ValueController import ValueController
 
 
@@ -26,7 +27,9 @@ class UpdateValueController(graphene.Mutation):
         # the update context
         value = ValueControllerUpdateInput(required=True)
 
-    # the result is always a value controller
+    # the result is a view with a new session token
+    view = graphene.Field(View)
+    # and a range controller
     controller = graphene.Field(ValueController)
 
     # the value controller mutator
@@ -36,38 +39,37 @@ class UpdateValueController(graphene.Mutation):
         Update the value of a controller
         """
         # unpack the input payload
-        dataset = value["dataset"]
-        channel = value["channel"]
-        slot = value["slot"]
-        newValue = value["value"]
+        viewport = value["viewport"]
+        channelName = value["channel"]
+        controllerName = value["controller"]
+        configuration = {
+            "min": value["min"],
+            "value": value["value"],
+            "max": value["max"],
+        }
 
         # build the resolution context
         # grab the store
         store = info.context["store"]
 
-        # get the dataset
-        dataset = store.dataset(name=dataset)
-        # ask it for the channel
-        channel = dataset.channel(name=channel)
-        # ask it for its controller
-        controller = getattr(channel, slot)
-        # and the controller metadata
-        trait = channel.pyre_trait(alias=slot)
+        # build the resolution context
+        # grab the store
+        store = info.context["store"]
+        # ask it to update the controller
+        view, controller = store.vizUpdateController(
+            viewport=viewport,
+            channel=channelName,
+            name=controllerName,
+            configuration=configuration,
+        )
 
-        # update
-        changed = controller.updateValue(value=newValue)
-        # and refresh the session key, if necessary
-        session = uuid.uuid1() if changed else controller.pyre_id
-
-        # build the context for the response resolution
+        # build the resolution context
         context = {
+            "view": view,
             "controller": {
                 "controller": controller,
-                "trait": trait,
-                "session": session,
-            }
+            },
         }
-
         # and use the result to resolve the mutation
         return context
 
