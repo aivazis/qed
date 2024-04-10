@@ -19,7 +19,6 @@ from .QED import QED
 from .Sample import Sample
 from .Shape import Shape
 from .Version import Version
-from .VizPipeline import VizPipeline
 
 
 # the query
@@ -48,8 +47,6 @@ class Query(graphene.ObjectType):
     sample = graphene.Field(
         Sample, dataset=graphene.ID(), sample=graphene.Int(), line=graphene.Int()
     )
-    # visualization pipeline
-    viz = graphene.Field(VizPipeline, dataset=graphene.ID(), channel=graphene.String())
     # generation of shape guesses from a raster size
     guessShape = graphene.Field(
         graphene.List(Shape), size=graphene.String(), aspect=graphene.String()
