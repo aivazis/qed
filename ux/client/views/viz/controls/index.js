@@ -8,4 +8,8 @@
 export { Controls } from './controls'
 
 
+// hooks
+export { useSyncToggleViewport, useSyncToggleAll } from './sync'
+
+
 // end of file

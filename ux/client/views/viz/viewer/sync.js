@@ -16,8 +16,7 @@ import { Badge } from '~/widgets'
 
 // locals
 // hooks
-import { useSyncToggleAll } from './useSyncToggleAll'
-import { useSyncToggleViewport } from './useSyncToggleViewport'
+import { useSyncToggleAll, useSyncToggleViewport } from '~/views/viz/controls'
 // styles
 import styles from './styles'
 

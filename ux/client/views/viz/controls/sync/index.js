@@ -8,4 +8,8 @@
 export { Sync } from './sync'
 
 
+// the hooks
+export { useSyncToggleAll } from './useSyncToggleAll'
+export { useSyncToggleViewport } from './useSyncToggleViewport'
+
 // end of file

@@ -52,6 +52,7 @@ const useSyncToggleAllMutation = graphql`
     mutation useSyncToggleAllMutation($viewport: Int!, $aspect: String!) {
         viewSyncToggleAll(viewport: $viewport, aspect: $aspect) {
             sync {
+                dirty
                 channel
                 zoom
                 scroll
