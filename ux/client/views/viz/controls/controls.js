@@ -50,7 +50,7 @@ export const Controls = ({ qed }) => {
             {/* visualization pipeline controls */}
             {enabled && <Viz viewport={activeViewport} view={view} />}
             {/* viewport synchronization controls */}
-            {/* enabled && <Sync qed={qed} /> */}
+            {enabled && <Sync qed={qed} />}
         </React.Suspense>
     )
 }
