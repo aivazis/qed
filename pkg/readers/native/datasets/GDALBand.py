@@ -112,8 +112,6 @@ class GDALBand(
         low, _, high = self.stats
         # zoom
         zoomedTile = tile[:: scale[1], :: scale[0]]
-        # resolve my channel
-        channel = self.channel(name=channel)
         # render a tile and return it
         return channel.gdal(source=zoomedTile, shape=shape, low=low, high=high)
 

@@ -99,8 +99,6 @@ class MemoryMap(
         """
         Render a tile of the given specification
         """
-        # resolve my channel
-        channel = self.channel(name=channel)
         # render a tile and return it
         return channel.tile(source=self, zoom=zoom, origin=origin, shape=shape)
 
