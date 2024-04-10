@@ -30,6 +30,25 @@ class Controller(qed.component, implements=qed.protocols.controller):
         # all done
         return
 
+    # metamethods
+    def __init__(self, **kwds):
+        # chain up
+        super().__init__(**kwds)
+        # mark me as clean
+        self.dirty = False
+        # all done
+        return
+
+    # framework hooks
+    def pyre_traitModified(self, **kwds):
+        """
+        Hook invoked when one of my traits is modified
+        """
+        # mark me as dirty
+        self.dirty = True
+        # all done
+        return
+
     # helpers
     def pyre_dump(self):
         """
@@ -37,9 +56,8 @@ class Controller(qed.component, implements=qed.protocols.controller):
         """
         # go through my traits
         for trait in self.pyre_configurables():
-            # my name
+            # the trait name and its value
             yield f"{trait.name}: {getattr(self, trait.name)}"
-
         # all done
         return
 
