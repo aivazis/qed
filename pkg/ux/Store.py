@@ -314,9 +314,20 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return view.measure
 
+    def syncSetAspect(self, viewport, aspect, value):
+        """
+        Update the sync table offsets
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # and delegate
+        view = port.syncSetAspect(aspect=aspect, value=value)
+        # return the measure configuration
+        return view.sync
+
     def syncToggleAll(self, viewport, aspect):
         """
-        Toggle the {aspect} flag of the sync table
+        Toggle the {aspect} flag of all entries in the sync table
         """
         # get the value from the {viewport} and flip it
         value = not getattr(self._viewports[viewport].view().sync, aspect)
@@ -331,7 +342,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
 
     def syncToggleViewport(self, viewport, aspect):
         """
-        Toggle the scroll flag of the sync table
+        Toggle the {aspect} flag of the sync table entry for {viewport}
         """
         # get the viewport configuration
         port = self._viewports[viewport]
