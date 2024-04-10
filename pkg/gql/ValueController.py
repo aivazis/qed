@@ -24,7 +24,8 @@ class ValueController(graphene.ObjectType):
 
     # my fields
     id = graphene.ID()
-    # my session key; used to detect changes in the controller state
+    # a flag that indicates the controller configuration has been modified
+    # since last persisted
     dirty = graphene.Boolean()
     # payload
     slot = graphene.String()
