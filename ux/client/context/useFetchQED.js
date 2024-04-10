@@ -39,6 +39,8 @@ const query = graphql`
             ...controlsGetDatasetAndChannelInViewFragment
             # information for rendering the viewport
             ...vizGetViewsFragment
+            # for the sync control
+            ...bodyGetSyncTableFragment
         }
     }
 `
