@@ -55,10 +55,12 @@ class RangeController(graphene.ObjectType):
     @staticmethod
     def resolve_dirty(context, *_):
         """
-        Resolve the dirty flag
+        Check the controller state relative to its persisted configuration
         """
-        # never...
-        return False
+        # extract the controller
+        controller = context["controller"]
+        # easy enough
+        return controller.dirty
 
     @staticmethod
     def resolve_min(context, *_):
