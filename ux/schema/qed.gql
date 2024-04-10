@@ -287,9 +287,10 @@ type Mutation {
   viewMeasureToggleClosedPath(viewport: Int!): DatasetMeasureInfo!
   viewMeasureReset(viewport: Int!): DatasetMeasureInfo!
   # sync
+  viewSyncReset(viewport: Int!): DatasetSyncInfo!
   viewSyncToggleAll(viewport: Int!, aspect: String!): DatasetSyncInfos!
   viewSyncToggleViewport(viewport: Int!, aspect: String!): DatasetSyncInfo!
-  viewSyncReset(viewport: Int!): DatasetSyncInfo!
+  viewSyncUpdateOffset(viewport: Int!, x: Int!, y: Int!): DatasetSyncInfo!
   # zoom
   viewZoomSetLevel(viewport: Int!, horizontal: Float!, vertical: Float!): DatasetZoomInfo!
   viewZoomToggleCoupled(viewport: Int!): DatasetZoomInfo!
