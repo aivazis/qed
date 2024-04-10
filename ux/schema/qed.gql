@@ -58,6 +58,7 @@ type View implements Node {
   # ids
   id: ID!
   name: ID!
+  session: String!
   # dataset selection
   selections: [Selector]
   # visualization pipeline
@@ -412,6 +413,8 @@ input RangeControllerUpdateInput {
 
 # the response payload
 type RangeControllerInfo {
+  # the view
+  view: View!
   # the updated controller
   controller: RangeController!
 }
@@ -444,6 +447,8 @@ input ValueControllerUpdateInput {
 
 # the response payload
 type ValueControllerInfo {
+  # the view
+  view: View!
   # the updated controller
   controller: ValueController!
 }
