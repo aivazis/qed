@@ -47,16 +47,10 @@ export const Controls = ({ qed }) => {
             {enabled && <Measure view={view} />}
             {/* the controls common to all datasets */}
             {enabled && <Zoom viewport={activeViewport} view={view} />}
-        </React.Suspense>
-    )
-
-    // render
-    return (
-        <React.Suspense fallback={<Loading />}>
             {/* visualization pipeline controls */}
-            {enabled && <Viz />}
+            {enabled && <Viz viewport={activeViewport} view={view} />}
             {/* viewport synchronization controls */}
-            {enabled && <Sync qed={qed} />}
+            {/* enabled && <Sync qed={qed} /> */}
         </React.Suspense>
     )
 }
@@ -100,6 +94,8 @@ const controlsGetDatasetAndChannelInViewFragment = graphql`
             ...profileMeasureGetMeasureLayerFragment
             # for the zoom control
             ...zoomControlsGetZoomStateFragment
+            # for the viz control
+            ...vizControlsGetViewFragment
         }
     }
 `
