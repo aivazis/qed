@@ -24,9 +24,6 @@ type Query {
   discover(archive: String!, uri: String!, module: String!) : ProductMetadata
   # collect data values as represented by the available channels at a particular pixel
   sample(dataset: ID, line: Int!, sample: Int!): Sample!
-  # describe the visualization pipeline for the specified {channel} of a {dataset}
-  # so the client can render controls to manipulate its configuration
-  viz(dataset: ID, channel: String!): VisualizationPipeline!
   # generate candidate shapes given the size of a raster
   guessShape(size: String! aspect: String!): [Shape]
 }
