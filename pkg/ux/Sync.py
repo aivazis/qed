@@ -107,6 +107,7 @@ class Sync(qed.component, family="qed.ux.sync.sync", implements=qed.protocols.ux
         channel.line(f"path: {self.path}")
         channel.line(f"scroll: {self.scroll}")
         channel.line(f"zoom: {self.zoom}")
+        channel.line(f"offsets: {self.offsets}")
         channel.outdent()
         # flush
         channel.log()
