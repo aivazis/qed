@@ -32,24 +32,19 @@ export const Sync = ({ viewport, view }) => {
     const { toggle: toggleAll } = useSyncToggleAll()
     const { toggle: toggleViewport } = useSyncToggleViewport()
     // turn the toggle into an event handler
-    const toggleScrollViewport = evt => {
+    const toggleScroll = evt => {
         // stop this event from bubbling up
         evt.stopPropagation()
         // quash the default behavior
         evt.preventDefault()
-        // flip the state of the scroll sync
-        toggleViewport({ viewport, aspect: "scroll" })
-        // all done
-        return
-    }
-    // turn the all sync into an event handler
-    const toggleScrollAll = evt => {
-        // stop this event from bubbling up
-        evt.stopPropagation()
-        // quash the default behavior
-        evt.preventDefault()
-        // flip the state of the scroll sync on all viewports
-        toggleAll({ viewport, aspect: "scroll" })
+        // get the state of the <alt> key
+        const { altKey } = evt
+        // set up the handler arguments
+        const argv = { viewport, aspect: "scroll" }
+        // pick a behavior
+        const toggle = altKey ? toggleAll : toggleViewport
+        // and invoke it
+        toggle(argv)
         // all done
         return
     }
@@ -57,9 +52,7 @@ export const Sync = ({ viewport, view }) => {
     // my event handlers
     const behaviors = {
         // toggle the sync state on a single click
-        onClick: toggleScrollViewport,
-        // toggle all the scroll sync flags on a double click
-        onDoubleClick: toggleScrollAll,
+        onClick: toggleScroll,
     }
 
     // set my state
