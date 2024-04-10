@@ -568,6 +568,10 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
                 reference = dataset.channel(name=pipeline.tag)
                 # mirror its configuration in my pipeline
                 self.harvester.configure(component=pipeline, reference=reference)
+                # go through its controllers
+                for controller, _ in pipeline.controllers():
+                    # and mark each one as clean
+                    controller.dirty = False
                 # hand off the configured pipeline
                 yield pipeline
         # all done
