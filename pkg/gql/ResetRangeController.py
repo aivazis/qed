@@ -12,6 +12,7 @@ import uuid
 from .RangeControllerResetInput import RangeControllerResetInput
 
 # the result types
+from .views.View import View
 from .RangeController import RangeController
 
 
@@ -26,7 +27,9 @@ class ResetRangeController(graphene.Mutation):
         # the reset context
         controller = RangeControllerResetInput(required=True)
 
-    # the result is always a range controller
+    # the result is a view with a new session token
+    view = graphene.Field(View)
+    # and a range controller
     controller = graphene.Field(RangeController)
 
     # the range controller mutator
@@ -36,46 +39,27 @@ class ResetRangeController(graphene.Mutation):
         Reset the range of a controller
         """
         # unpack the input payload
-        datasetName = controller["dataset"]
+        viewport = controller["viewport"]
         channelName = controller["channel"]
-        slotName = controller["slot"]
+        controllerName = controller["controller"]
 
-        # get the configuration store
+        # build the resolution context
+        # grab the store
         store = info.context["store"]
+        # ask it to update the controller
+        view, controller = store.vizResetController(
+            viewport=viewport,
+            channel=channelName,
+            name=controllerName,
+        )
 
-        # form the channel name
-        name = f"{datasetName}.{channelName}"
-        # get the channel view
-        view = store.channel(name=name)
-        # get the controller configuration
-        configuration = view.vizConfiguration[slotName]
-
-        # get the dataset
-        dataset = store.dataset(name=datasetName)
-        # get the channel
-        channel = dataset.channels[channelName]
-        # retrieve the controller
-        controller = getattr(channel, slotName)
-        # and its metadata
-        trait = channel.pyre_trait(alias=slotName)
-
-        # go through the stored state
-        for attr, value in configuration.items():
-            # and apply it to the controller
-            setattr(controller, attr, value)
-
-        # refresh the session key
-        session = uuid.uuid1()
-
-        # build the context for the response resolution
+        # build the resolution context
         context = {
+            "view": view,
             "controller": {
                 "controller": controller,
-                "trait": trait,
-                "session": session,
-            }
+            },
         }
-
         # and use the result to resolve the mutation
         return context
 
