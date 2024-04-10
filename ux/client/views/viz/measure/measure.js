@@ -57,12 +57,11 @@ const Layer = ({ viewport, view, shape, scale }) => {
 
     // unpack the measure layer info
     const { path, selection, closed } = measure
-    // convert the path into an array of (lines, samples) pairs
-    const anchors = path.map(anchor => [anchor.x, anchor.y])
     // project the points back into screen coordinates
-    const projected = anchors.map(
-        anchor => anchor.map((coord, idx) => Math.trunc(coord / scale[idx]))
-    )
+    const projected = path.map(point => ({
+        x: point.x / scale.horizontal,
+        y: point.y / scale.vertical,
+    }))
 
     // add an anchor to the pile
     const pick = evt => {
@@ -78,8 +77,8 @@ const Layer = ({ viewport, view, shape, scale }) => {
             const { offsetX, offsetY } = evt
             // scale and pack
             const anchor = {
-                x: scale[1] * offsetX,
-                y: scale[0] * offsetY,
+                x: scale.horizontal * offsetX,
+                y: scale.vertical * offsetY,
             }
             // add it to the pile
             add(anchor)
@@ -110,8 +109,8 @@ const Layer = ({ viewport, view, shape, scale }) => {
         }
         // compute the displacement implied by the current position of the cursor
         const delta = {
-            x: scale[1] * offsetX - path[dragging].x,
-            y: scale[0] * offsetY - path[dragging].y,
+            x: scale.horizontal * offsetX - path[dragging].x,
+            y: scale.vertical * offsetY - path[dragging].y,
         }
         // check for null displacement
         if (Math.abs(delta.x) < 1 && Math.abs(delta.y) < 1) {
@@ -166,7 +165,7 @@ const Layer = ({ viewport, view, shape, scale }) => {
             {/* join the points with a line */}
             <Path points={projected} closed={closed} />
             {/* add their labels */}
-            <Labels positions={projected} values={anchors} />
+            <Labels positions={projected} values={path} />
             {/* and draw markers for them */}
             {projected.map((point, idx) => {
                 // render a circle
@@ -186,8 +185,8 @@ const Placemat = styled(SVG)`
     position: absolute;
     top: 0px;
     left: 0px;
-    width: ${props => props.shape[1]}px;
-    height: ${props => props.shape[0]}px;
+    width: ${props => props.shape.width}px;
+    height: ${props => props.shape.height}px;
 `
 
 // my fragment

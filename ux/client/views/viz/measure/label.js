@@ -24,8 +24,8 @@ export const Label = ({ position, value }) => {
         // get the label bounding box
         const box = label.current.getBBox()
         // adjust the mat
-        mat.current.setAttribute("x", Math.trunc(box.x) - 5)
-        mat.current.setAttribute("y", Math.trunc(box.y) - 5)
+        mat.current.setAttribute("x", Math.round(box.x) - 5)
+        mat.current.setAttribute("y", Math.round(box.y) - 5)
         mat.current.setAttribute("width", Math.round(box.width) + 10)
         mat.current.setAttribute("height", Math.round(box.height) + 10)
         // all done
@@ -33,9 +33,9 @@ export const Label = ({ position, value }) => {
     })
 
     // get the position of the marker
-    const [x, y] = position
+    const { x, y } = position
     // get the value; we show: line x sample
-    const [dataX, dataY] = value
+    const { dataX, dataY } = value
     // and render
     return (
         <g>

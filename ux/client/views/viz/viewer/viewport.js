@@ -38,9 +38,9 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     // unpack what i need from the dataset
     const { shape, origin, tile } = dataset
     // convert the zoom level into a scale
-    const scale = [2 ** -zoom.vertical, 2 ** -zoom.horizontal]
+    const scale = { vertical: 2 ** -zoom.vertical, horizontal: 2 ** -zoom.horizontal }
     // compute the dimensions of the mosaic
-    const zoomedShape = shape.map((extent, idx) => Math.trunc(extent / scale[idx]))
+    const zoomedShape = { width: shape[1] / scale.horizontal, height: shape[0] / scale.vertical }
     // center the viewport at the cursor position
     const center = ({ clientX, clientY }) => {
         // get my placemat

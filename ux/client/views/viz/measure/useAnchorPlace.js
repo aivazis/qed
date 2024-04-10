@@ -29,8 +29,8 @@ export const useAnchorPlace = viewport => {
                 // the node being placed
                 handle,
                 // the displacement
-                x: position.x,
-                y: position.y,
+                x: Math.round(position.x),
+                y: Math.round(position.y),
             },
             onError: errors => {
                 // show me

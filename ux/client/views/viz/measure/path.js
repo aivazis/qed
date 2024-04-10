@@ -21,8 +21,8 @@ export const Path = ({ points, closed }) => {
     }
     // otherwise, form the path
     const path = points.reduce(
-        (prev, current) => prev + ` L ${current[0]} ${current[1]}`,
-        `M ${points[0][0]} ${points[0][1]} `
+        (prev, current) => prev + ` L ${current.x} ${current.y}`,
+        `M ${points[0].x} ${points[0].y} `
     )
     // the additional tail that specifies whether the path is open or closed
     const tail = closed ? " Z" : ""
