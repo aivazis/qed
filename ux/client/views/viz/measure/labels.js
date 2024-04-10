@@ -22,15 +22,14 @@ export const Labels = ({ positions, values }) => {
     return (
         <g>
             {positions.map((position, idx) => {
-                // get the position of the marker
-                const [y, x] = position
                 // get the value
-                const [dataY, dataX] = values[idx].map(value => Math.trunc(value))
+                const dataX = Math.round(values[idx].x)
+                const dataY = Math.round(values[idx].y)
                 // use the value to make a key
                 const key = `${dataY}x${dataX}`
                 // and render
                 return (
-                    <Label key={key} position={position} value={[dataY, dataX]} />
+                    <Label key={key} position={position} value={{ dataY, dataX }} />
                 )
             })}
         </g>

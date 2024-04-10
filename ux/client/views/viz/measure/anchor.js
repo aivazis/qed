@@ -50,7 +50,7 @@ export const Anchor = ({ viewport, selection, idx, at }) => {
         // and quash any side effects
         evt.preventDefault()
         // record the mouse position
-        setPosition([evt.clientX, evt.clientY])
+        setPosition({ x: evt.clientX, y: evt.clientY })
         // mark me as the initiator of the move
         start(idx)
         // all done
@@ -63,7 +63,7 @@ export const Anchor = ({ viewport, selection, idx, at }) => {
         //     don't prevent this event from bubbling up when this handler is tied to {moveup};
         //     the parent depends on the event reaching it to terminate anchor dragging
         // if i've moved since clicked
-        if (position[0] !== evt.clientX || position[1] != evt.clientY) {
+        if (position.x !== evt.clientX || position.y != evt.clientY) {
             // do nothing
             return
         }
@@ -109,7 +109,7 @@ export const Anchor = ({ viewport, selection, idx, at }) => {
 
     // render
     return (
-        <g ref={me} transform={`translate(${at[0]} ${at[1]})`}>
+        <g ref={me} transform={`translate(${at.x} ${at.y})`}>
             <Mat cx={0} cy={0} r="15" />
             <Ring cx={0} cy={0} r="7" />
             <Crosshairs d={crosshairs} />

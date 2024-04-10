@@ -29,8 +29,8 @@ export const useAnchorMove = viewport => {
                 // the node being dragged
                 handle,
                 // the displacement
-                dx: delta.x,
-                dy: delta.y,
+                dx: Math.round(delta.x),
+                dy: Math.round(delta.y),
             },
             onError: errors => {
                 // show me
