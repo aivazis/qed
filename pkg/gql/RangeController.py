@@ -25,7 +25,7 @@ class RangeController(graphene.ObjectType):
     # my fields
     id = graphene.ID()
     # my session key; used to detect changes in the controller state
-    session = graphene.ID()
+    dirty = graphene.Boolean()
     # payload
     slot = graphene.String()
     min = graphene.Float()
@@ -50,6 +50,14 @@ class RangeController(graphene.ObjectType):
         trait = context["trait"]
         # easy enough
         return trait.name
+
+    @staticmethod
+    def resolve_dirty(context, *_):
+        """
+        Resolve the dirty flag
+        """
+        # never...
+        return False
 
     @staticmethod
     def resolve_min(context, *_):
