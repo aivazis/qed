@@ -21,6 +21,15 @@ class Viewport(
 ):
 
     # interface
+    def tile(self, **kwds):
+        """
+        Extract a tile of data from my view
+        """
+        # get my view
+        view = self._view
+        # and delegate
+        return view.tile(**kwds)
+
     def view(self):
         """
         Return the current source selection
@@ -196,6 +205,19 @@ class Viewport(
         view = self._view
         # and delegate
         return view.syncReset()
+
+    def vizUpdateController(self, **kwds):
+        """
+        Update a controller of my active visualization pipeline
+        """
+        # get my active view
+        view = self._view
+        # update the controller
+        controller = view.vizUpdateController(**kwds)
+        # grab a new session token
+        view.session = uuid.uuid1()
+        # and hand off the pair
+        return view, controller
 
     def zoomSetLevel(self, horizontal, vertical):
         """

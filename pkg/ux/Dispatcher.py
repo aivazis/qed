@@ -133,31 +133,24 @@ class Dispatcher:
         Handle a data request
         """
         # unpack
-        name = match.group("data_dataset")
-        channel = match.group("data_channel")
+        viewport = int(match.group("data_viewport"))
+        datasetName = match.group("data_dataset")
+        channelName = match.group("data_channel")
         zoomSpec = match.group("data_zoom")
         zoom = tuple(map(int, zoomSpec.split("x")))
         spec = match.group("data_tile")
         origin = tuple(map(int, match.group("data_origin").split("x")))
         shape = tuple(map(int, match.group("data_shape").split("x")))
 
-        # get the dataset
-        dataset = self.store.dataset(name=name)
-        # if the store doesn't have it
-        if not dataset:
-            # we have a bug
-            chnl = journal.firewall("qed.ux.dispatch")
-            # complain
-            chnl.line(f"could not find data source {data}")
-            # flush
-            chnl.log()
-            # let the client know
-            return server.responses.NotFound(server=server)
         # attempt to
         try:
-            # ask the dataset for the tile
-            tile = dataset.render(
-                channel=channel, zoom=zoom, origin=origin, shape=shape
+            # get the tile
+            tile = self.store.tile(
+                viewport=viewport,
+                channel=f"{datasetName}.{channelName}",
+                zoom=zoom,
+                origin=origin,
+                shape=shape,
             )
         # if anything else goes wrong
         except Exception as error:
@@ -165,7 +158,7 @@ class Dispatcher:
             chnl = journal.error("qed.ux.dispatch")
             # show me
             chnl.line(str(error))
-            chnl.line(f"while fetching a tile of '{channel}' from '{name}'")
+            chnl.line(f"while fetching a tile of '{channelName}' from '{datasetName}'")
             chnl.line(f"with shape {shape} at {origin}")
             chnl.line(f"at zoom level {zoom}")
             # and flush
@@ -177,10 +170,8 @@ class Dispatcher:
         try:
             # build the response
             response = server.documents.BMP(server=server, bmp=memoryview(tile))
-            # get the dataset name
-            dataname = dataset.pyre_name
             # suggest a file name, in case the user wants to save the tile
-            filename = f"{dataname}.{channel}.{zoomSpec}.{spec}.bmp"
+            filename = f"{datasetName}.{channelName}.{zoomSpec}.{spec}.bmp"
             # encode it
             encoded = urllib.parse.quote(filename)
             # decorate it
@@ -199,7 +190,7 @@ class Dispatcher:
             chnl = journal.error("qed.ux.dispatch")
             # show me
             chnl.line(str(error))
-            chnl.line(f"while generating a '{channel}' tile of '{data}'")
+            chnl.line(f"while generating a '{channelName}' tile of '{datasetName}'")
             chnl.line(f"with shape {shape} at {origin}")
             chnl.line(f"at zoom level {zoom}")
             # and flush
@@ -356,6 +347,7 @@ class Dispatcher:
                 r"/(?P<data>data/"
                 + "/".join(
                     [
+                        rf"(?P<data_viewport>\d+)",
                         rf"(?P<data_dataset>{pyreid})",
                         r"(?P<data_channel>\w+)",
                         rf"(?P<data_zoom>{zoom})",
