@@ -25,7 +25,7 @@ export const useUpdateValueController = ({ viewport, channel }) => {
         // and invoke it
         update(old => old + 1)
         // show me
-        console.log(`viz.useUpdateValueController: served: ${served}, dropped: ${dropped}`)
+        // console.log(`viz.useUpdateValueController: served: ${served}, dropped: ${dropped}`)
         // all done
         return
     }
@@ -82,9 +82,11 @@ export const useUpdateValueController = ({ viewport, channel }) => {
 const useUpdateValueControllerMutation = graphql`
 mutation useUpdateValueControllerMutation($value: ValueControllerUpdateInput!) {
     updateValueController(value: $value) {
+        view {
+            session
+        }
         controller {
             id
-            slot
             dirty
             min
             value
