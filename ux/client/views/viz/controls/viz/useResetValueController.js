@@ -13,7 +13,7 @@ export const useResetValueController = ({ viewport, channel }) => {
     const [commit, pending] = useMutation(useResetValueControllerMutation)
 
     // make the handler
-    const reset = ({ controller }) => {
+    const reset = ({ controller, setMarker, setExtent }) => {
         // if there is a pending operation
         if (pending) {
             // nothing to do
@@ -32,6 +32,16 @@ export const useResetValueController = ({ viewport, channel }) => {
                     // the controller
                     controller,
                 }
+            },
+            onCompleted: (
+                { resetValueController: { controller: { min, value, max } } }
+            ) => {
+                // reset the range
+                setMarker(value)
+                // and the extent
+                setExtent({ min, max })
+                // all done
+                return
             },
             onError: errors => {
                 // show me
@@ -57,8 +67,15 @@ export const useResetValueController = ({ viewport, channel }) => {
 const useResetValueControllerMutation = graphql`
 mutation useResetValueControllerMutation($controller: ValueControllerResetInput!) {
     resetValueController(controller: $controller) {
+        view {
+            session
+        }
         controller {
             id
+            dirty
+            min
+            value
+            max
         }
 
     }
