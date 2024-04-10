@@ -25,7 +25,6 @@ import { Save } from './save'
 export const Sync = ({ qed }) => {
     // my state
     const [modified, setModified] = React.useState(false)
-
     // setup the reset action
     const reset = () => {
         // clear the flag
@@ -33,9 +32,8 @@ export const Sync = ({ qed }) => {
         // all done
         return
     }
-
     const mark = () => {
-        // clear the flag
+        // set the flag
         setModified(true)
         // all done
         return
@@ -46,7 +44,7 @@ export const Sync = ({ qed }) => {
         <Tray title="sync" initially={true} state="enabled" scale={0.5}>
             <Controls>
                 <Spacer />
-                <Save save={reset} enabled={modified} />
+                <Save save={reset} enabled={false} />
                 <Reset reset={reset} enabled={modified} />
             </Controls>
             <Housing>

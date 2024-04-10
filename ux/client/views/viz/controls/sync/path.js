@@ -6,32 +6,58 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay/hooks'
 
 // local
 // hooks
-import { useSynced } from '../../../main/useSynced'
-import { useSyncAspect } from '../../../main/useSyncAspect'
+import { useSyncToggleAll } from './useSyncToggleAll'
+import { useSyncToggleViewport } from './useSyncToggleViewport'
 // components
 import { Control } from './control'
 import { Toggle } from './toggle'
 
 // the path sync control
-export const Path = ({ viewport, mark }) => {
-    // get the sync state of all the viewports
-    const synced = useSynced()
-    // get the sync handler factories
-    const { toggle, force } = useSyncAspect()
+export const Path = ({ viewport, view, mark }) => {
+    // unpack the view
+    const { sync } = useFragment(pathSyncTableFragment, view)
+    // build the handler that toggles all viewports
+    const { toggle: toggleAll } = useSyncToggleAll()
+    // and the single viewport toggle
+    const { toggle: toggleViewport } = useSyncToggleViewport()
+
+    // specialize them
+    const togglePath = () => {
+        // toggle the path entry of the sync table for this viewport
+        toggleViewport({ viewport, aspect: "path" })
+        // all done
+        return
+    }
+    const toggleAllPath = () => {
+        // toggle the path entry of the sync table for this viewport
+        toggleAll({ viewport, aspect: "path" })
+        // all done
+        return
+    }
+
     // render
     return (
         <Control>
             <Toggle
-                state={synced[viewport].path}
-                mark={mark}
-                toggle={toggle(viewport, "path")}
-                force={force(viewport, "path")} />
+                state={sync.path} mark={mark}
+                toggle={togglePath} force={toggleAllPath}
+            />
         </Control>
     )
 }
+
+
+const pathSyncTableFragment = graphql`
+    fragment pathSyncTableFragment on View {
+        sync {
+            path
+        }
+    }
+`
 
 
 // end of file

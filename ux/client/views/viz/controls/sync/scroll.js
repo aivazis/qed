@@ -6,32 +6,58 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay/hooks'
 
 // local
 // hooks
-import { useSynced } from '../../../main/useSynced'
-import { useSyncAspect } from '../../../main/useSyncAspect'
+import { useSyncToggleAll } from './useSyncToggleAll'
+import { useSyncToggleViewport } from './useSyncToggleViewport'
 // components
 import { Control } from './control'
 import { Toggle } from './toggle'
 
 // the scroll sync control
-export const Scroll = ({ viewport, mark }) => {
-    // get the sync state of all the viewports
-    const synced = useSynced()
-    // get the sync handler factories
-    const { toggle, force } = useSyncAspect()
+export const Scroll = ({ viewport, view, mark }) => {
+    // unpack the view
+    const { sync } = useFragment(scrollSyncTableFragment, view)
+    // build the handler that toggles all viewports
+    const { toggle: toggleAll } = useSyncToggleAll()
+    // and the single viewport toggle
+    const { toggle: toggleViewport } = useSyncToggleViewport()
+
+    // specialize them
+    const toggleScroll = () => {
+        // toggle the scroll entry of the sync table for this viewport
+        toggleViewport({ viewport, aspect: "scroll" })
+        // all done
+        return
+    }
+    const toggleAllScroll = () => {
+        // toggle the scroll entry of the sync table for this viewport
+        toggleAll({ viewport, aspect: "scroll" })
+        // all done
+        return
+    }
+
     // render
     return (
         <Control>
             <Toggle
-                state={synced[viewport].scroll}
-                mark={mark}
-                toggle={toggle(viewport, "scroll")}
-                force={force(viewport, "scroll")} />
+                state={sync.scroll} mark={mark}
+                toggle={toggleScroll} force={toggleAllScroll}
+            />
         </Control>
     )
 }
+
+
+const scrollSyncTableFragment = graphql`
+    fragment scrollSyncTableFragment on View {
+        sync {
+            scroll
+        }
+    }
+`
 
 
 // end of file

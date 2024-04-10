@@ -6,6 +6,7 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay/hooks'
 import styled from 'styled-components'
 
 // locals
@@ -19,26 +20,21 @@ import { Zoom } from './zoom'
 
 // the body of the sync control table
 export const Body = ({ qed, mark }) => {
-    // MGA: FIXME
-    console.group(`views.viz.viz.controls.sync.body: FIREWALL`)
-    console.log(` -*- NEEDS FRAGMENT TO EXTRACT dataset -*-`)
-    console.groupEnd()
-    // get the set of views; NEEDS FRAGMENT
-    const { views } = qed
-
+    // unpack the views
+    const { views } = useFragment(bodyGetSyncTableFragment, qed)
     // render
     return (
         <Container>
-            {views.map(({ dataset }, viewport) => {
+            {views.map((view, viewport) => {
                 // render
                 return (
-                    <Viewport key={`${dataset.name}:${viewport}`}>
-                        <Dataset viewport={viewport}>{dataset.name}</Dataset>
-                        <Channel viewport={viewport} mark={mark} />
-                        <Zoom viewport={viewport} mark={mark} />
-                        <Scroll viewport={viewport} mark={mark} />
-                        <Path viewport={viewport} mark={mark} />
-                        <Offset viewport={viewport} mark={mark} />
+                    <Viewport key={`sync:${viewport}`}>
+                        <Dataset viewport={viewport} view={view} />
+                        <Channel viewport={viewport} view={view} mark={mark} />
+                        <Zoom viewport={viewport} view={view} mark={mark} />
+                        <Scroll viewport={viewport} view={view} mark={mark} />
+                        <Path viewport={viewport} view={view} mark={mark} />
+                        <Offset viewport={viewport} view={view} mark={mark} />
                     </Viewport>
                 )
             })}
@@ -46,6 +42,13 @@ export const Body = ({ qed, mark }) => {
     )
 }
 
+
+const foo = () => {
+    return (
+        <>
+        </>
+    )
+}
 
 // the table body
 const Container = styled.tbody`
@@ -56,6 +59,45 @@ const Container = styled.tbody`
 const Viewport = styled.tr`
     cursor: default;
     vertical-align: middle;
+`
+
+
+// fragments
+const bodyGetViewSyncStateFragment = graphql`
+    fragment bodyGetViewSyncStateFragment on View {
+        dataset {
+            name
+        }
+        sync {
+            dirty
+            channel
+            zoom
+            scroll
+            path
+            offsets { x y }
+        }
+    }
+`
+
+
+const bodyGetSyncTableFragment = graphql`
+    fragment bodyGetSyncTableFragment on QED {
+        views {
+            # individual entries
+            # for the dataset column
+            ...datasetSyncTableFragment
+            # for the channel column
+            ...channelSyncTableFragment
+            # for the zoom column
+            ...zoomSyncTableFragment
+            # for the scroll column
+            ...scrollSyncTableFragment
+            # for the path column
+            ...pathSyncTableFragment
+            # for the offset column
+            ...offsetSyncTableFragment
+    }
+}
 `
 
 

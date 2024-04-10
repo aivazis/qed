@@ -6,32 +6,32 @@
 
 // externals
 import React from 'react'
+import { graphql, useFragment } from 'react-relay/hooks'
 import styled from 'styled-components'
 
 // local
 // hooks
-import { useSynced } from '../../../main/useSynced'
-import { useSyncAspect } from '../../../main/useSyncAspect'
+import { useSyncUpdateOffset } from './useSyncUpdateOffset'
 // components
 import { Cell } from './cell'
 import { Coordinate } from './coordinate'
 
 
 // the channel sync control
-export const Offset = ({ viewport, mark }) => {
-    // get the sync state of all the viewports
-    const synced = useSynced()
-    // get the sync handler factory
-    const { update } = useSyncAspect()
+export const Offset = ({ viewport, view, mark }) => {
+    // unpack the view
+    const { sync } = useFragment(offsetSyncTableFragment, view)
+    // build the single viewport update
+    const { update } = useSyncUpdateOffset()
 
     // get the offset
-    const offset = synced[viewport].offset
+    const offset = sync.offsets
     // build the handler
-    const adjust = () => {
+    const adjust = offset => {
         // mark
         mark()
         // update
-        update(viewport, "offset")
+        update({ viewport, offset })
         // and done
         return
     }
@@ -60,5 +60,14 @@ const Sample = styled(Coordinate)`
     text-align: left;
     padding-left: 0.5em;
 `
+
+const offsetSyncTableFragment = graphql`
+    fragment offsetSyncTableFragment on View {
+        sync {
+            offsets {x y}
+        }
+    }
+`
+
 
 // end of file

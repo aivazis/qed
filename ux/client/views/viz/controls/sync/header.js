@@ -15,7 +15,7 @@ import { theme } from '~/palette'
 // local
 // hooks
 import { useViewports } from '~/views/viz'
-import { useSyncAspect } from '~/views/main/useSyncAspect'
+import { useSyncToggleAll } from './useSyncToggleAll'
 
 
 // the sync control table header
@@ -23,11 +23,9 @@ export const Header = ({ mark }) => {
     // get the set of views
     const { activeViewport } = useViewports()
     // get the sync handler factories
-    const { force } = useSyncAspect()
+    const { toggle } = useSyncToggleAll()
     // a behavior factory
     const behaviors = aspect => {
-        // build the handler
-        const update = force(activeViewport, aspect)
         // build the table of behaviors and return it
         return {
             onClick: evt => {
@@ -36,7 +34,7 @@ export const Header = ({ mark }) => {
                 // and quash any side effects
                 evt.preventDefault()
                 // update the entire column based on the state of the active viewport
-                update()
+                toggle({ viewport: activeViewport, aspect })
                 // mark the control as modified
                 mark()
                 // all done
