@@ -351,6 +351,15 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return view.sync
 
+    def vizResetController(self, viewport, **kwds):
+        """
+        Reset the configuration of a viz pipeline controller
+        """
+        # get the {viewport} configuration
+        port = self._viewports[viewport]
+        # and delegate
+        return port.vizResetController(**kwds)
+
     def vizUpdateController(self, viewport, **kwds):
         """
         Update the configuration of a viz pipeline controller

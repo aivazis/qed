@@ -206,6 +206,17 @@ class Viewport(
         # and delegate
         return view.syncReset()
 
+    def vizResetController(self, **kwds):
+        """
+        Reset a controller of my active visualization pipeline
+        """
+        # get my active view
+        view = self._view
+        # update the controller
+        controller = view.vizResetController(**kwds)
+        # and hand off the pair
+        return view, controller
+
     def vizUpdateController(self, **kwds):
         """
         Update a controller of my active visualization pipeline
@@ -214,8 +225,6 @@ class Viewport(
         view = self._view
         # update the controller
         controller = view.vizUpdateController(**kwds)
-        # grab a new session token
-        view.session = uuid.uuid1()
         # and hand off the pair
         return view, controller
 
