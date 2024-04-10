@@ -381,6 +381,25 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
+    def vizResetController(self, name, channel):
+        """
+        Reset the state of one of my controllers
+        """
+        # form the name of the pipeline and look it up
+        pipeline = self._pipelines[channel]
+        # get the controller
+        controller = getattr(pipeline, name)
+        # get the reference configuration
+        reference = getattr(self.dataset.channel(name=pipeline.tag), name)
+        # restore the controller configuration
+        self.harvester.configure(component=controller, reference=reference)
+        # mark is as clean
+        controller.dirty = False
+        # grab a new session token
+        self.session = uuid.uuid1()
+        # all done
+        return controller
+
     def vizUpdateController(self, name, channel, configuration):
         """
         Update the state of one of my controllers
@@ -393,6 +412,8 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         for name, value in configuration.items():
             # and adjust the controller state
             setattr(controller, name, value)
+        # grab a new session token
+        self.session = uuid.uuid1()
         # all done
         return controller
 
