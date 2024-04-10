@@ -316,10 +316,10 @@ class Store(qed.shells.command, family="qed.cli.ux"):
 
     def syncToggleAll(self, viewport, aspect):
         """
-        Toggle the scroll flag of the sync table
+        Toggle the {aspect} flag of the sync table
         """
-        # get the value from the viewport
-        value = getattr(self._viewports[viewport].view().sync, aspect)
+        # get the value from the {viewport} and flip it
+        value = not getattr(self._viewports[viewport].view().sync, aspect)
         # go through all my viewports
         for port in self._viewports:
             # and ask each one to set its {aspect} flag to the reference value
