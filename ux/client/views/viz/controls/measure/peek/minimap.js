@@ -37,7 +37,7 @@ export const Minimap = ({ viewport, view, point }) => {
     )
     // form the base tile uri at zoom level 0, suitable for the minimap
     const uri = tileURI({
-        reader, dataset, channel, zoom: { horizontal: 0, vertical: 0 }
+        viewport, reader, dataset, channel, zoom: { horizontal: 0, vertical: 0 }
     })
 
     // get the active dataset extent

@@ -27,14 +27,14 @@ import { Measure } from '../measure'
 export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     // unpack the view
     const {
-        reader, dataset, channel, measure, zoom
+        session, reader, dataset, channel, measure, zoom
     } = useFragment(viewportViewerGetViewFragment, view)
     // get the pile of registered {viewports}; i'm at {viewport}
     const { activeViewport, viewports } = useViewports()
     // make a handler that centers my viewport
     const centerViewport = useCenterViewport(viewport)
     // get the base URI for tiles
-    const uri = tileURI({ reader, dataset, channel, zoom })
+    const uri = tileURI({ reader, dataset, channel, zoom, viewport })
     // unpack what i need from the dataset
     const { shape, origin, tile } = dataset
     // convert the zoom level into a scale
@@ -82,7 +82,7 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
             <View uri={uri}
                 origin={origin} shape={shape} tile={tile}
                 zoom={[zoom.vertical, zoom.horizontal]}
-                session={channel.session} />
+                session={session} />
             {/* the measure layer */}
             {measure.active &&
                 <Measure viewport={viewport} view={view} shape={zoomedShape} scale={scale} />
@@ -147,6 +147,8 @@ const View = React.memo(DataTiles, canSkipRender)
 // my fragment
 const viewportViewerGetViewFragment = graphql`
     fragment viewportViewerGetViewFragment on View {
+        id
+        session
         reader {
             id
             name
@@ -161,7 +163,6 @@ const viewportViewerGetViewFragment = graphql`
         }
         channel {
             tag
-            session
         }
         measure {
             active

@@ -30,7 +30,7 @@ export const Info = ({ viewport, view }) => {
     const [location, setLocation] = React.useState({ x: 0, y: 0 })
 
     // assemble the data request URI
-    const base = tileURI({ reader, dataset, channel, zoom })
+    const base = tileURI({ reader, dataset, channel, zoom, viewport })
     // extract the relevant metadata
     const { name: readerName, id, uri } = reader
     const { name: datasetName, datatype, shape, origin, tile } = dataset

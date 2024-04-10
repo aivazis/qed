@@ -32,7 +32,7 @@ export const Print = ({ viewport, view }) => {
     // get the pile of registered {viewports}; mine is at {viewport}
     const { viewports } = useViewports()
     // get uri to the tile api
-    const uri = tileURI({ reader, dataset, channel, zoom })
+    const uri = tileURI({ reader, dataset, channel, zoom, viewport })
     // convert the zoom level into a scale
     const scale = [zoom.vertical, zoom.horizontal].map(level => 2 ** -level)
     // get the shape of the raster
