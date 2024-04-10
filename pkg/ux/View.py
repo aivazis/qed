@@ -48,7 +48,23 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
     zoom = qed.protocols.ux.zoom()
     zoom.doc = "the zoom level"
 
+    session = qed.properties.str()
+    session.doc = "the session token"
+
     # interface
+    def tile(self, channel, zoom, origin, shape):
+        """
+        Render a tile of data using the {channel} visualization pipeline
+        """
+        # form the channel name
+        name = f"{self.pyre_name}.{channel}"
+        # locate the pipeline
+        pipeline = self._pipelines[name]
+        # and ask my dataset to render the tile
+        return self.dataset.render(
+            channel=pipeline, zoom=zoom, origin=origin, shape=shape
+        )
+
     def toggleSelection(self, key, value):
         """
         Toggle the {value} of {key} in my {selections}
@@ -365,6 +381,21 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
+    def vizUpdateController(self, name, channel, configuration):
+        """
+        Update the state of one of my controllers
+        """
+        # form the name of the pipeline and look it up
+        pipeline = self._pipelines[channel]
+        # get the controller
+        controller = getattr(pipeline, name)
+        # go through the configuration
+        for name, value in configuration.items():
+            # and adjust the controller state
+            setattr(controller, name, value)
+        # all done
+        return controller
+
     def zoomSetLevel(self, horizontal, vertical):
         """
         Set the zoom levels
@@ -582,6 +613,8 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         self.measure = config.measure.clone(name=f"{name}.measure")
         self.sync = config.sync.clone(name=f"{name}.sync")
         self.zoom = config.zoom.clone(name=f"{name}.zoom")
+        # make my initial session token
+        self.session = uuid.uuid1()
         # all done; report no errors
         return []
 

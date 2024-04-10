@@ -22,6 +22,15 @@ class Store(qed.shells.command, family="qed.cli.ux"):
     """
 
     # interface
+    def tile(self, viewport, **kwds):
+        """
+        Extract a data tile from {viewport}
+        """
+        # get the port
+        port = self._viewports[viewport]
+        # and delegate
+        return port.tile(**kwds)
+
     # archives
     @property
     def archives(self):
@@ -341,6 +350,15 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         view = port.syncReset()
         # all done
         return view.sync
+
+    def vizUpdateController(self, viewport, **kwds):
+        """
+        Update the configuration of a viz pipeline controller
+        """
+        # get the {viewport} configuration
+        port = self._viewports[viewport]
+        # and delegate
+        return port.vizUpdateController(**kwds)
 
     def zoomSetLevel(self, viewport, horizontal, vertical):
         """
