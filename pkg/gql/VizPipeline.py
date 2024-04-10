@@ -56,7 +56,6 @@ class VizPipeline(graphene.ObjectType):
             context = {
                 "controller": controller,
                 "trait": trait,
-                "session": controller.pyre_id,
             }
             # and resolve it
             yield context

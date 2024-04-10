@@ -29,7 +29,6 @@ class Channel(graphene.ObjectType):
     id = graphene.ID()
     name = graphene.ID()
     tag = graphene.String()
-    session = graphene.String()
     controllers = graphene.List(Controller)
 
     # resolvers
@@ -60,7 +59,6 @@ class Channel(graphene.ObjectType):
             context = {
                 "controller": controller,
                 "trait": trait,
-                "session": controller.pyre_id,
             }
             # and resolve it
             yield context
