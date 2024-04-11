@@ -384,12 +384,14 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         Set the zoom levels
         """
-        # get the viewport configuration
-        port = self._viewports[viewport]
-        # and delegate
-        view = port.zoomSetLevel(horizontal=horizontal, vertical=vertical)
-        # return the measure configuration
-        return view.zoom
+        # go through all the synced viewports
+        for port in self._syncedWith(viewport=viewport, aspect="zoom"):
+            # set the zoom level
+            view = port.zoomSetLevel(horizontal=horizontal, vertical=vertical)
+            # and hand the zoom settings off
+            yield view.zoom
+        # all done
+        return
 
     def zoomToggleCoupled(self, viewport):
         """
@@ -472,6 +474,33 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         plexus.datasets = []
         # all done
         return sources
+
+    def _syncedWith(self, viewport, aspect):
+        """
+        Build a sequence of viewports that are {aspect} synced with {viewport}
+        """
+        # get the port
+        port = self._viewports[viewport]
+        # {viewport} is always in the set
+        yield port
+        # get the sync status of {aspect}
+        synced = getattr(port.view().sync, aspect)
+        # if it's {aspect} synced
+        if synced:
+            # hunt down all the others
+            for index, port in enumerate(self._viewports):
+                # {viewport} should not be double counted
+                if index == viewport:
+                    # so skip it
+                    continue
+                # get the sync status of {aspect}
+                synced = getattr(port.view().sync, aspect)
+                # if it's on
+                if synced:
+                    # add this viewport to the pile
+                    yield port
+        # all done
+        return
 
     # debugging support
     def pyre_dump(self):
