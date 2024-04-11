@@ -272,7 +272,7 @@ type Mutation {
   viewSplit(viewport: Int!): ViewInfo!
   viewSelectReader(viewport: Int!, reader: String!): ViewInfo!
   viewToggleCoordinate(selection: ViewSelectorInput!): ViewInfo!
-  viewToggleChannel(selection: ViewSelectorInput!): ViewInfo!
+  viewChannelSet(selection: ViewSelectorInput!): ViewInfos!
   viewPersist(dummy: ID): PersistInfo
   # measure layer
   viewMeasureAnchorAdd(viewport: Int!, x: Int!, y: Int!, index: Int): DatasetMeasureInfo!
@@ -332,6 +332,11 @@ input ViewSelectorInput {
 type ViewInfo {
   # the view settings
   view: View
+}
+
+type ViewInfos {
+  # the view settings
+  views: [View]
 }
 
 # the measure layer state response payload

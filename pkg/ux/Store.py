@@ -81,7 +81,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
 
     def source(self, name):
         """
-        Retrieve an reader given its {name}
+        Retrieve a reader given its {name}
         """
         # easy enough
         return self._dataSources.source(name=name)
@@ -169,7 +169,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # and ask it to select the named reader
         return port.selectSource(source=source)
 
-    def toggleChannel(self, viewport, source, tag):
+    def channelSet(self, viewport, source, tag):
         """
         Toggle the value of {channel}
         """
@@ -177,8 +177,38 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         source = self.source(name=source)
         # get the viewport configuration
         port = self._viewports[viewport]
-        # and delegate
-        return port.toggleChannel(source=source, tag=tag)
+        # and get the selected channel, if any
+        channel = port.view().channel
+        # if there is a channel and its tag matches our target {tag}
+        if channel and channel.tag == tag:
+            # just toggle {viewport} only
+            yield port.setChannel(source=source, tag=None)
+            # and leave everybody else alone
+            return
+        # otherwise, we are setting the channel to {tag}; get all the channel synced viewports
+        for port in self._syncedWith(viewport=viewport, aspect="channel"):
+            # get the view
+            view = port.view()
+            # get its source
+            source = view.reader
+            # if this view has no reader
+            if not source:
+                # skip it
+                continue
+            # get its dataset
+            dataset = view.dataset
+            # if this view has no selected dataset
+            if not dataset:
+                # skip it
+                continue
+            # if the dataset doesn't understand the tag
+            if tag not in dataset.channels:
+                # skip it
+                continue
+            # otherwise, set the channel
+            yield port.setChannel(source=source, tag=tag)
+        # all done
+        return
 
     def toggleCoordinate(self, viewport, source, axis, coordinate):
         """
@@ -481,14 +511,16 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return sources
 
-    def _syncedWith(self, viewport, aspect):
+    def _syncedWith(self, viewport, aspect, exclude=False):
         """
         Build a sequence of viewports that are {aspect} synced with {viewport}
         """
         # get the port
         port = self._viewports[viewport]
-        # {viewport} is always in the set
-        yield port
+        # if {viewport} is not excluded explicitly
+        if not exclude:
+            # add it to the pile
+            yield port
         # get the sync status of {aspect}
         synced = getattr(port.view().sync, aspect)
         # if it's {aspect} synced

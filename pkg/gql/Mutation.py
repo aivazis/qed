@@ -34,7 +34,7 @@ class Mutation(graphene.ObjectType):
     viewSelectReader = views.selectReader.Field()
     viewCollapse = views.collapse.Field()
     viewSplit = views.split.Field()
-    viewToggleChannel = views.toggleChannel.Field()
+    viewChannelSet = views.channelSet.Field()
     viewToggleCoordinate = views.toggleCoordinate.Field()
     viewPersist = views.persist.Field()
 
