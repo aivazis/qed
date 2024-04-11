@@ -77,8 +77,8 @@ const Layer = ({ viewport, view, shape, scale }) => {
             const { offsetX, offsetY } = evt
             // scale and pack
             const anchor = {
-                x: scale.horizontal * offsetX,
-                y: scale.vertical * offsetY,
+                x: Math.round(scale.horizontal * offsetX),
+                y: Math.round(scale.vertical * offsetY),
             }
             // add it to the pile
             add(anchor)
