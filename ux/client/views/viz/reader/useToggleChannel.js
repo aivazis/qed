@@ -110,6 +110,8 @@ const toggleChannelMutation = graphql`
                 ...zoomControlsGetZoomStateFragment
                 # for the viz control
                 ...vizControlsGetViewFragment
+                # for the sync table
+                ...bodyGetViewSyncStateFragment
             }
         }
     }
