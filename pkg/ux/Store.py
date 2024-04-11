@@ -399,10 +399,16 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         # get the viewport configuration
         port = self._viewports[viewport]
-        # and delegate
-        view = port.zoomToggleCoupled()
-        # return the measure configuration
-        return view.zoom
+        # get its coupled flag and invert it
+        flag = not port.view().zoom.coupled
+        # now, go through all the synced viewports
+        for port in self._syncedWith(viewport=viewport, aspect="zoom"):
+            # set the flag
+            view = port.zoomSetCoupled(flag=flag)
+            # hand the zoom setting off
+            yield view.zoom
+        # all done
+        return
 
     def zoomReset(self, viewport):
         """
