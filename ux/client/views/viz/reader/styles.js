@@ -218,6 +218,7 @@ const channelPaint = {
     },
 
     selected: {
+        cursor: "default",
         color: theme.page.name,
     },
 }
