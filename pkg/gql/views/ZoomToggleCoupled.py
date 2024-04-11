@@ -25,7 +25,7 @@ class ZoomToggleCoupled(graphene.Mutation):
         viewport = graphene.Int(required=True)
 
     # the result is the updated view
-    zoom = graphene.Field(Zoom)
+    zoom = graphene.List(Zoom)
 
     # the mutator
     @staticmethod
