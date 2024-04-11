@@ -11,7 +11,7 @@ import React from 'react'
 // hooks
 import { useIsActive } from './useIsActive'
 import { useChannel } from './useChannel'
-import { useToggleChannel } from './useToggleChannel'
+import { useChannelSet } from './useChannelSet'
 // styles
 import styles from './styles'
 
@@ -23,39 +23,35 @@ export const Channel = ({ channel }) => {
     // get the active channel
     const activeChannel = useChannel()
     // make a toggle
-    const toggleChannel = useToggleChannel(channel)
+    const channelSet = useChannelSet(channel)
     // park extra state dependent styling here
     const [polish, setPolish] = React.useState(false)
 
     // initialize my state
     const state = activeReader && (activeChannel?.tag === channel.tag) ? "selected" : "enabled"
 
-    // make a handler that toggles me as the value of my {axis}
-    const toggle = () => {
-        // toggle me as the value of my {axis}
-        toggleChannel()
-        // reset the extra polish
-        setPolish(false)
-        // all done
-        return
-    }
-    // and one that removes any extra polish
-    const reset = () => {
-        // reset the extra polish
-        setPolish(false)
-        // all done
-        return
-    }
+    // initialize my controllers
+    let behaviors = {}
 
-    // build my controllers
-    let behaviors = {
-        // select/unselect when clicked
-        onClick: toggle,
-        // and a reset for when it leaves my client area
-        onMouseLeave: reset,
-    }
     // if i'm enabled
     if (state === "enabled") {
+        // make a handler that toggles me as the value of my {axis}
+        const toggle = () => {
+            // toggle me as the value of my {axis}
+            channelSet()
+            // reset the extra polish
+            setPolish(false)
+            // all done
+            return
+        }
+        // and one that removes any extra polish
+        const reset = () => {
+            // reset the extra polish
+            setPolish(false)
+            // all done
+            return
+        }
+
         // make a handler that highlights enabled values
         const highlight = () => {
             // highlight
@@ -67,6 +63,10 @@ export const Channel = ({ channel }) => {
         behaviors = {
             // by adding to the default ones
             ...behaviors,
+            // select/unselect when clicked
+            onClick: toggle,
+            // and a reset for when it leaves my client area
+            onMouseLeave: reset,
             // the highlighter, when the cursor hovers
             onMouseEnter: highlight,
         }
