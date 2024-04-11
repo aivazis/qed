@@ -17,7 +17,7 @@ from .View import View
 
 
 # remove a view from the pile
-class ToggleChannel(graphene.Mutation):
+class ChannelSet(graphene.Mutation):
     """
     Remove a view
     """
@@ -28,7 +28,7 @@ class ToggleChannel(graphene.Mutation):
         selection = ViewSelectorInput(required=True)
 
     # the result is the updated view
-    view = graphene.Field(View)
+    views = graphene.List(View)
 
     # the range controller mutator
     @staticmethod
@@ -46,9 +46,9 @@ class ToggleChannel(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to set the reader of the {viewport}
-        view = store.toggleChannel(viewport=viewport, source=source, tag=tag)
+        views = store.channelSet(viewport=viewport, source=source, tag=tag)
         # form the mutation resolution context
-        context = {"view": view}
+        context = {"views": views}
         # and resolve the mutation
         return context
 

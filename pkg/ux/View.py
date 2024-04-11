@@ -86,35 +86,33 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
-    def toggleChannel(self, tag):
+    def setChannel(self, tag):
         """
-        Toggle the value of my {channel}
+        Set my channel to the one wih {tag}
         """
-        # get my dataset
+        # if the tag is trivial
+        if tag is None:
+            # clear the channel
+            self.channel = None
+            # and bail
+            return self
+        # otherwise, get my dataset
         dataset = self.dataset
         # if i don't have one
         if not dataset:
             # it's a bug
             firewall = journal.firewall("qed.ux.store")
             # complain
-            firewall.line(f"cannot toggle the channel using the tag '{tag}'")
+            firewall.line(f"cannot ser the channel to '{tag}'")
             firewall.line(f"no dataset selection for {self.reader}")
             # flush
             firewall.log()
             # and bail, just in case firewalls aren't fatal
             return self
-        # get the channel
-        current = self.channel
-        # if there is one and its tag matches {tag}
-        if current and current.tag == tag:
-            # clear it
-            self.channel = None
-        # otherwise
-        else:
-            # build its name
-            name = f"{self.pyre_name}.{dataset.pyre_name}.{tag}"
-            # look it up and set it
-            self.channel = self._pipelines[name]
+        # build the channel name
+        name = f"{self.pyre_name}.{dataset.pyre_name}.{tag}"
+        # look it up and set it
+        self.channel = self._pipelines[name]
         # solve the selection
         self.resolve()
         # all done

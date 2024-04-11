@@ -46,16 +46,14 @@ class Viewport(
         # all done
         return self.view()
 
-    def toggleChannel(self, source, tag):
+    def setChannel(self, source, tag):
         """
-        Toggle {coordinate}
+        Set the channel to the one with the given {tag}
         """
         # activate the {source}
         view = self._selectSource(source=source)
         # and delegate
-        view.toggleChannel(tag=tag)
-        # all done
-        return self.view()
+        return view.setChannel(tag=tag)
 
     def toggleCoordinate(self, source, axis, coordinate):
         """
