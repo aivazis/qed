@@ -292,7 +292,7 @@ type Mutation {
   viewSyncToggleViewport(viewport: Int!, aspect: String!): DatasetSyncInfo!
   viewSyncUpdateOffset(viewport: Int!, x: Int!, y: Int!): DatasetSyncInfo!
   # zoom
-  viewZoomSetLevel(viewport: Int!, horizontal: Float!, vertical: Float!): DatasetZoomInfo!
+  viewZoomSetLevel(viewport: Int!, horizontal: Float!, vertical: Float!): DatasetZoomInfos!
   viewZoomToggleCoupled(viewport: Int!): DatasetZoomInfo!
   viewZoomReset(viewport: Int!): DatasetZoomInfo!
 
@@ -356,6 +356,12 @@ type DatasetSyncInfos {
 type DatasetZoomInfo {
   # the zoom settings
   zoom: DatasetZoom
+}
+
+# the measure layer state response payload
+type DatasetZoomInfos {
+  # the zoom settings
+  zoom: [DatasetZoom]
 }
 
 # support for connecting and disconnecting data archives
