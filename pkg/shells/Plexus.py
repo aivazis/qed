@@ -34,6 +34,9 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     datasets.doc = "the list of datasets to display"
     datasets.aliases = {"ds"}
 
+    views = qed.properties.list(schema=qed.protocols.ux.view())
+    views.doc = "the initial list of views"
+
     # the reader to use for all datasets that don't specify one
     reader = qed.properties.str(default=None)
     reader.aliases = {"r"}
