@@ -293,7 +293,7 @@ type Mutation {
   viewSyncUpdateOffset(viewport: Int!, x: Int!, y: Int!): DatasetSyncInfo!
   # zoom
   viewZoomSetLevel(viewport: Int!, horizontal: Float!, vertical: Float!): DatasetZoomInfos!
-  viewZoomToggleCoupled(viewport: Int!): DatasetZoomInfo!
+  viewZoomToggleCoupled(viewport: Int!): DatasetZoomInfos!
   viewZoomReset(viewport: Int!): DatasetZoomInfo!
 
   # data archive connections
