@@ -7,8 +7,10 @@
 # the dispatcher
 from .Dispatcher import Dispatcher as dispatcher
 
-# the application store
+# the application store and its part
 from .Store import Store as store
+from .Viewport import Viewport as viewport
+from .View import View as view
 
 # configurable state
 from .Source import Source as source
