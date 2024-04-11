@@ -237,14 +237,14 @@ class Viewport(
         # and delegate
         return view.zoomSetLevel(horizontal=horizontal, vertical=vertical)
 
-    def zoomToggleCoupled(self):
+    def zoomSetCoupled(self, flag):
         """
-        Toggle the lock flag
+        Set the lock flag
         """
         # get the view
         view = self._view
         # and delegate
-        return view.zoomToggleCoupled()
+        return view.zoomSetCoupled(flag)
 
     def zoomReset(self):
         """
