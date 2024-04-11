@@ -27,7 +27,7 @@ class ZoomSetLevel(graphene.Mutation):
         vertical = graphene.Float(required=True)
 
     # the result is the updated view
-    zoom = graphene.Field(Zoom)
+    zoom = graphene.List(Zoom)
 
     # the mutator
     @staticmethod
