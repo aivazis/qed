@@ -427,12 +427,12 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
-    def zoomToggleCoupled(self):
+    def zoomSetCoupled(self, flag):
         """
-        Toggle the lock flag
+        Set the zoom lock flag
         """
         # set
-        self.zoom.coupled ^= True
+        self.zoom.coupled = flag
         # all done
         return self
 
