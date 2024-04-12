@@ -51,6 +51,7 @@ const measureToggleLayerMutation = graphql`
     mutation useMeasureToggleLayerMutation($viewport: Int!, $reader: String!) {
         viewMeasureToggleLayer(viewport: $viewport, reader: $reader) {
             measures{
+                dirty
                 active
             }
         }

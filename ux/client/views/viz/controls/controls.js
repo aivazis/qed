@@ -44,7 +44,7 @@ export const Controls = ({ qed }) => {
             {/* the title of the panel */}
             <Header title="controls" style={styles.header} />
             {/* controls for the measuring layer */}
-            {enabled && <Measure view={view} />}
+            {enabled && <Measure viewport={activeViewport} view={view} />}
             {/* the controls common to all datasets */}
             {enabled && <Zoom viewport={activeViewport} view={view} />}
             {/* visualization pipeline controls */}

@@ -54,7 +54,7 @@ const useAnchorRemoveMutation = graphql`
     mutation useAnchorRemoveMutation($viewport: Int!, $anchor:  Int!) {
         viewMeasureAnchorRemove(viewport: $viewport, anchor: $anchor) {
             measures {
-                id
+                dirty
                 path {
                     x
                     y
