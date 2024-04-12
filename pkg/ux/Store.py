@@ -244,7 +244,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         for port in self._syncedWith(viewport=viewport, aspect="path"):
             # and add an anchor to their path
             view = port.measureAddAnchor(x=x, y=y, index=index)
-            # hand of the measure configuration
+            # hand off the measure configuration
             yield view.measure
         # all done
         return
@@ -259,7 +259,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         for port in self._syncedWith(viewport=viewport, aspect="path"):
             # place the indicated anchor at the specified location
             view = port.measureAnchorPlace(handle=handle, x=x, y=y)
-            # hand of the measure configuration
+            # hand off the measure configuration
             yield view.measure
         # all done
         return
@@ -274,7 +274,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         for port in self._syncedWith(viewport=viewport, aspect="path"):
             # move the indicated anchor to a new location
             view = port.measureAnchorMove(handle=handle, dx=dx, dy=dy)
-            # hand of the measure configuration
+            # hand off the measure configuration
             yield view.measure
         # all done
         return
@@ -289,7 +289,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         for port in self._syncedWith(viewport=viewport, aspect="path"):
             # remove the indicated anchor
             view = port.measureAnchorRemove(anchor=anchor)
-            # hand of the measure configuration
+            # hand off the measure configuration
             yield view.measure
         # all done
         return
@@ -304,7 +304,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         for port in self._syncedWith(viewport=viewport, aspect="path"):
             # create a new anchor after the indicated one
             view = port.measureAnchorSplit(anchor=anchor)
-            # hand of the measure configuration
+            # hand off the measure configuration
             yield view.measure
         # all done
         return
@@ -330,7 +330,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         for port in self._syncedWith(viewport=viewport, aspect="path"):
             # and toggle the indicated index in the anchor selection
             view = port.measureAnchorToggleSelection(index=index)
-            # hand of the measure configuration
+            # hand off the measure configuration
             yield view.measure
         # all done
         return
@@ -341,10 +341,14 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         # get the viewport configuration
         port = self._viewports[viewport]
-        # delegate
-        view = port.measureAnchorToggleSelectionMulti(index=index)
+        # go through all viewports that are path synced
+        for port in self._syncedWith(viewport=viewport, aspect="path"):
+            # and toggle the selection in multinode mode
+            view = port.measureAnchorToggleSelectionMulti(index=index)
+            # hand off the measure configuration
+            yield view.measure
         # all done
-        return view.measure
+        return
 
     def measureToggleClosedPath(self, viewport):
         """
@@ -358,7 +362,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         for port in self._syncedWith(viewport=viewport, aspect="path"):
             # and adjust their flags
             view = port.measureSetClosedPath(closed=closed)
-            # hand of the measure configuration
+            # hand off the measure configuration
             yield view.measure
         # all done
         return
