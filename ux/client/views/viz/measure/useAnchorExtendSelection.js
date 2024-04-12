@@ -54,7 +54,7 @@ const useAnchorExtendSelectionMutation = graphql`
     mutation useAnchorExtendSelectionMutation($viewport: Int!, $index: Int!) {
         viewMeasureAnchorExtendSelection(viewport: $viewport, index: $index) {
             measures {
-                id
+                dirty
                 selection
             }
         }

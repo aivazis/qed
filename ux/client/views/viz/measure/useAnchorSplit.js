@@ -54,7 +54,7 @@ const useAnchorSplitMutation = graphql`
     mutation useAnchorSplitMutation($viewport: Int!, $anchor:  Int!) {
         viewMeasureAnchorSplit(viewport: $viewport, anchor: $anchor) {
             measures {
-                id
+                dirty
                 path {
                     x
                     y

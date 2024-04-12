@@ -54,7 +54,7 @@ const useAnchorToggleSelectionMutation = graphql`
     mutation useAnchorToggleSelectionMutation($viewport: Int!, $index: Int!) {
         viewMeasureAnchorToggleSelection(viewport: $viewport, index: $index) {
             measures {
-                id
+                dirty
                 selection
             }
         }

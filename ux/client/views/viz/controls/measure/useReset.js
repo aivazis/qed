@@ -7,13 +7,13 @@
 // externals
 import { graphql, useMutation } from 'react-relay/hooks'
 
-// toggle the anchor selection in multinode mode
-export const useAnchorToggleSelectionMulti = viewport => {
-    // toggling the anchor selection mutates the server side store
-    const [commit, pending] = useMutation(useAnchorToggleSelectionMultiMutation)
+// reset the zoom panel to its default state
+export const useReset = viewport => {
+    // resetting the measure state modifies the server side store
+    const [commit, pending] = useMutation(useResetMeasureMutation)
 
     // make the handler
-    const toggle = index => {
+    const reset = () => {
         // if there is already a pending operation
         if (pending) {
             // nothing to do
@@ -26,14 +26,13 @@ export const useAnchorToggleSelectionMulti = viewport => {
                 // the payload
                 // the viewport
                 viewport,
-                // the anchor index
-                index,
             },
             onError: errors => {
                 // show me
-                console.log(`viz.measure.useAnchorToggleSelectionMulti:`)
+                console.log(`viz.zoom.useReset:`)
                 console.group()
-                console.log(`ERROR while modifying the anchor selection in viewport ${viewport}`)
+                console.log(`viewport ${viewport}`)
+                console.log(`ERROR while resetting the zoom panel state`)
                 console.log(errors)
                 console.groupEnd()
                 // all done
@@ -45,16 +44,19 @@ export const useAnchorToggleSelectionMulti = viewport => {
     }
 
     // return the handler
-    return { toggle }
+    return { reset }
 }
 
 
-// toggle the selection in multinode mode
-const useAnchorToggleSelectionMultiMutation = graphql`
-    mutation useAnchorToggleSelectionMultiMutation($viewport: Int!, $index: Int!) {
-        viewMeasureAnchorToggleSelectionMulti(viewport: $viewport, index: $index) {
-            measures {
+// the mutation that adds an anchor to the path
+const useResetMeasureMutation = graphql`
+    mutation useResetMeasureMutation($viewport: Int!) {
+        viewMeasureReset(viewport: $viewport) {
+            measure {
                 dirty
+                active
+                closed
+                path {x y}
                 selection
             }
         }

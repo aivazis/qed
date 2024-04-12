@@ -52,7 +52,7 @@ const useToggleClosedPathMutation = graphql`
     mutation useToggleClosedPathMutation($viewport: Int!) {
         viewMeasureToggleClosedPath(viewport: $viewport) {
             measures {
-                id
+                dirty
                 closed
             }
         }
