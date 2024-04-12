@@ -157,14 +157,14 @@ class Viewport(
         # all done
         return view
 
-    def measureToggleClosedPath(self):
+    def measureSetClosedPath(self, closed):
         """
-        Toggle the {closed} path flag
+        Set the {closed} path flag
         """
         # get my active view
         view = self._view
         # delegate
-        view.measureToggleClosedPath()
+        view.measureSetClosedPath(closed=closed)
         # all done
         return view
 

@@ -328,10 +328,16 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         # get the viewport configuration
         port = self._viewports[viewport]
-        # delegate
-        view = port.measureToggleClosedPath()
+        # get the {closed} flag and invert it
+        closed = not port.view().measure.closed
+        # go through all viewports that are path synced
+        for port in self._syncedWith(viewport=viewport, aspect="path"):
+            # and adjust their flags
+            view = port.measureSetClosedPath(closed=closed)
+            # hand of the measure configuration
+            yield view.measure
         # all done
-        return view.measure
+        return
 
     def measureReset(self, viewport):
         """

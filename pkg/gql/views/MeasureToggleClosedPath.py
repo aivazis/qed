@@ -25,7 +25,7 @@ class MeasureToggleClosedPath(graphene.Mutation):
         viewport = graphene.Int(required=True)
 
     # the result is the updated view
-    measure = graphene.Field(Measure)
+    measures = graphene.List(Measure)
 
     # the mutator
     @staticmethod
@@ -36,9 +36,9 @@ class MeasureToggleClosedPath(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to toggle the selection
-        measure = store.measureToggleClosedPath(viewport=viewport)
+        measures = store.measureToggleClosedPath(viewport=viewport)
         # form the mutation resolution context
-        context = {"measure": measure}
+        context = {"measures": measures}
         # and resolve the mutation
         return context
 
