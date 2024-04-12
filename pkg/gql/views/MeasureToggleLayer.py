@@ -26,7 +26,7 @@ class MeasureToggleLayer(graphene.Mutation):
         reader = graphene.String(required=True)
 
     # the result is the new measure layer object
-    measure = graphene.Field(Measure)
+    measures = graphene.List(Measure)
 
     # the range controller mutator
     @staticmethod
@@ -37,9 +37,9 @@ class MeasureToggleLayer(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it for the measure layer of the dataset view
-        measure = store.toggleMeasure(viewport=viewport, source=reader)
+        measures = store.toggleMeasure(viewport=viewport, source=reader)
         # form the mutation resolution context
-        context = {"measure": measure}
+        context = {"measures": measures}
         # and resolve the mutation
         return context
 
