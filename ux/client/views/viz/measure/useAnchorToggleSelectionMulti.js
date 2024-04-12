@@ -53,7 +53,7 @@ export const useAnchorToggleSelectionMulti = viewport => {
 const useAnchorToggleSelectionMultiMutation = graphql`
     mutation useAnchorToggleSelectionMultiMutation($viewport: Int!, $index: Int!) {
         viewMeasureAnchorToggleSelectionMulti(viewport: $viewport, index: $index) {
-            measure {
+            measures {
                 id
                 selection
             }

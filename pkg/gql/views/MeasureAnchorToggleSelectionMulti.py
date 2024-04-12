@@ -26,7 +26,7 @@ class MeasureAnchorToggleSelectionMulti(graphene.Mutation):
         index = graphene.Int(required=False)
 
     # the result is the updated view
-    measure = graphene.Field(Measure)
+    measures = graphene.List(Measure)
 
     # the mutator
     @staticmethod
@@ -37,11 +37,11 @@ class MeasureAnchorToggleSelectionMulti(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to toggle the anchor selection
-        measure = store.measureAnchorToggleSelectionMulti(
+        measures = store.measureAnchorToggleSelectionMulti(
             viewport=viewport, index=index
         )
         # form the mutation resolution context
-        context = {"measure": measure}
+        context = {"measures": measures}
         # and resolve the mutation
         return context
 
