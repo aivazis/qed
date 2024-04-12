@@ -109,12 +109,14 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             firewall.log()
             # and bail, just in case firewalls aren't fatal
             return self
-        # build the channel name
-        name = f"{self.pyre_name}.{dataset.pyre_name}.{tag}"
-        # look it up and set it
-        self.channel = self._pipelines[name]
-        # solve the selection
-        self.resolve()
+        # if the tag is understood
+        if tag in dataset.channels:
+            # build the channel name
+            name = f"{self.pyre_name}.{dataset.pyre_name}.{tag}"
+            # look it up and set it
+            self.channel = self._pipelines[name]
+            # solve the selection
+            self.resolve()
         # all done
         return self
 
