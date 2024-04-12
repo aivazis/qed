@@ -266,10 +266,14 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         # get the viewport configuration
         port = self._viewports[viewport]
-        # delegate
-        view = port.measureAnchorMove(handle=handle, dx=dx, dy=dy)
+        # go through all viewports that are path synced
+        for port in self._syncedWith(viewport=viewport, aspect="path"):
+            # move the indicated anchor to a new location
+            view = port.measureAnchorMove(handle=handle, dx=dx, dy=dy)
+            # hand of the measure configuration
+            yield view.measure
         # all done
-        return view.measure
+        return
 
     def measureAnchorRemove(self, viewport, anchor):
         """
