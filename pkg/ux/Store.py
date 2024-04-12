@@ -326,10 +326,14 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         # get the viewport configuration
         port = self._viewports[viewport]
-        # delegate
-        view = port.measureAnchorToggleSelection(index=index)
+        # go through all viewports that are path synced
+        for port in self._syncedWith(viewport=viewport, aspect="path"):
+            # and toggle the indicated index in the anchor selection
+            view = port.measureAnchorToggleSelection(index=index)
+            # hand of the measure configuration
+            yield view.measure
         # all done
-        return view.measure
+        return
 
     def measureAnchorToggleSelectionMulti(self, viewport, index):
         """
