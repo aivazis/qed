@@ -26,7 +26,7 @@ class MeasureAnchorExtendSelection(graphene.Mutation):
         index = graphene.Int(required=False)
 
     # the result is the updated view
-    measure = graphene.Field(Measure)
+    measures = graphene.List(Measure)
 
     # the mutator
     @staticmethod
@@ -37,9 +37,9 @@ class MeasureAnchorExtendSelection(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to add an anchor to the path
-        measure = store.measureAnchorExtendSelection(viewport=viewport, index=index)
+        measures = store.measureAnchorExtendSelection(viewport=viewport, index=index)
         # form the mutation resolution context
-        context = {"measure": measure}
+        context = {"measures": measures}
         # and resolve the mutation
         return context
 

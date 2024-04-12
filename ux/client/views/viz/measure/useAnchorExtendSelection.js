@@ -53,7 +53,7 @@ export const useAnchorExtendSelection = viewport => {
 const useAnchorExtendSelectionMutation = graphql`
     mutation useAnchorExtendSelectionMutation($viewport: Int!, $index: Int!) {
         viewMeasureAnchorExtendSelection(viewport: $viewport, index: $index) {
-            measure {
+            measures {
                 id
                 selection
             }
