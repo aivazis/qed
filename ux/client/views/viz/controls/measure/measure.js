@@ -37,8 +37,6 @@ export const Measure = ({ viewport, view }) => {
         return null
     }
 
-    console.log(measure.dirty)
-
     // setup the reset action
     const reset = () => {
         // restore the default
