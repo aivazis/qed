@@ -300,10 +300,14 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         # get the viewport configuration
         port = self._viewports[viewport]
-        # delegate
-        view = port.measureAnchorSplit(anchor=anchor)
+        # go through all viewports that are path synced
+        for port in self._syncedWith(viewport=viewport, aspect="path"):
+            # create a new anchor after the indicated one
+            view = port.measureAnchorSplit(anchor=anchor)
+            # hand of the measure configuration
+            yield view.measure
         # all done
-        return view.measure
+        return
 
     def measureAnchorExtendSelection(self, viewport, index):
         """
