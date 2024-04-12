@@ -29,9 +29,12 @@ dependencies:
   - setuptools
   - boto3
   - graphene
+  - matplotlib
   - numpy
   - pybind11
+  - pytest
   - ruamel.yaml
+  - scipy
   - yaml
   - ipython
   - jupyter_client
