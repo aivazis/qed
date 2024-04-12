@@ -8,9 +8,9 @@
 import { graphql, useMutation } from 'react-relay/hooks'
 
 // add a new anchor to the path
-export const useMeasureAnchorAdd = viewport => {
+export const useAnchorAdd = viewport => {
     // adding an anchor to the path mutates the server side store
-    const [commit, pending] = useMutation(useMeasureAnchorAddMutation)
+    const [commit, pending] = useMutation(useAnchorAddMutation)
 
     // make the handler
     const add = (anchor, index = null) => {
@@ -33,7 +33,7 @@ export const useMeasureAnchorAdd = viewport => {
             },
             onError: errors => {
                 // show me
-                console.log(`viz.measure.useMeasureAnchorAdd:`)
+                console.log(`viz.measure.useAnchorAdd:`)
                 console.group()
                 console.log(`ERROR while adding an anchor to viewport ${viewport}`)
                 console.log(errors)
@@ -52,10 +52,10 @@ export const useMeasureAnchorAdd = viewport => {
 
 
 // the mutation that adds an anchor to the path
-const useMeasureAnchorAddMutation = graphql`
-    mutation useMeasureAnchorAddMutation($viewport: Int!, $x: Int!, $y: Int!, $index: Int) {
+const useAnchorAddMutation = graphql`
+    mutation useAnchorAddMutation($viewport: Int!, $x: Int!, $y: Int!, $index: Int) {
         viewMeasureAnchorAdd(viewport: $viewport, x: $x, y: $y, index: $index) {
-            measure {
+            measures {
                 id
                 path {
                     x
