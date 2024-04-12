@@ -279,7 +279,7 @@ type Mutation {
   viewMeasureAnchorExtendSelection(viewport: Int!, index: Int!): DatasetMeasureInfo!
   viewMeasureAnchorMove(viewport: Int!, handle: Int!, dx: Int!, dy: Int!): DatasetMeasureInfos!
   viewMeasureAnchorPlace(viewport: Int!, handle: Int!, x: Int!, y: Int!): DatasetMeasureInfos!
-  viewMeasureAnchorRemove(viewport: Int!, anchor: Int!): DatasetMeasureInfo!
+  viewMeasureAnchorRemove(viewport: Int!, anchor: Int!): DatasetMeasureInfos!
   viewMeasureAnchorSplit(viewport: Int!, anchor: Int!): DatasetMeasureInfo!
   viewMeasureAnchorToggleSelection(viewport: Int!, index: Int!): DatasetMeasureInfo!
   viewMeasureAnchorToggleSelectionMulti(viewport: Int!, index: Int!): DatasetMeasureInfo!
