@@ -28,7 +28,7 @@ class MeasureAnchorAdd(graphene.Mutation):
         index = graphene.Int(required=False)
 
     # the result is the updated view
-    measure = graphene.Field(Measure)
+    measures = graphene.List(Measure)
 
     # the range controller mutator
     @staticmethod
@@ -39,9 +39,9 @@ class MeasureAnchorAdd(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to add an anchor to the path
-        measure = store.measureAddAnchor(viewport=viewport, x=x, y=y, index=index)
+        measures = store.measureAddAnchor(viewport=viewport, x=x, y=y, index=index)
         # form the mutation resolution context
-        context = {"measure": measure}
+        context = {"measures": measures}
         # and resolve the mutation
         return context
 

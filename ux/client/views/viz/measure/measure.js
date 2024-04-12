@@ -19,7 +19,7 @@ import { SVG } from '~/widgets'
 // context
 import { Provider } from './context'
 // hooks
-import { useMeasureAnchorAdd } from './useMeasureAnchorAdd'
+import { useAnchorAdd } from './useAnchorAdd'
 import { useAnchorDrag } from './useAnchorDrag'
 import { useAnchorMove } from './useAnchorMove'
 // components
@@ -51,7 +51,7 @@ const Layer = ({ viewport, view, shape, scale }) => {
     // get anchor movement support
     const { dragging, stop } = useAnchorDrag()
     // the anchor interface
-    const { add } = useMeasureAnchorAdd(viewport)
+    const { add } = useAnchorAdd(viewport)
     // the anchor mover
     const { move } = useAnchorMove(viewport)
 

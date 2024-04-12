@@ -275,7 +275,7 @@ type Mutation {
   viewChannelSet(selection: ViewSelectorInput!): ViewInfos!
   viewPersist(dummy: ID): PersistInfo
   # measure layer
-  viewMeasureAnchorAdd(viewport: Int!, x: Int!, y: Int!, index: Int): DatasetMeasureInfo!
+  viewMeasureAnchorAdd(viewport: Int!, x: Int!, y: Int!, index: Int): DatasetMeasureInfos!
   viewMeasureAnchorExtendSelection(viewport: Int!, index: Int!): DatasetMeasureInfo!
   viewMeasureAnchorMove(viewport: Int!, handle: Int!, dx: Int!, dy: Int!): DatasetMeasureInfo!
   viewMeasureAnchorPlace(viewport: Int!, handle: Int!, x: Int!, y: Int!): DatasetMeasureInfo!
