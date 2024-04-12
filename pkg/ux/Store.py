@@ -9,6 +9,9 @@ import qed
 import journal
 import uuid
 
+# support
+from .Harvester import Harvester
+
 # my parts
 from .Archives import Archives
 from .Sources import Sources
@@ -206,7 +209,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
                 # skip it
                 continue
             # otherwise, set the channel
-            yield port.setChannel(source=source, tag=tag)
+            yield view.setChannel(tag=tag)
         # all done
         return
 
@@ -394,7 +397,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         port = self._viewports[viewport]
         # and delegate
         view = port.syncSetAspect(aspect=aspect, value=value)
-        # return the measure configuration
+        # return the sync table
         return view.sync
 
     def syncToggleAll(self, viewport, aspect):
@@ -418,10 +421,45 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         # get the viewport configuration
         port = self._viewports[viewport]
-        # and delegate
+        # get the current value of aspect
+        flag = getattr(port.view().sync, aspect)
+        # toggle it
         view = port.syncToggleAspect(aspect=aspect)
-        # return the measure configuration
-        return view.sync
+        # if the flag was on
+        if flag:
+            # nothing more to do; leaving a sync group does not modify any other state
+            return view
+        # if {aspect} is {scroll}
+        if aspect == "scroll":
+            # there is no further state change
+            return view
+        # otherwise, we may have to sync the state of {viewport} to the group; so, get a group
+        # representative
+        rep = self._syncRep(aspect=aspect)
+        # if there isn't one
+        if not rep:
+            # all done
+            return view
+        # if the target {aspect} is the {channel}
+        if aspect == "channel":
+            # get the channel of the sync representative
+            channel = rep.view().channel
+            # and use its tag, if it has one
+            view.setChannel(channel.tag if channel else None)
+            # all done
+            return view
+        # if the target {aspect} is "path"
+        if aspect == "path":
+            # translate
+            aspect = "measure"
+        # get the {aspect} of view
+        viewAspect = getattr(view, aspect)
+        # get the aspect of the sync representative
+        repAspect = getattr(rep.view(), aspect)
+        # copy the {rep} state for {aspect} in {view}
+        self.harvester.configure(component=viewAspect, reference=repAspect)
+        # all done
+        return view
 
     def syncReset(self, viewport):
         """
@@ -582,6 +620,21 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return
 
+    def _syncRep(self, aspect):
+        """
+        Find a viewport that is {aspect} synced to act as the class representative
+        """
+        # go through my viewports
+        for index, port in enumerate(self._viewports):
+            # get the sync status of {aspect}
+            synced = getattr(port.view().sync, aspect)
+            # if it's on
+            if synced:
+                # we have found the representative
+                return port
+        # if we get this far, there are no {aspect] synced ports
+        return None
+
     # debugging support
     def pyre_dump(self):
         """
@@ -614,6 +667,9 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         channel.log()
         # all done
         return
+
+    # the configuration harvester
+    harvester = Harvester()
 
 
 # end of file

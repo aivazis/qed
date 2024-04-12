@@ -213,15 +213,7 @@ type ValueController implements Node {
 # put them all together
 union Controller = RangeController | ValueController
 
-# viewport properties that are persisted with datasets
-type DatasetView implements Node {
-  id: ID!
-  name: ID!
-  measure: DatasetMeasure
-  sync: DatasetSync
-  zoom: DatasetZoom
-}
-
+# viewport properties
 type DatasetMeasure implements Node {
   id: ID!
   name: ID!
@@ -289,7 +281,7 @@ type Mutation {
   # sync
   viewSyncReset(viewport: Int!): DatasetSyncInfo!
   viewSyncToggleAll(viewport: Int!, aspect: String!): DatasetSyncInfos!
-  viewSyncToggleViewport(viewport: Int!, aspect: String!): DatasetSyncInfo!
+  viewSyncToggleViewport(viewport: Int!, aspect: String!): ViewInfo!
   viewSyncUpdateOffset(viewport: Int!, x: Int!, y: Int!): DatasetSyncInfo!
   # zoom
   viewZoomSetLevel(viewport: Int!, horizontal: Float!, vertical: Float!): DatasetZoomInfos!
