@@ -56,7 +56,7 @@ export const useAnchorMove = viewport => {
 const useAnchorMoveMutation = graphql`
     mutation useAnchorMoveMutation($viewport: Int!, $handle:  Int!, $dx: Int!, $dy: Int!) {
         viewMeasureAnchorMove(viewport: $viewport, handle: $handle, dx: $dx, dy: $dy) {
-            measure {
+            measures {
                 id
                 path {
                     x

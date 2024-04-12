@@ -277,7 +277,7 @@ type Mutation {
   # measure layer
   viewMeasureAnchorAdd(viewport: Int!, x: Int!, y: Int!, index: Int): DatasetMeasureInfos!
   viewMeasureAnchorExtendSelection(viewport: Int!, index: Int!): DatasetMeasureInfo!
-  viewMeasureAnchorMove(viewport: Int!, handle: Int!, dx: Int!, dy: Int!): DatasetMeasureInfo!
+  viewMeasureAnchorMove(viewport: Int!, handle: Int!, dx: Int!, dy: Int!): DatasetMeasureInfos!
   viewMeasureAnchorPlace(viewport: Int!, handle: Int!, x: Int!, y: Int!): DatasetMeasureInfo!
   viewMeasureAnchorRemove(viewport: Int!, anchor: Int!): DatasetMeasureInfo!
   viewMeasureAnchorSplit(viewport: Int!, anchor: Int!): DatasetMeasureInfo!

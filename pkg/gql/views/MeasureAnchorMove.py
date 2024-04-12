@@ -28,7 +28,7 @@ class MeasureAnchorMove(graphene.Mutation):
         dy = graphene.Int(required=True)
 
     # the result is the updated view
-    measure = graphene.Field(Measure)
+    measures = graphene.List(Measure)
 
     # the mutator
     @staticmethod
@@ -39,11 +39,11 @@ class MeasureAnchorMove(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to toggle the selection
-        measure = store.measureAnchorMove(
+        measures = store.measureAnchorMove(
             viewport=viewport, handle=handle, dx=dx, dy=dy
         )
         # form the mutation resolution context
-        context = {"measure": measure}
+        context = {"measures": measures}
         # and resolve the mutation
         return context
 
