@@ -308,12 +308,12 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
-    def measureToggleClosedPath(self):
+    def measureSetClosedPath(self, closed):
         """
-        Toggle the {closed} path flag
+        Set the {closed} path flag
         """
         # toggle the value of the flag
-        self.measure.closed ^= True
+        self.measure.closed = closed
         # all done
         return self
 

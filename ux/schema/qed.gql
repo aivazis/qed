@@ -284,7 +284,7 @@ type Mutation {
   viewMeasureAnchorToggleSelection(viewport: Int!, index: Int!): DatasetMeasureInfo!
   viewMeasureAnchorToggleSelectionMulti(viewport: Int!, index: Int!): DatasetMeasureInfo!
   viewMeasureToggleLayer(viewport: Int!, reader: String!): DatasetMeasureInfo!
-  viewMeasureToggleClosedPath(viewport: Int!): DatasetMeasureInfo!
+  viewMeasureToggleClosedPath(viewport: Int!): DatasetMeasureInfos!
   viewMeasureReset(viewport: Int!): DatasetMeasureInfo!
   # sync
   viewSyncReset(viewport: Int!): DatasetSyncInfo!
@@ -343,6 +343,11 @@ type ViewInfos {
 type DatasetMeasureInfo {
   # the measure layer settings
   measure: DatasetMeasure
+}
+
+type DatasetMeasureInfos {
+  # the measure layer settings
+  measures: [DatasetMeasure]
 }
 
 # the sync state response payload
