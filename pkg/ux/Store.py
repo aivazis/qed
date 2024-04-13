@@ -176,19 +176,13 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         Toggle the value of {channel}
         """
-        # locate the source
+        # identify the source
         source = self.source(name=source)
-        # get the viewport configuration
+        # get the {viewport}
         port = self._viewports[viewport]
-        # and get the selected channel, if any
-        channel = port.view().channel
-        # if there is a channel and its tag matches our target {tag}
-        if channel and channel.tag == tag:
-            # just toggle {viewport} only
-            yield port.setChannel(source=source, tag=None)
-            # and leave everybody else alone
-            return
-        # otherwise, we are setting the channel to {tag}; get all the channel synced viewports
+        # select the source
+        port.selectSource(source=source)
+        # get all the channel synced viewports
         for port in self._syncedWith(viewport=viewport, aspect="channel"):
             # get the view
             view = port.view()
