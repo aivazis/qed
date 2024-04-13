@@ -28,16 +28,16 @@ export const Channel = ({ channel }) => {
     const [polish, setPolish] = React.useState(false)
 
     // initialize my state
-    const state = activeReader && (activeChannel?.tag === channel.tag) ? "selected" : "enabled"
+    const state = (activeReader && (activeChannel?.tag === channel.tag)) ? "selected" : "enabled"
 
     // initialize my controllers
     let behaviors = {}
 
     // if i'm enabled
     if (state === "enabled") {
-        // make a handler that toggles me as the value of my {axis}
-        const toggle = () => {
-            // toggle me as the value of my {axis}
+        // make a handler that set me as the value of channel
+        const set = () => {
+            // set me as the value of the channel
             channelSet()
             // reset the extra polish
             setPolish(false)
@@ -64,7 +64,7 @@ export const Channel = ({ channel }) => {
             // by adding to the default ones
             ...behaviors,
             // select/unselect when clicked
-            onClick: toggle,
+            onClick: set,
             // and a reset for when it leaves my client area
             onMouseLeave: reset,
             // the highlighter, when the cursor hovers
