@@ -84,6 +84,10 @@ const channelSetMutation = graphql`
                 ...measureViewerGetMeasureLayerStateFragment
                 # for the sync control
                 ...syncViewerGetScrollSyncStateFragment
+                # for the measure control
+                ...measureControlsGetMeasureLayerStateFragment
+                ...minimapControlsGetMeasureLayerStateFragment
+                ...profileMeasureGetMeasureLayerFragment
                 # for the print button
                 ...printViewerGetViewFragment
                 # for the zoom control
