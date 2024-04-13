@@ -37,6 +37,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
     channel.doc = "my channel"
 
     selections = qed.properties.kv()
+    selections.default = {}
     selections.doc = "a key/value store of the user choices towards a dataset selection"
 
     measure = qed.protocols.ux.measure()
@@ -623,9 +624,11 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # otherwise, get my selections
         selections = self.selections
         # if i don't have any
-        if len(selections) == 0:
+        if not selections:
             # copy my reader's
-            selections.update(reader.selections)
+            selections = dict(reader.selections)
+            # and install them
+            self.selections = selections
         # get my name
         name = self.pyre_name
         # get the reader name
