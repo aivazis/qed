@@ -560,7 +560,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             name=name,
             reader=self.reader,
             dataset=self.dataset,
-            channel=self.channel.pyre_family(),
+            channel=self.channel.pyre_family() if self.channel else None,
             selections=dict(self.selections),
             measure=self.measure.clone(),
             sync=self.sync.clone(),

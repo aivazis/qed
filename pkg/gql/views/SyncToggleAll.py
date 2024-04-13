@@ -10,7 +10,7 @@ import journal
 
 
 # the result types
-from .Sync import Sync
+from .View import View
 
 
 # remove a view from the pile
@@ -26,7 +26,7 @@ class SyncToggleAll(graphene.Mutation):
         aspect = graphene.String(required=True)
 
     # the result is the new measure layer object
-    sync = graphene.List(Sync)
+    views = graphene.List(View)
 
     # the range controller mutator
     @staticmethod
@@ -37,9 +37,9 @@ class SyncToggleAll(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it for the measure layer of the dataset view
-        sync = store.syncToggleAll(viewport=viewport, aspect=aspect)
+        views = store.syncToggleAll(viewport=viewport, aspect=aspect)
         # form the mutation resolution context
-        context = {"sync": sync}
+        context = {"views": views}
         # and resolve the mutation
         return context
 

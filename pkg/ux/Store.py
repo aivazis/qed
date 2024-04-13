@@ -404,14 +404,55 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         Toggle the {aspect} flag of all entries in the sync table
         """
-        # get the value from the {viewport} and flip it
-        value = not getattr(self._viewports[viewport].view().sync, aspect)
+        # the active {view} of {viewport} acts as the reference
+        ref = self._viewports[viewport].view()
+        # get the value from the active {viewport} and flip it
+        value = not getattr(ref.sync, aspect)
         # go through all my viewports
         for port in self._viewports:
             # and ask each one to set its {aspect} flag to the reference value
-            view = port.syncSetAspect(aspect=aspect, value=value)
-            # hand off its scroll table
-            yield view.sync
+            port.syncSetAspect(aspect=aspect, value=value)
+        # if the flag is now off, there are no possible state changes
+        if not value:
+            # hand off the updated views from all my viewports
+            yield from (port.view() for port in self._viewports)
+            # and that's all
+            return
+        # if the target {aspect} is "scroll", there are no possible state changes
+        if aspect == "scroll":
+            # hand off the updated views from all my viewports
+            yield from (port.view() for port in self._viewports)
+            # all done
+            return
+        # if the target {aspect} is "channel"
+        if aspect == "channel":
+            # get the reference channel
+            channel = ref.channel
+            # we'll use its tag, if any, to update all views that support it
+            tag = channel.tag if channel else None
+            # engage...
+            yield from (port.view().setChannel(tag=tag) for port in self._viewports)
+            # and done
+            return
+        # if the aspect is "path"
+        if aspect == "path":
+            # translate it
+            aspect = "measure"
+        # get the aspect from the reference view
+        refAspect = getattr(ref, aspect)
+        # go through my viewports
+        for port in self._viewports:
+            # get its view
+            view = port.view()
+            # if we have not bumped into the reference view
+            if view.pyre_name != ref.pyre_name:
+                # get {aspect} from this view
+                viewAspect = getattr(view, aspect)
+                # mirror the ref state
+                self.harvester.configure(component=viewAspect, reference=refAspect)
+            # and hand off the updated view
+            yield view
+
         # all done
         return
 
@@ -445,9 +486,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             # get the channel of the sync representative
             channel = rep.view().channel
             # and use its tag, if it has one
-            view.setChannel(channel.tag if channel else None)
-            # all done
-            return view
+            return view.setChannel(channel.tag if channel else None)
         # if the target {aspect} is "path"
         if aspect == "path":
             # translate
