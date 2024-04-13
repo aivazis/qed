@@ -575,25 +575,19 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         super().__init__(plexus=plexus, spec="store", **kwds)
         # save the root of the document
         self._docroot = docroot
+
         # build my registries
         # map: name -> data archive
-        archives = self._loadPersistentArchives(plexus)
+        archives = self._loadPersistentArchives(plexus=plexus)
         # map: name -> data source
-        sources = self._loadPersistentSources(plexus)
-        # my viewports: start out with one
-        viewport = Viewport(name=str(uuid.uuid1()))
-
-        # if there is only one source
-        if len(sources) == 1:
-            # grab it
-            source = tuple(sources.sources())[0]
-            # and select it
-            viewport.selectSource(source=source)
+        sources = self._loadPersistentSources(plexus=plexus)
+        # list: the sequence of visible viewports
+        viewports = self._loadPersistentViewports(plexus=plexus, sources=sources)
 
         # record my state
         self._dataArchives = archives
         self._dataSources = sources
-        self._viewports = [viewport]
+        self._viewports = viewports
 
         # all done
         return
@@ -628,6 +622,33 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         plexus.datasets = []
         # all done
         return sources
+
+    def _loadPersistentViewports(self, plexus, sources):
+        """
+        Transfer the persistent viewports from the plexus
+        """
+        # make a pile
+        viewports = []
+        # go through the plexus views
+        for view in plexus.views:
+            # make a viewport with each one
+            viewport = Viewport(name=str(uuid.uuid1()), view=view.clone())
+            # and add it to the pile
+            viewports.append(viewport)
+        # if there weren't any
+        if not viewports:
+            # make a blank one
+            viewport = Viewport(name=str(uuid.uuid1()))
+            # if there is only one source
+            if len(sources) == 1:
+                # grab it
+                source = tuple(sources.sources())[0]
+                # and select it
+                viewport.selectSource(source=source)
+            # and add it to the pile
+            viewports.append(viewport)
+        # all done
+        return viewports
 
     def _syncedWith(self, viewport, aspect, exclude=False):
         """
