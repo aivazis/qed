@@ -50,12 +50,30 @@ export const useSyncToggleAll = () => {
 const useSyncToggleAllMutation = graphql`
     mutation useSyncToggleAllMutation($viewport: Int!, $aspect: String!) {
         viewSyncToggleAll(viewport: $viewport, aspect: $aspect) {
-            sync {
-                dirty
-                channel
-                zoom
-                scroll
-                path
+            views {
+                channel {
+                    tag
+                }
+                measure {
+                    dirty
+                    active
+                    path {x y}
+                    closed
+                    selection
+                }
+                sync {
+                    dirty
+                    channel
+                    zoom
+                    scroll
+                    path
+                }
+                zoom {
+                    dirty
+                    coupled
+                    horizontal
+                    vertical
+                }
             }
         }
     }

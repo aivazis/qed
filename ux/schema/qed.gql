@@ -280,7 +280,7 @@ type Mutation {
   viewMeasureReset(viewport: Int!): DatasetMeasureInfo!
   # sync
   viewSyncReset(viewport: Int!): DatasetSyncInfo!
-  viewSyncToggleAll(viewport: Int!, aspect: String!): DatasetSyncInfos!
+  viewSyncToggleAll(viewport: Int!, aspect: String!): ViewInfos!
   viewSyncToggleViewport(viewport: Int!, aspect: String!): ViewInfo!
   viewSyncUpdateOffset(viewport: Int!, x: Int!, y: Int!): DatasetSyncInfo!
   # zoom
