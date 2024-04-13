@@ -101,6 +101,10 @@ const selectReaderMutation = graphql`
                 ...syncViewerGetScrollSyncStateFragment
                 # for the print button
                 ...printViewerGetViewFragment
+                # for the measure control
+                ...measureControlsGetMeasureLayerStateFragment
+                ...minimapControlsGetMeasureLayerStateFragment
+                ...profileMeasureGetMeasureLayerFragment
                 # for the zoom control
                 ...zoomControlsGetZoomStateFragment
                 # for the viz control
