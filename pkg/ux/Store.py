@@ -432,6 +432,8 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         if aspect == "path":
             # translate it
             aspect = "measure"
+            # and turn the measure layer on
+            ref.measure.active = True
         # get the aspect from the reference view
         refAspect = getattr(ref, aspect)
         # go through my viewports
@@ -468,23 +470,26 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         if aspect == "scroll":
             # there is no further state change
             return view
-        # otherwise, we may have to sync the state of {viewport} to the group; so, get a group
-        # representative
+        # if {aspect} is {path}
+        if aspect == "path":
+            #  activate the measure layer
+            view.measure.active = True
+        # we may have to sync the state of {viewport} to the group, so get a group representative
         rep = self._syncRep(aspect=aspect)
         # if there isn't one
         if not rep:
             # all done
             return view
+        # if {aspect} is {path}
+        if aspect == "path":
+            # translate
+            aspect = "measure"
         # if the target {aspect} is the {channel}
         if aspect == "channel":
             # get the channel of the sync representative
             channel = rep.view().channel
             # and use its tag, if it has one
             return view.setChannel(channel.tag if channel else None)
-        # if the target {aspect} is "path"
-        if aspect == "path":
-            # translate
-            aspect = "measure"
         # get the {aspect} of view
         viewAspect = getattr(view, aspect)
         # get the aspect of the sync representative
