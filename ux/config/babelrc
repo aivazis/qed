@@ -10,10 +10,10 @@
     ],
 
 
-    "plugins": [
-        "relay",
-        "@babel/plugin-proposal-export-default-from",
-    ],
+        "plugins": [
+            ["relay", { "artifactDirectory": "./generated" }],
+            "@babel/plugin-proposal-export-default-from",
+        ],
 }
 
 // end of file

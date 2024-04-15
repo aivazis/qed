@@ -1,5 +1,21 @@
 {
     "compilerOptions": {
-        "sourceMap": true
-    }
+        "outDir": "./client",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "jsx": "react",
+        "allowJs": true,
+        "esModuleInterop": true,
+        "baseUrl": "./",
+        "paths": {
+            "~/*": [
+                "./client/*"
+            ],
+            "generated/*": [
+                "generated/*"
+            ]
+        }
+    },
 }

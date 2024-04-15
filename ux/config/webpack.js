@@ -13,6 +13,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const rootDir = __dirname
 const sourceDir = path.join(rootDir, 'client')
 const buildDir = path.join(rootDir, 'build')
+const generatedDir = path.join(rootDir, 'generated')
 
 
 // the configuration
@@ -28,6 +29,9 @@ module.exports = {
         filename: '[name].js',
     },
 
+    // source maps
+    devtool: 'inline-source-map',
+
     // loader rules
     module: {
         rules: [
@@ -39,7 +43,7 @@ module.exports = {
             {   // ts
                 test: /\.tsx?$/,
                 loader: 'ts-loader',
-                include: [sourceDir],
+                include: [sourceDir, generatedDir],
             }
         ]
     },
@@ -47,9 +51,10 @@ module.exports = {
     // locations of files
     resolve: {
         modules: [sourceDir, "node_modules"],
-        extensions: ['.js', '.jsx', '.ts'],
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
         alias: {
             '~': sourceDir,
+            'generated': generatedDir
         },
         fallback: {
             'path': require.resolve("path-browserify"),
@@ -63,9 +68,6 @@ module.exports = {
             filename: path.join(buildDir, 'qed.html')
         }),
     ],
-
-    devtool: "inline-source-map",
-
 }
 
 
