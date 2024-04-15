@@ -11,7 +11,7 @@ import throttle from 'lodash/throttle'
 
 
 // hook that listens to resize events
-const useResizeObserver = ({
+export const useResizeObserver = ({
     // a reference to the component whose size we care about; if {null}, a new one will be made
     ref = null,
     // an optional call back to invoke on size changes
@@ -100,10 +100,6 @@ const useResizeObserver = ({
     // make the ref and the extent available
     return { ref: cref, extent }
 }
-
-
-// publish
-export default useResizeObserver
 
 
 // end of file

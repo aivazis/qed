@@ -5,8 +5,8 @@
 
 
 // publish
-export useEvent from './useEvent'
-export useResizeObserver from './useResizeObserver'
+export { useEvent } from './useEvent'
+export { useResizeObserver } from './useResizeObserver'
 
 
 // end of file
