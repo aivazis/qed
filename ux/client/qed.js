@@ -34,6 +34,8 @@ import {
     Explorer, Archives,
     // datasets
     Viz, Controls, Readers,
+    // embedded documentation
+    Guide, TOC,
     // the main page
     Main,
     // boilerplate
@@ -60,7 +62,6 @@ const QEDApp = ({ base }) => {
             <Route path="/" element={<Main qed={qed} />} >
                 {/* specific activities */}
                 <Route path="about" element={<NYI base={base} />} />
-                <Route path="help" element={<NYI base={base} />} />
 
                 {/* data archives */}
                 <Route element={<Explorer qed={qed} />}>
@@ -72,6 +73,12 @@ const QEDApp = ({ base }) => {
                     <Route path="controls" element={<Controls qed={qed} />} />
                     <Route index element={<Readers qed={qed} />} />
                 </Route>
+
+                {/* embedded documentation */}
+                <Route element={<Guide qed={qed} />}>
+                    <Route path="help" element={<TOC qed={qed} />} />
+                </Route>
+
             </Route>
 
             {/* meta navigation */}
@@ -79,7 +86,7 @@ const QEDApp = ({ base }) => {
             <Route path="/stop" element={<Stop base={base} />} />
             {/* the page to render while waiting for data to arrive */}
             <Route path="/loading" element={<Loading />} />
-        </Routes>
+        </Routes >
     )
 }
 
