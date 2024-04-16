@@ -11,6 +11,9 @@ export { Main, useActivityPanel } from './main'
 export { Explorer, Archives } from './explorer'
 // datasets
 export { Viz, Controls, Readers } from './viz'
+// embedded documentation
+export { Guide, TOC } from './doc'
+
 // the status bar
 export { Status } from './status'
 
