@@ -31,7 +31,8 @@
         "webpack": "latest",
         "webpack-cli": "latest",
         "@types/react": "latest",
-        "@types/react-relay": "latest"
+        "@types/react-relay": "latest",
+        "@mdx-js/loader": "latest"
     },
     "dependencies": {
         "graphql": "latest",

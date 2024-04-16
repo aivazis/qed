@@ -44,6 +44,16 @@ module.exports = {
                 test: /\.tsx?$/,
                 loader: 'ts-loader',
                 include: [sourceDir, generatedDir],
+            },
+            {   // mdx
+                test: /\.mdx?$/,
+                use: [
+                    {
+                        loader: '@mdx-js/loader',
+                        /** @type {import)'@mdx-js/loader').Options} */
+                        options: {}
+                    }
+                ]
             }
         ]
     },
