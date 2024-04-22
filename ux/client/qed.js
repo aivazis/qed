@@ -75,9 +75,7 @@ const QEDApp = ({ base }) => {
                 </Route>
 
                 {/* embedded documentation */}
-                <Route element={<Guide qed={qed} />}>
-                    <Route path="help" element={<TOC qed={qed} />} />
-                </Route>
+                <Route path="doc/*" element={<Guide qed={qed} />} />
 
             </Route>
 
