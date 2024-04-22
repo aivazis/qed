@@ -7,7 +7,7 @@
 // externals
 import React from 'react'
 // routing
-import { Outlet } from 'react-router-dom'
+import { Routes, Route, Outlet } from 'react-router-dom'
 
 
 // project
@@ -18,7 +18,8 @@ import { Flex } from '~/widgets'
 
 // local
 // components
-import Welcome from './welcome.mdx'
+import { TOC } from '../toc'
+import Intro from './intro.mdx'
 // paint
 import { flex, toc } from './styles'
 
@@ -39,12 +40,14 @@ export const Guide = () => {
         <Flex.Box direction="row" style={flex}>
             {/* the table of contents */}
             <Flex.Panel min={300} style={tocPaint}>
-                <Outlet />
+                <TOC />
             </Flex.Panel>
 
             {/* the panel with the current page */}
             <Flex.Panel style={flex}>
-                <Welcome />
+                <Routes>
+                    <Route path="intro" element={<Intro />} />
+                </Routes>
             </Flex.Panel>
 
         </Flex.Box>
