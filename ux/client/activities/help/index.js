@@ -22,7 +22,7 @@ export const Help = ({ size, style }) => {
     const paint = styles.activity(style)
     // and render
     return (
-        <Activity size={size} url="/help" style={paint} >
+        <Activity size={size} url="/doc" style={paint} >
             <Icon />
         </Activity>
     )
