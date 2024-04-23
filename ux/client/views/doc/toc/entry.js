@@ -14,20 +14,25 @@ import { theme } from '~/palette'
 
 
 // a TOC entry
-export const Entry = ({ entry }) => {
+export const Entry = ({ here, entry }) => {
+    // if the location ends with my link, i'm the current topic
+    const current = here.endsWith(entry.link)
+    // pick the component to render
+    const Text = current ? Current : Topic
+
     // render
     return (
         <Link to={`${entry.link}`}>
-            <Title>
+            <Text>
                 {entry.title}
-            </Title>
+            </Text>
         </Link>
     )
 
 }
 
 // the parts
-const Title = styled.div`
+const Topic = styled.div`
     & {
         padding: 0.5em 0.0em 0.5em 1.0rem;
         cursor: pointer;
@@ -36,6 +41,12 @@ const Title = styled.div`
     &:hover {
         color: ${props => theme.page.highlight};
     }
+`
+
+const Current = styled.div`
+    padding: 0.5em 0.0em 0.5em 1.0rem;
+    color: ${props => theme.page.highlight};
+    cursor: default;
 `
 
 

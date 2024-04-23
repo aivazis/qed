@@ -6,6 +6,7 @@
 // external
 import React from 'react'
 import styled from 'styled-components'
+import { useLocation } from 'react-router-dom'
 
 // project
 import { theme } from '~/palette'
@@ -16,12 +17,16 @@ import { Entry } from './entry'
 
 // the table of contents
 export const TOC = () => {
+    // get the location
+    const location = useLocation()
+    // and extract the path
+    const here = location.pathname
     // render
     return (
         <Section>
             <Title>Contents</Title>
             <Contents>
-                {toc.map(entry => <Entry key={entry.link} entry={entry} />)}
+                {toc.map(entry => <Entry key={entry.link} here={here} entry={entry} />)}
             </Contents>
         </Section>
     )
