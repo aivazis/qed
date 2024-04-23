@@ -17,7 +17,7 @@ import styles from './styles'
 export const NYI = ({ base }) => {
     // get the location, as known to the app
     const url = location.pathname
-    // form the page name by removig {base} from it
+    // form the page name by removing {base} from it
     const where = url.replace(base, "")
     // render
     return (
