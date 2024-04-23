@@ -6,7 +6,7 @@
 
 // publish
 // the main page
-export { Main, useActivityPanel } from './main'
+export { Main, useTopic, useActivityPanel } from './main'
 // data archives
 export { Explorer, Archives } from './explorer'
 // datasets
