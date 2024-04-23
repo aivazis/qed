@@ -10,23 +10,32 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
 // project
+// hooks
+import { useTopic } from '~/views'
+// paint
 import { theme } from '~/palette'
 
 
 // a TOC entry
-export const Entry = ({ here, entry }) => {
+export const Entry = ({ entry }) => {
+    // get the topic and its selector
+    const { topic, pick } = useTopic()
     // if the location ends with my link, i'm the current topic
-    const current = here.endsWith(entry.link)
+    const current = entry.link === topic
     // pick the component to render
     const Text = current ? Current : Topic
 
+    // set up my behaviors
+    const behaviors = {
+        // do nothing when current, otherwise pick my topic
+        onClick: current ? null : () => pick(entry),
+    }
+
     // render
     return (
-        <Link to={`${entry.link}`}>
-            <Text>
-                {entry.title}
-            </Text>
-        </Link>
+        <Text {...behaviors}>
+            {entry.title}
+        </Text>
     )
 
 }
