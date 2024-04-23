@@ -390,7 +390,7 @@ class Dispatcher:
                 # document requests
                 r"/(?P<css>.+\.css)",
                 r"/(?P<jscript>.+\.js)",
-                r"/(?P<document>(graphics/.+)|(fonts/.+))",
+                r"/(?P<document>(graphics/.+)|(fonts/.+)|(figures/.+))",
                 r"/(?P<favicon>favicon.ico)",
                 # everything else gets the app page; see the {root} resolver above
                 r"/(?P<root>.*)",
