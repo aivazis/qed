@@ -6,7 +6,7 @@
 
 // externals
 import React from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 // project
 // hooks
@@ -26,14 +26,9 @@ import styles from './styles'
 // activities can be { "disabled", "enabled", "selected", "available" }
 // currently, there is no use case for a disabled activity, so the logic may need to change
 
-export const Activity = ({ size, url, children, style }) => {
+export const Activity = ({ size, url, current, children, style }) => {
     // grab the activity panel state mutators
     const { showActivityPanel, toggleActivityPanel } = useActivityPanel()
-    // get the current location
-    const location = useLocation().pathname
-
-    // check whether this is the current activity
-    const current = location === url
     // which determines its state
     const state = current ? "selected" : "enabled"
     // and the action on click
