@@ -14,7 +14,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter'
 
 // project
 // hooks
-import { useActivityPanel } from '~/views'
+import { useTopic, useActivityPanel } from '~/views'
 // widgets
 import { Flex } from '~/widgets'
 
@@ -32,6 +32,8 @@ import { flex, toc } from './styles'
 
 // the panel
 export const Guide = () => {
+    // the current topic
+    const { topic } = useTopic()
     // the activity panel state
     const { activityPanel } = useActivityPanel()
 
@@ -39,6 +41,9 @@ export const Guide = () => {
     const tocPaint = { ...toc }
     // so we can hide it when its not visible
     tocPaint.panel.display = activityPanel ? "flex" : "none"
+
+    // choose a topic
+    const Topic = topics[topic] || null
 
     // render
     return (
@@ -50,12 +55,9 @@ export const Guide = () => {
 
             {/* the panel with the current page */}
             <Flex.Panel style={flex}>
-                <Routes>
-                    {topics.map(topic => (
-                        <Route key={topic.name} path={topic.name}
-                            element={<Page>{topic.page}</Page>} />
-                    ))}
-                </Routes>
+                <Page>
+                    <Topic components={theme} />
+                </Page>
             </Flex.Panel>
 
         </Flex.Box>
@@ -78,7 +80,6 @@ const theme = {
     code: ({ className, ...properties }) => {
         // attempt to deduce the language
         const match = /language-(\w+)/.exec(className || "")
-        console.log(className, properties)
         // pick a renderer
         return match
             ? <SyntaxHighlighter style={hljs} language={match[1]} PreTag="div" {...properties} />
@@ -87,10 +88,9 @@ const theme = {
 }
 
 // the list of topics
-const topics = [
-    { name: "intro", page: <Intro components={theme} /> },
-]
-
+const topics = {
+    intro: Intro,
+}
 
 
 // end of file
