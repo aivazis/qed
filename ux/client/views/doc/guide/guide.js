@@ -6,8 +6,6 @@
 
 // externals
 import React from 'react'
-// routing
-import { Routes, Route } from 'react-router-dom'
 // syntax highlighting
 import SyntaxHighlighter from 'react-syntax-highlighter'
 
@@ -19,12 +17,12 @@ import { useTopic, useActivityPanel } from '~/views'
 import { Flex } from '~/widgets'
 
 // local
+// contents
+import { topics } from '../contents'
 // components
 import { TOC } from '../toc'
 import { Page } from './page'
 import { Title, Section, Subsection, Text } from './theme'
-// pages
-import Intro from './intro.mdx'
 // paint
 import hljs from './hljs'
 import { flex, toc } from './styles'
@@ -42,8 +40,10 @@ export const Guide = () => {
     // so we can hide it when its not visible
     tocPaint.panel.display = activityPanel ? "flex" : "none"
 
-    // choose a topic
-    const Topic = topics[topic] || null
+    // find the topic entry
+    const entry = topics.find(entry => entry.link === topic)
+    // and get its page
+    const Topic = entry?.page
 
     // render
     return (
@@ -85,11 +85,6 @@ const theme = {
             ? <SyntaxHighlighter style={hljs} language={match[1]} PreTag="div" {...properties} />
             : <code className={className} {...properties} />
     }
-}
-
-// the list of topics
-const topics = {
-    intro: Intro,
 }
 
 

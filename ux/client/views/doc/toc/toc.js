@@ -6,42 +6,27 @@
 // external
 import React from 'react'
 import styled from 'styled-components'
-import { useLocation } from 'react-router-dom'
 
 // project
 import { theme } from '~/palette'
 
 //  local
+import { topics } from '../contents'
 import { Entry } from './entry'
 
 
 // the table of contents
 export const TOC = () => {
-    // get the location
-    const location = useLocation()
-    // and extract the path
-    const here = location.pathname
     // render
     return (
         <Section>
             <Title>Contents</Title>
             <Contents>
-                {toc.map(entry => <Entry key={entry.link} here={here} entry={entry} />)}
+                {topics.map(entry => <Entry key={entry.link} entry={entry} />)}
             </Contents>
         </Section>
     )
 }
-
-// the table of contents
-const toc = [
-    { title: "Getting started", link: "intro" },
-    { title: "Connecting to data archives", link: "archives" },
-    { title: "Loading datasets", link: "readers" },
-    { title: "Selecting datasets", link: "datasets" },
-    { title: "Adjusting the view", link: "views" },
-    { title: "The measure layer", link: "measure" },
-    { title: "Working with multiple data panels", link: "panels" },
-]
 
 
 // the parts
