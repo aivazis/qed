@@ -61,7 +61,7 @@ module.exports = {
     // locations of files
     resolve: {
         modules: [sourceDir, "node_modules"],
-        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.mdx'],
         alias: {
             '~': sourceDir,
             'generated': generatedDir
