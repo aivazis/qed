@@ -9,11 +9,15 @@ import React from 'react'
 
 // the provider factory
 export const Provider = ({ children }) => {
-    // setup the activity panel flag
+    // the current documentation topic
+    const [topic, setTopic] = React.useState("intro")
+    // the activity panel visibility flag
     const [activityPanel, setActivityPanel] = React.useState(true)
 
     // build the current value of the context
     const context = {
+        // the help topic
+        topic, setTopic,
         // the activity panel state flag and its mutator
         activityPanel, setActivityPanel,
     }
@@ -31,6 +35,9 @@ export const Provider = ({ children }) => {
 export const Context = React.createContext(
     // the default value that consumers see when accessing the context outside a provider
     {
+        // the help topic
+        topic: null,
+        setTopic: () => { throw new Error(complaint) },
         // the activity panel state and its mutator
         activityPanel: null,
         setActivityPanel: () => { throw new Error(complaint) },
