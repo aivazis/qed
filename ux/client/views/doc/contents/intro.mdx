@@ -4,49 +4,290 @@
     (c) 1998-2024 all rights reserved
 */}
 
-import { ScreenShot } from './screenshot'
 
-# One
+# Getting started
 
-Here is some text that introduces the basic idea. How about some more text to make sure that we can
-see an entire paragraph with multiple lines?
+If you are reading this from within `qed`, you should be able to skip this section, as it deals with
+the various installation options.
 
-## Two
+If you are lucky enough to work on a machine that is managed professionally, `qed` may already be
+installed. Please contact the system administrators for instructions about how to access it, and skip
+to the next section.
 
-Drilling down into the details of capability. This is a long description with enough text  to make
-sure that we fill the pane
+If you are comfortable with `jupyter` notebooks, the current
+[release tarball](https://github.com/aivazis/qed/archive/refs/tags/v0.9.3.tar.gz)
+contains a notebook that can walk you through the installation procedure with minimal tweaking.
+It is located in `etc/mamba/qed.ipynb`. Please report any difficulties you encounter.
 
-### Three
+The same tarball has instructions on how to build a `docker` instance with a `qed` installation.
+You will find support for many recent `ubuntu` distributions in `etc/docker/dev`.
 
-A small corner with details that could be skipped on first reading. Let's continue describing what
-might go here, until there is enough text to fill the pane.
+If none of these options work for you, read on to the next section for a walk through of how to
+build `qed` from source.
 
-Another small corner with details that could be skipped on first reading. Let's continue describing
-what might go here, until there is enough text to fill the pane.
+### Dependencies
 
-One more small corner with details that could be skipped on first reading. Let's continue describing
-what might go here, until there is enough text to fill the pane.
+The easiest way to install the `qed` dependencies is using `micromamba` and `conda-forge`. The
+following configuration file will install everything `qed` needs in an environment named `qed`. Feel
+free to add these packages to an existing environment, rather than building one from scratch,
+although it might be easier at first if you avoid any potential conflicts with your existing
+environment.
 
-And a final small corner with details that could be skipped on first reading. Let's continue
-describing what might go here, until there is enough text to fill the pane.
+``` yaml
+# -*- yaml -*-
 
-Here is some helpful code
+name: qed
 
-``` python
-def foo(arg, **kwds):
-    """
-    This is the docstring for this function
-    """
-    # show me
-    print(f"arg: {arg}")
-    # all done
-    return
+channels:
+  - conda-forge
+
+dependencies:
+  - python
+  - git
+  - gcc
+  - gxx
+  - gfortran
+  - make
+  - nodejs
+  - awscli
+  - gsl
+  - hdf5
+  - openssl
+  - boto3
+  - graphene
+  - numpy
+  - pybind11
+  - pytest
+  - ruamel.yaml
+  - yaml
+
+# end of file
 ```
 
-And here is a screenshot of some application page
+On `macOS`, you may want to use `clang` instead of `gcc`. Make sure you activate this environment
+before moving on to build `qed`.
 
-<ScreenShot src="/figures/qed-datasets.png" width="100%"/>
+It is also possible to use other package managers to install these dependencies. Both `pyre` and
+`qed` have been tested on both `ubuntu` and `macOS` using their native environments, `macports`,
+`homebrew`, `spack`. Please keep in mind that most enterprise systems provide compilers and packages
+that are too old to build this code, so you will have to lean on something else to satisfy the
+dependencies. Further, you may have to adjust your `PATH`, `LD_LIBRARY_PATH`, `PYTHONPATH`, and
+perhaps other environment variables that control access to binaries, shared objects, and `python`
+packages on your machine.
 
+### Cloning the repositories
+
+We will need a place to clone the necessary source repositories. For the sake of concreteness, let's
+pick `~/dv` as the source directory.
+
+``` bash
+~> mkdir dv
+~> cd dv
+```
+
+GitHub allows access through `ssh` or `https`, with slightly different syntax. If you already have
+your `ssh` key installed on your GitHub account, you can clone the three repositories using
+
+``` bash
+~/dv> git clone git@github.com:aivazis/mm
+~/dv> git clone git@github.com:pyre/pyre
+~/dv> git clone git@github.com:aivazis/qed
+```
+
+Alternatively, you can use the `https` protocol for anonymous access:
+
+``` bash
+~> mkdir dv
+~> cd dv
+~/dv> git clone https://github.com/aivazis/mm
+~/dv> git clone https://github.com/pyre/pyre
+~/dv> git clone https://github.com/aivazis/qed
+```
+
+You can probably get away with installing `pyre` from `conda-forge`, but `qed` and `pyre` are
+currently evolving together rather quickly. Being tied to a slower release cycle may delay access to
+the latest feadtures. Generally speaking, the `HEAD` of all three repositories is a safe place to
+pull from, as they are thoroughly tested.
+
+### Setting up the build system
+
+The most involved step of the installation process is the configuration of the build system.
+We will place configuration files in two locations:
+
+``` bash
+~/dv> cd ~
+~> mkdir -p .config/pyre
+~> mkdir -p .config/mm
+```
+
+The conifguration for the build system lives in `~/.config/pyre/mm.yaml`:
+``` yaml
+# -*- yaml -*-
+
+# mm configuration
+mm:
+
+  # targets
+  target: "opt, shared"
+
+  # compilers
+  compilers: "gcc, python/python3"
+
+  # the following two settings get replaced with actual values by the notebook
+  # the location of final products
+  prefix: "{pyre.environ.CONDA_PREFIX}"
+  # the installation location of the python packages, relative to {prefix}
+  pycPrefix: "lib/python3.12/site-packages"
+  # the location of the temporary intermediate build products
+  bldroot: "{pyre.environ.HOME}/tmp/builds/mm/{pyre.environ.CONDA_DEFAULT_ENV}"
+
+  # misc
+  # the name of GNU make
+  make: make
+  # local makefiles
+  local: Make.mmm
+
+# end of file
+```
+
+You may need to replace `gcc` and the `python` version with whatever is available in your
+environment. Incidentally, the directory `~/.config/pyre` is the home for configuration files for
+all `pyre` applications, including `qed`, so we will be adding more files here later on.
+
+The build system needs to know wher to find headers and libraries for the `qed` dependencies. The
+package database lives in `~/.config/mm/config.mm`:
+
+``` makefile
+# -*- Makefile -*-
+
+# external dependencies
+# system tools
+sys.prefix := ${CONDA_PREFIX}
+
+# gsl
+gsl.version := 2.7
+gsl.dir := $(sys.prefix)
+
+# hdf5
+hdf5.version := 1.15.0
+hdf5.dir := ${sys.prefix}
+hdf5.parallel := off
+
+# libpq
+libpq.version := 16.1
+libpq.dir := ${sys.prefix}
+
+# pybind11
+pybind11.version := 2.11.1
+pybind11.dir = $(sys.prefix)
+
+# python: just major.minor
+python.version := 3.12
+python.dir := $(sys.prefix)
+
+# numpy
+numpy.version := 1.26.3
+numpy.dir := $(sys.prefix)/lib/python$(python.version)/site-packages/numpy/core
+
+# pyre
+pyre.version := 1.12.4
+pyre.dir := $(sys.prefix)
+
+# end of file
+```
+
+Most of the indicated package versions are there for documentation purposes, with the exception
+of the `python` version that is used by `mm` to locate the various locations where the interpreter
+and its packages deposit fiels we need.
+
+### Building
+
+The next step is to build `pyre` and `qed`. We will invoke `mm` a few times, so you may find
+it convenient to create an alias for it.
+
+``` bash
+~/dv> alias mm='python3 ${HOME}/dv/mm/mm.py'
+```
+
+You might want to make this more permanent by also adding it to your shell startup file, e.g. your
+`~/.bash_profile`.
+
+Let's verify that everything is ok so far. Let's go to the `pyre` source directory and ask `mm` to
+show a few details about the build. This should generate a few lines of output similar to the
+following:
+
+``` bash
+~/dv> cd pyre
+~/dv/pyre> mm builder.info
+
+    mm 5.0.0
+    Michael Aïvázis <michael.aivazis@para-sim.com>
+    copyright 1998-2024 all rights reserved
+
+builder directory layout:
+  staging layout:
+           tmp = /Users/mga/tmp/builds/mm/gcc/opt-shared-darwin-arm64/
+  install layout:
+        prefix = /Users/mga/.local/envs/qed
+           bin = /Users/mga/.local/envs/qed/bin/
+           doc = /Users/mga/.local/envs/qed/doc/
+           inc = /Users/mga/.local/envs/qed/include/
+           lib = /Users/mga/.local/envs/qed/lib/
+         share = /Users/mga/.local/envs/qed/share/
+           pyc = /Users/mga/.local/envs/qed/lib/python3.12/site-packages/
+~/dv/pyre>
+```
+
+You may see `mm` download a `pyre` archive from `github` to bootstrap the process. This is normal,
+as `mm` is itself a `pyre` application.
+
+If anything goes wrong at this stage that cannot be resolved by retracing your steps looking for
+typos, please file an issue at the `qed` [repository](https://github.com/aivazis/qed/issues),
+and attach a log file or a screenshot to help diagnose the problem.
+
+If everything looks ok, let's build and install `pyre`. If you are on a `linux` system, `mm` will
+automatically discover the number of cores on your machine and launch a parallel build:
+
+``` bash
+~/dv/pyre> mm
+```
+
+On `macOS`, it needs some help until `pyre` is built, so use something like:
+
+``` bash
+~/dv/pyre> mm --slots=20
+```
+
+Don't worry if you don't have twenty cores on your machine. Most modern machine will be able to
+handle this load. Feel free to up the count if you are on a machine with more cores. If all goes
+well, you will have a functional `pyre` in the `site-packages` directory of your `python`
+installation. Let's verify:
+
+``` bash
+~/dv/pyre> python3
+>>> import pyre
+>>> pyre.__file__
+```
+
+Both statements should succeed, and the latter should print out the `pyre` installation location.
+
+Similarly for `qed`:
+
+``` bash
+~/dv/pyre> cd ../qed
+~/dv/qed> mm builder.info
+~/dv/qed> mm
+```
+
+Again, if anything goes wrong, please reach out, and include as much about the failure as you
+can gather.
+
+
+### Launching
+
+If you are installing in a `conda` environment, `qed` is already on your path so there are no
+additional steps to take to makeit accessible. If not, you will have to tweak your environment
+variables.
 
 {/* end of file */}
 
