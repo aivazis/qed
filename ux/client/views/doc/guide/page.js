@@ -34,6 +34,7 @@ const Section = styled.section`
 `
 
 const Box = styled.div`
+    margin: 1.0rem;
     width: 60.0em;
 `
 
