@@ -6,8 +6,6 @@
 
 // externals
 import React from 'react'
-// syntax highlighting
-import SyntaxHighlighter from 'react-syntax-highlighter'
 
 
 // project
@@ -21,10 +19,10 @@ import { Flex } from '~/widgets'
 import { topics } from '../contents'
 // components
 import { TOC } from '../toc'
+import { Code } from './code'
 import { Page } from './page'
 import { Title, Section, Subsection, Text } from './theme'
 // paint
-import hljs from './hljs'
 import { flex, toc } from './styles'
 
 
@@ -77,14 +75,7 @@ const theme = {
     // text
     p: Text,
     // syntax highlighted code
-    code: ({ className, ...properties }) => {
-        // attempt to deduce the language
-        const match = /language-(\w+)/.exec(className || "")
-        // pick a renderer
-        return match
-            ? <SyntaxHighlighter style={hljs} language={match[1]} PreTag="div" {...properties} />
-            : <code className={className} {...properties} />
-    }
+    code: Code,
 }
 
 
