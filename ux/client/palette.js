@@ -57,6 +57,9 @@ const dark = {
         dim: "hsl(0deg, 0%, 40%)",
         pale: "hsl(0deg, 0%, 30%)",
         //
+        link: "hsl(280deg, 80%, 60%)",
+        linkActive: "hsl(280deg, 40%, 60%)",
+        //
         highlight: "hsl(28deg, 90%, 55%)",
         viewportBorder: "hsl(28deg, 90%, 55%, 50%)",
         //
