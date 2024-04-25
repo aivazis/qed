@@ -70,6 +70,13 @@ body {
     background-color: #1b1b1b;
 }
 
+code,
+tt,
+kbd,
+samp {
+    font-family: inconsolata;
+}
+
 a:link {
     color: #666;
     text-decoration: none;
