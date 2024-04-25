@@ -28,7 +28,7 @@ export const Entry = ({ entry }) => {
     // set up my behaviors
     const behaviors = {
         // do nothing when current, otherwise pick my topic
-        onClick: current ? null : () => pick(entry),
+        onClick: current ? null : () => pick(entry.link),
     }
 
     // render
@@ -37,7 +37,7 @@ export const Entry = ({ entry }) => {
             <Title {...behaviors}>
                 {entry.title}
             </Title>
-            {entry.contents?.map(item => {
+            {current && entry.contents?.map(item => {
                 // render
                 return (
                     <Subsection key={item.link} href={item.link}>
