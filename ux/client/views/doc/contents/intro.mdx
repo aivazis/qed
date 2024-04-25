@@ -11,8 +11,8 @@ If you are reading this from within `qed`, you should be able to skip this secti
 the various installation options.
 
 If you are lucky enough to work on a machine that is managed professionally, `qed` may already be
-installed. Please contact the system administrators for instructions about how to access it, and skip
-to the next section.
+installed. Please contact the system administrators for instructions about how to access it, and
+skip to the next section.
 
 If you are comfortable with `jupyter` notebooks, the current
 [release tarball](https://github.com/aivazis/qed/archive/refs/tags/v0.9.3.tar.gz)
@@ -154,7 +154,7 @@ You may need to replace `gcc` and the `python` version with whatever is availabl
 environment. Incidentally, the directory `~/.config/pyre` is the home for configuration files for
 all `pyre` applications, including `qed`, so we will be adding more files here later on.
 
-The build system needs to know wher to find headers and libraries for the `qed` dependencies. The
+The build system needs to know where to find headers and libraries for the `qed` dependencies. The
 package database lives in `~/.config/mm/config.mm`:
 
 ``` makefile
@@ -197,8 +197,8 @@ pyre.dir := $(sys.prefix)
 ```
 
 Most of the indicated package versions are there for documentation purposes, with the exception
-of the `python` version that is used by `mm` to locate the various locations where the interpreter
-and its packages deposit fiels we need.
+of the `python` version that is used by `mm` to find the various locations where the interpreter
+and its packages deposit fiels it needs.
 
 ### Building
 
@@ -258,7 +258,7 @@ On `macOS`, it needs some help until `pyre` is built, so use something like:
 ~/dv/pyre> mm --slots=20
 ```
 
-Don't worry if you don't have twenty cores on your machine. Most modern machine will be able to
+Don't worry if you don't have twenty cores on your machine. Most modern machines will be able to
 handle this load. Feel free to up the count if you are on a machine with more cores. If all goes
 well, you will have a functional `pyre` in the `site-packages` directory of your `python`
 installation. Let's verify:
