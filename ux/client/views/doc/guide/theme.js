@@ -43,4 +43,27 @@ export const Text = styled.p`
 `
 
 
+export const Link = styled.a`
+    & {
+        color: ${props => theme.page.link};
+    }
+
+    &:link {
+        color: ${props => theme.page.link};
+    }
+
+    &:hover {
+        color: ${props => theme.page.linkActive};
+    }
+
+    &:active {
+        color: ${props => theme.page.linkActive};
+    }
+
+    &:visited {
+        color: ${props => theme.page.link};
+    }
+`
+
+
 // end of file
