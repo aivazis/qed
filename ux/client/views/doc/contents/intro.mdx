@@ -5,7 +5,7 @@
 */}
 
 
-# Getting started
+# <a name="intro"></a>Getting started
 
 If you are reading this from within `qed`, you should be able to skip to the launching instructions
 at the end of this section.
@@ -25,7 +25,7 @@ You will find support for many recent `ubuntu` distributions in `etc/docker/dev`
 If none of these options work for you, read on to the next section for a walk through of how to
 build `qed` from source.
 
-### Dependencies
+### <a name="dependencies"></a>Dependencies
 
 The easiest way to install the `qed` dependencies is using `micromamba` and `conda-forge`. The
 following configuration file will install everything `qed` needs in an environment named `qed`. Feel
@@ -75,7 +75,7 @@ dependencies. Further, you may have to adjust your `PATH`, `LD_LIBRARY_PATH`, `P
 perhaps other environment variables that control access to binaries, shared objects, and `python`
 packages on your machine.
 
-### Cloning the repositories
+### <a name="cloning"></a>Cloning the repositories
 
 We will need a place to clone the necessary source repositories. For the sake of concreteness, let's
 pick `~/dv` as the source directory.
@@ -109,7 +109,7 @@ currently evolving together rather quickly. Being tied to a slower release cycle
 the latest feadtures. Generally speaking, the `HEAD` of all three repositories is a safe place to
 pull from, as they are thoroughly tested.
 
-### Setting up the build system
+### <a name="mm"></a>Setting up the build system
 
 The most involved step of the installation process is the configuration of the build system.
 We will place configuration files in two locations:
@@ -200,7 +200,7 @@ Most of the indicated package versions are there for documentation purposes, wit
 of the `python` version that is used by `mm` to find the various locations where the interpreter
 and its packages deposit fiels it needs.
 
-### Building
+### <a name="building"></a>Building
 
 The next step is to build `pyre` and `qed`. We will invoke `mm` a few times, so you may find
 it convenient to create an alias for it.
@@ -242,7 +242,7 @@ You may see `mm` download a `pyre` archive from `github` to bootstrap the proces
 as `mm` is itself a `pyre` application.
 
 If anything goes wrong at this stage that cannot be resolved by retracing your steps looking for
-typos, please file an issue at the `qed` [repository](https://github.com/aivazis/qed/issues),
+typos, please file an [issue](https://github.com/aivazis/qed/issues) at the `qed` repository,
 and attach a log file or a screenshot to help diagnose the problem.
 
 If everything looks ok, let's build and install `pyre`. If you are on a `linux` system, `mm` will
@@ -283,11 +283,86 @@ Again, if anything goes wrong, please reach out, and include as much about the f
 can gather.
 
 
-### Launching
+### <a name="launching"></a>Launching
 
 If you are installing in a `conda` environment, `mm` deposits `qed` in a directory that is already
-on your path so there are no additional steps to take to makeit accessible. If not, you will have to
+on your path so there are no additional steps to take to make it accessible. If not, you will have to
 tweak your environment variables.
+
+By default, the application operates as a command line tool:
+
+``` bash
+~/dv/qed> qed
+
+  qed 0.9.3 revision 038a584
+  copyright (c) 1998-2024 all rights reserved
+
+  The main action dispatcher
+
+  authors:
+      michael a.g. aïvázis <michael.aivazis@para-sim.com>
+
+  commands:
+         s3: access to S3 buckets
+    inspect: a collection of introspection utilities
+      about: information about this application
+     config: configuration information
+       info: helpful information
+      debug: debugging information
+
+  options:
+      --archives: the list of registered data archives [list]
+      --datasets: the list of datasets to display [list]
+         --views: the initial list of views [list]
+        --reader: the reader to use when opening datasets [str]
+          --cell: the format string that specifies the type of the dataset payload [qed.datatypes]
+        --origin: the smallest possible index [tuple]
+         --shape: the shape of the dataset [tuple]
+         --lines: set the vertical dimension of the dataset [int]
+       --samples: set the horizontal dimension of the dataset [int]
+         --uint8: set the cell type to an unsigned 8-bit integer [bool]
+        --uint16: set the cell type to an unsigned 16-bit integer [bool]
+        --uint32: set the cell type to an unsigned 32-bit integer [bool]
+        --uint64: set the cell type to an unsigned 64-bit integer [bool]
+          --int8: set the cell type to an 8-bit integer [bool]
+         --int16: set the cell type to a 16-bit integer [bool]
+         --int32: set the cell type to a 32-bit integer [bool]
+         --int64: set the cell type to a 64-bit integer [bool]
+       --float32: set the cell type to a 32-bit float [bool]
+       --float64: set the cell type to a 64-bit float [bool]
+     --complex64: set the cell type to a 64-bit complex [bool]
+    --complex128: set the cell type to a 32-bit complex [bool]
+       --logfile: file that captures all journal output [path]
+         --shell: my hosting strategy [pyre.shells]
+         --DEBUG: debugging mode [bool]
+```
+
+Launching it in the browser requires a couple of command line arguments
+
+``` bash
+~/dv/qed> qed --shell=web --shell.auto=yes
+qed: web server on '0.0.0.0':51122
+```
+
+This shows that the `qed` web server has started and is listening for connections at a specific
+port. The option `--shell.auto=yes` instructs `qed` to start a broswer automatically and point it
+to this port. You can make this behavior the default by creating a configuration file. Settings that
+affect all invokations of `qed` should be placed in a configuration file at
+`~/.config/pyre/qed.yaml`
+
+``` yaml
+# -*- yaml -*-
+
+shell: web
+shell.auto: yes
+
+# end of file
+```
+
+Settings from a `qed.yaml` in the current working directory override these global defaults, so you
+have complete control over how the application behaves by creating local configuration files next
+to your data. More details about application configuration, both from the command line and from
+within configuration files can be found in the section on [configuring](#mm) the app.
 
 Let's get some data to play with. NISAR has a publicly accessible
 [site](https://nisar.jpl.nasa.gov/data/sample-data/) with examples of all the planned standard data
@@ -308,4 +383,3 @@ features.
 
 
 {/* end of file */}
-
