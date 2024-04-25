@@ -27,7 +27,7 @@ export const Code = ({ className, ...properties }) => {
     if (match) {
         // use the syntax highlighter
         return (
-            <SyntaxHighlighter style={hljs} language={match[1]} PreTag="div" {...properties} />
+            <SyntaxHighlighter style={hljs} language={match[1]} PreTag={Housing} {...properties} />
         )
     }
     // otherwise, render a code fragment
@@ -43,6 +43,11 @@ const Inlay = styled.code`
     font-family: "inconsolata";
     font-size: medium;
     color: ${props => theme.page.highlight};
+`
+
+const Housing = styled.div`
+    border: 1px solid ${props => theme.page.active};
+    border-radius: 0.5em;
 `
 
 

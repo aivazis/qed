@@ -88,7 +88,7 @@ export default {
     "display": "block",
     "lineHeight": "150%",
     "overflowX": "auto",
-    "background": "#1d1f21",
+    "background": "hsl(0deg, 0%, 7%)",
     "color": "#c5c8c6",
     "margin": "1.0rem",
     "padding": "1.0em",
