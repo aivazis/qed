@@ -7,12 +7,12 @@
 
 # Getting started
 
-If you are reading this from within `qed`, you should be able to skip this section, as it deals with
-the various installation options.
+If you are reading this from within `qed`, you should be able to skip to the launching instructions
+at the end of this section.
 
-If you are lucky enough to work on a machine that is managed professionally, `qed` may already be
-installed. Please contact the system administrators for instructions about how to access it, and
-skip to the next section.
+Similarly, if you are lucky enough to work on a machine that is managed professionally, `qed` may
+already be installed. Please contact the system administrators for instructions about how to access
+it, and skip to the end of this section.
 
 If you are comfortable with `jupyter` notebooks, the current
 [release tarball](https://github.com/aivazis/qed/archive/refs/tags/v0.9.3.tar.gz)
@@ -206,14 +206,14 @@ The next step is to build `pyre` and `qed`. We will invoke `mm` a few times, so 
 it convenient to create an alias for it.
 
 ``` bash
-~/dv> alias mm='python3 ${HOME}/dv/mm/mm.py'
+~/dv> alias mm='python3 ${HOME}/dv/mm/mm'
 ```
 
 You might want to make this more permanent by also adding it to your shell startup file, e.g. your
 `~/.bash_profile`.
 
 Let's verify that everything is ok so far. Let's go to the `pyre` source directory and ask `mm` to
-show a few details about the build. This should generate a few lines of output similar to the
+show details about the build. This should generate a few lines of output similar to the
 following:
 
 ``` bash
@@ -226,7 +226,7 @@ following:
 
 builder directory layout:
   staging layout:
-           tmp = /Users/mga/tmp/builds/mm/gcc/opt-shared-darwin-arm64/
+           tmp = /Users/mga/tmp/builds/mm/clang/opt-shared-darwin-arm64/
   install layout:
         prefix = /Users/mga/.local/envs/qed
            bin = /Users/mga/.local/envs/qed/bin/
@@ -285,9 +285,27 @@ can gather.
 
 ### Launching
 
-If you are installing in a `conda` environment, `qed` is already on your path so there are no
-additional steps to take to makeit accessible. If not, you will have to tweak your environment
-variables.
+If you are installing in a `conda` environment, `mm` deposits `qed` in a directory that is already
+on your path so there are no additional steps to take to makeit accessible. If not, you will have to
+tweak your environment variables.
+
+Let's get some data to play with. NISAR has a publicly accessible
+[site](https://nisar.jpl.nasa.gov/data/sample-data/) with examples of all the planned standard data
+products in `hdf5` format. In the next section you will see how to read these products, select among
+the datasets they contain, and control the various visualization aspects. The filenames on the site
+are rather long, so in what follows they have been renamed to match their product type. Let's make a
+directory to house them, and download as many of them as you would like.
+
+``` bash
+~/dv/qed> cd ..
+~/dv> mkdir -p data/nisar
+~/dv> cd data/nisar
+~/dv/data/nisar>
+```
+
+You are now ready to move on to the next section that will walk through the various application
+features.
+
 
 {/* end of file */}
 
