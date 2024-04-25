@@ -23,7 +23,7 @@ export const Entry = ({ entry }) => {
     // if the location ends with my link, i'm the current topic
     const current = entry.link === topic
     // pick the component to render
-    const Text = current ? Current : Topic
+    const Title = current ? Current : Topic
 
     // set up my behaviors
     const behaviors = {
@@ -33,14 +33,27 @@ export const Entry = ({ entry }) => {
 
     // render
     return (
-        <Text {...behaviors}>
-            {entry.title}
-        </Text>
+        <Section>
+            <Title {...behaviors}>
+                {entry.title}
+            </Title>
+            {entry.contents?.map(item => {
+                // render
+                return (
+                    <Subsection key={item.link} href={item.link}>
+                        {item.title}
+                    </Subsection>
+                )
+            })}
+        </Section>
     )
 
 }
 
 // the parts
+const Section = styled.nav`
+`
+
 const Topic = styled.div`
     & {
         padding: 0.5em 0.0em 0.5em 1.0rem;
@@ -56,6 +69,19 @@ const Current = styled.div`
     padding: 0.5em 0.0em 0.5em 1.0rem;
     color: ${props => theme.page.highlight};
     cursor: default;
+`
+
+const Subsection = styled.a`
+    & {
+        display: block;
+        font-size: small;
+        padding: 0.5em 0.0em 0.5em 2.0rem;
+        cursor: pointer;
+    }
+
+    &:hover {
+        color: ${props => theme.page.highlight};
+    }
 `
 
 
