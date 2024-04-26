@@ -35,7 +35,7 @@ import {
     // datasets
     Viz, Controls, Readers,
     // embedded documentation
-    Guide, TOC,
+    Guide,
     // the main page
     Main,
     // boilerplate
@@ -60,9 +60,6 @@ const QEDApp = ({ base }) => {
         <Routes >
             {/* the app */}
             <Route path="/" element={<Main qed={qed} />} >
-                {/* specific activities */}
-                <Route path="about" element={<NYI base={base} />} />
-
                 {/* data archives */}
                 <Route element={<Explorer qed={qed} />}>
                     <Route path="explore" element={<Archives qed={qed} />} />
@@ -76,6 +73,9 @@ const QEDApp = ({ base }) => {
 
                 {/* embedded documentation */}
                 <Route path="doc/*" element={<Guide qed={qed} />} />
+
+                {/* specific activities */}
+                <Route path="about" element={<NYI base={base} />} />
 
             </Route>
 
