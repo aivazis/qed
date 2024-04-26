@@ -21,7 +21,7 @@ import { topics } from '../contents'
 import { TOC } from '../toc'
 import { Code } from './code'
 import { Page } from './page'
-import { Title, Section, Subsection, Text, Link } from './theme'
+import { Title, Section, Subsection, Text, Bold, Link } from './theme'
 // paint
 import { flex, toc } from './styles'
 
@@ -74,6 +74,7 @@ const theme = {
     h3: Subsection,
     // text
     p: Text,
+    strong: Bold,
     // syntax highlighted code
     code: Code,
     // links
