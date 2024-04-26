@@ -5,7 +5,7 @@
 */}
 
 
-# <a name="intro"></a>Getting started
+# <a name="intro" />Getting started
 
 If you are reading this from within `qed`, you should be able to skip to the launching instructions
 at the end of this section.
@@ -25,7 +25,7 @@ You will find support for many recent `ubuntu` distributions in `etc/docker/dev`
 If none of these options work for you, read on to the next section for a walk through of how to
 build `qed` from source.
 
-### <a name="dependencies"></a>Dependencies
+### <a name="intro.dependencies" />Dependencies
 
 The easiest way to install the `qed` dependencies is using `micromamba` and `conda-forge`. The
 following configuration file will install everything `qed` needs in an environment named `qed`. Feel
@@ -68,14 +68,14 @@ On `macOS`, you may want to use `clang` instead of `gcc`. Make sure you activate
 before moving on to build `qed`.
 
 It is also possible to use other package managers to install these dependencies. Both `pyre` and
-`qed` have been tested on both `ubuntu` and `macOS` using their native environments, `macports`,
-`homebrew`, `spack`. Please keep in mind that most enterprise systems provide compilers and packages
-that are too old to build this code, so you will have to lean on something else to satisfy the
-dependencies. Further, you may have to adjust your `PATH`, `LD_LIBRARY_PATH`, `PYTHONPATH`, and
-perhaps other environment variables that control access to binaries, shared objects, and `python`
-packages on your machine.
+`qed` have been tested on both `ubuntu` and `macOS` using their native environments, as well as
+`macports`, `homebrew`, `spack`. Please keep in mind that most enterprise systems provide compilers
+and packages that are too old to build this code, so you will have to lean on something else to
+satisfy the dependencies. Further, you may have to adjust your `PATH`, `LD_LIBRARY_PATH`,
+`PYTHONPATH`, and perhaps other environment variables that control access to binaries, shared
+objects, and `python` packages on your machine.
 
-### <a name="cloning"></a>Cloning the repositories
+### <a name="intro.cloning" />Cloning the repositories
 
 We will need a place to clone the necessary source repositories. For the sake of concreteness, let's
 pick `~/dv` as the source directory.
@@ -109,7 +109,7 @@ currently evolving together rather quickly. Being tied to a slower release cycle
 the latest feadtures. Generally speaking, the `HEAD` of all three repositories is a safe place to
 pull from, as they are thoroughly tested.
 
-### <a name="mm"></a>Setting up the build system
+### <a name="intro.mm" />Setting up the build system
 
 The most involved step of the installation process is the configuration of the build system.
 We will place configuration files in two locations:
@@ -200,7 +200,7 @@ Most of the indicated package versions are there for documentation purposes, wit
 of the `python` version that is used by `mm` to find the various locations where the interpreter
 and its packages deposit files it needs.
 
-### <a name="building"></a>Building
+### <a name="intro.building" />Building
 
 The next step is to build `pyre` and `qed`. We will invoke `mm` a few times, so you may find
 it convenient to create an alias for it.
@@ -283,7 +283,7 @@ Again, if anything goes wrong, please reach out, and include as much about the f
 can gather.
 
 
-### <a name="launching"></a>Launching
+### <a name="intro.launching" />Launching
 
 If you are installing in a `conda` environment, `mm` deposits `qed` in a directory that is already
 on your path so there are no additional steps to take to make it accessible. If not, you will have to
