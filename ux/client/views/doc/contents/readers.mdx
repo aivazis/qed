@@ -5,10 +5,10 @@
 */}
 
 {/* extrnal */}
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 {/* project */}
-import { Split, X } from '~/shapes'
+import { Chevron, Split, X } from '~/shapes'
 
 {/* local */}
 import { Badge } from './badge'
@@ -62,22 +62,51 @@ the current activity is the archive explorer, indicated by the highlight next to
 Our activity pane is titled "DATA ARCHIVES" and displays the contents of the default archive, i.e.
 the directory from which we launched the server at the terminal.
 
+The activity pane contains only one archive named `local:workspace`. The visibility of its contents
+can be toggled by clicking on the <Badge><Chevron /></Badge> next to its name. The contents show the
+URL of the archive, followed by a listing of the available files. Connected archives can be
+dismissed by clicking on the <Badge><X /></Badge> on their title bar.
+
 The activity pane is followed by one or more **data panes** that comprise the main work area of the
 application. When empty, the data panes typically display the icon that corresponds to the currently
-selected activity. We only have a single empty data pane. You can split a data pane in two by
-clicking on the <Badge><Split /></Badge> icon on its title bar, and you can dismiss it by clicking
-on <Badge><X /></Badge>.
-
+selected activity. Unless configured outherwise, `qed` starts up with a single empty data pane. You
+can split a data pane in two by clicking on the <Badge><Split /></Badge> icon on its title bar, and
+you can dismiss it by clicking on <Badge><X /></Badge>.
 
 ### <a name="#readers.nisar" />Connecting a NISAR reader
 
+Selecting `gunw.h5` from the listing of the archive contents brings up the reader connection form.
+
 <Screenshot src="/figures/qed-readers-entry.png" width="100%" />
+
+The sequence of steps necessary to successfully connect a `qed` reader depend on the data source.
+NISAR datasets are stored in HDF5 files and are fully self-describing. Typically, this means that
+there is very little guesswork associated with connecting them to `qed`, which knows the layout of
+all Level 1 and Level 2 NISAR data products. Clicking on `nisar` instructs `qed` to open the file
+with the reader that is able to determine the product details automatically:
 
 <Screenshot src="/figures/qed-readers-product.png" width="100%" />
 
+Note that `qed` recognized that `gunw.h5` is an unwrapped interferogram and selected the appropriate
+product type automatically. The `connect` button is not yet active because `qed` is still expecting
+one more piece of information: the **nickname** of this data product. The nickname is a user
+specified string that gets associated with this dataset for the remainder of your `qed` session. If
+you use any of the `qed` persistence features to save your choices for how to visualizae this
+dataset, they will be recorded in a dictionary using the nickname as the retrieval key. The current
+version of `qed` does not attempt to provide any suggestions about how to name your datasets, so
+you will to choose one on your own. Picking the, admittedly unimaginative, `gunw` nickname for our
+dataset yields:
+
 <Screenshot src="/figures/qed-readers-nickname.png" width="100%" />
 
+Note that the `connect` and `cancel` buttons are now active, indicating that `qed` has enough
+information to connect this reader to the app so we can start visualizing its contents. Clicking
+on `connect` adds the reader to data pile and returns the screen to its original form.
+
 <Screenshot src="/figures/qed-archives-empty.png" width="100%" />
+
+At this point you can choose to connect more DataTransferItemList, or proceed to explore the ones
+that are already connected.
 
 {/* end of file */}
 
