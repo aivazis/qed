@@ -46,7 +46,8 @@ export const Text = styled.p`
 `
 
 export const Bold = styled.strong`
-    color: ${props => theme.page.link};
+    font-weight: 300;
+    color: ${props => theme.page.highlight};
 `
 
 
