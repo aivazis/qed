@@ -9,7 +9,7 @@ import styled from 'styled-components'
 
 
 // a screenshot
-export const ScreenShot = styled.img`
+export const Screenshot = styled.img`
     width: ${props => props.width};
 `
 
