@@ -9,42 +9,42 @@ export const badge = ({ state, client, polish }) => ({
     // the container
     badge: {
         // the base coat
-        ...paint.badge.base, ...client.badge?.base,
+        ...paint.badge.base, ...client?.badge?.base,
         // the state dependent layer
-        ...paint.badge[state], ...client.badge?.[state],
+        ...paint.badge[state], ...client?.badge?.[state],
         // extra polish from the highlight, if necessary
         ...(polish ? paint.badge.available : null),
-        ...(polish ? client.badge?.available : null),
+        ...(polish ? client?.badge?.available : null),
     },
     // the svg container
     shape: {
         // the base coat
-        ...paint.shape.base, ...client.shape?.base,
+        ...paint.shape.base, ...client?.shape?.base,
         // the state dependent layer
-        ...paint.shape[state], ...client.shape?.[state],
+        ...paint.shape[state], ...client?.shape?.[state],
         // extra polish from the highlight, if necessary
         ...(polish ? paint.shape.available : null),
-        ...(polish ? client.shape?.available : null),
+        ...(polish ? client?.shape?.available : null),
     },
     // the main icon features
     icon: {
         // the base coat
-        ...paint.icon.base, ...client.icon?.base,
+        ...paint.icon.base, ...client?.icon?.base,
         // the state dependent layer
-        ...paint.icon[state], ...client.icon?.[state],
+        ...paint.icon[state], ...client?.icon?.[state],
         // extra polish from the highlight, if necessary
         ...(polish ? paint.icon.available : null),
-        ...(polish ? client.icon?.available : null),
+        ...(polish ? client?.icon?.available : null),
     },
     // icon decoration
     decoration: {
         // the base coat
-        ...paint.decoration.base, ...client.decoration?.base,
+        ...paint.decoration.base, ...client?.decoration?.base,
         // the state dependent layer
-        ...paint.decoration[state], ...client.decoration?.[state],
+        ...paint.decoration[state], ...client?.decoration?.[state],
         // extra polish from the highlight, if necessary
         ...(polish ? paint.decoration.available : null),
-        ...(polish ? client.decoration?.available : null),
+        ...(polish ? client?.decoration?.available : null),
     },
 })
 
