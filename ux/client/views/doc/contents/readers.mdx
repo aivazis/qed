@@ -1,0 +1,83 @@
+{/*
+    -* mdx -*-
+    michael a.g. aïvázis <michael.aivazis@para-sim.com>
+    (c) 1998-2024 all rights reserved
+*/}
+
+{/* extrnal */}
+import {Link} from 'react-router-dom'
+
+{/* project */}
+import { Split, X } from '~/shapes'
+
+{/* local */}
+import { Badge } from './badge'
+import { Screenshot } from './screenshot'
+
+
+# <a name="readers" />Loading datasets
+
+In the section on <Link to="intro#launching">launching</Link> the `qed` server, we installed a
+global configuration file in `~/.config/pyre/qed.yaml` that starts the web server and
+automatically opens a new borwser window with a connection to the server:
+
+``` yaml
+# -*- yaml -*-
+
+# launch the web server
+shell: web
+# connect a new browser window/tab to the qed server automatically
+shell.auto: yes
+
+# end of file
+```
+
+We also created a directory `~/dv/data/nisar-samples` and populated it with the NISAR standard data
+products from the project [website](https://nisar.jpl.nasa.gov/data/sample-data/). We also renamed
+the samples according to their product type, to reduce clutter. The directory should look something
+like this:
+
+``` bash
+~/dv/data/nisar-samples> ls -lh
+total 2.7G
+-rw-r--r-- 1 mga staff 243M Jan 14 17:24 gcov.h5
+-rw-r--r-- 1 mga staff 209M Jan 14 17:24 goff.h5
+-rw-r--r-- 1 mga staff 651M Jan 14 17:29 gslc.h5
+-rw-r--r-- 1 mga staff 465M Jan 14 08:36 gunw.h5
+-rw-r--r-- 1 mga staff  36M Jan 14 08:31 rifg.h5
+-rw-r--r-- 1 mga staff  15M Jan 14 17:19 roff.h5
+-rw-r--r-- 1 mga staff 231M Jan 14 17:29 rrsd.h5
+-rw-r--r-- 1 mga staff 772M Jan 14 17:29 rslc.h5
+-rw-r--r-- 1 mga staff  48M Jan 14 08:35 runw.h5
+```
+
+With these settings, launching `qed` from the terminal should open a browser window that looks
+something like this:
+
+<Screenshot src="/figures/qed-archives-empty.png" width="100%" />
+
+The column of icons on the left, the **activity bar**, is the main navigational element. It is
+followed by the **activity pane** whose contents are specific to selected activity. In this case,
+the current activity is the archive explorer, indicated by the highlight next to the activity icon.
+Our activity pane is titled "DATA ARCHIVES" and displays the contents of the default archive, i.e.
+the directory from which we launched the server at the terminal.
+
+The activity pane is followed by one or more **data panes** that comprise the main work area of the
+application. When empty, the data panes typically display the icon that corresponds to the currently
+selected activity. We only have a single empty data pane. You can split a data pane in two by
+clicking on the <Badge><Split /></Badge> icon on its title bar, and you can dismiss it by clicking
+on <Badge><X /></Badge>.
+
+
+### <a name="#readers.nisar" />Connecting a NISAR reader
+
+<Screenshot src="/figures/qed-readers-entry.png" width="100%" />
+
+<Screenshot src="/figures/qed-readers-product.png" width="100%" />
+
+<Screenshot src="/figures/qed-readers-nickname.png" width="100%" />
+
+<Screenshot src="/figures/qed-archives-empty.png" width="100%" />
+
+{/* end of file */}
+
