@@ -42,24 +42,27 @@ channels:
   - conda-forge
 
 dependencies:
+  # python and runtime packages
   - python
+  - graphene
+  - numpy
+  - yaml
+  - ruamel.yaml
+  # reading NISAR data products
+  - hdf5
+  # optional: reading GeoTIFFs and other supported formats
+  - gdal
+  # optional: listing the contents of S3 data archives
+  - awscli
+  - boto3
+  - openssl
+  # optional: building from source
   - git
   - gcc
   - gxx
-  - gfortran
   - make
   - nodejs
-  - awscli
-  - gsl
-  - hdf5
-  - openssl
-  - boto3
-  - graphene
-  - numpy
   - pybind11
-  - pytest
-  - ruamel.yaml
-  - yaml
 
 # end of file
 ```
