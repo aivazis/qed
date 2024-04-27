@@ -27,7 +27,7 @@ using grid_t = pyre::grid::grid_t<packing_t, storage_t>;
 
 // build a dataset
 int
-main(int argc, char * argv [])
+main(int argc, char * argv[])
 {
     // initialize the journal
     pyre::journal::init(argc, argv);
@@ -44,7 +44,7 @@ main(int argc, char * argv [])
     // layout
     packing_t packing { shape, origin };
     // storage
-    storage_t map("c8.dat", packing.cells());
+    storage_t map("d8.dat", packing.cells());
     // grid
     grid_t data { packing, map };
 
@@ -56,7 +56,7 @@ main(int argc, char * argv [])
         // transform
         auto scaled = delta * idx;
         // convert into a {data_t}
-        return data_t { scaled [0], scaled [1] };
+        return data_t { scaled[0], scaled[1] };
     };
 
     // fill the grid
@@ -66,7 +66,7 @@ main(int argc, char * argv [])
         // compute f(z)
         auto f = (z - 1.0f) / (z * z + z + 1.0f);
         // place into the data set
-        data [idx] = f;
+        data[idx] = f;
     }
 
     // all done
