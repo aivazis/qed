@@ -118,7 +118,9 @@ const Spec = ({ qref, view, setType, hide }) => {
     // determine whether i have enough information to make the connection
     const ready = (
         form.name !== null && form.name.length &&
-        form.product !== null && form.product.length
+        form.product !== null && form.product.length &&
+        form.lines !== null && form.lines.length &&
+        form.samples !== null && form.samples.length
     )
     // figure out the state of the connect button
     const Connect = ready ? EnabledConnect : DisabledConnect
