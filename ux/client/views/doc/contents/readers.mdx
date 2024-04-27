@@ -8,7 +8,7 @@
 import { Link } from 'react-router-dom'
 
 {/* project */}
-import { Chevron, Split, X } from '~/shapes'
+import { Chevron, Data, Split, X } from '~/shapes'
 
 {/* local */}
 import { Badge } from './badge'
@@ -106,7 +106,7 @@ on `connect` adds the reader to data pile and returns the screen to its original
 <Screenshot src="/figures/qed-archives-empty.png" width="100%" />
 
 At this point you can choose to connect more datasets, or proceed to explore the ones
-that are already connected.
+that are already connected by clicking on the <Badge><Data /></Badge> on the activity bar.
 
 ### <a name="#readers.flat" />Loading flat binary files
 
@@ -118,17 +118,17 @@ If you are following along with this guide and you don't have easy access to dat
 can ask `qed` to generate a couple of samples:
 
 ``` bash
-~/dv/data/nisar-samples> cd ../../qed/data
-~/dv/qed/data> ls -lh
+~/dv/data/nisar-samples> cd ../../qed/data/native
+~/dv/qed/data/native> ls -lh
 total 8.0K
 -rw-rw-r-- 1 mga staff 2.0K Apr 27 20:41 d16.cc
 -rw-rw-r-- 1 mga staff 2.0K Apr 27 20:41 d8.cc
-~/dv/qed/data> mm data
+~/dv/qed/data/native> mm data
   [c++] data/native/d16.cc
   [test] native/d16
   [c++] data/native/d8.cc
   [test] native/d8
-~/dv/qed/data> ls -lh
+~/dv/qed/data/native> ls -lh
 total 529M
 -rwxrwxr-x 1 mga staff  39K Apr 27 21:27 d16
 -rw-rw-r-- 1 mga staff 2.0K Apr 27 20:41 d16.cc
@@ -138,7 +138,7 @@ total 529M
 -rw-rw-r-- 1 mga staff 2.0K Apr 27 20:41 d8.cc
 -rw-rw-r-- 1 mga staff  83K Apr 27 21:27 d8.d
 -rw-rw-r-- 1 mga staff 182M Apr 27 21:27 d8.dat
-~/dv/qed/data>
+~/dv/qed/data/native>
 ```
 
 The two files `d16.dat` and `d18.dat` are flat binary files with `std::complex<double>` and
@@ -165,15 +165,40 @@ selection
 
 <Screenshot src="/figures/qed-flat-cell.png" width="100%" />
 
-which leaves us with having to select the shape. With a known pixel type and file size, `qed`
+This leaves us with having to specify the image shape. With a known pixel type and file size, `qed`
 provides some shape guidance by generating plausible pairs. In order to keep the choices to a
 manageable level, you can constrain the image aspect ratio. You can specify the shape by either
 selecting one of the available choices or supplying the number of lines and samples in directly in
 the form. For each selection, `qed` generates an image preview to help decide whether the chosen
-shape make sense. Our sample data is `3929 x 6049`, so selecting this shape from the list yields
+shape make sense. Our sample image is `3929 x 6049`, so selecting this shape from the list yields
 
 <Screenshot src="/figures/qed-flat-shape.png" width="100%" />
 
-with preview clearly showing the location of the two poles in the dataset.
+with the preview clearly showing the location of the two poles in the dataset. At this point you can
+choose to connect more datasets, or proceed to explore the ones that are already connected by
+clicking on the <Badge><Data /></Badge> icon on the activity bar.
+
+### <a name="#readers.isce2" />Support for `isce2`
+
+There is an ongoing effort to provide support for all input, intermediate, and output data products
+from [`isce2`]() workflows. These data products are flat binary files, so in principle they can be
+read using the machinery described in the previous section. Bit there are certain advantages of
+having native support:
+
+* `isce2` workflows generate auxiliary files that contain product metadata, such as product
+  type, pixel type, shape, etc.
+
+* Certain data products, such as wrapped and unwrapped interferograms, have custom visualization
+  pipelines that include specialized color maps that are in wide use in the community.
+
+Reader selection is very streamlined when the auxiliary files are present, and most of the
+associated form is prefilled with values from the metadata file. If the auxiliary file is missing,
+the specification workflow is very similar to the one shown in the previous section.
+
+### <a name="#readers.gdal" />Using `gdal`
+
+It is possible, although currently not well supported, to use `gdal` as the data product reader.
+This is useful for opening data products in any of the myriad of formats supported by it. This
+effort is on going and updates are forthcoming. Stay tuned.
 
 {/* end of file */}
