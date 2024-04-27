@@ -50,7 +50,7 @@ module.exports = {
                 use: [
                     {
                         loader: '@mdx-js/loader',
-                        /** @type {import)'@mdx-js/loader').Options} */
+                        /** @type {import('@mdx-js/loader').Options} */
                         options: {}
                     }
                 ]
