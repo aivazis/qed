@@ -27,7 +27,9 @@ export const topics = [
         link: "readers", title: "Loading datasets", page: Readers,
         contents: [
             { link: "#readers.nisar", title: "Connecting a NISAR reader" },
-            { link: "#readers.flat", title: "Reading flat binary files" }
+            { link: "#readers.flat", title: "Reading flat binary files" },
+            { link: "#readers.isce2", title: "Support for isce2" },
+            { link: "#readers.gdal", title: "Using gdal" },
         ]
     },
     {
