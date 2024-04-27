@@ -39,7 +39,7 @@
         "lazysizes": "latest",
         "lodash": "latest",
         "path-browserify": "latest",
-        "react": "18.2.0",
+        "react": "latest",
         "react-dom": "latest",
         "react-relay": "latest",
         "react-router": "latest",
