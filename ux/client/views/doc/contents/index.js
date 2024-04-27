@@ -26,7 +26,8 @@ export const topics = [
     {
         link: "readers", title: "Loading datasets", page: Readers,
         contents: [
-            { link: "#readers.nisar", title: "Connecting a NISAR reader" }
+            { link: "#readers.nisar", title: "Connecting a NISAR reader" },
+            { link: "#readers.flat", title: "Reading flat binary files" }
         ]
     },
     {

@@ -62,14 +62,14 @@ the current activity is the archive explorer, indicated by the highlight next to
 Our activity pane is titled "DATA ARCHIVES" and displays the contents of the default archive, i.e.
 the directory from which we launched the server at the terminal.
 
-The activity pane contains only one archive named `local:workspace`. The visibility of its contents
+The activity pane contains a single archive named `local:workspace`. The visibility of its contents
 can be toggled by clicking on the <Badge><Chevron /></Badge> next to its name. The contents show the
 URL of the archive, followed by a listing of the available files. Connected archives can be
 dismissed by clicking on the <Badge><X /></Badge> on their title bar.
 
 The activity pane is followed by one or more **data panes** that comprise the main work area of the
 application. When empty, the data panes typically display the icon that corresponds to the currently
-selected activity. Unless configured outherwise, `qed` starts up with a single empty data pane. You
+selected activity. Unless configured otherwise, `qed` starts up with a single empty data pane. You
 can split a data pane in two by clicking on the <Badge><Split /></Badge> icon on its title bar, and
 you can dismiss it by clicking on <Badge><X /></Badge>.
 
@@ -77,7 +77,7 @@ you can dismiss it by clicking on <Badge><X /></Badge>.
 
 Selecting `gunw.h5` from the listing of the archive contents brings up the reader connection form.
 
-<Screenshot src="/figures/qed-readers-entry.png" width="100%" />
+<Screenshot src="/figures/qed-nisar-entry.png" width="100%" />
 
 The sequence of steps necessary to successfully connect a `qed` reader depend on the data source.
 NISAR datasets are stored in HDF5 files and are fully self-describing. Typically, this means that
@@ -85,19 +85,19 @@ there is very little guesswork associated with connecting them to `qed`, which k
 all Level 1 and Level 2 NISAR data products. Clicking on `nisar` instructs `qed` to open the file
 with the reader that is able to determine the product details automatically:
 
-<Screenshot src="/figures/qed-readers-product.png" width="100%" />
+<Screenshot src="/figures/qed-nisar-product.png" width="100%" />
 
 Note that `qed` recognized that `gunw.h5` is an unwrapped interferogram and selected the appropriate
 product type automatically. The `connect` button is not yet active because `qed` is still expecting
 one more piece of information: the **nickname** of this data product. The nickname is a user
 specified string that gets associated with this dataset for the remainder of your `qed` session. If
-you use any of the `qed` persistence features to save your choices for how to visualizae this
+you use any of the `qed` persistence features to save your choices for how to visualize this
 dataset, they will be recorded in a dictionary using the nickname as the retrieval key. The current
 version of `qed` does not attempt to provide any suggestions about how to name your datasets, so
 you will to choose one on your own. Picking the, admittedly unimaginative, `gunw` nickname for our
 dataset yields:
 
-<Screenshot src="/figures/qed-readers-nickname.png" width="100%" />
+<Screenshot src="/figures/qed-nisar-nickname.png" width="100%" />
 
 Note that the `connect` and `cancel` buttons are now active, indicating that `qed` has enough
 information to connect this reader to the app so we can start visualizing its contents. Clicking
@@ -105,8 +105,75 @@ on `connect` adds the reader to data pile and returns the screen to its original
 
 <Screenshot src="/figures/qed-archives-empty.png" width="100%" />
 
-At this point you can choose to connect more DataTransferItemList, or proceed to explore the ones
+At this point you can choose to connect more datasets, or proceed to explore the ones
 that are already connected.
 
-{/* end of file */}
+### <a name="#readers.flat" />Loading flat binary files
 
+The NISAR standard products require very little user intervention because of the wealth of metadata
+stored in HDF5 files. At the other extreme are flat binary files that require the user to provide
+the dataset shape and its data type before they can be properly registered.
+
+If you are following along with this guide and you don't have easy access to data to play with, you
+can ask `qed` to generate a couple of samples:
+
+``` bash
+~/dv/data/nisar-samples> cd ../../qed/data
+~/dv/qed/data> ls -lh
+total 8.0K
+-rw-rw-r-- 1 mga staff 2.0K Apr 27 20:41 d16.cc
+-rw-rw-r-- 1 mga staff 2.0K Apr 27 20:41 d8.cc
+~/dv/qed/data> mm data
+  [c++] data/native/d16.cc
+  [test] native/d16
+  [c++] data/native/d8.cc
+  [test] native/d8
+~/dv/qed/data> ls -lh
+total 529M
+-rwxrwxr-x 1 mga staff  39K Apr 27 21:27 d16
+-rw-rw-r-- 1 mga staff 2.0K Apr 27 20:41 d16.cc
+-rw-rw-r-- 1 mga staff  83K Apr 27 21:27 d16.d
+-rw-rw-r-- 1 mga staff 363M Apr 27 21:27 d16.dat
+-rwxrwxr-x 1 mga staff  39K Apr 27 21:27 d8
+-rw-rw-r-- 1 mga staff 2.0K Apr 27 20:41 d8.cc
+-rw-rw-r-- 1 mga staff  83K Apr 27 21:27 d8.d
+-rw-rw-r-- 1 mga staff 182M Apr 27 21:27 d8.dat
+~/dv/qed/data>
+```
+
+The two files `d16.dat` and `d18.dat` are flat binary files with `std::complex<double>` and
+`std::complex<float>` pixels, respectively, and are plots of `(z-1)/(z^2 + z + 1)`. Assuming that
+you still have the `qed.yaml` file that we placed in `~/.config/pyre`, launching `qed` from this
+location yields
+
+<Screenshot src="/figures/qed-flat-empty.png" width="100%" />
+
+Let's click on the `d16.dat` entry in the archive listings. This brings up the reader selection form
+
+<Screenshot src="/figures/qed-flat-entry.png" width="100%" />
+
+Clicking on `native` deploys the reader that specializes on flat binary files
+
+<Screenshot src="/figures/qed-flat-product.png" width="100%" />
+
+The next thing we have to provide is the dataset nickname:
+
+<Screenshot src="/figures/qed-flat-nickname.png" width="100%" />
+
+The `d16` dataset has `std::complex<double>` pixels, which correspond to the `complex128` cell
+selection
+
+<Screenshot src="/figures/qed-flat-cell.png" width="100%" />
+
+which leaves us with having to select the shape. With a known pixel type and file size, `qed`
+provides some shape guidance by generating plausible pairs. In order to keep the choices to a
+manageable level, you can constrain the image aspect ratio. You can specify the shape by either
+selecting one of the available choices or supplying the number of lines and samples in directly in
+the form. For each selection, `qed` generates an image preview to help decide whether the chosen
+shape make sense. Our sample data is `3929 x 6049`, so selecting this shape from the list yields
+
+<Screenshot src="/figures/qed-flat-shape.png" width="100%" />
+
+with preview clearly showing the location of the two poles in the dataset.
+
+{/* end of file */}
