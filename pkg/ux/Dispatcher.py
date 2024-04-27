@@ -118,9 +118,9 @@ class Dispatcher:
         # instantiate it
         reader = cls(**config)
         # get its first dataset
-        data = reader.datasets[0]
-        # pick a channel
-        channel = tuple(data.channels.keys())[0]
+        data, *_ = reader.datasets
+        # and the first registered channel
+        channel, *_ = data.channels.values()
         # render the tile
         tile = data.render(
             channel=channel, zoom=(zoom, zoom), origin=(0, 0), shape=view
