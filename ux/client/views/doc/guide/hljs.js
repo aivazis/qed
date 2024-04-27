@@ -58,7 +58,7 @@ export default {
     "color": "#f0c674"
   },
   "hljs-string": {
-    "color": "hsl(0deg, 0%, 50%)",
+    "color": "hsl(28deg, 50%, 50%)",
     "fontStyle": "italic",
   },
   "hljs-symbol": {
