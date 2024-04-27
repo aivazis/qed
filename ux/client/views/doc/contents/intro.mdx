@@ -109,7 +109,7 @@ Alternatively, you can use the `https` protocol for anonymous access:
 
 You can probably get away with installing `pyre` from `conda-forge`, but `qed` and `pyre` are
 currently evolving together rather quickly. Being tied to a slower release cycle may delay access to
-the latest feadtures. Generally speaking, the `HEAD` of all three repositories is a safe place to
+the latest features. Generally speaking, the `HEAD` of all three repositories is a safe place to
 pull from, as they are thoroughly tested.
 
 ### <a name="intro.mm" />Setting up the build system
@@ -123,7 +123,7 @@ We will place configuration files in two locations:
 ~> mkdir -p .config/mm
 ```
 
-The conifguration for the build system lives in `~/.config/pyre/mm.yaml`:
+The configuration for the build system lives in `~/.config/pyre/mm.yaml`:
 ``` yaml
 # -*- yaml -*-
 
@@ -348,9 +348,9 @@ qed: web server on '0.0.0.0':51122
 ```
 
 This shows that the `qed` web server has started and is listening for connections at a specific
-port. The option `--shell.auto=yes` instructs `qed` to start a broswer automatically and point it
+port. The option `--shell.auto=yes` instructs `qed` to start a browser automatically and point it
 to this port. You can make this behavior the default by creating a configuration file. Settings that
-affect all invokations of `qed` should be placed in a configuration file at
+affect all invocations of `qed` should be placed in a configuration file at
 `~/.config/pyre/qed.yaml`
 
 ``` yaml
