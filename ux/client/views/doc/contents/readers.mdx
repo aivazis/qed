@@ -8,7 +8,7 @@
 import { Link } from 'react-router-dom'
 
 {/* project */}
-import { Chevron, Data, Split, X } from '~/shapes'
+import { Chevron, Data, Skull, Split, X } from '~/shapes'
 
 {/* local */}
 import { Badge } from './badge'
@@ -72,6 +72,19 @@ application. When empty, the data panes typically display the icon that correspo
 selected activity. Unless configured otherwise, `qed` starts up with a single empty data pane. You
 can split a data pane in two by clicking on the <Badge><Split /></Badge> icon on its title bar, and
 you can dismiss it by clicking on <Badge><X /></Badge>.
+
+Terminating a `qed` session requires two separate steps: stopping the `qed` server, and dismissing
+the browser window. The latter can only be done by the user, as there is no browser independent way
+to close a tab or window programmatically. The former requires sending a signal to the server to
+stop it. If you have access to the terminal from which the server was launched, you can use whatever
+process control facilities are available in your shell. For example, if the server is the foreground
+process, you can type `ctrl-C` to shut it down gracefully and terminate its process. An alternative
+is to click in the <Badge><Skull /></Badge> icon on the activity bar to send a signal to the server.
+In *ad hoc* installations of `qed`, this will terminate the server, but it is possible that your
+system administrator has set up something more complex surrounding the termination of the `qed`
+server. On the NISAR on-demand system, for example, a daemon is watching the `qed` server process
+and re-spawns it when it terminates with a signal. In such installations, you can treat the
+<Badge><Skull/></Badge> icon as a reboot of the server.
 
 ### <a name="#readers.nisar" />Connecting a NISAR reader
 
@@ -199,6 +212,6 @@ the specification workflow is very similar to the one shown in the previous sect
 
 It is possible, although currently not well supported, to use `gdal` as the data product reader.
 This is useful for opening data products in any of the myriad of formats supported by it. This
-effort is on going and updates are forthcoming. Stay tuned.
+effort is on-going and updates are forthcoming. Stay tuned.
 
 {/* end of file */}
