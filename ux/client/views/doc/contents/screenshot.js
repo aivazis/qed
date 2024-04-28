@@ -10,7 +10,7 @@ import styled from 'styled-components'
 
 // a screenshot
 export const Screenshot = styled.img`
-    width: ${props => props.width};
+    width: ${props => props?.width ?? "100%"};
 `
 
 
