@@ -7,6 +7,7 @@
 // pull the pages
 import Intro from './intro'
 import Readers from './readers'
+import Datasets from './datasets'
 import Archives from './archives'
 
 
@@ -33,16 +34,23 @@ export const topics = [
         ]
     },
     {
+        link: "datasets", title: "Selecting datasets", page: Datasets,
+        contents: [
+            { link: "#datasets.selectors", title: "Working with the data selectors" },
+            { link: "#datasets.channels", title: "Picking a visualization channel" },
+            { link: "#datasets.availability", title: "Data products and channels" },
+        ]
+    },
+    { link: "views", title: "Adjusting the view", page: null },
+    { link: "measure", title: "The measure layer", page: null },
+    { link: "panels", title: "Working with multiple data panels", page: null },
+    {
         link: "archives", title: "Connecting to data archives", page: Archives,
         contents: [
             { link: "#archives.local", title: "Local" },
             { link: "#archives.s3", title: "S3" },
         ]
     },
-    { link: "datasets", title: "Selecting datasets", page: null },
-    { link: "views", title: "Adjusting the view", page: null },
-    { link: "measure", title: "The measure layer", page: null },
-    { link: "panels", title: "Working with multiple data panels", page: null },
 ]
 
 

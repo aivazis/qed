@@ -1,0 +1,137 @@
+{/*
+    -* mdx -*-
+    michael a.g. aïvázis <michael.aivazis@para-sim.com>
+    (c) 1998-2024 all rights reserved
+*/}
+
+{/* external */}
+import { Link } from 'react-router-dom'
+
+{/* project */}
+import { Camera, Data, Eye, Target, X } from '~/shapes'
+
+{/* local */}
+import { Badge } from './badge'
+import { Screenshot } from './screenshot'
+
+
+# <a name="datasets" />Selecting datasets
+
+Let's go back to the back to the folder with the NISAR data samples and load a few more. The
+discussion that follows assumes that you have loaded the RSLC, GUNW, and GCOV products, and
+given them simple nicknames that correspond to their product type. Clicking on the
+<Badge><Data/></Badge> icon will bring up a display that should look something like this:
+
+<Screenshot src="/figures/qed-datasets-start.png" />
+
+The activity bar has the <Badge><Data/></Badge> icon highlighted, indicating that this is the
+current activity. The activity panel shows four **trays** with the four data readers we have
+connected to the app. Each tray displays the location of the associated data product, and a listing
+of the available datasets. More on this in a little bit. To the right of the activity panel is a
+single empty data pane. That's where the image will eventually show up.
+
+Individual trays can be dismissed, and the corresponding reader disconnected, by clicking on the
+<Badge><X /></Badge> icon on the tray title bar.
+
+### <a name="#datasets.selectors" />Working with data selectors
+
+THe NISAR data products are great examples of the power and versatility that HDF5 provides. The data
+is arranged in a hierarchical tree with data groups playing the role of intermediate nodes, similar
+to directories in a filesystem, and datasets as the leaf nodes, akin to files. The tree structure
+is fairly complex and designed to satisfy a collection of constraints that are entirely outside the
+scope of a visualization tool. In order to map the group structure into a usable interface, `qed`
+introduces the notion of **selectors**, i.e. choices with a discreet set of values that become part
+of a filter for identifying a dataset of interest. The fact that it is so much easier to show this
+process in action than it is to describe it with words is a testament to the power of the visual
+language it represents.
+
+Take the `rslc` reader in the top tray as an example. Its internal group structure has been reduced
+to three selections: band, frequency, and polarization. The RSLC formal product specification is
+able to represent both L and S band datasets, so the `band` selector has two possible values. The
+`rslc` reader that is managing this data product found an L band group in the file, so `L` is shown
+in a normal font; the absence of an S band product is indicated by the dimmed `S`. Moving on, the
+NISAR instruments can operate in either of two frequencies, named A and B, and either or both may be
+present in a given data product. This particular only has an A frequency dataset, so `A` is shown as
+available and `B` is dimmed. Similarly for the transmit/receive polarization pairs: there are four
+possible choices, all of which are represented in the polarization line, but only one is available
+in the current data product.
+
+A **selector** is sequence of choices, one from each selection point, that help narrow down the set of
+candidate datasets. A fully resolved selector has a values for each of the choices, and hence
+corresponds to a single dataset, but selectors can be partial, as they will be while you are making
+up your mind what to display.
+
+Selecting a dataset to show is a problem that's a bit more dynamic than may be apparent from these
+simple data products. It is possible for an L-band RSLC to have HH and HV polarizations for the A
+frequency, but HH and VV polarizations for the B frequency. Therefore, the set of available choices
+changes as you pick values for the various selection axes. `qed` uses selectors to allow for
+arbitrarily complex relationships among the possible value sets, keeps track of your choices, and
+always indicates what are viable options for the as yet unselected axes.
+
+When you click anywhere on a data product tray, `qed` runs its selector solver through the your
+selection, checking whether it has enough information to select a single dataset. This is trivial in
+the case of this `rslc`: click anywhere on its tray and the display should look like this:
+
+<Screenshot src="/figures/qed-datasets-rslc-selectors.png" />
+
+The selector solver ran through the possible options, determined that there is only one available
+option for each axis, and automatically selected the corresponding values. Richer data products will
+typically offer a mix of datasets, and the solver will require you to select some values before it
+can identify the dataset of interest.
+
+### <a name="#datasets.channels" />Picking a visualization channel
+
+Once the selector points to a unique dataset, all that remains is to select the visualization
+pipeline to deploy in order to map the pixel values in the dataset into color on the screen. `qed`
+refers to the visualization pipeline choices as **channels**. As you can see, the three data
+products present very different channel choices.
+
+ For `rslc`, the channels are determined by the fact that its pixels are complex numbers. The
+`amplitude` channel extracts the signal amplitude and displays it as a grayscale image; `phase`
+extract the signal phase and uses an HSV color wheel to map angles to colors; `complex` combines
+these two in a single color image with the pixel brightness tied to the amplitude and the color to
+the phase. The `real` and `imaginary` channels present the corresponding signal parts as grayscale
+images.
+
+If you click on a channel selection, say `amplitude`, `qed` fills the data pane to the right of the
+activity panel with the image that results form running the HH signal through the `amplitude`
+visualization pipeline. Notice that the pane title is highlighted, indicating that this is the
+active pane, and the title itself is built out of the reader name, the value of each selector in
+order, and, finally, the channel name. This way, you always have an easy way of identifying which
+dataset is on display in any given data pane.
+
+<Screenshot src="/figures/qed-datasets-rslc-channel.png" />
+
+You can now scroll around the image. The `qed` server fetches data tiles, runs them through the
+selected visualization pipeline, and ships them to the client on demand, so you may notice a tiny
+delay while scrolling as new tiles are requested and come into view.
+
+You can dismiss the pane by click on the <Badge><X/></Badge> icon, which will bring the display
+back to its initial state, with no selected reader and an empty data pane.
+
+You may have noticed that a few more icons have popped up on the data pane title bar. Clicking on
+the <Badge><Camera/></Badge> icon will take a screenshot of the exact contents of the data pane and
+save them as a bitmap on your disk. The <Badge><Eye/></Badge> icon toggles synchronized scrolling
+for this data pane; more on this in the section on working with multiple panes. Finally, the
+<Badge><Target/></Badge> icon toggles the measure layer, which is covered in detail in the
+section on working with the measure layer.
+
+Another thing you may have noticed are the two lines above the image itself that show pixel and
+cursor values. The are part of the **info** panel. The cursor line always shows the current location
+of the cursor in screen coordinates, whereas pixel refers to image coordinates that depend on the
+data product, zoom level, and other factors. The info panel has a host of other useful metadata
+about the data product that you can reveal or hide by clicking on the `more` and `less` controls.
+
+### <a name="#datasets.availability" />Data products and channels
+
+Currently, unwrapped interferograms present a single channel, the unwrapped phase. The GUNW product
+contains a wealth of other information that would be useful to visualize, so there is an effort
+underway to identify interesting signal and design appropriate visualization pipelines.
+
+GCOV data products don't have transmit/receive polarization pairs; instead, they present the
+possible covariance terms as the `cov` selector. The diagonal terms are real valued, so their
+channels have two options: the raw signal value or its absolute value. The complex values
+off-diagonal terms have the same channels as the `rslc` datasets above.
+
+{/* end of file */}
+
