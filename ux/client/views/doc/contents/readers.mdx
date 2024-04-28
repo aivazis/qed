@@ -93,9 +93,20 @@ Selecting `gunw.h5` from the listing of the archive contents brings up the reade
 <Screenshot src="/figures/qed-nisar-entry.png" width="100%" />
 
 The sequence of steps necessary to successfully connect a `qed` reader depend on the data source.
+Each reader provides specialized support for the internal structure of the data product and the
+encoding of its pixels, the availability of the metadata required to map the signal in each product
+to colored pixels on the screen, as well as specialized visualizations particular to each product
+type. At the top level, `qed` provides support for NISAR data products, partial support for the data
+formats understood by the popular `isce2` SAR processor, partial integration with `gdal` to access
+the many data formats it supports, and access to flat binary files on local disk. The main focus of
+the development effort so far has been support for the NISAR level 1 and level 2 products, but
+support for the other types, especially `isce2` and `gdal`, is an on-going effort. Furthermore,
+`qed` is designed to be extensible, so there is a path for integrating support for custom formats
+by the end user.
+
 NISAR datasets are stored in HDF5 files and are fully self-describing. Typically, this means that
 there is very little guesswork associated with connecting them to `qed`, which knows the layout of
-all Level 1 and Level 2 NISAR data products. Clicking on `nisar` instructs `qed` to open the file
+all level 1 and level 2 NISAR data products. Clicking on `nisar` instructs `qed` to open the file
 with the reader that is able to determine the product details automatically:
 
 <Screenshot src="/figures/qed-nisar-product.png" width="100%" />
@@ -106,8 +117,8 @@ one more piece of information: the **nickname** of this data product. The nickna
 specified string that gets associated with this dataset for the remainder of your `qed` session. If
 you use any of the `qed` persistence features to save your choices for how to visualize this
 dataset, they will be recorded in a dictionary using the nickname as the retrieval key. The current
-version of `qed` does not attempt to provide any suggestions about how to name your datasets, so
-you will to choose one on your own. Picking the, admittedly unimaginative, `gunw` nickname for our
+version of `qed` does not attempt to provide any suggestions about how to name your datasets, so you
+will have to choose one on your own. Picking the, admittedly unimaginative, `gunw` nickname for our
 dataset yields:
 
 <Screenshot src="/figures/qed-nisar-nickname.png" width="100%" />
@@ -195,8 +206,8 @@ clicking on the <Badge><Data /></Badge> icon on the activity bar.
 
 There is an ongoing effort to provide support for all input, intermediate, and output data products
 from [`isce2`]() workflows. These data products are flat binary files, so in principle they can be
-read using the machinery described in the previous section. Bit there are certain advantages of
-having native support:
+read using the machinery described in the previous section. However, native support offers several
+advantages:
 
 * `isce2` workflows generate auxiliary files that contain product metadata, such as product
   type, pixel type, shape, etc.
