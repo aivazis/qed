@@ -1,0 +1,90 @@
+{/*
+    -* mdx -*-
+    michael a.g. aïvázis <michael.aivazis@para-sim.com>
+    (c) 1998-2024 all rights reserved
+*/}
+
+
+{/* external */}
+import { Link } from 'react-router-dom'
+
+{/* project */}
+import { Gear, Plus, Target, X } from '~/shapes'
+
+{/* local */}
+import { Badge } from './badge'
+import { Screenshot } from './screenshot'
+
+
+# <a name="measure" />The measure layer
+
+Clicking on the <Badge><Target/></Badge> icon on the title bar of a data pane activates the
+**measure** layer. The measure layer is an overlay over the image in the data pane that supports
+additional interactions with the data. Activating adds a dedicated tray to the controls activity,
+resulting in a screen that looks something like this.
+
+<Screenshot src="/figures/qed-measure.png" />
+
+The measure layer control tray has two sections. The first offers an enhanced view of the image and
+signal details at the cursor location. The other lets you extract signal values along a user
+specified path on the image.
+
+### <a name="#measure.peek" />Peeking at pixel values
+
+The **peek** section offers an enhanced view of the image that tracks the mouse cursor and provides
+information about the cursor location and the value of the signal at that pixel. Moving the cursor
+over the image should continuously update both the zoomed local view and the pixel values.
+
+The information displayed depends on the data product type. The unwrapped interferogram in our
+example shows the unwrapped phase value followed by its units. Clicking on the units will cycle
+through all the available representations.
+
+If you want to focus at a single point of the image, you can decouple the pixel about which
+information is displayed from the moving cursor by picking a point on the image. The instructions
+right below the image view specify the platform specific keyboard modifier to a mouse click that
+will let you place a point on the measure layer over the image:
+
+<Screenshot src="/figures/qed-measure-point.png" />
+
+Note that the point shows up both on image in the data pane itself as well as in a table in the
+measure tray of the control panel. Clicking on the <Badge><Target/></Badge> icon in either place
+select the point and freezes the location about which information is displayed. You can move the
+selected point by dragging it around the image. You can select specific coordinates by entering
+their values directly in the table. Fine tuning can be accomplished by clicking on any of the four
+arrows in the zoomed display. Clicks shift the point by one pixel in the indicated direction,
+clicking while holding the Alt or option key shifts by five pixels at a time, and clicking while
+holding down the shift key will shift by 10 pixels at a time. Finally, you can dismiss the point by
+clicking in the <Badge><X/></Badge> icon in the point table.
+
+### <a name="#measure.path" />Selecting a path
+
+You can add more point to the measure layer by clicking on the image. Each new point is connected to
+the previous one by a straight line, forming a path. Individual points can be moved by dragging them
+on the image, or modifying their coordinates in the measure control by specifying explicit
+coordinate values or selecting them and using the arrows in the zoomed view to move them around.
+Here is what the screen might look like after adding a few points:
+
+<Screenshot src="/figures/qed-measure-path.png" />
+
+As mentioned above, points can be dismissed by clicking on the <Badge><X/></Badge> icons on the table.
+Points can be added in the middle of the path by clicking on the <Badge><Plus/></Badge> icon on the
+table. This action places a new point midway between the selected point and the one that follows it.
+
+You can toggle whether the path is open or closed by clicking on button on the last row of the
+table, as shown below.
+
+<Screenshot src="/figures/qed-measure-path-closed.png" />
+
+You can download a CSV file with the signal values along the pixels on your chose path by clicking
+the corresponding button at the bottom of the control. More functionality will be added here in an
+upcoming release, including the ability to display image statistics about the interior of a closed
+path.
+
+Finally, you can select and drag around multiple points at a time. Multi-point selection works
+as expected: selecting a point followed by a shift click on another selects all the point between
+the two, and individual points can be toggled in and out of the selection by clicking while holding
+down the Alt/option key.
+
+<Screenshot src="/figures/qed-measure-path-selected.png" />
+
+{/* end of file */}
