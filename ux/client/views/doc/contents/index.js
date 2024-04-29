@@ -8,6 +8,8 @@
 import Intro from './intro'
 import Readers from './readers'
 import Datasets from './datasets'
+import Controls from './controls'
+import Measure from './measure'
 import Archives from './archives'
 
 
@@ -41,9 +43,25 @@ export const topics = [
             { link: "#datasets.availability", title: "Data products and channels" },
         ]
     },
-    { link: "views", title: "Adjusting the view", page: null },
-    { link: "measure", title: "The measure layer", page: null },
-    { link: "panels", title: "Working with multiple data panels", page: null },
+    {
+        link: "views", title: "Adjusting the view", page: Controls,
+        contents: [
+            { link: "#controls.zoom", title: "The zoom level" },
+            { link: "#controls.viz", title: "The visualization parameters" },
+        ]
+    },
+    {
+        link: "measure", title: "The measure layer", page: Measure,
+        contents: [
+            { link: "#measure.peek", title: "Peeking at pixel values" },
+            { link: "#measure.path", title: "Selecting a path" },
+        ]
+    },
+    {
+        link: "panels", title: "Working with multiple data panes", page: null,
+        contents: [
+        ]
+    },
     {
         link: "archives", title: "Connecting to data archives", page: Archives,
         contents: [
