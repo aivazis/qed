@@ -1,0 +1,79 @@
+{/*
+    -* mdx -*-
+    michael a.g. aïvázis <michael.aivazis@para-sim.com>
+    (c) 1998-2024 all rights reserved
+*/}
+
+
+{/* external */}
+import { Link } from 'react-router-dom'
+
+{/* project */}
+import { Eye, Gear, Plus, Split, Target, X } from '~/shapes'
+
+{/* local */}
+import { Badge } from './badge'
+import { Screenshot } from './screenshot'
+
+# <a name="panes" />Working with multiple data panes
+
+Let's go back to the data explorer, connect the readers for the RIFG and RUNW sample datasets, and
+dismiss all the others. Select the `phase` channel of the `rifg` dataset, making the browser window
+look something like this:
+
+<Screenshot src="/figures/qed-panes.png" />
+
+### <a name="#panes.scroll" />Synchronized scrolling
+
+Clicking on the <Badge><Split/></Badge> icon of the data pane will split it in two, and make the new
+pane the active one. You can always tell which pane is the active one from its highlighted title
+bar. Similarly, you can tell which dataset and channel are being displayed in the active data pane
+because the corresponding readers and its selectors will be highlighted in the dataset activity
+pane.
+
+<Screenshot src="/figures/qed-panes-split.png" />
+
+Each data pane is now entirely independent. You can select either as the active one by clicking
+anywhere in its client area, and you can modify what is being displayed by picking whichever channel
+you would like to display in each one. Let's click on the `unwrapped` channel of `runw` to place its
+image in the active pane, yielding a screen that looks something like this:
+
+<Screenshot src="/figures/qed-panes-two.png" />
+
+You can click on the <Badge><gear/></Badge> icon on the activity bar and make any modifications you
+like to the view in the active data pane.
+
+The two datasets on display in our example are actually related: they are both interferograms in
+radar coordinates, the only difference being whether the phase is unwrapped or not. You can sync the
+scrolling of the two data panes so that you can look at the same area in both panes side by side by
+clicking on the <Badge><Eye/></Badge> icon on the two title bars until both are on. Any scrolling on
+either pane will now change both so that the pixel locations of the upper left hand corners of the
+two panes are identical, if possible.
+
+<Screenshot src="/figures/qed-panes-scroll.png" />
+
+The same procedure will work regardless of how many times you have split teh data panes. Each one
+can opt in to synchronized scrolling by toggling its <Badge><Eye/></Badge>. You can toggle all
+panes at the same time by Alt/option clicking on the icon.
+
+### <a name="#panes.scroll" />The sync table
+
+It is occasionally useful to make other synchronized changes to data pane contents. The control
+activity panel has a **sync** tray at the bottom that offers more options.
+
+<Screenshot src="/figures/qed-panes-table.png" />
+
+As you can see, the `scroll` column is on for both of our panes, reflecting the fact that we have
+synchronized their scrolling. You can control which panes have opted in to synchronized scrolling
+by toggling their entries in this table. Clicking on the `scroll` column header toggles all the
+panes at once, just like the Alt/option click on the sync icon on the data pane title.
+
+This table offers one refinement that is useful occasionally: you can specify a set of relative
+**offsets** to apply while scrolling the synced datasets.
+
+Similarly, you can synchronize **zoom** level changes, and even **path** specifications, down to the
+level of which points are selected, and how points are moved. Every change is simply mirrored by all
+data panes that have opted in. Finally, if both datasets offer the same **channel** selection, you
+can sync the channel selection.
+
+{/* end of file */}

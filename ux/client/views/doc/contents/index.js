@@ -10,6 +10,7 @@ import Readers from './readers'
 import Datasets from './datasets'
 import Controls from './controls'
 import Measure from './measure'
+import Panes from './panes'
 import Archives from './archives'
 
 
@@ -58,8 +59,10 @@ export const topics = [
         ]
     },
     {
-        link: "panels", title: "Working with multiple data panes", page: null,
+        link: "panels", title: "Working with multiple data panes", page: Panes,
         contents: [
+            { link: "#panes.scroll", title: "Synchronized scrolling" },
+            { link: "#panes.table", title: "The sync table" },
         ]
     },
     {
