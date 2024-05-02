@@ -32,10 +32,10 @@ class Phase(Channel, family="qed.channels.isce2.int.phase"):
         # if i'm supposed to
         if self.phase.auto:
             # adjust my range
-            self.phase.min = 0
-            self.phase.low = 0
-            self.phase.max = 1
-            self.phase.high = 1
+            self.phase.min = -cmath.pi
+            self.phase.low = -cmath.pi
+            self.phase.max = cmath.pi
+            self.phase.high = cmath.pi
         # if 'im supposed to
         if self.brightness.auto:
             # adjust my brightness
