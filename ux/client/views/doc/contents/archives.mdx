@@ -21,11 +21,11 @@ import { Screenshot } from './screenshot'
 Any time during a `qed` session you can connect to additional data archives. Clicking on the
 <Badge><Pin/></Badge> icon will take you back to the data explorer screen:
 
-<Screenshot src="/figures/qed-archives.png" />
+<Screenshot src="figures/qed-archives.png" />
 
 The <Badge><Plus/></Badge> icon on the activity panel title brings up the archive connection form:
 
-<Screenshot src="/figures/qed-archives-connect.png" />
+<Screenshot src="figures/qed-archives-connect.png" />
 
 Currently `qed` has support for accessing data either on your **local** machine, or in **s3*
 buckets.
@@ -34,25 +34,25 @@ buckets.
 
 Selecting a `local` archive brings up the following form:
 
-<Screenshot src="/figures/qed-archives-local.png" />
+<Screenshot src="figures/qed-archives-local.png" />
 
 The archive **nickname** should be something that is meaningful to you that is unique to this
 location. The path should be the absolute path of the target directory on your machine.
 
-<Screenshot src="/figures/qed-archives-data.png" />
+<Screenshot src="figures/qed-archives-data.png" />
 
 Clicking the **connect** will mount the new archive and display its contents in a collapsible tray,
 with subdirectories at the top and regular files at the bottom. Directories can be expanded by
 clicking on them; clicking on files will bring up the dataset connection form that we saw in the
 section on loading datasets.
 
-<Screenshot src="/figures/qed-archives-data-contents.png" />
+<Screenshot src="figures/qed-archives-data-contents.png" />
 
 ### <a name="#archives.s3" />Amazon S3
 
 Selecting **s3** as the archive type brings up the S3 specific connector:
 
-<Screenshot src="/figures/qed-archives-s3.png" />
+<Screenshot src="figures/qed-archives-s3.png" />
 
 The only required field is the archive **nickname**. The rest of the fields may or may not be
 required, depending on the actual access mode and authentication mechanisms in place for accessing

@@ -54,7 +54,7 @@ total 2.7G
 With these settings, launching `qed` from the terminal should open a browser window that looks
 something like this:
 
-<Screenshot src="/figures/qed-archives-empty.png" width="100%" />
+<Screenshot src="figures/qed-archives-empty.png" width="100%" />
 
 The column of icons on the left, the **activity bar**, is the main navigational element. It is
 followed by the **activity pane** whose contents are specific to selected activity. In this case,
@@ -90,7 +90,7 @@ and re-spawns it when it terminates with a signal. In such installations, you ca
 
 Selecting `gunw.h5` from the listing of the archive contents brings up the reader connection form.
 
-<Screenshot src="/figures/qed-nisar-entry.png" width="100%" />
+<Screenshot src="figures/qed-nisar-entry.png" width="100%" />
 
 The sequence of steps necessary to successfully connect a `qed` reader depend on the data source.
 Each reader provides specialized support for the internal structure of the data product and the
@@ -109,7 +109,7 @@ there is very little guesswork associated with connecting them to `qed`, which k
 all level 1 and level 2 NISAR data products. Clicking on `nisar` instructs `qed` to open the file
 with the reader that is able to determine the product details automatically:
 
-<Screenshot src="/figures/qed-nisar-product.png" width="100%" />
+<Screenshot src="figures/qed-nisar-product.png" width="100%" />
 
 Note that `qed` recognized that `gunw.h5` is an unwrapped interferogram and selected the appropriate
 product type automatically. The `connect` button is not yet active because `qed` is still expecting
@@ -121,13 +121,13 @@ version of `qed` does not attempt to provide any suggestions about how to name y
 will have to choose one on your own. Picking the, admittedly unimaginative, `gunw` nickname for our
 dataset yields:
 
-<Screenshot src="/figures/qed-nisar-nickname.png" width="100%" />
+<Screenshot src="figures/qed-nisar-nickname.png" width="100%" />
 
 Note that the `connect` and `cancel` buttons are now active, indicating that `qed` has enough
 information to connect this reader to the app so we can start visualizing its contents. Clicking
 on `connect` adds the reader to data pile and returns the screen to its original form.
 
-<Screenshot src="/figures/qed-archives-empty.png" width="100%" />
+<Screenshot src="figures/qed-archives-empty.png" width="100%" />
 
 At this point you can choose to connect more datasets, or proceed to explore the ones
 that are already connected by clicking on the <Badge><Data /></Badge> on the activity bar.
@@ -170,24 +170,24 @@ The two files `d16.dat` and `d18.dat` are flat binary files with `std::complex<d
 you still have the `qed.yaml` file that we placed in `~/.config/pyre`, launching `qed` from this
 location yields
 
-<Screenshot src="/figures/qed-flat-empty.png" width="100%" />
+<Screenshot src="figures/qed-flat-empty.png" width="100%" />
 
 Let's click on the `d16.dat` entry in the archive listings. This brings up the reader selection form
 
-<Screenshot src="/figures/qed-flat-entry.png" width="100%" />
+<Screenshot src="figures/qed-flat-entry.png" width="100%" />
 
 Clicking on `native` deploys the reader that specializes on flat binary files
 
-<Screenshot src="/figures/qed-flat-product.png" width="100%" />
+<Screenshot src="figures/qed-flat-product.png" width="100%" />
 
 The next thing we have to provide is the dataset nickname:
 
-<Screenshot src="/figures/qed-flat-nickname.png" width="100%" />
+<Screenshot src="figures/qed-flat-nickname.png" width="100%" />
 
 The `d16` dataset has `std::complex<double>` pixels, which correspond to the `complex128` cell
 selection
 
-<Screenshot src="/figures/qed-flat-cell.png" width="100%" />
+<Screenshot src="figures/qed-flat-cell.png" width="100%" />
 
 This leaves us with having to specify the image shape. With a known pixel type and file size, `qed`
 provides some shape guidance by generating plausible pairs. In order to keep the choices to a
@@ -196,7 +196,7 @@ selecting one of the available choices or supplying the number of lines and samp
 the form. For each selection, `qed` generates an image preview to help decide whether the chosen
 shape make sense. Our sample image is `3929 x 6049`, so selecting this shape from the list yields
 
-<Screenshot src="/figures/qed-flat-shape.png" width="100%" />
+<Screenshot src="figures/qed-flat-shape.png" width="100%" />
 
 with the preview clearly showing the location of the two poles in the dataset. At this point you can
 choose to connect more datasets, or proceed to explore the ones that are already connected by
