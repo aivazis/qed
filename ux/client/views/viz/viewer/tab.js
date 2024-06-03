@@ -16,6 +16,7 @@ import { Spacer } from '~/widgets'
 import { useViewports } from '~/views/viz'
 // components
 import { Collapse } from './collapse'
+import { Flow } from './flow'
 import { Measure } from './measure'
 import { Print } from './print'
 import { Selector } from './selector'
@@ -42,6 +43,8 @@ export const Tab = ({ viewport, view, behaviors }) => {
             {view && <Selector viewport={viewport} view={view} />}
             {/* some blank space */}
             <Spacer />
+            {/* the button that toggles the flow layer */}
+            {view && <Flow viewport={viewport} view={view} />}
             {/* the button that toggles the data layer */}
             {view && <Measure viewport={viewport} view={view} />}
             {/* the button that toggles the sync status of the data viewport */}

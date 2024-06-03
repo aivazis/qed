@@ -175,6 +175,47 @@ const collapse = {
 }
 
 
+// the button that turns on the flow layer
+const flow = {
+    // inherit
+    ...badge,
+
+    badge: {
+        ...badge.badge,
+        base: {
+            ...badge.badge.base,
+            // for me
+            justifySelf: "end",
+        },
+    },
+
+    icon: {
+        ...badge.icon,
+        selected: {
+            ...badge.icon.selected,
+            fill: theme.page.highlight,
+            stroke: theme.page.highlight,
+        },
+        available: {
+            ...badge.icon.available,
+            stroke: theme.page.highlight,
+        },
+    },
+
+    decoration: {
+        ...badge.decoration,
+        selected: {
+            ...badge.decoration.selected,
+            stroke: theme.page.highlight,
+        },
+        available: {
+            ...badge.decoration.available,
+            stroke: theme.page.highlight,
+        },
+    }
+}
+
+
 // the button that turns on the measuring layer
 const measure = {
     // inherit
@@ -352,6 +393,7 @@ const blank = {
 export default {
     blank,
     collapse,
+    flow,
     measure,
     print,
     selector,
