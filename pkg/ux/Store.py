@@ -878,6 +878,19 @@ class Store(qed.component, family="qed.ux.store"):
         # and delegate
         return port.resetMembers(source=source)
 
+    def toggleFlow(self, viewport, source):
+        """
+        Toggle the measure layer state on {viewport}
+        """
+        # locate the source
+        source = self.source(name=source)
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # toggle the measure layer
+        view = port.toggleFlow(source=source)
+        # and return the flow
+        return view.flow
+
     def toggleMeasure(self, viewport, source):
         """
         Toggle the measure layer state on {viewport}
