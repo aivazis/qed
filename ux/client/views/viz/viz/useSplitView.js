@@ -90,6 +90,8 @@ const splitMutation = graphql`
                 id
                 # for synchronized scrolling
                 ...vizGetScrollSyncedViewsFragment
+                # for the flow layer control
+                ...flowViewerGetFlowLayerStateFragment
                 # for the measure layer
                 ...measureGetMeasureLayerFragment
                 # for the viewport

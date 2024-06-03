@@ -117,6 +117,8 @@ const vizGetViewsFragment = graphql`
             ...viewportViewerGetViewFragment
             # for the info widget with the dataset metadata
             ...infoViewerGetViewFragment
+            # for the flow layer control
+            ...flowViewerGetFlowLayerStateFragment
             # for the measure control
             ...measureViewerGetMeasureLayerStateFragment
             # for the sync control

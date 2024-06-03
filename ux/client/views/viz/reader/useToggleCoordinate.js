@@ -100,6 +100,8 @@ const toggleCoordinateMutation = graphql`
                 ...infoViewerGetViewFragment
                 # whatever readers need
                 ...contextReaderGetViewFragment
+                # for the flow layer control
+                ...flowViewerGetFlowLayerStateFragment
                 # for the measure layer control
                 ...measureViewerGetMeasureLayerStateFragment
                 # for the sync control
