@@ -18,6 +18,7 @@ from .Channel import Channel as channel
 
 # controls
 from .Center import Center as center
+from .Flow import Flow as flow
 from .Measure import Measure as measure
 from .Sync import Sync as sync
 from .Zoom import Zoom as zoom
