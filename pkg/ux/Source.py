@@ -18,6 +18,8 @@ class Source(qed.component, family="qed.ux.sources.source"):
     # configurable state
     center = qed.protocols.ux.center()
     center.doc = "the look-at center"
+    flow = qed.protocols.ux.flow()
+    flow.doc = "the flow layer indicator"
 
     measure = qed.protocols.ux.measure()
     measure.doc = "the measure layer indicator"
