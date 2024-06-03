@@ -28,6 +28,7 @@ import { useInitializeViewports } from './useInitializeViewports'
 import { useMakePanDispatcher } from './useMakePanDispatcher'
 import { useStageReaders } from './useStageReaders'
 // components
+import { Flow } from '../flow'
 import { Viewer } from '../viewer'
 // paint
 import styles from './styles'
@@ -88,12 +89,23 @@ const VizPanel = ({ qed }) => {
                 // the view behaviors are attached to the flex panel because the {viewer} is not
                 // a real container, just a react fragment
                 return (
-                    <Flex.Panel key={`panel:${viewport}`}
-                        auto={true}
-                        data-qed-viewport={viewport}
-                        style={styles.flex} {...behaviors}
-                    >
-                        <Viewer viewport={viewport} view={view} registrar={registrar} />
+                    <Flex.Panel key={`panel:${viewport}`} auto={true}
+                        data-qed-viewport={viewport} style={styles.flex}>
+                        <Flex.Box direction="column" style={styles.flex}>
+                            <Flex.Panel
+                                auto={true}
+                                style={styles.flex} {...behaviors}
+                            >
+                                <Viewer viewport={viewport} view={view} registrar={registrar} />
+                            </Flex.Panel>
+                            {/* when the flow layer is active */}
+                            {
+                                view.flow.active &&
+                                <Flex.Panel auto={true} style={styles.flex}>
+                                    <Flow viewport={viewport} view={view} />
+                                </Flex.Panel>
+                            }
+                        </Flex.Box>
                     </Flex.Panel>
                 )
             })}
@@ -111,6 +123,9 @@ const vizGetViewsFragment = graphql`
             # this is a copy-paste of my vizGetScrollSyncedViewsFragment
             # is there a way to avoid this duplication?
             id
+            flow {
+                active
+            }
             sync {
                 scroll
                 offsets {
