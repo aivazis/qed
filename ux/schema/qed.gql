@@ -63,6 +63,7 @@ type View implements Node {
   dataset: Dataset
   channel: Channel
   # dataset specific viewing options
+  flow: DatasetFlow
   measure: DatasetMeasure
   sync: DatasetSync
   zoom: DatasetZoom
@@ -214,6 +215,13 @@ type ValueController implements Node {
 union Controller = RangeController | ValueController
 
 # viewport properties
+type DatasetFlow implements Node {
+  id: ID!
+  name: ID!
+  dirty: Boolean
+  active: Boolean
+}
+
 type DatasetMeasure implements Node {
   id: ID!
   name: ID!
@@ -266,6 +274,8 @@ type Mutation {
   viewToggleCoordinate(selection: ViewSelectorInput!): ViewInfo!
   viewChannelSet(selection: ViewSelectorInput!): ViewInfos!
   viewPersist(dummy: ID): PersistInfo
+  # flow
+  viewFlowToggleLayer(viewport: Int!, reader: String!): DatasetFlowInfo!
   # measure layer
   viewMeasureAnchorAdd(viewport: Int!, x: Int!, y: Int!, index: Int): DatasetMeasureInfos!
   viewMeasureAnchorExtendSelection(viewport: Int!, index: Int!): DatasetMeasureInfos!
@@ -331,7 +341,12 @@ type ViewInfos {
   views: [View]
 }
 
-# the measure layer state response payload
+# the flow layer state response payload
+type DatasetFlowInfo {
+  # the flow layer settings
+  flow: DatasetFlow
+}
+
 type DatasetMeasureInfo {
   # the measure layer settings
   measure: DatasetMeasure
