@@ -17,6 +17,9 @@ from .ViewSplit import ViewSplit as viewSplit
 from .ViewChannelSet import ViewChannelSet as viewChannelSet
 from .ViewCoordinateToggle import ViewCoordinateToggle as viewCoordinateToggle
 
+# flow
+from .FlowToggleLayer import FlowToggleLayer as flowToggleLayer
+
 # measure
 from .ViewMeasureAnchorPlace import ViewMeasureAnchorPlace as viewMeasureAnchorPlace
 from .ViewMeasureAnchorMove import ViewMeasureAnchorMove as viewMeasureAnchorMove
