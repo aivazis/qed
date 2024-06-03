@@ -15,6 +15,9 @@ from .Split import Split as split
 from .ChannelSet import ChannelSet as channelSet
 from .ToggleCoordinate import ToggleCoordinate as toggleCoordinate
 
+# flow
+from .FlowToggleLayer import FlowToggleLayer as flowToggleLayer
+
 # measure
 from .MeasureAnchorPlace import MeasureAnchorPlace as measureAnchorPlace
 from .MeasureAnchorMove import MeasureAnchorMove as measureAnchorMove

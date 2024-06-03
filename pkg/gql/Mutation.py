@@ -38,6 +38,9 @@ class Mutation(graphene.ObjectType):
     viewToggleCoordinate = views.toggleCoordinate.Field()
     viewPersist = views.persist.Field()
 
+    # flow
+    viewFlowToggleLayer = views.flowToggleLayer.Field()
+
     # measure
     viewMeasureToggleLayer = views.measureToggleLayer.Field()
     # anchor management

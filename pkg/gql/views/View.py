@@ -15,6 +15,7 @@ from ..Channel import Channel
 from ..Dataset import Dataset
 from ..Reader import Reader
 from ..Selector import Selector
+from .Flow import Flow
 from .Measure import Measure
 from .Sync import Sync
 from .Zoom import Zoom
@@ -42,6 +43,7 @@ class View(graphene.ObjectType):
     dataset = graphene.Field(Dataset)
     channel = graphene.Field(Channel)
     # dataset specific configuration
+    flow = graphene.Field(Flow)
     measure = graphene.Field(Measure)
     sync = graphene.Field(Sync)
     zoom = graphene.Field(Zoom)
