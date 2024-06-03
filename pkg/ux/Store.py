@@ -218,6 +218,19 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # and delegate
         return port.toggleCoordinate(source=source, axis=axis, coordinate=coordinate)
 
+    def toggleFlow(self, viewport, source):
+        """
+        Toggle the measure layer state on {viewport}
+        """
+        # locate the source
+        source = self.source(name=source)
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # toggle the measure layer
+        view = port.toggleFlow(source=source)
+        # and return the flow
+        return view.flow
+
     def toggleMeasure(self, viewport, source):
         """
         Toggle the measure layer state on {viewport}

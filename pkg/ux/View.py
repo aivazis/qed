@@ -40,6 +40,9 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
     selections.default = {}
     selections.doc = "a key/value store of the user choices towards a dataset selection"
 
+    flow = qed.protocols.ux.flow()
+    flow.doc = "the flow layer indicator"
+
     measure = qed.protocols.ux.measure()
     measure.doc = "the measure layer indicator"
 
@@ -118,6 +121,15 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             self.channel = self._pipelines[name]
             # solve the selection
             self.resolve()
+        # all done
+        return self
+
+    def toggleFlow(self):
+        """
+        Toggle the flow layer state
+        """
+        # toggle the active flag
+        self.flow.active ^= True
         # all done
         return self
 

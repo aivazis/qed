@@ -66,9 +66,20 @@ class Viewport(
         # all done
         return self.view()
 
+    def toggleFlow(self, source):
+        """
+        Toggle the flow layer
+        """
+        # activate the {source}
+        view = self._selectSource(source=source)
+        # and delegate
+        view.toggleFlow()
+        # all done
+        return self.view()
+
     def toggleMeasure(self, source):
         """
-        Toggle {coordinate}
+        Toggle the measure layer
         """
         # activate the {source}
         view = self._selectSource(source=source)

@@ -16,6 +16,7 @@ from .View import View as view
 from .Source import Source as source
 
 # controls
+from .Flow import Flow as flow
 from .Measure import Measure as measure
 from .Sync import Sync as sync
 from .Zoom import Zoom as zoom
