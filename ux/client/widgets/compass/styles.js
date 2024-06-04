@@ -36,7 +36,7 @@ export default {
         fill: "none",
     },
 
-    needle: {
+    face: {
         // stroke
         stroke: red,
         // exclude the stroke from any transforms
@@ -46,7 +46,7 @@ export default {
         fill: "none",
     },
 
-    needletip: {
+    needle: {
         // stroke
         stroke: "none",
         // just in case we ever stroke this
