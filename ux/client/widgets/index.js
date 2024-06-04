@@ -7,6 +7,7 @@
 
 // publish
 export { Badge } from './badge'
+export { Camera } from './camera'
 export { Colophon } from './colophon'
 export { Compass } from './compass'
 export { Extent } from './extent'
