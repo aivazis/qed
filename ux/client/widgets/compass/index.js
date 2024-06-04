@@ -7,34 +7,47 @@
 // externals
 import React from 'react'
 // locals
-import base from './styles'
+import styles from './styles'
 
 
 // a scale and orientation indicator
-export const Compass = ({ style, ...xforms }) => (
-      <g {...base.panel} {...style} {...xforms}>
-            <line x1="-1" y1="0" x2="1" y2="0"
-                  {...base.east} {...style?.east} />
+export const Compass = ({ style, ...xforms }) => {
+    // mix paint
+    // for my container
+    const boxStyle = { ...styles.box, ...style?.box }
+    // for the axis markers
+    const eStyle = { ...styles.east, ...style?.east }
+    const nStyle = { ...styles.north, ...style?.north }
+    // for the compass face
+    const faceStyle = { ...styles.face, ...style?.face }
+    // and the needle
+    const needleStyle = { ...styles.needle, ...style?.needle }
 
-            <line x1="0" y1="-1" x2="0" y2="1"
-                  {...base.north} {...style?.north} />
+    return (
+        <g {...boxStyle} {...xforms}>
+            {/* the x-axis */}
+            <line x1="-0.5" y1="0" x2="0.5" y2="0" {...eStyle} />
+            {/* the y-axis */}
+            <line x1="0" y1="-0.5" x2="0" y2="0.5" {...nStyle} />
 
-            <circle cx="0" cy="0" r=".1"
-                  {...base.needle} {...style?.needle} />
+            {/* the inner marker */}
+            <circle cx="0" cy="0" r=".1" {...faceStyle} />
 
+            {/* the x-axis marker */}
             <path d="M -0.14142 0.14142
-                 C 0 .25 0 .25 0.14142 0.14142
-                 L 0 .3
-                 Z"
-                  {...base.needletip} {...style?.needletip} />
-
+                    C 0 .25 0 .25 0.14142 0.14142
+                    L 0 .3
+                    Z"
+                {...needleStyle} />
+            {/* the y-axis marker */}
             <path d="M 0.14142 -0.14142
-                 C .3 0 .3 0 0.14142 0.14142
-                 L .3 0
-                 Z"
-                  {...base.needletip} {...style?.needletip} />
-      </g>
-)
+                    C .3 0 .3 0 0.14142 0.14142
+                    L .3 0
+                    Z"
+                {...needleStyle} />
+        </g>
+    )
+}
 
 
 // end of file
