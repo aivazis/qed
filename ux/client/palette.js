@@ -56,6 +56,7 @@ const dark = {
         normal: "hsl(0deg, 0%, 50%)",
         dim: "hsl(0deg, 0%, 40%)",
         pale: "hsl(0deg, 0%, 30%)",
+        dark: "hsl(0deg, 0%, 20%)",
         //
         link: "hsl(280deg, 80%, 60%)",
         linkActive: "hsl(280deg, 40%, 60%)",
