@@ -15,14 +15,29 @@ export const Provider = React.forwardRef(({ viewport, scale, children }, clientR
     // build a camera
     const [camera, setCamera] = React.useState({ x: 0, y: 0, z: 1, phi: 0 })
     // the cursor position in ICS
-    const cursor = { x: 0, y: 0 }
+    const [cursor, setCursor] = React.useState(null)
+
     // the transform from viewport to the internal coordinate system
     const toICS = point => {
+        // get the origin of my viewport
+        const { left, top } = clientRef.current?.getBoundingClientRect() ?? { left: 0, top: 0 }
+        // project the mouse coordinates to ICS
+        const rx = (point.x - left - els * camera.x) / (els / camera.z)
+        const ry = (point.y - top - els * camera.y) / (els / camera.z)
+        // compute the length of this vector
+        const r = (rx ** 2 + ry ** 2) ** 0.5
+        // and its angle with the x-axis
+        const phi = Math.atan2(ry, rx)
+        // from this, compute its angle with the rotated diagram x-axis
+        const theta = phi - Math.PI / 180 * camera.phi
+        // use the camera angle to project to the actual diagram coordinates
+        const x = Math.round(r * Math.cos(theta))
+        const y = Math.round(r * Math.sin(theta))
         // all done
-        return point
+        return { x, y }
     }
 
-    // convenience
+    // camera control
     // movement along the x-y plane
     const pan = ({ dx = 0, dy = 0 }) => {
         // adjust the camera
@@ -50,8 +65,25 @@ export const Provider = React.forwardRef(({ viewport, scale, children }, clientR
         return
     }
 
+    // event handlers
+    // keep track of the cursor position
+    const track = evt => {
+        // unpack the cursor position
+        const { clientX: x, clientY: y } = evt
+        // record the location
+        setCursor(toICS({ x, y }))
+        // all done
+        return
+    }
+    // reset the cursor position
+    const reset = () => {
+        // clear the cursor location
+        setCursor(null)
+        // all done
+        return
+    }
     // keypad
-    const keydown = evt => {
+    const keypad = evt => {
         // unpack the key
         const { key } = evt
         // the base displacement
@@ -115,8 +147,7 @@ export const Provider = React.forwardRef(({ viewport, scale, children }, clientR
         // ignore everything else
         return
     }
-
-    // mouse wheel events
+    // wheel
     const wheel = evt => {
         // unpack the vent
         const { deltaX, deltaY, ctrlKey, shiftKey } = evt
@@ -135,20 +166,27 @@ export const Provider = React.forwardRef(({ viewport, scale, children }, clientR
 
     // install the event listeners
     React.useEffect(() => {
+        // track the cursor when it moves in my area
+        clientRef.current?.addEventListener("mousemove", track)
+        // stop tracking when it leaves my area
+        clientRef.current?.addEventListener("mouseleave", reset)
         // install the keypad
-        clientRef.current?.addEventListener("keydown", keydown)
+        clientRef.current?.addEventListener("keydown", keypad)
         // handle wheel events
         clientRef.current?.addEventListener("wheel", wheel)
         // register a cleanup
         return () => {
+            // disconnect the cursor trackers
+            clientRef.current?.removeEventListener("mousemove", track)
+            clientRef.current?.removeEventListener("mouseleave", reset)
             // disconnect the keypad
-            clientRef.current?.removeEventListener("keydown", wheel)
+            clientRef.current?.removeEventListener("keydown", keypad)
             // disconnect the wheel listener
             clientRef.current?.removeEventListener("wheel", wheel)
             // all done
             return
         }
-    }, [setCamera])
+    }, [camera, setCamera])
 
     // build the context
     const context = {
@@ -157,7 +195,7 @@ export const Provider = React.forwardRef(({ viewport, scale, children }, clientR
         // the camera
         camera, setCamera,
         // the current cursor position in ICS
-        cursor,
+        cursor, setCursor,
         // the transform to diagram coordinates
         toICS,
     }
@@ -183,6 +221,7 @@ export const Context = React.createContext(
         setCamera: () => { throw new Error(complaint) },
         // the cursor position
         cursor: null,
+        setCursor: () => { throw new Error(complaint) },
         // the transform to diagram coordinates
         toICS: () => { throw new Error(complaint) },
     }
