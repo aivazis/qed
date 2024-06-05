@@ -8,8 +8,6 @@
 import React from 'react'
 
 // project
-// widgets
-import { Compass } from '~/widgets'
 // hooks
 import { useCamera } from '~/widgets/camera'
 // local
