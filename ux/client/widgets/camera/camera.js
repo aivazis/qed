@@ -19,7 +19,7 @@ import styles from './styles'
 // a passive transformation to the intrinsic coordinate system (ICS) of the diagram
 const Lens = ({ style, children }) => {
     // the camera factory
-    const { camera, els } = useCamera()
+    const { els, camera } = useCamera()
     // unpack the camera parameters
     const { x, y, z, phi } = camera
     // transform to viewport coordinates
