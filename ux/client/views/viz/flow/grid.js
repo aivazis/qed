@@ -16,8 +16,8 @@ import styles from './styles'
 
 // highlight the grid cell that's under the cursor
 // N.B.: this component renders whenever either the cursor position or the camera changes
-//       on mouse move, we highlight the current cell
-//       on camera changes, we hide the highlight; it will show up next time the cursor moves
+//       - on mouse move, we highlight the current cell
+//       - on camera changes, we hide the highlight; it will show up next time the cursor moves
 export const Grid = () => {
     // get the current camera and cursor position
     const { camera, cursor } = useCamera()
