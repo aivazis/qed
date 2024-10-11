@@ -88,7 +88,8 @@ export const toggleCoordinateMutation = graphql`
                 ...infoViewerGetViewFragment
                 # whatever readers need
                 ...contextReaderGetViewFragment
-                # for the flow layer control
+                # for the flow layer
+                ...flowVizGetFlowDiagramFragment
                 ...flowViewerGetFlowLayerStateFragment
                 # for the measure layer control
                 ...measureViewerGetMeasureLayerStateFragment
