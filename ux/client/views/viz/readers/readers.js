@@ -66,6 +66,7 @@ const readersGetReadersFragment = graphql`
             ...vizGetScrollSyncedViewsFragment
             ...viewportViewerGetViewFragment
             ...contextReaderGetViewFragment
+            ...flowVizGetFlowDiagramFragment
             ...flowViewerGetFlowLayerStateFragment
             ...measureViewerGetMeasureLayerStateFragment
             ...syncViewerGetScrollSyncStateFragment

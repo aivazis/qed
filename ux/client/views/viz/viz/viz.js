@@ -112,15 +112,15 @@ const vizGetViewsFragment = graphql`
             # this is a copy-paste of my vizGetScrollSyncedViewsFragment
             # is there a way to avoid this duplication?
             id
-            flow {
-                active
-            }
             sync {
                 scroll
                 offsets {
                     x
                     y
                 }
+            }
+            flow {
+                active
             }
             # what i need for synced scrolling
             ...vizGetScrollSyncedViewsFragment
@@ -132,7 +132,8 @@ const vizGetViewsFragment = graphql`
             ...viewportViewerGetViewFragment
             # for the info widget with the dataset metadata
             ...infoViewerGetViewFragment
-            # for the flow layer control
+            # for the flow layer
+            ...flowVizGetFlowDiagramFragment
             ...flowViewerGetFlowLayerStateFragment
             # for the measure control
             ...measureViewerGetMeasureLayerStateFragment
@@ -163,6 +164,14 @@ const vizGetScrollSyncedViewsFragment = graphql`
                 x
                 y
             }
+        }
+   }
+`
+
+const vizGetFlowStateFragment = graphql`
+   fragment vizGetFlowStateFragment on View {
+        flow {
+            active
         }
    }
 `
