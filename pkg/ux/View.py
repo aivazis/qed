@@ -107,7 +107,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             # it's a bug
             firewall = journal.firewall("qed.ux.store")
             # complain
-            firewall.line(f"cannot ser the channel to '{tag}'")
+            firewall.line(f"cannot set the channel to '{tag}'")
             firewall.line(f"no dataset selection for {self.reader}")
             # flush
             firewall.log()
@@ -483,7 +483,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             return self
         # get the reader selectors
         selectors = reader.selectors
-        # get my selections
+        # and my selections
         selections = self.selections
         # if we don't have have enough selections
         if len(selections) != len(selectors):
@@ -504,8 +504,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         else:
             # there is no solution
             self.dataset = None
-            # it could be a bug, but it's also possible that the reader has no datasets
-            # so, if the reader has datasets
+            # if the reader has datasets, we should have matched one, so...
             if reader.datasets:
                 # it's a bug
                 firewall = journal.firewall("qed.ux.store")
@@ -533,7 +532,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         if channel:
             # it may be left over from a previous interaction; gingerly
             try:
-                # let's look up the channel of the solution that has the same tag
+                # let's look up the channel of the solution that has the same tag;
                 # build its name
                 name = f"{self.pyre_name}.{dataset.pyre_name}.{channel.tag}"
                 # and look it up
@@ -558,7 +557,8 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
                 name = f"{self.pyre_name}.{dataset.pyre_name}.{candidate.tag}"
                 # look it up and install it
                 self.channel = self._pipelines[name]
-
+        # regardless of how it all worked out, let the flow know
+        self.flow.pipeline(pipeline=self.channel)
         # all done
         return self
 
