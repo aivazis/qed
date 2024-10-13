@@ -67,6 +67,8 @@ type View implements Node {
   measure: DatasetMeasure
   sync: DatasetSync
   zoom: DatasetZoom
+  # the diagram
+  diagram: FlowDiagram
 }
 
 # archives
@@ -214,11 +216,11 @@ type ValueController implements Node {
 # put them all together
 union Controller = RangeController | ValueController
 
-# viewport properties
+# viewport properties  that are tied to the dataset being displayed
 type DatasetFlow implements Node {
   id: ID!
   name: ID!
-  dirty: Boolean
+  dirty: Boolean # deprecate at some point; it's not useful
   active: Boolean
 }
 
@@ -265,6 +267,65 @@ type Shape {
 }
 
 
+# flow: rendering of the visualization pipeline that corresponds to a selected data channel
+type FlowDiagram implements Node {
+  # identification
+  id: ID!
+  # the name of the flow component
+  name: String!
+  # and its family
+  family: String!
+
+  # contents:
+  # the set of factories
+  factories: [FlowFactory!]!
+  # the set of bound and unbound products
+  slots: [FlowSlot!]!
+  # the connectors that represent the flow of information
+  connectors: [FlowConnector!]!
+  # and the various labels
+  labels: [FlowLabel!]!
+}
+
+# factories
+type FlowFactory implements Node {
+  id: ID!
+  at: FlowPosition!
+  inputs: Int!
+  outputs: Int!
+}
+
+# slots
+type FlowSlot implements Node {
+  id: ID!
+  at: FlowPosition!
+  bound: Boolean!
+}
+
+# connectors
+type FlowConnector implements Node {
+  id: ID!
+  input: Boolean!
+  slot: FlowPosition!
+  factory: FlowPosition!
+}
+
+# labels
+type FlowLabel implements Node {
+  id: ID!
+  at: FlowPosition!
+  value: [String!]!
+  category: String
+}
+
+# diagram coordinates
+type FlowPosition {
+  # the coordinates of a diagram node
+  x: Float!
+  y: Float!
+}
+
+
 # mutations
 type Mutation {
   # viewports
@@ -274,7 +335,6 @@ type Mutation {
   viewToggleCoordinate(selection: ViewSelectorInput!): ViewInfo!
   viewChannelSet(selection: ViewSelectorInput!): ViewInfos!
   viewPersist(dummy: ID): PersistInfo
-  # flow
   viewFlowToggleLayer(viewport: Int!, reader: String!): DatasetFlowInfo!
   # measure layer
   viewMeasureAnchorAdd(viewport: Int!, x: Int!, y: Int!, index: Int): DatasetMeasureInfos!
@@ -310,6 +370,8 @@ type Mutation {
   updateRangeController(range: RangeControllerUpdateInput!): RangeControllerInfo!
   resetValueController(controller: ValueControllerResetInput!): ValueControllerInfo!
   updateValueController(value: ValueControllerUpdateInput!): ValueControllerInfo!
+
+  # flow diagrams
 }
 
 type PersistInfo {
