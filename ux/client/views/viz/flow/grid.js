@@ -38,9 +38,6 @@ export const Grid = () => {
 
     // otherwise, unpack the cursor location
     const { x, y } = cursor
-    // build the translation that positions the shape
-    const xform = `translate(${x} ${y})`
-
     // and make a mark; don't forget we are in a quarter cell grid, so the highlight marks
     // the four grid cells around the current coordinate
     return (
