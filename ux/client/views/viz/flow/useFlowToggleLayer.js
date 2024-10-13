@@ -51,7 +51,6 @@ const flowToggleLayerMutation = graphql`
     mutation useFlowToggleLayerMutation($viewport: Int!, $reader: String!) {
         viewFlowToggleLayer(viewport: $viewport, reader: $reader) {
             flow {
-                dirty
                 active
             }
         }
