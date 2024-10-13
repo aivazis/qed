@@ -13,7 +13,7 @@ from .Channel import Channel
 
 
 # a channel for displaying the phase of complex values
-class Phase(Channel, family="qed.channels.isce2.int.phase"):
+class Phase(Channel, family="qed.channels.isce2.unw.phase"):
     """
     Make a visualization pipeline to display the phase of complex values
     """

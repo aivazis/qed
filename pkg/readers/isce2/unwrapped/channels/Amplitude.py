@@ -12,7 +12,7 @@ from .Channel import Channel
 
 
 # a channel for displaying the amplitude of complex values
-class Amplitude(Channel, family="qed.channels.isce2.int.amplitude"):
+class Amplitude(Channel, family="qed.channels.isce2.unw.amplitude"):
     """
     Make a visualization pipeline to display the amplitude of complex values
     """

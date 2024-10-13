@@ -15,7 +15,7 @@ from .Channel import Channel
 
 
 # a channel for displaying complex values
-class Complex(Channel, family="qed.channels.isce2.int.complex"):
+class Complex(Channel, family="qed.channels.isce2.unw.complex"):
     """
     Make a visualization pipeline to display complex values
     """
