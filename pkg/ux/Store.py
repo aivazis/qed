@@ -697,7 +697,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         Find a viewport that is {aspect} synced to act as the class representative
         """
         # go through my viewports
-        for index, port in enumerate(self._viewports):
+        for port in self._viewports:
             # get the sync status of {aspect}
             synced = getattr(port.view().sync, aspect)
             # if it's on
