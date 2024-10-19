@@ -35,8 +35,8 @@ class Flow(graphene.ObjectType):
         """
         Get the {flow} id
         """
-        # splice together the {family} and {name} of the {reader}
-        return f"{flow.pyre_family()}:{flow.pyre_name}"
+        # splice together the {family} and {name} of the {flow}
+        return f"{flow.pyre_family()}:{flow.pyre_name}.flow"
 
     @staticmethod
     def resolve_name(flow, *_):
@@ -44,7 +44,7 @@ class Flow(graphene.ObjectType):
         Get the name of the {flow}
         """
         # easy enough
-        return flow.pyre_name
+        return f"{flow.pyre_name}.flow"
 
 
 # end of file
