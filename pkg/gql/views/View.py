@@ -20,6 +20,9 @@ from .Measure import Measure
 from .Sync import Sync
 from .Zoom import Zoom
 
+# flow diagrams
+from .. import diagram
+
 
 # the type
 class View(graphene.ObjectType):
@@ -47,8 +50,11 @@ class View(graphene.ObjectType):
     measure = graphene.Field(Measure)
     sync = graphene.Field(Sync)
     zoom = graphene.Field(Zoom)
+    # the visualization pipeline diagram
+    diagram = graphene.Field(diagram.diagram)
 
     # resolvers
+    # metadata
     @staticmethod
     def resolve_id(view, info, **kwds):
         """
@@ -65,6 +71,7 @@ class View(graphene.ObjectType):
         # easy enough
         return view.pyre_name
 
+    # dataset selections
     @staticmethod
     def resolve_selections(view, info, **kwds):
         """
@@ -72,6 +79,15 @@ class View(graphene.ObjectType):
         """
         # easy enough
         return view.selections.items()
+
+    # rendering of the visualization pipeline
+    @staticmethod
+    def resolve_diagram(view, info, **kwds):
+        """
+        Resolve the flow diagram
+        """
+        # easy enough
+        return view.diagram()
 
 
 # end of file
