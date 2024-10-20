@@ -21,4 +21,8 @@ from .Measure import Measure as measure
 from .Sync import Sync as sync
 from .Zoom import Zoom as zoom
 
+# the diagram data model
+from .diagram import diagram
+
+
 # end of file
