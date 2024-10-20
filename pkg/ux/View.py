@@ -69,6 +69,21 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             channel=pipeline, zoom=zoom, origin=origin, shape=shape
         )
 
+    def diagram(self):
+        """
+        Build the visualization pipeline diagram
+        """
+        # get my channel
+        channel = self.channel
+        # if it's trivial
+        if not channel:
+            # bail
+            return
+        # otherwise, build the diagram
+        diagram = qed.ux.diagram(name=f"{channel.pyre_name}.diagram", flow=channel)
+        # and return it
+        return diagram
+
     def toggleSelection(self, key, value):
         """
         Toggle the {value} of {key} in my {selections}
@@ -557,8 +572,6 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
                 name = f"{self.pyre_name}.{dataset.pyre_name}.{candidate.tag}"
                 # look it up and install it
                 self.channel = self._pipelines[name]
-        # regardless of how it all worked out, let the flow know
-        self.flow.pipeline(pipeline=self.channel)
         # all done
         return self
 
@@ -575,6 +588,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             dataset=self.dataset,
             channel=self.channel.pyre_family() if self.channel else None,
             selections=dict(self.selections),
+            flow=self.flow.clone(),
             measure=self.measure.clone(),
             sync=self.sync.clone(),
             zoom=self.zoom.clone(),
@@ -586,6 +600,8 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         """
         # get my reader
         reader = self.reader
+        # and my harvester
+        harvester = self.harvester
         # if it's trivial
         if not reader:
             # nothing to do
@@ -599,7 +615,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
                 # get the reference configuration
                 reference = dataset.channel(name=pipeline.tag)
                 # mirror its configuration in my pipeline
-                self.harvester.configure(component=pipeline, reference=reference)
+                harvester.configure(component=pipeline, reference=reference)
                 # go through its controllers
                 for controller, _ in pipeline.controllers():
                     # and mark each one as clean
@@ -619,6 +635,20 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         }
         # resolve my state
         self.resolve()
+        # show me
+        channel = journal.info("qed.ux.view")
+        channel.line(f"view.__init__:")
+        channel.line(f"self: {self}")
+        pipelines = self._pipelines
+        if pipelines:
+            channel.indent()
+            channel.line(f"pipelines:")
+            channel.indent()
+            for idx, pipeline in enumerate(pipelines.values()):
+                channel.line(f"{idx:>02}: {pipeline}")
+            channel.outdent()
+            channel.outdent()
+        channel.log()
         # all done
         return
 
