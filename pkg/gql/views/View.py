@@ -24,6 +24,9 @@ from .ViewMeasure import ViewMeasure
 from .ViewSync import ViewSync
 from .ViewZoom import ViewZoom
 
+# flow diagrams
+from .. import diagram
+
 
 # the type
 class View(graphene.ObjectType):
@@ -66,8 +69,11 @@ class View(graphene.ObjectType):
     depth = graphene.Int(required=True)
     # and how many of them can be shown now
     reach = graphene.Int(required=True)
+    # the visualization pipeline diagram
+    diagram = graphene.Field(diagram.diagram)
 
     # resolvers
+    # metadata
     @staticmethod
     def resolve_ready(view, info, **kwds):
         """
@@ -162,6 +168,7 @@ class View(graphene.ObjectType):
         # easy enough
         return view.pyre_name
 
+    # dataset selections
     @staticmethod
     def resolve_selections(view, info, **kwds):
         """
@@ -185,6 +192,15 @@ class View(graphene.ObjectType):
         """
         # hand off the effective availability
         return view.availableSelectors().items()
+
+    # rendering of the visualization pipeline
+    @staticmethod
+    def resolve_diagram(view, info, **kwds):
+        """
+        Resolve the flow diagram
+        """
+        # easy enough
+        return view.diagram()
 
 
 # end of file
