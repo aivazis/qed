@@ -15,7 +15,7 @@ from .Slot import Slot
 
 
 # flow graph entities and their layout
-class Diagram:
+class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
     """
     The server side representation of the flow diagram
     """
@@ -83,40 +83,8 @@ class Diagram:
         """
         # place the factory in the flow
         self.flow.factories.add(factory)
-        # build an entity
-        entity = Factory(factory=factory, position=position)
-        # its slots
-        slots = entity.slots
-        # and its connectors
-        connectors = list(entity.connections())
-
-        # make a pile
-        labels = []
-        # add the entity labels
-        labels.extend(entity.labels)
-        # go through the connetors
-        for connector in connectors:
-            # and add their labels to the pile
-            labels.extend(connector.labels)
-
-        # i maintain a set of all factories
-        self.factories.add(entity)
-        # and all slots
-        self.slots |= slots
-
-        # update my node index: it keeps track of the factory itself
-        self.nodes[entity.eid] = entity
-        # its slots
-        self.nodes.update((slot.eid, slot) for slot in slots)
-        # and the new labels
-        self.nodes.update((label.eid, label) for label in labels)
-
-        # update my layout
-        self.layout[entity.position] = entity
-        self.layout.update((slot.position, slot) for slot in slots)
-
-        # return the new factory
-        return entity, labels, slots, connectors
+        # and update the diagram
+        return self.drawFactory(factory=factory, position=position)
 
     def addProduct(self, product, position):
         """
@@ -212,31 +180,84 @@ class Diagram:
     def __init__(self, flow=None, **kwds):
         # chain up
         super().__init__(**kwds)
-
-        # my flow
-        self.flow = flow if flow is not None else qed.flow.dynamic()
-        # the pile of slots
+        # initialize my indices: the pile of slots
         self.slots = set()
         # factories
         self.factories = set()
-
         # my layout keeps track of entity locations
         self.layout = {}
-
         # the node index maps relay ids to diagram entities
         self.nodes = {}
         # a set of labels that are not associated with any entity
         self.labels = set()
-
         # a record of the moving node and its initial position
         self.migrant = None, ()
         # marker that a collision among nodes was detected during a move
         self.collision = None
-
+        # set up my flow
+        self.flow = self.draw(flow=flow)
         # all done
         return
 
     # implementation details
+    def draw(self, flow):
+        """
+        Traverse the {flow} graph and categorize its contents
+        """
+        # if it's a trivial {flow}
+        if flow is None:
+            # make an empty one and return it
+            return qed.flow.dynamic()
+
+        # otherwise, harvest its nodes; go through the factories
+        for factory in flow.pyre_factories():
+            # and add them to the diagram
+            # MGA - FIXME: positions?
+            self.drawFactory(factory=factory, position=(0, 0))
+
+        # MGA - FIXME: add the other nodes
+
+        # all done
+        return flow
+
+    def drawFactory(self, factory, position):
+        """
+        Add {factory} to the diagram
+        """
+        # build an entity
+        entity = Factory(factory=factory, position=position)
+        # grab its slots
+        slots = entity.slots
+        # and its connectors
+        connectors = list(entity.connections())
+        # make a pile of labels
+        labels = []
+        # add the entity labels
+        labels.extend(entity.labels)
+        # go through the connectors
+        for connector in connectors:
+            # and their labels to the pile
+            labels.extend(connector.labels)
+
+        # add the entity to the set of factories
+        self.factories.add(entity)
+        # its slots to the pile of slots
+        self.slots |= slots
+        # and its labels to the pile of labels
+        self.labels |= set(labels)
+        # update my node index: keep track of the new entity
+        self.nodes[entity.eid] = entity
+        # its slots
+        self.nodes.update((slot.eid, slot) for slot in slots)
+        # and the new labels
+        self.nodes.update((label.eid, label) for label in labels)
+        # update my layout by adding the factory
+        self.layout[entity.position] = entity
+        # and its slots
+        self.layout.update((slot.position, slot) for slot in slots)
+        # all done
+        return entity, labels, slots, connectors
+
     def supported(self, n1, n2):
         """
         Check whether a binding between {n1} and {n2} is permissible
