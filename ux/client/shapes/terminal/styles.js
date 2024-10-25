@@ -1,0 +1,45 @@
+// -*- web -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2024 all rights reserved
+
+
+// get colors
+import { theme } from '~/palette'
+
+// the base style
+import style from '~/shapes/styles'
+
+
+// the shape color
+const ink = "hsl(0deg, 70%, 40%)"
+const paint = "hsl(0deg, 40%, 20%)"
+
+
+// publish
+export default {
+    // the main shape
+    icon: {
+        // inherit
+        ...style.icon,
+        // stroke
+        stroke: ink,
+        strokeWidth: 2,
+        // fill
+        fill: "none",
+    },
+
+    // decorative touches
+    decoration: {
+        // inherit
+        ...style.decoration,
+        // stroke
+        stroke: "none",
+        // fill
+        fill: paint,
+    },
+
+}
+
+
+// end of file
