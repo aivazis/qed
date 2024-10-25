@@ -12,7 +12,10 @@ import journal
 from ..Node import Node
 
 # my parts
+from .FlowConnector import FlowConnector
 from .FlowFactory import FlowFactory
+from .FlowLabel import FlowLabel
+from .FlowSlot import FlowSlot
 
 
 # the type
@@ -31,7 +34,10 @@ class FlowDiagram(graphene.ObjectType):
     name = graphene.String(required=True)
     family = graphene.String(required=True)
     # diagram parts
+    connectors = graphene.List(FlowConnector)
     factories = graphene.List(FlowFactory)
+    labels = graphene.List(FlowLabel)
+    slots = graphene.List(FlowSlot)
 
     # resolvers
     @staticmethod
@@ -57,15 +63,6 @@ class FlowDiagram(graphene.ObjectType):
         """
         # easy enough
         return f"{diagram.pyre_family()}"
-
-    # diagram parts
-    @staticmethod
-    def resolve_factories(diagram, info, **kwds):
-        """
-        Resolve the list of factories
-        """
-        # easy enough
-        return []
 
 
 # end of file

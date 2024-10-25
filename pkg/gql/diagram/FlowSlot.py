@@ -15,9 +15,9 @@ from .Point import Point
 
 
 # the type
-class FlowFactory(graphene.ObjectType):
+class FlowSlot(graphene.ObjectType):
     """
-    A product factory
+    A data product slot
     """
 
     # {graphene} metadata
@@ -27,28 +27,26 @@ class FlowFactory(graphene.ObjectType):
 
     # metadata
     id = graphene.ID(required=True)
-    # product counts
-    inputs = graphene.Int(required=True)
-    outputs = graphene.Int(required=True)
-    # placements
+    # fields
     at = graphene.Field(Point, required=True)
+    bound = graphene.Boolean(required=True)
 
     # resolvers
     @staticmethod
-    def resolve_id(factory, info, **kwds):
+    def resolve_id(slot, info, **kwds):
         """
         Make an id
         """
-        # splice together the {family} and {name} of the {factory}
-        return factory.relay
+        # splice together the {family} and {name} of the {slot}
+        return slot.relay
 
     @staticmethod
-    def resolve_at(factory, info, **kwds):
+    def resolve_at(slot, info, **kwds):
         """
-        Resolve the factory position
+        Resolve the slot position
         """
         # get the location
-        x, y = factory.position
+        x, y = slot.position
         # turn it into a point and return it
         return Point(x=x, y=y)
 
