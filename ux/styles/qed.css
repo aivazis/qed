@@ -131,6 +131,11 @@ a:active {
     src: url("../fonts/fira-mono-regular.ttf");
 }
 
+@font-face {
+    font-family: "noto-italic";
+    src: url("../fonts/noto-italic.ttf");
+}
+
 
 /* animations */
 @keyframes busy {
