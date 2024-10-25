@@ -8,7 +8,7 @@
 import qed
 
 # my superclass
-from .Producer import Producer
+from .factories import producer
 
 # my product specs
 from .Dataset import Dataset
@@ -18,7 +18,7 @@ from . import properties
 
 
 # the product payload
-class Reader(Producer, family="qed.readers"):
+class Reader(producer, family="qed.readers"):
     """
     A dataset factory
     """

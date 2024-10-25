@@ -11,11 +11,11 @@ import sys
 import qed
 
 # my superclass
-from .Specification import Specification
+from .products import specification
 
 
 # the dataset layout
-class Datatype(Specification, family="qed.datatypes"):
+class Datatype(specification, family="qed.datatypes"):
     """
     The datatype metadata
     """

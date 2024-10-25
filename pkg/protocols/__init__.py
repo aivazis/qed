@@ -7,10 +7,13 @@
 # custom properties
 from .properties import selectors
 
+# flow
+from . import products
+from . import factories
 
-# export the local wrappers over the flow protocols
-from .Producer import Producer as producer
-from .Specification import Specification as specification
+# ux state
+from . import ux
+
 
 # data archives
 from .Archive import Archive as archive
@@ -25,9 +28,6 @@ from .Channel import Channel as channel
 
 # and their controllers
 from .Controller import Controller as controller
-
-# ux state
-from . import ux
 
 
 # end of file
