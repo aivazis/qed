@@ -63,7 +63,10 @@ from . import archives
 # support for data types, controllers, and readers
 from . import datatypes
 from . import controllers
+from . import products
+from . import factories
 from . import readers
+from . import channels
 
 # schema
 from . import gql
