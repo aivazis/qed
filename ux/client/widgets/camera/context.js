@@ -149,7 +149,9 @@ export const Provider = React.forwardRef(({ viewport, scale, children }, clientR
     }
     // wheel
     const wheel = evt => {
-        // unpack the vent
+        // prevent the default behavior
+        evt.preventDefault()
+        // unpack the event
         const { deltaX, deltaY, ctrlKey, shiftKey } = evt
         // scrolling with the <ctrl> or <shift> key pressed
         if (ctrlKey || shiftKey) {
