@@ -63,7 +63,7 @@ export default {
         },
 
         factory: {
-            fontFamily: "noto",
+            fontFamily: "noto-italic",
             fontSize: 0.65,
             stroke: "none",
             fill: "hsl(28deg, 70%, 55%)",
