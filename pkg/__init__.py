@@ -66,7 +66,10 @@ from . import workspaces
 # support for data types, controllers, readers, and stacks
 from . import datatypes
 from . import controllers
+from . import products
+from . import factories
 from . import readers
+from . import channels
 from . import stacks
 
 # support for concurrent tile production
