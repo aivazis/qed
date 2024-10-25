@@ -9,7 +9,7 @@
 import qed
 
 # my superclass
-from .Specification import Specification
+from .products import specification
 
 # my parts
 from .Channel import Channel
@@ -17,7 +17,7 @@ from .Datatype import Datatype
 
 
 # the product payload
-class Dataset(Specification, family="qed.datasets"):
+class Dataset(specification, family="qed.datasets"):
     """
     A dataset provides access to the actual data
     """
