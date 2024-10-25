@@ -45,8 +45,8 @@ class Output(Connector):
         # and the slot position
         sx, sy = self.slot.position
         # build the label position
-        lx = sx - 1
-        ly = sy + (0.5 if sy > fy else -0.25)
+        lx = sx - 0.75
+        ly = sy + (0.75 if sy > fy else -0.5)
         # pack it and ship it
         return lx, ly
 

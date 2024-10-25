@@ -19,6 +19,14 @@ class Slot(Node):
     The representation of a slot
     """
 
+    # properties
+    @property
+    def bound(self):
+        """
+        Indicate whether this slot is associated with an actual product
+        """
+        return self.product is not None
+
     # interface
     def connectReader(self, factory, trait):
         """
@@ -129,7 +137,7 @@ class Slot(Node):
 
     def __str__(self):
         # build the binding decoration
-        bound = "(unbound)" if self.product is None else "(bound)"
+        bound = "(unbound)" if self.bound else "(bound)"
         # add it to my textual representation
         return " ".join([super().__str__(), bound])
 
