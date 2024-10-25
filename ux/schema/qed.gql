@@ -290,7 +290,7 @@ type FlowDiagram implements Node {
 # factories
 type FlowFactory implements Node {
   id: ID!
-  at: FlowPosition!
+  at: Point!
   inputs: Int!
   outputs: Int!
 }
@@ -298,7 +298,7 @@ type FlowFactory implements Node {
 # slots
 type FlowSlot implements Node {
   id: ID!
-  at: FlowPosition!
+  at: Point!
   bound: Boolean!
 }
 
@@ -306,20 +306,20 @@ type FlowSlot implements Node {
 type FlowConnector implements Node {
   id: ID!
   input: Boolean!
-  slot: FlowPosition!
-  factory: FlowPosition!
+  slot: Point!
+  factory: Point!
 }
 
 # labels
 type FlowLabel implements Node {
   id: ID!
-  at: FlowPosition!
+  at: Point!
   value: [String!]!
   category: String
 }
 
 # diagram coordinates
-type FlowPosition {
+type Point {
   # the coordinates of a diagram node
   x: Float!
   y: Float!
