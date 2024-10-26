@@ -8,10 +8,6 @@
 # custom properties
 from .properties import selectors
 
-# flow
-from . import products
-from . import factories
-
 # ux state
 from . import ux
 
