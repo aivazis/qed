@@ -22,6 +22,8 @@ from pyre import (
     nexus,
     # support for workflows, products, and factories
     flow,
+    # visualization flow nodes
+    viz,
     # shells
     application,
     plexus,
@@ -63,8 +65,6 @@ from . import archives
 # support for data types, controllers, and readers
 from . import datatypes
 from . import controllers
-from . import products
-from . import factories
 from . import readers
 from . import channels
 
