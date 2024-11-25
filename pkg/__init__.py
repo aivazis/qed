@@ -22,6 +22,8 @@ from pyre import (
     executive,
     # support for workflows, products, and factories
     flow,
+    # visualization flow nodes
+    viz,
     # shells
     application,
     plexus,
@@ -66,8 +68,6 @@ from . import workspaces
 # support for data types, controllers, readers, and stacks
 from . import datatypes
 from . import controllers
-from . import products
-from . import factories
 from . import readers
 from . import channels
 from . import stacks
