@@ -33,6 +33,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
     dataset = qed.protocols.dataset()
     dataset.doc = "my dataset"
 
+    # MGA - FIXME: need a better protocol
     channel = qed.protocols.channel()
     channel.doc = "my channel"
 
@@ -74,13 +75,17 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         Build the visualization pipeline diagram
         """
         # get my channel
+        # MGA - FIXME: integrate the new channels into the view
         channel = self.channel
         # if it's trivial
         if not channel:
             # bail
             return
         # otherwise, build the diagram
-        diagram = qed.ux.diagram(name=f"{channel.pyre_name}.diagram", flow=channel)
+        # MGA - FIXME: feed my channel to the diagram
+        diagram = qed.ux.diagram(
+            name=f"{channel.pyre_name}.diagram", flow=qed.channels.phase()
+        )
         # and return it
         return diagram
 
@@ -636,8 +641,8 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # resolve my state
         self.resolve()
         # show me
-        channel = journal.info("qed.ux.view")
-        channel.line(f"view.__init__:")
+        channel = journal.debug("qed.ux.view")
+        channel.line(f"ux.View.__init__:")
         channel.line(f"self: {self}")
         pipelines = self._pipelines
         if pipelines:
