@@ -21,11 +21,11 @@ class Channel(qed.flow.workflow, family="qed.channels.channel"):
     # products
     # expose the output node; everything else is internal, as far as clients are concerned
     # lean on the protocols for sensible defaults
-    bmp = qed.protocols.products.image.output()
+    bmp = qed.viz.raster.output()
     bmp.doc = "the final rendered image of the channel"
 
     # factories
-    codec = qed.protocols.factories.codec()
+    codec = qed.viz.codec()
     codec.doc = "the encoder of the data tile as an image to be rendered by the client"
 
     # framework hooks
