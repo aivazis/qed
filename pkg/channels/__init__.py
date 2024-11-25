@@ -7,5 +7,8 @@
 # channels are visualization pipeline fragments, i.e. partial flows
 from .Channel import Channel as channel
 
+# specific channels
+from .Phase import Phase as phase
+
 
 # end of file
