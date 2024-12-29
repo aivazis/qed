@@ -55,7 +55,7 @@ class H5(qed.flow.factory, implements=qed.protocols.reader):
 
         # load the datasets
         self._loadDatasets()
-        # and build the build the selector availability map
+        # and build the selector availability map
         self.available = self._checkAvailability()
 
         # all done
