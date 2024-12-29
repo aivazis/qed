@@ -73,12 +73,12 @@ class Dispatcher:
         pfs["ux"] = docroot
 
         # make a spec for the app engine
-        spec = "ux"
+        spec = "store"
         # use the spec to build a name for my panel
         name = f"{plexus.pyre_name}.{spec}"
         # build the application store
         self.store = qed.ux.store(
-            name=f"{plexus.pyre_name}.store",
+            name=name,
             plexus=plexus,
             docroot=docroot,
             globalAliases=True,
