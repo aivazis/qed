@@ -512,7 +512,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
                 # and bail, just in case firewalls aren't fatal
                 return self
         # if we were not able to identify the dataset
-        if not dataset:
+        if not self.dataset:
             # all done
             return self
         # get the channel
