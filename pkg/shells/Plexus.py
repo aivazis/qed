@@ -138,7 +138,7 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         # chain up and pass on any configuration errors
         yield from super().pyre_configured()
 
-        # sort out my cell configuration, since it has multiple way do being set
+        # sort out my cell configuration, since it has multiple ways of being set
         yield from self._configureCell()
         # configure my shape
         yield from self._configureShape()
