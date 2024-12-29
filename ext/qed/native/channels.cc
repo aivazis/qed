@@ -84,6 +84,68 @@ qed::py::native::channels(py::module & m)
         // the docstring
         "render the value of a double tile");
 
+    // add the individual channel bindings for views
+    // {b} value
+    channels.def(
+        // the name of the function
+        "value",
+        // the handler
+        &qed::native::channels::value<viewgrid_t<char>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the value of a byte tile");
+    // {i2} value
+    channels.def(
+        // the name of the function
+        "value",
+        // the handler
+        &qed::native::channels::value<viewgrid_t<int16_t>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the value of a int16_t tile");
+    // {i4} value
+    channels.def(
+        // the name of the function
+        "value",
+        // the handler
+        &qed::native::channels::value<viewgrid_t<int32_t>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the value of an int32_t tile");
+    // {i8} value
+    channels.def(
+        // the name of the function
+        "value",
+        // the handler
+        &qed::native::channels::value<viewgrid_t<int64_t>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the value of a int64_t tile");
+    // {r4} value
+    channels.def(
+        // the name of the function
+        "value",
+        // the handler
+        &qed::native::channels::value<viewgrid_t<float>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the value of a float tile");
+    // {r8} value
+    channels.def(
+        // the name of the function
+        "value",
+        // the handler
+        &qed::native::channels::value<viewgrid_t<double>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the value of a double tile");
+
     // {b} abs
     channels.def(
         // the name of the function
@@ -140,6 +202,67 @@ qed::py::native::channels(py::module & m)
         "abs",
         // the handler
         &qed::native::channels::magnitude<mapgrid_t<double>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the absolute value of a double tile");
+
+    // {b} abs
+    channels.def(
+        // the name of the function
+        "abs",
+        // the handler
+        &qed::native::channels::magnitude<viewgrid_t<char>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the absolute value of a byte tile");
+    // {i2} abs
+    channels.def(
+        // the name of the function
+        "abs",
+        // the handler
+        &qed::native::channels::magnitude<viewgrid_t<int16_t>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the absolute value of a int16_t tile");
+    // {i4} abs
+    channels.def(
+        // the name of the function
+        "abs",
+        // the handler
+        &qed::native::channels::magnitude<viewgrid_t<int32_t>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the absolute value of an int32_t tile");
+    // {i8} abs
+    channels.def(
+        // the name of the function
+        "abs",
+        // the handler
+        &qed::native::channels::magnitude<viewgrid_t<int64_t>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the absolute value of a int64_t tile");
+    // {r4} abs
+    channels.def(
+        // the name of the function
+        "abs",
+        // the handler
+        &qed::native::channels::magnitude<viewgrid_t<float>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the absolute value of a float tile");
+    // {r8} abs
+    channels.def(
+        // the name of the function
+        "abs",
+        // the handler
+        &qed::native::channels::magnitude<viewgrid_t<double>>,
         // the signature
         "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
@@ -279,6 +402,115 @@ qed::py::native::channels(py::module & m)
         "real",
         // the handler
         &qed::native::channels::real<mapgrid_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the real part of a complex double tile");
+
+    // {c8} amplitude
+    channels.def(
+        // the name of the function
+        "amplitude",
+        // the handler
+        &qed::native::channels::amplitude<viewgrid_t<std::complex<float>>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the amplitude of a complex float tile");
+    // {c16} amplitude
+    channels.def(
+        // the name of the function
+        "amplitude",
+        // the handler
+        &qed::native::channels::amplitude<viewgrid_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the amplitude of a complex double tile");
+
+    // {c8}
+    channels.def(
+        // the name of the function
+        "complex",
+        // the handler
+        &qed::native::channels::complex<viewgrid_t<std::complex<float>>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
+        "saturation"_a,
+        // the docstring
+        "render the value of a complex float tile");
+    // {c16}
+    channels.def(
+        // the name of the function
+        "complex",
+        // the handler
+        &qed::native::channels::complex<viewgrid_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
+        "saturation"_a,
+        // the docstring
+        "render the value of a complex double tile");
+
+    // imaginary part of {c8}
+    channels.def(
+        // the name of the function
+        "imaginary",
+        // the handler
+        &qed::native::channels::imaginary<viewgrid_t<std::complex<float>>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the imaginary part a complex float tile");
+    // imaginary part of {c16}
+    channels.def(
+        // the name of the function
+        "imaginary",
+        // the handler
+        &qed::native::channels::imaginary<viewgrid_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the imaginary part of a complex double tile");
+
+    // phase of {c8}
+    channels.def(
+        // the name of the function
+        "phase",
+        // the handler
+        &qed::native::channels::phase<viewgrid_t<std::complex<float>>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "low"_a, "high"_a, "saturation"_a,
+        "brightness"_a,
+        // the docstring
+        "render the phase of a complex float tile");
+    // phase of {c16}
+    channels.def(
+        // the name of the function
+        "phase",
+        // the handler
+        &qed::native::channels::phase<viewgrid_t<std::complex<double>>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "low"_a, "high"_a, "saturation"_a,
+        "brightness"_a,
+        // the docstring
+        "render the phase of a complex double tile");
+
+    // real part of {c8}
+    channels.def(
+        // the name of the function
+        "real",
+        // the handler
+        &qed::native::channels::real<viewgrid_t<std::complex<float>>>,
+        // the signature
+        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the real part a complex float tile");
+    // real part of {c16}
+    channels.def(
+        // the name of the function
+        "real",
+        // the handler
+        &qed::native::channels::real<viewgrid_t<std::complex<double>>>,
         // the signature
         "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
