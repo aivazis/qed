@@ -73,22 +73,21 @@ const Layer = ({ viewport, view, shape, scale }) => {
         const { altKey } = evt
         // if <Alt> is pressed
         if (altKey) {
-            // unpack the pointer coordinates relative to the ULC of the client area
-            const { offsetX, offsetY } = evt
-            // scale and pack
-            const anchor = {
-                x: Math.round(scale.horizontal * offsetX),
-                y: Math.round(scale.vertical * offsetY),
-            }
-            // add it to the pile
-            add(anchor)
+            // do something special
             // all done
             return
         }
 
-        // the default action is to clear the selection
-        // disabled for now, until we check with actual users
-        // clearSelection()
+        // when no modifiers are present, add an anchor to the layer
+        // unpack the pointer coordinates relative to the ULC of the client area
+        const { offsetX, offsetY } = evt
+        // scale and pack
+        const anchor = {
+            x: Math.round(scale.horizontal * offsetX),
+            y: Math.round(scale.vertical * offsetY),
+        }
+        // add it to the pile
+        add(anchor)
 
         // all done
         return
