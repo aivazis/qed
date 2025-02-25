@@ -16,6 +16,7 @@ import { Close } from './close'
 import { Coordinate } from './coordinate'
 import { Delete } from './delete'
 import { Focus } from './focus'
+import { Rect } from './rect'
 
 
 // an entry from the table of the points on the {measure} layer of the active viewport
@@ -40,6 +41,8 @@ export const Point = ({ viewport, view, idx, point, last }) => {
             {idx != last && <Add viewport={viewport} idx={idx} />}
             {/* instead, the last point gets a control to close the path */}
             {idx == last && <Close viewport={viewport} view={view} />}
+            {/* when only two points, the last one gets the box marker */}
+            {last == 1 && idx == last && <Rect viewport={viewport} view={view} />}
         </Box>
     )
 }
