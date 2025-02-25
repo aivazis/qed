@@ -77,14 +77,14 @@ class Viewport(
         # all done
         return self.view()
 
-    def measureAddAnchor(self, x, y, index):
+    def measureAnchorAdd(self, x, y, index):
         """
         Add an anchor to my measure path
         """
         # get my active view
         view = self._view
         # and delegate
-        view.measureAddAnchor(x=x, y=y, index=index)
+        view.measureAnchorAdd(x=x, y=y, index=index)
         # all done
         return view
 
@@ -154,6 +154,17 @@ class Viewport(
         view = self._view
         # delegate
         view.measureAnchorToggleSelectionMulti(index=index)
+        # all done
+        return view
+
+    def measureMakeBox(self):
+        """
+        Add an anchor to my measure path
+        """
+        # get my active view
+        view = self._view
+        # and delegate
+        view.measureMakeBox()
         # all done
         return view
 
