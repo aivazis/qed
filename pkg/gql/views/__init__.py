@@ -30,6 +30,7 @@ from .MeasureAnchorToggleSelection import (
 from .MeasureAnchorToggleSelectionMulti import (
     MeasureAnchorToggleSelectionMulti as measureAnchorToggleSelectionMulti,
 )
+from .MeasureMakeBox import MeasureMakeBox as measureMakeBox
 from .MeasureToggleClosedPath import MeasureToggleClosedPath as measureToggleClosedPath
 from .MeasureReset import MeasureReset as measureReset
 
