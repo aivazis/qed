@@ -68,6 +68,7 @@ class Mutation(graphene.ObjectType):
     viewMeasureAnchorExtendSelection = views.viewMeasureAnchorExtendSelection.Field()
     viewMeasureAnchorToggleSelection = views.viewMeasureAnchorToggleSelection.Field()
     viewMeasureAnchorToggleSelectionMulti = views.viewMeasureAnchorToggleSelectionMulti.Field()
+    viewMeasureMakeBox = views.viewMeasureMakeBox.Field()
     viewMeasureToggleClosedPath = views.viewMeasureToggleClosedPath.Field()
     viewMeasureReset = views.viewMeasureReset.Field()
 
