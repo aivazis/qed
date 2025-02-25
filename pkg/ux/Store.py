@@ -908,7 +908,7 @@ class Store(qed.component, family="qed.ux.store"):
         # all done
         return
 
-    def measureAddAnchor(self, viewport, x, y, index):
+    def measureAnchorAdd(self, viewport, x, y, index):
         """
         Add an anchor to the path of the measure layer of the current viewport
         """
@@ -917,7 +917,7 @@ class Store(qed.component, family="qed.ux.store"):
         # go through all viewports that are path synced
         for port in self._syncedWith(viewport=viewport, aspect="path"):
             # and add an anchor to their path
-            view = port.measureAddAnchor(x=x, y=y, index=index)
+            view = port.measureAnchorAdd(x=x, y=y, index=index)
             # hand off the measure configuration
             yield view.measure
         # all done
@@ -1023,6 +1023,19 @@ class Store(qed.component, family="qed.ux.store"):
         for port in self._syncedWith(viewport=viewport, aspect="path"):
             # and toggle the selection in multinode mode
             view = port.measureAnchorToggleSelectionMulti(index=index)
+            # hand off the measure configuration
+            yield view.measure
+        # all done
+        return
+
+    def measureMakeBox(self, viewport):
+        """
+        Convert a pair of anchors into a box
+        """
+        # go through all viewports that are path synced
+        for port in self._syncedWith(viewport=viewport, aspect="path"):
+            # and ask each one to make the box
+            view = port.measureMakeBox()
             # hand off the measure configuration
             yield view.measure
         # all done
