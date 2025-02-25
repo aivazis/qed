@@ -235,7 +235,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # all done
         return
 
-    def measureAddAnchor(self, viewport, x, y, index):
+    def measureAnchorAdd(self, viewport, x, y, index):
         """
         Add an anchor to the path of the measure layer of the current viewport
         """
@@ -244,7 +244,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # go through all viewports that are path synced
         for port in self._syncedWith(viewport=viewport, aspect="path"):
             # and add an anchor to their path
-            view = port.measureAddAnchor(x=x, y=y, index=index)
+            view = port.measureAnchorAdd(x=x, y=y, index=index)
             # hand off the measure configuration
             yield view.measure
         # all done
@@ -352,6 +352,19 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             view = port.measureAnchorToggleSelectionMulti(index=index)
             # hand off the measure configuration
             yield view.measure
+        # all done
+        return
+
+    def measureMakeBox(self, viewport):
+        """
+        Convert a pair of anchors into a box
+        """
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # ask it to make the box
+        view = port.measureMakeBox()
+        # send of its measure
+        yield view.measure
         # all done
         return
 

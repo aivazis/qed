@@ -130,7 +130,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
-    def measureAddAnchor(self, x, y, index):
+    def measureAnchorAdd(self, x, y, index):
         """
         Add an anchor to my measure path
         """
@@ -215,6 +215,10 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             for idx in range(spot, len(selection)):
                 # have to be reduce by one
                 selection[idx] -= 1
+        # if this leaves us without any anchoors
+        if not anchors:
+            # clear the closed path flag
+            measure.closed = False
         # all done
         return self
 
@@ -308,6 +312,30 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             toggled.insert(spot, index)
         # store the new selection
         self.measure.selection = toggled
+        # all done
+        return self
+
+    def measureMakeBox(self):
+        # get the measure
+        measure = self.measure
+        # get the first two anchors; currently, the box toggle only appears on the client when
+        # there are only two anchors on the path, but let's be defensive here
+        anchors = measure.path[:2]
+        # unpack
+        (x0, y0), (x1, y1) = anchors
+        # build the four nodes in the box
+        box = [
+            (min(x0, x1), min(y0, y1)),
+            (max(x0, x1), min(y0, y1)),
+            (max(x0, x1), max(y0, y1)),
+            (min(x0, x1), max(y0, y1)),
+        ]
+        # adjust the anchor set
+        measure.path[0:2] = box
+        # select all the nodes
+        measure.selection = list(range(4))
+        # mark the path as closed
+        measure.closed = True
         # all done
         return self
 
