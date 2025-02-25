@@ -38,7 +38,7 @@ class ViewMeasureAnchorAdd(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # delegate to the store
-        measures = store.measureAddAnchor(
+        measures = store.measureAnchorAdd(
             viewport=input.viewport, x=input.x, y=input.y, index=input.index
         )
         # form the mutation resolution context
