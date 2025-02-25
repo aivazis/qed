@@ -189,7 +189,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
-    def measureAddAnchor(self, x, y, index):
+    def measureAnchorAdd(self, x, y, index):
         """
         Add an anchor to my measure path
         """
@@ -279,6 +279,10 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             for idx in range(spot, len(selection)):
                 # have to be reduce by one
                 selection[idx] -= 1
+        # if this leaves us without any anchors
+        if not anchors:
+            # clear the closed path flag
+            measure.closed = False
         # all done
         return self
 
@@ -372,6 +376,41 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             toggled.insert(spot, index)
         # store the new selection
         self.measure.selection = toggled
+        # all done
+        return self
+
+    def measureMakeBox(self):
+        """
+        Turn the first two anchors of my measure path into the corners of a closed box
+        """
+        # get the measure
+        measure = self.measure
+        # the client offers the box only when the path holds exactly two anchors
+        if len(measure.path) != 2:
+            # so anything else means its behavior has changed under us
+            firewall = journal.firewall("qed.ux.store")
+            # complain
+            firewall.line(f"cannot make a box out of a path with {len(measure.path)} anchors")
+            firewall.line(f"in the measure layer of {self.pyre_name}")
+            # flush
+            firewall.log()
+            # and bail, just in case firewalls aren't fatal
+            return self
+        # unpack the two anchors, which are opposite corners of the box
+        (x0, y0), (x1, y1) = measure.path
+        # build the four nodes in the box
+        box = [
+            (min(x0, x1), min(y0, y1)),
+            (max(x0, x1), min(y0, y1)),
+            (max(x0, x1), max(y0, y1)),
+            (min(x0, x1), max(y0, y1)),
+        ]
+        # replace the two anchors with the corners
+        measure.path = box
+        # select all the nodes
+        measure.selection = list(range(4))
+        # mark the path as closed
+        measure.closed = True
         # all done
         return self
 
