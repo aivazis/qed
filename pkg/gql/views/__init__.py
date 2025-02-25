@@ -35,6 +35,7 @@ from .ViewMeasureAnchorToggleSelection import (
 from .ViewMeasureAnchorToggleSelectionMulti import (
     ViewMeasureAnchorToggleSelectionMulti as viewMeasureAnchorToggleSelectionMulti,
 )
+from .ViewMeasureMakeBox import ViewMeasureMakeBox as viewMeasureMakeBox
 from .ViewMeasureToggleClosedPath import (
     ViewMeasureToggleClosedPath as viewMeasureToggleClosedPath,
 )
