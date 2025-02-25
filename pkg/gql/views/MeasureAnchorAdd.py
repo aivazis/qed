@@ -39,7 +39,7 @@ class MeasureAnchorAdd(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to add an anchor to the path
-        measures = store.measureAddAnchor(viewport=viewport, x=x, y=y, index=index)
+        measures = store.measureAnchorAdd(viewport=viewport, x=x, y=y, index=index)
         # form the mutation resolution context
         context = {"measures": measures}
         # and resolve the mutation
