@@ -45,10 +45,6 @@ export const Measure = ({ viewport, view }) => {
         return
     }
 
-    // the platform dependent prompt; {platform} is deprecated, but the recommended replacement
-    // is neither an approved standard nor widely implemented; the web...
-    const stroke = navigator.platform.startsWith("Mac") ? "option+click" : "alt+click"
-
     // otherwise, render
     return (
         <Tray title="measure" state="enabled" initially={true} scale={0.5}>
@@ -61,7 +57,7 @@ export const Measure = ({ viewport, view }) => {
             <Peek view={view} />
             {/* if the pixel path is empty, show a brief help message */}
             <Help>
-                use {stroke} to pick points on the active view
+                click on the active view to add points to the path
             </Help>
             {/* render the pixel path */}
             <Path view={view} />
