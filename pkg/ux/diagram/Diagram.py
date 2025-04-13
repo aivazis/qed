@@ -215,7 +215,16 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
             # MGA - FIXME: positions?
             self.drawFactory(factory=factory, position=(0, 0))
 
-        # MGA - FIXME: add the other nodes
+        # initialize the set of products
+        inputs = [product for product, _ in flow.pyre_inputs()]
+        outputs = [product for product, _ in flow.pyre_outputs()]
+        # go through them
+        print(f"input:")
+        for product in inputs:
+            print(f"  {product}")
+        print(f"output:")
+        for product in outputs:
+            print(f"  {product}")
 
         # all done
         return flow
