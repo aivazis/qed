@@ -26,7 +26,7 @@ import { Save } from './save'
 
 
 //  display the zoom control
-export const Zoom = ({ viewport, view, min = -4, max = 4, ils = 200 }) => {
+export const Zoom = ({ viewport, view, min = -6, max = 4, ils = 200 }) => {
     // unpack the view
     const { reader, dataset, channel, zoom } = useFragment(zoomControlsGetZoomStateFragment, view)
 
