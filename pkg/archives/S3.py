@@ -81,13 +81,15 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
         # make an explorer
         explorer = qed.filesystem.treeExplorer()
         # make a channel
-        channel = journal.info("qed.archives.s3")
-        # show me
-        channel.report(
-            report=explorer.explore(node=self.fs, label=self.fs.location().address)
-        )
-        # flush
-        channel.log()
+        channel = journal.debug("qed.archives.s3")
+        # if the channel is active
+        if channel:
+            # show me
+            channel.report(
+                report=explorer.explore(node=self.fs, label=self.fs.location().address)
+            )
+            # flush
+            channel.log()
 
         # all done
         return
