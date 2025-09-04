@@ -4,18 +4,16 @@
 # (c) 1998-2025 all rights reserved
 
 
-# externals
-import journal
 # support
 import qed
+import journal
 
 
 # declaration
-class Debug(qed.shells.command, family='qed.cli.debug'):
+class Debug(qed.shells.command, family="qed.cli.debug"):
     """
     Display debugging information about this application
     """
-
 
     # user configurable state
     root = qed.properties.str()
@@ -26,6 +24,49 @@ class Debug(qed.shells.command, family='qed.cli.debug'):
     full.default = False
     full.tip = "control whether to do a full dive"
 
+    @qed.export(tip="display information about the connected archives")
+    def archives(self, plexus, **kwds):
+        """
+        Generate a report about the connected archives
+        """
+        # make a channel
+        channel = journal.info("qed.cli.config")
+        # section header
+        channel.line(f"archives:")
+        # indent
+        channel.indent()
+        # go through the archives
+        for archive in plexus._ux.store._dataArchives.archives():
+            # sign on
+            channel.line(f"{archive.pyre_name}: {archive.uri}")
+        # back out
+        channel.outdent()
+        # flush
+        channel.log()
+        # all done
+        return 0
+
+    @qed.export(tip="display information about the connected datasets")
+    def datasets(self, plexus, **kwds):
+        """
+        Generate a report about the connected datasets
+        """
+        # make a channel
+        channel = journal.info("qed.cli.config")
+        # section header
+        channel.line(f"datasets:")
+        # indent
+        channel.indent()
+        # go through the datasets
+        for dataset in plexus._ux.store._dataSources.sources():
+            # sign on
+            channel.line(f"{dataset.pyre_name}: {dataset.uri}")
+        # back out
+        channel.outdent()
+        # flush
+        channel.log()
+        # all done
+        return 0
 
     @qed.export(tip="dump the application configuration namespace")
     def config(self, plexus, **kwds):
@@ -34,22 +75,17 @@ class Debug(qed.shells.command, family='qed.cli.debug'):
         """
         # make a channel
         channel = journal.info("qed.cli.config")
-        # set up the indentation level
-        indent = " " * 2
-
         # get the configurator
         cfg = self.pyre_configurator
         # go through its list of sources
         for uri, priority in cfg.sources:
             # tell me
-            channel.line(f"{indent}{uri}, priority '{priority.name}'")
-
+            channel.line(f"{uri}, priority '{priority.name}'")
         # flush
         channel.log()
 
         # all done
         return 0
-
 
     @qed.export(tip="dump the application configuration namespace")
     def nfs(self, plexus, **kwds):
@@ -85,15 +121,13 @@ class Debug(qed.shells.command, family='qed.cli.debug'):
         # all done
         return 0
 
-
     @qed.export(tip="dump the application configuration namespace")
     def vfs(self, plexus, **kwds):
         """
         Dump the application virtual filesystem
         """
         # get the prefix as a path
-        prefix = qed.primitives.path(
-            "/qed" if self.root is None else self.root)
+        prefix = qed.primitives.path("/qed" if self.root is None else self.root)
 
         # starting at the root of the {vfs}
         folder = plexus.vfs
@@ -109,7 +143,9 @@ class Debug(qed.shells.command, family='qed.cli.debug'):
                 channel = journal.error("merlin.debug.vfs")
                 # complain
                 channel.line(f"could not find '{part}' in '{folder.uri}'")
-                channel.line(f"while scanning for '{prefix}' in the virtual file system")
+                channel.line(
+                    f"while scanning for '{prefix}' in the virtual file system"
+                )
                 # flush
                 channel.log()
                 # and bail if errors aren't fatal
