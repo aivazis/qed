@@ -53,7 +53,7 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
 
     shape = qed.properties.tuple(schema=qed.properties.int())
     shape.default = None
-    shape.doc = "the shape of the dataset"
+    shape.doc = "the shape of the dataset, in (lines x samples)"
 
     # shorthands for specifying shape parts
     lines = qed.properties.int(default=None)
