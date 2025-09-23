@@ -16,5 +16,12 @@ from .Imaginary import Imaginary as imaginary
 from .Phase import Phase as phase
 from .Real import Real as real
 
+# channels suitable for a BFPQ encoded complex dataset
+from .BFPQAmplitude import BFPQAmplitude as amplitudeBFPQ
+from .BFPQComplex import BFPQComplex as complexBFPQ
+from .BFPQImaginary import BFPQImaginary as imaginaryBFPQ
+from .BFPQPhase import BFPQPhase as phaseBFPQ
+from .BFPQReal import BFPQReal as realBFPQ
+
 
 # end of file

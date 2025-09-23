@@ -43,7 +43,7 @@ class Complex(Channel, family="qed.channels.nisar.complex"):
             self.phase.low = 0
             self.phase.max = 1
             self.phase.high = 1
-        # if 'im supposed to
+        # if i'm supposed to
         if self.saturation.auto:
             # adjust my saturation
             self.saturation.value = 1
