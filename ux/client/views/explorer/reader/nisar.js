@@ -140,6 +140,7 @@ export const Products = ({ value, update }) => {
     return (
         <Field name="product" value={value} tip="select the reader type">
             <Values>
+                <Product name="rrsd" rep="rrsd" current={value} select={select} />
                 <Product name="rslc" rep="rslc" current={value} select={select} />
                 <Product name="rifg" rep="rifg" current={value} select={select} />
                 <Product name="roff" rep="roff" current={value} select={select} />
