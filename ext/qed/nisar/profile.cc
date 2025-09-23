@@ -36,6 +36,16 @@ qed::py::nisar::profile(py::module & m)
         // the docstring
         "collect values from a dataset along a path");
 
+    m.def(
+        // the name of the function
+        "profileBFPQ",
+        // the handler
+        &qed::nisar::profileBFPQ<heapgrid_t<std::complex<float>>>,
+        // the signature
+        "source"_a, "datatype"_a, "bfpq"_a, "points"_a, "closed"_a = false,
+        // the docstring
+        "collect values from a BFPQ encoded dataset along a path");
+
     // all done
     return;
 }

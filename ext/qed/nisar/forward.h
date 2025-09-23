@@ -17,6 +17,7 @@ namespace qed::py::nisar {
     // data products
     void real(py::module &);
     void slc(py::module &);
+    void bfpq(py::module &);
     // profile
     void profile(py::module &);
     // stats
