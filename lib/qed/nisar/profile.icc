@@ -41,12 +41,13 @@ qed::nisar::profile(
         // make a container of segments
         auto segments = native::segments_t();
         // go through the points
-        for (auto it = path.cbegin(); it != path.cend() - 1; ++it) {
+        for (auto tail = path.cbegin(), head = std::next(tail); head != path.end();
+             ++head, ++tail) {
             // form a segment from the current point and the next one and add it to the pile
-            segments.emplace_back(*it, *(it + 1));
+            segments.emplace_back(*tail, *head);
         }
         // if the path is closed
-        if (closed) {
+        if (closed && path.size() > 2) {
             // add a segment from the last point back to the first
             segments.emplace_back(path.back(), path.front());
         }
@@ -60,12 +61,17 @@ qed::nisar::profile(
             // compute the origin of the segment bounding box
             auto origin = index_t(std::min(tail[0], head[0]), std::min(tail[1], head[1]));
             // and its shape
-            auto shape = shape_t(std::abs(tail[0] - head[0] + 1), std::abs(tail[1] - head[1] + 1));
+            auto shape = shape_t {
+                std::abs(tail[0] - head[0]) + 1,
+                std::abs(tail[1] - head[1]) + 1,
+            };
             // we operate at zoom level 0
             auto strides = index_t::one();
 
             // show me
             channel
+                // mark
+                << pyre::journal::at()
                 // segment
                 << "segment: (" << tail << ") -> (" << head << ")"
                 << pyre::journal::newline
@@ -76,7 +82,7 @@ qed::nisar::profile(
                 << "  shape: (" << shape << ")"
                 << pyre::journal::newline
                 // flush
-                << pyre::journal::endl(__HERE__);
+                << pyre::journal::endl;
 
             // read the data
             auto data = pyre::h5::read<sourceT>(dataset, datatype, origin, shape, strides);
@@ -121,6 +127,169 @@ qed::nisar::profile(
     dataset.read(&value, datatype, writeSpace, readSpace);
     // and build the last entry
     values.emplace_back(std::get<0>(last), std::get<1>(last), value);
+
+    // all done
+    return values;
+}
+
+
+template <typename sourceT>
+auto
+qed::nisar::profileBFPQ(
+    // the data source
+    const dataset_t & dataset,
+    // the layout
+    const datatype_t & datatype,
+    // the BFPQ lookup table
+    bfpq_lut_t bfpq,
+    // the points
+    const native::points_t & path,
+    // the closed path indicator
+    bool closed) -> native::values_t<typename sourceT::value_type>
+{
+    // type aliases
+    using value_t = typename sourceT::value_type;
+    using index_t = typename sourceT::index_type;
+    using shape_t = typename sourceT::shape_type;
+    using layout_t = typename sourceT::packing_type;
+
+    // make a channel
+    auto channel = pyre::journal::debug_t("qed.datasets.profile");
+    // make a container for the answer
+    native::values_t<value_t> values;
+
+    // if there are no points in the path
+    if (path.size() == 0) {
+        // nothing much to do
+        return values;
+    }
+
+    // setup the decoder
+    auto decoder = [&](bfpq_slc_cell_t encoded) -> value_t {
+        // unpack and decode
+        auto r = bfpq.at(encoded.real());
+        auto i = bfpq.at(encoded.imag());
+        // pack and ship
+        return value_t { r, i };
+    };
+
+    // if there is at least one pair of points in the path
+    if (path.size() > 1) {
+        // make a container of segments
+        auto segments = native::segments_t {};
+        // go through the points
+        for (auto tail = path.cbegin(), head = std::next(tail); head != path.end();
+             ++head, ++tail) {
+            // form a segment from the {tail} to the {head}
+            segments.emplace_back(*tail, *head);
+        }
+        // if the path is closed
+        if (closed && path.size() > 2) {
+            // add a segment from the last point back to the first
+            segments.emplace_back(path.back(), path.front());
+        }
+        // now, go through the segments
+        for (const auto & segment : segments) {
+            // unpack
+            const auto & [ptail, phead] = segment;
+            // convert the points into (line, sample) indices
+            auto tail = index_t { std::get<0>(ptail), std::get<1>(ptail) };
+            auto head = index_t { std::get<0>(phead), std::get<1>(phead) };
+            // compute the origin of the segment bounding box
+            auto origin = index_t { std::min(tail[0], head[0]), std::min(tail[1], head[1]) };
+            // and its shape; make it inclusive of the {tail} because the user expects
+            // its value as well
+            auto shape = shape_t {
+                std::abs(tail[0] - head[0]) + 1,
+                std::abs(tail[1] - head[1]) + 1,
+            };
+            // we operate at zoom level zero
+            auto strides = index_t::one();
+
+            // show me
+            channel
+                // mark
+                << pyre::journal::at()
+                // segment
+                << "segment: (" << tail << ") -> (" << head << ")"
+                << pyre::journal::newline
+                // origin
+                << "  origin: (" << origin << ")"
+                << pyre::journal::newline
+                // shape
+                << "  shape: (" << shape << ")"
+                << pyre::journal::newline
+                // flush
+                << pyre::journal::endl;
+
+            // read the BFPQ encode data
+            auto encoded = pyre::h5::read<bfpq_slc_t>(dataset, datatype, origin, shape, strides);
+            // report
+            channel << "encoded tile shape: " << encoded.layout().shape() << pyre::journal::endl;
+
+            // describe the decoded tile
+            auto layout = layout_t { shape };
+            // allocate storage
+            auto decoded = sourceT(layout, layout.cells());
+            // report
+            channel << "decoded tile shape: " << decoded.layout().shape() << pyre::journal::endl;
+            // decode the tile
+            std::transform(encoded.cbegin(), encoded.cend(), decoded.begin(), decoder);
+
+            // compute the pixel separation
+            double sep = std::max(shape[0], shape[1]);
+            // which determines   the number of data samples
+            for (int pxl = 0; pxl < sep; ++pxl) {
+                // interpolate
+                int d0 = std::round(pxl / sep * (head[0] - tail[0]));
+                int d1 = std::round(pxl / sep * (head[1] - tail[1]));
+                // to compute the index shift to this pixel
+                auto shift = index_t { d0, d1 };
+                // and form the target pixel location
+                auto source = tail - origin + shift;
+                // read the value
+                auto value = decoded[source];
+                // build the index in the raster space
+                auto destination = index_t(tail + shift);
+                // show me
+                channel
+                    // value
+                    << "depositing " << value
+                    << pyre::journal::newline
+                    // source
+                    << "from " << source << "in the decoded tile"
+                    << pyre::journal::newline
+                    // destination
+                    << "as " << destination << pyre::journal::endl;
+                // store
+                values.emplace_back(destination[0], destination[1], value);
+            }
+        }
+    }
+
+    // get the last point on the path
+    const auto & [lastLine, lastSample] = (closed && path.size() > 2) ? path.front() : path.back();
+    // build the address of the point
+    hsize_t index[2] = {
+        static_cast<hsize_t>(lastLine),
+        static_cast<hsize_t>(lastSample),
+    };
+    // the shape of a pixel
+    hsize_t shape[2] = { 1, 1 };
+    // get the dataspace of the dataset
+    auto readSpace = dataset.getSpace();
+    // select the hyperslab that corresponds to the pixel we want to extract
+    readSpace.selectHyperslab(H5S_SELECT_SET, shape, index);
+    // make a dataspace for the destination
+    auto writeSpace = dataspace_t(2, shape);
+    // allocate room for the value
+    bfpq_slc_cell_t value;
+    // transfer
+    dataset.read(&value, datatype, writeSpace, readSpace);
+    // decode
+    auto decoded = decoder(value);
+    // and build the last entry
+    values.emplace_back(lastLine, lastSample, decoded);
 
     // all done
     return values;
