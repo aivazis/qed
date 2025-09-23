@@ -20,6 +20,20 @@ namespace qed::nisar {
         const native::points_t &,
         // the closed path indicator
         bool closed = false) -> native::values_t<typename sourceT::value_type>;
+
+    // profile for a complex HDF5 source
+    template <typename sourceT>
+    auto profileBFPQ(
+        // the source
+        const dataset_t & source,
+        // the data layout
+        const datatype_t & datatype,
+        // the BFPQ lookup table
+        bfpq_lut_t bfpq,
+        // the points
+        const native::points_t &,
+        // the closed path indicator
+        bool closed = false) -> native::values_t<typename sourceT::value_type>;
 }
 
 

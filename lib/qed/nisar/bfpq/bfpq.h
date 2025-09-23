@@ -7,4 +7,13 @@
 // code guard
 #pragma once
 
+
+// channels
+#include "amplitude.h"
+#include "complex.h"
+#include "imaginary.h"
+#include "phase.h"
+#include "real.h"
+
+
 // end of file

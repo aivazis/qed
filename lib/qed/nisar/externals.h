@@ -5,13 +5,13 @@
 // (c) 1998-2025 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_externals_h)
-#define qed_nisar_externals_h
+#pragma once
 
 
 // journal
 #include <pyre/journal.h>
 // pyre
+#include <pyre/memory.h>
 #include <pyre/h5.h>
 #include <pyre/grid.h>
 #include <pyre/viz.h>
@@ -41,10 +41,12 @@ namespace qed::nisar {
     using hl_t = pyre::viz::iterators::colormaps::hl_t<hueSourceT, luminositySourceT>;
     // hsb
     template <typename hueSourceT, typename saturationSourceT, typename brightnessSourceT>
-    using hsb_t = pyre::viz::iterators::colormaps::hsb_t<hueSourceT, saturationSourceT, brightnessSourceT>;
+    using hsb_t =
+        pyre::viz::iterators::colormaps::hsb_t<hueSourceT, saturationSourceT, brightnessSourceT>;
     // hsl
     template <typename hueSourceT, typename saturationSourceT, typename luminositySourceT>
-    using hsl_t = pyre::viz::iterators::colormaps::hsl_t<hueSourceT, saturationSourceT, luminositySourceT>;
+    using hsl_t =
+        pyre::viz::iterators::colormaps::hsl_t<hueSourceT, saturationSourceT, luminositySourceT>;
 
     // filters
     // map [0,1] to an interval
@@ -72,7 +74,5 @@ namespace qed::nisar {
     using real_t = pyre::viz::iterators::filters::real_t<sourceT>;
 }
 
-
-#endif
 
 // end of file

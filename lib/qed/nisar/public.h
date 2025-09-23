@@ -5,8 +5,8 @@
 // (c) 1998-2025 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_public_h)
-#define qed_nisar_public_h
+#pragma once
+
 
 // external packages
 #include "externals.h"
@@ -20,12 +20,11 @@
 // data products
 #include "real/real.h"
 #include "slc/slc.h"
+#include "bfpq/bfpq.h"
 // profile
 #include "profile.h"
 // statistics
 #include "stats.h"
 
-
-#endif
 
 // end of file
