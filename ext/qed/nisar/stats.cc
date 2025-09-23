@@ -25,6 +25,16 @@ qed::py::nisar::stats(py::module & m)
         // the docstring
         "collect statistics on a subset of a dataset");
 
+    m.def(
+        // the name of the function
+        "statsBFPQ",
+        // the handler
+        &qed::nisar::statsBFPQ<heapgrid_t<std::complex<float>>>,
+        // the signature
+        "source"_a, "datatype"_a, "bfpq"_a, "origin"_a, "shape"_a,
+        // the docstring
+        "collect statistics on a subset of a BFPQ encoded dataset");
+
     // all done
     return;
 }
