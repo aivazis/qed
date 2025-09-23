@@ -7,31 +7,10 @@
 #pragma once
 
 
-// collect statistics on a tile
+// the phase tile generator
 template <typename sourceT>
 auto
-qed::nisar::stats(
-    // the source
-    const dataset_t & dataset,
-    // the layout
-    const datatype_t & datatype,
-    // the origin of the tile
-    typename sourceT::index_type origin,
-    // the tile shape
-    typename sourceT::shape_type tile) -> native::stats_t
-{
-    // we operate at zoom level 0
-    auto strides = sourceT::index_type::one();
-    // read the data
-    auto source = pyre::h5::read<sourceT>(dataset, datatype, origin, tile, strides);
-    // compute the statistics and pass them on
-    return native::collectStatistics(source);
-}
-
-// collect statistics on a BFPQ encoded tile
-template <typename sourceT>
-auto
-qed::nisar::statsBFPQ(
+qed::nisar::bfpq::phase(
     // the source
     const dataset_t & dataset,
     // the layout
@@ -41,7 +20,13 @@ qed::nisar::statsBFPQ(
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
-    typename sourceT::shape_type tile) -> native::stats_t
+    typename sourceT::shape_type tile,
+    // the stride
+    typename sourceT::index_type stride,
+    // the hue range
+    double low, double high,
+    // the range of values to render
+    double saturation, double brightness) -> bmp_t
 {
     // type aliases
     using value_t = typename sourceT::value_type;
@@ -49,10 +34,16 @@ qed::nisar::statsBFPQ(
     using shape_t = typename sourceT::shape_type;
     using layout_t = typename sourceT::packing_type;
 
-    // we operate at zoom level 0
-    auto strides = sourceT::index_type::one();
+    // the origin of the data region is scaled by this
+    auto from = origin;
+    // by going through its entries
+    for (int axis = 0; axis < index_t::rank(); ++axis) {
+        // and multiplying them by the stride
+        from[axis] *= stride[axis];
+    }
+
     // read the BFPQ encoded data into a grid
-    auto source = pyre::h5::read<bfpq_slc_t>(dataset, datatype, origin, tile, strides);
+    auto encoded = pyre::h5::read<bfpq_slc_t>(dataset, datatype, from, tile, stride);
     // describe the decoded tile
     auto packing = layout_t { tile };
     // build storage for the decoded tile
@@ -66,10 +57,11 @@ qed::nisar::statsBFPQ(
         return value_t { r, i };
     };
     // decode the tile
-    std::transform(source.cbegin(), source.cend(), decoded.begin(), decoder);
+    std::transform(encoded.cbegin(), encoded.cend(), decoded.begin(), decoder);
 
-    // compute the statistics and pass them on
-    return native::collectStatistics(source);
+    // render and return
+    return native::channels::phase(
+        decoded, { 0, 0 }, tile, { 1, 1 }, low, high, saturation, brightness);
 }
 
 
