@@ -41,6 +41,8 @@ type Version {
 type QED implements Node {
   # the id
   id: ID!
+  # the available archive types
+  availableArchiveTypes: [ArchiveType]
   # the visible viewports
   views: [View]
   # the connected data archives
@@ -49,6 +51,15 @@ type QED implements Node {
   readers: [Reader]
 }
 
+
+# archive types
+type ArchiveType implements Node {
+  # node requirements
+  id: ID!
+  # the name
+  name: String!
+  label: String!
+}
 
 # viewports
 type View implements Node {
