@@ -24,7 +24,7 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
     readers = ("nisar",)
 
     # interface
-    @qed.provides
+    @qed.export
     def contents(self, uri):
         """
         Retrieve the archive contents at {uri}, a location expected to belong within the archive
