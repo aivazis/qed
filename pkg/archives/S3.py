@@ -94,5 +94,26 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
         # all done
         return
 
+    # hooks
+    @classmethod
+    def isSupported(cls):
+        """
+        Check whether there is runtime support for this archive type
+        """
+        # attempt to
+        try:
+            # access the external packages we need
+            import boto3
+        # if anything goes wrong
+        except ImportError as error:
+            # no dice
+            return False
+        # otherwise, chances are good the runtime support is present
+        return True
+
+    # constants
+    tag = "s3"
+    label = "s3"
+
 
 # end of file
