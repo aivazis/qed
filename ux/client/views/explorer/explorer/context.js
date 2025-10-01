@@ -12,8 +12,13 @@ import { graphql, useFragment } from 'react-relay/hooks'
 // the provider factory
 export const Provider = ({ qed, children }) => {
     // ask it for all known data archives and attach them as read-only state
-    const { archives } = useFragment(graphql`
+    const { availableArchiveTypes, archives } = useFragment(graphql`
         fragment context_archives on QED {
+            availableArchiveTypes {
+                id
+                name
+                label
+            }
             archives {
                 id
                 name
@@ -25,12 +30,14 @@ export const Provider = ({ qed, children }) => {
     )
     // the set of known views; it starts out with one empty vew
     const [views, setViews] = React.useState([emptyView()])
-    //  the active viewport is an index into the set of views
+    // the active viewport is an index into the set of views
     const [activeViewport, setActiveViewport] = React.useState(0)
 
     // build the initial context value
     const context = {
-        // the data archives
+        // the available archive types
+        availableArchiveTypes,
+        // the connected data archives
         archives,
 
         // the known views
@@ -53,7 +60,9 @@ export const Provider = ({ qed, children }) => {
 export const Context = React.createContext(
     // the default value clients see when accessing the context outside a provide
     {
-        // the data archives
+        // the available archive types
+        availableArchiveTypes: [],
+        // the connected data archives
         archives: [],
 
         // the known views
