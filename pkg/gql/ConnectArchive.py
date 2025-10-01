@@ -60,12 +60,15 @@ class ConnectArchive(graphene.Mutation):
         elif uri.scheme == "s3":
             # mount it
             archive = qed.archives.s3(name=name, uri=uri)
+        # if it's a collection of datasets on earth access
+        elif uri.scheme == "earth":
+            archive = qed.archives.earth(name=name, uri=uri)
         # anything else
         else:
             # make a channel
             channel = journal.error("qed.gql.connect")
             # complain
-            channel.line(f"unknown scheme '{uri.shceme}'")
+            channel.line(f"unknown scheme '{uri.scheme}'")
             channel.indent()
             channel.line(f"while attempting to connect to '{uri}'")
             # flush
