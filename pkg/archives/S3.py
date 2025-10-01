@@ -24,9 +24,11 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
     readers = ("nisar",)
 
     # interface
-    def contents(self, uri, **kwds):
+    @qed.provides
+    def contents(self, uri):
         """
-        Retrieve my contents at {uri}
+        Retrieve the archive contents at {uri}, a location expected to belong within the archive
+        document space
         """
         # get my root
         root = self.fs

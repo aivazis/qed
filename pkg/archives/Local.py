@@ -30,9 +30,11 @@ class Local(
     readers = "nisar", "isce2", "gdal", "native"
 
     # interface
+    @qed.export
     def contents(self, uri):
         """
-        Retrieve my contents at {uri}
+        Retrieve my contents at {uri}, a location expected to belong within the archive document
+        space
         """
         # get my root
         root = self.fs
