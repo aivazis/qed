@@ -16,6 +16,7 @@ from .Node import Node
 
 # my parts
 from .Archive import Archive
+from .ArchiveType import ArchiveType
 from .Reader import Reader
 from . import views
 
@@ -34,6 +35,7 @@ class QED(graphene.ObjectType):
     # metadata
     id = graphene.ID(required=True)
     # my parts
+    availableArchiveTypes = graphene.List(ArchiveType)
     views = graphene.List(views.view)
     archives = graphene.List(Archive)
     readers = graphene.List(Reader)
@@ -46,6 +48,17 @@ class QED(graphene.ObjectType):
         """
         # easy enough
         return "QED"
+
+    # available archive types
+    @staticmethod
+    def resolve_availableArchiveTypes(store, info, **kwds):
+        """
+        Retrieve the archive types for which there is runtime support
+        """
+        # go through the archive types for which there is runtime support
+        yield from qed.archives.available()
+        # all done
+        return
 
     # views
     @staticmethod
