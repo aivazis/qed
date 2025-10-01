@@ -98,7 +98,7 @@ const Root = () => {
     //   users run the server, it grabs a port on its host and browsers connect directly
     //   using host:port
 
-    // - hosting as a embedded app in an existing document structure
+    // - hosting as an embedded app in an existing document structure
     //   an example of which is the NISAR on-demand system, where the url seen by the user,
     //   e.g. https://<host>/ondemand/user/<username>/qed, is forwarded to the qed server port
 
