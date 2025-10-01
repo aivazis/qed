@@ -14,11 +14,12 @@ import { useCollapseViewport } from '../explorer/useCollapseViewport'
 // components
 import { Panel } from './panel'
 import { Cancel, DisabledConnect, } from './buttons'
-import { Local } from './local'
-import { S3 } from './s3'
 import { TypeSelector } from './type'
 import { Form, Body } from '../form'
-
+// supported archives
+import { Local } from './local'
+import { Earth } from './earth'
+import { S3 } from './s3'
 
 // the form
 export const Archive = ({ view, viewport }) => {
@@ -60,7 +61,7 @@ export const Archive = ({ view, viewport }) => {
         )
     }
     // otherwise, resolve the connector
-    const Connector = types[type]
+    const Connector = supportedArchiveTypes[type]
     // and render it
     return (
         <Connector view={view} setType={update} hide={hide} />
@@ -68,10 +69,10 @@ export const Archive = ({ view, viewport }) => {
 }
 
 // the dispatch table with the archive types
-const types = {
+export const supportedArchiveTypes = {
     local: Local,
     s3: S3,
+    earth: Earth,
 }
-
 
 // end of file
