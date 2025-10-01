@@ -8,6 +8,8 @@
 import React from 'react'
 
 // local
+// hooks
+import { useGetAvailableArchiveTypes } from '../explorer/useGetAvailableArchiveTypes'
 // components
 import {
     Field,
@@ -17,6 +19,8 @@ import {
 
 // the archive type selector
 export const TypeSelector = ({ value, update }) => {
+    // ask the server for the available archive types
+    const availableArchiveTypes = useGetAvailableArchiveTypes()
     // make a handler that sets the archive type
     const select = type => {
         // build the selector
@@ -31,8 +35,9 @@ export const TypeSelector = ({ value, update }) => {
     return (
         <Field name="type" value={value} tip="select the archive type">
             <Values>
-                <Type name="local" rep="local" current={value} select={select} />
-                <Type name="s3" rep="s3" current={value} select={select} />
+                {availableArchiveTypes.map(({ name, label }) => (
+                    <Type key={label} name={label} rep={name} current={value} select={select} />
+                ))}
             </Values>
         </Field>
     )
