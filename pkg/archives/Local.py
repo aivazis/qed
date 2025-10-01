@@ -74,5 +74,18 @@ class Local(
         # all done
         return
 
+    # hooks
+    @classmethod
+    def isSupported(cls):
+        """
+        Check whether there is runtime support for this archive type
+        """
+        # always available...
+        return True
+
+    # constants
+    tag = "local"
+    label = "local"
+
 
 # end of file
