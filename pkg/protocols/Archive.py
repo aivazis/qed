@@ -19,5 +19,13 @@ class Archive(qed.protocol, family="qed.archives"):
     uri.default = qed.primitives.uri(address=qed.primitives.path.cwd())
     uri.doc = "the location of the archive"
 
+    # interface
+    @qed.provides
+    def contents(self, uri):
+        """
+        Retrieve the archive contents at {uri}, a location expected to belong within the archive
+        document space
+        """
+
 
 # end of file
