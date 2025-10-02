@@ -25,6 +25,16 @@ class EarthAccess(
     # constants
     readers = ("nisar",)
 
+    # interface
+    @qed.export
+    def contents(self, uri):
+        """
+        Retrieve the archive contents at {uri}, a location expected to belong within the archive
+        document space
+        """
+        # nothing, for now
+        return []
+
     # hooks
     @classmethod
     def isSupported(cls):
@@ -39,7 +49,7 @@ class EarthAccess(
         except ImportError as error:
             # no dice
             return False
-        # otherwise, chances are good the runtime support is present
+        # otherwise, chances are good there is runtime support
         return True
 
     # constants
