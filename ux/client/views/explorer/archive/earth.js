@@ -159,6 +159,7 @@ const connectMutation = graphql`
             archive {
                 id
                 name
+                uri
                 readers
             }
         }
