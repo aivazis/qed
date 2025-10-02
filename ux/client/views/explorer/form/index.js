@@ -25,5 +25,8 @@ export { Error } from './error'
 export { Value, EnabledValue, Values } from './value'
 export { Input, EnabledInput, SelectedInput, Numeric } from './input'
 
+// spacers
+export { SpacerFirst, SpacerRest } from './spacers'
+
 
 // end of file
