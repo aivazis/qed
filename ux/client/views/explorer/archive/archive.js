@@ -6,7 +6,6 @@
 
 // external
 import React from 'react'
-import styled from 'styled-components'
 
 // local
 // hooks
@@ -74,5 +73,6 @@ export const supportedArchiveTypes = {
     s3: S3,
     earth: Earth,
 }
+
 
 // end of file
