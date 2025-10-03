@@ -9,12 +9,18 @@ import graphene
 import journal
 import qed
 
+# my input types
+from .GeoVertexInput import GeoVertexInput
+from .GeoCircleInput import GeoCircleInput
+from .GeoLineInput import GeoLineInput
+from .GeoPolygonInput import GeoPolygonInput
+
 # the result types
 from .Archive import Archive
 
 
 # add a new data archive to the pile
-class ConnectArchive(graphene.Mutation):
+class ConnectEarthAccessArchive(graphene.Mutation):
     """
     Connect a new data archive
     """
@@ -24,54 +30,65 @@ class ConnectArchive(graphene.Mutation):
         # the update context
         name = graphene.String(required=True)
         uri = graphene.String(required=True)
+        filters = graphene.List(graphene.String)
+        geo = graphene.String()
+        point = GeoVertexInput()
+        circle = GeoCircleInput()
+        line = GeoLineInput()
+        polygon = GeoPolygonInput()
 
     # the result is always an archive
     archive = graphene.Field(Archive)
 
     # the range controller mutator
     @staticmethod
-    def mutate(root, info, name, uri):
+    def mutate(
+        root,
+        info,
+        name,
+        uri,
+        filters,
+        geo,
+        point,
+        circle,
+        line,
+        polygon,
+    ):
         """
         Add a new archive to the pile
         """
         # make a channel
         channel = journal.info("qed.archives.connect")
+        # show me
+        channel.line(f"{name=}")
+        channel.indent()
+        channel.line(f"{uri=}")
+        channel.line(f"{filters=}")
+        channel.line(f"{geo=}")
+        channel.line(f"{point=}")
+        channel.line(f"{circle=}")
+        channel.line(f"{line=}")
+        channel.line(f"{polygon=}")
+        channel.outdent()
+        # flush
+        channel.log()
+
         # grab the store
         store = info.context["store"]
-        # check for an existing archive
-        archive = store.archive(uri=uri)
         # if the {uri} is already connected
-        if archive:
+        if store.archive(uri=uri):
             # make a channel
             channel = journal.warning("qed.gql.connect")
             # issue a warning
             channel.log(f"archive '{uri}' is already connected")
-            # bail
+            # and bail
             return None
         # otherwise, parse the uri
         uri = qed.primitives.uri.parse(uri, scheme="file")
         # show me
         channel.log(f"connecting to archive {uri}")
-        # if this is a local archive
-        if uri.scheme == "file":
-            # mount it
-            archive = qed.archives.local(name=name, uri=uri)
-        # if it's an archive in an S3 bucket
-        elif uri.scheme == "s3":
-            # mount it
-            archive = qed.archives.s3(name=name, uri=uri)
-        # anything else
-        else:
-            # make a channel
-            channel = journal.error("qed.gql.connect")
-            # complain
-            channel.line(f"unknown scheme '{uri.scheme}'")
-            channel.indent()
-            channel.line(f"while attempting to connect to '{uri}'")
-            # flush
-            channel.log()
-            # and bail, in case errors aren't fatal
-            return None
+        # build a collection of datasets on earth access
+        archive = qed.archives.earth(name=name, uri=uri)
         # add the new archive to the pile
         store.connectArchive(archive=archive)
         # report
