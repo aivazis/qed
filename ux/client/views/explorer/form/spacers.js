@@ -13,7 +13,7 @@ import styled from 'styled-components'
 export const SpacerFirst = styled.span`
     padding-right: 0.25em;
 `
-export const SpacerRest = styled.span`
+export const SpacerBetween = styled.span`
     padding-left: 1.0em;
     padding-right: 0.25em;
 `
