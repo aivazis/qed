@@ -57,4 +57,5 @@ const Type = ({ name, rep, current, select }) => {
     )
 }
 
+
 // end of file
