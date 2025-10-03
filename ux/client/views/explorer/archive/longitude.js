@@ -29,7 +29,7 @@ export const Longitude = ({ region, update }) => {
                 "(?:", // followed by
                 "180(?:\\.0*)?", // the interval edges
                 "|", // or
-                "(?:(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:\\.\\d*)?)", // numbers in (-180, 180)
+                "(?:(?:[0-9]|[1-9][0-9]|1[0-7][0-9])?(?:\\.\\d*)?)", // numbers in (-180, 180)
                 ")?",
                 "$", // the end of the string
             ].join(''))

@@ -29,7 +29,7 @@ export const Latitude = ({ region, update }) => {
                 "(?:", // followed by
                 "90(?:\\.0*)?", // the interval edges
                 "|", // or
-                "(?:(?:[0-9]|[1-8][0-9])(?:\\.\\d*)?)", // numbers in (-90, 90)
+                "(?:(?:[0-9]|[1-8][0-9])?(?:\\.\\d*)?)", // numbers in (-90, 90)
                 ")?",
                 "$", // the end of the string
             ].join(''))
