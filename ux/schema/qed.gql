@@ -301,6 +301,15 @@ type Mutation {
 
   # data archive connections
   connectArchive(name: String!, uri: String!): ArchiveInfo!
+  connectEarthAccessArchive(
+    name: String!, uri: String!,
+    filters: [String!]!,
+    geo: String,
+    point: GeoVertexInput,
+    circle: GeoCircleInput,
+    line: GeoLineInput,
+    polygon: GeoPolygonInput,
+    ): ArchiveInfo!
   disconnectArchive(uri: String!): ArchiveInfo!
   # reader connections
   connectReader(spec: ReaderInput!): ReaderInfo!
@@ -468,6 +477,26 @@ type ValueControllerInfo {
   view: View!
   # the updated controller
   controller: ValueController!
+}
+
+# earth access archive connector types
+input GeoCircleInput {
+  radius: String!
+  longitude: String!
+  latitude: String!
+}
+
+input GeoVertexInput {
+  longitude: String!
+  latitude: String!
+}
+
+input GeoLineInput {
+  vertices: [GeoVertexInput!]
+}
+
+input GeoPolygonInput {
+  vertices: [GeoVertexInput!]
 }
 
 
