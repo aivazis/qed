@@ -86,7 +86,14 @@ const dark = {
 
     // widgets
     widgets: {
-        focus: "hsl(0deg, 0%, 15%)",
+        focus: {
+            color: "hsl(28deg, 90%, 55%)",
+            background: "hsl(0deg, 0%, 15%)",
+        },
+        selection: {
+            color: "hsl(28deg, 90%, 55%)",
+            background: "hsl(0deg, 0%, 75%)",
+        },
         background: "hsl(0deg, 0%, 10%)",
     },
 
