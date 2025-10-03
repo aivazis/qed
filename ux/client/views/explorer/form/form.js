@@ -38,12 +38,14 @@ export const Prompt = styled.td`
     width: 10.0em;
     min-width: 10.0em;
     max-width: 12.0em;
+    vertical-align: top;
 `
 
 export const Separator = styled.td`
     width: 1.0em;
     padding: 0.0em 0.25em 0.0em 0.25em;
     text-align: center;
+    vertical-align: top;
 `
 
 export const Required = styled.span`

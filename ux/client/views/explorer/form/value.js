@@ -12,6 +12,7 @@ import styled from 'styled-components'
 export const Values = styled.td`
     font-family: "inconsolata";
     text-align: left;
+    vertical-align: top;
 `
 
 // base field value
@@ -21,6 +22,7 @@ export const Value = styled.td`
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    vertical-align: top;
 `
 
 // active
