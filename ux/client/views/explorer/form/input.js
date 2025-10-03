@@ -29,7 +29,6 @@ export const Input = styled.input`
 export const EnabledInput = styled(Input)`
     & {
         color: hsl(0deg, 0%, 60%);
-        color: hsl(28deg, 90%, 55%);
         background-color: ${theme.widgets.background};
     }
 
@@ -38,12 +37,12 @@ export const EnabledInput = styled(Input)`
     }
 
     &:active{
-        color: hsl(0deg, 0%, 60%);
+        color: hsl(28deg, 90%, 55%);
     }
 
     &:focus{
-        color: hsl(0deg, 0%, 60%);
-        background-color: ${theme.widgets.focus};
+        color: ${theme.widgets.focus.color};
+        background-color: ${theme.widgets.focus.background};
     }
 
     &:invalid {
@@ -51,8 +50,8 @@ export const EnabledInput = styled(Input)`
     }
 
     &::selection {
-        color: hsl(0deg, 0%, 60%);
-        background-color: hsl(0deg, 0%, 20%);
+        background-color: ${theme.widgets.selection.color};
+        background-color: ${theme.widgets.selection.background};
     }
 `
 
