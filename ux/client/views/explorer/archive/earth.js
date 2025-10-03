@@ -21,6 +21,7 @@ import { Form, Body, Error } from '../form'
 // fields
 import { Name } from './name'
 import { Geo } from './geo'
+import { Filters } from './filters'
 // geographic region types
 import { Circle } from './circle'
 import { Line } from './line'
@@ -35,6 +36,8 @@ export const Earth = ({ view, setType, hide }) => {
     const [form, setForm] = React.useState({
         // the nickname
         name: "",
+        // the filters
+        filters: new Set(),
         // the type of region of interest
         geo: "",
         // point
@@ -156,8 +159,12 @@ export const Earth = ({ view, setType, hide }) => {
     )
     // use this to figure out which button to render
     const Connect = ready ? EnabledConnect : DisabledConnect
+
+    // unpack the selected filters
+    const geo = form.filters.has("geo")
     // resolve the geo search type
     const Region = form.geo === "" ? null : regionTypes[form.geo]
+
     // render
     return (
         <Panel>
@@ -165,8 +172,9 @@ export const Earth = ({ view, setType, hide }) => {
                 <Body>
                     <TypeSelector value="earth" update={setType} />
                     <Name value={form.name} update={update} />
-                    <Geo value={form.geo} update={update} types={regionTypes} />
-                    {form.geo && <Region region={form[form.geo]} update={update} />}
+                    <Filters value={form.filters} update={update} types={filterTypes} />
+                    {geo && <Geo value={form.geo} update={update} types={regionTypes} />}
+                    {geo && form.geo && <Region region={form[form.geo]} update={update} />}
                 </Body>
             </Form>
             <Connect connect={connect} />
@@ -192,6 +200,10 @@ const connectMutation = graphql`
     }
 `
 
+// the dispatch table with the supported filters
+const filterTypes = {
+    geo: Geo,
+}
 
 // the dispatch table with the supported geographic region types
 const regionTypes = {
