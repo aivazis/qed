@@ -99,11 +99,17 @@ export const Earth = ({ view, setType, hide }) => {
                 // the payload
                 name: `earth:${name}`,
                 uri: `earth:${name}`,
+                filters: [...form.filters],
+                geo: form.geo,
+                point: form.point,
+                circle: form.circle,
+                line: form.line,
+                polygon: form.polygon,
             },
             // updater
             updater: store => {
                 // get the root field of the query result
-                const payload = store.getRootField("connectArchive")
+                const payload = store.getRootField("connectEarthAccessArchive")
                 // if it's trivial
                 if (!payload) {
                     // raise an issue
@@ -188,8 +194,17 @@ export const Earth = ({ view, setType, hide }) => {
 
 // the mutation that connects an earth access archive
 const connectMutation = graphql`
-    mutation earthArchiveMutation($name: String!, $uri: String!) {
-        connectArchive(name: $name, uri: $uri) {
+    mutation earthArchiveMutation(
+        $name: String!, $uri: String!, $filters: [String!]!,
+        $geo: String,
+        $point: GeoVertexInput, $circle: GeoCircleInput,
+        $line: GeoLineInput, $polygon: GeoPolygonInput
+    ) {
+        connectEarthAccessArchive(
+            name: $name, uri: $uri,
+            filters: $filters,
+            geo: $geo, point: $point, circle: $circle, line: $line, polygon: $polygon
+            ) {
             archive {
                 id
                 name
