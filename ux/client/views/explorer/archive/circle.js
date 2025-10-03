@@ -12,11 +12,13 @@ import React from 'react'
 import { Latitude } from './latitude'
 import { Longitude } from './longitude'
 import { Radius } from './radius'
-import { Field, Value, SpacerFirst, SpacerRest } from '../form'
+import { Field, Value, SpacerFirst, SpacerBetween } from '../form'
 
 
 // collect the coordinates of a point of interest
-export const Circle = ({ longitude, latitude, radius, update }) => {
+export const Circle = ({ region, update }) => {
+    // unpack the region
+    const { radius, longitude, latitude } = region
     // check the value
     const valid = longitude === "" || latitude == "" || radius == "" ? "" : "ok"
     // specialize the form update
@@ -27,9 +29,9 @@ export const Circle = ({ longitude, latitude, radius, update }) => {
             <Value>
                 <SpacerFirst title="positive number, in meters">radius:</SpacerFirst>
                 <Radius region={{ longitude, latitude, radius }} update={updateCircle} />
-                <SpacerRest title="decimal degrees in [-180, 180]">longitude:</SpacerRest>
+                <SpacerBetween title="decimal degrees in [-180, 180]">longitude:</SpacerBetween>
                 <Longitude region={{ longitude, latitude, radius }} update={updateCircle} />
-                <SpacerRest title="decimal degrees in [-90, 90]">latitude:</SpacerRest>
+                <SpacerBetween title="decimal degrees in [-90, 90]">latitude:</SpacerBetween>
                 <Latitude region={{ longitude, latitude, radius }} update={updateCircle} />
             </Value>
         </Field>
