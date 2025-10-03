@@ -18,10 +18,17 @@ import { Field, Value, SpacerBetween } from '../form'
 export const Polygon = ({ region, update }) => {
     // unpack the region
     const { vertices } = region
+    // check the size
+    const empty = vertices.length === 0
+    // check that the contents are non trivial
+    const nontrivial = vertices.some(v => v.longitude !== "" && v.latitude !== "")
     // validate my contents
-    const ok = (
-        vertices.length > 0 && vertices.some(v => v.longitude !== "" && v.latitude !== "")
-    ) ? "ok" : ""
+    const ok = nontrivial ? "ok" : ""
+    // make sure there is something the user can modify
+    if (empty) {
+        // by adding a trivial vertex to the displayed pile
+        vertices.splice(0, 0, { longitude: "", latitude: "" })
+    }
     // specialize the form update
     const updatePolygon = (polygon) => update("polygon", polygon)
     // render
