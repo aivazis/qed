@@ -14,6 +14,7 @@ from .Specification import Specification as specification
 
 # data archives
 from .Archive import Archive as archive
+from .ArchiveFilter import ArchiveFilter as archiveFilter
 
 # datasets and their readers
 from .Datatype import Datatype as datatype
