@@ -10,6 +10,7 @@ import journal
 import qed
 
 # my input types
+from .GeoBBoxInput import GeoBBoxInput
 from .GeoVertexInput import GeoVertexInput
 from .GeoCircleInput import GeoCircleInput
 from .GeoLineInput import GeoLineInput
@@ -32,6 +33,7 @@ class ConnectEarthAccessArchive(graphene.Mutation):
         uri = graphene.String(required=True)
         filters = graphene.List(graphene.String)
         geo = graphene.String()
+        bbox = GeoBBoxInput()
         point = GeoVertexInput()
         circle = GeoCircleInput()
         line = GeoLineInput()
@@ -49,6 +51,7 @@ class ConnectEarthAccessArchive(graphene.Mutation):
         uri,
         filters,
         geo,
+        bbox,
         point,
         circle,
         line,
@@ -94,8 +97,16 @@ class ConnectEarthAccessArchive(graphene.Mutation):
         if "geo" in filters:
             # build the name of the filter
             filterName = f"{name}.geo.{geo}"
+            # if the selection is a bounding box
+            if geo == "bbox":
+                # make a geo bounding box
+                filter = qed.archives.geoBBox(
+                    name=filterName,
+                    ne=(bbox["ne"]["longitude"], bbox["ne"]["latitude"]),
+                    sw=(bbox["sw"]["longitude"], bbox["sw"]["latitude"]),
+                )
             # if the selection is a point
-            if geo == "point":
+            elif geo == "point":
                 # make a geo point
                 filter = qed.archives.geoPoint(name=filterName, **point)
             # if it's a circle
