@@ -22,6 +22,9 @@ class EarthAccess(
     uri.default = qed.primitives.uri(scheme="earth", address=())
     uri.doc = "the archive identifier"
 
+    filters = qed.properties.list(schema=qed.protocols.archiveFilter())
+    filters.doc = "the collection of search filters to apply when looking for datasets"
+
     # constants
     readers = ("nisar",)
 
