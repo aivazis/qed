@@ -23,6 +23,7 @@ import { Name } from './name'
 import { Geo } from './geo'
 import { Filters } from './filters'
 // geographic region types
+import { BBox } from './bbox'
 import { Circle } from './circle'
 import { Line } from './line'
 import { Point } from './point'
@@ -40,6 +41,8 @@ export const Earth = ({ view, setType, hide }) => {
         filters: new Set(),
         // the type of region of interest
         geo: "",
+        // bounding box
+        bbox: { ne: { longitude: "", latitude: "" }, sw: { longitude: "", latitude: "" } },
         // point
         point: { longitude: "", latitude: "" },
         // circle
@@ -101,6 +104,7 @@ export const Earth = ({ view, setType, hide }) => {
                 uri: `earth:${name}`,
                 filters: [...form.filters],
                 geo: form.geo,
+                bbox: form.bbox,
                 point: form.point,
                 circle: form.circle,
                 line: form.line,
@@ -197,13 +201,13 @@ const connectMutation = graphql`
     mutation earthArchiveMutation(
         $name: String!, $uri: String!, $filters: [String!]!,
         $geo: String,
-        $point: GeoVertexInput, $circle: GeoCircleInput,
+        $bbox: GeoBBoxInput, $point: GeoVertexInput, $circle: GeoCircleInput,
         $line: GeoLineInput, $polygon: GeoPolygonInput
     ) {
         connectEarthAccessArchive(
             name: $name, uri: $uri,
             filters: $filters,
-            geo: $geo, point: $point, circle: $circle, line: $line, polygon: $polygon
+            geo: $geo, bbox: $bbox, point: $point, circle: $circle, line: $line, polygon: $polygon
             ) {
             archive {
                 id
@@ -222,6 +226,7 @@ const filterTypes = {
 
 // the dispatch table with the supported geographic region types
 const regionTypes = {
+    bbox: BBox,
     point: Point,
     circle: Circle,
     line: Line,
