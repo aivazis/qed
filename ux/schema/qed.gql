@@ -305,6 +305,7 @@ type Mutation {
     name: String!, uri: String!,
     filters: [String!]!,
     geo: String,
+    bbox: GeoBBoxInput,
     point: GeoVertexInput,
     circle: GeoCircleInput,
     line: GeoLineInput,
@@ -484,6 +485,11 @@ input GeoCircleInput {
   radius: String!
   longitude: String!
   latitude: String!
+}
+
+input GeoBBoxInput {
+  ne: GeoVertexInput!
+  sw: GeoVertexInput!
 }
 
 input GeoVertexInput {
