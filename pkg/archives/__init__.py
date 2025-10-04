@@ -10,6 +10,7 @@ from .S3 import S3 as s3
 
 # earth access and its filters
 from .EarthAccess import EarthAccess as earth
+from .GeoBBox import GeoBBox as geoBBox
 from .GeoPoint import GeoPoint as geoPoint
 from .GeoCircle import GeoCircle as geoCircle
 from .GeoLine import GeoLine as geoLine
