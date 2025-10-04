@@ -87,12 +87,62 @@ class ConnectEarthAccessArchive(graphene.Mutation):
         uri = qed.primitives.uri.parse(uri, scheme="file")
         # show me
         channel.log(f"connecting to archive {uri}")
+
+        # unpack the filters;
+        selectedFilters = []
+        #  first the geographical searches
+        if "geo" in filters:
+            # build the name of the filter
+            filterName = f"{name}.geo.{geo}"
+            # if the selection is a point
+            if geo == "point":
+                # make a geo point
+                filter = qed.archives.geoPoint(name=filterName, **point)
+            # if it's a circle
+            elif geo == "circle":
+                # make a geo circle
+                filter = qed.archives.geoCircle(name=filterName, **circle)
+            # if it's a line
+            elif geo == "line":
+                # parse the vertices
+                vertices = qed.archives.geoLine.parseVertices(payload=line["vertices"])
+                # and build the filter
+                filter = qed.archives.geoLine(name=filterName, vertices=vertices)
+            # if it's a polygon
+            elif geo == "polygon":
+                # parse the vertices
+                vertices = qed.archives.geoPolygon.parseVertices(
+                    payload=polygon["vertices"]
+                )
+                # and build the filter
+                filter = qed.archives.geoPolygon(name=filterName, vertices=vertices)
+            # otherwise
+            else:
+                # we have a bug
+                bug = journal.firewall("qed.gql.connectArhive.earth")
+                # report
+                bug.line(f"unknown geo filter '{geo}'")
+                bug.line(
+                    f"while attempting to connect '{name}', an earth access archive"
+                )
+                bug.log()
+                # and bail, just in case firewalls aren't fatal
+                return
+            # if all went well, add the filter to the pile
+            filters.append(filter)
+
         # build a collection of datasets on earth access
-        archive = qed.archives.earth(name=name, uri=uri)
+        archive = qed.archives.earth(name=name, uri=uri, filters=filters)
         # add the new archive to the pile
         store.connectArchive(archive=archive)
         # report
-        channel.log(f"connected to '{uri}'")
+        channel.line(f"connected to '{uri}', an earth access archive")
+        channel.line("filters:")
+        channel.indent()
+        for filter in archive.filters:
+            channel.line(f"{filter}")
+        channel.outdent()
+        channel.log()
         # make a resolution context
         context = {
             "archive": archive,
