@@ -8,9 +8,12 @@
 import qed
 import journal
 
+# superclass
+from .Archive import Archive
+
 
 # a S3 data archive
-class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archive):
+class S3(Archive, family="qed.archives.s3"):
     """
     A data archive that resides in an S3 bucket
     """
@@ -95,6 +98,22 @@ class S3(qed.component, family="qed.archives.s3", implements=qed.protocols.archi
 
         # all done
         return
+
+    # visitor support
+    def identify(self, visitor, **kwds):
+        """
+        Let {visitor} know i'm an S3 archive
+        """
+        # attempt to
+        try:
+            # ask {visitor} for it's base handler
+            handler = visitor.onS3
+        # if it doesn't understand
+        except AttributeError:
+            # chain up
+            return super().identify(visitor=visitor, **kwds)
+        # if all went well, invoke the hook
+        return handler(archive=self, **kwds)
 
     # hooks
     @classmethod

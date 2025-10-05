@@ -8,13 +8,12 @@
 import qed
 import journal
 
+# superclass
+from .Filter import Filter
+
 
 # a point on the surface of a sphere
-class GeoCircle(
-    qed.component,
-    family="qed.archives.filters.geoCircle",
-    implements=qed.protocols.archiveFilter,
-):
+class GeoCircle(Filter, family="qed.archives.filters.geoCircle"):
     """
     A filter for earthdata searches that identifies datasets that contain a specific point
     """
@@ -29,12 +28,19 @@ class GeoCircle(
     latitude = qed.properties.float()
     latitude.doc = "the latitude of the center"
 
-    # interface
-    @qed.export
-    def filter(self):
+    # implementation details
+    # visitor support
+    def onEarthAccess(self, **kwds):
         """
-        Apply the filter to a search
+        Generate the required representation so an {EarthAccess} archive can filter its contents
         """
+        # produce the {earthaccess} keyword
+        yield (
+            # the name
+            "circle",
+            # the contents
+            (self.longitude, self.latitude, self.radius),
+        )
         # all done
         return
 

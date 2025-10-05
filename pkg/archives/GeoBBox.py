@@ -8,13 +8,12 @@
 import qed
 import journal
 
+# superclass
+from .Filter import Filter
+
 
 # a polygon on the surface of a sphere
-class GeoBBox(
-    qed.component,
-    family="qed.archives.filters.geoBBox",
-    implements=qed.protocols.archiveFilter,
-):
+class GeoBBox(Filter, family="qed.archives.filters.geoBBox"):
     """
     A filter for earthdata searches that identifies datasets that contain a specific point
     """
@@ -26,12 +25,22 @@ class GeoBBox(
     sw = qed.properties.tuple(schema=qed.properties.float())
     sw.doc = "the coordinates of the south west corner"
 
-    # interface
-    @qed.export
-    def filter(self):
+    # implementation details
+    # visitor support
+    def onEarthAccess(self, **kwds):
         """
-        Apply the filter to a search
+        Generate the required representation so an {EarthAccess} archive can filter its contents
         """
+        # unpack my state
+        swLon, swLat = self.sw
+        neLon, neLat = self.ne
+        # produce the {earthaccess} keyword
+        yield (
+            # the name
+            "bounding_box",
+            # the contents
+            (swLon, swLat, neLon, neLat),
+        )
         # all done
         return
 
