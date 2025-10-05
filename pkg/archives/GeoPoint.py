@@ -8,13 +8,12 @@
 import qed
 import journal
 
+# superclass
+from .Filter import Filter
+
 
 # a point on the surface of a sphere
-class GeoPoint(
-    qed.component,
-    family="qed.archives.filters.geoPoint",
-    implements=qed.protocols.archiveFilter,
-):
+class GeoPoint(Filter, family="qed.archives.filters.geoPoint"):
     """
     A filter for earthdata searches that identifies datasets that contain a specific point
     """
@@ -26,12 +25,19 @@ class GeoPoint(
     latitude = qed.properties.float()
     latitude.doc = "the latitude of the point"
 
-    # interface
-    @qed.export
-    def filter(self):
+    # implementation details
+    # visitor support
+    def onEarthAccess(self, **kwds):
         """
-        Apply the filter to a search
+        Generate the required representation so an {EarthAccess} archive can filter its contents
         """
+        # produce the {earthaccess} keyword
+        yield (
+            # the name
+            "point",
+            # the contents
+            (self.longitude, self.latitude),
+        )
         # all done
         return
 

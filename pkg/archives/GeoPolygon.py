@@ -8,13 +8,12 @@
 import qed
 import journal
 
+# superclass
+from .Filter import Filter
+
 
 # a polygon on the surface of a sphere
-class GeoPolygon(
-    qed.component,
-    family="qed.archives.filters.geoPolygon",
-    implements=qed.protocols.archiveFilter,
-):
+class GeoPolygon(Filter, family="qed.archives.filters.geoPolygon"):
     """
     A filter for earthdata searches that identifies datasets that contain a specific point
     """
@@ -25,16 +24,50 @@ class GeoPolygon(
     )
     vertices.doc = "the collection of (lon, lat) vertices that make up the polygon"
 
-    # interface
-    @qed.export
-    def filter(self):
+    # implementation details
+    # visitor support
+    def onEarthAccess(self, **kwds):
         """
-        Apply the filter to a search
+        Generate the required representation so an {EarthAccess} archive can filter its contents
         """
+        # get my vertices
+        vertices = self.vertices
+        # if there is only one
+        if len(vertices) == 1:
+            # pretend i'm a point
+            yield (
+                # the name
+                "point",
+                # the payload
+                vertices[0],
+            )
+            # all done
+            return
+        # if there are two
+        if len(vertices) == 2:
+            # pretend i'm a line
+            yield (
+                # the name
+                "line",
+                # the payload
+                vertices,
+            )
+        # if the user didn't bother to close the poylgon
+        if vertices[0] != vertices[-1]:
+            # make a copy
+            vertices = list(vertices)
+            # and close it by repeating the first vertex
+            vertices.append(vertices[0])
+        # produce the {earthaccess} keyword
+        yield (
+            # the name
+            "polygon",
+            # the contents
+            vertices,
+        )
         # all done
         return
 
-    # implementation details
     @classmethod
     def parseVertices(cls, payload):
         """

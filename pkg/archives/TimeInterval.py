@@ -8,13 +8,12 @@
 import qed
 import journal
 
+# superclass
+from .Filter import Filter
+
 
 # a point on the surface of a sphere
-class TimeInterval(
-    qed.component,
-    family="qed.archives.filters.when",
-    implements=qed.protocols.archiveFilter,
-):
+class TimeInterval(Filter, family="qed.archives.filters.when"):
     """
     A filter for earthdata searches that identifies datasets from a given time interval
     """
@@ -26,12 +25,19 @@ class TimeInterval(
     end = qed.properties.str()
     end.doc = "the latitude of the point"
 
-    # interface
-    @qed.export
-    def filter(self):
+    # implementation details
+    # visitor support
+    def onEarthAccess(self, **kwds):
         """
-        Apply the filter to a search
+        Generate the required representation so an {EarthAccess} archive can filter its contents
         """
+        # produce the {earthaccess} keyword
+        yield (
+            # the name
+            "temporal",
+            # the contents
+            (self.begin, self.end),
+        )
         # all done
         return
 

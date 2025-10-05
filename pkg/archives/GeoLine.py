@@ -8,13 +8,12 @@
 import qed
 import journal
 
+# superclass
+from .Filter import Filter
+
 
 # a collection of connected line segment on the surface of a sphere
-class GeoLine(
-    qed.component,
-    family="qed.archives.filters.geoLine",
-    implements=qed.protocols.archiveFilter,
-):
+class GeoLine(Filter, family="qed.archives.filters.geoLine"):
     """
     A filter for earthdata searches that identifies datasets that contain a specific line
     """
@@ -27,16 +26,35 @@ class GeoLine(
         "the collection of (lon, lat) vertices that make up the line segments"
     )
 
-    # interface
-    @qed.export
-    def filter(self):
+    # implementation details
+    # visitor support
+    def onEarthAccess(self, **kwds):
         """
-        Apply the filter to a search
+        Generate the required representation so an {EarthAccess} archive can filter its contents
         """
+        # get my vertices
+        vertices = self.vertices
+        # if there is only one
+        if len(vertices) == 1:
+            # pretend i'm a point
+            yield (
+                # the name
+                "point",
+                # the payload
+                vertices[0],
+            )
+            # all done
+            return
+        # otherwise, produce the {earthaccess} keyword
+        yield (
+            # the name
+            "line",
+            # the contents
+            vertices,
+        )
         # all done
         return
 
-    # implementation details
     @classmethod
     def parseVertices(cls, payload):
         """

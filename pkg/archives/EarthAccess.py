@@ -8,11 +8,12 @@
 import qed
 import journal
 
+# superclass
+from .Archive import Archive
+
 
 # an earth access data archive
-class EarthAccess(
-    qed.component, family="qed.archives.earth", implements=qed.protocols.archive
-):
+class EarthAccess(Archive, family="qed.archives.earth"):
     """
     A data archive that consists of datasets available through earth access
     """
@@ -35,8 +36,39 @@ class EarthAccess(
         Retrieve the archive contents at {uri}, a location expected to belong within the archive
         document space
         """
-        # nothing, for now
+        # collect the my filters
+        config = dict(
+            (name, value)
+            for filter in self.filters
+            for name, value in self.identify(visitor=filter)
+        )
+
+        # show me
+        channel = journal.info("qed.archives.earth.contents")
+        channel.line(f"{self}")
+        channel.indent()
+        channel.line(f"config: {config}")
+        channel.outdent()
+        channel.log()
+
+        # no contents, until we can get real data from vertex
         return []
+
+    # visitor support
+    def identify(self, visitor, **kwds):
+        """
+        Let {visitor} know i'm an earth access archive
+        """
+        # attempt to
+        try:
+            # ask {visitor} for it's base handler
+            handler = visitor.onEarthAccess
+        # if it doesn't understand
+        except AttributeError:
+            # chain up
+            return super().identify(visitor=visitor, **kwds)
+        # if all went well, invoke the hook
+        return handler(archive=self, **kwds)
 
     # hooks
     @classmethod
