@@ -70,6 +70,7 @@ class ConnectEarthAccessArchive(graphene.Mutation):
         channel.indent()
         channel.line(f"{uri=}")
         channel.line(f"{filters=}")
+        channel.line(f"{when=}")
         channel.line(f"{geo=}")
         channel.line(f"{point=}")
         channel.line(f"{circle=}")
