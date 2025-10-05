@@ -27,11 +27,11 @@ export const When = ({ interval, update }) => {
         <Field name="time" value={valid} tip="the time interval of interest">
             <Value>
                 <Box>
-                    <Spacer title="a timestamp in YYYY-MM-DD HH:mm:ss">from:</Spacer>
+                    <Spacer title="a timestamp in YYYY-mm-dd HH:MM:SS">from:</Spacer>
                     <Timestamp interval={interval} field="begin" update={updateWhen} />
                 </Box>
                 <Box>
-                    <Spacer title="a timestamp in YYYY-MM-DD HH:mm:ss">until:</Spacer>
+                    <Spacer title="a timestamp in YYYY-mm-dd HH:MM:SS">until:</Spacer>
                     <Timestamp interval={interval} field="end" update={updateWhen} />
                 </Box>
             </Value>
