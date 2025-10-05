@@ -43,7 +43,7 @@ export const Timestamp = ({ interval, field, update }) => {
     // render
     return (
         <Stamp
-            title="a timestamp in YYYY-MM-DD HH:mm:ss" type="text"
+            title="a timestamp in YYYY-mm-dd HH:MM:SS" type="text"
             value={interval[field]}
             {...behaviors}
         />
