@@ -22,6 +22,8 @@ import { Form, Body, Error } from '../form'
 import { Name } from './name'
 import { Geo } from './geo'
 import { Filters } from './filters'
+// time interval
+import { When } from './when'
 // geographic region types
 import { BBox } from './bbox'
 import { Circle } from './circle'
@@ -39,6 +41,8 @@ export const Earth = ({ view, setType, hide }) => {
         name: "",
         // the filters
         filters: new Set(),
+        // a time interval
+        when: { begin: "", end: "" },
         // the type of region of interest
         geo: "",
         // bounding box
@@ -103,6 +107,7 @@ export const Earth = ({ view, setType, hide }) => {
                 name: `earth:${name}`,
                 uri: `earth:${name}`,
                 filters: [...form.filters],
+                when: form.when,
                 geo: form.geo,
                 bbox: form.bbox,
                 point: form.point,
@@ -172,6 +177,7 @@ export const Earth = ({ view, setType, hide }) => {
 
     // unpack the selected filters
     const geo = form.filters.has("geo")
+    const when = form.filters.has("when")
     // resolve the geo search type
     const Region = form.geo === "" ? null : regionTypes[form.geo]
 
@@ -183,6 +189,7 @@ export const Earth = ({ view, setType, hide }) => {
                     <TypeSelector value="earth" update={setType} />
                     <Name value={form.name} update={update} />
                     <Filters value={form.filters} update={update} types={filterTypes} />
+                    {when && <When interval={form.when} update={update} />}
                     {geo && <Geo value={form.geo} update={update} types={regionTypes} />}
                     {geo && form.geo && <Region region={form[form.geo]} update={update} />}
                 </Body>
@@ -200,6 +207,7 @@ export const Earth = ({ view, setType, hide }) => {
 const connectMutation = graphql`
     mutation earthArchiveMutation(
         $name: String!, $uri: String!, $filters: [String!]!,
+        $when: TimeIntervalInput,
         $geo: String,
         $bbox: GeoBBoxInput, $point: GeoVertexInput, $circle: GeoCircleInput,
         $line: GeoLineInput, $polygon: GeoPolygonInput
@@ -207,6 +215,7 @@ const connectMutation = graphql`
         connectEarthAccessArchive(
             name: $name, uri: $uri,
             filters: $filters,
+            when: $when,
             geo: $geo, bbox: $bbox, point: $point, circle: $circle, line: $line, polygon: $polygon
             ) {
             archive {
@@ -221,6 +230,7 @@ const connectMutation = graphql`
 
 // the dispatch table with the supported filters
 const filterTypes = {
+    when: When,
     geo: Geo,
 }
 
