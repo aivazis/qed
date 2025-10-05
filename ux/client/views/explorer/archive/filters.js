@@ -22,20 +22,24 @@ export const Filters = ({ value, update, types }) => {
         if (value.has(type)) {
             // build a handler that removes it
             return () => {
+                // copy the current value
+                const clone = new Set([...value])
                 // remove the value
-                value.delete(type)
+                clone.delete(type)
                 // update the form
-                update("filter", value)
+                update("filters", clone)
                 // all done
                 return
             }
         }
         // otherwise, build a handler that adds it
         return () => {
+            // copy the current value
+            const clone = new Set([...value])
             // add the value
-            value.add(type)
+            clone.add(type)
             // update the form
-            update("filter", type)
+            update("filters", clone)
             // all done
             return
         }
