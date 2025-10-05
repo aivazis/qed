@@ -15,6 +15,7 @@ from .GeoPoint import GeoPoint as geoPoint
 from .GeoCircle import GeoCircle as geoCircle
 from .GeoLine import GeoLine as geoLine
 from .GeoPolygon import GeoPolygon as geoPolygon
+from .TimeInterval import TimeInterval as timeInterval
 
 
 # discovery
