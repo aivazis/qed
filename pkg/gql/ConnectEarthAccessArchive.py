@@ -10,6 +10,7 @@ import journal
 import qed
 
 # my input types
+from .TimeIntervalInput import TimeIntervalInput
 from .GeoBBoxInput import GeoBBoxInput
 from .GeoVertexInput import GeoVertexInput
 from .GeoCircleInput import GeoCircleInput
@@ -32,6 +33,7 @@ class ConnectEarthAccessArchive(graphene.Mutation):
         name = graphene.String(required=True)
         uri = graphene.String(required=True)
         filters = graphene.List(graphene.String)
+        when = TimeIntervalInput()
         geo = graphene.String()
         bbox = GeoBBoxInput()
         point = GeoVertexInput()
@@ -50,6 +52,7 @@ class ConnectEarthAccessArchive(graphene.Mutation):
         name,
         uri,
         filters,
+        when,
         geo,
         bbox,
         point,
@@ -91,12 +94,22 @@ class ConnectEarthAccessArchive(graphene.Mutation):
         # show me
         channel.log(f"connecting to archive {uri}")
 
-        # unpack the filters;
+        # make room for the search filters
         selectedFilters = []
-        #  first the geographical searches
+        # first, the time interval
+        if "when" in filters:
+            # build the name of the filter
+            filterName = f"{name}.when"
+            # make a time interval filter
+            filter = qed.archives.timeInterval(
+                name=filterName, begin=when["begin"], end=when["end"]
+            )
+            # add it to the pile
+            selectedFilters.append(filter)
+        #  next, the geographical searches
         if "geo" in filters:
             # build the name of the filter
-            filterName = f"{name}.geo.{geo}"
+            filterName = f"{name}.where.{geo}"
             # if the selection is a bounding box
             if geo == "bbox":
                 # make a geo bounding box
@@ -140,10 +153,10 @@ class ConnectEarthAccessArchive(graphene.Mutation):
                 # and bail, just in case firewalls aren't fatal
                 return
             # if all went well, add the filter to the pile
-            filters.append(filter)
+            selectedFilters.append(filter)
 
         # build a collection of datasets on earth access
-        archive = qed.archives.earth(name=name, uri=uri, filters=filters)
+        archive = qed.archives.earth(name=name, uri=uri, filters=selectedFilters)
         # add the new archive to the pile
         store.connectArchive(archive=archive)
         # report
