@@ -304,6 +304,7 @@ type Mutation {
   connectEarthAccessArchive(
     name: String!, uri: String!,
     filters: [String!]!,
+    when: TimeIntervalInput,
     geo: String,
     bbox: GeoBBoxInput,
     point: GeoVertexInput,
@@ -485,6 +486,11 @@ input GeoCircleInput {
   radius: String!
   longitude: String!
   latitude: String!
+}
+
+input TimeIntervalInput {
+  begin: String!
+  end: String!
 }
 
 input GeoBBoxInput {
