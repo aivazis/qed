@@ -28,19 +28,14 @@ dependencies:
   - pip
   - setuptools
   - boto3
+  - earthaccess
   - graphene
   - matplotlib
   - numpy
   - pybind11
-  - pytest
+  - pyyaml
   - ruamel.yaml
   - scipy
-  - yaml
-  - ipython
-  - jupyter_client
-  - jupyter_server
-  - jupyterlab
-  - jupyterlab_pygments
-  - jupyterlab_server
+
 
 # end of file
