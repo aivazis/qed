@@ -5,11 +5,11 @@
 
 
 # jammy-gcc image configuration
-qed.dev.jammy-gcc.name := jammy-gcc
-qed.dev.jammy-gcc.root := etc/docker/dev/
-qed.dev.jammy-gcc.launch.mounts := mm pyre qed data
+qed.dev.native.jammy-gcc.name := jammy-gcc
+qed.dev.native.jammy-gcc.root := etc/docker/dev/native/
+qed.dev.native.jammy-gcc.launch.mounts := mm pyre qed data
 # qed listens on port 8005, by default; map it to port 9005 on the host
-qed.dev.jammy-gcc.launch.options := -p 9005:8005
+qed.dev.native.jammy-gcc.launch.options := -p 9005:8005
 
 
 # end of file

@@ -1,15 +1,15 @@
-## -*- docker-image-name: "qed:jammy-clang" -*-
+## -*- docker-image-name: "qed:lunar-clang" -*-
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # (c) 1998-2025 all rights reserved
 
 # based on ubuntu
-FROM ubuntu:jammy
+FROM ubuntu:lunar
 
 # set up some build variables
-ARG instance=dev/jammy-clang
+ARG instance=dev/native/lunar-clang
 # python version
-ARG python_version=3.10
+ARG python_version=3.11
 ARG python=python${python_version}
 # locations
 ARG prefix=/usr/local
@@ -36,15 +36,13 @@ RUN apt dist-upgrade -y
 # install the base software stack
 RUN DEBIAN_FRONTEND=noninteractive \
         apt install -y \
-        git vim unzip zip curl \
+        git vim unzip zip \
         openssh-server \
         clang gfortran make \
+        npm \
         ${python} ${python}-dev \
         python3-graphene python3-numpy python3-pip python3-pybind11 python3-yaml \
         libgsl-dev libhdf5-dev libfftw3-dev
-
-# install nodejs from source
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs
 
 
 # setup the interactive environment

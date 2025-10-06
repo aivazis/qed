@@ -7,7 +7,7 @@
 FROM ubuntu:jammy
 
 # set up some build variables
-ARG instance=dev/jammy-gcc
+ARG instance=dev/native/jammy-gcc
 # python version
 ARG python_version=3.10
 ARG python=python${python_version}

@@ -17,9 +17,9 @@ qed.tests := qed.pkg.tests qed.ext.tests qed.data
 # docker images
 qed.docker-images := \
     qed.ci.lunar-gcc qed.ci.jammy-gcc  \
-    qed.dev.jammy-clang qed.dev.jammy-gcc  \
-    qed.dev.lunar-clang qed.dev.lunar-gcc  \
-    qed.dev.mantic-clang qed.dev.mantic-gcc  \
+    qed.dev.native.jammy-clang qed.dev.native.jammy-gcc  \
+    qed.dev.native.lunar-clang qed.dev.native.lunar-gcc  \
+    qed.dev.native.mantic-clang qed.dev.native.mantic-gcc  \
 
 # load the packages
 include $(qed.packages)

@@ -1,13 +1,13 @@
-## -*- docker-image-name: "qed:lunar-clang" -*-
+## -*- docker-image-name: "qed:mantic-gcc" -*-
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # (c) 1998-2025 all rights reserved
 
 # based on ubuntu
-FROM ubuntu:lunar
+FROM ubuntu:mantic
 
 # set up some build variables
-ARG instance=dev/lunar-clang
+ARG instance=dev/native/mantic-gcc
 # python version
 ARG python_version=3.11
 ARG python=python${python_version}
@@ -38,7 +38,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
         apt install -y \
         git vim unzip zip \
         openssh-server \
-        clang gfortran make \
+        g++ gfortran make \
         npm \
         ${python} ${python}-dev \
         python3-graphene python3-numpy python3-pip python3-pybind11 python3-yaml \
