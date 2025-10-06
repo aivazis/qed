@@ -1,0 +1,33 @@
+# -*- yaml -*-
+
+name: qed
+
+channels:
+  - conda-forge
+
+dependencies:
+  # tools for building from source
+  - binutils
+  - curl
+  - git
+  - git-lfs
+  - gcc
+  - gxx
+  - make
+  - nodejs
+  - vim
+  # python and runtime packages
+  - python
+  - graphene
+  - numpy
+  - pyproj
+  - pyyaml
+  - scipy
+  - spiceypy
+  # external libraries
+  - gsl
+  - hdf5
+  - libpq
+  - pybind11
+
+# end of file
