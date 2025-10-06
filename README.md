@@ -23,7 +23,7 @@ it, and skip to the end of this section.
 
 
 If you are comfortable with `jupyter` notebooks, the current
-[release tarball][https://github.com/aivazis/qed/archive/refs/tags/v0.9.4.tar.gz]
+[release tarball](https://github.com/aivazis/qed/archive/refs/tags/v0.9.4.tar.gz)
 contains a notebook that can walk you through the installation procedure with minimal tweaking.
 It is located in `etc/mamba/qed.ipynb`. Please report any difficulties you encounter.
 
