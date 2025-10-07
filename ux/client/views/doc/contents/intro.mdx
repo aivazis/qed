@@ -42,39 +42,35 @@ channels:
   - conda-forge
 
 dependencies:
-  # python and runtime packages
+  - binutils
   - python
   - graphene
-  - yaml
-  - ruamel.yaml
-  # reading NISAR data products
-  - hdf5
-  # optional: reading GeoTIFFs and other supported formats
-  - gdal
-  - numpy
-  # optional: listing the contents of S3 data archives
+  - pybind11
+  - pyyaml
+  # for access to S3 buckets
   - awscli
   - boto3
-  - openssl
+  # for access to earthdata
+  - earthaccess
   # optional: building from source
+  # tools
   - git
   - gcc
   - gxx
   - make
   - nodejs
-  - pybind11
+  # external libraries
+  - hdf5
 
 # end of file
 ```
 
-Packages that have been problematic include `hdf5` and `h5py`, its python support layer. `qed` does
-not depend on `h5py`, which frees `conda` to use the latest available version that incorporates a
-few bug fixes that improve access to files hosted in S3 buckets. Another source of trouble has been
-`gdal` with its deep dependency tree. If you bump into any trouble, you may want to start the
-diagnostic excursion by removing `numpy` and `gdal` from the mix and trying again.
-
 On `macOS`, you will want to use `clang` instead of `gcc`. Make sure you activate this environment
 before moving on to build `qed` so that you use the `conda-forge` provided compilers.
+
+``` text
+~> micromamba activate qed
+```
 
 It is also possible to use other package managers to install these dependencies. Both `pyre` and
 `qed` have been tested on both `ubuntu` and `macOS` using their native environments, as well as
@@ -173,33 +169,21 @@ package database lives in `~/.config/mm/config.mm`:
 # system tools
 sys.prefix := ${CONDA_PREFIX}
 
-# gsl
-gsl.version := 2.7
-gsl.dir := $(sys.prefix)
-
 # hdf5
-hdf5.version := 1.15.0
+hdf5.version := 1.14.6
 hdf5.dir := ${sys.prefix}
 hdf5.parallel := off
 
-# libpq
-libpq.version := 16.1
-libpq.dir := ${sys.prefix}
-
 # pybind11
-pybind11.version := 2.11.1
+pybind11.version := 3.0.1
 pybind11.dir = $(sys.prefix)
 
 # python: just major.minor
 python.version := 3.12
 python.dir := $(sys.prefix)
 
-# numpy
-numpy.version := 1.26.3
-numpy.dir := $(sys.prefix)/lib/python$(python.version)/site-packages/numpy/core
-
 # pyre
-pyre.version := 1.12.4
+pyre.version := 1.12.5
 pyre.dir := $(sys.prefix)
 
 # end of file
