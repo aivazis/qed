@@ -142,7 +142,7 @@ mm:
   # the location of final products
   prefix: "{pyre.environ.CONDA_PREFIX}"
   # the installation location of the python packages, relative to {prefix}
-  pycPrefix: "lib/python3.12/site-packages"
+  pycPrefix: "lib/python3.13/site-packages"
   # the location of the temporary intermediate build products
   bldroot: "{pyre.environ.HOME}/tmp/builds/mm/{pyre.environ.CONDA_DEFAULT_ENV}"
 
@@ -179,7 +179,7 @@ pybind11.version := 3.0.1
 pybind11.dir = ${sys.prefix}
 
 # python: just major.minor
-python.version := 3.12
+python.version := 3.13
 python.dir := ${sys.prefix}
 
 # pyre
@@ -227,7 +227,7 @@ builder directory layout:
            inc = /Users/mga/.local/envs/qed/include/
            lib = /Users/mga/.local/envs/qed/lib/
          share = /Users/mga/.local/envs/qed/share/
-           pyc = /Users/mga/.local/envs/qed/lib/python3.12/site-packages/
+           pyc = /Users/mga/.local/envs/qed/lib/python3.13/site-packages/
 ~/dv/pyre>
 ```
 
