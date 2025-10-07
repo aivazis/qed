@@ -85,7 +85,7 @@ objects, and `python` packages on your machine.
 We will need a place to clone the necessary source repositories. For the sake of concreteness, let's
 pick `~/dv` as the source directory.
 
-``` bash
+``` text
 ~> mkdir dv
 ~> cd dv
 ```
@@ -93,7 +93,7 @@ pick `~/dv` as the source directory.
 GitHub allows access through `ssh` or `https`, with slightly different syntax. If you already have
 your `ssh` key installed on your GitHub account, you can clone the three repositories using
 
-``` bash
+``` text
 ~/dv> git clone git@github.com:aivazis/mm
 ~/dv> git clone git@github.com:pyre/pyre
 ~/dv> git clone git@github.com:aivazis/qed
@@ -101,7 +101,7 @@ your `ssh` key installed on your GitHub account, you can clone the three reposit
 
 Alternatively, you can use the `https` protocol for anonymous access:
 
-``` bash
+``` text
 ~> mkdir dv
 ~> cd dv
 ~/dv> git clone https://github.com/aivazis/mm
@@ -119,7 +119,7 @@ pull from, as they are thoroughly tested.
 The most involved step of the installation process is the configuration of the build system.
 We will place configuration files in two locations:
 
-``` bash
+``` text
 ~/dv> cd ~
 ~> mkdir -p .config/pyre
 ~> mkdir -p .config/mm
@@ -162,7 +162,7 @@ all `pyre` applications, including `qed`, so we will be adding more files here l
 The build system needs to know where to find headers and libraries for the `qed` dependencies. The
 package database lives in `~/.config/mm/config.mm`:
 
-``` makefile
+``` make
 # -*- Makefile -*-
 
 # external dependencies
@@ -176,15 +176,15 @@ hdf5.parallel := off
 
 # pybind11
 pybind11.version := 3.0.1
-pybind11.dir = $(sys.prefix)
+pybind11.dir = ${sys.prefix}
 
 # python: just major.minor
 python.version := 3.12
-python.dir := $(sys.prefix)
+python.dir := ${sys.prefix}
 
 # pyre
 pyre.version := 1.12.5
-pyre.dir := $(sys.prefix)
+pyre.dir := ${sys.prefix}
 
 # end of file
 ```
@@ -198,7 +198,7 @@ and its packages deposit files it needs.
 The next step is to build `pyre` and `qed`. We will invoke `mm` a few times, so you may find
 it convenient to create an alias for it.
 
-``` bash
+``` text
 ~/dv> alias mm='python3 ${HOME}/dv/mm/mm'
 ```
 
@@ -209,7 +209,7 @@ Let's verify that everything is ok so far. Let's go to the `pyre` source directo
 show details about the build. This should generate a few lines of output similar to the
 following:
 
-``` bash
+``` text
 ~/dv> cd pyre
 ~/dv/pyre> mm builder.info
 
@@ -241,13 +241,13 @@ and attach a log file or a screenshot to help diagnose the problem.
 If everything looks ok, let's build and install `pyre`. If you are on a `linux` system, `mm` will
 automatically discover the number of cores on your machine and launch a parallel build:
 
-``` bash
+``` text
 ~/dv/pyre> mm
 ```
 
 On `macOS`, it needs some help until `pyre` is built, so use something like:
 
-``` bash
+``` text
 ~/dv/pyre> mm --slots=20
 ```
 
@@ -256,7 +256,7 @@ handle this load. Feel free to up the count if you are on a machine with more co
 well, you will have a functional `pyre` in the `site-packages` directory of your `python`
 installation. Let's verify:
 
-``` bash
+``` text
 ~/dv/pyre> python3
 >>> import pyre
 >>> pyre.__file__
@@ -266,7 +266,7 @@ Both statements should succeed, and the latter should print out the `pyre` insta
 
 Similarly for `qed`:
 
-``` bash
+``` text
 ~/dv/pyre> cd ../qed
 ~/dv/qed> mm builder.info
 ~/dv/qed> mm
@@ -284,7 +284,7 @@ tweak your environment variables.
 
 By default, the application operates as a command line tool:
 
-``` bash
+``` text
 ~/dv/qed> qed
 
   qed 0.9.3 revision 038a584
@@ -332,7 +332,7 @@ By default, the application operates as a command line tool:
 
 Launching it in the browser requires a couple of command line arguments
 
-``` bash
+``` text
 ~/dv/qed> qed --shell=web --shell.auto=yes
 qed: web server on '0.0.0.0':51122
 ```
@@ -366,7 +366,7 @@ the datasets they contain, and control the various visualization aspects. The fi
 are rather long, so in what follows they have been renamed to match their product type. Let's make a
 directory to house them, and download as many of them as you would like.
 
-``` bash
+``` text
 ~/dv/qed> cd ..
 ~/dv> mkdir -p data/nisar-samples
 ~/dv> cd data/nisar-samples
