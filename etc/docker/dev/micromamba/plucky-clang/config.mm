@@ -8,34 +8,14 @@
 # system tools
 sys.prefix := ${CONDA_PREFIX}
 
-# cspice
-cspice.version := 7.0.0
-cspice.dir := $(sys.prefix)
-
-# gsl
-gsl.version := 2.7.1
-gsl.dir := $(sys.prefix)
-
 # hdf5
 hdf5.version := 1.14.5
 hdf5.dir := ${sys.prefix}
 hdf5.parallel := off
 
-# libpq
-libpq.version := 17.2
-libpq.dir := ${sys.prefix}
-
-# proj
-proj.version := 9.6.0
-proj.dir := $(sys.prefix)
-
 # python
 python.version := @PYTHON_VERSION@
 python.dir := $(sys.prefix)
-
-# numpy
-numpy.version := 2.1.3
-numpy.dir := $(sys.prefix)/lib/python3/dist-packages/numpy/_core
 
 # pybind11
 pybind11.version := 2.11.1

@@ -8,7 +8,6 @@ channels:
 dependencies:
   # tools for building from source
   - binutils
-  - curl
   - git
   - git-lfs
   - clang
@@ -19,15 +18,9 @@ dependencies:
   # python and runtime packages
   - python
   - graphene
-  - numpy
-  - pyproj
   - pyyaml
-  - scipy
-  - spiceypy
   # external libraries
-  - gsl
   - hdf5
-  - libpq
   - pybind11
 
 # end of file
