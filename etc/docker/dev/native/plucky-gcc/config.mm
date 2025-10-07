@@ -12,22 +12,22 @@ sys.lib := ${sys.prefix}/lib/${host.arch}-linux-gnu
 usr.prefix := /usr/local
 
 # gsl
-gsl.version := 2.7.1
+gsl.version := 2.8
 gsl.dir := $(sys.prefix)
 
 # hdf5
-hdf5.version := 1.10.10
+hdf5.version := 1.14.5
 hdf5.dir := ${sys.prefix}
 hdf5.parallel := serial
 hdf5.incpath := $(hdf5.dir)/include/hdf5/$(hdf5.parallel)
 hdf5.libpath := $(sys.lib)/hdf5/${hdf5.parallel}
 
 # numpy
-numpy.version := 1.26.4
-numpy.dir := $(sys.prefix)/lib/python3/dist-packages/numpy/core
+numpy.version := 2.2.3
+numpy.dir := $(sys.prefix)/lib/python3/dist-packages/numpy/_core
 
 # pybind11
-pybind11.version := 2.11.1
+pybind11.version := 2.13.6
 pybind11.dir = $(sys.prefix)
 
 # python
