@@ -21,6 +21,7 @@ qed.docker-images := \
     qed.dev.native.lunar-clang qed.dev.native.lunar-gcc  \
     qed.dev.native.mantic-clang qed.dev.native.mantic-gcc  \
     qed.dev.native.noble-clang qed.dev.native.noble-gcc  \
+    qed.dev.native.plucky-clang qed.dev.native.plucky-gcc  \
     qed.dev.micromamba.noble-clang qed.dev.micromamba.noble-gcc  \
     qed.dev.micromamba.plucky-clang qed.dev.micromamba.plucky-gcc  \
 

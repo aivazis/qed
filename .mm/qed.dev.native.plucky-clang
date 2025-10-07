@@ -1,0 +1,15 @@
+# -*- makefile -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2025 all rights reserved
+
+
+# plucky-clang image configuration
+qed.dev.native.plucky-clang.name := plucky-clang
+qed.dev.native.plucky-clang.root := etc/docker/dev/native/
+qed.dev.native.plucky-clang.launch.mounts := mm pyre qed data
+# qed listens on port 8005, by default; map it to port 9005 on the host
+qed.dev.native.plucky-clang.launch.options := -p 9005:8005
+
+
+# end of file
