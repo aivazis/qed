@@ -1,0 +1,29 @@
+# -*- yaml -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2024 all rights reserved
+
+# mm configuration
+mm:
+
+  # targets
+  target: opt,shared
+
+  # compilers
+  compilers: clang, python/python3
+
+  # the following two settings get replaced with actual values by the notebook
+  # the location of final products
+  prefix: @PREFIX@
+  # the location of the temporary intermediate build products
+  bldroot: /tmp/builds
+# install the python packages straight where they need to go
+  pycPrefix: /usr/lib/python3/dist-packages/
+
+  # misc
+  # the name of GNU make
+  make: make
+  # local makefiles
+  local: Make.mmm
+
+# end of file
