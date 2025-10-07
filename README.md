@@ -50,19 +50,21 @@ channels:
   - conda-forge
 
 dependencies:
+  - binutils
   - python
-  - boto3
-  - earthaccess
   - graphene
   - pybind11
   - pyyaml
+  # for access to S3 buckets
+  - awscli
+  - boto3
+  # for access to earthdata
+  - earthaccess
   # optional: building from source
   # tools
-  - awscli
   - git
   - gcc
   - gxx
-  - gfortran
   - make
   - nodejs
   # external libraries
@@ -72,7 +74,7 @@ dependencies:
 ```
 
 On `macOS`, you will want to use `clang` instead of `gcc`. Make sure you activate this environment
-before moving on to build `qed` so that you use the `conda-forge` provided compilers:
+before moving on to build `qed` so that you can access the `conda-forge` provided compilers:
 
 ``` text
 ~> micromamba activate qed
@@ -181,7 +183,7 @@ hdf5.dir := ${sys.prefix}
 hdf5.parallel := off
 
 # pybind11
-pybind11.version := 2.11.1
+pybind11.version := 3.0.1
 pybind11.dir = $(sys.prefix)
 
 # python: just major.minor
