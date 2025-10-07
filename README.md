@@ -54,11 +54,8 @@ dependencies:
   - boto3
   - earthaccess
   - graphene
-  - matplotlib
-  - numpy
   - pybind11
   - pyyaml
-  - ruamel.yaml
   # optional: building from source
   # tools
   - awscli
@@ -69,17 +66,17 @@ dependencies:
   - make
   - nodejs
   # external libraries
-  - fftw
-  - gsl
   - hdf5
-  - libpq
-  - openssl
 
 # end of file
 ```
 
 On `macOS`, you will want to use `clang` instead of `gcc`. Make sure you activate this environment
-before moving on to build `qed` so that you use the `conda-forge` provided compilers.
+before moving on to build `qed` so that you use the `conda-forge` provided compilers:
+
+``` text
+~> micromamba activate qed
+```
 
 It is also possible to use other package managers to install these dependencies. Both `pyre` and
 `qed` have been tested on both `ubuntu` and `macOS` using their native environments, as well as
@@ -178,6 +175,11 @@ package database lives in `~/.config/mm/config.mm`:
 # system tools
 sys.prefix := ${CONDA_PREFIX}
 
+# hdf5
+hdf5.version := 1.14.6
+hdf5.dir := ${sys.prefix}
+hdf5.parallel := off
+
 # pybind11
 pybind11.version := 2.11.1
 pybind11.dir = $(sys.prefix)
@@ -187,7 +189,7 @@ python.version := 3.13
 python.dir := $(sys.prefix)
 
 # pyre
-pyre.version := 1.12.4
+pyre.version := 1.12.5
 pyre.dir := $(sys.prefix)
 
 # end of file
