@@ -13,13 +13,13 @@ from .EarthAccess import EarthAccess as earth
 
 from .DataCollection import DataCollection as collection
 from .DataGranule import DataGranule as granule
-from .GeoBBox import GeoBBox as geoBBox
-from .GeoPoint import GeoPoint as geoPoint
-from .GeoCircle import GeoCircle as geoCircle
-from .GeoLine import GeoLine as geoLine
-from .GeoPolygon import GeoPolygon as geoPolygon
-from .Limit import Limit as limit
-from .TimeInterval import TimeInterval as timeInterval
+from .GeoBBox import GeoBBox as bbox
+from .GeoPoint import GeoPoint as point
+from .GeoCircle import GeoCircle as circle
+from .GeoLine import GeoLine as line
+from .GeoPolygon import GeoPolygon as polygon
+from .Limit import Limit as count
+from .TimeInterval import TimeInterval as window
 
 
 # discovery
