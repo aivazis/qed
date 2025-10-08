@@ -10,6 +10,8 @@ import journal
 import qed
 
 # my input types
+from .DataCollectionInput import DataCollectionInput
+from .DataGranuleInput import DataGranuleInput
 from .TimeIntervalInput import TimeIntervalInput
 from .GeoBBoxInput import GeoBBoxInput
 from .GeoVertexInput import GeoVertexInput
@@ -32,6 +34,9 @@ class ConnectEarthAccessArchive(graphene.Mutation):
         # the update context
         name = graphene.String(required=True)
         uri = graphene.String(required=True)
+        count = graphene.String()
+        granule = DataGranuleInput()
+        collection = DataCollectionInput()
         filters = graphene.List(graphene.String)
         when = TimeIntervalInput()
         geo = graphene.String()
@@ -51,6 +56,9 @@ class ConnectEarthAccessArchive(graphene.Mutation):
         info,
         name,
         uri,
+        count,
+        granule,
+        collection,
         filters,
         when,
         geo,
@@ -97,7 +105,32 @@ class ConnectEarthAccessArchive(graphene.Mutation):
 
         # make room for the search filters
         selectedFilters = []
-        # first, the time interval
+
+        # if the users wants to limit the size of the search
+        if count:
+            # build the name of the filter
+            filterName = f"{name}.limit"
+            # make a data size limiter
+            filter = qed.archives.limit(name=filterName, count=count)
+            # and add it the pile
+            selectedFilters.append(filter)
+        # if there is a restriction on the data collection
+        if collection.shortName or collection.conceptId:
+            # build the name of the filter
+            filterName = f"{name}.collection"
+            # make a data size limiter
+            filter = qed.archives.collection(name=filterName, **collection)
+            # and add it the pile
+            selectedFilters.append(filter)
+        # if there is a restriction on the data granule
+        if granule.pattern:
+            # build the name of the filter
+            filterName = f"{name}.granule"
+            # make a data size limiter
+            filter = qed.archives.granule(name=filterName, **granule)
+            # and add it the pile
+            selectedFilters.append(filter)
+        # if there is a time interval restriction
         if "when" in filters:
             # build the name of the filter
             filterName = f"{name}.when"
