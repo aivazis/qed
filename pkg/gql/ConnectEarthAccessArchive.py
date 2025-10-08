@@ -109,7 +109,7 @@ class ConnectEarthAccessArchive(graphene.Mutation):
         # if the users wants to limit the size of the search
         if count:
             # build the name of the filter
-            filterName = f"{name}.limit"
+            filterName = f"{name}.count"
             # make a data size limiter
             filter = qed.archives.count(name=filterName, count=count)
             # and add it the pile
@@ -133,7 +133,7 @@ class ConnectEarthAccessArchive(graphene.Mutation):
         # if there is a time interval restriction
         if "when" in filters:
             # build the name of the filter
-            filterName = f"{name}.when"
+            filterName = f"{name}.window"
             # make a time interval filter
             filter = qed.archives.window(
                 name=filterName, begin=when["begin"], end=when["end"]
