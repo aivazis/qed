@@ -6,9 +6,10 @@
 
 # the archive
 example:
+    uri: earth:example
     filters:
-        - qed.archives.collection#l0b
-        - qed.archives.geoPolygon#crete
+        - collection#l0b
+        - polygon#crete
 
 # the NISAR L0B collection
 l0b:
