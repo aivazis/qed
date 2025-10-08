@@ -20,6 +20,9 @@ import { Form, Body, Error } from '../form'
 
 // fields
 import { Name } from './name'
+import { Count } from './count'
+import { Collection } from './collection'
+import { Granule } from './granule'
 import { Geo } from './geo'
 import { Filters } from './filters'
 // time interval
@@ -39,6 +42,12 @@ export const Earth = ({ view, setType, hide }) => {
     const [form, setForm] = React.useState({
         // the nickname
         name: "",
+        // limit on the number of results
+        count: "",
+        // data collection
+        collection: { conceptId: "", shortName: "" },
+        // granule
+        granule: { pattern: "" },
         // the filters
         filters: new Set(),
         // a time interval
@@ -106,6 +115,9 @@ export const Earth = ({ view, setType, hide }) => {
                 // the payload
                 name: `earth:${name}`,
                 uri: `earth:${name}`,
+                count: form.count,
+                collection: form.collection,
+                granule: form.granule,
                 filters: [...form.filters],
                 when: form.when,
                 geo: form.geo,
@@ -188,6 +200,9 @@ export const Earth = ({ view, setType, hide }) => {
                 <Body>
                     <TypeSelector value="earth" update={setType} />
                     <Name value={form.name} update={update} />
+                    <Count form={form} update={update} />
+                    <Collection form={form} update={update} />
+                    <Granule form={form} update={update} />
                     <Filters value={form.filters} update={update} types={filterTypes} />
                     {when && <When interval={form.when} update={update} />}
                     {geo && <Geo value={form.geo} update={update} types={regionTypes} />}
@@ -206,7 +221,11 @@ export const Earth = ({ view, setType, hide }) => {
 // the mutation that connects an earth access archive
 const connectMutation = graphql`
     mutation earthArchiveMutation(
-        $name: String!, $uri: String!, $filters: [String!]!,
+        $name: String!, $uri: String!,
+        $count: String,
+        $collection: DataCollectionInput,
+        $granule: DataGranuleInput,
+        $filters: [String!]!,
         $when: TimeIntervalInput,
         $geo: String,
         $bbox: GeoBBoxInput, $point: GeoVertexInput, $circle: GeoCircleInput,
@@ -214,6 +233,9 @@ const connectMutation = graphql`
     ) {
         connectEarthAccessArchive(
             name: $name, uri: $uri,
+            count: $count,
+            collection: $collection,
+            granule: $granule,
             filters: $filters,
             when: $when,
             geo: $geo, bbox: $bbox, point: $point, circle: $circle, line: $line, polygon: $polygon
