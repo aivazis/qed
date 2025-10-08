@@ -22,17 +22,6 @@ export const Radius = ({ region, update }) => {
         const handler = evt => {
             // get the value from the form field
             const candidate = evt.target.value
-            // the validation regex; checks for numbers in [-90, 90]
-            const regex = new RegExp([
-                "^", // the beginning of the string
-                "[+]?", // optional sign
-                "(?:", // followed by
-                "(?:\\d*)?", // the integer part
-                "(?:\\.*)?", // the decimal point
-                "(?:\\d*)?", // the fractional part
-                ")?",
-                "$", // the end of the string
-            ].join(''))
             // build the new region
             const replacement = {
                 // unpack the rest of the region properties
@@ -61,6 +50,19 @@ export const Radius = ({ region, update }) => {
         />
     )
 }
+
+
+// the validation regex; checks for numbers in [-90, 90]
+const regex = new RegExp([
+    "^", // the beginning of the string
+    "[+]?", // optional sign
+    "(?:", // followed by
+    "(?:\\d*)?", // the integer part
+    "(?:\\.*)?", // the decimal point
+    "(?:\\d*)?", // the fractional part
+    ")?",
+    "$", // the end of the string
+].join(''))
 
 
 // end of file
