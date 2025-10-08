@@ -36,23 +36,59 @@ class EarthAccess(Archive, family="qed.archives.earth"):
         Retrieve the archive contents at {uri}, a location expected to belong within the archive
         document space
         """
-        # collect the my filters
+        # get the package; if we get here we can assume it will import correctly because we now
+        # check that archives has the runtime support they need
+        import earthaccess
+
+        # collect my filters
         config = dict(
             (name, value)
             for filter in self.filters
             for name, value in self.identify(visitor=filter)
         )
-
         # show me
         channel = journal.info("qed.archives.earth.contents")
         channel.line(f"{self}")
         channel.indent()
         channel.line(f"config: {config}")
+
+        # get the data
+        for granule in earthaccess.search_data(**config):
+            # get the name of the granule
+            name = granule["meta"]["native-id"]
+            # and its size
+            size = granule.size()
+            # form the file name
+            filename = f"{name}.h5"
+            # look up all the direct access links
+            links = granule.data_links(access="direct")
+            # go through them
+            for link in links:
+                # if this link ends with the granule filename
+                if link.startswith("s3://") and link.endswith(filename):
+                    # show me
+                    channel.line(f"granule:")
+                    channel.indent()
+                    channel.line(f"name: {name}")
+                    channel.line(f"size: {size}")
+                    channel.line(f"link: {link}")
+                    channel.outdent()
+                    # convert it into a uri
+                    uri = qed.primitives.uri(
+                        scheme="s3", authority="daac@us-west-2", address=link[4:]
+                    )
+                    # make it available
+                    yield name, str(uri), False
+                    # and bail
+                    break
+
+        # outdent
         channel.outdent()
+        # and flush
         channel.log()
 
-        # no contents, until we can get real data from vertex
-        return []
+        # all done
+        return
 
     # visitor support
     def identify(self, visitor, **kwds):
