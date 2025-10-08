@@ -13,7 +13,7 @@ from .Filter import Filter
 
 
 # a point on the surface of a sphere
-class DataCollection(Filter, family="qed.archives.filters.collection"):
+class Collection(Filter, family="qed.archives.filters.collection"):
     """
     A filter for earthdata searches that identifies the data collection that matching datasets
     should belong to

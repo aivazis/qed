@@ -11,15 +11,15 @@ from .S3 import S3 as s3
 # earth access and its filters
 from .EarthAccess import EarthAccess as earth
 
-from .DataCollection import DataCollection as collection
-from .DataGranule import DataGranule as granule
-from .GeoBBox import GeoBBox as bbox
-from .GeoPoint import GeoPoint as point
-from .GeoCircle import GeoCircle as circle
-from .GeoLine import GeoLine as line
-from .GeoPolygon import GeoPolygon as polygon
-from .Limit import Limit as count
-from .TimeInterval import TimeInterval as window
+from .BBox import BBox as bbox
+from .Circle import Circle as circle
+from .Collection import Collection as collection
+from .Count import Count as count
+from .Granule import Granule as granule
+from .Line import Line as line
+from .Polygon import Polygon as polygon
+from .Point import Point as point
+from .Window import Window as window
 
 
 # discovery

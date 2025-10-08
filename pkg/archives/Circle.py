@@ -12,18 +12,21 @@ import journal
 from .Filter import Filter
 
 
-# a polygon on the surface of a sphere
-class GeoBBox(Filter, family="qed.archives.filters.geoBBox"):
+# a point on the surface of a sphere
+class Circle(Filter, family="qed.archives.filters.circle"):
     """
     A filter for earthdata searches that identifies datasets that contain a specific point
     """
 
     # user-configurable state
-    ne = qed.properties.tuple(schema=qed.properties.float())
-    ne.doc = "the coordinates of the north east corner"
+    radius = qed.properties.float()
+    radius.doc = "the radius of the circle, in meters"
 
-    sw = qed.properties.tuple(schema=qed.properties.float())
-    sw.doc = "the coordinates of the south west corner"
+    longitude = qed.properties.float()
+    longitude.doc = "the longitude of the center"
+
+    latitude = qed.properties.float()
+    latitude.doc = "the latitude of the center"
 
     # implementation details
     # visitor support
@@ -31,15 +34,12 @@ class GeoBBox(Filter, family="qed.archives.filters.geoBBox"):
         """
         Generate the required representation so an {EarthAccess} archive can filter its contents
         """
-        # unpack my state
-        swLon, swLat = self.sw
-        neLon, neLat = self.ne
         # produce the {earthaccess} keyword
         yield (
             # the name
-            "bounding_box",
+            "circle",
             # the contents
-            (swLon, swLat, neLon, neLat),
+            (self.longitude, self.latitude, self.radius),
         )
         # all done
         return

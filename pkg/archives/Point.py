@@ -13,14 +13,17 @@ from .Filter import Filter
 
 
 # a point on the surface of a sphere
-class Limit(Filter, family="qed.archives.filters.limit"):
+class Point(Filter, family="qed.archives.filters.point"):
     """
-    A filter for earthdata searches that limits the size of results
+    A filter for earthdata searches that identifies datasets that contain a specific point
     """
 
     # user-configurable state
-    count = qed.properties.int()
-    count.doc = "limit the search results"
+    longitude = qed.properties.float()
+    longitude.doc = "the longitude of the point"
+
+    latitude = qed.properties.float()
+    latitude.doc = "the latitude of the point"
 
     # implementation details
     # visitor support
@@ -31,9 +34,9 @@ class Limit(Filter, family="qed.archives.filters.limit"):
         # produce the {earthaccess} keyword
         yield (
             # the name
-            "count",
+            "point",
             # the contents
-            self.count,
+            (self.longitude, self.latitude),
         )
         # all done
         return

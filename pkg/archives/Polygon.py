@@ -13,7 +13,7 @@ from .Filter import Filter
 
 
 # a polygon on the surface of a sphere
-class GeoPolygon(Filter, family="qed.archives.filters.geoPolygon"):
+class Polygon(Filter, family="qed.archives.filters.polygon"):
     """
     A filter for earthdata searches that identifies datasets that contain a specific point
     """

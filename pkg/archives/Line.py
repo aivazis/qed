@@ -13,7 +13,7 @@ from .Filter import Filter
 
 
 # a collection of connected line segment on the surface of a sphere
-class GeoLine(Filter, family="qed.archives.filters.geoLine"):
+class Line(Filter, family="qed.archives.filters.line"):
     """
     A filter for earthdata searches that identifies datasets that contain a specific line
     """

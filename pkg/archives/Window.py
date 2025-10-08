@@ -13,20 +13,17 @@ from .Filter import Filter
 
 
 # a point on the surface of a sphere
-class GeoCircle(Filter, family="qed.archives.filters.geoCircle"):
+class Window(Filter, family="qed.archives.filters.window"):
     """
-    A filter for earthdata searches that identifies datasets that contain a specific point
+    A filter for earthdata searches that identifies datasets from a given time interval
     """
 
     # user-configurable state
-    radius = qed.properties.float()
-    radius.doc = "the radius of the circle, in meters"
+    begin = qed.properties.str()
+    begin.doc = "the longitude of the point"
 
-    longitude = qed.properties.float()
-    longitude.doc = "the longitude of the center"
-
-    latitude = qed.properties.float()
-    latitude.doc = "the latitude of the center"
+    end = qed.properties.str()
+    end.doc = "the latitude of the point"
 
     # implementation details
     # visitor support
@@ -37,9 +34,9 @@ class GeoCircle(Filter, family="qed.archives.filters.geoCircle"):
         # produce the {earthaccess} keyword
         yield (
             # the name
-            "circle",
+            "temporal",
             # the contents
-            (self.longitude, self.latitude, self.radius),
+            (self.begin, self.end),
         )
         # all done
         return
