@@ -41,19 +41,5 @@ class TimeInterval(Filter, family="qed.archives.filters.when"):
         # all done
         return
 
-    # framework hooks
-    def pyre_configured(self, **kwds):
-        # chain up
-        yield from super().pyre_configured(**kwds)
-        # show me
-        channel = journal.info("qed.archives.time")
-        channel.line(f"{self}")
-        channel.indent()
-        channel.line(f"begin: {self.begin}")
-        channel.line(f"  end: {self.end}")
-        channel.outdent()
-        # all done
-        return
-
 
 # end of file
