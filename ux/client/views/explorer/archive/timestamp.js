@@ -73,8 +73,6 @@ const regex = new RegExp(
     `${HOUR.source}${MINUTE.source}${SECOND.source}` +
     `$`
 )
-// show me
-console.log(regex.source)
 
 
 // end of file
