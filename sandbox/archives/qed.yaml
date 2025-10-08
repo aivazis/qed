@@ -1,0 +1,48 @@
+# -*- pyre -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2025 all rights reserved
+
+
+# the archive
+example:
+    filters:
+        - qed.archives.collection#l0b
+        - qed.archives.geoPolygon#crete
+
+# the NISAR L0B collection
+l0b:
+    conceptId: C3622228339-ASF
+    shortName: NISAR_L0B_RRSD_BETA_V1
+
+# a polygon around crete
+crete:
+    vertices:
+        - (23.3547, 34.7211)
+        - (26.4923, 34.7211)
+        - (26.4923, 35.7146)
+        - (23.3547, 35.7146)
+        - (23.3547, 34.7211)
+
+# connect it
+archives:
+    - qed.archives.earth#example
+
+
+# overall application configuration
+qed.app:
+    # send console output to a log file
+    # logfile: qed.log
+    # run as a web app
+    shell: web
+    # for the web server
+    nexus.services.web:
+        # pin the port for serving web content to some number in user space
+        address: ip4:0.0.0.0:8005
+
+# configure the {web} shell
+pyre.shells.web#qed.app.shell:
+    # spawn a new browser window/tab every time the server starts?
+    auto: no
+
+# end of file
