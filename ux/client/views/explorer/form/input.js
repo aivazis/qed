@@ -22,7 +22,7 @@ export const Input = styled.input`
     font-family: inconsolata;
     width: 20.0rem;
     text-align: start;
-    padding: 0.0rem 0.25rem 0.0rem 0.0rem;
+    padding: 0.0rem 0.25rem 0.0rem 0.25rem;
     border: 0 transparent;
 `
 
