@@ -303,6 +303,9 @@ type Mutation {
   connectArchive(name: String!, uri: String!): ArchiveInfo!
   connectEarthAccessArchive(
     name: String!, uri: String!,
+    count: String,
+    granule: DataGranuleInput,
+    collection: DataCollectionInput,
     filters: [String!]!,
     when: TimeIntervalInput,
     geo: String,
@@ -482,15 +485,24 @@ type ValueControllerInfo {
 }
 
 # earth access archive connector types
-input GeoCircleInput {
-  radius: String!
-  longitude: String!
-  latitude: String!
+input DataCollectionInput {
+  shortName: String!
+  conceptId: String!
+}
+
+input DataGranuleInput {
+  pattern: String!
 }
 
 input TimeIntervalInput {
   begin: String!
   end: String!
+}
+
+input GeoCircleInput {
+  radius: String!
+  longitude: String!
+  latitude: String!
 }
 
 input GeoBBoxInput {
