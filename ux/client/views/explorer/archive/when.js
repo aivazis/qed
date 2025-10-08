@@ -47,7 +47,7 @@ const Box = styled.div`
 // the spacer
 const Spacer = styled.span`
     display: inline-block;
-    width: 3rem;
+    width: 5.0rem;
     text-align: end;
     padding: 0.0rem 0.25rem 0.25rem 0.0rem;
 `

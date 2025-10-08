@@ -53,7 +53,7 @@ export const Timestamp = ({ interval, field, update }) => {
 
 // the input field
 const Stamp = styled(EnabledInput)`
-    width: 12rem;
+    width: 12.0rem;
 `
 
 // the timestamp regular expression
