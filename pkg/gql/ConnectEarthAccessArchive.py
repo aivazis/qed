@@ -111,7 +111,7 @@ class ConnectEarthAccessArchive(graphene.Mutation):
             # build the name of the filter
             filterName = f"{name}.limit"
             # make a data size limiter
-            filter = qed.archives.limit(name=filterName, count=count)
+            filter = qed.archives.count(name=filterName, count=count)
             # and add it the pile
             selectedFilters.append(filter)
         # if there is a restriction on the data collection
@@ -135,7 +135,7 @@ class ConnectEarthAccessArchive(graphene.Mutation):
             # build the name of the filter
             filterName = f"{name}.when"
             # make a time interval filter
-            filter = qed.archives.timeInterval(
+            filter = qed.archives.window(
                 name=filterName, begin=when["begin"], end=when["end"]
             )
             # add it to the pile
@@ -147,7 +147,7 @@ class ConnectEarthAccessArchive(graphene.Mutation):
             # if the selection is a bounding box
             if geo == "bbox":
                 # make a geo bounding box
-                filter = qed.archives.geoBBox(
+                filter = qed.archives.bbox(
                     name=filterName,
                     ne=(bbox["ne"]["longitude"], bbox["ne"]["latitude"]),
                     sw=(bbox["sw"]["longitude"], bbox["sw"]["latitude"]),
@@ -155,25 +155,25 @@ class ConnectEarthAccessArchive(graphene.Mutation):
             # if the selection is a point
             elif geo == "point":
                 # make a geo point
-                filter = qed.archives.geoPoint(name=filterName, **point)
+                filter = qed.archives.point(name=filterName, **point)
             # if it's a circle
             elif geo == "circle":
                 # make a geo circle
-                filter = qed.archives.geoCircle(name=filterName, **circle)
+                filter = qed.archives.circle(name=filterName, **circle)
             # if it's a line
             elif geo == "line":
                 # parse the vertices
-                vertices = qed.archives.geoLine.parseVertices(payload=line["vertices"])
+                vertices = qed.archives.line.parseVertices(payload=line["vertices"])
                 # and build the filter
-                filter = qed.archives.geoLine(name=filterName, vertices=vertices)
+                filter = qed.archives.line(name=filterName, vertices=vertices)
             # if it's a polygon
             elif geo == "polygon":
                 # parse the vertices
-                vertices = qed.archives.geoPolygon.parseVertices(
+                vertices = qed.archives.polygon.parseVertices(
                     payload=polygon["vertices"]
                 )
                 # and build the filter
-                filter = qed.archives.geoPolygon(name=filterName, vertices=vertices)
+                filter = qed.archives.polygon(name=filterName, vertices=vertices)
             # otherwise
             else:
                 # we have a bug
