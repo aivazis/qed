@@ -13,7 +13,7 @@ from .Filter import Filter
 
 
 # a point on the surface of a sphere
-class DataGranule(Filter, family="qed.archives.filters.granule"):
+class Granule(Filter, family="qed.archives.filters.granule"):
     """
     A filter for earthdata searches that identifies a pattern to match against the granule name
     """

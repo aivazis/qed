@@ -12,18 +12,18 @@ import journal
 from .Filter import Filter
 
 
-# a point on the surface of a sphere
-class GeoPoint(Filter, family="qed.archives.filters.geoPoint"):
+# a polygon on the surface of a sphere
+class BBox(Filter, family="qed.archives.filters.bbox"):
     """
     A filter for earthdata searches that identifies datasets that contain a specific point
     """
 
     # user-configurable state
-    longitude = qed.properties.float()
-    longitude.doc = "the longitude of the point"
+    ne = qed.properties.tuple(schema=qed.properties.float())
+    ne.doc = "the coordinates of the north east corner"
 
-    latitude = qed.properties.float()
-    latitude.doc = "the latitude of the point"
+    sw = qed.properties.tuple(schema=qed.properties.float())
+    sw.doc = "the coordinates of the south west corner"
 
     # implementation details
     # visitor support
@@ -31,12 +31,15 @@ class GeoPoint(Filter, family="qed.archives.filters.geoPoint"):
         """
         Generate the required representation so an {EarthAccess} archive can filter its contents
         """
+        # unpack my state
+        swLon, swLat = self.sw
+        neLon, neLat = self.ne
         # produce the {earthaccess} keyword
         yield (
             # the name
-            "point",
+            "bounding_box",
             # the contents
-            (self.longitude, self.latitude),
+            (swLon, swLat, neLon, neLat),
         )
         # all done
         return

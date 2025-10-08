@@ -12,18 +12,15 @@ import journal
 from .Filter import Filter
 
 
-# a point on the surface of a sphere
-class TimeInterval(Filter, family="qed.archives.filters.when"):
+# limit the search results
+class Count(Filter, family="qed.archives.filters.count"):
     """
-    A filter for earthdata searches that identifies datasets from a given time interval
+    A filter for earthdata searches that limits the size of results
     """
 
     # user-configurable state
-    begin = qed.properties.str()
-    begin.doc = "the longitude of the point"
-
-    end = qed.properties.str()
-    end.doc = "the latitude of the point"
+    count = qed.properties.int()
+    count.doc = "limit the search results"
 
     # implementation details
     # visitor support
@@ -34,9 +31,9 @@ class TimeInterval(Filter, family="qed.archives.filters.when"):
         # produce the {earthaccess} keyword
         yield (
             # the name
-            "temporal",
+            "count",
             # the contents
-            (self.begin, self.end),
+            self.count,
         )
         # all done
         return
