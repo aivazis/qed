@@ -9,6 +9,9 @@ import qed
 import journal
 from osgeo import gdal
 
+# to avoid some interim noise until gdal 4.0, enable exceptions
+gdal.UseExceptions()
+
 # dataset
 from . import datasets
 
@@ -71,7 +74,9 @@ class GDAL(
         self.product = dataset
         # update the selectors
         self.selectors["raster"] = bands
-        # and build the availability map
+        # initialize the availability map
+        self.available = {}
+        # and populate it
         self.available["raster"] = bands
         # if there is only one available band
         if len(bands) == 1:
