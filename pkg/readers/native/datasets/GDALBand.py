@@ -68,7 +68,7 @@ class GDALBand(
         # my channels
         channels = self.channels
         # and the value of the {pixel}
-        _, _, value = self.profile(points=[pixel])[0]
+        value = self.data.ReadAsArray(pixel[1], pixel[0], 1, 1)[0, 0]
 
         # build the cursor rep
         yield "cursor", [(f"{pixel}", "pixel")]
@@ -88,11 +88,7 @@ class GDALBand(
         Sample my data along the path defined by {points}
         """
         # ask my data manager to build a profile
-        profile = qed.libqed.native.profile(
-            source=self.data, points=points, closed=closed
-        )
-        # and return it
-        return profile
+        return []
 
     def render(self, channel, zoom, origin, shape):
         """
@@ -158,7 +154,7 @@ class GDALBand(
         # store my shape
         self.shape = dataset.RasterYSize, dataset.RasterXSize
         # set up my selector
-        self.selector["raster"] = rid
+        self.selector["band"] = rid
 
         # get stats on a sample of my data
         self.stats = self._collectStatistics()

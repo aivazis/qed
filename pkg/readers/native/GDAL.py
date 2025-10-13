@@ -30,7 +30,7 @@ class GDAL(
 
     selectors = qed.protocols.selectors()
     selectors.default = {
-        "raster": [],
+        "band": [],
     }
     selectors.doc = "a map of selector names to their allowed values"
 
@@ -73,15 +73,15 @@ class GDAL(
         # remember the data product
         self.product = dataset
         # update the selectors
-        self.selectors["raster"] = bands
+        self.selectors["band"] = bands
         # initialize the availability map
         self.available = {}
         # and populate it
-        self.available["raster"] = bands
+        self.available["band"] = bands
         # if there is only one available band
         if len(bands) == 1:
             # force this selection
-            self.selections["raster"] = 0
+            self.selections["band"] = 0
         # all done
         return
 
