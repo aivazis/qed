@@ -130,7 +130,7 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                         "selector": selector,
                     }
                     # the off-diagonal terms
-                    if term[0:2] != term[2:]:
+                    if term[0:2] != term[2:4]:
                         # are complex
                         data = SLC(name=name, data=dataset, **config)
                     # the diagonal terms
