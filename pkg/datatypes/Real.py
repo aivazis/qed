@@ -22,5 +22,8 @@ class Real(Datatype):
     channels.default = ["value", "abs"]
     channels.doc = "the names of channels provided by real datatypes"
 
+    # constants
+    summary = ("value", "abs")
+
 
 # end of file
