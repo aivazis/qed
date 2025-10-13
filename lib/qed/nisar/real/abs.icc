@@ -41,7 +41,7 @@ qed::nisar::real::abs(
     // read the data
     auto source = pyre::h5::read<sourceT>(dataset, datatype, from, tile, stride);
     // and render
-    return native::channels::amplitude(source, { 0, 0 }, tile, stride, min, max);
+    return native::channels::amplitude(source, { 0, 0 }, tile, { 1, 1 }, min, max);
 }
 
 
