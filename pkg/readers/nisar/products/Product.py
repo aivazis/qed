@@ -162,8 +162,14 @@ class Product(
         super().__init__(**kwds)
         # save the dataset
         self.data = data
-        # adjust my tile to match the dataset chunk size
-        self.tile = data.chunk
+        # attempt to
+        try:
+            # adjust my tile to match the dataset chunk size
+            self.tile = data.chunk
+        # if anything goes wrong
+        except Exception:
+            # just ignore it and use the configured value
+            pass
         # collect statistics from a sample of my data
         self.stats = self._collectStatistics()
         # populate my channel pipelines
