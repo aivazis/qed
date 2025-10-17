@@ -92,7 +92,7 @@ const Panel = ({ qed }) => {
                     // build an axis and return it
                     return <Axis key={axis} axis={axis}>{values}</Axis>
                 })}
-                <Channels>{channels}</Channels>
+                {channels.length > 0 && <Channels>{channels}</Channels>}
             </Meta.Table>
         </Tray>
     )
