@@ -70,17 +70,20 @@ class H5(qed.flow.factory, implements=qed.protocols.reader):
         """
         Build a map with the available values of each selector
         """
-        # initialize the map
+        # get the map of the required selector values
+        selectors = self.selectors
+        # initialize the map of available values, i.e. values that are present as selections in at
+        # least one known dataset
         available = collections.defaultdict(set)
         # go through my datasets
         for dataset in self.datasets:
-            # and their selectors
-            for axis, coordinate in dataset.selector.items():
-                # and add the {coordinate} as a possible value of {axis}
-                available[axis].add(coordinate)
+            # for each known legal axis
+            for axis in selectors:
+                # add the corresponding value from this dataset to the {available} pile
+                available[axis].add(dataset.selector[axis])
         # now, get my selections
         selections = self.selections
-        # now, go through the options
+        # and go through the options
         for axis, options in available.items():
             # if there is only one option
             if len(options) == 1:
