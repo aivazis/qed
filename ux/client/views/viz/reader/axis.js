@@ -30,7 +30,7 @@ export const Axis = ({ axis, children }) => {
 
     // a mark is required if my reader is the active one and the selector has no value for me
     const mark = active && !selector.get(axis)
-    // make a label that is marked as required when when there is no selection for this {axis}
+    // make a label that is marked as required when there is no selection for this {axis}
     const label = (
         <span>
             {mark ? <span style={styles.mark}>*</span> : null}
