@@ -24,15 +24,15 @@ export const Coordinate = ({ axis, coordinate }) => {
     const reader = useReader()
     // get the selection status of my reader
     const activeReader = useIsActive()
+    // get the current selections; this applies only to the active reader, so careful not to pollute
+    // the logic with stuff that doesn't belong to me
+    const selections = useSelections()
     // ask for the pile of possible values for my {axis}
     const available = useAvailableSelectors(axis)
     // make a toggle
     const toggleCoordinate = useToggleCoordinate(axis, coordinate)
     // park extra state dependent styling here
     const [polish, setPolish] = React.useState(false)
-    // get the current selections; this applies only to the active reader, so careful not to pollute
-    // the logic with stuff that doesn't belong to me
-    const selections = useSelections()
 
     // i'm a possible solution if and only if the set of {available} values contains my {coordinate}
     const possible = available.has(coordinate)
@@ -43,7 +43,7 @@ export const Coordinate = ({ axis, coordinate }) => {
     if (activeReader) {
         // get the current value of my axis
         const currentCoordinate = selections.get(axis)
-        // and i am the current selection for my axis
+        // if i am the current selection for my axis
         if (currentCoordinate == coordinate) {
             // upgrade me
             state = "selected"
