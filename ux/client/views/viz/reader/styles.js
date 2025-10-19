@@ -165,12 +165,11 @@ const axisPaint = {
 const coordinatePaint = {
     base: {
         display: "inline-block",
-        cursor: "pointer",
+        cursor: "default",
         margin: "0.0em 1.0em 0.0em 0.0em",
     },
 
     disabled: {
-        cursor: "default",
         color: wheel.gray.gabro,
         // N.B.:
         //   dimming disabled coordinates using opacity seems to trigger a table rendering bug
@@ -184,12 +183,12 @@ const coordinatePaint = {
     enabled: {},
 
     available: {
+        cursor: "pointer",
         color: theme.page.name,
     },
 
     selected: {
         color: theme.page.name,
-        cursor: "normal",
     },
 }
 
