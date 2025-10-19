@@ -114,7 +114,6 @@ export const Coordinate = ({ axis, coordinate }) => {
 
     // build my controllers
     let behaviors = {
-        onMouseLeave: reset,
     }
     // if i'm enabled
     if (state === "enabled") {
@@ -132,11 +131,12 @@ export const Coordinate = ({ axis, coordinate }) => {
             // with the coordinate toggle
             onClick: toggle,
             // and the highlighter
+            onMouseLeave: reset,
             onMouseEnter: highlight,
         }
     }
     // if i'm selected
-    else if (state == "selected") {
+    else if (state === "selected") {
         // assemble the behaviors
         behaviors = {
             // by extending what was already there
@@ -149,7 +149,7 @@ export const Coordinate = ({ axis, coordinate }) => {
     // mix my paint
     const paint = styles.coordinate(state, polish)
     // pick my tip
-    let tip
+    let tip = ""
     // based on my state; if i'm disabled
     if (state === "disabled") {
         // let the user know why i'm grayed out
@@ -161,7 +161,7 @@ export const Coordinate = ({ axis, coordinate }) => {
 
     }
     // if i'm selected
-    else if (state == "selected") {
+    else if (state === "selected") {
         // explain why interaction is turned off
         tip = `the currently selected ${axis} of '${reader.name}'`
     }
