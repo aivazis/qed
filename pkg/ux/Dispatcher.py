@@ -349,7 +349,7 @@ class Dispatcher:
                     [
                         rf"(?P<data_viewport>\d+)",
                         rf"(?P<data_dataset>{pyreid})",
-                        r"(?P<data_channel>\w+)",
+                        rf"(?P<data_channel>\w+)",
                         rf"(?P<data_zoom>{zoom})",
                         rf"(?P<data_tile>(?P<data_origin>{origin})\+(?P<data_shape>{shape}))",
                     ]
