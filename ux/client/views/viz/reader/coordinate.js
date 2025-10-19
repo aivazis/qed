@@ -95,6 +95,15 @@ export const Coordinate = ({ axis, coordinate }) => {
         // all done
         return
     }
+    // one that just absorbs the click, for the selected value
+    const absorb = evt => {
+        // stop this event from propagating
+        evt.stopPropagation()
+        // and quash any side effects
+        evt.preventDefault()
+        // all done
+        return
+    }
     // and one that removes any extra polish
     const reset = () => {
         // reset the extra polish
@@ -132,23 +141,40 @@ export const Coordinate = ({ axis, coordinate }) => {
         behaviors = {
             // by extending what was already there
             ...behaviors,
-            // with the coordinate toggle only; the coordinate is already highlighted
-            onClick: toggle,
+            // with the handler that absorbs the click; no highlight necessary
+            onClick: absorb,
         }
     }
 
     // mix my paint
     const paint = styles.coordinate(state, polish)
     // pick my tip
-    const tip = (
-        state === "disabled"
-            ? `the ${coordinate} ${axis} is not available in '${reader.name}'`
-            : `select the ${coordinate} ${axis} of '${reader.name}'`
-    )
+    let tip
+    // based on my state; if i'm disabled
+    if (state === "disabled") {
+        // let the user know why i'm grayed out
+        tip = `the ${coordinate} ${axis} is not available in '${reader.name}'`
+    }
+    // if i'm enabled
+    else if (state === "enabled") {
+        tip = `select the ${coordinate} ${axis} of '${reader.name}'`
+
+    }
+    // if i'm selected
+    else if (state == "selected") {
+        // explain why interaction is turned off
+        tip = `the currently selected ${axis} of '${reader.name}'`
+    }
+    // otherwise
+    else {
+        // something is wrong; act like a firewall
+        tip = `unknown state ${state} for ${axis} in '${reader.name}'`
+    }
+
 
     // and render
     return (
-        <div style={paint} {...behaviors} title={tip}>
+        <div title={tip} style={paint} {...behaviors}>
             {coordinate}
         </div>
     )

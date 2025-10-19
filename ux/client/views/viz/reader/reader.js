@@ -64,8 +64,11 @@ const Panel = ({ qed }) => {
         evt.stopPropagation()
         // quash the default behavior
         evt.preventDefault()
-        // modify the server side store
-        select()
+        // modify the server side store, if necessary
+        if (!state) {
+            // by selecting me
+            select()
+        }
         // all done
         return
     }

@@ -189,6 +189,7 @@ const coordinatePaint = {
 
     selected: {
         color: theme.page.name,
+        cursor: "normal",
     },
 }
 
