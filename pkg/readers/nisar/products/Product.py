@@ -162,14 +162,12 @@ class Product(
         super().__init__(**kwds)
         # save the dataset
         self.data = data
-        # attempt to
-        try:
+        # ask {h5} for its on-disk layout
+        layout = data.dcpl.getLayout()
+        # if it is chunked
+        if layout == qed.h5.libh5.Layout.chunked:
             # adjust my tile to match the dataset chunk size
             self.tile = data.chunk
-        # if anything goes wrong
-        except Exception:
-            # just ignore it and use the configured value
-            pass
         # collect statistics from a sample of my data
         self.stats = self._collectStatistics()
         # populate my channel pipelines
