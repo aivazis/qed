@@ -13,7 +13,7 @@ import styles from './styles'
 
 
 // an individual entry
-export const Entry = ({ threshold = 0, attribute, style, children }) => {
+export const Entry = ({ title, threshold = 0, attribute, style, children }) => {
     // get the current detail level
     const { detail } = useDetail()
     // if my threshold is higher
@@ -31,7 +31,7 @@ export const Entry = ({ threshold = 0, attribute, style, children }) => {
     // paint me
     return (
         <tr style={entryStyle}>
-            <td style={attributeStyle}>{attribute}</td>
+            <td title={title} style={attributeStyle}>{attribute}</td>
             <td style={separatorStyle}>:</td>
             <td style={valueStyle}>
                 {children}
