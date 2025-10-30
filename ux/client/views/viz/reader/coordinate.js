@@ -89,18 +89,9 @@ export const Coordinate = ({ axis, coordinate }) => {
         if (available.size > 1) {
             // toggle me as the value of my {axis}
             toggleCoordinate()
-            // reset the extra polish
+            // disable the extra polish
             setPolish(false)
         }
-        // all done
-        return
-    }
-    // one that just absorbs the click, for the selected value
-    const absorb = evt => {
-        // stop this event from propagating
-        evt.stopPropagation()
-        // and quash any side effects
-        evt.preventDefault()
         // all done
         return
     }
@@ -141,8 +132,8 @@ export const Coordinate = ({ axis, coordinate }) => {
         behaviors = {
             // by extending what was already there
             ...behaviors,
-            // with the handler that absorbs the click; no highlight necessary
-            onClick: absorb,
+            // with the coordinate toggle
+            onClick: toggle,
         }
     }
 
