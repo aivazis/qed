@@ -65,8 +65,8 @@ const Panel = ({ qed }) => {
         // quash the default behavior
         evt.preventDefault()
         // modify the server side store, if necessary
-        if (!state) {
-            // by selecting me
+        if (!active) {
+            // by selecting me if i'm not the active reader
             select()
         }
         // all done
