@@ -12,7 +12,7 @@ import qed
 
 
 # the basic reader for products in HDF5 format
-class H5(qed.flow.factory, implements=qed.protocols.reader):
+class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protocols.reader):
     """
     The base class for readers of HDF5 files
     """
@@ -31,7 +31,7 @@ class H5(qed.flow.factory, implements=qed.protocols.reader):
     selections.doc = "a key value store of preferred values for selectors"
 
     pages = qed.properties.int()
-    pages.default = None
+    pages.default = 1024**2
     pages.doc = "the number of 4K pages in the aggregation cache"
 
     # metamethods
