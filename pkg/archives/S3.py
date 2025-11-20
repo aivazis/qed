@@ -33,47 +33,30 @@ class S3(Archive, family="qed.archives.s3"):
         Retrieve the archive contents at {uri}, a location expected to belong within the archive
         document space
         """
+        # normalize {uri}
+        # MGA: FIXME: remove the normalization after {uri} has {path} in {address}
+        uri.address = qed.primitives.path(uri.address)
         # get my root
         root = self.fs
-        # lookup its location
-        location = root.location()
-        # get the target address
-        path = qed.primitives.path(uri.address)
-        # project it onto my prefix
-        rel = path.relativeTo(location.address)
-
-        # attempt to
-        try:
-            # get the folder
-            folder = root[rel]
-        # if it doesn't exist
-        except root.NotFoundError as error:
-            # make a channel
-            channel = journal.error("qed.archives.s3")
-            # complain
-            channel.line(f"could not find '{uri}'")
-            channel.line(f"while exploring '{location}'")
-            channel.line(f"error: {error}")
-            # flush
-            channel.log()
-            # and bail
-            return []
-        # get its contents
-        contents = tuple(sorted(folder.contents.items()))
-
+        # project it onto the root of my filesystem
+        rel = uri.address.relativeTo(root.uri.address)
+        # ask for the folder at {uri}
+        folder = root[rel]
+        # look down one level
+        folder.discover(levels=1)
         # make a pile of files
         files = [
-            (name, location.clone(address=location.address / node.uri), node.isFolder)
-            for name, node in contents
+            (name, node.uri, node.isFolder)
+            for name, node in folder.contents.items()
             if not node.isFolder
         ]
         # and a pile of directories
         folders = [
-            (name, location.clone(address=location.address / node.uri), node.isFolder)
-            for name, node in contents
+            (name, node.uri, node.isFolder)
+            for name, node in folder.contents.items()
             if node.isFolder
         ]
-        # present them in this order
+        # and present them in this order
         return folders + files
 
     # metamethods
@@ -81,14 +64,14 @@ class S3(Archive, family="qed.archives.s3"):
         # chain up
         super().__init__(**kwds)
         # mount my s3 filesystem
-        self.fs = qed.filesystem.s3(root=self.uri).discover()
+        self.fs = qed.filesystem.s3(root=self.uri).discover(levels=1)
 
-        # make an explorer
-        explorer = qed.filesystem.treeExplorer()
         # make a channel
         channel = journal.debug("qed.archives.s3")
         # if the channel is active
         if channel:
+            # make an explorer
+            explorer = qed.filesystem.treeExplorer()
             # show me
             channel.report(
                 report=explorer.explore(node=self.fs, label=self.fs.location().address)
