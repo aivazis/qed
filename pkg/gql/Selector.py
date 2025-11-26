@@ -32,7 +32,7 @@ class Selector(graphene.ObjectType):
         """
         Get the {selector} value
         """
-        # the name is the second value of the pair
+        # the value is the second value of the pair
         return selector[1]
 
 
