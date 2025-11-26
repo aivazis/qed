@@ -65,10 +65,8 @@ export const S3 = ({ view, setType, hide }) => {
         const region = (field == "region") ? value : form.region
         const bucket = (field == "bucket") ? value : form.bucket
         const path = (field == "path") ? value : form.path
-        // form the authority portion of the uri
-        const authority = (profile.length > 0) ? `${profile}@${region}` : region
         // update the uri of the archive in the current view
-        view.archive.uri = `s3://${authority}/${bucket}/${path}`
+        view.archive.uri = `s3://${bucket}/${path}`
         // and set it
         decorate(view)
         // all done
@@ -87,10 +85,8 @@ export const S3 = ({ view, setType, hide }) => {
         const region = form.region
         const bucket = form.bucket
         const path = form.path
-        // form the authority portion of the uri
-        const authority = profile.length > 0 ? `${profile}@${region}` : region
         // update the uri of the archive in the current view
-        const uri = `s3://${authority}/${bucket}/${path}`
+        const uri = `s3://${bucket}/${path}`
         // send the mutation to the server
         request({
             // input
@@ -98,6 +94,12 @@ export const S3 = ({ view, setType, hide }) => {
                 // the payload
                 name: `s3:${name}`,
                 uri,
+                credentials: {
+                    tokens: [
+                        { name: "profile", value: profile },
+                        { name: "region", value: region },
+                    ]
+                },
             },
             // updater
             updater: store => {
@@ -180,12 +182,16 @@ export const S3 = ({ view, setType, hide }) => {
 
 // the mutation that connects a archive
 const connectMutation = graphql`
-    mutation s3ArchiveMutation($name: String!, $uri: String!) {
-        connectArchive(name: $name, uri: $uri) {
+    mutation s3ArchiveMutation($name: String!, $uri: String!, $credentials: CredentialsInput!) {
+        connectArchive(name: $name, uri: $uri, credentials: $credentials) {
             archive {
                 id
                 name
                 uri
+                credentials {
+                    name
+                    value
+                }
                 readers
             }
         }

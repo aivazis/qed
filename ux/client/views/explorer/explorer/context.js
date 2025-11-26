@@ -23,6 +23,10 @@ export const Provider = ({ qed, children }) => {
                 id
                 name
                 uri
+                credentials {
+                    name
+                    value
+                }
                 readers
             }
         }`,
