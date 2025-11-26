@@ -7,6 +7,7 @@
 # support
 import qed
 import journal
+import boto3
 
 # superclass
 from .Archive import Archive
@@ -20,8 +21,16 @@ class S3(Archive, family="qed.archives.s3"):
 
     # the location
     uri = qed.properties.uri()
-    uri.default = qed.primitives.uri(scheme="file", address=qed.primitives.path.cwd())
+    uri.default = qed.primitives.uri(scheme="s3")
     uri.doc = "the location of the archive"
+
+    profile = qed.properties.str()
+    profile.default = None
+    profile.doc = "the name of the authentication profile"
+
+    region = qed.properties.str()
+    region.default = None
+    region.doc = "the name of the region where the data bucket resides"
 
     # constants
     readers = ("nisar",)
@@ -33,15 +42,14 @@ class S3(Archive, family="qed.archives.s3"):
         Retrieve the archive contents at {uri}, a location expected to belong within the archive
         document space
         """
-        # normalize {uri}
-        # MGA: FIXME: remove the normalization after {uri} has {path} in {address}
-        uri.address = qed.primitives.path(uri.address)
         # get my root
         root = self.fs
-        # project it onto the root of my filesystem
-        rel = uri.address.relativeTo(root.uri.address)
+        # normalize the {uri}, until the primitives does this automatically
+        uri.address = qed.primitives.path(uri.address)
+        # project the request
+        projection = uri.address.relativeTo(root.uri.address)
         # ask for the folder at {uri}
-        folder = root[rel]
+        folder = root[projection]
         # look down one level
         folder.discover(levels=1)
         # make a pile of files
@@ -63,8 +71,24 @@ class S3(Archive, family="qed.archives.s3"):
     def __init__(self, **kwds):
         # chain up
         super().__init__(**kwds)
+        # unpack my state
+        uri = self.uri
+        profile = self.profile
+        region = self.region
+        # build the AWS credentials
+        opts = {}
+        # if i know the profile
+        if profile:
+            # add it to the pile
+            opts["profile_name"] = profile
+        # if i know the region
+        if region:
+            # add it to the pile
+            opts["region_name"] = region
+        # make a session
+        session = boto3.Session(**opts)
         # mount my s3 filesystem
-        self.fs = qed.filesystem.s3(root=self.uri).discover(levels=1)
+        self.fs = qed.filesystem.s3(root=uri, session=session).discover(levels=1)
 
         # make a channel
         channel = journal.debug("qed.archives.s3")
