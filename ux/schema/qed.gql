@@ -87,8 +87,17 @@ type Archive implements Node {
   name: String!
   # its uri
   uri: String!
+  # credentials
+  credentials: [Credential!]!
   # the supported readers
   readers: [String!]!
+}
+
+type Credential {
+  # the name of the token
+  name: String!
+  # the value of the token
+  value: String!
 }
 
 # archive contents
@@ -300,7 +309,7 @@ type Mutation {
   viewZoomReset(viewport: Int!): DatasetZoomInfo!
 
   # data archive connections
-  connectArchive(name: String!, uri: String!): ArchiveInfo!
+  connectArchive(name: String!, uri: String!, credentials: CredentialsInput): ArchiveInfo!
   connectEarthAccessArchive(
     name: String!, uri: String!,
     count: String,
@@ -325,6 +334,15 @@ type Mutation {
   updateRangeController(range: RangeControllerUpdateInput!): RangeControllerInfo!
   resetValueController(controller: ValueControllerResetInput!): ValueControllerInfo!
   updateValueController(value: ValueControllerUpdateInput!): ValueControllerInfo!
+}
+
+input CredentialsInput {
+  tokens: [CredentialInput!]
+}
+
+input CredentialInput {
+  name: String!
+  value: String!
 }
 
 type PersistInfo {
