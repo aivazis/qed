@@ -10,6 +10,9 @@ import graphene
 # my interface
 from .Node import Node
 
+# my parts
+from .Credential import Credential
+
 
 # my node type
 class Archive(graphene.ObjectType):
@@ -26,6 +29,7 @@ class Archive(graphene.ObjectType):
     id = graphene.ID()
     name = graphene.String()
     uri = graphene.String()
+    credentials = graphene.List(Credential)
     readers = graphene.List(graphene.String)
 
     # the resolvers
