@@ -9,6 +9,9 @@ import graphene
 import journal
 import qed
 
+# the input types
+from .CredentialsInput import CredentialsInput
+
 # the result types
 from .Archive import Archive
 
@@ -24,13 +27,14 @@ class ConnectArchive(graphene.Mutation):
         # the update context
         name = graphene.String(required=True)
         uri = graphene.String(required=True)
+        credentials = CredentialsInput()
 
     # the result is always an archive
     archive = graphene.Field(Archive)
 
     # the range controller mutator
     @staticmethod
-    def mutate(root, info, name, uri):
+    def mutate(root, info, name, uri, credentials):
         """
         Add a new archive to the pile
         """
@@ -58,8 +62,14 @@ class ConnectArchive(graphene.Mutation):
             archive = qed.archives.local(name=name, uri=uri)
         # if it's an archive in an S3 bucket
         elif uri.scheme == "s3":
-            # mount it
-            archive = qed.archives.s3(name=name, uri=uri)
+            # initialize the credentials
+            tokens = {
+                token["name"]: token["value"]
+                for token in credentials.tokens
+                if token["value"]
+            }
+            # build the archive and mount it
+            archive = qed.archives.s3(name=name, uri=uri, **tokens)
         # anything else
         else:
             # make a channel
