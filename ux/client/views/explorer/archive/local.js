@@ -78,6 +78,9 @@ export const Local = ({ view, setType, hide }) => {
                 // the payload
                 name: `local:${name}`,
                 uri: `file:${path}`,
+                credentials: {
+                    tokens: []
+                },
             },
             // updater
             updater: store => {
@@ -161,8 +164,8 @@ export const Local = ({ view, setType, hide }) => {
 
 // the mutation that connects a local archive
 const connectMutation = graphql`
-    mutation localArchiveMutation($name: String!, $uri: String!) {
-        connectArchive(name: $name, uri: $uri) {
+    mutation localArchiveMutation($name: String!, $uri: String!, $credentials: CredentialsInput!) {
+        connectArchive(name: $name, uri: $uri, credentials: $credentials) {
             archive {
                 id
                 name
