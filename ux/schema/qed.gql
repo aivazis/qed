@@ -419,6 +419,7 @@ type ArchiveInfo {
 # support for connecting and disconnecting data readers
 # the request payload
 input ReaderInput {
+  archive: String!
   reader: String!
   name: String!
   uri: String!
