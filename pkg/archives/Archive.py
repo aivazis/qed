@@ -35,6 +35,13 @@ class Archive(
         # i got nothing
         return []
 
+    def credentials(self):
+        """
+        Generate the credentials necessary to access my contents
+        """
+        # nothing, by default
+        return {}
+
     # implementation details
     # visitor support
     def identify(self, visitor, **kwds):

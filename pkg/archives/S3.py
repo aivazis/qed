@@ -67,6 +67,26 @@ class S3(Archive, family="qed.archives.s3"):
         # and present them in this order
         return folders + files
 
+    def credentials(self):
+        """
+        Generate the credentials necessary to access my contents
+        """
+        # prime by chaining up
+        credentials = super().credentials()
+        # unpack my state
+        session = self.fs.session
+        # we need the region
+        region = session.region_name
+        # and the session credentials
+        frozen = session.get_credentials().get_frozen_credentials()
+        # pack the S3 credentials
+        credentials["region"] = region
+        credentials["access_key"] = frozen.access_key
+        credentials["secret_key"] = frozen.secret_key
+        credentials["token"] = frozen.token
+        # and hand them off
+        return credentials
+
     # metamethods
     def __init__(self, **kwds):
         # chain up
