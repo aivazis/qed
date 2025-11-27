@@ -18,22 +18,5 @@ class Credential(graphene.ObjectType):
     name = graphene.String()
     value = graphene.String()
 
-    # the resolvers
-    @staticmethod
-    def resolve_name(credential, *_):
-        """
-        Get the {credential} name
-        """
-        # the name is the first value of the pair
-        return credential[0]
-
-    @staticmethod
-    def resolve_value(credential, *_):
-        """
-        Get the {credential} value
-        """
-        # the value is the second value of the pair
-        return credential[1]
-
 
 # end of file

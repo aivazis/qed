@@ -58,6 +58,20 @@ class Archive(graphene.ObjectType):
         return f"{archive.uri}"
 
     @staticmethod
+    def resolve_credentials(archive, *_):
+        """
+        Get the archive location
+        """
+        # get the archive credentials
+        credentials = archive.credentials()
+        # go through them
+        for name, value in credentials.items():
+            # and convert them into credential form
+            yield {"name": name, "value": value}
+        # all done
+        return
+
+    @staticmethod
     def resolve_readers(archive, *_):
         """
         Get the supported readers
