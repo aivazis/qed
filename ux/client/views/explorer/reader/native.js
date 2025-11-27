@@ -106,6 +106,7 @@ const Spec = ({ qref, view, setType, hide }) => {
     const { error, update, makeConnector, cancel } = useConnectReader(setForm, hide)
     // build the payload
     const spec = {
+        archive: view.reader.archive,
         reader: "native.flat",
         name: form.name,
         uri,
