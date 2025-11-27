@@ -62,10 +62,8 @@ class ConnectReader(graphene.Mutation):
         factory = qed.protocols.reader.pyre_resolveSpecification(spec=reader)
         # get the archive
         archive = store.archive(uri=archive)
-        # ask it for credentials
-        credentials = archive.credentials()
         # instantiate
-        source = factory(credentials=credentials, **args)
+        source = factory(archive=archive, **args)
         # get the store
         store = info.context["store"]
         # add the new source to the store
