@@ -50,7 +50,7 @@ class Reader(
     datasets.doc = "the list of data sets provided by the reader"
 
     # metamethods
-    def __init__(self, name, **kwds):
+    def __init__(self, name, archive=None, **kwds):
         # make a timer that measures the layout discovery time
         discovery = qed.timers.wall(f"qed.profiler.discovery.{name}")
         # start the discovery timer

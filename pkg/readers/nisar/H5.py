@@ -35,7 +35,7 @@ class H5(qed.flow.factory, implements=qed.protocols.reader):
     pages.doc = "the number of 4K pages in the aggregation cache"
 
     # metamethods
-    def __init__(self, credentials=None, fapl=None, **kwds):
+    def __init__(self, archive=None, fapl=None, **kwds):
         # chain up
         super().__init__(**kwds)
         # if the caller didn't provide an access property list
@@ -50,8 +50,12 @@ class H5(qed.flow.factory, implements=qed.protocols.reader):
             size = 4 * 1024 * pages
             # adjust the {fapl}
             fapl.setPageBufferSize(page=size, meta=50, raw=50)
+        # if i'm managed, get access credentials from the archive
+        credentials = archive.credentials() if archive else {}
         # open my file
-        self.product = qed.h5.reader(uri=self.uri, credentials=credentials, fapl=fapl).read()
+        self.product = qed.h5.reader(
+            uri=self.uri, credentials=credentials, fapl=fapl
+        ).read()
 
         # load the datasets
         self._loadDatasets()

@@ -41,7 +41,7 @@ class GDAL(
     datasets.doc = "the list of data sets provided by the reader"
 
     # metamethods
-    def __init__(self, name, **kwds):
+    def __init__(self, name, archive=None, **kwds):
         # chain up
         super().__init__(name=name, **kwds)
         # open the file
