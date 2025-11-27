@@ -153,10 +153,16 @@ class Query(graphene.ObjectType):
             channel.log()
             # bail
             return context
+        # grab the store
+        store = info.context["store"]
+        # identify the archive
+        manager = store.archive(uri=archive)
+        # ask it for credentials
+        credentials = manager.credentials()
         # attempt to
         try:
             # load the metadata
-            metadata = factory(uri=uri)
+            metadata = factory(uri=uri, credentials=credentials)
         # if anything goes wrong
         except Exception as error:
             # make a channel
