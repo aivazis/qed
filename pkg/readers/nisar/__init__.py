@@ -27,7 +27,7 @@ from .GCOV import GCOV as gcov
 
 
 # metadata factory
-def metadata(uri):
+def metadata(uri, credentials, **kwds):
     """
     Build a metadata object
     """
@@ -36,7 +36,10 @@ def metadata(uri):
     # attach the uri
     metadata.uri = uri
     # open the file
-    data = qed.h5.read(uri=uri)
+    #
+    # MGA: we are here...
+    #
+    data = qed.h5.read(uri=uri, credentials=credentials)
     # set the product type
     metadata.product = data.science.LSAR.identification.productType.lower()
     # attempt to

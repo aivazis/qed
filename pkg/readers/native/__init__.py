@@ -33,7 +33,7 @@ def gdal():
 
 
 # metadata factory
-def metadata(uri):
+def metadata(uri, **kwds):
     """
     Build a metadata object
     """

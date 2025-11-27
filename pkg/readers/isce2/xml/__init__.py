@@ -11,7 +11,7 @@ from .Document import Document as document
 
 
 # high level metadata extractor
-def metadata(uri):
+def metadata(uri, **kwds):
     """
     Given the {uri} of a data product, extract the metadata from its auxiliary file
     """
