@@ -35,7 +35,10 @@ class ConnectReader(graphene.Mutation):
         """
         Add a new reader to the pile
         """
+        # get the store
+        store = info.context["store"]
         # unpack
+        archive = spec["archive"]
         reader = spec["reader"]
         name = spec["name"]
         uri = spec["uri"]
@@ -57,8 +60,12 @@ class ConnectReader(graphene.Mutation):
             args["cell"] = cell
         # resolve the {reader} into a factory
         factory = qed.protocols.reader.pyre_resolveSpecification(spec=reader)
+        # get the archive
+        archive = store.archive(uri=archive)
+        # ask it for credentials
+        credentials = archive.credentials()
         # instantiate
-        source = factory(**args)
+        source = factory(credentials=credentials, **args)
         # get the store
         store = info.context["store"]
         # add the new source to the store

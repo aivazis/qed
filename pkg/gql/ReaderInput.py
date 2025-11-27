@@ -15,6 +15,7 @@ class ReaderInput(graphene.InputObjectType):
     """
 
     # the fields
+    archive = graphene.String(required=True)
     reader = graphene.String(required=True)
     name = graphene.String(required=True)
     uri = graphene.String(required=True)
