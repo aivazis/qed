@@ -14,6 +14,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 // generator support
 import 'regenerator-runtime'
 
+// configuration for image lazy loading
+import './lazysizes.config.js'
 // support for image lazy loading
 import 'lazysizes'
 // detect attribute changes in transformed elements
