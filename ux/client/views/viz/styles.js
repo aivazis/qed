@@ -14,7 +14,7 @@ import { wheel, theme } from '~/palette'
 const meta = {
     // the overall table: three columns: {attribute}, {separator}, {value}
     box: {
-        fontFamily: "rubik-light",
+        fontFamily: "fira-sans-light",
         color: theme.header.color,
     },
     // for each row
@@ -27,7 +27,7 @@ const meta = {
     separator: {},
     // the value of the attribute
     value: {
-        fontFamily: "inconsolata",
+        fontFamily: "fira-mono-regular",
         color: theme.page.bright,
     },
 }
