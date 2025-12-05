@@ -17,7 +17,7 @@ const box = {
 const entry = {
     cursor: "default",
     lineHeight: "150%",
-    verticalAlign: "baseline",
+    verticalAlign: "middle",
 }
 
 const attribute = {
