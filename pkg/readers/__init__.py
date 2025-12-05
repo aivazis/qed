@@ -13,6 +13,9 @@ from . import alos
 from . import nisar
 from . import asar
 
+# stack
+from . import stacks
+
 # reader metadata
 from .Metadata import Metadata as metadata
 
