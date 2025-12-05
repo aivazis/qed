@@ -118,6 +118,16 @@ a:active {
     src: url("../fonts/rubik-light.ttf");
 }
 
+@font-face {
+    font-family: "fira-sans-light";
+    src: url("../fonts/fira-sans-light.ttf");
+}
+
+@font-face {
+    font-family: "fira-mono-regular";
+    src: url("../fonts/fira-mono-regular.ttf");
+}
+
 
 /* animations */
 @keyframes busy {
