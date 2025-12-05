@@ -22,6 +22,7 @@ import { useSelectReader } from './useSelectReader'
 // components
 import { Axis } from './axis'
 import { Channels } from './channels'
+import { Stack } from './stack'
 import { Disconnect } from './disconnect'
 // styles
 import styles from './styles'
@@ -93,6 +94,7 @@ const Panel = ({ qed }) => {
                     return <Axis key={axis} axis={axis}>{values}</Axis>
                 })}
                 <Channels>{channels}</Channels>
+                <Stack />
             </Meta.Table>
         </Tray>
     )
