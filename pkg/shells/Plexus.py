@@ -34,6 +34,10 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     datasets.doc = "the list of datasets to display"
     datasets.aliases = {"ds"}
 
+    # the pile of known stacks
+    stacks = qed.properties.list(schema=qed.protocols.stack())
+    stacks.doc = "the list of dataset stacks"
+
     views = qed.properties.list(schema=qed.protocols.ux.view())
     views.doc = "the initial list of views"
 
