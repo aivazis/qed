@@ -20,6 +20,7 @@ from .ArchiveFilter import ArchiveFilter as archiveFilter
 from .Datatype import Datatype as datatype
 from .Dataset import Dataset as dataset
 from .Reader import Reader as reader
+from .Stack import Stack as stack
 
 # visualization workflows
 from .Channel import Channel as channel
