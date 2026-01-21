@@ -1,0 +1,17 @@
+# -*- makefile -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2026 all rights reserved
+
+
+# performance assessments
+qed.perf.stem := qed.perf
+# its location
+qed.perf.root := perf/
+# external dependencies
+qed.perf.extern := pyre
+# compiler control
+qed.perf.c++.flags += $($(compiler.c++).std.c++20)
+
+
+# end of file

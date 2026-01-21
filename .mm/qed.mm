@@ -13,7 +13,7 @@ qed.extensions := qed.ext
 # a ux bundle
 qed.webpack := qed.ux
 # tests
-qed.tests := qed.pkg.tests qed.ext.tests qed.data
+qed.tests := qed.pkg.tests qed.ext.tests qed.perf qed.data
 # docker images
 qed.docker-images := \
     qed.ci.lunar-gcc qed.ci.jammy-gcc  \
