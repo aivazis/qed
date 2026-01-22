@@ -23,7 +23,7 @@ it, and skip to the end of this section.
 
 
 If you are comfortable with `jupyter` notebooks, the current
-[release tarball](https://github.com/aivazis/qed/archive/refs/tags/v0.9.4.tar.gz)
+[release tarball](https://github.com/aivazis/qed/archive/refs/tags/v0.9.5.tar.gz)
 contains a notebook that can walk you through the installation procedure with minimal tweaking.
 It is located in `etc/mamba/qed.ipynb`. Please report any difficulties you encounter.
 
@@ -295,7 +295,7 @@ By default, the application operates as a command line tool:
 ``` text
 ~/dv/qed> qed
 
-  qed 0.9.4 revision 847415b9
+  qed 0.9.5 revision 847415b9
   copyright (c) 1998-2026 all rights reserved
 
   The main action dispatcher
