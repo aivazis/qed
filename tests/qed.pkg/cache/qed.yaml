@@ -1,0 +1,17 @@
+# -*- coding: utf-8 -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2026 all rights reserved
+
+
+# setup the app services
+cache.nexus.services:
+    tilers: qed.cache.tileCache
+
+# configure the {tilers}
+cache.nexus.services.tilers:
+    # the team size
+    size: 10
+
+
+# end of file
