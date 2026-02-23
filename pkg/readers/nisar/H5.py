@@ -34,6 +34,50 @@ class H5(qed.flow.factory, implements=qed.protocols.reader):
     pages.default = None
     pages.doc = "the number of 4K pages in the aggregation cache"
 
+    # interface
+    def select(self, selector):
+        """
+        Retrieve all datasets that match {selector}
+        """
+        # go through my datasets
+        for dataset in self.datasets:
+            # get their selectors
+            spec = dataset.selector
+            # go through the constraints provided by the user
+            for key, value in selector.items():
+                # if it's not a match
+                if spec[key] != value:
+                    # bail
+                    break
+            # if everything matched
+            else:
+                # hand the dataset off
+                yield dataset
+
+        # all done
+        return
+
+    def find(self, selector):
+        """
+        Retrieve the first dataset that matches {selector}
+        """
+        # go through my datasets
+        for dataset in self.datasets:
+            # get their selectors
+            spec = dataset.selector
+            # go through the constraints provided by the user
+            for key, value in selector.items():
+                # if it's not a match
+                if spec[key] != value:
+                    # bail
+                    break
+            # if everything matched
+            else:
+                # hand the dataset off
+                return dataset
+        # all done
+        return
+
     # metamethods
     def __init__(self, archive=None, fapl=None, **kwds):
         # chain up
