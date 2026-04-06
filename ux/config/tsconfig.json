@@ -8,13 +8,12 @@
         "jsx": "react",
         "allowJs": true,
         "esModuleInterop": true,
-        "baseUrl": "./",
         "paths": {
             "~/*": [
                 "./client/*"
             ],
             "generated/*": [
-                "generated/*"
+                "./generated/*"
             ]
         }
     },
