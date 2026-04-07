@@ -14,11 +14,14 @@ from pyre import (
     component,
     foundry,
     # decorators
-    export,
     provides,
+    required,
+    export,
+    implements,
     # the manager of the pyre runtime
     executive,
     # support for concurrency
+    ipc,
     nexus,
     # support for workflows, products, and factories
     flow,
@@ -59,6 +62,9 @@ from . import protocols
 
 # support for data archives
 from . import archives
+
+# dataset caching
+from . import cache
 
 # support for data types, controllers, and readers
 from . import datatypes
