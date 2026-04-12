@@ -30,6 +30,8 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
         "band": ["L", "S"],
         "frequency": ["A", "B"],
         "polarization": ["HH", "HV", "VH", "VV"],
+	"layer": ["phase","ionosphere"],
+
     }
 
     # implementation details
@@ -102,12 +104,13 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                     # get the dataset
                     dataset = data.unwrappedPhase
                     # generate a name for the dataset
-                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}"
+                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.unwrappedPhase"
                     # build its selector
                     selector = {
                         "band": band,
                         "frequency": frequency,
                         "polarization": polarization,
+			"layer": "phase",
                     }
                     # pack its configuration
                     config = {
@@ -119,6 +122,29 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                     unw = UNW(name=name, data=dataset, **config)
                     # add the dataset to my pile
                     self.datasets.append(unw)
+		    # read the ionospheric layer
+                    # get the dataset
+                    dataset = data.ionospherePhaseScreen
+                    # generate a name for the dataset
+                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.ionospherePhaseScreen"
+                    # build its selector
+                    selector = {
+                        "band": band,
+                        "frequency": frequency,
+                        "polarization": polarization,
+			"layer": "ionosphere",
+                    }
+                    # pack its configuration
+                    config = {
+                        "uri": self.uri,
+                        "shape": dataset.shape,
+                        "selector": selector,
+                    }
+                    # instantiate it
+                    iono = UNW(name=name, data=dataset, **config)
+                    # add the dataset to my pile
+                    self.datasets.append(iono)
+
         # all done
         return
 
