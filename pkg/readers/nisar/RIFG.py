@@ -70,7 +70,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                     # so grab a channel
                     channel = journal.warning("qed.nisar.rifg")
                     # and complain
-                    channel.line(f"while exploring '{name}'")
+                    channel.line(f"while exploring '{product.pyre_name}'")
                     channel.line(
                         f"no '{frequency}' frequency in the '{band}'-band swaths"
                     )
@@ -91,7 +91,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                         # so grab a channel
                         channel = journal.warning("qed.nisar.rifg")
                         # and complain
-                        channel.line(f"while exploring '{name}'")
+                        channel.line(f"while exploring '{product.pyre_name}'")
                         channel.line(
                             f"no '{polarization}' polarization in the '{frequency}' swath"
                         )

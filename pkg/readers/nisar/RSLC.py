@@ -77,7 +77,7 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
                     # so grab a channel
                     channel = journal.warning("qed.nisar.rslc")
                     # and complain
-                    channel.line(f"while exploring '{name}'")
+                    channel.line(f"while exploring '{product.pyre_name}'")
                     channel.line(
                         f"no '{frequency}' frequency in the '{band}'-band swaths"
                     )
@@ -98,7 +98,7 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
                         # so grab a channel
                         channel = journal.warning("qed.nisar.rslc")
                         # and complain
-                        channel.line(f"while exploring '{name}'")
+                        channel.line(f"while exploring '{product.pyre_name}'")
                         channel.line(
                             f"no '{polarization}' polarization in the '{frequency}' swath"
                         )
