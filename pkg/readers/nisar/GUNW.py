@@ -12,7 +12,9 @@ import journal
 from .H5 import H5
 
 # my dataset
+from .products.SLC import SLC
 from .products.UNW import UNW
+from .products.Real import Real
 
 
 # the GUNW reader
@@ -30,7 +32,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
         "band": ["L", "S"],
         "frequency": ["A", "B"],
         "polarization": ["HH", "HV", "VH", "VV"],
-	"layer": ["phase","ionosphere"],
+	"layer": ["phase","ionosphere","coherence","interferogram","wrapped coherence"],
 
     }
 
@@ -88,6 +90,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                     try:
                         # get the dataset
                         data = getattr(grid.unwrappedInterferogram, polarization)
+                        datawrap = getattr(grid.wrappedInterferogram, polarization)
                     # if not there
                     except AttributeError:
                         # so grab a channel
@@ -101,7 +104,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                         channel.log()
                         # and move on
                         continue
-                    # get the dataset
+                    # get the unwrapped dataset
                     dataset = data.unwrappedPhase
                     # generate a name for the dataset
                     name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.unwrappedPhase"
@@ -122,17 +125,17 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                     unw = UNW(name=name, data=dataset, **config)
                     # add the dataset to my pile
                     self.datasets.append(unw)
-		    # read the ionospheric layer
+		    # read the unwrapped coherence layer
                     # get the dataset
-                    dataset = data.ionospherePhaseScreen
+                    dataset = data.coherenceMagnitude
                     # generate a name for the dataset
-                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.ionospherePhaseScreen"
+                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.coherenceMagnitude"
                     # build its selector
                     selector = {
                         "band": band,
                         "frequency": frequency,
                         "polarization": polarization,
-			"layer": "ionosphere",
+			"layer": "coherence",
                     }
                     # pack its configuration
                     config = {
@@ -141,9 +144,55 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                         "selector": selector,
                     }
                     # instantiate it
-                    iono = UNW(name=name, data=dataset, **config)
+                    coh = Real(name=name, data=dataset, **config)
                     # add the dataset to my pile
-                    self.datasets.append(iono)
+                    self.datasets.append(coh)
+
+                    # get the unwrapped dataset
+                    dataset = datawrap.wrappedInterferogram
+                    # generate a name for the dataset
+                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.wrappedInterferogram"
+                    # build its selector
+                    selector = {
+                        "band": band,
+                        "frequency": frequency,
+                        "polarization": polarization,
+			"layer": "interferogram",
+                    }
+                    # pack its configuration
+                    config = {
+                        "uri": self.uri,
+                        "shape": dataset.shape,
+                        "selector": selector,
+                    }
+                    # instantiate it
+                    wrp = SLC(name=name, data=dataset, **config)
+                    # add the dataset to my pile
+                    self.datasets.append(wrp)
+		    # read the unwrapped coherence layer
+
+
+                    # get the wrapped dataset
+                    dataset = datawrap.coherenceMagnitude
+                    # generate a name for the dataset
+                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.wrappedcoherenceMagnitude"
+                    # build its selector
+                    selector = {
+                        "band": band,
+                        "frequency": frequency,
+                        "polarization": polarization,
+			"layer": "wrapped coherence",
+                    }
+                    # pack its configuration
+                    config = {
+                        "uri": self.uri,
+                        "shape": dataset.shape,
+                        "selector": selector,
+                    }
+                    # instantiate it
+                    wcoh = Real(name=name, data=dataset, **config)
+                    # add the dataset to my pile
+                    self.datasets.append(wcoh)
 
         # all done
         return
