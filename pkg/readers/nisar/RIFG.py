@@ -31,7 +31,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
         "band": ["L", "S"],
         "frequency": ["A", "B"],
         "polarization": ["HH", "HV", "VH", "VV"],
-        "layer": ["interferogram","coherence"],
+        "layer": ["interferogram", "coherence"],
     }
 
     # implementation details
@@ -102,49 +102,85 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                         # and move on
                         continue
 
-                    # get the interferogram dataset
-                    dataset = data.wrappedInterferogram
-                    # generate a name for the dataset
-                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.wrappedInterferogram"
-                    # build its selector
-                    selector = {
-                        "band": band,
-                        "frequency": frequency,
-                        "polarization": polarization,
-                        "layer": "interferogram",
-                    }
-                    # pack its configuration
-                    config = {
-                        "uri": self.uri,
-                        "shape": dataset.shape,
-                        "selector": selector,
-                    }
-                    # instantiate it
-                    slc = SLC(name=name, data=dataset, **config)
-                    # add the dataset to my pile
-                    self.datasets.append(slc)
+                    # attempt to
+                    try:
+                        # get the interferogram dataset
+                        dataset = data.wrappedInterferogram
+                    # if the dataset is not present
+                    except AttributeError:
+                        # so grab a channel
+                        channel = journal.warning("qed.nisar.rifg")
+                        # and complain
+                        channel.line(f"while exploring '{product.pyre_name}':")
+                        channel.indent()
+                        channel.line(f"no 'wrappedInterferogram' dataset ")
+                        channel.line(
+                            f"in band '{band}', frequency '{frequency}, polarization '{polarization}"
+                        )
+                        channel.outdent()
+                        # flush
+                        channel.log()
+                    # otherwise
+                    else:
+                        # generate a name for the dataset
+                        name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.wrappedInterferogram"
+                        # build its selector
+                        selector = {
+                            "band": band,
+                            "frequency": frequency,
+                            "polarization": polarization,
+                            "layer": "interferogram",
+                        }
+                        # pack its configuration
+                        config = {
+                            "uri": self.uri,
+                            "shape": dataset.shape,
+                            "selector": selector,
+                        }
+                        # instantiate it
+                        slc = SLC(name=name, data=dataset, **config)
+                        # add the dataset to my pile
+                        self.datasets.append(slc)
 
-                    # get the coherence dataset
-                    dataset = data.coherenceMagnitude
-                    # generate a name for the dataset
-                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.coherenceMagnitude"
-                    # build its selector
-                    selector = {
-                        "band": band,
-                        "frequency": frequency,
-                        "polarization": polarization,
-                        "layer": "coherence",
-                    }
-                    # pack its configuration
-                    config = {
-                        "uri": self.uri,
-                        "shape": dataset.shape,
-                        "selector": selector,
-                    }
-                    # instantiate it
-                    coh = Real(name=name, data=dataset, **config)
-                    # add the dataset to my pile
-                    self.datasets.append(coh)
+                    # attempt to
+                    try:
+                        # get the coherence dataset
+                        dataset = data.coherenceMagnitude
+                    # if the dataset is not present
+                    except AttributeError:
+                        # so grab a channel
+                        channel = journal.warning("qed.nisar.rifg")
+                        # and complain
+                        channel.line(f"while exploring '{product.pyre_name}':")
+                        channel.indent()
+                        channel.line(f"no 'coherenceMagnitude' dataset ")
+                        channel.line(
+                            f"in band '{band}', frequency '{frequency}, polarization '{polarization}"
+                        )
+                        channel.outdent()
+                        # flush
+                        channel.log()
+                    # otherwise
+                    else:
+                        # generate a name for the dataset
+                        name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.coherenceMagnitude"
+                        # build its selector
+                        selector = {
+                            "band": band,
+                            "frequency": frequency,
+                            "polarization": polarization,
+                            "layer": "coherence",
+                        }
+                        # pack its configuration
+                        config = {
+                            "uri": self.uri,
+                            "shape": dataset.shape,
+                            "selector": selector,
+                        }
+                        # instantiate it
+                        coh = Real(name=name, data=dataset, **config)
+                        # add the dataset to my pile
+                        self.datasets.append(coh)
         # all done
         return
 

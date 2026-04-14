@@ -31,7 +31,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
         "band": ["L", "S"],
         "frequency": ["A", "B"],
         "polarization": ["HH", "HV", "VH", "VV"],
-	"layer": ["unwrappedPhase", "ionosphere", "coherence"],
+        "layer": ["unwrappedPhase", "ionosphere", "coherence"],
     }
 
     # implementation details
@@ -102,71 +102,125 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         # and move on
                         continue
 
-                    # get the unwrapped dataset
-                    dataset = data.unwrappedPhase
-                    # generate a name for the dataset
-                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.unwrappedPhase"
-                    # build its selector
-                    selector = {
-                        "band": band,
-                        "frequency": frequency,
-                        "polarization": polarization,
-                        "layer": "unwrappedPhase",
-                    }
-                    # pack its configuration
-                    config = {
-                        "uri": self.uri,
-                        "shape": dataset.shape,
-                        "selector": selector,
-                    }
-                    # instantiate it
-                    unw = UNW(name=name, data=dataset, **config)
-                    # add the dataset to my pile
-                    self.datasets.append(unw)
+                    # attempt to
+                    try:
+                        # get the unwrapped dataset
+                        dataset = data.unwrappedPhase
+                    # if the dataset is not available
+                    except AttributeError:
+                        # so grab a channel
+                        channel = journal.warning("qed.nisar.runw")
+                        # and complain
+                        channel.line(f"while exploring '{product.pyre_name}':")
+                        channel.indent()
+                        channel.line(f"no 'unwrappedPhase' dataset ")
+                        channel.line(
+                            f"in band '{band}', frequency '{frequency}, polarization '{polarization}"
+                        )
+                        channel.outdent()
+                        # flush
+                        channel.log()
+                    # otherwise
+                    else:
+                        # generate a name for the dataset
+                        name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.unwrappedPhase"
+                        # build its selector
+                        selector = {
+                            "band": band,
+                            "frequency": frequency,
+                            "polarization": polarization,
+                            "layer": "unwrappedPhase",
+                        }
+                        # pack its configuration
+                        config = {
+                            "uri": self.uri,
+                            "shape": dataset.shape,
+                            "selector": selector,
+                        }
+                        # instantiate it
+                        unw = UNW(name=name, data=dataset, **config)
+                        # add the dataset to my pile
+                        self.datasets.append(unw)
 
-                    # get the ionosphere dataset
-                    dataset = data.ionospherePhaseScreen
-                    # generate a name for the dataset
-                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.ionospherePhaseScreen"
-                    # build its selector
-                    selector = {
-                        "band": band,
-                        "frequency": frequency,
-                        "polarization": polarization,
-                        "layer": "ionosphere",
-                    }
-                    # pack its configuration
-                    config = {
-                        "uri": self.uri,
-                        "shape": dataset.shape,
-                        "selector": selector,
-                    }
-                    # instantiate it
-                    iono = UNW(name=name, data=dataset, **config)
-                    # add the dataset to my pile
-                    self.datasets.append(iono)
+                    # attempt to
+                    try:
+                        # get the ionosphere dataset
+                        dataset = data.ionospherePhaseScreen
+                    # if the dataset is not present
+                    except AttributeError:
+                        # so grab a channel
+                        channel = journal.warning("qed.nisar.runw")
+                        # and complain
+                        channel.line(f"while exploring '{product.pyre_name}':")
+                        channel.indent()
+                        channel.line(f"no 'ionospherePhaseScreen' dataset ")
+                        channel.line(
+                            f"in band '{band}', frequency '{frequency}, polarization '{polarization}"
+                        )
+                        channel.outdent()
+                        # flush
+                        channel.log()
+                    # otherwise
+                    else:
+                        # generate a name for the dataset
+                        name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.ionospherePhaseScreen"
+                        # build its selector
+                        selector = {
+                            "band": band,
+                            "frequency": frequency,
+                            "polarization": polarization,
+                            "layer": "ionosphere",
+                        }
+                        # pack its configuration
+                        config = {
+                            "uri": self.uri,
+                            "shape": dataset.shape,
+                            "selector": selector,
+                        }
+                        # instantiate it
+                        iono = UNW(name=name, data=dataset, **config)
+                        # add the dataset to my pile
+                        self.datasets.append(iono)
 
-                    # get the coherence dataset
-                    dataset = data.coherenceMagnitude
-                    # generate a name for the dataset
-                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.coherenceMagnitude"
-                    # build its selector
-                    selector = {
-                        "band": band,
-                        "frequency": frequency,
-                        "polarization": polarization,
-                        "layer": "coherence",
-                    }
-                    # pack its configuration
-                    config = {
-                        "uri": self.uri,
-                        "shape": dataset.shape,
-                        "selector": selector,
-                    }
-                    # instantiate it
-                    coh = Real(name=name, data=dataset, **config)
-                    # add the dataset to my pile
-                    self.datasets.append(coh)
+                    # attempt to
+                    try:
+                        # get the coherence dataset
+                        dataset = data.coherenceMagnitude
+                    # if the dataset is not present
+                    except AttributeError:
+                        # so grab a channel
+                        channel = journal.warning("qed.nisar.runw")
+                        # and complain
+                        channel.line(f"while exploring '{product.pyre_name}':")
+                        channel.indent()
+                        channel.line(f"no 'coherenceMagnitude' dataset ")
+                        channel.line(
+                            f"in band '{band}', frequency '{frequency}, polarization '{polarization}"
+                        )
+                        channel.outdent()
+                        # flush
+                        channel.log()
+                    # otherwise
+                    else:
+                        # generate a name for the dataset
+                        name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.coherenceMagnitude"
+                        # build its selector
+                        selector = {
+                            "band": band,
+                            "frequency": frequency,
+                            "polarization": polarization,
+                            "layer": "coherence",
+                        }
+                        # pack its configuration
+                        config = {
+                            "uri": self.uri,
+                            "shape": dataset.shape,
+                            "selector": selector,
+                        }
+                        # instantiate it
+                        coh = Real(name=name, data=dataset, **config)
+                        # add the dataset to my pile
+                        self.datasets.append(coh)
         # all done
         return
 
