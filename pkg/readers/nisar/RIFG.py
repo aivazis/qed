@@ -13,6 +13,7 @@ from .H5 import H5
 
 # my dataset
 from .products.SLC import SLC
+from .products.Real import Real
 
 
 # the RIFG reader
@@ -30,6 +31,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
         "band": ["L", "S"],
         "frequency": ["A", "B"],
         "polarization": ["HH", "HV", "VH", "VV"],
+        "layer": ["interferogram","coherence"],
     }
 
     # implementation details
@@ -99,15 +101,17 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                         channel.log()
                         # and move on
                         continue
-                    # get the dataset
+
+                    # get the interferogram dataset
                     dataset = data.wrappedInterferogram
                     # generate a name for the dataset
-                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}"
+                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.wrappedInterferogram"
                     # build its selector
                     selector = {
                         "band": band,
                         "frequency": frequency,
                         "polarization": polarization,
+                        "layer": "interferogram",
                     }
                     # pack its configuration
                     config = {
@@ -119,6 +123,28 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                     slc = SLC(name=name, data=dataset, **config)
                     # add the dataset to my pile
                     self.datasets.append(slc)
+
+                    # get the coherence dataset
+                    dataset = data.coherenceMagnitude
+                    # generate a name for the dataset
+                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.coherenceMagnitude"
+                    # build its selector
+                    selector = {
+                        "band": band,
+                        "frequency": frequency,
+                        "polarization": polarization,
+                        "layer": "coherence",
+                    }
+                    # pack its configuration
+                    config = {
+                        "uri": self.uri,
+                        "shape": dataset.shape,
+                        "selector": selector,
+                    }
+                    # instantiate it
+                    coh = Real(name=name, data=dataset, **config)
+                    # add the dataset to my pile
+                    self.datasets.append(coh)
         # all done
         return
 
