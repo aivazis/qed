@@ -13,6 +13,7 @@ from .H5 import H5
 
 # my dataset
 from .products.UNW import UNW
+from .products.Real import Real
 
 
 # the RUNW reader
@@ -30,6 +31,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
         "band": ["L", "S"],
         "frequency": ["A", "B"],
         "polarization": ["HH", "HV", "VH", "VV"],
+	"layer": ["unwrappedPhase", "ionosphere", "coherence"],
     }
 
     # implementation details
@@ -99,15 +101,17 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         channel.log()
                         # and move on
                         continue
-                    # get the dataset
+
+                    # get the unwrapped dataset
                     dataset = data.unwrappedPhase
                     # generate a name for the dataset
-                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}"
+                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.unwrappedPhase"
                     # build its selector
                     selector = {
                         "band": band,
                         "frequency": frequency,
                         "polarization": polarization,
+                        "layer": "unwrappedPhase",
                     }
                     # pack its configuration
                     config = {
@@ -119,6 +123,50 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                     unw = UNW(name=name, data=dataset, **config)
                     # add the dataset to my pile
                     self.datasets.append(unw)
+
+                    # get the ionosphere dataset
+                    dataset = data.ionospherePhaseScreen
+                    # generate a name for the dataset
+                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.ionospherePhaseScreen"
+                    # build its selector
+                    selector = {
+                        "band": band,
+                        "frequency": frequency,
+                        "polarization": polarization,
+                        "layer": "ionosphere",
+                    }
+                    # pack its configuration
+                    config = {
+                        "uri": self.uri,
+                        "shape": dataset.shape,
+                        "selector": selector,
+                    }
+                    # instantiate it
+                    iono = UNW(name=name, data=dataset, **config)
+                    # add the dataset to my pile
+                    self.datasets.append(iono)
+
+                    # get the coherence dataset
+                    dataset = data.coherenceMagnitude
+                    # generate a name for the dataset
+                    name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.coherenceMagnitude"
+                    # build its selector
+                    selector = {
+                        "band": band,
+                        "frequency": frequency,
+                        "polarization": polarization,
+                        "layer": "coherence",
+                    }
+                    # pack its configuration
+                    config = {
+                        "uri": self.uri,
+                        "shape": dataset.shape,
+                        "selector": selector,
+                    }
+                    # instantiate it
+                    coh = Real(name=name, data=dataset, **config)
+                    # add the dataset to my pile
+                    self.datasets.append(coh)
         # all done
         return
 
