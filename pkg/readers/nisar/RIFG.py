@@ -12,8 +12,9 @@ import journal
 from .H5 import H5
 
 # my dataset
-from .products.SLC import SLC
+from .products.Mask import Mask
 from .products.Real import Real
+from .products.SLC import SLC
 
 
 # the RIFG reader
@@ -31,7 +32,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
         "band": ["L", "S"],
         "frequency": ["A", "B"],
         "polarization": ["HH", "HV", "VH", "VV"],
-        "layer": ["interferogram", "coherence"],
+        "layer": ["interferogram", "coherence", "mask"],
     }
 
     # implementation details
@@ -72,7 +73,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                     # so grab a channel
                     channel = journal.warning("qed.nisar.rifg")
                     # and complain
-                    channel.line(f"while exploring '{product.pyre_name}'")
+                    channel.line(f"while exploring '{self.pyre_name}'")
                     channel.line(
                         f"no '{frequency}' frequency in the '{band}'-band swaths"
                     )
@@ -93,7 +94,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                         # so grab a channel
                         channel = journal.warning("qed.nisar.rifg")
                         # and complain
-                        channel.line(f"while exploring '{product.pyre_name}'")
+                        channel.line(f"while exploring '{self.pyre_name}'")
                         channel.line(
                             f"no '{polarization}' polarization in the '{frequency}' swath"
                         )
@@ -111,7 +112,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                         # so grab a channel
                         channel = journal.warning("qed.nisar.rifg")
                         # and complain
-                        channel.line(f"while exploring '{product.pyre_name}':")
+                        channel.line(f"while exploring '{self.pyre_name}':")
                         channel.indent()
                         channel.line(f"no 'wrappedInterferogram' dataset ")
                         channel.line(
@@ -151,7 +152,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                         # so grab a channel
                         channel = journal.warning("qed.nisar.rifg")
                         # and complain
-                        channel.line(f"while exploring '{product.pyre_name}':")
+                        channel.line(f"while exploring '{self.pyre_name}':")
                         channel.indent()
                         channel.line(f"no 'coherenceMagnitude' dataset ")
                         channel.line(
@@ -181,6 +182,48 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                         coh = Real(name=name, data=dataset, **config)
                         # add the dataset to my pile
                         self.datasets.append(coh)
+
+                    # attempt to
+                    try:
+                        # get the mask from the frequency swath; this is common to all polarizations
+                        # but we are reading here so the gui looks ok
+                        mask = swath.interferogram.mask
+                    # if it's not present
+                    except AttributeError:
+                        # so grab a channel
+                        channel = journal.warning("qed.nisar.runw")
+                        # and complain
+                        channel.line(f"while exploring '{self.pyre_name}':")
+                        channel.indent()
+                        channel.line(f"no 'mask' dataset in the 'interferogram' group")
+                        channel.line(f"in band '{band}', frequency '{frequency}'")
+                        channel.outdent()
+                        # flush
+                        channel.log()
+                    # otherwise
+                    else:
+                        # generate a name for the dataset
+                        name = (
+                            f"{self.pyre_name}.{band}.{frequency}.{polarization}.mask"
+                        )
+                        # build its selector
+                        selector = {
+                            "band": band,
+                            "frequency": frequency,
+                            "polarization": polarization,
+                            "layer": "mask",
+                        }
+                        # pack its configuration
+                        config = {
+                            "uri": self.uri,
+                            "shape": mask.shape,
+                            "selector": selector,
+                        }
+                        # instantiate it
+                        mask = Mask(name=name, data=mask, **config)
+                        # add the dataset to my pile
+                        self.datasets.append(mask)
+
         # all done
         return
 
