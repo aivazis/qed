@@ -21,6 +21,7 @@
 #include "real/real.h"
 #include "slc/slc.h"
 #include "bfpq/bfpq.h"
+#include "mask/mask.h"
 // profile
 #include "profile.h"
 // statistics

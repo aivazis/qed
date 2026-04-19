@@ -6,10 +6,11 @@
 // code guard
 #pragma once
 
+
 // the value part tile generator
 template <typename sourceT>
 auto
-qed::nisar::real::value(
+qed::nisar::mask::valid(
     // the source
     const dataset_t & dataset,
     // the layout
@@ -19,18 +20,11 @@ qed::nisar::real::value(
     // the tile shape
     typename sourceT::shape_type tile,
     // the stride
-    typename sourceT::index_type stride,
-    // the range of values to render
-    double min, double max) -> bmp_t
+    typename sourceT::index_type stride) -> bmp_t
 {
     // type aliases
     using index_t = typename sourceT::index_type;
     using shape_t = typename sourceT::shape_type;
-
-    auto channel = pyre::journal::info_t("parosen");
-    channel << pyre::journal::here() << "Hello from the 'value' rendering pipeline"
-            << pyre::journal::endl;
-
 
     // compute the zoomed origin
     auto zoomedOrigin = origin;
@@ -39,11 +33,10 @@ qed::nisar::real::value(
         // to the product of the stride with the specified origin
         zoomedOrigin[axis] *= stride[axis];
     }
-
     // read the data
     auto source = pyre::h5::read<sourceT>(dataset, datatype, zoomedOrigin, tile, stride);
     // render and return
-    return native::channels::real(source, { 0, 0 }, tile, { 1, 1 }, min, max);
+    return native::channels::real(source, { 0, 0 }, tile, { 1, 1 }, 0, 0xFF);
 }
 
 
