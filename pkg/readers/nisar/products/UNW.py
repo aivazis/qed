@@ -34,11 +34,11 @@ class UNW(Product, family="qed.datasets.nisar.products.unw"):
         """
         # generate cursor information
         yield from self.cursor(pixel=pixel)
-        # get my channels
-        channels = self.channels
+
         # get the value of the {pixel}
         _, _, value = self.profile(points=[pixel])[0]
-
+        # get my channels
+        channels = self.channels
         # now, go through my channels
         for name, channel in channels.items():
             # and ask each one for {value} representations
