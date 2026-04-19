@@ -14,6 +14,7 @@ from .H5 import H5
 # my dataset
 from .products.UNW import UNW
 from .products.Real import Real
+from .products.Mask import Mask
 
 
 # the RUNW reader
@@ -31,7 +32,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
         "band": ["L", "S"],
         "frequency": ["A", "B"],
         "polarization": ["HH", "HV", "VH", "VV"],
-        "layer": ["unwrappedPhase", "ionosphere", "coherence"],
+        "layer": ["unwrappedPhase", "ionosphere", "coherence", "mask"],
     }
 
     # implementation details
@@ -105,7 +106,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                     # attempt to
                     try:
                         # get the unwrapped dataset
-                        dataset = data.unwrappedPhase
+                        unwrappedPhase = data.unwrappedPhase
                     # if the dataset is not available
                     except AttributeError:
                         # so grab a channel
@@ -115,7 +116,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         channel.indent()
                         channel.line(f"no 'unwrappedPhase' dataset ")
                         channel.line(
-                            f"in band '{band}', frequency '{frequency}, polarization '{polarization}"
+                            f"in band '{band}', frequency '{frequency}', polarization '{polarization}"
                         )
                         channel.outdent()
                         # flush
@@ -134,18 +135,18 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         # pack its configuration
                         config = {
                             "uri": self.uri,
-                            "shape": dataset.shape,
+                            "shape": unwrappedPhase.shape,
                             "selector": selector,
                         }
                         # instantiate it
-                        unw = UNW(name=name, data=dataset, **config)
+                        unwrappedPhase = UNW(name=name, data=unwrappedPhase, **config)
                         # add the dataset to my pile
-                        self.datasets.append(unw)
+                        self.datasets.append(unwrappedPhase)
 
                     # attempt to
                     try:
                         # get the ionosphere dataset
-                        dataset = data.ionospherePhaseScreen
+                        ionosphere = data.ionospherePhaseScreen
                     # if the dataset is not present
                     except AttributeError:
                         # so grab a channel
@@ -155,7 +156,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         channel.indent()
                         channel.line(f"no 'ionospherePhaseScreen' dataset ")
                         channel.line(
-                            f"in band '{band}', frequency '{frequency}, polarization '{polarization}"
+                            f"in band '{band}', frequency '{frequency}', polarization '{polarization}"
                         )
                         channel.outdent()
                         # flush
@@ -174,18 +175,18 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         # pack its configuration
                         config = {
                             "uri": self.uri,
-                            "shape": dataset.shape,
+                            "shape": ionosphere.shape,
                             "selector": selector,
                         }
                         # instantiate it
-                        iono = UNW(name=name, data=dataset, **config)
+                        ionosphere = UNW(name=name, data=ionosphere, **config)
                         # add the dataset to my pile
-                        self.datasets.append(iono)
+                        self.datasets.append(ionosphere)
 
                     # attempt to
                     try:
                         # get the coherence dataset
-                        dataset = data.coherenceMagnitude
+                        coherence = data.coherenceMagnitude
                     # if the dataset is not present
                     except AttributeError:
                         # so grab a channel
@@ -195,7 +196,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         channel.indent()
                         channel.line(f"no 'coherenceMagnitude' dataset ")
                         channel.line(
-                            f"in band '{band}', frequency '{frequency}, polarization '{polarization}"
+                            f"in band '{band}', frequency '{frequency}', polarization '{polarization}"
                         )
                         channel.outdent()
                         # flush
@@ -214,13 +215,55 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         # pack its configuration
                         config = {
                             "uri": self.uri,
-                            "shape": dataset.shape,
+                            "shape": coherence.shape,
                             "selector": selector,
                         }
                         # instantiate it
-                        coh = Real(name=name, data=dataset, **config)
+                        coherence = Real(name=name, data=coherence, **config)
                         # add the dataset to my pile
-                        self.datasets.append(coh)
+                        self.datasets.append(coherence)
+
+                    # attempt to
+                    try:
+                        # get the mask from the frequency swath; this is common to all polarizations
+                        # but we are reading here so the gui looks ok
+                        mask = swath.interferogram.mask
+                    # if it's not present
+                    except AttributeError:
+                        # so grab a channel
+                        channel = journal.warning("qed.nisar.runw")
+                        # and complain
+                        channel.line(f"while exploring '{product.pyre_name}':")
+                        channel.indent()
+                        channel.line(f"no 'mask' dataset in the 'interferogram' group")
+                        channel.line(f"in band '{band}', frequency '{frequency}'")
+                        channel.outdent()
+                        # flush
+                        channel.log()
+                    # otherwise
+                    else:
+                        # generate a name for the dataset
+                        name = (
+                            f"{self.pyre_name}.{band}.{frequency}.{polarization}.mask"
+                        )
+                        # build its selector
+                        selector = {
+                            "band": band,
+                            "frequency": frequency,
+                            "polarization": polarization,
+                            "layer": "mask",
+                        }
+                        # pack its configuration
+                        config = {
+                            "uri": self.uri,
+                            "shape": mask.shape,
+                            "selector": selector,
+                        }
+                        # instantiate it
+                        mask = Mask(name=name, data=mask, **config)
+                        # add the dataset to my pile
+                        self.datasets.append(mask)
+
         # all done
         return
 
