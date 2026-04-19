@@ -27,11 +27,6 @@ qed::nisar::real::value(
     using index_t = typename sourceT::index_type;
     using shape_t = typename sourceT::shape_type;
 
-    auto channel = pyre::journal::info_t("parosen");
-    channel << pyre::journal::here() << "Hello from the 'value' rendering pipeline"
-            << pyre::journal::endl;
-
-
     // compute the zoomed origin
     auto zoomedOrigin = origin;
     // by setting each of its entries
@@ -39,7 +34,6 @@ qed::nisar::real::value(
         // to the product of the stride with the specified origin
         zoomedOrigin[axis] *= stride[axis];
     }
-
     // read the data
     auto source = pyre::h5::read<sourceT>(dataset, datatype, zoomedOrigin, tile, stride);
     // render and return
