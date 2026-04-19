@@ -23,5 +23,8 @@ from .BFPQImaginary import BFPQImaginary as imaginaryBFPQ
 from .BFPQPhase import BFPQPhase as phaseBFPQ
 from .BFPQReal import BFPQReal as realBFPQ
 
+# bitmasks
+from .Valid import Valid as valid
+
 
 # end of file
