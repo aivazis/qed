@@ -72,7 +72,7 @@ class ROFF(H5):
                     # so grab a channel
                     channel = journal.warning("qed.nisar.roff")
                     # and complain
-                    channel.line(f"while exploring '{product.pyre_name}'")
+                    channel.line(f"while exploring '{self.pyre_name}'")
                     channel.line(
                         f"no '{frequency}' frequency in the '{band}'-band swaths"
                     )
@@ -93,7 +93,7 @@ class ROFF(H5):
                         # so grab a channel
                         channel = journal.warning("qed.nisar.roff")
                         # and complain
-                        channel.line(f"while exploring '{product.pyre_name}'")
+                        channel.line(f"while exploring '{self.pyre_name}'")
                         channel.line(
                             f"no '{polarization}' polarization in the '{frequency}' pixel offsets"
                         )

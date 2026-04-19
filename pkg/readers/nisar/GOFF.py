@@ -72,7 +72,7 @@ class GOFF(H5):
                     # so grab a channel
                     channel = journal.warning("qed.nisar.goff")
                     # and complain
-                    channel.line(f"while exploring '{product.pyre_name}'")
+                    channel.line(f"while exploring '{self.pyre_name}'")
                     channel.line(
                         f"no '{frequency}' frequency in the '{band}'-band grids"
                     )
@@ -93,7 +93,7 @@ class GOFF(H5):
                         # grab a channel
                         channel = journal.warning("qed.nisar.goff")
                         # and complain
-                        channel.line(f"while exploring '{product.pyre_name}'")
+                        channel.line(f"while exploring '{self.pyre_name}'")
                         channel.line(
                             f"no '{polarization}' polarization in the '{frequency}' pixel offsets"
                         )

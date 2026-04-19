@@ -73,7 +73,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                     # so grab a channel
                     channel = journal.warning("qed.nisar.runw")
                     # and complain
-                    channel.line(f"while exploring '{product.pyre_name}'")
+                    channel.line(f"while exploring '{self.pyre_name}'")
                     channel.line(
                         f"no '{frequency}' frequency in the '{band}'-band swaths"
                     )
@@ -94,7 +94,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         # so grab a channel
                         channel = journal.warning("qed.nisar.runw")
                         # and complain
-                        channel.line(f"while exploring '{product.pyre_name}'")
+                        channel.line(f"while exploring '{self.pyre_name}'")
                         channel.line(
                             f"no '{polarization}' polarization in the '{frequency}' interferograms"
                         )
@@ -112,7 +112,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         # so grab a channel
                         channel = journal.warning("qed.nisar.runw")
                         # and complain
-                        channel.line(f"while exploring '{product.pyre_name}':")
+                        channel.line(f"while exploring '{self.pyre_name}':")
                         channel.indent()
                         channel.line(f"no 'unwrappedPhase' dataset ")
                         channel.line(
@@ -152,7 +152,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         # so grab a channel
                         channel = journal.warning("qed.nisar.runw")
                         # and complain
-                        channel.line(f"while exploring '{product.pyre_name}':")
+                        channel.line(f"while exploring '{self.pyre_name}':")
                         channel.indent()
                         channel.line(f"no 'ionospherePhaseScreen' dataset ")
                         channel.line(
@@ -192,7 +192,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         # so grab a channel
                         channel = journal.warning("qed.nisar.runw")
                         # and complain
-                        channel.line(f"while exploring '{product.pyre_name}':")
+                        channel.line(f"while exploring '{self.pyre_name}':")
                         channel.indent()
                         channel.line(f"no 'coherenceMagnitude' dataset ")
                         channel.line(
@@ -233,7 +233,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         # so grab a channel
                         channel = journal.warning("qed.nisar.runw")
                         # and complain
-                        channel.line(f"while exploring '{product.pyre_name}':")
+                        channel.line(f"while exploring '{self.pyre_name}':")
                         channel.indent()
                         channel.line(f"no 'mask' dataset in the 'interferogram' group")
                         channel.line(f"in band '{band}', frequency '{frequency}'")

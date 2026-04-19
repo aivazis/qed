@@ -77,7 +77,7 @@ class RRSD(H5, family="qed.readers.nisar.rrsd"):
                     # so grab a channel
                     channel = journal.warning("qed.nisar.rrsd")
                     # and complain
-                    channel.line(f"while exploring '{product.pyre_name}'")
+                    channel.line(f"while exploring '{self.pyre_name}'")
                     channel.line(
                         f"no '{frequency}' frequency in the '{band}'-band swaths"
                     )
@@ -108,7 +108,7 @@ class RRSD(H5, family="qed.readers.nisar.rrsd"):
                             # so grab a channel
                             channel = journal.warning("qed.nisar.rrsd")
                             # and complain
-                            channel.line(f"while exploring '{product.pyre_name}'")
+                            channel.line(f"while exploring '{self.pyre_name}'")
                             channel.line(
                                 f"no '{pol}' dataset in the '{frequency}' swath"
                             )
@@ -125,7 +125,7 @@ class RRSD(H5, family="qed.readers.nisar.rrsd"):
                             # so grab a channel
                             channel = journal.warning("qed.nisar.rrsd")
                             # and complain
-                            channel.line(f"while exploring '{product.pyre_name}'")
+                            channel.line(f"while exploring '{self.pyre_name}'")
                             channel.line(
                                 f"no BFPQ lookup table for the '{pol}' dataset in the '{frequency}' swath"
                             )

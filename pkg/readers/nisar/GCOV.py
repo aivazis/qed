@@ -86,7 +86,7 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                     # so grab a channel
                     channel = journal.warning("qed.nisar.gcov")
                     # and complain
-                    channel.line(f"while exploring '{product.pyre_name}'")
+                    channel.line(f"while exploring '{self.pyre_name}'")
                     channel.line(
                         f"no '{frequency}' frequency in the '{band}'-band grids"
                     )
@@ -109,7 +109,7 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                         # so grab a channel
                         channel = journal.warning("qed.nisar.gcov")
                         # and complain
-                        channel.line(f"while exploring '{product.pyre_name}'")
+                        channel.line(f"while exploring '{self.pyre_name}'")
                         channel.line(f"no '{term}' in the '{frequency}' grid")
                         # flush
                         channel.log()
