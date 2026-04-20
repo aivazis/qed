@@ -36,10 +36,11 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
         "layer": [
             "unwrappedPhase",
             "unwrappedCoherence",
+            "unwrappedMask",
             "wrappedInterferogram",
             "wrappedCoherence",
+            "wrappedMask",
             "ionosphere",
-            "mask",
         ],
     }
 
@@ -278,13 +279,13 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
         # otherwise
         else:
             # generate a name for the dataset
-            name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.mask"
+            name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.unwrappedMask"
             # build its selector
             selector = {
                 "band": band,
                 "frequency": frequency,
                 "polarization": polarization,
-                "layer": "mask",
+                "layer": "unwrappedMask",
             }
             # pack its configuration
             config = {
@@ -427,13 +428,13 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
         # otherwise
         else:
             # generate a name for the dataset
-            name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.mask"
+            name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.wrappedMask"
             # build its selector
             selector = {
                 "band": band,
                 "frequency": frequency,
                 "polarization": polarization,
-                "layer": "mask",
+                "layer": "wrappedMask",
             }
             # pack its configuration
             config = {
