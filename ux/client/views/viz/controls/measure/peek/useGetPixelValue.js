@@ -19,11 +19,6 @@ import { Context } from './context'
 export const useGetPixelValue = () => {
     // pull info out of my context
     const { variables, options } = React.useContext(Context)
-
-    // - the first time, {options} is null so we ask the server
-    // - on {refresh}, we adjust the {options} so queries get resolved from the store,
-    //   which bypasses suspense
-
     // get the data and return it
     return useLazyLoadQuery(pixelValueQuery, variables, options)
 }
