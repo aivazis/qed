@@ -49,7 +49,7 @@ export const useUpdatePixelLocation = view => {
         setLoading(true)
 
         // assemble the query variables
-        const queryVars = { ...variables, line: y, sample: x }
+        const queryVars = { ...variables, dataset: dataset.name, line: y, sample: x }
         // {fetchQuery} will update the {relay} store; this ensures that when {peek}
         // renders again, all the necessary data is already in place, and the rendering
         // will not suspend
@@ -147,6 +147,7 @@ export const useUpdatePixelLocation = view => {
 const useUpdatePixelLocationMeasureGetPixelLocationFragment = graphql`
     fragment useUpdatePixelLocationMeasureGetPixelLocationFragment on View {
         dataset {
+            name
             origin
             shape
         }
