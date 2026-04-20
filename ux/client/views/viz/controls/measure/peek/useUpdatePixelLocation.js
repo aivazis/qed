@@ -82,7 +82,7 @@ export const useUpdatePixelLocation = view => {
         return
     }
 
-    // build a handler that adjust the current values of the variables and refreshes
+    // build a handler that adjusts the current values of the variables and refreshes
     const nudge = ({ dx, dy }) => {
         // compute the new location
         const x = variables.sample + dx
