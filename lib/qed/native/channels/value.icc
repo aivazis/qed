@@ -4,9 +4,11 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_native_channels_value_icc)
-#error this file contains implementation details for qed::native::channels::value
-#else
+#pragma once
+
+
+// the declarations
+#include "value.h"
 
 
 // the tile generators
@@ -69,7 +71,5 @@ qed::native::channels::value(
     return bmp;
 }
 
-
-#endif
 
 // end of file

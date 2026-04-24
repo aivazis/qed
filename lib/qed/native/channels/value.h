@@ -4,8 +4,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_native_channels_value_h)
-#define qed_native_channels_value_h
+#pragma once
 
 
 // decorators
@@ -26,11 +25,8 @@ namespace qed::native::channels {
 }
 
 
-// pull in the implementations
-#define qed_native_channels_value_icc
+// the implementations
 #include "value.icc"
-#undef qed_native_channels_value_icc
 
-#endif
 
 // end of file

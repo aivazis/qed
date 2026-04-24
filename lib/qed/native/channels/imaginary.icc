@@ -4,9 +4,11 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_native_channels_imaginary_icc)
-#error this file contains implementation details for qed::native::channels::imaginary
-#else
+#pragma once
+
+
+// the declarations
+#include "imaginary.h"
 
 
 // the imaginary part tile generator
@@ -73,7 +75,5 @@ qed::native::channels::imaginary(
     return bmp;
 }
 
-
-#endif
 
 // end of file

@@ -4,9 +4,11 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_native_channels_complex_icc)
-#error this file contains implementation details for qed::native::channels::complex
-#else
+#pragma once
+
+
+// the declarations
+#include "complex.h"
 
 
 // the complex tile generator
@@ -83,7 +85,5 @@ qed::native::channels::complex(
     return bmp;
 }
 
-
-#endif
 
 // end of file

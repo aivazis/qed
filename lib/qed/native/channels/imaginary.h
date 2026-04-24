@@ -4,8 +4,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_native_channels_imaginary_h)
-#define qed_native_channels_imaginary_h
+#pragma once
 
 
 // the imaginary part tile generator
@@ -26,11 +25,8 @@ namespace qed::native::channels {
 }
 
 
-// pull in the implementations
-#define qed_native_channels_imaginary_icc
+// the implementations
 #include "imaginary.icc"
-#undef qed_native_channels_imaginary_icc
 
-#endif
 
 // end of file

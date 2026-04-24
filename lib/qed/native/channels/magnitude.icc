@@ -4,9 +4,11 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_native_channels_magnitude_icc)
-#error this file contains implementation details for qed::native::channels::magnitude
-#else
+#pragma once
+
+
+// the declarations
+#include "magnitude.h"
 
 
 // the tile generators
@@ -71,7 +73,5 @@ qed::native::channels::magnitude(
     return bmp;
 }
 
-
-#endif
 
 // end of file

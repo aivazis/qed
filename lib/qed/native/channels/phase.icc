@@ -4,9 +4,11 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_native_channels_phase_icc)
-#error this file contains implementation details for qed::native::channels::phase
-#else
+#pragma once
+
+
+// the declarations
+#include "phase.h"
 
 
 // the tile generators
@@ -80,7 +82,5 @@ qed::native::channels::phase(
     return bmp;
 }
 
-
-#endif
 
 // end of file

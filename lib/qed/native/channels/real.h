@@ -4,8 +4,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_native_channels_real_h)
-#define qed_native_channels_real_h
+#pragma once
 
 
 // the real part tile generator
@@ -26,11 +25,8 @@ namespace qed::native::channels {
 }
 
 
-// pull in the implementations
-#define qed_native_channels_real_icc
+// the implementations
 #include "real.icc"
-#undef qed_native_channels_real_icc
 
-#endif
 
 // end of file
