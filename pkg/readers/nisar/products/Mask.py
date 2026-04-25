@@ -54,7 +54,7 @@ class Mask(Product, family="qed.datasets.nisar.products.mask"):
         Generate a sequence of channel pipelines for this product
         """
         # i only have one
-        yield "valid"
+        yield "raw"
         # all done
         return
 

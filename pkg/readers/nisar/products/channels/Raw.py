@@ -12,7 +12,7 @@ from .Channel import Channel
 
 
 # a channel for masks
-class Valid(Channel, family="qed.channels.nisar.valid"):
+class Raw(Channel, family="qed.channels.nisar.raw"):
     """
     Make a visualization pipeline to display masks
     """
@@ -42,7 +42,7 @@ class Valid(Channel, family="qed.channels.nisar.valid"):
         return
 
     # constants
-    tag = "valid"
+    tag = "raw"
     category = "mask"
 
 

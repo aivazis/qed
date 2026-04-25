@@ -24,7 +24,7 @@ from .BFPQPhase import BFPQPhase as phaseBFPQ
 from .BFPQReal import BFPQReal as realBFPQ
 
 # bitmasks
-from .Valid import Valid as valid
+from .Raw import Raw as raw
 
 
 # end of file
