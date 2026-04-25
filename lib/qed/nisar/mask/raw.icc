@@ -7,10 +7,16 @@
 #pragma once
 
 
+// the declarations
+#include "raw.h"
+// the redener
+#include "RawMask.h"
+
+
 // the value part tile generator
 template <typename sourceT>
 auto
-qed::nisar::mask::valid(
+qed::nisar::mask::raw(
     // the source
     const dataset_t & dataset,
     // the layout
@@ -25,6 +31,7 @@ qed::nisar::mask::valid(
     // type aliases
     using index_t = typename sourceT::index_type;
     using shape_t = typename sourceT::shape_type;
+    using renderer_t = RawMask<sourceT>;
 
     // compute the zoomed origin
     auto zoomedOrigin = origin;
@@ -34,9 +41,16 @@ qed::nisar::mask::valid(
         zoomedOrigin[axis] *= stride[axis];
     }
     // read the data
-    auto source = pyre::h5::read<sourceT>(dataset, datatype, zoomedOrigin, tile, stride);
-    // render and return
-    return native::channels::real(source, { 0, 0 }, tile, { 1, 1 }, 0, 0xFF);
+    auto mask = pyre::h5::read<sourceT>(dataset, datatype, zoomedOrigin, tile, stride);
+
+    // make a bitmap
+    auto bmp = bmp_t(tile[0], tile[1]);
+    // build the render
+    auto renderer = renderer_t(mask);
+    // encode
+    bmp.encode(renderer);
+    // all done
+    return bmp;
 }
 
 

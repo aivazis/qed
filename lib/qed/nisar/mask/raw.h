@@ -9,9 +9,13 @@
 
 // the value part tile generator
 namespace qed::nisar::mask {
+    // renderers
+    template <class sourceT>
+    class RawMask;
+
     // the tile generator for the value part of a complex HDF5 source
     template <typename sourceT>
-    inline auto valid(
+    inline auto raw(
         // the source
         const dataset_t & source,
         // the data layout
@@ -26,7 +30,7 @@ namespace qed::nisar::mask {
 
 
 // pull in the implementations
-#include "valid.icc"
+#include "raw.icc"
 
 
 // end of file
