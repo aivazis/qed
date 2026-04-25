@@ -8,7 +8,7 @@
 # its path relative to the project
 qed.ux.root := ux/
 # static assets
-qed.ux.static := fonts figures graphices styles
+qed.ux.static := fonts figures graphics styles
 # code chunks from external dependencies
 qed.ux.chunks := vendors-node_modules node_modules
 
