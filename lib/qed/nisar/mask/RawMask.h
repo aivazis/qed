@@ -9,6 +9,8 @@
 
 // externals
 #include <array>
+// support
+#include <pyre/viz.h>
 
 
 // map a single value to a shade of gray
@@ -32,7 +34,16 @@ public:
 public:
     inline RawMask(source_const_reference data);
 
-    // interface: pretend to be an iterator
+    // accessors
+public:
+    inline auto palette(int code) const -> rgb_type;
+
+    // mutators
+public:
+    inline auto palette(int code, rgb_type color) -> void;
+
+
+    // interface: behave like an iterator
 public:
     // map the current data value to a color
     inline auto operator*() const -> rgb_type;
@@ -44,7 +55,7 @@ private:
     // the data source
     iterator_type _source;
     // the color palette
-    static palette_type _palette;
+    palette_type _palette;
 
     // default metamethods
 public:
