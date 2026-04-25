@@ -24,13 +24,13 @@ qed::py::nisar::mask(py::module & m)
     // {unit8_t} bitmasks
     mask.def(
         // the name of the function
-        "valid",
+        "raw",
         // the handler
-        &qed::nisar::mask::valid<heapgrid_t<uint8_t>>,
+        &qed::nisar::mask::raw<heapgrid_t<uint8_t>>,
         // the signature
         "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a,
         // the docstring
-        "render the value of a bitmask tile");
+        "render the raw value of a bitmask tile");
 
     // all done
     return;
