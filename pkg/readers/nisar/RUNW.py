@@ -85,6 +85,47 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                 polarizations = swath.listOfPolarizations
                 # go through them
                 for polarization in polarizations:
+                    # attempt to
+                    try:
+                        # get the mask from the frequency swath; this is common to all polarizations
+                        # but we are reading here so the gui looks ok
+                        mask = swath.interferogram.mask
+                    # if it's not present
+                    except AttributeError:
+                        # so grab a channel
+                        channel = journal.warning("qed.nisar.runw")
+                        # and complain
+                        channel.line(f"while exploring '{self.pyre_name}':")
+                        channel.indent()
+                        channel.line(f"no 'mask' dataset in the 'interferogram' group")
+                        channel.line(f"in band '{band}', frequency '{frequency}'")
+                        channel.outdent()
+                        # flush
+                        channel.log()
+                    # otherwise
+                    else:
+                        # generate a name for the dataset
+                        name = (
+                            f"{self.pyre_name}.{band}.{frequency}.{polarization}.mask"
+                        )
+                        # build its selector
+                        selector = {
+                            "band": band,
+                            "frequency": frequency,
+                            "polarization": polarization,
+                            "layer": "mask",
+                        }
+                        # pack its configuration
+                        config = {
+                            "uri": self.uri,
+                            "shape": mask.shape,
+                            "selector": selector,
+                        }
+                        # instantiate it
+                        dataset = Mask(name=name, data=mask, **config)
+                        # add the dataset to my pile
+                        self.datasets.append(dataset)
+
                     # some datasets lie, so attempt to
                     try:
                         # get the dataset
@@ -139,9 +180,11 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                             "selector": selector,
                         }
                         # instantiate it
-                        unwrappedPhase = UNW(name=name, data=unwrappedPhase, **config)
+                        dataset = UNW(
+                            name=name, data=unwrappedPhase, mask=mask, **config
+                        )
                         # add the dataset to my pile
-                        self.datasets.append(unwrappedPhase)
+                        self.datasets.append(dataset)
 
                     # attempt to
                     try:
@@ -179,9 +222,9 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                             "selector": selector,
                         }
                         # instantiate it
-                        ionosphere = UNW(name=name, data=ionosphere, **config)
+                        dataset = UNW(name=name, data=ionosphere, mask=mask, **config)
                         # add the dataset to my pile
-                        self.datasets.append(ionosphere)
+                        self.datasets.append(dataset)
 
                     # attempt to
                     try:
@@ -222,47 +265,6 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         coherence = Real(name=name, data=coherence, **config)
                         # add the dataset to my pile
                         self.datasets.append(coherence)
-
-                    # attempt to
-                    try:
-                        # get the mask from the frequency swath; this is common to all polarizations
-                        # but we are reading here so the gui looks ok
-                        mask = swath.interferogram.mask
-                    # if it's not present
-                    except AttributeError:
-                        # so grab a channel
-                        channel = journal.warning("qed.nisar.runw")
-                        # and complain
-                        channel.line(f"while exploring '{self.pyre_name}':")
-                        channel.indent()
-                        channel.line(f"no 'mask' dataset in the 'interferogram' group")
-                        channel.line(f"in band '{band}', frequency '{frequency}'")
-                        channel.outdent()
-                        # flush
-                        channel.log()
-                    # otherwise
-                    else:
-                        # generate a name for the dataset
-                        name = (
-                            f"{self.pyre_name}.{band}.{frequency}.{polarization}.mask"
-                        )
-                        # build its selector
-                        selector = {
-                            "band": band,
-                            "frequency": frequency,
-                            "polarization": polarization,
-                            "layer": "mask",
-                        }
-                        # pack its configuration
-                        config = {
-                            "uri": self.uri,
-                            "shape": mask.shape,
-                            "selector": selector,
-                        }
-                        # instantiate it
-                        mask = Mask(name=name, data=mask, **config)
-                        # add the dataset to my pile
-                        self.datasets.append(mask)
 
         # all done
         return

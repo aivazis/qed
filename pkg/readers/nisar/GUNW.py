@@ -139,6 +139,45 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
 
         # attempt to
         try:
+            # get the mask from the frequency swath; this is common to all polarizations
+            # but we are reading here so the gui looks ok
+            mask = grid.unwrappedInterferogram.mask
+        # if it's not present
+        except AttributeError:
+            # so grab a channel
+            channel = journal.warning("qed.nisar.gunw")
+            # and complain
+            channel.line(f"while exploring '{self.pyre_name}':")
+            channel.indent()
+            channel.line(f"no 'mask' dataset in the 'interferogram' group")
+            channel.line(f"in band '{band}', frequency '{frequency}'")
+            channel.outdent()
+            # flush
+            channel.log()
+        # otherwise
+        else:
+            # generate a name for the dataset
+            name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.unwrappedMask"
+            # build its selector
+            selector = {
+                "band": band,
+                "frequency": frequency,
+                "polarization": polarization,
+                "layer": "unwrappedMask",
+            }
+            # pack its configuration
+            config = {
+                "uri": self.uri,
+                "shape": mask.shape,
+                "selector": selector,
+            }
+            # instantiate it
+            dataset = Mask(name=name, data=mask, **config)
+            # add the dataset to my pile
+            registered.append(dataset)
+
+        # attempt to
+        try:
             # get the unwrapped phase
             unwrappedPhase = data.unwrappedPhase
         # if the dataset is not available
@@ -173,9 +212,9 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 "selector": selector,
             }
             # instantiate it
-            unwrappedPhase = UNW(name=name, data=unwrappedPhase, **config)
+            dataset = UNW(name=name, data=unwrappedPhase, mask=mask, **config)
             # add the dataset to my pile
-            registered.append(unwrappedPhase)
+            registered.append(dataset)
 
         # attempt to
         try:
@@ -215,9 +254,9 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 "selector": selector,
             }
             # instantiate it
-            coherence = Real(name=name, data=coherence, **config)
+            dataset = Real(name=name, data=coherence, **config)
             # add the dataset to my pile
-            registered.append(coherence)
+            registered.append(dataset)
 
         # attempt to
         try:
@@ -255,48 +294,9 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 "selector": selector,
             }
             # instantiate it
-            ionosphere = UNW(name=name, data=ionosphere, **config)
+            dataset = UNW(name=name, data=ionosphere, mask=mask, **config)
             # add the dataset to my pile
-            registered.append(ionosphere)
-
-        # attempt to
-        try:
-            # get the mask from the frequency swath; this is common to all polarizations
-            # but we are reading here so the gui looks ok
-            mask = grid.unwrappedInterferogram.mask
-        # if it's not present
-        except AttributeError:
-            # so grab a channel
-            channel = journal.warning("qed.nisar.gunw")
-            # and complain
-            channel.line(f"while exploring '{self.pyre_name}':")
-            channel.indent()
-            channel.line(f"no 'mask' dataset in the 'interferogram' group")
-            channel.line(f"in band '{band}', frequency '{frequency}'")
-            channel.outdent()
-            # flush
-            channel.log()
-        # otherwise
-        else:
-            # generate a name for the dataset
-            name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.unwrappedMask"
-            # build its selector
-            selector = {
-                "band": band,
-                "frequency": frequency,
-                "polarization": polarization,
-                "layer": "unwrappedMask",
-            }
-            # pack its configuration
-            config = {
-                "uri": self.uri,
-                "shape": mask.shape,
-                "selector": selector,
-            }
-            # instantiate it
-            mask = Mask(name=name, data=mask, **config)
-            # add the dataset to my pile
-            registered.append(mask)
+            registered.append(dataset)
 
         # all done
         return
@@ -325,6 +325,45 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
 
         # get the pile of registered datasets
         registered = self.datasets
+
+        # attempt to
+        try:
+            # get the mask from the frequency swath; this is common to all polarizations
+            # but we are reading here so the gui looks ok
+            mask = grid.wrappedInterferogram.mask
+        # if it's not present
+        except AttributeError:
+            # so grab a channel
+            channel = journal.warning("qed.nisar.gunw")
+            # and complain
+            channel.line(f"while exploring '{self.pyre_name}':")
+            channel.indent()
+            channel.line(f"no 'mask' dataset in the 'interferogram' group")
+            channel.line(f"in band '{band}', frequency '{frequency}'")
+            channel.outdent()
+            # flush
+            channel.log()
+        # otherwise
+        else:
+            # generate a name for the dataset
+            name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.wrappedMask"
+            # build its selector
+            selector = {
+                "band": band,
+                "frequency": frequency,
+                "polarization": polarization,
+                "layer": "wrappedMask",
+            }
+            # pack its configuration
+            config = {
+                "uri": self.uri,
+                "shape": mask.shape,
+                "selector": selector,
+            }
+            # instantiate it
+            dataset = Mask(name=name, data=mask, **config)
+            # add the dataset to my pile
+            registered.append(dataset)
 
         # attempt to
         try:
@@ -362,9 +401,9 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 "selector": selector,
             }
             # instantiate it
-            wrappedInterferogram = SLC(name=name, data=wrappedInterferogram, **config)
+            dataset = SLC(name=name, data=wrappedInterferogram, **config)
             # add the dataset to my pile
-            registered.append(wrappedInterferogram)
+            registered.append(dataset)
 
         # attempt to
         try:
@@ -404,48 +443,9 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 "selector": selector,
             }
             # instantiate it
-            coherence = Real(name=name, data=coherence, **config)
+            dataset = Real(name=name, data=coherence, **config)
             # add the dataset to my pile
-            registered.append(coherence)
-
-        # attempt to
-        try:
-            # get the mask from the frequency swath; this is common to all polarizations
-            # but we are reading here so the gui looks ok
-            mask = grid.wrappedInterferogram.mask
-        # if it's not present
-        except AttributeError:
-            # so grab a channel
-            channel = journal.warning("qed.nisar.gunw")
-            # and complain
-            channel.line(f"while exploring '{self.pyre_name}':")
-            channel.indent()
-            channel.line(f"no 'mask' dataset in the 'interferogram' group")
-            channel.line(f"in band '{band}', frequency '{frequency}'")
-            channel.outdent()
-            # flush
-            channel.log()
-        # otherwise
-        else:
-            # generate a name for the dataset
-            name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.wrappedMask"
-            # build its selector
-            selector = {
-                "band": band,
-                "frequency": frequency,
-                "polarization": polarization,
-                "layer": "wrappedMask",
-            }
-            # pack its configuration
-            config = {
-                "uri": self.uri,
-                "shape": mask.shape,
-                "selector": selector,
-            }
-            # instantiate it
-            mask = Mask(name=name, data=mask, **config)
-            # add the dataset to my pile
-            registered.append(mask)
+            registered.append(dataset)
 
         # all done
         return
