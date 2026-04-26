@@ -71,10 +71,10 @@ qed::py::nisar::real(py::module & m)
         // the handler
         &qed::nisar::real::unwrapped<heapgrid_t<float>>,
         // the signature
-        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         "brightness"_a,
         // the docstring
-        "render the absolute value of a float tile");
+        "render the unwrapped phase");
     // {r8}
     real.def(
         // the name of the function
@@ -82,10 +82,33 @@ qed::py::nisar::real(py::module & m)
         // the handler
         &qed::nisar::real::unwrapped<heapgrid_t<double>>,
         // the signature
-        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         "brightness"_a,
         // the docstring
-        "render the absolute value of a double tile");
+        "render the unwrapped phase");
+
+    // {r4}
+    real.def(
+        // the name of the function
+        "unwrappedMasked",
+        // the handler
+        &qed::nisar::real::unwrappedMasked<heapgrid_t<float>>,
+        // the signature
+        "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        "brightness"_a,
+        // the docstring
+        "render the unwrapped masked phase");
+    // {r8}
+    real.def(
+        // the name of the function
+        "unwrappedMasked",
+        // the handler
+        &qed::nisar::real::unwrappedMasked<heapgrid_t<double>>,
+        // the signature
+        "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        "brightness"_a,
+        // the docstring
+        "render the unwrapped masked phae");
 
     // all done
     return;
