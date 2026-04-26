@@ -8,6 +8,7 @@
 from .Magnitude import Magnitude as abs
 from .Value import Value as value
 from .UnwrappedPhase import UnwrappedPhase as unwrapped
+from .UnwrappedPhaseMasked import UnwrappedPhaseMasked as unwrappedMasked
 
 # channels suitable for a complex dataset
 from .Amplitude import Amplitude as amplitude

@@ -43,7 +43,21 @@ class UNW(Product, family="qed.datasets.nisar.products.unw"):
         for name, channel in channels.items():
             # and ask each one for {value} representations
             yield name, channel.project(pixel=value)
+        # all done
+        return
 
+    def render(self, **kwds):
+        """
+        Render a tile of the given specification
+        """
+        # render a tile and return it
+        return super().render(mask=self.mask.dataset, **kwds)
+
+    def __init__(self, mask=None, **kwds):
+        # chain up
+        super().__init__(**kwds)
+        # record the mask
+        self.mask = mask
         # all done
         return
 
@@ -52,8 +66,10 @@ class UNW(Product, family="qed.datasets.nisar.products.unw"):
         """
         Generate a sequence of channel pipelines for this product
         """
-        # i only have one
+        # the unwrapped phase
         yield "unwrapped"
+        # and the masked data
+        yield "unwrappedMasked"
         # all done
         return
 

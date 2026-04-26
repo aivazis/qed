@@ -111,7 +111,7 @@ class Product(
         # all done
         return
 
-    def render(self, channel, zoom, origin, shape):
+    def render(self, channel, zoom, origin, shape, **kwds):
         """
         Render a tile of the given specification
         """
@@ -122,6 +122,7 @@ class Product(
             zoom=zoom,
             origin=origin,
             shape=shape,
+            **kwds,
         )
 
     def summary(self):
