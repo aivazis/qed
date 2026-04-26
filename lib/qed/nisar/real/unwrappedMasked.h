@@ -11,7 +11,7 @@
 namespace qed::nisar::real {
     // the tile generator for datasets that are unwrapped phases
     template <typename sourceT>
-    inline auto unwrapped(
+    inline auto unwrappedMasked(
         // the source
         const dataset_t & source,
         // the mask
@@ -31,8 +31,8 @@ namespace qed::nisar::real {
 }
 
 
-// the implementation
-#include "unwrapped.icc"
+// pull in the implementations
+#include "unwrappedMasked.icc"
 
 
 // end of file

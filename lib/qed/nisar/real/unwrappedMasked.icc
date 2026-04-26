@@ -7,18 +7,21 @@
 #pragma once
 
 
-// the declarations
-#include "unwrapped.h"
+// the declaration
+#include "unwrappedMasked.h"
+
+// the masking workflow
+#include "Mask.h"
 
 
 // the unwrapped phase tile generator
 template <typename sourceT>
 auto
-qed::nisar::real::unwrapped(
+qed::nisar::real::unwrappedMasked(
     // the source
     const dataset_t & dataset,
     // the mask
-    const dataset_t & mask,
+    const dataset_t & maskDataset,
     // the layout
     const datatype_t & datatype,
     // the origin of the tile
@@ -37,6 +40,10 @@ qed::nisar::real::unwrapped(
     // and its parts
     using index_t = typename source_t::index_type;
     using shape_t = typename source_t::shape_type;
+    // type aliases for the mask data
+    using mask_storage_t = pyre::memory::heap_t<std::uint8_t>;
+    using mask_t = pyre::grid::grid_t<typename source_t::packing_type, mask_storage_t>;
+
     // type aliases for the workflow nodes
     // my decimator
     using zoom_t = decimate_t<sourceT>;
@@ -54,22 +61,17 @@ qed::nisar::real::unwrapped(
         zoomedOrigin[axis] *= stride[axis];
     }
     // read the data
-    auto source = pyre::h5::read<sourceT>(dataset, datatype, zoomedOrigin, tile, stride);
+    auto source = pyre::h5::read<source_t>(dataset, datatype, zoomedOrigin, tile, stride);
+    // and the mask
+    auto mask =
+        pyre::h5::read<mask_t>(maskDataset, maskDataset.getDataType(), zoomedOrigin, tile, stride);
 
+    // build the wrokflow
+    auto workflow = Mask(source, mask, min, max, brightness);
     // make a bitmap
     bmp_t bmp(tile[0], tile[1]);
-
-    // zoom
-    auto decimator = zoom_t(source, { 0, 0 }, tile, { 1, 1 });
-    // extract the phase
-    auto c = selector_t(decimator, { min, max });
-    auto h = scale_t(c, { 0, 2 * M_PI });
-    // set up the brightness
-    auto b = constant_t(brightness);
-    // generate color
-    auto colormap = colormap_t(h, b);
     // encode
-    bmp.encode(colormap);
+    bmp.encode(workflow);
     // and return the tile
     return bmp;
 }

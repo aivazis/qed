@@ -1,0 +1,60 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// the declaration
+#include "Mask.h"
+
+
+// metamethods
+template <class sourceT, class maskT>
+qed::nisar::real::Mask<sourceT, maskT>::Mask(
+    source_const_reference source, mask_const_reference mask, double min, double max,
+    double brightness) :
+    _source { source.cbegin() },
+    _mask { mask.cbegin() },
+    _selector { _source, { min, max } },
+    _hue { _selector, { 0, 2 * M_PI } },
+    _brightness { brightness },
+    _color { _hue, _brightness }
+{}
+
+// interface
+template <class sourceT, class maskT>
+auto
+qed::nisar::real::Mask<sourceT, maskT>::operator*() const -> typename colormap_type::rgb_type
+{
+    // get the mask
+    auto mask = *_mask;
+    // isolate the last two decimal digits
+    mask = mask % 100;
+    // if either digit is zero
+    if (mask % 10 == 0 || mask / 10 == 0) {
+        // show black
+        return typename colormap_type::rgb_type { 0, 0, 0 };
+    }
+
+    // otherwise, invoke the workflow
+    return *_color;
+}
+
+
+template <class sourceT, class maskT>
+auto
+qed::nisar::real::Mask<sourceT, maskT>::operator++() -> void
+{
+    // update the color generator
+    ++_color;
+    // and the masj
+    ++_mask;
+    // all done
+    return;
+}
+
+
+// end of file

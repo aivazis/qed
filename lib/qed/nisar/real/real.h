@@ -5,15 +5,17 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_real_real_h)
-#define qed_nisar_real_real_h
+#pragma once
+
+
+// forward declarations
+#include "forward.h"
 
 // channels
 #include "abs.h"
 #include "value.h"
 #include "unwrapped.h"
+#include "unwrappedMasked.h"
 
-
-#endif
 
 // end of file
