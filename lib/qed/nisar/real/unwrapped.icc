@@ -17,8 +17,8 @@ auto
 qed::nisar::real::unwrapped(
     // the source
     const dataset_t & dataset,
-    // the mask
-    const dataset_t & mask,
+    // the mask (unused)
+    const dataset_t &,
     // the layout
     const datatype_t & datatype,
     // the origin of the tile
