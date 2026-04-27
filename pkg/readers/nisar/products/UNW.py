@@ -39,10 +39,10 @@ class UNW(Product, family="qed.datasets.nisar.products.unw"):
         _, _, value = self.profile(points=[pixel])[0]
         # get my channels
         channels = self.channels
-        # now, go through my channels
-        for name, channel in channels.items():
-            # and ask each one for {value} representations
-            yield name, channel.project(pixel=value)
+        # get the {unwrapped} channel
+        unwrapped = channels["unwrapped"]
+        # project
+        yield "unwrapped", unwrapped.project(pixel=value)
         # all done
         return
 
