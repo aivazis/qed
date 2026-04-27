@@ -131,6 +131,27 @@ qed::py::nisar::real(py::module & m)
         // the docstring
         "render the coherence");
 
+    // {r4}
+    real.def(
+        // the name of the function
+        "coherenceMasked",
+        // the handler
+        &qed::nisar::real::coherenceMasked<heapgrid_t<float>>,
+        // the signature
+        "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the coherence");
+    // {r8}
+    real.def(
+        // the name of the function
+        "coherenceMasked",
+        // the handler
+        &qed::nisar::real::coherenceMasked<heapgrid_t<double>>,
+        // the signature
+        "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the coherence");
+
     // all done
     return;
 }
