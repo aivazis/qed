@@ -68,6 +68,8 @@ class Coherence(Product, family="qed.datasets.nisar.products.coherence"):
         """
         # the coherence
         yield "coherence"
+        # and the masked version
+        yield "coherenceMasked"
         # all done
         return
 
