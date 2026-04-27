@@ -12,6 +12,7 @@ import journal
 from .H5 import H5
 
 # my dataset
+from .products.Coherence import Coherence
 from .products.UNW import UNW
 from .products.Real import Real
 from .products.Mask import Mask
@@ -262,7 +263,9 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                             "selector": selector,
                         }
                         # instantiate it
-                        coherence = Real(name=name, data=coherence, **config)
+                        coherence = Coherence(
+                            name=name, data=coherence, mask=mask, **config
+                        )
                         # add the dataset to my pile
                         self.datasets.append(coherence)
 

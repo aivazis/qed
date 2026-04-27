@@ -12,6 +12,7 @@ import journal
 from .H5 import H5
 
 # my dataset
+from .products.Coherence import Coherence
 from .products.Mask import Mask
 from .products.Real import Real
 from .products.SLC import SLC
@@ -237,9 +238,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
         # otherwise
         else:
             # generate a name for the dataset
-            name = (
-                f"{self.pyre_name}.{band}.{frequency}.{polarization}.coherenceMagnitude"
-            )
+            name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.coherence"
             # build its selector
             selector = {
                 "band": band,
@@ -254,7 +253,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 "selector": selector,
             }
             # instantiate it
-            dataset = Real(name=name, data=coherence, **config)
+            dataset = Coherence(name=name, data=coherence, mask=mask, **config)
             # add the dataset to my pile
             registered.append(dataset)
 
@@ -443,7 +442,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 "selector": selector,
             }
             # instantiate it
-            dataset = Real(name=name, data=coherence, **config)
+            dataset = Coherence(name=name, data=coherence, mask=mask, **config)
             # add the dataset to my pile
             registered.append(dataset)
 
