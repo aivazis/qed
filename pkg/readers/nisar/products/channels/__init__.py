@@ -7,6 +7,8 @@
 # channels suitable for a real dataset
 from .Magnitude import Magnitude as abs
 from .Value import Value as value
+
+from .Coherence import Coherence as coherence
 from .UnwrappedPhase import UnwrappedPhase as unwrapped
 from .UnwrappedPhaseMasked import UnwrappedPhaseMasked as unwrappedMasked
 
