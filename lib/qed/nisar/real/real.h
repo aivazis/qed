@@ -14,6 +14,7 @@
 // channels
 #include "abs.h"
 #include "value.h"
+#include "coherence.h"
 #include "unwrapped.h"
 #include "unwrappedMasked.h"
 

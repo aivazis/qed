@@ -10,9 +10,14 @@
 // set up the namespace
 namespace qed::nisar::real {
 
-    // the masking workflow
+    // the masked phase workflow
     template <class sourceT, class maskT>
     class Mask;
+
+    // the masked coherence workflow
+    template <class sourceT, class maskT>
+    class MaskedCoherence;
+
 }
 
 

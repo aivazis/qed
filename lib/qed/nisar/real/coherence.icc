@@ -1,0 +1,68 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// the declaration
+#include "coherence.h"
+// the masking workflow
+#include "MaskedCoherence.h"
+
+
+// the coherence tile generator
+template <typename sourceT>
+auto
+qed::nisar::real::coherence(
+    // the source
+    const dataset_t & dataset,
+    // the mask
+    const dataset_t & maskDataset,
+    // the layout
+    const datatype_t & datatype,
+    // the origin of the tile
+    typename sourceT::index_type origin,
+    // the tile shape
+    typename sourceT::shape_type tile,
+    // the stride
+    typename sourceT::index_type stride,
+    // the brightness interval
+    double min, double max) -> bmp_t
+{
+    // type aliases for the source
+    using source_t = sourceT;
+    // and its parts
+    using index_t = typename source_t::index_type;
+    using shape_t = typename source_t::shape_type;
+    // type aliases for the mask data
+    using mask_storage_t = pyre::memory::heap_t<std::uint8_t>;
+    using mask_t = pyre::grid::grid_t<typename source_t::packing_type, mask_storage_t>;
+
+    // compute the zoomed origin
+    auto zoomedOrigin = origin;
+    // by setting each of its entries
+    for (int axis = 0; axis < index_t::rank(); ++axis) {
+        // to the product of the stride with the specified origin
+        zoomedOrigin[axis] *= stride[axis];
+    }
+    // read the data
+    auto source = pyre::h5::read<source_t>(dataset, datatype, zoomedOrigin, tile, stride);
+    // and the mask
+    auto mask =
+        pyre::h5::read<mask_t>(maskDataset, maskDataset.getDataType(), zoomedOrigin, tile, stride);
+
+    // build the wrokflow
+    auto workflow = MaskedCoherence(source, mask, min, max);
+    // make a bitmap
+    bmp_t bmp(tile[0], tile[1]);
+    // encode
+    bmp.encode(workflow);
+    // and return the tile
+    return bmp;
+}
+
+
+// end of file
