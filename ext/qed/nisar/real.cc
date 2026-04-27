@@ -108,7 +108,28 @@ qed::py::nisar::real(py::module & m)
         "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         "brightness"_a,
         // the docstring
-        "render the unwrapped masked phae");
+        "render the unwrapped masked phase");
+
+    // {r4}
+    real.def(
+        // the name of the function
+        "coherence",
+        // the handler
+        &qed::nisar::real::coherence<heapgrid_t<float>>,
+        // the signature
+        "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the coherence");
+    // {r8}
+    real.def(
+        // the name of the function
+        "coherence",
+        // the handler
+        &qed::nisar::real::coherence<heapgrid_t<double>>,
+        // the signature
+        "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the coherence");
 
     // all done
     return;
