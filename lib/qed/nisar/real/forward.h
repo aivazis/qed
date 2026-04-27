@@ -12,7 +12,7 @@ namespace qed::nisar::real {
 
     // the masked phase workflow
     template <class sourceT, class maskT>
-    class Mask;
+    class MaskedPhase;
 
     // the masked coherence workflow
     template <class sourceT, class maskT>

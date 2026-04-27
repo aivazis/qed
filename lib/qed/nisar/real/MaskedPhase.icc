@@ -8,12 +8,12 @@
 
 
 // the declaration
-#include "Mask.h"
+#include "MaskedPhase.h"
 
 
 // metamethods
 template <class sourceT, class maskT>
-qed::nisar::real::Mask<sourceT, maskT>::Mask(
+qed::nisar::real::MaskedPhase<sourceT, maskT>::MaskedPhase(
     source_const_reference source, mask_const_reference mask, double min, double max,
     double brightness) :
     _source { source.cbegin() },
@@ -27,7 +27,7 @@ qed::nisar::real::Mask<sourceT, maskT>::Mask(
 // interface
 template <class sourceT, class maskT>
 auto
-qed::nisar::real::Mask<sourceT, maskT>::operator*() const -> typename colormap_type::rgb_type
+qed::nisar::real::MaskedPhase<sourceT, maskT>::operator*() const -> typename colormap_type::rgb_type
 {
     // get the mask
     auto mask = *_mask;
@@ -46,11 +46,11 @@ qed::nisar::real::Mask<sourceT, maskT>::operator*() const -> typename colormap_t
 
 template <class sourceT, class maskT>
 auto
-qed::nisar::real::Mask<sourceT, maskT>::operator++() -> void
+qed::nisar::real::MaskedPhase<sourceT, maskT>::operator++() -> void
 {
     // update the color generator
     ++_color;
-    // and the masj
+    // and the mask
     ++_mask;
     // all done
     return;

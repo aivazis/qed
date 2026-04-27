@@ -17,7 +17,7 @@
 
 // map a single value to a shade of gray
 template <class sourceT, class maskT>
-class qed::nisar::real::Mask {
+class qed::nisar::real::MaskedPhase {
     // types
 public:
     // my template parameters
@@ -39,7 +39,7 @@ public:
 
     // metamethods
 public:
-    inline Mask(
+    inline MaskedPhase(
         source_const_reference data, mask_const_reference mask,
         // parameters
         double mi, double max, double brightness);
@@ -69,18 +69,18 @@ private:
     // default metamethods
 public:
     // destructor
-    ~Mask() = default;
+    ~MaskedPhase() = default;
 
     // constructors
-    Mask(const Mask &) = default;
-    Mask(Mask &&) = default;
-    Mask & operator=(const Mask &) = default;
-    Mask & operator=(Mask &&) = default;
+    MaskedPhase(const MaskedPhase &) = default;
+    MaskedPhase(MaskedPhase &&) = default;
+    MaskedPhase & operator=(const MaskedPhase &) = default;
+    MaskedPhase & operator=(MaskedPhase &&) = default;
 };
 
 
 // the definitions
-#include "Mask.icc"
+#include "MaskedPhase.icc"
 
 
 // end of file
