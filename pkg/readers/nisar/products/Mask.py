@@ -48,7 +48,6 @@ class Mask(Product, family="qed.datasets.nisar.products.mask"):
         return
 
     # implementation details
-    # implementation details
     def _retrieveChannels(self):
         """
         Generate a sequence of channel pipelines for this product
