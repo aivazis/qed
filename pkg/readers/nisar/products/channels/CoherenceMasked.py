@@ -12,7 +12,7 @@ import qed
 from .Channel import Channel
 
 
-# a channel for displaying conherence values
+# a channel for displaying coherence values
 class CoherenceMasked(Channel, family="qed.channels.nisar.coherenceMasked"):
     """
     Make a visualization pipeline to display the coherence
