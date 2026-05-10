@@ -24,7 +24,7 @@ qed::nisar::mask::RawMask<sourceT>::RawMask(source_const_reference source) :
     }
 
     // render the fill value as light gray
-    _palette[255] = { 0.800, 0.800, 0.800 };
+    _palette[255] = { 0.150, 0.050, 0.050 };
 
     // five evenly spaced hues
     constexpr float step = 360.f / 5.f;
