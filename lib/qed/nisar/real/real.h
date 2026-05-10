@@ -16,6 +16,8 @@
 #include "value.h"
 #include "coherence.h"
 #include "coherenceMasked.h"
+#include "covariance.h"
+#include "covarianceMasked.h"
 #include "unwrapped.h"
 #include "unwrappedMasked.h"
 

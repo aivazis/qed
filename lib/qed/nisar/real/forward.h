@@ -18,6 +18,10 @@ namespace qed::nisar::real {
     template <class sourceT, class maskT>
     class MaskedCoherence;
 
+    // the masked covariance workflow
+    template <class sourceT, class maskT>
+    class MaskedCovariance;
+
 }
 
 

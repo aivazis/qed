@@ -1,0 +1,55 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// the declaration
+#include "MaskedCovariance.h"
+
+
+// metamethods
+template <class sourceT, class maskT>
+qed::nisar::real::MaskedCovariance<sourceT, maskT>::MaskedCovariance(
+    source_const_reference source, mask_const_reference mask, double min, double max) :
+    _source { source.cbegin() },
+    _mask { mask.cbegin() },
+    _normalizer { _source, { min, max } },
+    _color { _normalizer }
+{}
+
+// interface
+template <class sourceT, class maskT>
+auto
+qed::nisar::real::MaskedCovariance<sourceT, maskT>::operator*() const ->
+    typename colormap_type::rgb_type
+{
+    // get the mask
+    auto mask = *_mask;
+    // if it's the fill value
+    if (mask == 0xff) {
+        // show black
+        return typename colormap_type::rgb_type { 0.10, 0.05, 0.05 };
+    }
+    // otherwise, invoke the workflow
+    return *_color;
+}
+
+
+template <class sourceT, class maskT>
+auto
+qed::nisar::real::MaskedCovariance<sourceT, maskT>::operator++() -> void
+{
+    // update the color generator
+    ++_color;
+    // and the mask
+    ++_mask;
+    // all done
+    return;
+}
+
+
+// end of file
