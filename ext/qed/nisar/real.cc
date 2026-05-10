@@ -134,6 +134,48 @@ qed::py::nisar::real(py::module & m)
     // {r4}
     real.def(
         // the name of the function
+        "covarianceMasked",
+        // the handler
+        &qed::nisar::real::covarianceMasked<heapgrid_t<float>>,
+        // the signature
+        "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the masked covariance");
+    // {r8}
+    real.def(
+        // the name of the function
+        "covarianceMasked",
+        // the handler
+        &qed::nisar::real::covarianceMasked<heapgrid_t<double>>,
+        // the signature
+        "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the masked covariance");
+
+    // {r4}
+    real.def(
+        // the name of the function
+        "covariance",
+        // the handler
+        &qed::nisar::real::covariance<heapgrid_t<float>>,
+        // the signature
+        "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the covariance");
+    // {r8}
+    real.def(
+        // the name of the function
+        "covariance",
+        // the handler
+        &qed::nisar::real::covariance<heapgrid_t<double>>,
+        // the signature
+        "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the covariance");
+
+    // {r4}
+    real.def(
+        // the name of the function
         "coherenceMasked",
         // the handler
         &qed::nisar::real::coherenceMasked<heapgrid_t<float>>,
