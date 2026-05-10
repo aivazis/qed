@@ -10,6 +10,8 @@ from .Value import Value as value
 
 from .Coherence import Coherence as coherence
 from .CoherenceMasked import CoherenceMasked as coherenceMasked
+from .Covariance import Covariance as covariance
+from .CovarianceMasked import CovarianceMasked as covarianceMasked
 from .UnwrappedPhase import UnwrappedPhase as unwrapped
 from .UnwrappedPhaseMasked import UnwrappedPhaseMasked as unwrappedMasked
 
@@ -29,6 +31,5 @@ from .BFPQReal import BFPQReal as realBFPQ
 
 # bitmasks
 from .Raw import Raw as raw
-
 
 # end of file

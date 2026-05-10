@@ -11,8 +11,9 @@ import journal
 # superclass
 from .H5 import H5
 
-# my dataset
-from .products.Real import Real
+# my datasets
+from .products.Covariance import Covariance
+from .products.Mask import Mask
 from .products.SLC import SLC
 
 
@@ -45,6 +46,7 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
             "RHRV",
             "RVRH",
             "RVRV",
+            "mask",
         ],
     }
 
@@ -57,6 +59,9 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
         product = self.product
         # grab my selectors
         selectors = self.selectors
+        # and the registered datasets
+        registered = self.datasets
+
         # get the science group
         science = product.science
         # go through the possible bands
@@ -96,7 +101,45 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                     continue
                 # look up the grid group for this frequency
                 grid = getattr(grids, f"frequency{frequency}")
-                # and get the list of polarizations present
+
+                # attempt to
+                try:
+                    # get the mask
+                    mask = grid.mask
+                # if it is not present
+                except AttributeError:
+                    # so grab a channel
+                    channel = journal.warning("qed.nisar.gcov")
+                    # and complain
+                    channel.line(f"while exploring '{self.pyre_name}':")
+                    channel.indent()
+                    channel.line(f"no 'mask' dataset")
+                    channel.line(f"in band '{band}', frequency '{frequency}'")
+                    channel.outdent()
+                    # flush
+                    channel.log()
+                # otherwise
+                else:
+                    # generate a name for the dataset
+                    name = f"{self.pyre_name}.{band}.{frequency}.mask"
+                    # build its selector
+                    selector = {
+                        "band": band,
+                        "frequency": frequency,
+                        "cov": "mask",
+                    }
+                    # pack its configuration
+                    config = {
+                        "uri": self.uri,
+                        "shape": mask.shape,
+                        "selector": selector,
+                    }
+                    # instantiate it
+                    dataset = Mask(name=name, data=mask, **config)
+                    # add the dataset to my pile
+                    registered.append(dataset)
+
+                # get the list of polarizations present
                 terms = grid.listOfCovarianceTerms
                 # go through them
                 for term in terms:
@@ -136,9 +179,9 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                     # the diagonal terms
                     else:
                         # are real
-                        data = Real(name=name, data=dataset, **config)
+                        data = Covariance(name=name, data=dataset, mask=mask, **config)
                     # add the dataset to my pile
-                    self.datasets.append(data)
+                    registered.append(data)
         # all done
         return
 
