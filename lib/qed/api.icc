@@ -35,7 +35,13 @@ qed::api::factor(long product, long aspect) -> pairs_t
         guesses.emplace_back(op1, op2);
     }
 
-    // now, let's symmetrize the {guesses}
+    // if the problem has no solution
+    if (guesses.size() == 0) {
+        // we are done
+        return guesses;
+    }
+
+    // otherwise, let's symmetrize the {guesses}
     // first, make sure {guesses} doesn't relocate during the update
     guesses.reserve(2 * guesses.size());
     // point to the last guess
@@ -58,5 +64,6 @@ qed::api::factor(long product, long aspect) -> pairs_t
     // all done
     return guesses;
 }
+
 
 // end of file
