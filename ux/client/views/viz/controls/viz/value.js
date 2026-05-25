@@ -128,14 +128,16 @@ const Controller = styled(Slider)`
 
 // the fragment
 const valueVizGetControllerStateFragment = graphql`
-    fragment valueVizGetControllerStateFragment on ValueController {
+    fragment valueVizGetControllerStateFragment on Controller {
         slot
         dirty
         min
-        value
         max
+        ... on ValueController {
+            value
+        }
     }
- `
+`
 
 
 // end of file

@@ -54,17 +54,10 @@ const vizControlsGetViewFragment = graphql`
             name
             controllers {
                 __typename
-                ... on Node {
-                   id
-                }
-                ... on RangeController {
-                    slot
-                    ...rangeVizGetControllerStateFragment
-                }
-                ... on ValueController {
-                    slot
-                    ...valueVizGetControllerStateFragment
-                }
+                id
+                slot
+                ...rangeVizGetControllerStateFragment
+                ...valueVizGetControllerStateFragment
             }
         }
     }

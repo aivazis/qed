@@ -132,15 +132,17 @@ const Controller = styled(Range)`
 
 // the fragment
 const rangeVizGetControllerStateFragment = graphql`
-    fragment rangeVizGetControllerStateFragment on RangeController {
+    fragment rangeVizGetControllerStateFragment on Controller {
         slot
         dirty
         min
-        low
-        high
         max
+        ... on RangeController {
+            low
+            high
+        }
     }
- `
+`
 
 
 // end of file
