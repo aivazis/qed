@@ -210,8 +210,17 @@ type VisualizationPipeline {
   controllers: [Controller!]!
 }
 
+# the shared controller interface
+interface Controller {
+  id: ID!
+  dirty: Boolean!
+  slot: String!
+  min: Float!
+  max: Float!
+}
+
 # controllers
-type RangeController implements Node {
+type RangeController implements Node & Controller {
   id: ID!
   dirty: Boolean!
   slot: String!
@@ -221,7 +230,7 @@ type RangeController implements Node {
   high: Float!
 }
 
-type ValueController implements Node {
+type ValueController implements Node & Controller {
   id: ID!
   dirty: Boolean!
   slot: String!
@@ -229,9 +238,6 @@ type ValueController implements Node {
   max: Float!
   value: Float!
 }
-
-# put them all together
-union Controller = RangeController | ValueController
 
 # viewport properties
 type DatasetMeasure implements Node {
