@@ -7,8 +7,9 @@
 # externals
 import graphene
 
-# my interface
+# my interfaces
 from .Node import Node
+from .Controller import Controller
 
 
 # a controller that captures a range of values
@@ -19,8 +20,8 @@ class RangeController(graphene.ObjectType):
 
     # {graphene} metadata
     class Meta:
-        # register my interface
-        interfaces = (Node,)
+        # register my interfaces
+        interfaces = (Node, Controller)
 
     # my fields
     id = graphene.ID()

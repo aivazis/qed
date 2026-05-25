@@ -7,38 +7,36 @@
 # externals
 import graphene
 
-# base types
-from .RangeController import RangeController
-from .ValueController import ValueController
 
-
-# the union of all controller types
-class Controller(graphene.Union):
+# the shared interface for all controller types
+class Controller(graphene.Interface):
     """
-    The union of all controller types
+    The shared interface for all viz pipeline controller types
     """
 
-    # metadata
-    class Meta:
-        # my possible types
-        types = RangeController, ValueController
+    # shared fields
+    id = graphene.ID()
+    dirty = graphene.Boolean()
+    slot = graphene.String()
+    min = graphene.Float()
+    max = graphene.Float()
 
-    # the type resolver
+    # type resolver
     @classmethod
     def resolve_type(cls, context, info):
         """
-        Deduce the controller type from the {instance} information
+        Deduce the controller type from the {context} information
         """
-        # extract the type id
-        tag = context["controller"].tag
-        # look up the associated class in my registry and return it
-        return cls.registry[tag]
-
-    # the resolver table
-    registry = {
-        "range": RangeController,
-        "value": ValueController,
-    }
+        # avoid a circular import
+        from .RangeController import RangeController
+        from .ValueController import ValueController
+        # the resolver table
+        registry = {
+            "range": RangeController,
+            "value": ValueController,
+        }
+        # extract the type tag and look up the concrete type
+        return registry[context["controller"].tag]
 
 
 # end of file
