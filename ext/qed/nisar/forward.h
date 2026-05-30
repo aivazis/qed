@@ -17,6 +17,7 @@ namespace qed::py::nisar {
     // data products
     void real(py::module &);
     void slc(py::module &);
+    void stack(py::module &);
     void bfpq(py::module &);
     void mask(py::module &);
     // profile
