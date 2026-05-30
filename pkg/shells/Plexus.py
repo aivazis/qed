@@ -31,13 +31,14 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
 
     # the pile of known datasets
     datasets = qed.properties.list(schema=qed.protocols.reader())
-    datasets.doc = "the list of datasets to display"
     datasets.aliases = {"ds"}
+    datasets.doc = "the list of datasets to display"
 
-    # the pile of known stacks
-    stacks = qed.properties.list(schema=qed.protocols.stack())
+    # the pile of known stacks; a stack is just another reader implementation
+    stacks = qed.properties.list(schema=qed.protocols.reader())
     stacks.doc = "the list of dataset stacks"
 
+    # view configuration
     views = qed.properties.list(schema=qed.protocols.ux.view())
     views.doc = "the initial list of views"
 

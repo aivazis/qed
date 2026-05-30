@@ -620,6 +620,12 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             sources.addSource(source=reader)
         # clear out the plexus pile
         plexus.datasets = []
+        # go through the plexus stacks, which present as reader-like sources
+        for stack in plexus.stacks:
+            # and connect them alongside the readers
+            sources.addSource(source=stack)
+        # clear out the plexus stack pile
+        plexus.stacks = []
         # all done
         return sources
 
