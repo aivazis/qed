@@ -24,6 +24,7 @@ qed::py::nisar::nisar(py::module & m)
     // datasets
     real(nisar);
     slc(nisar);
+    stack(nisar);
     bfpq(nisar);
     mask(nisar);
     // profile
