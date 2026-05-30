@@ -3,7 +3,6 @@
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # (c) 1998-2026 all rights reserved
 
-
 # the base reader support
 from . import native
 
@@ -13,11 +12,7 @@ from . import alos
 from . import nisar
 from . import asar
 
-# stack
-from . import stacks
-
 # reader metadata
 from .Metadata import Metadata as metadata
-
 
 # end of file
