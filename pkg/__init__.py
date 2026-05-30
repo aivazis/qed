@@ -60,10 +60,11 @@ from . import protocols
 # support for data archives
 from . import archives
 
-# support for data types, controllers, and readers
+# support for data types, controllers, readers, and stacks
 from . import datatypes
 from . import controllers
 from . import readers
+from . import stacks
 
 # schema
 from . import gql
