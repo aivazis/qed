@@ -22,6 +22,9 @@ from .Imaginary import Imaginary as imaginary
 from .Phase import Phase as phase
 from .Real import Real as real
 
+# channels suitable for a stack of complex datasets
+from .MeanPower import MeanPower as meanpower
+
 # channels suitable for a BFPQ encoded complex dataset
 from .BFPQAmplitude import BFPQAmplitude as amplitudeBFPQ
 from .BFPQComplex import BFPQComplex as complexBFPQ
