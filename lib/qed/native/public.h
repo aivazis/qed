@@ -25,6 +25,7 @@
 #include "channels/real.h"
 #include "channels/value.h"
 #include "channels/magnitude.h"
+#include "channels/MeanPower.h"
 
 // profile
 #include "profile.h"

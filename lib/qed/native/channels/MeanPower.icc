@@ -1,0 +1,129 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+// my declarations
+#include "MeanPower.h"
+
+// {std::norm} is how i get |z|^2 from a complex value
+#include <complex>
+// {std::move} lets me take ownership of my sources without copying
+#include <utility>
+
+
+// metamethods
+// i take ownership of the sources i was handed
+template <typename sourceT>
+qed::native::channels::MeanPower<sourceT>::MeanPower(std::vector<source_type> sources) :
+    // by moving them into my store
+    _sources(std::move(sources))
+{}
+
+
+// interface
+// report the mean power at my current position
+template <typename sourceT>
+auto
+qed::native::channels::MeanPower<sourceT>::operator*() const -> value_type
+{
+    // start a running total
+    value_type sum = 0;
+    // visit each of my sources
+    for (const auto & source : _sources) {
+        // and fold in the power of the value it points to; {std::norm} is |z|^2
+        sum += std::norm(*source);
+    }
+    // the answer is the average over the members
+    return sum / _sources.size();
+}
+
+
+// walk all of my sources together
+template <typename sourceT>
+auto
+qed::native::channels::MeanPower<sourceT>::operator++() -> void
+{
+    // visit each of my sources
+    for (auto & source : _sources) {
+        // and step it forward by one
+        ++source;
+    }
+    // all done
+    return;
+}
+
+
+// the tile generator
+// stand up the lazy chain that turns a set of complex sources into a rendered mean-power tile
+template <typename sourceT>
+auto
+qed::native::channels::meanpower(
+    // the sources to reduce
+    const std::vector<sourceT> & sources,
+    // where the tile starts
+    typename sourceT::index_type origin,
+    // how big the tile is
+    typename sourceT::shape_type tile,
+    // how much to decimate as we zoom out
+    typename sourceT::index_type stride,
+    // the range of powers that maps onto the full color scale
+    double min, double max) -> bmp_t
+{
+    // the index type i use to walk the grid
+    using index_t = typename sourceT::index_type;
+
+    // first stage: subsample each source to realize the zoom level
+    using zoom_t = decimate_t<sourceT>;
+    // second stage: collapse the decimated members to their mean power
+    using selector_t = MeanPower<zoom_t>;
+    // third stage: map the power range onto the unit interval
+    using norm_t = parametric_t<selector_t>;
+    // final stage: paint the unit interval as grayscale
+    using colormap_t = gray_t<norm_t>;
+
+    // the decimator reads from the full-resolution grid, so scale the origin up
+    auto zoomedOrigin = origin;
+    // by walking its axes
+    for (int axis = 0; axis < index_t::rank(); ++axis) {
+        // and stretching each by the stride
+        zoomedOrigin[axis] *= stride[axis];
+    }
+    // and scale the tile extent the same way
+    auto zoomedTile = tile;
+    // by walking its axes
+    for (int axis = 0; axis < index_t::rank(); ++axis) {
+        // and stretching each by the stride
+        zoomedTile[axis] *= stride[axis];
+    }
+
+    // the bitmap i will hand back, sized to the requested tile
+    bmp_t bmp(tile[0], tile[1]);
+
+    // one decimator per member
+    std::vector<zoom_t> decimators;
+    // size the store up front to avoid reallocation
+    decimators.reserve(sources.size());
+    // go through the members
+    for (const auto & source : sources) {
+        // and wrap each in its own decimator
+        decimators.emplace_back(source, zoomedOrigin, zoomedTile, stride);
+    }
+    // reduce the decimated members to their mean power
+    auto selection = selector_t(decimators);
+    // normalize that power onto the unit interval
+    auto norm = norm_t(selection, typename norm_t::interval_type(min, max));
+    // colorize the normalized values
+    auto colormap = colormap_t(norm);
+    // and drive the whole lazy chain, filling the bitmap
+    bmp.encode(colormap);
+
+    // hand back the rendered tile
+    return bmp;
+}
+
+
+// end of file
