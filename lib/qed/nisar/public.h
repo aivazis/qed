@@ -20,6 +20,7 @@
 // data products
 #include "real/real.h"
 #include "slc/slc.h"
+#include "stack/stack.h"
 #include "bfpq/bfpq.h"
 #include "mask/mask.h"
 // profile

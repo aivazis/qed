@@ -1,0 +1,57 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+// my declarations
+#include "meanpower.h"
+
+
+// the mean-power tile generator
+// gather a tile from every member, then defer to the native pipeline to reduce and render it
+template <typename sourceT>
+auto
+qed::nisar::stack::meanpower(
+    // the member datasets, one per stack entry
+    const std::vector<dataset_t> & datasets,
+    // how the cells are laid out on disk
+    const datatype_t & datatype,
+    // where the tile starts
+    typename sourceT::index_type origin,
+    // how big the tile is
+    typename sourceT::shape_type tile,
+    // how much to decimate as we zoom out
+    typename sourceT::index_type stride,
+    // the range of powers that maps onto the full color scale
+    double min, double max) -> bmp_t
+{
+    // the index type i use to walk the grid
+    using index_t = typename sourceT::index_type;
+
+    // the hdf5 read applies the stride itself, so place the read in full-resolution space
+    auto from = origin;
+    // by walking its axes
+    for (int axis = 0; axis < index_t::rank(); ++axis) {
+        // and stretching each by the stride
+        from[axis] *= stride[axis];
+    }
+
+    // the tiles i pull from the members
+    std::vector<sourceT> sources;
+    // size the store up front to avoid reallocation
+    sources.reserve(datasets.size());
+    // go through the member datasets
+    for (const auto & dataset : datasets) {
+        // read this member's tile and stash it alongside the others
+        sources.push_back(pyre::h5::read<sourceT>(dataset, datatype, from, tile, stride));
+    }
+
+    // the tiles are already decimated, so let the native pipeline render them at unit stride
+    return native::channels::meanpower(sources, { 0, 0 }, tile, { 1, 1 }, min, max);
+}
+
+
+// end of file
