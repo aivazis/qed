@@ -66,6 +66,9 @@ class Mutation(graphene.ObjectType):
     viewZoomToggleCoupled = views.zoomToggleCoupled.Field()
     viewZoomReset = views.zoomReset.Field()
 
+    # stack member pinning
+    viewSetStackIndex = views.setStackIndex.Field()
+
     # data archive connection management
     connectArchive = ConnectArchive.Field()
     connectEarthAccessArchive = ConnectEarthAccessArchive.Field()

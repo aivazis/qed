@@ -37,6 +37,8 @@ class Reader(graphene.ObjectType):
     selectors = graphene.List(Selectors)
     available = graphene.List(Selectors)
     datasets = graphene.List(Dataset)
+    # the number of members, if this reader is a stack
+    stackExtent = graphene.Int()
 
     # the resolvers
     @staticmethod
@@ -91,6 +93,14 @@ class Reader(graphene.ObjectType):
         Build a list of the available datasets
         """
         return reader.datasets
+
+    @staticmethod
+    def resolve_stackExtent(reader, *_):
+        """
+        Report the number of members if this reader is a stack, otherwise nothing
+        """
+        # a stack reports its member count; other readers report nothing
+        return getattr(reader, "extent", None)
 
 
 # end of file
