@@ -1,0 +1,105 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+// my declarations
+#include "stats.h"
+
+// {std::norm} is how i get |z|^2 from a complex value
+#include <complex>
+// {std::numeric_limits} seeds my running extrema
+#include <limits>
+
+
+// sample the mean power over a stack
+template <typename sourceT>
+auto
+qed::nisar::stack::stats(
+    // the member datasets, one per stack entry
+    const std::vector<dataset_t> & datasets,
+    // the layout
+    const datatype_t & datatype,
+    // where the sample tile starts
+    typename sourceT::index_type origin,
+    // how big the sample tile is
+    typename sourceT::shape_type tile) -> native::stats_t
+{
+    // i sample at full resolution
+    auto strides = sourceT::index_type::one();
+
+    // read the same tile from each member
+    std::vector<sourceT> sources;
+    // size the store up front to avoid reallocation
+    sources.reserve(datasets.size());
+    // go through the member datasets
+    for (const auto & dataset : datasets) {
+        // read this member's tile and stash it alongside the others
+        sources.push_back(pyre::h5::read<sourceT>(dataset, datatype, origin, tile, strides));
+    }
+
+    // the number of members
+    const double n = sources.size();
+    // with no members, there is nothing to sample
+    if (sources.empty()) {
+        // so hand back nominal values
+        return { 0.0, 0.5, 1.0 };
+    }
+
+    // a cursor into each member's tile
+    std::vector<decltype(sources.front().cbegin())> cursors;
+    // size the store up front
+    cursors.reserve(sources.size());
+    // seed each cursor at the start of its tile
+    for (const auto & source : sources) {
+        // one per member
+        cursors.push_back(source.cbegin());
+    }
+    // the sentinel that marks the end of the walk
+    const auto sentinel = sources.front().cend();
+
+    // the running statistics over the per-pixel mean power
+    double min = std::numeric_limits<double>::infinity();
+    double max = -std::numeric_limits<double>::infinity();
+    double sum = 0.0;
+    long samples = 0;
+
+    // walk every pixel of the tile, all members in lockstep
+    while (cursors.front() != sentinel) {
+        // accumulate the power of each member at this pixel
+        double pixelSum = 0.0;
+        // by visiting every member's cursor
+        for (auto & cursor : cursors) {
+            // folding in its power, {std::norm} being |z|^2
+            pixelSum += std::norm(*cursor);
+            // and stepping it forward
+            ++cursor;
+        }
+        // the mean power at this pixel
+        const double power = pixelSum / n;
+        // a nan would pollute the sample
+        if (std::isnan(power)) {
+            // so skip it
+            continue;
+        }
+        // fold this pixel into the running statistics
+        min = std::min(min, power);
+        max = std::max(max, power);
+        sum += power;
+        ++samples;
+    }
+
+    // if every pixel was nan
+    if (samples == 0) {
+        // hand back nominal values
+        return { 0.0, 0.5, 1.0 };
+    }
+    // otherwise report (low, mean, high)
+    return { min, sum / samples, max };
+}
+
+
+// end of file
