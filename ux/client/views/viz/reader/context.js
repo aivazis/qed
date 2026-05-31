@@ -33,14 +33,21 @@ export const Provider = props => {
         // i also know my channel if i have a dataset and it only has one channel
         dataset?.channels.length == 1 ? dataset.channels[0].tag : null
     )
-    // convert the table of available selectors into a map (name -> available values)
+    // the effective availability: a pinned member realizes more combos than the aggregate, so
+    // when i'm the active reader use the view's availability, otherwise my own collective set
     const available = new Map(
-        reader.available.map(selector => [selector.name, new Set(selector.values)])
+        (active ? view.available : reader.available).map(
+            selector => [selector.name, new Set(selector.values)]
+        )
     )
     // convert the user selections into a (axis -> value) map
     const selections = new Map(
         view.selections.map(selection => [selection.name, selection.value])
     )
+    // if i am a stack, the number of members i have
+    const stackExtent = reader.stackExtent
+    // the pinned member, but only meaningful when i am the active reader
+    const stackIndex = active ? view.stackIndex : null
 
     // assemble the context value
     const context = {
@@ -56,6 +63,10 @@ export const Provider = props => {
         available,
         // the current set of user choices
         selections,
+        // the number of members if i am a stack
+        stackExtent,
+        // my pinned member, if i am the active reader
+        stackIndex,
     }
 
     // provide for my children
@@ -119,6 +130,11 @@ export const contextReaderGetViewFragment = graphql`
             name
             value
         }
+        stackIndex
+        available {
+            name
+            values
+        }
     }
 `
 
@@ -149,6 +165,7 @@ export const contextGetReaderFragment = graphql`
                 tag
             }
         }
+        stackExtent
     }
 `
 

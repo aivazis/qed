@@ -1,7 +1,7 @@
 // -*- web -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
-// (c) 1998-2025 all rights reserved
+// (c) 1998-2026 all rights reserved
 
 
 // externals
@@ -13,29 +13,49 @@ import styled from 'styled-components'
 import { Meta, Slider, SVG } from '~/widgets'
 
 // local
+// context
+import { Context } from './context'
+// hooks
+import { useSetStackIndex } from './useSetStackIndex'
 // styles
 import styles from './styles'
 
-// display a stack frame selector
-export const Stack = () => {
-    // the stack index
-    const [index, setIndex] = React.useState(0)
-    // and its range
-    const [extent, setExtent] = React.useState(5)
 
-    // if we have a trivial stack
-    if (extent == 0) {
-        // bail
+// display a stack member selector
+export const Stack = () => {
+    // get my stack details from the reader context
+    const { stackExtent, stackIndex } = React.useContext(Context)
+    // the mutation that pins or clears a member
+    const setStackIndex = useSetStackIndex()
+
+    // if i am not a stack, or the stack has too few members to be interesting
+    if (!stackExtent || stackExtent < 2) {
+        // there is nothing to show
         return null
     }
 
-    // set up the tick marks
-    const major = [...Array(extent + 1).keys()]
+    // my members are indexed from zero to one less than my extent
+    const max = stackExtent - 1
+    // the tick marks, one per member
+    const major = [...Array(stackExtent).keys()]
+
     // controller configuration
     const opt = {
-        value: index,
-        setValue: value => setIndex(Math.round(value)),
-        min: 0, max: extent, major,
+        // the marker sits on the pinned member; collective leaves it unpinned
+        value: stackIndex,
+        // a click pins the chosen member, or clears the pin if it is already pinned
+        setValue: raw => {
+            // round to a whole member
+            const member = Math.round(raw)
+            // ignore anything off the scale
+            if (member < 0 || member > max) {
+                // nothing to do
+                return
+            }
+            // clicking the pinned member clears the pin; otherwise pin the chosen one
+            setStackIndex(member === stackIndex ? null : member)
+        },
+        min: 0, max, major,
         direction: "row", labels: "bottom", arrows: "top", markers: true,
         height: 75, width: 190,
         tickPrecision: 0, markerPrecision: 0,
