@@ -151,6 +151,8 @@ type Reader implements Node {
   datasets: [Dataset]!
   # for stacks: the number of readers in the stack
   stackExtent: Int
+  # for stacks: the uris of the member readers, in index order
+  members: [String]
 }
 
 
