@@ -23,7 +23,7 @@ import styles from './styles'
 // export the data viewer
 export const Info = ({ viewport, view }) => {
     // unpack the view
-    const { reader, dataset, channel, zoom } = useFragment(infoViewerGetViewFragment, view)
+    const { reader, dataset, channel, zoom, stackIndex } = useFragment(infoViewerGetViewFragment, view)
     // get the viewport registry
     const { viewports } = useViewports()
     // make room for the cursor position
@@ -32,7 +32,7 @@ export const Info = ({ viewport, view }) => {
     // assemble the data request URI
     const base = tileURI({ reader, dataset, channel, zoom, viewport })
     // extract the relevant metadata
-    const { name: readerName, id, uri } = reader
+    const { name: readerName, id, uri, members } = reader
     const { name: datasetName, datatype, shape, origin, tile } = dataset
     // unpack the zoom level
     const level = [zoom.vertical, zoom.horizontal]
@@ -104,6 +104,12 @@ export const Info = ({ viewport, view }) => {
             <Meta.Entry threshold={2} attribute="uri" style={paint}>
                 {uri}
             </Meta.Entry>
+            {members?.map((memberURI, member) => (
+                <Meta.Entry key={member} threshold={2} style={paint}
+                    attribute={member === stackIndex ? `member ${member} ◂` : `member ${member}`}>
+                    {memberURI}
+                </Meta.Entry>
+            ))}
             <Meta.Entry threshold={2} attribute="shape" style={paint}>
                 {shape.join(" x ")}
             </Meta.Entry>
@@ -147,6 +153,7 @@ const infoViewerGetViewFragment = graphql`
             name
             uri
             api
+            members
         }
         dataset {
             name
@@ -162,6 +169,7 @@ const infoViewerGetViewFragment = graphql`
             horizontal
             vertical
         }
+        stackIndex
     }
 `
 
