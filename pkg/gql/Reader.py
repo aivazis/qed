@@ -39,6 +39,8 @@ class Reader(graphene.ObjectType):
     datasets = graphene.List(Dataset)
     # the number of members, if this reader is a stack
     stackExtent = graphene.Int()
+    # the uris of the member readers, in index order, if this reader is a stack
+    members = graphene.List(graphene.String)
 
     # the resolvers
     @staticmethod
@@ -101,6 +103,20 @@ class Reader(graphene.ObjectType):
         """
         # a stack reports its member count; other readers report nothing
         return getattr(reader, "extent", None)
+
+    @staticmethod
+    def resolve_members(reader, *_):
+        """
+        For a stack, the uris of its member readers in index order; otherwise nothing
+        """
+        # get my member readers, if i am a stack
+        members = getattr(reader, "readers", None)
+        # a plain reader has none
+        if members is None:
+            # so report nothing
+            return None
+        # otherwise, hand off the member uris in order, so members[i] is the file at index i
+        return [str(member.uri) for member in members]
 
 
 # end of file
