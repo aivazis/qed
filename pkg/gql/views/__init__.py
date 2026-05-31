@@ -44,4 +44,7 @@ from .ZoomSetLevel import ZoomSetLevel as zoomSetLevel
 from .ZoomToggleCoupled import ZoomToggleCoupled as zoomToggleCoupled
 from .ZoomReset import ZoomReset as zoomReset
 
+# stack
+from .SetStackIndex import SetStackIndex as setStackIndex
+
 # end of file

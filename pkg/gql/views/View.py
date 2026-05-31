@@ -15,6 +15,7 @@ from ..Channel import Channel
 from ..Dataset import Dataset
 from ..Reader import Reader
 from ..Selector import Selector
+from ..Selectors import Selectors
 from .Measure import Measure
 from .Sync import Sync
 from .Zoom import Zoom
@@ -45,6 +46,10 @@ class View(graphene.ObjectType):
     measure = graphene.Field(Measure)
     sync = graphene.Field(Sync)
     zoom = graphene.Field(Zoom)
+    # the pinned stack member, if any
+    stackIndex = graphene.Int()
+    # the available selector values, reflecting any pinned member
+    available = graphene.List(Selectors)
 
     # resolvers
     @staticmethod
@@ -70,6 +75,22 @@ class View(graphene.ObjectType):
         """
         # easy enough
         return view.selections.items()
+
+    @staticmethod
+    def resolve_stackIndex(view, info, **kwds):
+        """
+        Resolve the pinned stack member, if any
+        """
+        # hand it off
+        return view.stackIndex
+
+    @staticmethod
+    def resolve_available(view, info, **kwds):
+        """
+        Resolve the available selector values, reflecting any pinned stack member
+        """
+        # hand off the effective availability
+        return view.availableSelectors().items()
 
 
 # end of file
