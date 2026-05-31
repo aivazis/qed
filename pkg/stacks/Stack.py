@@ -4,6 +4,9 @@
 # (c) 1998-2026 all rights reserved
 
 
+# externals
+import collections
+
 # support
 import qed
 
@@ -70,28 +73,46 @@ class Stack(
         # otherwise, there is no match
         return None
 
+    def member(self, index, selector):
+        """
+        Retrieve the dataset of my {index}-th member that matches {selector}
+        """
+        # get the member reader
+        reader = self.readers[index]
+        # and ask it for the dataset that matches {selector}
+        return reader.find(selector=selector)
+
+    def memberAvailable(self, index):
+        """
+        Retrieve the availability map of my {index}-th member
+        """
+        # a pinned member can realize more combos than the aggregate; hand off its own map
+        return self.readers[index].available
+
     # metamethods
     def __init__(self, **kwds):
         # chain up
         super().__init__(**kwds)
         # get my members
         readers = self.readers
+        # remember how many members i have
+        self.extent = len(readers)
         # if i somehow have none
         if not readers:
             # there is nothing to aggregate
             return
-        # the first member is my reference for the shared selector spec
+        # the selector SPEC is shared by every member by construction, so i can borrow it
         head, *_ = readers
-        # adopt its selector spec
+        # from the first member
         self.selectors = head.selectors
-        # its availability map
-        self.available = head.available
-        # and its preferred selections
-        self.selections = head.selections
         # synthesize a uri that identifies me
         self.uri = f"stack:{self.pyre_name}"
-        # build my aggregate datasets
+        # build my aggregate datasets, one per combo that every member realizes
         self._loadDatasets()
+        # my availability is what those aggregate datasets actually realize: the intersection
+        # across all members, NOT any one member's; derive it from the datasets themselves, the
+        # way a reader derives its own availability (this also auto-selects single-valued axes)
+        self.available = self._checkAvailability()
         # all done
         return
 
@@ -126,6 +147,33 @@ class Stack(
             self.datasets.append(dataset)
         # all done
         return
+
+    def _checkAvailability(self):
+        """
+        Build a map with the available values of each selector, from my aggregate datasets
+        """
+        # get my selector spec
+        selectors = self.selectors
+        # the values that appear in at least one of my aggregate datasets
+        available = collections.defaultdict(set)
+        # go through my aggregate datasets
+        for dataset in self.datasets:
+            # for each selector axis
+            for axis in selectors:
+                # record the value this dataset realizes
+                available[axis].add(dataset.selector[axis])
+        # get my selections
+        selections = self.selections
+        # go through the available options
+        for axis, options in available.items():
+            # if an axis has exactly one option
+            if len(options) == 1:
+                # get it
+                option, *_ = options
+                # and select it on the user's behalf
+                selections[axis] = option
+        # all done
+        return available
 
 
 # end of file
