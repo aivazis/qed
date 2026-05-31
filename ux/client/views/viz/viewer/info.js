@@ -11,6 +11,8 @@ import { graphql, useFragment } from 'react-relay/hooks'
 // project
 // widgets
 import { Meta } from '~/widgets'
+// colors
+import { theme } from '~/palette'
 // hooks
 import { useViewports } from '~/views/viz'
 
@@ -92,6 +94,12 @@ export const Info = ({ viewport, view }) => {
 
     // mix my paint
     const paint = styles.viewer
+    // the active stack member gets painted in the highlight color
+    const activePaint = {
+        ...paint,
+        attribute: { ...paint.attribute, color: theme.page.highlight },
+        value: { ...paint.value, color: theme.page.highlight },
+    }
     // and render
     return (
         < Meta.Table min={0} initial={1} max={5} style={paint} >
@@ -104,12 +112,18 @@ export const Info = ({ viewport, view }) => {
             <Meta.Entry threshold={2} attribute="uri" style={paint}>
                 {uri}
             </Meta.Entry>
-            {members?.map((memberURI, member) => (
-                <Meta.Entry key={member} threshold={2} style={paint}
-                    attribute={member === stackIndex ? `member ${member} ◂` : `member ${member}`}>
-                    {memberURI}
-                </Meta.Entry>
-            ))}
+            {members?.map((memberURI, member) => {
+                // is this the member currently on display?
+                const active = member === stackIndex
+                // mark the active one with an arrow on the left, painted in the highlight color
+                return (
+                    <Meta.Entry key={member} threshold={2}
+                        style={active ? activePaint : paint}
+                        attribute={active ? `▸ member ${member}` : `member ${member}`}>
+                        {memberURI}
+                    </Meta.Entry>
+                )
+            })}
             <Meta.Entry threshold={2} attribute="shape" style={paint}>
                 {shape.join(" x ")}
             </Meta.Entry>
