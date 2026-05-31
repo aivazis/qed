@@ -63,6 +63,27 @@ qed::py::nisar::stack(py::module & m)
         // the docstring
         "render the coherence of a stack of complex double tiles");
 
+    // {c8} mean-power statistics
+    stack.def(
+        // the name of the function
+        "stats",
+        // the handler
+        &qed::nisar::stack::stats<heapgrid_t<std::complex<float>>>,
+        // the signature
+        "sources"_a, "datatype"_a, "origin"_a, "shape"_a,
+        // the docstring
+        "sample the mean power over a stack of complex float tiles");
+    // {c16} mean-power statistics
+    stack.def(
+        // the name of the function
+        "stats",
+        // the handler
+        &qed::nisar::stack::stats<heapgrid_t<std::complex<double>>>,
+        // the signature
+        "sources"_a, "datatype"_a, "origin"_a, "shape"_a,
+        // the docstring
+        "sample the mean power over a stack of complex double tiles");
+
     // all done
     return;
 }
