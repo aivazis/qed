@@ -8,6 +8,7 @@
 
 // the aggregate channels this category provides
 #include "meanpower.h"
+#include "coherence.h"
 
 
 // end of file
