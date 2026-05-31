@@ -52,6 +52,9 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
     session = qed.properties.str()
     session.doc = "the session token"
 
+    stackIndex = qed.properties.int(default=None)
+    stackIndex.doc = "the pinned stack member, or None for the collective aggregate view"
+
     # interface
     def tile(self, channel, zoom, origin, shape):
         """
@@ -458,6 +461,19 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
+    def setStackIndex(self, index):
+        """
+        Pin the stack member with the given {index}, or clear the pin when {index} is None
+        """
+        # store the new pin
+        self.stackIndex = index
+        # re-resolve my dataset and channel
+        self.resolve()
+        # grab a new session token so the client refetches tiles
+        self.session = uuid.uuid1()
+        # all done
+        return self
+
     # state resolution
     def resolve(self):
         """
@@ -469,6 +485,9 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         if not reader:
             # there is no solution
             return self
+        # prune any selections that the current availability no longer allows; this matters
+        # when a stack pin is cleared and the collective set is narrower than the member's
+        self._validateSelections()
         # get the reader selectors
         selectors = reader.selectors
         # get my selections
@@ -515,6 +534,10 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         if not self.dataset:
             # all done
             return self
+        # if a stack member is pinned, switch from the aggregate to that member's dataset
+        dataset = self._pinnedDataset(dataset=dataset)
+        # record the resolved dataset
+        self.dataset = dataset
         # get the channel
         channel = self.channel
         # if we were able to find a dataset and we have a channel selection
@@ -566,6 +589,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             measure=self.measure.clone(),
             sync=self.sync.clone(),
             zoom=self.zoom.clone(),
+            stackIndex=self.stackIndex,
         )
 
     def pipelines(self):
@@ -594,6 +618,97 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
                     controller.dirty = False
                 # hand off the configured pipeline
                 yield pipeline
+        # all done
+        return
+
+    # implementation details
+    def _pinnedDataset(self, dataset):
+        """
+        If a stack member is pinned, return that member's dataset in place of the aggregate
+        """
+        # get my pinned index
+        index = self.stackIndex
+        # if nothing is pinned, the aggregate dataset stands
+        if index is None:
+            # hand it back unchanged
+            return dataset
+        # get my reader
+        reader = self.reader
+        # only a stack can pin members
+        if not isinstance(reader, qed.stacks.stack):
+            # hand the dataset back unchanged
+            return dataset
+        # get the member dataset that matches my current selection
+        member = reader.member(index=index, selector=dataset.selector)
+        # if there is no such member
+        if member is None:
+            # hand the aggregate back unchanged
+            return dataset
+        # make sure the member's channel pipelines are registered
+        self._registerDataset(dataset=member)
+        # and hand the member back
+        return member
+
+    def _registerDataset(self, dataset):
+        """
+        Register the channel pipelines of {dataset} into my pipeline table, on demand
+        """
+        # form the namespace for this dataset's pipelines
+        namespace = f"{self.pyre_name}.{dataset.pyre_name}"
+        # if i have already registered this dataset
+        if any(name.startswith(namespace + ".") for name in self._pipelines):
+            # there is nothing more to do
+            return
+        # otherwise, build its pipelines
+        for pipeline in dataset.pipelines(context=namespace):
+            # get the reference configuration
+            reference = dataset.channel(name=pipeline.tag)
+            # mirror its configuration in my pipeline
+            self.harvester.configure(component=pipeline, reference=reference)
+            # mark its controllers clean
+            for controller, _ in pipeline.controllers():
+                # one at a time
+                controller.dirty = False
+            # register it
+            self._pipelines[pipeline.pyre_name] = pipeline
+        # all done
+        return
+
+    def availableSelectors(self):
+        """
+        Build the map of available selector values, reflecting any pinned stack member
+        """
+        # get my reader
+        reader = self.reader
+        # if i don't have one, nothing is available
+        if not reader:
+            # hand back an empty map
+            return {}
+        # a pinned member can realize more combos than the aggregate
+        index = self.stackIndex
+        # so when a member is pinned on a stack
+        if index is not None and isinstance(reader, qed.stacks.stack):
+            # use that member's wider availability
+            return reader.memberAvailable(index)
+        # otherwise, the reader's own availability stands
+        return reader.available
+
+    def _validateSelections(self):
+        """
+        Drop any selection whose value is no longer available, e.g. after collapsing a pin
+        """
+        # the values currently available, given any pin
+        available = self.availableSelectors()
+        # my selections
+        selections = self.selections
+        # go through a snapshot of the selected axes
+        for axis in list(selections):
+            # the values available for this axis
+            values = available.get(axis, ())
+            # if my selection is no longer among them
+            if selections[axis] not in values:
+                # drop it so the user can re-pick from the narrower set
+                del selections[axis]
         # all done
         return
 

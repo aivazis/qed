@@ -66,6 +66,17 @@ class Viewport(
         # all done
         return self.view()
 
+    def setStackIndex(self, source, index):
+        """
+        Pin (or clear, when {index} is None) the stack member
+        """
+        # activate the {source}
+        view = self._selectSource(source=source)
+        # and delegate
+        view.setStackIndex(index=index)
+        # all done
+        return self.view()
+
     def toggleMeasure(self, source):
         """
         Toggle {coordinate}
