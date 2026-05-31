@@ -24,16 +24,12 @@ class MeanPower(Channel, family="qed.channels.nisar.meanpower"):
     # interface
     def autotune(self, stats, **kwds):
         """
-        Use the {stats} gathered on a data sample to adjust the power configuration
+        Use the mean-power {stats} gathered on a sample to adjust the power configuration
         """
         # chain up
         super().autotune(stats=stats, **kwds)
-        # my sample {stats} are amplitudes, but i render power
-        low, mean, high = stats
-        # so square them to form a sensible initial power range
-        powerStats = (low * low, mean * mean, high * high)
-        # and hand it to my range
-        self.power.autotune(stats=powerStats, **kwds)
+        # my {stats} are already mean-power statistics, so tune my range with them directly
+        self.power.autotune(stats=stats, **kwds)
         # all done
         return
 

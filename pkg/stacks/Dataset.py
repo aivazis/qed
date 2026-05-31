@@ -134,14 +134,39 @@ class Dataset(
         self.origin = head.origin
         # its preferred tile
         self.tile = head.tile
-        # and a data sample to autotune against
-        self.stats = head.stats
+        # sample the aggregate to get statistics to autotune against
+        self.stats = self._collectStatistics()
         # populate my channel pipelines
         self._registerChannels()
         # all done
         return
 
     # implementation details
+    def _collectStatistics(self):
+        """
+        Sample the mean power over my members to set a sensible default rendering range
+        """
+        # my reference member
+        head, *_ = self.members
+        # test stand-ins carry no live data, so fall back to a member's own sample
+        if not hasattr(head, "data"):
+            # which is the best we can do without data
+            return head.stats
+        # gather the member data sources
+        sources = [member.data.dataset for member in self.members]
+        # make a sample tile that fits within my shape
+        tile = tuple(min(256, extent) for extent in self.shape)
+        # centered in my shape
+        center = tuple((extent - t) // 2 for extent, t in zip(self.shape, tile))
+        # as a grid index
+        center = qed.libpyre.grid.Index2D(index=center)
+        # and a grid shape
+        tile = qed.libpyre.grid.Shape2D(shape=tile)
+        # sample the per-pixel mean power over my members
+        return qed.libqed.nisar.stack.stats(
+            sources=sources, datatype=self.datatype.htype, origin=center, shape=tile
+        )
+
     def _registerChannels(self):
         """
         Build the channel pipelines
