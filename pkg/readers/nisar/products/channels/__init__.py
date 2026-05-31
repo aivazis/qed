@@ -24,6 +24,7 @@ from .Real import Real as real
 
 # channels suitable for a stack of complex datasets
 from .MeanPower import MeanPower as meanpower
+from .StackCoherence import StackCoherence as stackCoherence
 
 # channels suitable for a BFPQ encoded complex dataset
 from .BFPQAmplitude import BFPQAmplitude as amplitudeBFPQ
