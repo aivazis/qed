@@ -80,8 +80,8 @@ class Dataset(
         for channel in self._retrieveChannels():
             # get the factory from the channels package
             cls = getattr(channels, channel)
-            # instantiate it
-            pipeline = cls(name=f"{context}.{channel}")
+            # instantiate it, naming it after its {tag} so the view can look it up by tag
+            pipeline = cls(name=f"{context}.{cls.tag}")
             # autotune it from my sample
             pipeline.autotune(stats=self.stats)
             # and make it available
@@ -157,8 +157,10 @@ class Dataset(
         """
         Generate a sequence of the aggregate channels this dataset provides
         """
-        # v1 offers a single aggregate: the mean power of the stack
+        # the mean power of the stack
         yield "meanpower"
+        # and its temporal coherence
+        yield "stackCoherence"
         # all done
         return
 
