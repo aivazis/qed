@@ -41,6 +41,12 @@ export const Marker = ({ value, id = 0, ...rest }) => {
         onMouseDown: start,
     } : {}
 
+    // if there is no value to point at, there is nothing to mark
+    if (value == null) {
+        // so render nothing
+        return null
+    }
+
     // render
     return (
         <g transform={markerPosition(value)} {...behaviors} >

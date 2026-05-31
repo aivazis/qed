@@ -28,6 +28,12 @@ export const MarkerLabel = ({ value }) => {
         return null
     }
 
+    // if there is no value to show, there is nothing to label
+    if (value == null) {
+        // so render nothing
+        return null
+    }
+
     // pick an implementation based on my state
     const Label = enabled ? Enabled : Disabled
 
