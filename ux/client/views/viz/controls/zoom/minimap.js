@@ -265,9 +265,9 @@ export const Minimap = ({ ils, shape, zoom }) => {
         }
     }, [viewports, activeViewport, data, scale])
 
-    // render
+    // render; the minimap is an interactive overview of the raster, the client's identity for it
     return (
-        <g ref={placemat}>
+        <g ref={placemat} role="group" aria-label="viewport minimap" data-qed-control="minimap">
             <Placemat x={0} y={0} width={1} height={1} />
             <Data ref={data} x={0} y={0} width={dWidth * scale} height={dHeight * scale} />
             <Viewport ref={rep} x={zoomX * x * scale} y={zoomY * y * scale}

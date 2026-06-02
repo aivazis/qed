@@ -34,13 +34,16 @@ export const Range = ({ value, setValue, ...config }) => {
 
 // render the controller
 const Controller = ({ value, setValue }) => {
-    // render
+    // render; the axis, ticks, and tick labels are a decorative scale that duplicates the
+    // accessible thumbs (role=slider, aria-valuenow), so they are hidden from assistive tech
     return (
         <Rangemat setValue={setValue} >
-            <Axis />
-            <Major />
-            <Minor />
-            <Labels />
+            <g aria-hidden="true">
+                <Axis />
+                <Major />
+                <Minor />
+                <Labels />
+            </g>
             <Interval value={value} />
             <Marker id={0} value={value[0]} />
             <MarkerLabel value={value[0]} />

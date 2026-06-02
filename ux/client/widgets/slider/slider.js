@@ -33,13 +33,17 @@ export const Slider = ({ value, setValue, ...config }) => {
 
 // lay out the control
 const Controller = ({ value, setValue }) => {
-    // render
+    // render; the axis, ticks, and tick labels are a decorative scale that duplicates the
+    // accessible thumb (role=slider, aria-valuenow), so they are hidden from assistive tech --
+    // they stay clickable for mouse users. the {Marker} thumb stays in the accessible tree.
     return (
         <Simplemat setValue={setValue} >
-            <Axis />
-            <Major setValue={setValue} />
-            <Minor setValue={setValue} />
-            <Labels value={value} setValue={setValue} />
+            <g aria-hidden="true">
+                <Axis />
+                <Major setValue={setValue} />
+                <Minor setValue={setValue} />
+                <Labels value={value} setValue={setValue} />
+            </g>
             <Marker value={value} />
             <MarkerLabel value={value} />
         </Simplemat>
