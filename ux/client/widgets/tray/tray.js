@@ -49,7 +49,13 @@ export const Tray = ({
     // paint me
     return (
         <Section style={paint}>
-            <Header style={paint} onClick={toggle}>
+            <Header
+                style={paint}
+                onClick={toggle}
+                role="button"
+                aria-expanded={expanded}
+                aria-label={typeof title === "string" ? title : undefined}
+                data-qed-control="tray">
                 <Indicator expanded={expanded} size={0.6 * size} />
                 <Title>{title}</Title>
                 <Spacer />

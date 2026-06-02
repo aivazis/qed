@@ -29,7 +29,7 @@ export const Controls = ({ size, style }) => {
     const paint = styles.activity(style)
     // paint me
     return (
-        <Activity size={size} url={url} current={current} style={paint} >
+        <Activity size={size} url={url} current={current} style={paint} label="view controls" >
             <Icon />
         </Activity>
     )

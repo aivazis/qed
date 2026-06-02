@@ -29,7 +29,7 @@ export const About = ({ size, style }) => {
     const paint = styles.activity(style)
     // and render
     return (
-        <Activity size={size} url={url} current={current} style={paint} >
+        <Activity size={size} url={url} current={current} style={paint} label="about qed" >
             <Icon />
         </Activity>
     )

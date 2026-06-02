@@ -45,7 +45,8 @@ export const Collapse = ({ viewport }) => {
     const paint = styles.collapse
     // and render
     return (
-        <Badge size={10} state="enabled" behaviors={behaviors} style={paint} >
+        <Badge size={10} state="enabled" behaviors={behaviors} style={paint}
+            aria-label="collapse this viewport" data-qed-control="viewport" data-qed-action="collapse" >
             <Icon />
         </Badge>
     )
