@@ -96,15 +96,17 @@ Playwright projects (`tests/qed.ux.playwright/`):
   endpoint (`viewChannelSet`) so exactly one Mosaic, and the zoom slider on `/controls`, renders.
   Without it the viewport is an empty shell and the widget checks are vacuous. The selection is
   server-side state, so it persists for the later projects.
-- **`gate`** — the two checks that must pass:
+- **`gate`** — every `identity/*.spec.ts` and `aria/*.spec.ts` must pass:
   - `identity/grammar.spec.ts` — every `data-pyre-widget` names a known kind and every
     `-part`/`-name` lives under a `-widget`; data-independent.
   - `aria/widgets.spec.ts` — every tagged widget part carries the ARIA its role implies (slider
     thumb → `aria-valuenow/min/max`, separator → `aria-orientation`, mosaic → `role`+`aria-label`).
-- **`backlog`** (`aria/coverage.spec.ts`) — every interactive control (native or
-  `cursor: pointer`) carries a `role`, a `data-pyre-widget`, or a `data-qed-*`. This is the
-  rollout TODO: it is **expected to fail** today and is excluded from the gate. Run it with
-  `npx playwright test --project=backlog` (from the staging area) to see what remains.
+  - `aria/coverage.spec.ts` — every interactive control (native or `cursor: pointer`, excluding
+    `aria-hidden` decorative subtrees) carries a `role`, a `data-pyre-widget`, or a `data-qed-*`.
+    The phase-2 rollout is complete, so this is now a hard gate, not a backlog.
+  - per-control identity specs — `channels`, `detail`, `sync`, `icons` (nav rail + viewport
+    actions), `slider` (decorative scale + minimap), `doc` (table-of-contents topics) — assert the
+    exact role/ARIA/`data-qed-*` each control owes, so a regression is pinned to a single control.
 
 `mm qed.ux.playwright` runs only the `gate` project, so a clean tree is green; failures print one
 line per problem. The framework lives in a dedicated `node_modules` kept out of the client bundle
