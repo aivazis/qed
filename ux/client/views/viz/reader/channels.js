@@ -41,12 +41,14 @@ export const Channels = ({ children }) => {
 
     // mix my paint
     const channelStyle = styles.channels()
-    // and render
+    // and render; the channel values form a radiogroup -- the client's identity for this control
     return (
         <Meta.Entry attribute={label} style={channelStyle}>
-            {children.map(channel => (
-                <Channel key={channel.id} channel={channel} />
-            ))}
+            <div role="radiogroup" aria-label="channels" data-qed-control="channel">
+                {children.map(channel => (
+                    <Channel key={channel.id} channel={channel} />
+                ))}
+            </div>
         </Meta.Entry>
     )
 }
