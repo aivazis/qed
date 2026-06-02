@@ -107,10 +107,12 @@ const Box = styled.div`
 
 
 // style {Mosaic}
+// N.B.: do NOT set width/height here. {Mosaic} sizes its own {Box} from the *zoomed* shape; this
+// wrapper's class is now forwarded onto that same {Box} (the mosaic spreads {...rest}), so a
+// width/height here -- computed from the *raw* shape -- would override the zoomed size and freeze
+// the scroll extent at zoom 0. let {Mosaic} own its geometry.
 const DataTiles = styled(Mosaic)`
     background-color: hsl(0deg, 5%, 7%);
-    width: ${props => props.shape[1]}px;
-    height: ${props => props.shape[0]}px;
 `
 
 // memoize it
