@@ -23,8 +23,8 @@ export const Marker = ({ value, id = 0, ...rest }) => {
     // make a handler that indicates the user is dragging the marker to pick a new value
     const startSliding = useStartSliding()
 
-    // unpack the geometry
-    const { enabled, marker, markerPosition } = useConfig()
+    // unpack the geometry and the bits i need to describe myself
+    const { enabled, label, direction, min, max, marker, markerPosition } = useConfig()
     // pick a styling based on my state
     const Indicator = enabled ? Enabled : Disabled
 
@@ -47,9 +47,23 @@ export const Marker = ({ value, id = 0, ...rest }) => {
         return null
     }
 
+    // describe myself as the slider thumb; a row control reads as horizontal, a column one
+    // as vertical; the client owns the accessible name through {label}
+    const semantics = {
+        role: "slider",
+        "aria-orientation": direction === "column" ? "vertical" : "horizontal",
+        "aria-valuenow": value,
+        "aria-valuemin": min,
+        "aria-valuemax": max,
+        "aria-label": label,
+        "aria-disabled": enabled ? undefined : true,
+        "data-pyre-widget": "slider",
+        "data-pyre-widget-part": "thumb",
+    }
+
     // render
     return (
-        <g transform={markerPosition(value)} {...behaviors} >
+        <g transform={markerPosition(value)} {...semantics} {...behaviors} >
             <Indicator d={marker} {...rest} />
         </g>
     )

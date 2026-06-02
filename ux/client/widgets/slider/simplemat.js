@@ -97,7 +97,8 @@ export const Simplemat = ({ setValue, children, ...rest }) => {
     // otherwise, the {mouseleave} will trigger when the mouse enters any of the other
     // {children} of the slider
     return (
-        <g ref={placemat} transform={emplace} onClick={enabled ? pick : null}>
+        <g ref={placemat} transform={emplace} onClick={enabled ? pick : null}
+            data-pyre-widget="slider" data-pyre-widget-part="track">
             <Rect {...bboxMine} {...rest} />
             {children}
         </g>

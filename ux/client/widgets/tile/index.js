@@ -9,11 +9,13 @@ import React from 'react'
 import styled from 'styled-components'
 
 
-// a widget that contains a lazily loaded image
-export const Tile = ({ uri, shape }) => {
+// a widget that contains a lazily loaded image; a tile is one slice of a larger {mosaic}
+// image, so it carries an empty {alt} by default and reads as decorative to assistive tech
+export const Tile = ({ uri, shape, alt = "", ...rest }) => {
     // render
     return (
-        <Image shape={shape} loading="lazy" className="lazyload" data-src={uri} />
+        <Image shape={shape} loading="lazy" className="lazyload" data-src={uri}
+            alt={alt} data-pyre-widget="tile" {...rest} />
     )
 }
 
