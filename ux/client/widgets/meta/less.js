@@ -66,9 +66,16 @@ export const Less = () => {
 
     // mix my paint
     const paint = styles.detailControl(state, polish)
-    // and render
+    // and render; a button with a stable identity, its availability in ARIA, not in {data-*}
     return (
-        <div style={paint} {...controls}>less</div>
+        <div
+            style={paint}
+            role="button"
+            aria-label="show less detail"
+            aria-disabled={state === "disabled"}
+            data-qed-control="detail"
+            data-qed-detail="less"
+            {...controls}>less</div>
     )
 }
 
