@@ -1,0 +1,14 @@
+# -*- gitignore -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2026 all rights reserved
+
+
+# the generated fixtures: produced on demand by the {qed.data} generators, never committed
+*.dat
+
+# the compiled generator binaries (one per generator source, no extension)
+native/d8
+native/d16
+
+# end of file
