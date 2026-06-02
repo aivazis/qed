@@ -74,9 +74,15 @@ export const Channel = ({ channel }) => {
 
     // mix my paint
     const paint = styles.channel(state, polish)
-    // and render
+    // and render; the client owns this control's identity and role: it is one radio in the
+    // CHANNELS radiogroup, and ARIA carries its selected state (never mirrored into {data-*})
     return (
-        <div style={paint} {...behaviors} >
+        <div
+            style={paint}
+            role="radio"
+            aria-checked={state === "selected"}
+            data-qed-value={channel.tag}
+            {...behaviors} >
             {channel.tag}
         </div>
     )
