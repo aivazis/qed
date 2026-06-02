@@ -49,6 +49,9 @@ const findUntagged = (): string[] => {
     for (const node of document.querySelectorAll("*")) {
         // a pointer cursor is our proxy for "this reacts to a click"
         if (window.getComputedStyle(node).cursor !== "pointer") continue
+        // decorative subtrees are hidden from assistive tech; the control that owns them carries
+        // the role and name, so their internals (e.g. the paths of an icon) are not offenders
+        if (node.closest('[aria-hidden="true"]')) continue
         // native controls are already accessible
         if (nativelyAccessible(node)) continue
         // so is anything nested inside a native control (e.g. an svg icon in a link or button)

@@ -52,10 +52,11 @@ export const Badge = ({ size, state, behaviors, style, children, ...options }) =
     const shrink = `scale(${size / 1000})`
     // mix my paint
     const paint = paintBadge({ state, client: style, polish })
-    // and render
+    // and render; a {Badge} is a button by default (the client may override {role}, e.g. to none
+    // when it nests the badge inside a link); the svg is decorative, named by the badge's label
     return (
-        <div {...options} style={paint.badge} {...controls}>
-            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width={size} height={size} >
+        <div role="button" {...options} style={paint.badge} {...controls}>
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width={size} height={size} aria-hidden="true" >
                 <g transform={shrink} style={paint.shape} >
                     {React.cloneElement(React.Children.only(children), { style: paint })}
                 </g>

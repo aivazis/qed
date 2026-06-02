@@ -26,7 +26,7 @@ import styles from './styles'
 // activities can be { "disabled", "enabled", "selected", "available" }
 // currently, there is no use case for a disabled activity, so the logic may need to change
 
-export const Activity = ({ size, url, current, children, style }) => {
+export const Activity = ({ size, url, current, children, style, label }) => {
     // grab the activity panel state mutators
     const { showActivityPanel, toggleActivityPanel } = useActivityPanel()
     // which determines its state
@@ -38,10 +38,11 @@ export const Activity = ({ size, url, current, children, style }) => {
 
     // mix my paint
     const paint = styles.activity(style)
-    // paint me
+    // paint me; the {Link} is the control and carries the accessible name and nav identity, so the
+    // badge inside opts out of the button role (no interactive element nested in another)
     return (
-        <Link to={url} >
-            <Badge size={size} state={state} behaviors={behaviors} style={paint} >
+        <Link to={url} aria-label={label} data-qed-nav={label} >
+            <Badge size={size} state={state} behaviors={behaviors} style={paint} role={undefined} >
                 {children}
             </Badge>
         </Link>

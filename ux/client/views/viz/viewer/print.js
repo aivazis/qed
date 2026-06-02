@@ -81,8 +81,9 @@ export const Print = ({ viewport, view }) => {
     const paint = styles.print
     // render
     return (
-        <a ref={link} download href={`${uri}/0x0+512x512`} >
-            <Badge size={16} state={state} behaviors={behaviors} style={paint} >
+        <a ref={link} download href={`${uri}/0x0+512x512`}
+            aria-label="download this view" data-qed-control="viewport" data-qed-action="print" >
+            <Badge size={16} state={state} behaviors={behaviors} style={paint} role={undefined} >
                 <Shape />
             </Badge>
         </a>

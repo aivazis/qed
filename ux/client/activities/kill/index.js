@@ -29,7 +29,7 @@ export const Kill = ({ size, style }) => {
     const paint = styles.activity(style)
     // and render
     return (
-        <Activity size={size} url={url} current={current} style={paint} >
+        <Activity size={size} url={url} current={current} style={paint} label="shut down the server" >
             <Icon />
         </Activity>
     )

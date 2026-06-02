@@ -50,7 +50,8 @@ export const Measure = ({ viewport, view }) => {
     const paint = styles.measure
     // and render
     return (
-        <Badge size={14} state={state} behaviors={behaviors} style={paint} >
+        <Badge size={14} state={state} behaviors={behaviors} style={paint}
+            aria-label="toggle the measure layer" data-qed-control="viewport" data-qed-action="measure" >
             <Icon />
         </Badge>
     )
