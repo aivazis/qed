@@ -24,10 +24,16 @@ export const Header = ({ mark }) => {
     const { activeViewport } = useViewports()
     // get the sync handler factories
     const { toggle } = useSyncToggleAll()
-    // a behavior factory
+    // a behavior factory; it also carries the client identity for the toggle-all-aspect button
     const behaviors = aspect => {
         // build the table of behaviors and return it
         return {
+            // identity + role: this header toggles {aspect} across every viewport
+            "data-qed-control": "sync",
+            "data-qed-aspect": aspect,
+            "data-qed-scope": "all",
+            role: "button",
+            "aria-label": `sync ${aspect} across all viewports`,
             onClick: evt => {
                 // stop this event from bubbling up
                 evt.stopPropagation()
