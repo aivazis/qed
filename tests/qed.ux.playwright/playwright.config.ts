@@ -44,18 +44,11 @@ export default defineConfig({
         // a one-shot setup that selects a channel so a Mosaic (and the zoom slider) renders for
         // the read-only specs; without it the viewport is an empty shell and the gate is vacuous
         { name: "setup", testMatch: /.*\.setup\.ts/, use: { ...devices["Desktop Chrome"] } },
-        // the gate: the grammar and widget-aria checks must pass
+        // the gate: every identity and aria spec must pass -- the rollout is complete, so the
+        // coverage check (no untagged interactive controls) is now part of the gate, not a backlog
         {
             name: "gate",
-            testMatch: [/identity\/.*\.spec\.ts/, /aria\/widgets\.spec\.ts/],
-            dependencies: ["setup"],
-            use: { ...devices["Desktop Chrome"] },
-        },
-        // the backlog: the coverage check tracks the rollout TODO and is expected to fail; it is
-        // excluded from the gate (run it explicitly with {--project=backlog})
-        {
-            name: "backlog",
-            testMatch: /aria\/coverage\.spec\.ts/,
+            testMatch: [/identity\/.*\.spec\.ts/, /aria\/.*\.spec\.ts/],
             dependencies: ["setup"],
             use: { ...devices["Desktop Chrome"] },
         },
