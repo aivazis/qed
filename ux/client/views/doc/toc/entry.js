@@ -25,10 +25,16 @@ export const Entry = ({ entry }) => {
     // pick the component to render
     const Title = current ? Current : Topic
 
-    // set up my behaviors
+    // set up my behaviors and identity; a topic is a button that selects it, except the current
+    // one, which is inert and marked with {aria-current}. the title text is the accessible name.
     const behaviors = {
         // do nothing when current, otherwise pick my topic
         onClick: current ? null : () => pick(entry.link),
+        // the client's identity for this topic
+        "data-qed-control": "doc-topic",
+        "data-qed-topic": entry.link,
+        // the current topic is marked in ARIA; the rest are buttons
+        ...(current ? { "aria-current": "true" } : { role: "button" }),
     }
 
     // render
