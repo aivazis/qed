@@ -15,7 +15,7 @@ import { Tile } from '~/widgets'
 
 
 // a large raster represented as a rectangular grid of tiles
-export const Mosaic = ({ uri, origin, shape, tile, zoom, session }) => {
+export const Mosaic = ({ uri, origin, shape, tile, zoom, session, ...rest }) => {
     // split the zoom level into two parts:
     // - magnification: the integer part of the zoom level
     // - distortion: the fractional part of the zoom level
@@ -50,8 +50,18 @@ export const Mosaic = ({ uri, origin, shape, tile, zoom, session }) => {
     )
 
     // render
+    // the mosaic is one logical raster image assembled from many decorative tile slices,
+    // so it carries the image role and its source geometry; the client owns the accessible
+    // name and may override it through {rest}
     return (
-        <Box shape={zoomedShape}>
+        <Box shape={zoomedShape}
+            role="img"
+            aria-label={`raster at ${uri}`}
+            data-pyre-widget="mosaic"
+            data-pyre-widget-origin={origin.join(",")}
+            data-pyre-widget-shape={shape.join(",")}
+            data-pyre-widget-zoom={zoom.join(",")}
+            {...rest}>
             {tiles.map(spec => {
                 // unpack
                 const [origin, shape] = spec

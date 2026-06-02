@@ -18,6 +18,8 @@ export const Provider = ({ config, children }) => {
 
     // state
     const { enabled } = config
+    // the accessible name the client gives this control
+    const { label } = config
     // directional configuration
     const { direction, flipped = false, arrows, labels, markers } = config
     // the layout of the controller in client coordinates
@@ -194,6 +196,8 @@ export const Provider = ({ config, children }) => {
 
         // state
         enabled,
+        // the accessible name
+        label,
         // directional configuration
         direction, arrows, labels, markers,
         // the layout of the controller in client coordinates
@@ -253,6 +257,8 @@ export const Context = React.createContext(
 
         // state
         enabled: null,
+        // the accessible name
+        label: null,
         // directional configuration
         direction: null, arrows: null, labels: null, markers: null,
         // the layout of the controller in client coordinates

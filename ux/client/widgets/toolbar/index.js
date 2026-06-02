@@ -10,14 +10,15 @@ import React from 'react'
 import styles from './styles'
 
 
-// a container with author and copyright notes
-export const Toolbar = ({ direction, style, children }) => {
+// a strip of controls; defaults to a navigation landmark, but the client may override
+// {role} (e.g. "toolbar") and supply an {aria-label} through {rest}
+export const Toolbar = ({ direction, style, children, ...rest }) => {
     // mix my styles
     const boxStyle = { ...styles.box, ...style?.box, flexDirection: direction }
 
     // paint me
     return (
-        <nav style={boxStyle} >
+        <nav style={boxStyle} data-pyre-widget="toolbar" {...rest} >
             {children}
         </nav>
     )

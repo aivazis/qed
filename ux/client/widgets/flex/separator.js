@@ -14,9 +14,9 @@ import useDirectionalAttributes from './useDirectionalAttributes'
 import styles from './styles'
 
 // the separator inserted between consecutive items in a flex panel
-const separator = ({ beginFlex, style }) => {
+const separator = ({ beginFlex, name, controls, min = 0, max = Infinity, extent, style }) => {
     // access the flex direction
-    const { mainExtent, crossExtent, transform, cursor } = useDirectionalAttributes()
+    const { isRow, mainExtent, crossExtent, transform, cursor } = useDirectionalAttributes()
 
     // direction dependent settings
     // for the rule
@@ -80,9 +80,27 @@ const separator = ({ beginFlex, style }) => {
         onMouseDown: beginFlex,
     }
 
+    // describe myself as the divider between the panel i resize and its neighbor; a divider
+    // across a row layout reads as vertical, one across a column layout as horizontal
+    const orientation = isRow ? "vertical" : "horizontal"
+    // my current size is the live extent of the panel i control along the main axis
+    const valuenow = extent?.[mainExtent]
+    // the semantic markup that doubles as the a11y contract; identity rides in via {name}
+    const semantics = {
+        role: "separator",
+        "aria-orientation": orientation,
+        "aria-controls": controls,
+        "aria-valuenow": valuenow == null ? undefined : Math.round(valuenow),
+        "aria-valuemin": min > 0 ? min : undefined,
+        "aria-valuemax": max < Infinity ? max : undefined,
+        "data-pyre-widget": "flex",
+        "data-pyre-widget-part": "resizer",
+        "data-pyre-widget-name": name,
+    }
+
     // paint me
     return (
-        <div style={ruleStyle} >
+        <div style={ruleStyle} {...semantics} >
             <div ref={ref} style={handleStyle} {...handleControls} />
         </div>
     )

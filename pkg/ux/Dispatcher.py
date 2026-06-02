@@ -243,7 +243,7 @@ class Dispatcher:
         # build the response
         response = document(server=server, value=stream)
         # decorate it
-        response.headers["Content-disposition"] = f'attachment; filename="{filename}"'
+        response.headers["content-disposition"] = f'attachment; filename="{filename}"'
         # and send it off
         return response
 

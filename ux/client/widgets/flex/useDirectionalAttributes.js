@@ -15,12 +15,14 @@ import { Context } from './context'
 export default () => {
     // pull the values from the context
     const {
+        isRow,
         mainPos, crossPos, mainExtent, crossExtent, minExtent, maxExtent,
         transform,
         cursor,
     } = React.useContext(Context)
     // and make them available
     return {
+        isRow,
         mainPos, crossPos, mainExtent, crossExtent, minExtent, maxExtent,
         transform,
         cursor,

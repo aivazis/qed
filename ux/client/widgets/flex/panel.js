@@ -25,7 +25,7 @@ import styles from './styles'
 // a container for client children
 export const Panel = ({
     min = 0, max = Infinity, auto = false, debug = false,
-    style, children, ...rest
+    name, id, style, children, ...rest
 }) => {
     // register this panel and make a {ref} for it
     const panel = useRegisterPanel({ min, max, auto })
@@ -33,6 +33,11 @@ export const Panel = ({
     const flexProps = useBeginFlex({ panel })
     // get the direction dependent extent names
     const { minExtent, maxExtent } = useDirectionalAttributes()
+    // measure my live size so my separator can report it as the resize value
+    const { extent } = useResizeObserver({ ref: panel })
+    // a stable id so my separator can name me as the region it controls
+    const reactId = React.useId()
+    const panelId = id ?? reactId
 
     // storage for the size dependent styling
     let sizeStyle = {}
@@ -54,19 +59,21 @@ export const Panel = ({
     let content = children
     // however, in debugging mode
     if (debug) {
-        // get my extent
-        const { extent } = useResizeObserver({ ref: panel })
-        // and render it as my content
+        // render my measured extent as my content
         content = <span style={styles.extent}>debug: {extent.width}x{extent.height}</span>
     }
 
     // paint me
     return (
         <>
-            <div ref={panel} style={panelStyle} {...rest} >
+            <div ref={panel} id={panelId} style={panelStyle}
+                data-pyre-widget="flex" data-pyre-widget-part="panel"
+                data-pyre-widget-name={name} {...rest} >
                 {content}
             </div>
-            <Separator {...flexProps} style={style.separator} />
+            <Separator {...flexProps}
+                name={name} controls={panelId} min={min} max={max} extent={extent}
+                style={style?.separator} />
         </>
     )
 }

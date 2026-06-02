@@ -17,7 +17,7 @@ import { Context } from "./context"
 export const useConfig = () => {
     // pull what i need from {context}
     const {
-        enabled,
+        enabled, label, direction,
         arrows, labels, markers,
         min, max, major, minor, tickPrecision, markerPrecision,
         intervalPosition,
@@ -26,7 +26,7 @@ export const useConfig = () => {
 
     // and publish
     return {
-        enabled,
+        enabled, label, direction,
         arrows, labels, markers,
         min, max, major, minor, tickPrecision, markerPrecision,
         intervalPosition, labelPosition, majorPosition, minorPosition,
