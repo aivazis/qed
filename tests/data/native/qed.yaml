@@ -1,0 +1,70 @@
+# -*- pyre -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2026 all rights reserved
+
+
+# the archive root: the directory that holds the generated rasters (this directory)
+qed.native: .
+
+# the c16 (complex-double) fixture, emitted by the {d16} generator: a 3929x6049 raster of
+# f(z) = (z-1)/(z^2+z+1) over (-2,2)^2 -- poles and a zero make every channel visually distinct
+d16:
+    uri: "{qed.native}/d16.dat"
+    shape: 3929, 6049
+    cell: c16
+
+    # pin the visualization pipeline so renders never depend on sampled statistics
+    data.complex:
+        amplitude:
+            auto: no
+            min: 0.0
+            low: 0.5
+            high: 5.0
+            max: 50.0
+        phase:
+            auto: no
+            min: -3.15
+            low: -1.6
+            high: 1.6
+            max: 3.15
+        saturation:
+            auto: no
+            min: 0.0
+            value: 0.5
+            max: 1.0
+    data.amplitude:
+        amplitude:
+            auto: no
+            min: 0.0
+            low: 0.5
+            high: 5.0
+            max: 50.0
+    data.phase:
+        phase:
+            auto: no
+            min: -3.15
+            low: -1.6
+            high: 1.6
+            max: 3.15
+
+
+# attach the dataset to the application
+datasets:
+    - native.flat#d16
+
+
+# run as a web app on a default test port; a runner launches {qed} from this directory and may
+# override the port on the command line so parallel suites do not collide, e.g.
+#     qed --nexus.services.web.address=ip4:0.0.0.0:<port>
+qed.app:
+    shell: web
+    nexus.services.web:
+        address: ip4:0.0.0.0:8123
+
+# never spawn a browser; the test driver owns the browser
+pyre.shells.web#qed.app.shell:
+    auto: no
+
+
+# end of file

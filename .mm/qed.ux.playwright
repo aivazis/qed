@@ -1,0 +1,48 @@
+# -*- makefile -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2026 all rights reserved
+
+
+# the playwright-driven test suite for the qed ux client: it drives the built client in a
+# headless browser and enforces the semantic-markup convention (doc/semantic-markup.md)
+qed.ux.playwright.stem := qed.ux.playwright
+# it delegates discovery, parallelism, and the server-under-test to playwright
+qed.ux.playwright.runner := playwright
+# it needs the built client (the server serves it) and the generated native fixture (the server
+# reads it); the {qed.data.native.d16} file target regenerates it only when missing or stale
+qed.ux.playwright.prerequisites := qed.ux $(qed.data.native.d16)
+
+# tell the runner where the shared, generated test data lives so playwright.config can point the
+# webServer's {qed} at it; the suite runs staged, away from the source tree, so it needs the path
+qed.ux.playwright.env := QED_DATA_NATIVE=$(dir $(qed.data.native.d16))
+
+# the test framework lives in a dedicated node_modules, deliberately kept out of the client
+# bundle; it sits outside the suite tree so the staged runner does not copy it. deferred (=)
+# because {qed.tmpdir} is not defined until this project's init runs, after this file is read
+qed.ux.playwright.modules = $(qed.tmpdir)qed.ux.playwright.modules
+qed.ux.playwright.stage.modules = $(qed.ux.playwright.modules)/node_modules
+
+# only run the {gate} project (grammar + widget aria); the {backlog} project (coverage) tracks
+# the rollout TODO and is expected to fail, so it is excluded from the gate
+qed.ux.playwright.runner.launch := npx playwright test --project=gate
+
+# make sure the framework and its browser are installed before the runner launches
+qed.ux.playwright.pre := qed.ux.playwright.deps
+
+
+# install the dedicated test dependencies and the chromium browser on first run; the browser
+# lands in {PLAYWRIGHT_BROWSERS_PATH}, which is set once in the shell profile. a phony target
+# with a guard so the install runs only when the modules are missing
+qed.ux.playwright.deps:
+	@if [ ! -d "$(qed.ux.playwright.stage.modules)" ]; then \
+	    ${call log.action,install,"qed.ux.playwright test dependencies"}; \
+	    mkdir -p $(qed.ux.playwright.modules); \
+	    cp $(qed.home)tests/qed.ux.playwright/config/package.json $(qed.ux.playwright.modules)/package.json; \
+	    cd $(qed.ux.playwright.modules) && npm install --no-fund --no-audit && npx playwright install chromium; \
+	fi
+
+.PHONY: qed.ux.playwright.deps
+
+
+# end of file
