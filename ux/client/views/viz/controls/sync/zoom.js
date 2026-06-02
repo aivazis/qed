@@ -43,7 +43,7 @@ export const Zoom = ({ viewport, view, mark }) => {
     return (
         <Control>
             <Toggle
-                state={sync.zoom} mark={mark}
+                state={sync.zoom} mark={mark} aspect="zoom" viewport={viewport}
                 toggle={toggleZoom} force={toggleAllZoom}
             />
         </Control>

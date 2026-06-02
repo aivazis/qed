@@ -12,8 +12,8 @@ import styled from 'styled-components'
 // colors
 import { theme } from '~/palette'
 
-//  a toggle
-export const Toggle = ({ state, mark, toggle, force }) => {
+//  a toggle; {aspect} and {viewport} give it a stable client identity for tests and a11y
+export const Toggle = ({ state, mark, toggle, force, aspect, viewport }) => {
     // build the event handler for flipping my state
     const flip = evt => {
         // stop this event from bubbling up
@@ -36,9 +36,16 @@ export const Toggle = ({ state, mark, toggle, force }) => {
     }
     // mix my paint
     const Control = state ? SelectedButton : ActiveButton;
-    // and render
+    // and render; a switch whose on/off state lives in ARIA, identified by aspect and viewport
     return (
-        <Control {...behaviors} />
+        <Control
+            role="switch"
+            aria-checked={!!state}
+            aria-label={`sync ${aspect} for viewport ${viewport}`}
+            data-qed-control="sync"
+            data-qed-aspect={aspect}
+            data-qed-viewport={viewport}
+            {...behaviors} />
     )
 }
 

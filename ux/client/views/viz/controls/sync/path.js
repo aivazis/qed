@@ -43,7 +43,7 @@ export const Path = ({ viewport, view, mark }) => {
     return (
         <Control>
             <Toggle
-                state={sync.path} mark={mark}
+                state={sync.path} mark={mark} aspect="path" viewport={viewport}
                 toggle={togglePath} force={toggleAllPath}
             />
         </Control>

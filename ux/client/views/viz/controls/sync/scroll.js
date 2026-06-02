@@ -43,7 +43,7 @@ export const Scroll = ({ viewport, view, mark }) => {
     return (
         <Control>
             <Toggle
-                state={sync.scroll} mark={mark}
+                state={sync.scroll} mark={mark} aspect="scroll" viewport={viewport}
                 toggle={toggleScroll} force={toggleAllScroll}
             />
         </Control>

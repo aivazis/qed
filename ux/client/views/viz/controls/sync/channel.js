@@ -42,7 +42,7 @@ export const Channel = ({ viewport, view, mark }) => {
     // render
     return (
         <Control>
-            <Toggle state={sync.channel} mark={mark}
+            <Toggle state={sync.channel} mark={mark} aspect="channel" viewport={viewport}
                 toggle={toggleChannel} force={toggleAllChannels}
             />
         </Control>
