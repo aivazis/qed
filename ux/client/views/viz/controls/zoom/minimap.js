@@ -226,7 +226,10 @@ export const Minimap = ({ ils, shape, zoom }) => {
             // remove the mouse movement listener
             placematRep.removeEventListener("mousemove", drag)
         }
-    }, [viewports, activeViewport, dragging, scale])
+        // N.B.: {zoomX/zoomY/ils} are captured by {drag}; they must be dependencies, because
+        // {scale} is invariant under zoom when the dataset dimensions dominate its {Math.max},
+        // so depending on {scale} alone would leave the handler bound to a stale zoom factor
+    }, [viewports, activeViewport, dragging, scale, zoomX, zoomY, ils])
 
     // the user can also click to place the viewport rep at a specific location
     React.useEffect(() => {
@@ -263,7 +266,9 @@ export const Minimap = ({ ils, shape, zoom }) => {
             // all done
             return
         }
-    }, [viewports, activeViewport, data, scale])
+        // N.B.: see the note on the {drag} effect -- {zoomX/zoomY/ils} are captured by {place}
+        // and must be dependencies, since {scale} can stay constant across a zoom change
+    }, [viewports, activeViewport, data, scale, zoomX, zoomY, ils])
 
     // render; the minimap is an interactive overview of the raster, the client's identity for it
     return (
