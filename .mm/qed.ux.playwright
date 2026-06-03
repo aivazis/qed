@@ -9,13 +9,17 @@
 qed.ux.playwright.stem := qed.ux.playwright
 # it delegates discovery, parallelism, and the server-under-test to playwright
 qed.ux.playwright.runner := playwright
-# it needs the built client (the server serves it) and the generated native fixture (the server
-# reads it); the {qed.data.native.d16} file target regenerates it only when missing or stale
-qed.ux.playwright.prerequisites := qed.ux $(qed.data.native.d16)
+# it needs the built client (the server serves it) and the test fixtures the servers read: the
+# native raster ({qed.data.native.d16}) and the two NISAR products ({qed.data.nisar.*}). each file
+# target produces its fixture only when missing -- skip-if-present, so present data is never rebuilt
+qed.ux.playwright.prerequisites := qed.ux \
+    $(qed.data.native.d16) $(qed.data.nisar.gslc) $(qed.data.nisar.gcov)
 
-# tell the runner where the shared, generated test data lives so playwright.config can point the
-# webServer's {qed} at it; the suite runs staged, away from the source tree, so it needs the path
-qed.ux.playwright.env := QED_DATA_NATIVE=$(dir $(qed.data.native.d16))
+# tell the runner where the test data lives so playwright.config can point each webServer's {qed} at
+# it; the suite runs staged, away from the source tree, so it needs the absolute paths
+qed.ux.playwright.env := \
+    QED_DATA_NATIVE=$(dir $(qed.data.native.d16)) \
+    QED_DATA_NISAR=$(dir $(qed.data.nisar.gslc))
 
 # the test framework lives in a dedicated node_modules, deliberately kept out of the client
 # bundle; it sits outside the suite tree so the staged runner does not copy it. deferred (=)
