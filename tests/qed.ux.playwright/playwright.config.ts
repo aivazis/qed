@@ -52,6 +52,16 @@ export default defineConfig({
             dependencies: ["setup"],
             use: { ...devices["Desktop Chrome"] },
         },
+        // behavior specs that operate controls and mutate shared server state (e.g. the zoom
+        // level). they run AFTER the read-only gate and serially, and restore the state they
+        // touch, so they never race the parallel gate specs against the shared server.
+        {
+            name: "behavior",
+            testMatch: /behavior\/.*\.spec\.ts/,
+            dependencies: ["gate"],
+            fullyParallel: false,
+            use: { ...devices["Desktop Chrome"] },
+        },
     ],
 
     // bring up an isolated qed server on the shared generated dataset; the installed {qed} command

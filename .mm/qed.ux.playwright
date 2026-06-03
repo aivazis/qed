@@ -23,9 +23,9 @@ qed.ux.playwright.env := QED_DATA_NATIVE=$(dir $(qed.data.native.d16))
 qed.ux.playwright.modules = $(qed.tmpdir)qed.ux.playwright.modules
 qed.ux.playwright.stage.modules = $(qed.ux.playwright.modules)/node_modules
 
-# only run the {gate} project (grammar + widget aria); the {backlog} project (coverage) tracks
-# the rollout TODO and is expected to fail, so it is excluded from the gate
-qed.ux.playwright.runner.launch := npx playwright test --project=gate
+# run every project: {setup} then the read-only {gate} then the stateful {behavior} specs, with
+# playwright honoring the inter-project dependencies and serialization
+qed.ux.playwright.runner.launch := npx playwright test
 
 # make sure the framework and its browser are installed before the runner launches
 qed.ux.playwright.pre := qed.ux.playwright.deps
