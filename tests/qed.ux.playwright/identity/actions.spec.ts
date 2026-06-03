@@ -11,11 +11,10 @@ import { test, expect } from "@playwright/test"
 
 // the viewport action glyphs split into two kinds. {split} and {print} are momentary actions, so
 // they carry identity and a label but no toggle state. {measure} and {sync} are toggle buttons:
-// their on/off truth lives in ARIA ({aria-pressed}), never in a data attribute, and each governs a
-// panel on the controls view. those panels carry a stable, display-independent identity
-// ({data-qed-panel}) so a driver confirms the button-governs-panel relationship without scraping
-// the panel title or doing pixel arithmetic. all of this co-mounts on {/controls}, where the
-// viewport tab and the controls panels render together.
+// their on/off truth lives in ARIA ({aria-pressed}), never in a data attribute. this spec is part
+// of the read-only gate, so it asserts only the static markup contract; the behavior project
+// proves that operating a toggle flips its state and governs its panel. the sync panel always
+// renders on the controls view and carries its own client identity ({data-qed-panel}).
 test.describe("the viewport actions", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto("/controls", { waitUntil: "networkidle" })
@@ -32,44 +31,18 @@ test.describe("the viewport actions", () => {
         }
     })
 
-    test("the measure action is a toggle button that governs the measure panel", async ({ page }) => {
-        const button = page.locator('[data-qed-control="viewport"][data-qed-action="measure"]').first()
-        await expect(button).toHaveAttribute("role", "button")
-        const panel = page.locator('[data-qed-panel="measure"]')
-
-        // the starting state is a definite boolean in ARIA, and the panel presence agrees with it
-        const start = await button.getAttribute("aria-pressed")
-        expect(["true", "false"]).toContain(start)
-        if (start === "true") await expect(panel).toBeVisible()
-        else await expect(panel).toHaveCount(0)
-
-        // toggling flips the ARIA state and the panel follows -- no pixels, no title scraping
-        await button.click()
-        const flipped = start === "true" ? "false" : "true"
-        await expect(button).toHaveAttribute("aria-pressed", flipped)
-        if (flipped === "true") await expect(panel).toBeVisible()
-        else await expect(panel).toHaveCount(0)
-
-        // restore the starting state so later specs see a clean slate
-        await button.click()
-        await expect(button).toHaveAttribute("aria-pressed", start)
+    test("toggle actions carry their on/off state in aria-pressed", async ({ page }) => {
+        for (const action of ["measure", "sync"]) {
+            const button = page.locator(`[data-qed-control="viewport"][data-qed-action="${action}"]`).first()
+            await expect(button).toHaveAttribute("role", "button")
+            // state is a definite boolean in ARIA, so assistive tech and drivers read it directly
+            await expect(button).toHaveAttribute("aria-pressed", /true|false/)
+        }
     })
 
-    test("the sync action is a toggle button beside an identifiable sync panel", async ({ page }) => {
-        const button = page.locator('[data-qed-control="viewport"][data-qed-action="sync"]').first()
-        await expect(button).toHaveAttribute("role", "button")
-        // the sync panel renders whenever the controls view does, found by its stable identity
+    test("the sync panel is identifiable by its client identity", async ({ page }) => {
+        // the sync panel renders whenever the controls view does, found without scraping its title
         await expect(page.locator('[data-qed-panel="sync"]')).toBeVisible()
-
-        // its on/off truth is a definite boolean in ARIA, and a click flips it
-        const start = await button.getAttribute("aria-pressed")
-        expect(["true", "false"]).toContain(start)
-        await button.click()
-        await expect(button).toHaveAttribute("aria-pressed", start === "true" ? "false" : "true")
-
-        // restore the starting state so later specs see a clean slate
-        await button.click()
-        await expect(button).toHaveAttribute("aria-pressed", start)
     })
 })
 

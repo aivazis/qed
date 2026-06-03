@@ -37,7 +37,24 @@ qed-specific identity was never inside it.
   part the client cannot reach with `{...rest}` (e.g. the flex separator). The client
   passes a `name` prop; the widget re-emits it under this neutral attribute.
 - **`data-qed-*`** — client identity at the call site: `data-qed-control`,
-  `data-qed-value`, `data-qed-panel`. Greppable, app-meaningful, qed-only.
+  `data-qed-value`, `data-qed-panel`, `data-qed-region`. Greppable, app-meaningful,
+  qed-only.
+
+### Coordinate metadata (regions)
+
+A region a driver maps clicks into — the scrollable viewport, the minimap — carries
+`data-qed-region` for identity plus the geometry that relates screen space to source
+space. All of it is **row-major**, matching the dataset `shape` and the tile api
+(`{top}x{left}+{height}x{width}`):
+
+- **viewport** (`data-qed-region="viewport"`): `data-qed-shape="rows,cols"` (the full
+  source extent) and `data-qed-zoom="vertical,horizontal"` (the log2 level, so the scale
+  is `2**-zoom`). With these plus the element's live `scrollTop/scrollLeft` and bounding
+  box, a driver converts any screen pixel to a source pixel.
+- **minimap** (`data-qed-control="minimap"`): `data-qed-shape` names the same raster; the
+  viewport box carries `data-qed-view-origin="row,col"` and `data-qed-view-shape="rows,cols"`
+  — the visible window resolved to **source pixels**, recomputed on every scroll/resize.
+  A driver reads what is on screen without doing the arithmetic itself.
 
 `data-pyre-widget-*` (not bare `data-widget`, which a third-party library might squat,
 nor bare `data-pyre-*`, which is broader than the widget subsystem) reserves the
@@ -108,9 +125,13 @@ Playwright projects (`tests/qed.ux.playwright/`):
     `aria-hidden` decorative subtrees) carries a `role`, a `data-pyre-widget`, or a `data-qed-*`.
     The phase-2 rollout is complete, so this is now a hard gate, not a backlog.
   - per-control identity specs — `channels`, `detail`, `sync`, `icons` (nav rail + viewport
-    actions), `actions` (viewport toggle buttons + the panels they govern), `slider` (decorative
-    scale + minimap), `doc` (table-of-contents topics) — assert the exact role/ARIA/`data-qed-*`
-    each control owes, so a regression is pinned to a single control.
+    actions), `actions` (viewport toggle buttons' static contract), `coordinates` (viewport +
+    minimap geometry), `slider` (decorative scale + minimap), `doc` (table-of-contents topics) —
+    assert the exact role/ARIA/`data-qed-*` each control owes, so a regression is pinned to a
+    single control. A spec that must *operate* a control (toggling measure/sync, scrolling the
+    viewport) mutates the shared server store, so it lives in the `behavior` project (serial, after
+    the gate, restoring what it touches), not here — see `behavior/actions.spec.ts` and
+    `behavior/coordinates.spec.ts`.
 
 `mm qed.ux.playwright` runs only the `gate` project, so a clean tree is green; failures print one
 line per problem. The framework lives in a dedicated `node_modules` kept out of the client bundle
