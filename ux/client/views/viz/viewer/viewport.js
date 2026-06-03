@@ -77,7 +77,10 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
 
     // and render; don't forget to use the zoomed raster shape
     return (
-        <Box ref={registrar} $state={active} {...controllers} {...rest} >
+        <Box ref={registrar} $state={active} {...controllers} {...rest}
+            data-qed-region="viewport"
+            data-qed-shape={shape.join(",")}
+            data-qed-zoom={[zoom.vertical, zoom.horizontal].join(",")} >
             {/* the data tiles */}
             <View uri={uri}
                 origin={origin} shape={shape} tile={tile}

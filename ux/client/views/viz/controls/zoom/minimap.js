@@ -270,13 +270,21 @@ export const Minimap = ({ ils, shape, zoom }) => {
         // and must be dependencies, since {scale} can stay constant across a zoom change
     }, [viewports, activeViewport, data, scale, zoomX, zoomY, ils])
 
+    // the source-pixel geometry of the visible window, resolved from the live scroll/extent state
+    // and the current zoom; row-major, matching the dataset {shape} and the tile api. these update
+    // on every scroll/resize, so a driver reads what is on screen without any pixel arithmetic
+    const viewOrigin = `${Math.round(zoomY * y)},${Math.round(zoomX * x)}`
+    const viewShape = `${Math.round(zoomY * height)},${Math.round(zoomX * width)}`
+
     // render; the minimap is an interactive overview of the raster, the client's identity for it
     return (
-        <g ref={placemat} role="group" aria-label="viewport minimap" data-qed-control="minimap">
+        <g ref={placemat} role="group" aria-label="viewport minimap" data-qed-control="minimap"
+            data-qed-shape={`${dHeight},${dWidth}`}>
             <Placemat x={0} y={0} width={1} height={1} />
             <Data ref={data} x={0} y={0} width={dWidth * scale} height={dHeight * scale} />
             <Viewport ref={rep} x={zoomX * x * scale} y={zoomY * y * scale}
-                width={zoomX * width * scale} height={zoomY * height * scale} />
+                width={zoomX * width * scale} height={zoomY * height * scale}
+                data-qed-view-origin={viewOrigin} data-qed-view-shape={viewShape} />
         </g>
     )
 }
