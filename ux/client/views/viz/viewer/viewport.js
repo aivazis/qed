@@ -41,6 +41,65 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     const scale = { vertical: 2 ** -zoom.vertical, horizontal: 2 ** -zoom.horizontal }
     // compute the dimensions of the mosaic
     const zoomedShape = { width: shape[1] / scale.horizontal, height: shape[0] / scale.vertical }
+
+    // the scroll position lives in *rendered* pixels, which grow as 2**zoom; when the zoom level
+    // changes in place, the mosaic resizes but the browser leaves the old scroll offset alone, so
+    // it no longer points at the same source pixel -- and if it now exceeds the smaller mosaic, it
+    // gets clamped to a corner. we rescale the offset by the change in zoom factor (below), holding
+    // the source pixel under the viewport center fixed, so changing zoom keeps you looking at the
+    // same place. but the resize clamps the offset in the same commit, *before* a layout effect
+    // could read it, so we cannot trust the post-resize value; track the live offset here, while it
+    // is still valid for the current zoom, and rescale that
+    const lastScroll = React.useRef({ left: 0, top: 0 })
+    React.useEffect(() => {
+        // get my scrolling container
+        const placemat = viewports[viewport]
+        // if there is none yet, there is nothing to track
+        if (!placemat) {
+            // bail
+            return
+        }
+        // record the offset whenever it changes, so we always have its pre-resize value on hand
+        const track = () => {
+            // stash the live offset
+            lastScroll.current = { left: placemat.scrollLeft, top: placemat.scrollTop }
+            // all done
+            return
+        }
+        // seed it, then follow along
+        track()
+        placemat.addEventListener("scroll", track)
+        // clean up
+        return () => placemat.removeEventListener("scroll", track)
+    }, [viewport, viewports])
+
+    // rescale the tracked offset when the zoom level changes, holding the centered source pixel put
+    const previousZoom = React.useRef(zoom)
+    React.useLayoutEffect(() => {
+        // get my scrolling container
+        const placemat = viewports[viewport]
+        // the previous zoom levels
+        const previous = previousZoom.current
+        // remember the current ones for next time
+        previousZoom.current = zoom
+        // the per-axis change in the rendered-pixel scale
+        const ratioX = 2 ** (zoom.horizontal - previous.horizontal)
+        const ratioY = 2 ** (zoom.vertical - previous.vertical)
+        // if there is no container yet, or the zoom did not actually change, there is nothing to do
+        if (!placemat || (ratioX === 1 && ratioY === 1)) {
+            // bail
+            return
+        }
+        // measure the viewport
+        const box = placemat.getBoundingClientRect()
+        // use the offset as it was *before* this commit resized (and clamped) the mosaic
+        const { left, top } = lastScroll.current
+        // rescale each offset about the viewport center, so the centered source pixel stays put
+        placemat.scrollLeft = (left + box.width / 2) * ratioX - box.width / 2
+        placemat.scrollTop = (top + box.height / 2) * ratioY - box.height / 2
+        // all done
+        return
+    }, [viewport, viewports, zoom.horizontal, zoom.vertical])
     // center the viewport at the cursor position
     const center = ({ clientX, clientY }) => {
         // get my placemat
