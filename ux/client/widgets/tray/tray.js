@@ -23,7 +23,7 @@ import { Indicator } from './indicator'
 export const Tray = ({
     style,
     title, state, initially = false, scale = 1.0, busy = false, controls = null,
-    children
+    children, ...rest
 }) => {
     // scale up a bit on large displays
     const rem = (window.screen.width > 2048 ? 1.2 : 1.0) * scale
@@ -46,9 +46,9 @@ export const Tray = ({
         ...style,
     }
 
-    // paint me
+    // paint me; {rest} carries any client identity (e.g. {data-qed-panel}) for the whole tray
     return (
-        <Section style={paint}>
+        <Section style={paint} {...rest}>
             <Header
                 style={paint}
                 onClick={toggle}

@@ -45,11 +45,14 @@ namespace for widgets specifically.
 
 ## ARIA is the single source of truth for state
 
-Selected / checked / disabled / current-value live **only** in ARIA — `aria-checked`,
-`aria-selected`, `aria-disabled`, `aria-valuenow`. Do **not** mirror state into a
-`data-*` attribute: two sources drift apart. State is already queryable
-(`[aria-checked="true"]`, Playwright `getByRole`). `data-*` carries *identity*, never
-state.
+Selected / checked / pressed / disabled / current-value live **only** in ARIA —
+`aria-checked`, `aria-selected`, `aria-pressed`, `aria-disabled`, `aria-valuenow`. Do
+**not** mirror state into a `data-*` attribute: two sources drift apart. State is already
+queryable (`[aria-checked="true"]`, Playwright `getByRole`). `data-*` carries *identity*,
+never state. A control that turns a mode on and off — e.g. the viewport `measure` and
+`sync` glyphs — is a toggle button: `role="button"` + `aria-pressed`. The panel such a
+button governs carries its own client identity (`data-qed-panel`) so the
+button-governs-panel relationship is testable without scraping the panel title.
 
 ## Role and accessible name can be client-owned too
 
@@ -105,8 +108,9 @@ Playwright projects (`tests/qed.ux.playwright/`):
     `aria-hidden` decorative subtrees) carries a `role`, a `data-pyre-widget`, or a `data-qed-*`.
     The phase-2 rollout is complete, so this is now a hard gate, not a backlog.
   - per-control identity specs — `channels`, `detail`, `sync`, `icons` (nav rail + viewport
-    actions), `slider` (decorative scale + minimap), `doc` (table-of-contents topics) — assert the
-    exact role/ARIA/`data-qed-*` each control owes, so a regression is pinned to a single control.
+    actions), `actions` (viewport toggle buttons + the panels they govern), `slider` (decorative
+    scale + minimap), `doc` (table-of-contents topics) — assert the exact role/ARIA/`data-qed-*`
+    each control owes, so a regression is pinned to a single control.
 
 `mm qed.ux.playwright` runs only the `gate` project, so a clean tree is green; failures print one
 line per problem. The framework lives in a dedicated `node_modules` kept out of the client bundle

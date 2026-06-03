@@ -62,7 +62,8 @@ export const Sync = ({ viewport, view }) => {
     // render
     return (
         <Badge size={18} state={state} behaviors={behaviors} style={paint}
-            aria-label="toggle camera sync" data-qed-control="viewport" data-qed-action="sync" >
+            aria-label="toggle camera sync" aria-pressed={isScrollSynced}
+            data-qed-control="viewport" data-qed-action="sync" >
             <Shape />
         </Badge >
     )
