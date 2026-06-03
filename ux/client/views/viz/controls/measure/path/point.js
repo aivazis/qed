@@ -19,9 +19,13 @@ import { Focus } from './focus'
 
 // an entry from the table of the points on the {measure} layer of the active viewport
 export const Point = ({ viewport, view, idx, point, last }) => {
+    // resolve my source coordinate; {idx} is my position in the polygon, not a durable id, so this
+    // row and its on-raster anchor agree by {row,col} source pixel rather than by a stable handle
+    const row = Math.round(point.y)
+    const col = Math.round(point.x)
     // draw an entry of the {path} table
     return (
-        <Box>
+        <Box data-qed-marker-index={idx} data-qed-source={`${row},${col}`}>
             {/* select this point*/}
             <Focus viewport={viewport} view={view} idx={idx} point={point} />
 
