@@ -78,7 +78,8 @@ export const Coordinate = ({ viewport, view, node, point, axis }) => {
 
     // make a mark
     return (
-        <Entry type="text" value={point[axis]} {...behaviors} />
+        <Entry type="text" value={point[axis]} {...behaviors}
+            aria-label={axis == "y" ? "row" : "column"} />
     )
 }
 

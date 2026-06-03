@@ -56,6 +56,25 @@ space. All of it is **row-major**, matching the dataset `shape` and the tile api
   — the visible window resolved to **source pixels**, recomputed on every scroll/resize.
   A driver reads what is on screen without doing the arithmetic itself.
 
+### Verifiable annotations (measure markers)
+
+The measure layer's markers are placed *by* coordinate (alt-click, or typed into the control
+table) and must be read *back* by coordinate, so a driver can confirm what is on screen without
+pixel hunting. Each marker is tagged at **both** call sites that render it — the on-raster anchor
+(`views/viz/measure/anchor.js`) and the control-table row (`views/viz/controls/measure/path/`):
+
+- `data-qed-marker-index` — the marker's **vertex ordinal**, its position in the polygon. This is
+  *not* a durable id: inserting a vertex between two others (the table's `+` / `viewMeasureAnchorSplit`)
+  renumbers everyone so the list stays in polygon order. Drivers use it to enumerate in order, never
+  as a stable handle.
+- `data-qed-source="row,col"` — the marker's source pixel, **row-major** like every other coordinate
+  here. This is the stable verifier: it survives renumbering and is recomputed live as the marker is
+  dragged on the raster or re-typed in the table. The on-raster anchor and its table row always agree.
+
+Selection lives in ARIA, not here: the anchor is a toggle button (`role="button"` + `aria-pressed`)
+with an `aria-label` naming its ordinal and source; the table's coordinate inputs are native text
+boxes carrying `aria-label="row"` / `"column"`. State is never mirrored into a `data-*` attribute.
+
 `data-pyre-widget-*` (not bare `data-widget`, which a third-party library might squat,
 nor bare `data-pyre-*`, which is broader than the widget subsystem) reserves the
 namespace for widgets specifically.

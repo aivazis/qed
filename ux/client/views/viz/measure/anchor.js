@@ -23,7 +23,7 @@ import { useAnchorToggleSelectionMulti } from './useAnchorToggleSelectionMulti'
 
 
 // mark a point
-export const Anchor = ({ viewport, selection, idx, at }) => {
+export const Anchor = ({ viewport, selection, idx, at, source }) => {
     // make a ref for my client area
     const me = React.useRef(null)
     // record of the mouse position when the user clicks on me; this is used to detect
@@ -42,6 +42,11 @@ export const Anchor = ({ viewport, selection, idx, at }) => {
     const selected = selection.includes(idx)
     // and use it to choose how to render the event capture area
     const Highlight = selected ? SelectedHighlight : EnabledHighlight
+
+    // resolve my source coordinate; {idx} is my position in the polygon, not a durable id, so
+    // automated drivers verify a marker by its {row,col} source pixel, recomputed as it is dragged
+    const row = Math.round(source.y)
+    const col = Math.round(source.x)
 
     // movement
     const move = evt => {
@@ -109,7 +114,10 @@ export const Anchor = ({ viewport, selection, idx, at }) => {
 
     // render
     return (
-        <g ref={me} transform={`translate(${at.x} ${at.y})`}>
+        <g ref={me} transform={`translate(${at.x} ${at.y})`}
+            role="button" aria-pressed={selected}
+            aria-label={`marker ${idx + 1}: row ${row}, column ${col}`}
+            data-qed-marker-index={idx} data-qed-source={`${row},${col}`}>
             <Mat cx={0} cy={0} r="15" />
             <Ring cx={0} cy={0} r="7" />
             <Crosshairs d={crosshairs} />

@@ -172,6 +172,7 @@ const Layer = ({ viewport, view, shape, scale }) => {
                 return (
                     <Anchor key={idx}
                         viewport={viewport} selection={selection} idx={idx} at={point}
+                        source={path[idx]}
                     />
                 )
             })}
