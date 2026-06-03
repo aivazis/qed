@@ -163,9 +163,16 @@ export const Coordinate = ({ axis, coordinate }) => {
     }
 
 
-    // and render
+    // and render; the client owns this control's identity and the widget owns nothing here: it is one
+    // radio in the {axis} radiogroup. ARIA carries its state -- selected and disabled both live there,
+    // never mirrored into {data-*}; the visible coordinate text is its accessible name
     return (
-        <div title={tip} style={paint} {...behaviors}>
+        <div title={tip} style={paint}
+            role="radio"
+            aria-checked={state === "selected"}
+            aria-disabled={state === "disabled"}
+            data-qed-value={coordinate}
+            {...behaviors}>
             {coordinate}
         </div>
     )
