@@ -51,7 +51,7 @@ export const Measure = ({ viewport, view }) => {
 
     // otherwise, render
     return (
-        <Tray title="measure" state="enabled" initially={true} scale={0.5}>
+        <Tray title="measure" state="enabled" initially={true} scale={0.5} data-qed-panel="measure">
             <Header>
                 <Spacer />
                 <Save save={reset} enabled={false} />

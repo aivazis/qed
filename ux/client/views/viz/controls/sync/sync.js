@@ -41,7 +41,7 @@ export const Sync = ({ qed }) => {
 
     // render
     return (
-        <Tray title="sync" initially={true} state="enabled" scale={0.5}>
+        <Tray title="sync" initially={true} state="enabled" scale={0.5} data-qed-panel="sync">
             <Controls>
                 <Spacer />
                 <Save save={reset} enabled={false} />
