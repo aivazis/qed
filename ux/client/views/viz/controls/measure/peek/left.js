@@ -48,7 +48,7 @@ export const Left = ({ viewport, view, handle, deltas }) => {
 
     // render
     return (
-        <Arrow path={arrow}
+        <Arrow path={arrow} label="pan left"
             placement={`translate(100 ${9 / 10 * 500}) scale(${1 / 10})`}
             behaviors={behaviors} />
     )

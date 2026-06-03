@@ -43,7 +43,7 @@ export const Timestamp = ({ interval, field, update }) => {
     // render
     return (
         <Stamp
-            title="a timestamp in YYYY-mm-dd HH:MM:SS" type="text"
+            title="a timestamp in YYYY-mm-dd HH:MM:SS" type="text" aria-label={`${field} timestamp`}
             value={interval[field]}
             {...behaviors}
         />

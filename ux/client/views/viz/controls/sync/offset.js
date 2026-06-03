@@ -37,7 +37,7 @@ export const Offset = ({ viewport, view, mark }) => {
     }
     // render
     return (
-        <Housing>
+        <Housing data-qed-viewport={viewport}>
             <Line point={offset} axis={"y"} adjust={adjust} />
             <Sample point={offset} axis={"x"} adjust={adjust} />
         </Housing>

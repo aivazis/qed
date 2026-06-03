@@ -75,9 +75,40 @@ Selection lives in ARIA, not here: the anchor is a toggle button (`role="button"
 with an `aria-label` naming its ordinal and source; the table's coordinate inputs are native text
 boxes carrying `aria-label="row"` / `"column"`. State is never mirrored into a `data-*` attribute.
 
+### Scoping duplicated controls (`data-qed-viewport`)
+
+A control that appears once per viewport — every action glyph in the tab (measure, sync, print,
+split, collapse), the detail toggle, the per-viewport sync-offset inputs — has an identical handle
+in each viewport. When the viz panel is split, a driver cannot tell two `measure` toggles apart by
+their own identity. So the per-viewport **panel** carries `data-qed-viewport={index}` (the
+`Flex.Panel` wrapper in `viz/viz.js`, which contains the tab, the info bar, and the raster), and the
+sync table's per-viewport offset row carries the same. Anything inside is then uniquely addressable
+by scoping: `[data-qed-viewport="1"] [data-qed-action="measure"]`. The rule is general — when a
+control repeats across a structural axis, put the axis identity on the smallest container that wraps
+one instance, and let descendant selectors do the rest.
+
+### Accessible names on inputs and icon controls
+
+A bare `role` is *findable* but not *driveable*: two unnamed inputs or icon buttons cannot be told
+apart. So every text input carries an `aria-label` (the explorer form injects the field name through
+its `Field` wrapper; composite fields — latitude/longitude, lines/samples — name their own inputs),
+and every icon-only control (a `Badge`, a peek arrow) carries an `aria-label` at its call site. SVG
+that merely *renders* an addressable control — the measure polyline and coordinate labels, the tray
+chevron, a badge's glyph — is marked `aria-hidden` so it does not read as a separate control.
+
 `data-pyre-widget-*` (not bare `data-widget`, which a third-party library might squat,
 nor bare `data-pyre-*`, which is broader than the widget subsystem) reserves the
 namespace for widgets specifically.
+
+## The driveability audit
+
+`aria/coverage` (the gate) proves every control is *findable*; it does not prove a driver can target a
+*specific* one in every state. `audit/driveability.spec.ts` (the `audit` project, run last so it can
+operate the store) is a live sweep over routes **and states the gate never sees** — the measure layer
+on, the viewport split, the NISAR reader on its own server. For each it reports controls with no stable
+handle (a findability gap) or a handle shared by others (an ambiguity a scope must resolve). It always
+passes; the value is the printed report. Treat a new gap or ambiguity as a regression to tag, not a
+test to silence.
 
 ## ARIA is the single source of truth for state
 

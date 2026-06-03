@@ -19,7 +19,7 @@ export const Indicator = ({ expanded, size = 16 }) => {
     // paint me
     return (
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
-            width={size} height={size} >
+            width={size} height={size} aria-hidden="true" >
             <g transform={xform}>
                 <Chevron />
             </g>

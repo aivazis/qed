@@ -77,7 +77,8 @@ const Name = ({ form, update }) => {
     }
     // render
     return (
-        <Entry type="text" value={form.collection.shortName} {...behaviors} />
+        <Entry type="text" value={form.collection.shortName} {...behaviors}
+            aria-label="collection short name" />
     )
 }
 
@@ -100,7 +101,8 @@ const Concept = ({ form, update }) => {
     }
     // render
     return (
-        <Entry type="text" value={form.collection.conceptId} {...behaviors} />
+        <Entry type="text" value={form.collection.conceptId} {...behaviors}
+            aria-label="collection concept id" />
     )
 }
 

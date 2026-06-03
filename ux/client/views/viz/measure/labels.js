@@ -18,9 +18,10 @@ export const Labels = ({ positions, values }) => {
         // and if not, bail
         return null
     }
-    // otherwise, go through the selection and put a label below each node
+    // otherwise, go through the selection and put a label below each node; the labels merely echo each
+    // anchor's coordinate (already on the anchor as data-qed-source), so they are decorative
     return (
-        <g>
+        <g aria-hidden="true">
             {positions.map((position, idx) => {
                 // get the value
                 const dataX = Math.round(values[idx].x)

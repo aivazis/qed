@@ -49,7 +49,7 @@ export const Right = ({ viewport, view, handle, deltas }) => {
     // render
     return (
         <Arrow
-            path={arrow}
+            path={arrow} label="pan right"
             placement={`translate(800 ${9 / 10 * 500}) scale(${1 / 10})`}
             behaviors={behaviors} />
     )

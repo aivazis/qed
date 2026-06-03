@@ -13,12 +13,12 @@ import styled from 'styled-components'
 import { theme } from "~/palette"
 
 // an arrow
-export const Arrow = ({ placement, path, behaviors }) => {
-    // render
+export const Arrow = ({ placement, path, behaviors, label }) => {
+    // render; the {label} names the direction so the four arrows are distinguishable controls
     return (
         <Container transform={placement}>
             <Placemat d={path} />
-            <Shape d={path} {...behaviors} />
+            <Shape d={path} role="button" aria-label={label} {...behaviors} />
         </Container>
     )
 }
