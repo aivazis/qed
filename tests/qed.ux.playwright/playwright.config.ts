@@ -78,6 +78,15 @@ export default defineConfig({
             fullyParallel: false,
             use: { ...devices["Desktop Chrome"], baseURL: nisarBaseURL },
         },
+        // a live driveability audit (not a gate): it mutates the native store and reaches the nisar
+        // server, so it runs LAST and serially, after every other project, restoring what it touches
+        {
+            name: "audit",
+            testMatch: /audit\/.*\.spec\.ts/,
+            dependencies: ["behavior", "nisar"],
+            fullyParallel: false,
+            use: { ...devices["Desktop Chrome"] },
+        },
     ],
 
     // bring up two isolated qed servers: the native fixture (the gate + behavior specs) and the NISAR
