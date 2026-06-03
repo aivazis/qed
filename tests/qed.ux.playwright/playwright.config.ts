@@ -19,6 +19,13 @@ const baseURL = process.env.QED_URL ?? `http://localhost:${port}`
 // it (the qed.data step produces it). the fallback lets the suite run by hand from its source tree
 const dataDir = process.env.QED_DATA_NATIVE ?? "../data/native"
 
+// a second, independent server on the NISAR fixtures (a GSLC and a GCOV), on its own port and data
+// directory, so the band/frequency/polarization selectors -- which only a multi-dataset NISAR reader
+// surfaces -- can be exercised. it mirrors the native server's overridable port + injected data dir
+const nisarPort = Number(process.env.QED_PORT_NISAR ?? 8138)
+const nisarBaseURL = process.env.QED_URL_NISAR ?? `http://localhost:${nisarPort}`
+const nisarDataDir = process.env.QED_DATA_NISAR ?? "../data/nisar"
+
 
 // the qed.ux suite drives the built client in a headless browser to enforce the semantic-markup
 // convention (doc/semantic-markup.md). playwright owns discovery, parallelism, and -- via the
@@ -62,19 +69,40 @@ export default defineConfig({
             fullyParallel: false,
             use: { ...devices["Desktop Chrome"] },
         },
+        // the NISAR suite runs against its own server (the {nisarBaseURL}); it selects a reader and a
+        // selector value, then asserts the band/frequency/polarization radiogroups. it operates the
+        // controls, so it is serial and restores what it touches, like the {behavior} project
+        {
+            name: "nisar",
+            testMatch: /nisar\/.*\.spec\.ts/,
+            fullyParallel: false,
+            use: { ...devices["Desktop Chrome"], baseURL: nisarBaseURL },
+        },
     ],
 
-    // bring up an isolated qed server on the shared generated dataset; the installed {qed} command
-    // reads {qed.yaml} from {dataDir} and we override its port on the command line
-    webServer: {
-        command: `qed --qed.app.nexus.services.web.address=ip4:0.0.0.0:${port}`,
-        cwd: dataDir,
-        url: baseURL,
-        reuseExistingServer: !process.env.CI,
-        timeout: 60_000,
-        stdout: "ignore",
-        stderr: "pipe",
-    },
+    // bring up two isolated qed servers: the native fixture (the gate + behavior specs) and the NISAR
+    // fixtures (the nisar specs). the installed {qed} command reads {qed.yaml} from each data dir and
+    // we override its port on the command line so the two never collide
+    webServer: [
+        {
+            command: `qed --qed.app.nexus.services.web.address=ip4:0.0.0.0:${port}`,
+            cwd: dataDir,
+            url: baseURL,
+            reuseExistingServer: !process.env.CI,
+            timeout: 60_000,
+            stdout: "ignore",
+            stderr: "pipe",
+        },
+        {
+            command: `qed --qed.app.nexus.services.web.address=ip4:0.0.0.0:${nisarPort}`,
+            cwd: nisarDataDir,
+            url: nisarBaseURL,
+            reuseExistingServer: !process.env.CI,
+            timeout: 60_000,
+            stdout: "ignore",
+            stderr: "pipe",
+        },
+    ],
 })
 
 

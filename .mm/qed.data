@@ -34,4 +34,19 @@ $(qed.data.native.d8): $(CURDIR)/tests/data/native/d8
 	@cd ${dir $@} && ./d8
 
 
+# the NISAR fixtures: a GSLC and a GCOV the {qed.ux.playwright} suite reads. synthetic generation
+# is DEFERRED (a future generator -- likely python over {pyre.h5.api.Writer} with an articulated
+# NISAR product schema -- will synthesize tiny valid products); until then real products stand in.
+qed.data.nisar.gslc := $(CURDIR)/tests/data/nisar/gslc.h5
+qed.data.nisar.gcov := $(CURDIR)/tests/data/nisar/gcov.h5
+
+# no generator yet, so these targets only assert presence: with the fixture there (the real stand-in
+# or a future synthetic), make sees it up to date and does nothing -- the real data is never touched.
+# the recipe runs ONLY when the fixture is absent, failing with a pointer rather than clobbering
+$(qed.data.nisar.gslc) $(qed.data.nisar.gcov):
+	@echo "qed.data: missing NISAR fixture '${subst $(CURDIR)/,,$@}'" >&2
+	@echo "qed.data: synthetic generation is deferred -- drop a real NISAR product there" >&2
+	@exit 1
+
+
 # end of file

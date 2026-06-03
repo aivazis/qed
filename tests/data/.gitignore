@@ -7,6 +7,10 @@
 # the generated fixtures: produced on demand by the {qed.data} generators, never committed
 *.dat
 
+# the NISAR fixtures (a GSLC and a GCOV): synthetic ones are generated on demand, and the real
+# stand-ins used until the generators land are far too large to track -- never commit either
+*.h5
+
 # the compiled generator binaries (one per generator source, no extension)
 native/d8
 native/d16
