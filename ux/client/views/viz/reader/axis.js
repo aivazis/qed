@@ -40,12 +40,16 @@ export const Axis = ({ axis, children }) => {
 
     // mix my paint
     const paint = styles.axis()
-    // and render
+    // and render; the axis values form a radiogroup -- the client's identity for this selector is
+    // the {axis} it binds (frequency / polarization / band), and ARIA names it and carries its state
     return (
         <Meta.Entry attribute={label} style={paint}>
-            {children.map(coordinate => (
-                <Coordinate key={coordinate} axis={axis} coordinate={coordinate} />
-            ))}
+            <div role="radiogroup" aria-label={axis}
+                data-qed-control="selector" data-qed-axis={axis}>
+                {children.map(coordinate => (
+                    <Coordinate key={coordinate} axis={axis} coordinate={coordinate} />
+                ))}
+            </div>
         </Meta.Entry>
     )
 }

@@ -83,9 +83,11 @@ const Panel = ({ qed }) => {
 
     // mix my paint
     const paint = styles.reader(state)
-    // and render
+    // and render; the reader carries its name as client identity so its selectors are addressable
+    // per reader (two readers can share an axis, e.g. {frequency}), forwarded onto the {Tray} section
     return (
-        <Tray title={name} initially={true} state={state} scale={0.5} controls={Controls}>
+        <Tray title={name} initially={true} state={state} scale={0.5} controls={Controls}
+            data-qed-reader={name}>
             <Meta.Table style={paint.meta} {...behaviors}>
                 <Meta.Entry attribute="uri" style={paint.meta}>
                     {uri}
