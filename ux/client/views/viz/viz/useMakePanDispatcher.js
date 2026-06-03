@@ -5,7 +5,7 @@
 
 
 // get the viewport position
-export const useMakePanDispatcher = ({ synced, viewports }) => {
+export const useMakePanDispatcher = ({ synced, zooms, viewports }) => {
     // make a handler that pans the shared camera and scrolls the synced viewports
     const pan = (evt, idx) => {
         // if i have a raised flag
@@ -24,9 +24,11 @@ export const useMakePanDispatcher = ({ synced, viewports }) => {
         }
         // get the scrolling element
         const element = evt.target
-        // get the scroll coordinates
-        const y = Math.max(element.scrollTop, 0)
-        const x = Math.max(element.scrollLeft, 0)
+        // scroll offsets live in *rendered* pixels, which scale as 2**zoom; convert mine to source
+        // pixels -- zoom-independent, hence comparable to a viewport at any other zoom level
+        const [myH, myV] = [zooms[idx]?.horizontal ?? 0, zooms[idx]?.vertical ?? 0]
+        const x = Math.max(element.scrollLeft, 0) * 2 ** -myH
+        const y = Math.max(element.scrollTop, 0) * 2 ** -myV
         // go through the viewports
         viewports.forEach((port, i) => {
             // get the sync state
@@ -38,10 +40,12 @@ export const useMakePanDispatcher = ({ synced, viewports }) => {
             }
             // everybody else gets a bump on its semaphore
             ++semaphores[i]
-            // and scrolls to my location
+            // shift by the relative (source-pixel) offset, then convert into the peer's own
+            // rendered pixels, so the same source pixel lines up regardless of its zoom
+            const [h, v] = [zooms[i]?.horizontal ?? 0, zooms[i]?.vertical ?? 0]
             port.scroll(
-                x + sync.offsets.x - mySync.offsets.x,
-                y + sync.offsets.y - mySync.offsets.y
+                (x + sync.offsets.x - mySync.offsets.x) * 2 ** h,
+                (y + sync.offsets.y - mySync.offsets.y) * 2 ** v
             )
             // all done
             return
