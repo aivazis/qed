@@ -48,7 +48,7 @@ export const Up = ({ viewport, view, handle, deltas }) => {
 
     // render
     return (
-        <Arrow path={arrow}
+        <Arrow path={arrow} label="pan up"
             placement={`translate(${9 / 10 * 500} 100) scale(${1 / 10})`}
             behaviors={behaviors} />
     )

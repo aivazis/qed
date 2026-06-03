@@ -36,7 +36,8 @@ export const Aspect = ({ aspect, update }) => {
             </Prompt>
             <Separator>:</Separator>
             <Value>
-                <Numeric type="text" value={aspect === null ? "" : aspect} {...behaviors} />
+                <Numeric type="text" value={aspect === null ? "" : aspect} {...behaviors}
+                    aria-label="max aspect ratio" />
             </Value>
         </Row>
     )

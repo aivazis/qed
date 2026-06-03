@@ -82,6 +82,7 @@ const VizPanel = ({ qed }) => {
                 return (
                     <Flex.Panel key={`panel:${viewport}`}
                         auto={true}
+                        data-qed-viewport={viewport}
                         style={styles.flex} {...behaviors}
                     >
                         <Viewer viewport={viewport} view={view} registrar={registrar} />

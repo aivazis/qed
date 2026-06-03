@@ -81,7 +81,8 @@ export const Disconnect = ({ uri }) => {
     }
     // render
     return (
-        <Badge size={10} state="enabled" behaviors={behaviors} style={paintDisconnect}>
+        <Badge size={10} state="enabled" behaviors={behaviors} style={paintDisconnect}
+            aria-label="disconnect this archive">
             <Icon />
         </Badge>
 

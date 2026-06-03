@@ -46,9 +46,10 @@ export const Coordinate = ({ className, point, axis, adjust }) => {
     // pick my entry based on my state
     const Entry = selected ? Selected : Enabled
 
-    // make a mark
+    // make a mark; name the field so a driver (and assistive tech) can tell the two offsets apart
     return (
-        <Entry className={className} type="text" value={rep} {...behaviors} />
+        <Entry className={className} type="text" value={rep} {...behaviors}
+            aria-label={axis === "y" ? "line offset" : "sample offset"} />
     )
 }
 

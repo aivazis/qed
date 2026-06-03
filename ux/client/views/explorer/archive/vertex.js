@@ -99,7 +99,8 @@ const Add = ({ update }) => {
     }
     // render
     return (
-        <Badge size={12} state="enabled" behaviors={behaviors} style={paintAdd}>
+        <Badge size={12} state="enabled" behaviors={behaviors} style={paintAdd}
+            aria-label="add a vertex">
             <Plus />
         </Badge>
     )
@@ -112,7 +113,8 @@ const Delete = ({ update }) => {
     }
     // render
     return (
-        <Badge size={12} state="enabled" behaviors={behaviors} style={paintDelete}>
+        <Badge size={12} state="enabled" behaviors={behaviors} style={paintDelete}
+            aria-label="delete this vertex">
             <X />
         </Badge>
     )

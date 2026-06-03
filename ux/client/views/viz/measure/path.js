@@ -28,7 +28,8 @@ export const Path = ({ points, closed }) => {
     const tail = closed ? " Z" : ""
     // and render
     return (
-        <g>
+        // the polyline is a decorative rendering of the anchors, which are the addressable controls
+        <g aria-hidden="true">
             <Mat d={path + tail} />
             <Line d={path + tail} />
         </g>

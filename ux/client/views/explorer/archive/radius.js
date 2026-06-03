@@ -44,7 +44,7 @@ export const Radius = ({ region, update }) => {
     // render
     return (
         <Numeric
-            title="decimal degrees in [-180, 180]" type="text"
+            title="decimal degrees in [-180, 180]" type="text" aria-label="radius"
             value={radius}
             {...behaviors}
         />

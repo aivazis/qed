@@ -55,7 +55,7 @@ export const Latitude = ({ region, update }) => {
     // render
     return (
         <Numeric
-            title="decimal degrees in [-90, 90]" type="text"
+            title="decimal degrees in [-90, 90]" type="text" aria-label="latitude"
             value={latitude}
             {...behaviors}
         />

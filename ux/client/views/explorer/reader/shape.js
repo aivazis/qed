@@ -51,11 +51,13 @@ export const Shape = ({ lines, samples, update }) => {
             </Prompt>
             <Separator>:</Separator>
             <Value>
-                <Numeric type="text" value={lines === null ? "" : lines} {...setLines} />
+                <Numeric type="text" value={lines === null ? "" : lines} {...setLines}
+                    aria-label="lines" />
                 {" "}
                 lines,
                 {" "}
-                <Numeric type="text" value={samples === null ? "" : samples} {...setSamples} />
+                <Numeric type="text" value={samples === null ? "" : samples} {...setSamples}
+                    aria-label="samples" />
                 {" "}
                 samples
             </Value>

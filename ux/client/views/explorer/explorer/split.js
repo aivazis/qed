@@ -45,7 +45,8 @@ export const Split = ({ viewport }) => {
     const paint = splitPaint
     // and render
     return (
-        <Badge size={16} state="enabled" behaviors={behaviors} style={paint} >
+        <Badge size={16} state="enabled" behaviors={behaviors} style={paint}
+            aria-label="split this viewport" >
             <Icon />
         </Badge>
     )
