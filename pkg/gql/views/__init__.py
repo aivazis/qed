@@ -46,5 +46,6 @@ from .ZoomReset import ZoomReset as zoomReset
 
 # stack
 from .SetMembers import SetMembers as setMembers
+from .ResetMembers import ResetMembers as resetMembers
 
 # end of file

@@ -68,6 +68,7 @@ class Mutation(graphene.ObjectType):
 
     # stack member participation
     viewSetMembers = views.setMembers.Field()
+    viewResetMembers = views.resetMembers.Field()
 
     # data archive connection management
     connectArchive = ConnectArchive.Field()
