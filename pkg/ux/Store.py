@@ -218,16 +218,16 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # and delegate
         return port.toggleCoordinate(source=source, axis=axis, coordinate=coordinate)
 
-    def setStackIndex(self, viewport, source, index):
+    def setMembers(self, viewport, source, members):
         """
-        Pin (or clear, when {index} is None) the stack member for {viewport}
+        Set the per-member participation mask of the stack {source} for {viewport}
         """
         # locate the source
         source = self.source(name=source)
         # get the viewport configuration
         port = self._viewports[viewport]
         # and delegate
-        return port.setStackIndex(source=source, index=index)
+        return port.setMembers(source=source, members=members)
 
     def toggleMeasure(self, viewport, source):
         """

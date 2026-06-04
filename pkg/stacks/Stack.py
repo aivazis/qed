@@ -40,6 +40,10 @@ class Stack(
     readers = qed.properties.list(schema=qed.protocols.reader())
     readers.doc = "the readers of my stack"
 
+    # the members that start active; empty means all of them
+    membership = qed.properties.strings()
+    membership.doc = "the names of the members active at startup; empty means all"
+
     # interface
     def select(self, selector):
         """
@@ -97,6 +101,8 @@ class Stack(
         readers = self.readers
         # remember how many members i have
         self.extent = len(readers)
+        # resolve the participation mask my views start from; empty membership means all
+        self.defaultMask = self._resolveMask()
         # if i somehow have none
         if not readers:
             # there is nothing to aggregate
@@ -117,6 +123,28 @@ class Stack(
         return
 
     # implementation details
+    def _resolveMask(self):
+        """
+        Build the initial participation mask from my {membership}, preserving member order
+        """
+        # get my members
+        readers = self.readers
+        # an empty membership means every member participates
+        if not self.membership:
+            # so the whole stack is on
+            return [True] * len(readers)
+        # otherwise, the names that should start active; the set is only a membership test,
+        # the mask itself is built positionally so member order is preserved
+        active = set(self.membership)
+        # mark each member by whether its name was named
+        mask = [reader.pyre_name in active for reader in readers]
+        # if nothing matched, e.g. the names were misspelled, an empty stack is useless
+        if not any(mask):
+            # so fall back to the whole stack
+            return [True] * len(readers)
+        # hand off the resolved mask
+        return mask
+
     def _loadDatasets(self):
         """
         Build one aggregate dataset per selector assignment shared by all my members
