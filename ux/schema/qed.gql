@@ -77,8 +77,8 @@ type View implements Node {
   measure: DatasetMeasure
   sync: DatasetSync
   zoom: DatasetZoom
-  # the pinned stack member, if any
-  stackIndex: Int
+  # the per-member participation mask, if the reader is a stack
+  members: [Boolean!]
   # the available selector values, reflecting any pinned member
   available: [Selectors]
 }
@@ -322,7 +322,7 @@ type Mutation {
   viewZoomToggleCoupled(viewport: Int!): DatasetZoomInfos!
   viewZoomReset(viewport: Int!): DatasetZoomInfo!
   # stack
-  viewSetStackIndex(viewport: Int!, source: String!, index: Int): ViewInfo!
+  viewSetMembers(viewport: Int!, source: String!, members: [Boolean!]!): ViewInfo!
 
   # data archive connections
   connectArchive(name: String!, uri: String!, credentials: CredentialsInput): ArchiveInfo!
