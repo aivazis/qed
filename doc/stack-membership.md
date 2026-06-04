@@ -7,8 +7,11 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 
 # Stack membership — replacing the stack-index slider
 
-> Status: **Wave 1 landed** (branch `stack-membership`, builds clean via `mm`); Wave 2 — the
-> All / Reset / Invert convenience actions — and the tests are still to do.
+> Status: **Wave 1 complete and tested** (branch `stack-membership`, builds clean via `mm`). The
+> client ships the raw per-member toggles. The **reset** capability landed server-side (resolver +
+> `viewResetMembers` mutation) but its client buttons are **deferred** — we want to show the raw
+> capability and gather feedback before committing to the All / Invert / Reset UI. All / Invert
+> were client-only sugar and are not yet built.
 
 ## Why
 
@@ -43,8 +46,10 @@ aggregation over an arbitrary subset.
    different subsets in different viewports — the point of having viewports for comparison.
 3. **Order-preserving structure.** The mask is a positional `list[bool]` aligned to the already
    ordered `Stack.readers`; never a `set`. Member order is canonical config (qed.yaml) order.
-4. **Convenience actions (All / Reset / Invert)** ship in Wave 2, on top of the proven mutation.
-   "None" is omitted — the empty set is forbidden at runtime.
+4. **Convenience actions (All / Reset / Invert)** are Wave 2, on top of the proven mutation.
+   "None" is omitted — the empty set is forbidden at runtime. All / Invert are pure client
+   computations over the current mask; **Reset is a server action** (`viewResetMembers`) so the
+   default never leaves the server. The client UI is deferred pending feedback (see Wave 2).
 
 ## Vocabulary
 
@@ -59,23 +64,25 @@ aggregation over an arbitrary subset.
 ## Render path (why C++ is untouched)
 
 `View → Dataset.render → channel.tile`. `MeanPower.tile`/`StackCoherence.tile` build the C++
-member vector from `source.members`, then call `qed.libqed.nisar.stack.meanpower`
+member vector from the `members` they are handed, then call `qed.libqed.nisar.stack.meanpower`
 (`lib/qed/nisar/stack/meanpower.h`), which already reduces over *whatever vector it is handed*.
 A subset is just a shorter vector — so the subset logic is pure Python and the C++ engines need
 no change. The aggregate `Dataset` is shared across all Views (built once in
 `Stack._loadDatasets`), so per-View membership must be threaded down at render time, never
-stored on the shared dataset.
+stored on the shared dataset: `Dataset.render` resolves the participating members (full list, or
+the mask's subset) and names them explicitly to the channel, which has no fallback of its own.
 
 ## Wave 1 — the spine
 
 1. **`pkg/stacks/Stack.py`** — add `membership` trait; in `__init__` resolve `self.defaultMask`
    (empty ⇒ all `True`, preserving `readers` order, guard all-`False` → all-`True`).
 2. **`pkg/readers/nisar/products/channels/MeanPower.py` + `StackCoherence.py`** —
-   `tile(self, source, …, members=None, **kwds)`: build `sources` from
-   `source.members if members is None else members`.
-3. **`pkg/stacks/Dataset.py`** — `render(self, channel, …, mask=None, **kwds)`: when `mask` is
-   given, pass `members=[m for m, on in zip(self.members, mask) if on]` to `channel.tile`.
-   `_collectStatistics` stays over the full set for now (known limitation, see below).
+   `tile(self, source, …, members, **kwds)`: build `sources` from the required `members` list;
+   no `source.members` fallback (render always names them).
+3. **`pkg/stacks/Dataset.py`** — `render(self, channel, …, mask=None, **kwds)`: resolve
+   `members = self.members if mask is None else [m for m, on in zip(self.members, mask) if on]`
+   and pass it explicitly to `channel.tile`. `_collectStatistics` stays over the full set for
+   now (known limitation, see below).
 4. **`pkg/ux/View.py`** —
    - trait `stackIndex` → `members` (`list[bool]`);
    - `pyre_configured`: seed `self.members = list(reader.defaultMask)` when the reader is a stack
@@ -99,23 +106,45 @@ stored on the shared dataset.
 
 ## Wave 2 — convenience actions
 
-**All** (all `True`), **Reset** (restore `reader.defaultMask`), **Invert** (flip, same empty
-guard). "None" omitted. Optionally expose `defaultMask` on the GraphQL `Reader` type so Reset
-need not recompute it.
+**Reset** is the only part with a server side, and it **landed**: `View.resetMembers`
+(restores `reader.defaultMask` via `setMembers`) → `Viewport`/`Store` forwarders →
+`viewResetMembers` resolver and SDL mutation. The default stays server-internal; **no
+`Reader.defaultMask` is exposed** (an earlier draft did; it was backed out — the client never
+needs the default).
+
+**All** (all `True`) and **Invert** (flip, with the empty-set guard) are pure client computations
+over the current mask. "None" is omitted — the empty set is forbidden.
+
+The client UI for all three (`action.js`, `useResetMembers.js`, the actions row in `stack.js`)
+was built, then **backed out** so we can demo the raw per-member toggles first. Re-wiring is
+purely client work against the already-present `viewSetMembers` / `viewResetMembers` mutations.
 
 ## Tests
 
-- `tests/qed.pkg`: seed resolution (empty ⇒ all, explicit subset, all-`False` guard);
-  `setMembers` rejects empty / wrong length; `_effectiveDataset` branch at 1 vs > 1;
-  `Dataset.render(mask=…)` builds the right subset vector (stand-in-member trick).
-- `tests/qed.ux.playwright`: toggle members, assert button states, assert isolating one member
-  exposes its native channels.
+Landed (`tests/qed.pkg`, stand-in based, no NISAR data needed):
+- `stacks.py` — `Stack._resolveMask` (empty ⇒ all, named subset, order preserved, no-match
+  fallback) and `Dataset.render(mask=…)` (subset selection + no-mask full-list passthrough).
+- `membership.py` — `View._activeMembers` (mask → indices) and `View.setMembers` (empty-set
+  rejected; real mask stored and re-resolves).
+
+> Gotcha learned here: pyre components are keyed by name — reusing a component name returns the
+> cached instance, so each test dataset needs its own name (this silently fed an old dataset's
+> members into a later test).
+
+Deferred until we synthesize a NISAR stack fixture (need a real stack reader):
+- `_effectiveDataset` single-member swap to native channels; `availableSelectors` widening;
+  `setMembers`/`resetMembers` → `resolve` across the single-member boundary; the end-to-end
+  mean-power/coherence subset render with real data; the `viewSetMembers`/`viewResetMembers`
+  GraphQL round-trips; the `tests/qed.ux.playwright` driveability test.
 
 ## Automation surface tie-in
 
-Tag each member button with stable `data-qed-*` (`data-qed-stack-member`, `data-qed-member-active`)
-and ARIA `aria-pressed`. Per-member targets are far more driveable than slider geometry and slot
-directly into the automation-surface work — the reason this redesign precedes it.
+Each member toggle carries stable identity in `data-qed-stack-member` (the index) with its
+participation state in ARIA `aria-checked` — following the codebase convention (see
+`coordinate.js`) that identity lives in `data-*` and state lives in ARIA, never mirrored into
+`data-*`. The member group is `data-qed-control="stack"`. Per-member targets are far more
+driveable than the old slider geometry and slot directly into the automation-surface work — the
+reason this redesign precedes it.
 
 ## To confirm during implementation
 
