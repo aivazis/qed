@@ -65,19 +65,21 @@ class Dataset(
         When {mask} is given, it is a per-member boolean selecting the subset that participates
         in the aggregate; my full membership stands when it is absent.
         """
-        # if a participation mask was supplied
-        if mask is not None:
-            # reduce my members to the participating subset, preserving their order
-            kwds["members"] = [
-                member for member, on in zip(self.members, mask) if on
-            ]
-        # hand the request to the channel, pointing it at me as the source of members
+        # a mask reduces my members to the participating subset, preserving order; without one,
+        # every member i carry participates
+        members = (
+            self.members
+            if mask is None
+            else [member for member, active in zip(self.members, mask) if active]
+        )
+        # hand the request to the channel, naming the members it should reduce over
         return channel.tile(
             source=self,
             datatype=self.datatype.htype,
             zoom=zoom,
             origin=origin,
             shape=shape,
+            members=members,
             **kwds,
         )
 

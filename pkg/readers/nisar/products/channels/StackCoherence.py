@@ -63,12 +63,9 @@ class StackCoherence(Channel, family="qed.channels.nisar.stack.coherence"):
         # all done
         return
 
-    def tile(self, source, zoom, origin, shape, datatype, members=None, **kwds):
+    def tile(self, source, zoom, origin, shape, datatype, members, **kwds):
         """
-        Render a coherence tile from the members of a {source} stack
-
-        When {members} is given, it is the subset of member datasets that participate; otherwise
-        every member of the {source} does.
+        Render a coherence tile over the given {members} of a {source} stack
         """
         # my pipeline reduces several sources at once
         pipeline = qed.libqed.nisar.stack.coherence
@@ -78,10 +75,8 @@ class StackCoherence(Channel, family="qed.channels.nisar.stack.coherence"):
         origin = qed.libpyre.grid.Index2D(index=origin)
         # and the zoom into strides
         stride = qed.libpyre.grid.Index2D(index=tuple(2**level for level in zoom))
-        # the participating members default to every member of the source
-        participants = source.members if members is None else members
         # collect the data handle of each participating member
-        sources = [member.data.dataset for member in participants]
+        sources = [member.data.dataset for member in members]
         # build the visualization pipeline and return it; the coherence range is already linear
         return pipeline(
             sources=sources,
