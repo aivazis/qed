@@ -497,6 +497,19 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
+    def resetMembers(self):
+        """
+        Restore my participation mask to the default the stack was primed with
+        """
+        # get my reader
+        reader = self.reader
+        # only a stack has a default mask to restore
+        if isinstance(reader, qed.stacks.stack):
+            # set my mask to a copy of the stack's default, reusing the setter's validation
+            self.setMembers(members=list(reader.defaultMask))
+        # all done
+        return self
+
     # state resolution
     def resolve(self):
         """

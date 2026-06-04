@@ -77,6 +77,17 @@ class Viewport(
         # all done
         return self.view()
 
+    def resetMembers(self, source):
+        """
+        Restore the stack {source} to its default participation mask
+        """
+        # activate the {source}
+        view = self._selectSource(source=source)
+        # and delegate
+        view.resetMembers()
+        # all done
+        return self.view()
+
     def toggleMeasure(self, source):
         """
         Toggle {coordinate}
