@@ -46,8 +46,8 @@ export const Provider = props => {
     )
     // if i am a stack, the number of members i have
     const stackExtent = reader.stackExtent
-    // the pinned member, but only meaningful when i am the active reader
-    const stackIndex = active ? view.stackIndex : null
+    // the per-member participation mask, but only meaningful when i am the active reader
+    const members = active ? view.members : null
 
     // assemble the context value
     const context = {
@@ -65,8 +65,8 @@ export const Provider = props => {
         selections,
         // the number of members if i am a stack
         stackExtent,
-        // my pinned member, if i am the active reader
-        stackIndex,
+        // my per-member participation mask, if i am the active reader
+        members,
     }
 
     // provide for my children
@@ -130,7 +130,7 @@ export const contextReaderGetViewFragment = graphql`
             name
             value
         }
-        stackIndex
+        members
         available {
             name
             values

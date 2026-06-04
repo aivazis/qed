@@ -16,17 +16,17 @@ import { useViewports } from '~/views/viz'
 import { useReader } from './useReader'
 
 
-// pin a stack member, or clear the pin to return to the collective aggregate view
-export const useSetStackIndex = () => {
+// set the per-member participation mask of a stack
+export const useSetMembers = () => {
     // get the active viewport
     const { activeViewport } = useViewports()
     // get my reader
     const reader = useReader()
-    // pinning a member mutates the server side store
-    const [commit, pending] = useMutation(setStackIndexMutation)
+    // adjusting membership mutates the server side store
+    const [commit, pending] = useMutation(setMembersMutation)
 
-    // make the handler; pass {index} null to clear the pin
-    const setStackIndex = (index, viewport = activeViewport) => {
+    // make the handler; {members} is the full per-member boolean mask
+    const setMembers = (members, viewport = activeViewport) => {
         // if there is already a pending operation
         if (pending) {
             // nothing to do
@@ -38,12 +38,12 @@ export const useSetStackIndex = () => {
             variables: {
                 viewport,
                 source: reader.name,
-                index,
+                members,
             },
             // update the store
             updater: store => {
                 // get the root field of the mutation result
-                const response = store.getRootField("viewSetStackIndex")
+                const response = store.getRootField("viewSetMembers")
                 // ask for the view
                 const view = response.getLinkedRecord("view")
                 // if it's trivial
@@ -62,9 +62,9 @@ export const useSetStackIndex = () => {
             },
             onError: errors => {
                 // send the error to the console
-                console.error(`viz.reader.useSetStackIndex:`)
+                console.error(`viz.reader.useSetMembers:`)
                 console.group()
-                console.error(`ERROR while pinning '${reader.name}' to member '${index}'`)
+                console.error(`ERROR while setting the membership of '${reader.name}'`)
                 console.log(errors)
                 console.groupEnd()
                 // all done
@@ -76,14 +76,14 @@ export const useSetStackIndex = () => {
     }
 
     // all done
-    return setStackIndex
+    return setMembers
 }
 
 
-// the mutation that pins or clears a stack member
-const setStackIndexMutation = graphql`
-    mutation useSetStackIndexMutation($viewport: Int!, $source: String!, $index: Int) {
-        viewSetStackIndex(viewport: $viewport, source: $source, index: $index) {
+// the mutation that sets the per-member participation mask
+const setMembersMutation = graphql`
+    mutation useSetMembersMutation($viewport: Int!, $source: String!, $members: [Boolean!]!) {
+        viewSetMembers(viewport: $viewport, source: $source, members: $members) {
             view {
                 id
                 # for synchronized scrolling
@@ -118,4 +118,4 @@ const setStackIndexMutation = graphql`
 `
 
 
-// end of file
+/* end of file */

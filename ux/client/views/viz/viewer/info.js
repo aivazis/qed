@@ -24,8 +24,9 @@ import styles from './styles'
 
 // export the data viewer
 export const Info = ({ viewport, view }) => {
-    // unpack the view
-    const { reader, dataset, channel, zoom, stackIndex } = useFragment(infoViewerGetViewFragment, view)
+    // unpack the view; the view's {members} is the participation mask, aliased so it does not
+    // collide with the reader's {members}, which is the list of member URIs
+    const { reader, dataset, channel, zoom, members: participation } = useFragment(infoViewerGetViewFragment, view)
     // get the viewport registry
     const { viewports } = useViewports()
     // make room for the cursor position
@@ -113,9 +114,9 @@ export const Info = ({ viewport, view }) => {
                 {uri}
             </Meta.Entry>
             {members?.map((memberURI, member) => {
-                // is this the member currently on display?
-                const active = member === stackIndex
-                // mark the active one with an arrow on the left, painted in the highlight color
+                // is this member participating in the aggregate?
+                const active = participation?.[member] ?? false
+                // mark each active one with an arrow on the left, painted in the highlight color
                 return (
                     <Meta.Entry key={member} threshold={2}
                         style={active ? activePaint : paint}
@@ -183,7 +184,7 @@ const infoViewerGetViewFragment = graphql`
             horizontal
             vertical
         }
-        stackIndex
+        members
     }
 `
 
