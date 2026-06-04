@@ -11,10 +11,10 @@ import graphene
 from .View import View
 
 
-# pin or clear a stack member for a viewport
-class SetStackIndex(graphene.Mutation):
+# set the per-member participation mask of a stack for a viewport
+class SetMembers(graphene.Mutation):
     """
-    Pin a stack member, or clear the pin to return to the collective aggregate view
+    Set which members of a stack participate in its aggregate views
     """
 
     # inputs
@@ -23,22 +23,22 @@ class SetStackIndex(graphene.Mutation):
         viewport = graphene.Int(required=True)
         # the stack to act on
         source = graphene.String(required=True)
-        # the member to pin; omit or pass null to clear the pin
-        index = graphene.Int(required=False)
+        # the per-member participation mask, aligned to the stack's member order
+        members = graphene.List(graphene.NonNull(graphene.Boolean), required=True)
 
     # the result is the updated view
     view = graphene.Field(View)
 
     # the mutator
     @staticmethod
-    def mutate(root, info, viewport, source, index=None):
+    def mutate(root, info, viewport, source, members):
         """
-        Pin the stack member {index} of {source} in {viewport}, or clear it when {index} is None
+        Set the participation {members} of the stack {source} in {viewport}
         """
         # get the store
         store = info.context["store"]
-        # ask it to pin or clear the member
-        view = store.setStackIndex(viewport=viewport, source=source, index=index)
+        # ask it to set the mask
+        view = store.setMembers(viewport=viewport, source=source, members=members)
         # form the mutation resolution context
         context = {"view": view}
         # and resolve the mutation

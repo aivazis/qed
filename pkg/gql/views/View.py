@@ -46,8 +46,8 @@ class View(graphene.ObjectType):
     measure = graphene.Field(Measure)
     sync = graphene.Field(Sync)
     zoom = graphene.Field(Zoom)
-    # the pinned stack member, if any
-    stackIndex = graphene.Int()
+    # the per-member participation mask, if the reader is a stack
+    members = graphene.List(graphene.NonNull(graphene.Boolean))
     # the available selector values, reflecting any pinned member
     available = graphene.List(Selectors)
 
@@ -77,12 +77,12 @@ class View(graphene.ObjectType):
         return view.selections.items()
 
     @staticmethod
-    def resolve_stackIndex(view, info, **kwds):
+    def resolve_members(view, info, **kwds):
         """
-        Resolve the pinned stack member, if any
+        Resolve the per-member participation mask, if the reader is a stack
         """
         # hand it off
-        return view.stackIndex
+        return view.members
 
     @staticmethod
     def resolve_available(view, info, **kwds):
