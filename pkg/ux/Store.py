@@ -229,6 +229,17 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # and delegate
         return port.setMembers(source=source, members=members)
 
+    def resetMembers(self, viewport, source):
+        """
+        Restore the stack {source} to its default participation mask for {viewport}
+        """
+        # locate the source
+        source = self.source(name=source)
+        # get the viewport configuration
+        port = self._viewports[viewport]
+        # and delegate
+        return port.resetMembers(source=source)
+
     def toggleMeasure(self, viewport, source):
         """
         Toggle the measure layer state on {viewport}
