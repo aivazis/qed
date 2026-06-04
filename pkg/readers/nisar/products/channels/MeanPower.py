@@ -60,9 +60,12 @@ class MeanPower(Channel, family="qed.channels.nisar.meanpower"):
         # all done
         return
 
-    def tile(self, source, zoom, origin, shape, datatype, **kwds):
+    def tile(self, source, zoom, origin, shape, datatype, members=None, **kwds):
         """
         Render a mean-power tile from the members of a {source} stack
+
+        When {members} is given, it is the subset of member datasets that participate; otherwise
+        every member of the {source} does.
         """
         # my pipeline reduces several sources at once
         pipeline = qed.libqed.nisar.stack.meanpower
@@ -72,8 +75,10 @@ class MeanPower(Channel, family="qed.channels.nisar.meanpower"):
         origin = qed.libpyre.grid.Index2D(index=origin)
         # and the zoom into strides
         stride = qed.libpyre.grid.Index2D(index=tuple(2**level for level in zoom))
-        # collect the data handle of each stack member
-        sources = [member.data.dataset for member in source.members]
+        # the participating members default to every member of the source
+        participants = source.members if members is None else members
+        # collect the data handle of each participating member
+        sources = [member.data.dataset for member in participants]
         # lift my range out of log scale
         low = 10 ** self.power.low
         # at both ends

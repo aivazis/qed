@@ -66,14 +66,14 @@ class Viewport(
         # all done
         return self.view()
 
-    def setStackIndex(self, source, index):
+    def setMembers(self, source, members):
         """
-        Pin (or clear, when {index} is None) the stack member
+        Set the per-member participation mask of the stack {source}
         """
         # activate the {source}
         view = self._selectSource(source=source)
         # and delegate
-        view.setStackIndex(index=index)
+        view.setMembers(members=members)
         # all done
         return self.view()
 

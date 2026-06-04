@@ -52,8 +52,9 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
     session = qed.properties.str()
     session.doc = "the session token"
 
-    stackIndex = qed.properties.int(default=None)
-    stackIndex.doc = "the pinned stack member, or None for the collective aggregate view"
+    members = qed.properties.list(schema=qed.properties.bool())
+    members.default = None
+    members.doc = "the per-member participation mask, or None until seeded from a stack reader"
 
     # interface
     def tile(self, channel, zoom, origin, shape):
@@ -64,9 +65,16 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         name = f"{self.pyre_name}.{channel}"
         # locate the pipeline
         pipeline = self._pipelines[name]
+        # an aggregate dataset renders over only the members my mask leaves active; a
+        # single-member dataset is a plain reader dataset that knows nothing of masks
+        extra = (
+            {"mask": self.members}
+            if isinstance(self.dataset, qed.stacks.dataset)
+            else {}
+        )
         # and ask my dataset to render the tile
         return self.dataset.render(
-            channel=pipeline, zoom=zoom, origin=origin, shape=shape
+            channel=pipeline, zoom=zoom, origin=origin, shape=shape, **extra
         )
 
     def toggleSelection(self, key, value):
@@ -461,13 +469,28 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
-    def setStackIndex(self, index):
+    def setMembers(self, members):
         """
-        Pin the stack member with the given {index}, or clear the pin when {index} is None
+        Set my per-member participation mask; at least one member must stay active
         """
-        # store the new pin
-        self.stackIndex = index
-        # re-resolve my dataset and channel
+        # the mask must line up with my reader's members
+        if self.members is not None and len(members) != len(self.members):
+            # a mismatch is a client bug
+            firewall = journal.firewall("qed.ux.store")
+            # complain
+            firewall.line(f"member mask of length {len(members)} for {self}")
+            firewall.line(f"expected length {len(self.members)}")
+            # flush
+            firewall.log()
+            # and bail, just in case firewalls aren't fatal
+            return self
+        # an empty stack has nothing to show, so reject a mask that turns everyone off
+        if not any(members):
+            # leave the current mask in place
+            return self
+        # store the new mask
+        self.members = members
+        # re-resolve my dataset and channel; this may cross the single-member boundary
         self.resolve()
         # grab a new session token so the client refetches tiles
         self.session = uuid.uuid1()
@@ -534,8 +557,8 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         if not self.dataset:
             # all done
             return self
-        # if a stack member is pinned, switch from the aggregate to that member's dataset
-        dataset = self._pinnedDataset(dataset=dataset)
+        # when exactly one member is active, switch from the aggregate to that member's dataset
+        dataset = self._effectiveDataset(dataset=dataset)
         # record the resolved dataset
         self.dataset = dataset
         # get the channel
@@ -589,7 +612,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             measure=self.measure.clone(),
             sync=self.sync.clone(),
             zoom=self.zoom.clone(),
-            stackIndex=self.stackIndex,
+            members=list(self.members) if self.members is not None else None,
         )
 
     def pipelines(self):
@@ -622,22 +645,38 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         return
 
     # implementation details
-    def _pinnedDataset(self, dataset):
+    def _activeMembers(self):
         """
-        If a stack member is pinned, return that member's dataset in place of the aggregate
+        The indices of the members my mask leaves active, in member order
         """
-        # get my pinned index
-        index = self.stackIndex
-        # if nothing is pinned, the aggregate dataset stands
-        if index is None:
-            # hand it back unchanged
-            return dataset
+        # get my mask
+        mask = self.members
+        # if i have none, e.g. my reader is not a stack, nothing is singled out
+        if not mask:
+            # so report no active members
+            return []
+        # otherwise, the positions that are on
+        return [index for index, on in enumerate(mask) if on]
+
+    def _effectiveDataset(self, dataset):
+        """
+        When exactly one member is active, return that member's dataset in place of the aggregate
+        """
         # get my reader
         reader = self.reader
-        # only a stack can pin members
+        # only a stack singles members out
         if not isinstance(reader, qed.stacks.stack):
             # hand the dataset back unchanged
             return dataset
+        # find the active members
+        active = self._activeMembers()
+        # the member-native view applies only when exactly one member is active; otherwise the
+        # aggregate dataset stands, rendered over whatever subset the mask leaves on
+        if len(active) != 1:
+            # so hand the aggregate back unchanged
+            return dataset
+        # the single active member
+        (index,) = active
         # get the member dataset that matches my current selection
         member = reader.member(index=index, selector=dataset.selector)
         # if there is no such member
@@ -684,12 +723,15 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         if not reader:
             # hand back an empty map
             return {}
-        # a pinned member can realize more combos than the aggregate
-        index = self.stackIndex
-        # so when a member is pinned on a stack
-        if index is not None and isinstance(reader, qed.stacks.stack):
-            # use that member's wider availability
-            return reader.memberAvailable(index)
+        # a single active member can realize more combos than the aggregate
+        if isinstance(reader, qed.stacks.stack):
+            # find the active members
+            active = self._activeMembers()
+            # when exactly one is active
+            if len(active) == 1:
+                # use that member's wider availability
+                (index,) = active
+                return reader.memberAvailable(index)
         # otherwise, the reader's own availability stands
         return reader.available
 
@@ -736,6 +778,11 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         if not reader:
             # nothing more to do; report no errors
             return []
+        # if my reader is a stack and i have not been given a mask, seed mine from the stack's
+        # configured default so every view starts from the membership the stack was primed with
+        if self.members is None and isinstance(reader, qed.stacks.stack):
+            # copy it so later edits stay local to me
+            self.members = list(reader.defaultMask)
         # otherwise, get my selections
         selections = self.selections
         # if i don't have any

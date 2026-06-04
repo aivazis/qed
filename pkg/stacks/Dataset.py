@@ -58,10 +58,19 @@ class Dataset(
         # look up the channel and return it
         return self.channels[name]
 
-    def render(self, channel, zoom, origin, shape, **kwds):
+    def render(self, channel, zoom, origin, shape, mask=None, **kwds):
         """
         Render a tile of the given specification
+
+        When {mask} is given, it is a per-member boolean selecting the subset that participates
+        in the aggregate; my full membership stands when it is absent.
         """
+        # if a participation mask was supplied
+        if mask is not None:
+            # reduce my members to the participating subset, preserving their order
+            kwds["members"] = [
+                member for member, on in zip(self.members, mask) if on
+            ]
         # hand the request to the channel, pointing it at me as the source of members
         return channel.tile(
             source=self,
