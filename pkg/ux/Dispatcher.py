@@ -205,6 +205,19 @@ class Dispatcher:
         # delegate to my {graphql} handler
         return self.gql.respond(store=self.store, **kwds)
 
+    def schema(self, server, **kwds):
+        """
+        Serve the GraphQL schema as SDL so external clients can retrieve it
+        """
+        # render the schema as SDL text
+        document = qed.gql.sdl()
+        # wrap it in a literal text response
+        response = server.documents.Literal(server=server, value=document)
+        # mark it as plain text
+        response.headers["Content-Type"] = "text/plain; charset=utf-8"
+        # and send it off
+        return response
+
     def profile(self, server, match, request, **kwds):
         """
         Handle a request for a dataset profile
@@ -385,6 +398,8 @@ class Dispatcher:
                 + ")",
                 # graphql requests
                 r"/(?P<graphql>graphql)",
+                # the schema in SDL form, for external clients
+                r"/(?P<schema>schema)",
                 # the kill command
                 r"/(?P<stop>stop)",
                 # document requests
