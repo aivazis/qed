@@ -6,80 +6,69 @@
 
 // externals
 import React from 'react'
-import styled from 'styled-components'
 
 // project
 // widgets
-import { Meta, Slider, SVG } from '~/widgets'
+import { Meta } from '~/widgets'
 
 // local
 // context
 import { Context } from './context'
+// components
+import { Member } from './member'
 // hooks
-import { useSetStackIndex } from './useSetStackIndex'
+import { useSetMembers } from './useSetMembers'
 // styles
 import styles from './styles'
 
 
-// display a stack member selector
+// display the stack member participation control
 export const Stack = () => {
     // get my stack details from the reader context
-    const { stackExtent, stackIndex } = React.useContext(Context)
-    // the mutation that pins or clears a member
-    const setStackIndex = useSetStackIndex()
+    const { stackExtent, members } = React.useContext(Context)
+    // the mutation that updates the membership mask
+    const setMembers = useSetMembers()
 
-    // if i am not a stack, or the stack has too few members to be interesting
+    // if i am not a stack, or the stack has too few members to be worth toggling
     if (!stackExtent || stackExtent < 2) {
         // there is nothing to show
         return null
     }
 
-    // my members are indexed from zero to one less than my extent
-    const max = stackExtent - 1
-    // the tick marks, one per member
-    const major = [...Array(stackExtent).keys()]
+    // the effective mask; when i'm not the active reader i have no view, so assume the default
+    // all-on state until the user activates me by interacting with a member
+    const mask = members ?? Array(stackExtent).fill(true)
+    // how many members are active; the last active member is locked on so the stack is never empty
+    const live = mask.filter(Boolean).length
 
-    // controller configuration
-    const opt = {
-        // the marker sits on the pinned member; collective leaves it unpinned
-        value: stackIndex,
-        // a click pins the chosen member, or clears the pin if it is already pinned
-        setValue: raw => {
-            // round to a whole member
-            const member = Math.round(raw)
-            // ignore anything off the scale
-            if (member < 0 || member > max) {
-                // nothing to do
-                return
-            }
-            // clicking the pinned member clears the pin; otherwise pin the chosen one
-            setStackIndex(member === stackIndex ? null : member)
-        },
-        min: 0, max, major,
-        direction: "row", labels: "bottom", arrows: "top", markers: true,
-        height: 75, width: 190,
-        tickPrecision: 0, markerPrecision: 0,
+    // toggle member {index}, committing the full new mask
+    const toggle = index => {
+        // refuse to turn off the last active member
+        if (mask[index] && live === 1) {
+            // nothing to do
+            return
+        }
+        // flip member {index} and send the whole mask to the server
+        setMembers(mask.map((on, i) => (i === index ? !on : on)))
+        // all done
+        return
     }
 
     // mix my paint
     const paint = styles.axis()
-    // render
+    // and render; the members form a group of independent toggles, one per stack member, and the
+    // client identifies the control as the stack so a driver can find every member under it
     return (
-        <Meta.Entry attribute="stack index" style={paint}>
-            <Housing height={opt.height} width={opt.width}>
-                <Controller enabled={true} {...opt} />
-            </Housing>
+        <Meta.Entry attribute="members" style={paint}>
+            <div role="group" aria-label="stack members" data-qed-control="stack">
+                {mask.map((on, index) => (
+                    <Member key={index} index={index}
+                        active={on} locked={on && live === 1} toggle={toggle} />
+                ))}
+            </div>
         </Meta.Entry>
     )
 }
 
 
-// the controller housing
-const Housing = styled(SVG)`
-`
-
-// the controller
-const Controller = styled(Slider)`
-`
-
-// end of file
+/* end of file */
