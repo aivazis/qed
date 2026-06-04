@@ -323,6 +323,7 @@ type Mutation {
   viewZoomReset(viewport: Int!): DatasetZoomInfo!
   # stack
   viewSetMembers(viewport: Int!, source: String!, members: [Boolean!]!): ViewInfo!
+  viewResetMembers(viewport: Int!, source: String!): ViewInfo!
 
   # data archive connections
   connectArchive(name: String!, uri: String!, credentials: CredentialsInput): ArchiveInfo!
