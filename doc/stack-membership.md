@@ -7,8 +7,8 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 
 # Stack membership — replacing the stack-index slider
 
-> Status: **in progress** (branch `stack-membership`). Wave 1 is the cross-layer spine; Wave 2
-> adds convenience actions once the mutation is proven.
+> Status: **Wave 1 landed** (branch `stack-membership`, builds clean via `mm`); Wave 2 — the
+> All / Reset / Invert convenience actions — and the tests are still to do.
 
 ## Why
 
@@ -124,7 +124,7 @@ directly into the automation-surface work — the reason this redesign precedes 
 2. **Subset-aware stats** — deferred; the color range is computed over all members, so a subset
    may stretch slightly off. Same class as the existing center-sample limitation; flagged, not
    silent.
-3. **Trait identifier form** — `Stack.membership` by member *name* (robust to yaml reordering)
-   vs raw index. Leaning name.
+3. **Trait identifier form** — resolved: `Stack.membership` lists member *names*, matched
+   against each member reader's `pyre_name` in `_resolveMask` (robust to yaml reordering).
 
 <!-- end of file -->
