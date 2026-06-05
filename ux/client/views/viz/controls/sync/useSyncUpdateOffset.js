@@ -23,10 +23,12 @@ export const useSyncUpdateOffset = () => {
         request({
             // input
             variables: {
-                // the payload
-                viewport,
-                x: offset.x,
-                y: offset.y,
+                input: {
+                    // the payload
+                    viewport,
+                    x: offset.x,
+                    y: offset.y,
+                }
             },
             onError: errors => {
                 // send the error to the console
@@ -49,8 +51,8 @@ export const useSyncUpdateOffset = () => {
 
 // the mutation that updates the scroll sync state
 const useSyncUpdateOffsetMutation = graphql`
-    mutation useSyncUpdateOffsetMutation($viewport: Int!, $x: Int!, $y: Int!) {
-        viewSyncUpdateOffset(viewport: $viewport, x: $x, y: $y) {
+    mutation useSyncUpdateOffsetMutation($input: ViewSyncUpdateOffsetInput!) {
+        viewSyncUpdateOffset(input: $input) {
             sync {
                 offsets {x y}
             }
