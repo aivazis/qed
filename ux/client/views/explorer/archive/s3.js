@@ -91,15 +91,17 @@ export const S3 = ({ view, setType, hide }) => {
         request({
             // input
             variables: {
-                // the payload
-                name: `s3:${name}`,
-                uri,
-                credentials: {
-                    tokens: [
-                        { name: "profile", value: profile },
-                        { name: "region", value: region },
-                    ]
-                },
+                input: {
+                    // the payload
+                    name: `s3:${name}`,
+                    uri,
+                    credentials: {
+                        tokens: [
+                            { name: "profile", value: profile },
+                            { name: "region", value: region },
+                        ]
+                    },
+                }
             },
             // updater
             updater: store => {
@@ -182,8 +184,8 @@ export const S3 = ({ view, setType, hide }) => {
 
 // the mutation that connects a archive
 const connectMutation = graphql`
-    mutation s3ArchiveMutation($name: String!, $uri: String!, $credentials: CredentialsInput!) {
-        connectArchive(name: $name, uri: $uri, credentials: $credentials) {
+    mutation s3ArchiveMutation($input: ConnectArchiveInput!) {
+        connectArchive(input: $input) {
             archive {
                 id
                 name

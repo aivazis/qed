@@ -112,20 +112,22 @@ export const Earth = ({ view, setType, hide }) => {
         request({
             // input
             variables: {
-                // the payload
-                name: `earth:${name}`,
-                uri: `earth:${name}`,
-                count: form.count,
-                collection: form.collection,
-                granule: form.granule,
-                filters: [...form.filters],
-                when: form.when,
-                geo: form.geo,
-                bbox: form.bbox,
-                point: form.point,
-                circle: form.circle,
-                line: form.line,
-                polygon: form.polygon,
+                input: {
+                    // the payload
+                    name: `earth:${name}`,
+                    uri: `earth:${name}`,
+                    count: form.count,
+                    collection: form.collection,
+                    granule: form.granule,
+                    filters: [...form.filters],
+                    when: form.when,
+                    geo: form.geo,
+                    bbox: form.bbox,
+                    point: form.point,
+                    circle: form.circle,
+                    line: form.line,
+                    polygon: form.polygon,
+                }
             },
             // updater
             updater: store => {
@@ -220,26 +222,8 @@ export const Earth = ({ view, setType, hide }) => {
 
 // the mutation that connects an earth access archive
 const connectMutation = graphql`
-    mutation earthArchiveMutation(
-        $name: String!, $uri: String!,
-        $count: String,
-        $collection: DataCollectionInput,
-        $granule: DataGranuleInput,
-        $filters: [String!]!,
-        $when: TimeIntervalInput,
-        $geo: String,
-        $bbox: GeoBBoxInput, $point: GeoVertexInput, $circle: GeoCircleInput,
-        $line: GeoLineInput, $polygon: GeoPolygonInput
-    ) {
-        connectEarthAccessArchive(
-            name: $name, uri: $uri,
-            count: $count,
-            collection: $collection,
-            granule: $granule,
-            filters: $filters,
-            when: $when,
-            geo: $geo, bbox: $bbox, point: $point, circle: $circle, line: $line, polygon: $polygon
-            ) {
+    mutation earthArchiveMutation($input: ConnectEarthAccessArchiveInput!) {
+        connectEarthAccessArchive(input: $input) {
             archive {
                 id
                 name
