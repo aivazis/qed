@@ -23,9 +23,11 @@ export const useReset = viewport => {
         commit({
             // input
             variables: {
-                // the payload
-                // the viewport
-                viewport,
+                input: {
+                    // the payload
+                    // the viewport
+                    viewport,
+                }
             },
             onError: errors => {
                 // show me
@@ -50,8 +52,8 @@ export const useReset = viewport => {
 
 // the mutation that adds an anchor to the path
 const useResetZoomMutation = graphql`
-    mutation useResetZoomMutation($viewport: Int!) {
-        viewZoomReset(viewport: $viewport) {
+    mutation useResetZoomMutation($input: ViewZoomResetInput!) {
+        viewZoomReset(input: $input) {
             zoom {
                 dirty
                 coupled
