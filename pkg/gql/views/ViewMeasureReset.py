@@ -25,8 +25,8 @@ class ViewMeasureReset(graphene.Mutation):
         # the request payload
         input = ViewMeasureResetInput(required=True)
 
-    # the result is the updated measure state
-    measure = graphene.Field(ViewMeasure)
+    # the result is the affected measure states, one per path-synced view
+    measures = graphene.List(ViewMeasure)
 
     # the mutator
     @staticmethod
@@ -37,9 +37,9 @@ class ViewMeasureReset(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # delegate to the store
-        measure = store.measureReset(viewport=input.viewport)
+        measures = store.measureReset(viewport=input.viewport)
         # form the mutation resolution context
-        context = {"measure": measure}
+        context = {"measures": measures}
         # and resolve the mutation
         return context
 
