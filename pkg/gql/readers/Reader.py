@@ -31,7 +31,7 @@ class Reader(graphene.ObjectType):
 
     # my fields
     id = graphene.ID()
-    name = graphene.ID()
+    name = graphene.String()
     uri = graphene.String()
     api = graphene.String()
     selectors = graphene.List(SelectorAxis)

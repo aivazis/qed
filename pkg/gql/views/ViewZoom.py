@@ -24,7 +24,7 @@ class ViewZoom(graphene.ObjectType):
 
     # my fields
     id = graphene.ID()
-    name = graphene.ID()
+    name = graphene.String()
 
     dirty = graphene.Boolean()
     coupled = graphene.Boolean()
