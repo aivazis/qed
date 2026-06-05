@@ -14,7 +14,7 @@ from .ChannelValue import ChannelValue
 # a pixel value as represented by a channel
 class ChannelRep(graphene.ObjectType):
     """
-    The value of a dataset sample
+    A channel's value representations at a sampled pixel
     """
 
     # fields

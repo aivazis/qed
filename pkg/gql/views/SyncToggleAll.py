@@ -16,7 +16,7 @@ from .View import View
 # remove a view from the pile
 class SyncToggleAll(graphene.Mutation):
     """
-    Toggle the state of the measure layer of a dataset
+    Toggle a sync aspect across all viewports
     """
 
     # inputs

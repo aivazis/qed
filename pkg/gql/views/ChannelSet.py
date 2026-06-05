@@ -19,7 +19,7 @@ from .View import View
 # remove a view from the pile
 class ChannelSet(graphene.Mutation):
     """
-    Remove a view
+    Set the channel displayed in a view
     """
 
     # inputs

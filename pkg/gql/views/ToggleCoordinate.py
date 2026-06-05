@@ -19,7 +19,7 @@ from .View import View
 # remove a view from the pile
 class ToggleCoordinate(graphene.Mutation):
     """
-    Remove a view
+    Toggle a coordinate value in a view's dataset selection
     """
 
     # inputs
