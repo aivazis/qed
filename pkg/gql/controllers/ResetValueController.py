@@ -9,55 +9,48 @@ import graphene
 import uuid
 
 # the input payload
-from .RangeControllerUpdateInput import RangeControllerUpdateInput
+from .ValueControllerResetInput import ValueControllerResetInput
 
 # the result types
-from .views.View import View
-from .RangeController import RangeController
+from ..views.View import View
+from .ValueController import ValueController
 
 
-# update the range of a controller
-class UpdateRangeController(graphene.Mutation):
+# reset the value of a controller
+class ResetValueController(graphene.Mutation):
     """
-    Update the value range of a ranged controller
+    Reset the value of a controller
     """
 
     # inputs
     class Arguments:
-        # the update context
-        range = RangeControllerUpdateInput(required=True)
+        # the reset context
+        controller = ValueControllerResetInput(required=True)
 
     # the result is a view with a new session token
     view = graphene.Field(View)
     # and a range controller
-    controller = graphene.Field(RangeController)
+    controller = graphene.Field(ValueController)
 
-    # the range controller mutator
+    # the value controller mutator
     @staticmethod
-    def mutate(root, info, range):
+    def mutate(root, info, controller):
         """
-        Update the range of a controller
+        Reset the value of a controller
         """
         # unpack the input payload
-        viewport = range["viewport"]
-        channelName = range["channel"]
-        controllerName = range["controller"]
-        configuration = {
-            "min": range["min"],
-            "low": range["low"],
-            "high": range["high"],
-            "max": range["max"],
-        }
+        viewport = controller["viewport"]
+        channelName = controller["channel"]
+        controllerName = controller["controller"]
 
         # build the resolution context
         # grab the store
         store = info.context["store"]
         # ask it to update the controller
-        view, controller = store.vizUpdateController(
+        view, controller = store.vizResetController(
             viewport=viewport,
             channel=channelName,
             name=controllerName,
-            configuration=configuration,
         )
 
         # build the resolution context

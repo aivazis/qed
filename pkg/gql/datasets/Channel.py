@@ -8,10 +8,10 @@
 import graphene
 
 # my interface
-from .Node import Node
+from ..Node import Node
 
 # my fields
-from .Controller import Controller
+from ..controllers.Controller import Controller
 
 
 # my node type

@@ -11,10 +11,10 @@ import graphene
 import qed
 
 # my interface
-from .Node import Node
+from ..Node import Node
 
 # my parts
-from .Dataset import Dataset
+from ..datasets.Dataset import Dataset
 from .SelectorAxis import SelectorAxis
 
 
