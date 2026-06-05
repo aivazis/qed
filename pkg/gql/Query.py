@@ -14,7 +14,7 @@ import journal
 
 # types
 from .Item import Item
-from .Metadata import Metadata
+from .ProductMetadata import ProductMetadata
 from .QED import QED
 from .Sample import Sample
 from .Shape import Shape
@@ -38,7 +38,7 @@ class Query(graphene.ObjectType):
     )
     # dataset auto discovery
     discover = graphene.Field(
-        Metadata,
+        ProductMetadata,
         archive=graphene.String(),
         uri=graphene.String(),
         module=graphene.String(),

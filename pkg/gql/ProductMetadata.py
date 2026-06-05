@@ -9,9 +9,9 @@ import graphene
 
 
 # information about a dataset
-class Metadata(graphene.ObjectType):
+class ProductMetadata(graphene.ObjectType):
     """
-    The value of a dataset sample
+    Metadata discovered about a data product
     """
 
     # fields
