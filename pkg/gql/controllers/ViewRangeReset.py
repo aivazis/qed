@@ -6,53 +6,49 @@
 
 # externals
 import graphene
-import uuid
 
-# the input payload
-from .RangeControllerResetInput import RangeControllerResetInput
+# the request payload
+from .ViewRangeResetInput import ViewRangeResetInput
 
 # the result types
 from ..views.View import View
 from .RangeController import RangeController
 
 
-# reset the range of a controller
-class ResetRangeController(graphene.Mutation):
+# reset a ranged controller
+class ViewRangeReset(graphene.Mutation):
     """
     Reset the value range of a ranged controller
     """
 
     # inputs
     class Arguments:
-        # the reset context
-        controller = RangeControllerResetInput(required=True)
+        # the request payload
+        input = ViewRangeResetInput(required=True)
 
     # the result is a view with a new session token
     view = graphene.Field(View)
-    # and a range controller
+    # and the reset range controller
     controller = graphene.Field(RangeController)
 
-    # the range controller mutator
+    # the mutator
     @staticmethod
-    def mutate(root, info, controller):
+    def mutate(root, info, input):
         """
-        Reset the range of a controller
+        Reset the range of the controller named in {input}
         """
-        # unpack the input payload
-        viewport = controller["viewport"]
-        channelName = controller["channel"]
-        controllerName = controller["controller"]
-
-        # build the resolution context
+        # unpack the payload
+        viewport = input["viewport"]
+        channelName = input["channel"]
+        controllerName = input["controller"]
         # grab the store
         store = info.context["store"]
-        # ask it to update the controller
+        # ask it to reset the controller
         view, controller = store.vizResetController(
             viewport=viewport,
             channel=channelName,
             name=controllerName,
         )
-
         # build the resolution context
         context = {
             "view": view,

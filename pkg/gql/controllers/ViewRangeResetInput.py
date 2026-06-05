@@ -8,15 +8,17 @@
 import graphene
 
 
-# the payload of the reset of the state of a controller
-class ValueControllerResetInput(graphene.InputObjectType):
+# the request payload for resetting a ranged controller
+class ViewRangeResetInput(graphene.InputObjectType):
     """
-    The payload for a value controller reset
+    The payload to reset the value range of a ranged controller
     """
 
-    # the fields
+    # the viewport
     viewport = graphene.Int()
+    # the channel that owns the controller
     channel = graphene.String()
+    # the controller name
     controller = graphene.String()
 
 

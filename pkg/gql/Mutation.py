@@ -19,10 +19,10 @@ from .readers.ConnectReader import ConnectReader
 from .readers.DisconnectReader import DisconnectReader
 
 # visualization pipeline controls
-from .controllers.ResetRangeController import ResetRangeController
-from .controllers.ResetValueController import ResetValueController
-from .controllers.UpdateRangeController import UpdateRangeController
-from .controllers.UpdateValueController import UpdateValueController
+from .controllers.ViewRangeReset import ViewRangeReset
+from .controllers.ViewValueReset import ViewValueReset
+from .controllers.ViewRangeUpdate import ViewRangeUpdate
+from .controllers.ViewValueUpdate import ViewValueUpdate
 
 
 # the mutation anchor
@@ -79,12 +79,12 @@ class Mutation(graphene.ObjectType):
     disconnectReader = DisconnectReader.Field()
 
     # updates to viz controllers
-    updateRangeController = UpdateRangeController.Field()
-    updateValueController = UpdateValueController.Field()
+    viewRangeUpdate = ViewRangeUpdate.Field()
+    viewValueUpdate = ViewValueUpdate.Field()
 
     # resetting of viz controller state
-    resetRangeController = ResetRangeController.Field()
-    resetValueController = ResetValueController.Field()
+    viewRangeReset = ViewRangeReset.Field()
+    viewValueReset = ViewValueReset.Field()
 
 
 # end of file

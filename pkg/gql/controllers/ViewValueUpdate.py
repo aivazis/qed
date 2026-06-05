@@ -6,50 +6,46 @@
 
 # externals
 import graphene
-import uuid
 
-# the input payload
-from .RangeControllerUpdateInput import RangeControllerUpdateInput
+# the request payload
+from .ViewValueUpdateInput import ViewValueUpdateInput
 
 # the result types
 from ..views.View import View
-from .RangeController import RangeController
+from .ValueController import ValueController
 
 
-# update the range of a controller
-class UpdateRangeController(graphene.Mutation):
+# update the value of a controller
+class ViewValueUpdate(graphene.Mutation):
     """
-    Update the value range of a ranged controller
+    Update the value of a controller
     """
 
     # inputs
     class Arguments:
-        # the update context
-        range = RangeControllerUpdateInput(required=True)
+        # the request payload
+        input = ViewValueUpdateInput(required=True)
 
     # the result is a view with a new session token
     view = graphene.Field(View)
-    # and a range controller
-    controller = graphene.Field(RangeController)
+    # and the updated value controller
+    controller = graphene.Field(ValueController)
 
-    # the range controller mutator
+    # the mutator
     @staticmethod
-    def mutate(root, info, range):
+    def mutate(root, info, input):
         """
-        Update the range of a controller
+        Update the value of the controller named in {input}
         """
-        # unpack the input payload
-        viewport = range["viewport"]
-        channelName = range["channel"]
-        controllerName = range["controller"]
+        # unpack the payload
+        viewport = input["viewport"]
+        channelName = input["channel"]
+        controllerName = input["controller"]
         configuration = {
-            "min": range["min"],
-            "low": range["low"],
-            "high": range["high"],
-            "max": range["max"],
+            "min": input["min"],
+            "value": input["value"],
+            "max": input["max"],
         }
-
-        # build the resolution context
         # grab the store
         store = info.context["store"]
         # ask it to update the controller
@@ -59,7 +55,6 @@ class UpdateRangeController(graphene.Mutation):
             name=controllerName,
             configuration=configuration,
         )
-
         # build the resolution context
         context = {
             "view": view,

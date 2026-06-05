@@ -8,18 +8,19 @@
 import graphene
 
 
-# the payload for an update to the range of a controller
-class ValueControllerUpdateInput(graphene.InputObjectType):
+# the request payload for updating the value of a controller
+class ViewValueUpdateInput(graphene.InputObjectType):
     """
-    The payload for a value controller update
+    The payload to update the value of a controller
     """
 
-    # the fields
+    # the viewport
     viewport = graphene.Int()
-    channel = graphene.ID()
-
+    # the channel that owns the controller
+    channel = graphene.String()
+    # the controller name
     controller = graphene.String(required=True)
-
+    # the value parameters
     min = graphene.Float(required=True)
     value = graphene.Float(required=True)
     max = graphene.Float(required=True)
