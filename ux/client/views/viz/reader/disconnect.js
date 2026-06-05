@@ -44,8 +44,10 @@ export const Disconnect = ({ qed, name }) => {
         request({
             // input
             variables: {
-                // the payload
-                name
+                input: {
+                    // the payload
+                    name
+                }
             },
             // update the store
             updater: store => {
@@ -131,8 +133,8 @@ export const Disconnect = ({ qed, name }) => {
 
 // the mutation that disconnects an archive
 const disconnectMutation = graphql`
-    mutation disconnectReaderMutation($name: String!) {
-                    disconnectReader(name: $name) {
+    mutation disconnectReaderMutation($input: DisconnectReaderInput!) {
+                    disconnectReader(input: $input) {
             reader {
                             id
                         }

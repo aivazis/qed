@@ -38,8 +38,10 @@ export const Disconnect = ({ uri }) => {
         request({
             // input
             variables: {
-                // the payload
-                uri
+                input: {
+                    // the payload
+                    uri
+                }
             },
             // update the store
             updater: store => {
@@ -92,8 +94,8 @@ export const Disconnect = ({ uri }) => {
 
 // the mutation that disconnects an archive
 const disconnectMutation = graphql`
-    mutation disconnectArchiveMutation($uri: String!) {
-        disconnectArchive(uri: $uri) {
+    mutation disconnectArchiveMutation($input: DisconnectArchiveInput!) {
+        disconnectArchive(input: $input) {
             archive {
                 id
             }

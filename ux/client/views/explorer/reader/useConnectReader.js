@@ -67,7 +67,7 @@ export const useConnectReader = (setForm, hide) => {
             // input
             variables: {
                 // the payload
-                spec
+                input: spec
             },
             updater: store => {
                 // get the root field of the query result
@@ -130,8 +130,8 @@ export const useConnectReader = (setForm, hide) => {
 
 // the mutation that associates a reader with a data product
 const connectMutation = graphql`
-    mutation useConnectReaderMutation($spec: ReaderInput!) {
-        connectReader(spec: $spec) {
+    mutation useConnectReaderMutation($input: ConnectReaderInput!) {
+        connectReader(input: $input) {
             reader {
                 id
                 # what readers need for dataset selection
