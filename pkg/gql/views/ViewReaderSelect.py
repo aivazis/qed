@@ -7,36 +7,37 @@
 # externals
 import graphene
 
+# the request payload
+from .ViewReaderSelectInput import ViewReaderSelectInput
+
 # the result types
 from .View import View
 
 
-# restore a stack to its default participation mask for a viewport
-class ResetMembers(graphene.Mutation):
+# place a reader in a viewport
+class ViewReaderSelect(graphene.Mutation):
     """
-    Restore a stack's membership to the default it was primed with
+    Place a reader in a viewport
     """
 
     # inputs
     class Arguments:
-        # the viewport
-        viewport = graphene.Int(required=True)
-        # the stack to act on
-        source = graphene.String(required=True)
+        # the request payload
+        input = ViewReaderSelectInput(required=True)
 
     # the result is the updated view
     view = graphene.Field(View)
 
     # the mutator
     @staticmethod
-    def mutate(root, info, viewport, source):
+    def mutate(root, info, input):
         """
-        Restore the default membership of the stack {source} in {viewport}
+        Place the reader {input.reader} in {input.viewport}
         """
         # get the store
         store = info.context["store"]
-        # ask it to reset the mask
-        view = store.resetMembers(viewport=viewport, source=source)
+        # ask it to set the reader of the {viewport}
+        view = store.selectSource(viewport=input.viewport, name=input.reader)
         # form the mutation resolution context
         context = {"view": view}
         # and resolve the mutation

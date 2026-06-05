@@ -6,37 +6,38 @@
 
 # externals
 import graphene
-import journal
 
+# the request payload
+from .ViewCollapseInput import ViewCollapseInput
 
 # the result types
 from .View import View
 
 
 # remove a view from the pile
-class Collapse(graphene.Mutation):
+class ViewCollapse(graphene.Mutation):
     """
     Remove a view
     """
 
     # inputs
     class Arguments:
-        # the update context
-        viewport = graphene.Int(required=True)
+        # the request payload
+        input = ViewCollapseInput(required=True)
 
-    # the result is view that was removed from the pile
+    # the result is the view that was removed from the pile
     view = graphene.Field(View)
 
-    # the range controller mutator
+    # the mutator
     @staticmethod
-    def mutate(root, info, viewport):
+    def mutate(root, info, input):
         """
-        Remove a reader from the pile
+        Collapse the view in {input.viewport}
         """
         # get the store
         store = info.context["store"]
         # ask it to collapse the view
-        view = store.collapseViewport(viewport=viewport)
+        view = store.collapseViewport(viewport=input.viewport)
         # form the mutation resolution context
         context = {"view": view}
         # and resolve the mutation

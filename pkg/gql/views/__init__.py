@@ -8,12 +8,12 @@ from .View import View as view
 
 # the mutations
 from .MeasureAnchorAdd import MeasureAnchorAdd as measureAnchorAdd
-from .Collapse import Collapse as collapse
-from .Persist import Persist as persist
-from .SelectReader import SelectReader as selectReader
-from .Split import Split as split
-from .ChannelSet import ChannelSet as channelSet
-from .ToggleCoordinate import ToggleCoordinate as toggleCoordinate
+from .ViewCollapse import ViewCollapse as viewCollapse
+from .ViewPersist import ViewPersist as viewPersist
+from .ViewReaderSelect import ViewReaderSelect as viewReaderSelect
+from .ViewSplit import ViewSplit as viewSplit
+from .ViewChannelSet import ViewChannelSet as viewChannelSet
+from .ViewCoordinateToggle import ViewCoordinateToggle as viewCoordinateToggle
 
 # measure
 from .MeasureAnchorPlace import MeasureAnchorPlace as measureAnchorPlace
@@ -45,7 +45,7 @@ from .ZoomToggleCoupled import ZoomToggleCoupled as zoomToggleCoupled
 from .ZoomReset import ZoomReset as zoomReset
 
 # stack
-from .SetMembers import SetMembers as setMembers
-from .ResetMembers import ResetMembers as resetMembers
+from .ViewMembersSet import ViewMembersSet as viewMembersSet
+from .ViewMembersReset import ViewMembersReset as viewMembersReset
 
 # end of file

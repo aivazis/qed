@@ -32,12 +32,12 @@ class Mutation(graphene.ObjectType):
     """
 
     # view management
-    viewSelectReader = views.selectReader.Field()
-    viewCollapse = views.collapse.Field()
-    viewSplit = views.split.Field()
-    viewChannelSet = views.channelSet.Field()
-    viewToggleCoordinate = views.toggleCoordinate.Field()
-    viewPersist = views.persist.Field()
+    viewReaderSelect = views.viewReaderSelect.Field()
+    viewCollapse = views.viewCollapse.Field()
+    viewSplit = views.viewSplit.Field()
+    viewChannelSet = views.viewChannelSet.Field()
+    viewCoordinateToggle = views.viewCoordinateToggle.Field()
+    viewPersist = views.viewPersist.Field()
 
     # measure
     viewMeasureToggleLayer = views.measureToggleLayer.Field()
@@ -67,8 +67,8 @@ class Mutation(graphene.ObjectType):
     viewZoomReset = views.zoomReset.Field()
 
     # stack member participation
-    viewSetMembers = views.setMembers.Field()
-    viewResetMembers = views.resetMembers.Field()
+    viewMembersSet = views.viewMembersSet.Field()
+    viewMembersReset = views.viewMembersReset.Field()
 
     # data archive connection management
     connectArchive = ConnectArchive.Field()

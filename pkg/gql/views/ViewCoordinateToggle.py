@@ -6,46 +6,42 @@
 
 # externals
 import graphene
-import journal
-
 
 # the request payload
-from .ViewSelectorInput import ViewSelectorInput
+from .ViewCoordinateToggleInput import ViewCoordinateToggleInput
 
 # the result types
 from .View import View
 
 
-# remove a view from the pile
-class ToggleCoordinate(graphene.Mutation):
+# toggle a coordinate value in a view's dataset selection
+class ViewCoordinateToggle(graphene.Mutation):
     """
     Toggle a coordinate value in a view's dataset selection
     """
 
     # inputs
     class Arguments:
-        # the update context
-        selection = ViewSelectorInput(required=True)
+        # the request payload
+        input = ViewCoordinateToggleInput(required=True)
 
     # the result is the updated view
     view = graphene.Field(View)
 
-    # the range controller mutator
+    # the mutator
     @staticmethod
-    def mutate(root, info, selection):
+    def mutate(root, info, input):
         """
-        Remove a reader from the pile
+        Toggle {input.value} for the {input.selector} axis of {input.reader} in {input.viewport}
         """
-        # unpack the selector
-        viewport = selection.viewport
-        source = selection.reader
-        axis = selection.selector
-        coordinate = selection.value
         # get the store
         store = info.context["store"]
-        # ask it to set the reader of the {viewport}
+        # ask it to toggle the coordinate
         view = store.toggleCoordinate(
-            viewport=viewport, source=source, axis=axis, coordinate=coordinate
+            viewport=input.viewport,
+            source=input.reader,
+            axis=input.selector,
+            coordinate=input.value,
         )
         # form the mutation resolution context
         context = {"view": view}

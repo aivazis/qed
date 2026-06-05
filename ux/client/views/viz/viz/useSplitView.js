@@ -31,7 +31,9 @@ export const useSplitView = () => {
             // input
             variables: {
                 // the payload
-                viewport
+                input: {
+                    viewport
+                }
             },
             // update the store
             updater: store => {
@@ -84,8 +86,8 @@ export const useSplitView = () => {
 
 // the mutation that splits a viewport
 const splitMutation = graphql`
-    mutation useSplitViewMutation($viewport: Int!) {
-        viewSplit(viewport: $viewport) {
+    mutation useSplitViewMutation($input: ViewSplitInput!) {
+        viewSplit(input: $input) {
             view {
                 id
                 # for synchronized scrolling
