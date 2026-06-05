@@ -26,7 +26,7 @@ from .Archive import Archive
 # add a new data archive to the pile
 class ConnectEarthAccessArchive(graphene.Mutation):
     """
-    Connect a new data archive
+    Connect a new EarthAccess data archive
     """
 
     # inputs

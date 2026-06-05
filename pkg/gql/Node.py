@@ -11,7 +11,7 @@ import graphene
 # a flow node that represents a typed+named variable
 class Node(graphene.relay.Node):
     """
-    Specification for a base flow node
+    The relay node interface
     """
 
     # register this as the {graphene.relay.Node} replacement
