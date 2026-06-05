@@ -42,9 +42,9 @@ from .ViewSyncToggleAll import ViewSyncToggleAll as viewSyncToggleAll
 from .ViewSyncReset import ViewSyncReset as viewSyncReset
 
 # zoom
-from .ZoomSetLevel import ZoomSetLevel as zoomSetLevel
-from .ZoomToggleCoupled import ZoomToggleCoupled as zoomToggleCoupled
-from .ZoomReset import ZoomReset as zoomReset
+from .ViewZoomSetLevel import ViewZoomSetLevel as viewZoomSetLevel
+from .ViewZoomToggleCoupled import ViewZoomToggleCoupled as viewZoomToggleCoupled
+from .ViewZoomReset import ViewZoomReset as viewZoomReset
 
 # stack
 from .ViewMembersSet import ViewMembersSet as viewMembersSet
