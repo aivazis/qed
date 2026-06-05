@@ -10,7 +10,7 @@ import journal
 
 
 # response types
-from .Measure import Measure
+from .ViewMeasure import ViewMeasure
 
 
 # toggle the current anchor selection in single node mode
@@ -26,7 +26,7 @@ class MeasureAnchorToggleSelection(graphene.Mutation):
         index = graphene.Int(required=False)
 
     # the result is the updated view
-    measures = graphene.List(Measure)
+    measures = graphene.List(ViewMeasure)
 
     # the mutator
     @staticmethod

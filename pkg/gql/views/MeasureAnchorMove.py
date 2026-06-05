@@ -10,13 +10,13 @@ import journal
 
 
 # response types
-from .Measure import Measure
+from .ViewMeasure import ViewMeasure
 
 
 # toggle the current anchor selection in single node mode
 class MeasureAnchorMove(graphene.Mutation):
     """
-    Toggle the anchor selection in single node mode
+    Move a measure handle by a pixel delta
     """
 
     # inputs
@@ -28,13 +28,13 @@ class MeasureAnchorMove(graphene.Mutation):
         dy = graphene.Int(required=True)
 
     # the result is the updated view
-    measures = graphene.List(Measure)
+    measures = graphene.List(ViewMeasure)
 
     # the mutator
     @staticmethod
     def mutate(root, info, viewport, handle, dx, dy):
         """
-        Toggle the anchor selection in single node mode
+        Move a measure handle by a pixel delta
         """
         # get the store
         store = info.context["store"]

@@ -10,7 +10,7 @@ import journal
 
 
 # response types
-from .Measure import Measure
+from .ViewMeasure import ViewMeasure
 
 
 # remove an anchor from the pile
@@ -26,7 +26,7 @@ class MeasureAnchorRemove(graphene.Mutation):
         anchor = graphene.Int(required=True)
 
     # the result is the updated view
-    measures = graphene.List(Measure)
+    measures = graphene.List(ViewMeasure)
 
     # the mutator
     @staticmethod

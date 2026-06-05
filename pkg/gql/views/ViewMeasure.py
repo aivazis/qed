@@ -15,9 +15,9 @@ from ..Pixel import Pixel
 
 
 # my node type
-class Measure(graphene.ObjectType):
+class ViewMeasure(graphene.ObjectType):
     """
-    The store managed state of a dataset channel
+    A view's measure-layer state
     """
 
     # {graphene} metadata

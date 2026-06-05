@@ -15,10 +15,10 @@ from ..Channel import Channel
 from ..Dataset import Dataset
 from ..Reader import Reader
 from ..Selector import Selector
-from ..Selectors import Selectors
-from .Measure import Measure
-from .Sync import Sync
-from .Zoom import Zoom
+from ..SelectorAxis import SelectorAxis
+from .ViewMeasure import ViewMeasure
+from .ViewSync import ViewSync
+from .ViewZoom import ViewZoom
 
 
 # the type
@@ -43,13 +43,13 @@ class View(graphene.ObjectType):
     dataset = graphene.Field(Dataset)
     channel = graphene.Field(Channel)
     # dataset specific configuration
-    measure = graphene.Field(Measure)
-    sync = graphene.Field(Sync)
-    zoom = graphene.Field(Zoom)
+    measure = graphene.Field(ViewMeasure)
+    sync = graphene.Field(ViewSync)
+    zoom = graphene.Field(ViewZoom)
     # the per-member participation mask, if the reader is a stack
     members = graphene.List(graphene.NonNull(graphene.Boolean))
     # the available selector values, reflecting any pinned member
-    available = graphene.List(Selectors)
+    available = graphene.List(SelectorAxis)
 
     # resolvers
     @staticmethod

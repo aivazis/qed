@@ -10,13 +10,13 @@ import journal
 
 
 # the result types
-from .Sync import Sync
+from .ViewSync import ViewSync
 
 
 # remove a view from the pile
 class SyncUpdateOffset(graphene.Mutation):
     """
-    Toggle the state of the measure layer of a dataset
+    Update the sync scroll offset
     """
 
     # inputs
@@ -27,7 +27,7 @@ class SyncUpdateOffset(graphene.Mutation):
         y = graphene.Int(required=True)
 
     # the result is the new measure layer object
-    sync = graphene.Field(Sync)
+    sync = graphene.Field(ViewSync)
 
     # the range controller mutator
     @staticmethod

@@ -10,7 +10,7 @@ import journal
 
 
 # the result types
-from .Measure import Measure
+from .ViewMeasure import ViewMeasure
 
 
 # extend the current anchor selection to a given anchor index
@@ -26,7 +26,7 @@ class MeasureAnchorExtendSelection(graphene.Mutation):
         index = graphene.Int(required=False)
 
     # the result is the updated view
-    measures = graphene.List(Measure)
+    measures = graphene.List(ViewMeasure)
 
     # the mutator
     @staticmethod

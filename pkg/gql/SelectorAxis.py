@@ -9,9 +9,9 @@ import graphene
 
 
 # my node type
-class Selectors(graphene.ObjectType):
+class SelectorAxis(graphene.ObjectType):
     """
-    A dataset reader
+    A dataset selector axis and its candidate values
     """
 
     # my fields
