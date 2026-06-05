@@ -8,6 +8,8 @@
 import graphene
 import journal
 
+# the request payload
+from .DisconnectArchiveInput import DisconnectArchiveInput
 
 # the result types
 from .Archive import Archive
@@ -21,18 +23,20 @@ class DisconnectArchive(graphene.Mutation):
 
     # inputs
     class Arguments:
-        # the update context
-        uri = graphene.String(required=True)
+        # the request payload
+        input = DisconnectArchiveInput(required=True)
 
     # the result is the disconnected archive
     archive = graphene.Field(Archive)
 
-    # the range controller mutator
+    # the mutator
     @staticmethod
-    def mutate(root, info, uri):
+    def mutate(root, info, input):
         """
         Remove an archive from the pile
         """
+        # unpack the payload
+        uri = input.uri
         # grab the store
         store = info.context["store"]
         # get the archive

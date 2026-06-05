@@ -9,8 +9,8 @@ import graphene
 import journal
 import qed
 
-# the input types
-from .CredentialsInput import CredentialsInput
+# the request payload
+from .ConnectArchiveInput import ConnectArchiveInput
 
 # the result types
 from .Archive import Archive
@@ -24,20 +24,22 @@ class ConnectArchive(graphene.Mutation):
 
     # inputs
     class Arguments:
-        # the update context
-        name = graphene.String(required=True)
-        uri = graphene.String(required=True)
-        credentials = CredentialsInput()
+        # the request payload
+        input = ConnectArchiveInput(required=True)
 
     # the result is always an archive
     archive = graphene.Field(Archive)
 
-    # the range controller mutator
+    # the mutator
     @staticmethod
-    def mutate(root, info, name, uri, credentials):
+    def mutate(root, info, input):
         """
         Add a new archive to the pile
         """
+        # unpack the payload
+        name = input.name
+        uri = input.uri
+        credentials = input.credentials
         # make a channel
         channel = journal.info("qed.archives.connect")
         # grab the store

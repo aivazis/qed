@@ -9,15 +9,8 @@ import graphene
 import journal
 import qed
 
-# my input types
-from .DataCollectionInput import DataCollectionInput
-from .DataGranuleInput import DataGranuleInput
-from .TimeIntervalInput import TimeIntervalInput
-from .GeoBBoxInput import GeoBBoxInput
-from .GeoVertexInput import GeoVertexInput
-from .GeoCircleInput import GeoCircleInput
-from .GeoLineInput import GeoLineInput
-from .GeoPolygonInput import GeoPolygonInput
+# the request payload
+from .ConnectEarthAccessArchiveInput import ConnectEarthAccessArchiveInput
 
 # the result types
 from .Archive import Archive
@@ -31,46 +24,32 @@ class ConnectEarthAccessArchive(graphene.Mutation):
 
     # inputs
     class Arguments:
-        # the update context
-        name = graphene.String(required=True)
-        uri = graphene.String(required=True)
-        count = graphene.String()
-        granule = DataGranuleInput()
-        collection = DataCollectionInput()
-        filters = graphene.List(graphene.String)
-        when = TimeIntervalInput()
-        geo = graphene.String()
-        bbox = GeoBBoxInput()
-        point = GeoVertexInput()
-        circle = GeoCircleInput()
-        line = GeoLineInput()
-        polygon = GeoPolygonInput()
+        # the request payload
+        input = ConnectEarthAccessArchiveInput(required=True)
 
     # the result is always an archive
     archive = graphene.Field(Archive)
 
-    # the range controller mutator
+    # the mutator
     @staticmethod
-    def mutate(
-        root,
-        info,
-        name,
-        uri,
-        count,
-        granule,
-        collection,
-        filters,
-        when,
-        geo,
-        bbox,
-        point,
-        circle,
-        line,
-        polygon,
-    ):
+    def mutate(root, info, input):
         """
         Add a new archive to the pile
         """
+        # unpack the payload
+        name = input.name
+        uri = input.uri
+        count = input.count
+        granule = input.granule
+        collection = input.collection
+        filters = input.filters
+        when = input.when
+        geo = input.geo
+        bbox = input.bbox
+        point = input.point
+        circle = input.circle
+        line = input.line
+        polygon = input.polygon
         # make a channel
         channel = journal.info("qed.archives.connect")
         # show me
