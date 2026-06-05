@@ -400,10 +400,18 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         # get the viewport configuration
         port = self._viewports[viewport]
-        # delegate
-        view = port.measureReset()
+        # go through all viewports that are path synced, so a reset honors the sync the
+        # same way every other measure mutation does and never leaves peers out of step
+        for port in self._syncedWith(viewport=viewport, aspect="path"):
+            # reset the measure layer
+            view = port.measureReset()
+            # an empty viewport has nothing to reset
+            if view is None:
+                continue
+            # hand off the measure configuration
+            yield view.measure
         # all done
-        return view.measure
+        return
 
     def syncSetAspect(self, viewport, aspect, value):
         """

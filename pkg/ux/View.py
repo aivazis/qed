@@ -54,7 +54,9 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
 
     members = qed.properties.list(schema=qed.properties.bool())
     members.default = None
-    members.doc = "the per-member participation mask, or None until seeded from a stack reader"
+    members.doc = (
+        "the per-member participation mask, or None until seeded from a stack reader"
+    )
 
     # interface
     def tile(self, channel, zoom, origin, shape):
@@ -187,6 +189,10 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         targets = selection if handle in selection else [handle]
         # go though the selected anchors
         for index in targets:
+            # a path-synced peer may carry fewer anchors than this view; skip any that
+            # are out of range rather than walking off the end of the list
+            if index >= len(anchors):
+                continue
             # get the anchor position
             x, y = anchors[index]
             # clip and update
