@@ -6,37 +6,38 @@
 
 # externals
 import graphene
-import journal
 
+# the request payload
+from .ViewZoomResetInput import ViewZoomResetInput
 
-# response types
+# the result types
 from .ViewZoom import ViewZoom
 
 
 # reset the zoom state
-class ZoomReset(graphene.Mutation):
+class ViewZoomReset(graphene.Mutation):
     """
     Reset the zoom state back to its persisted value
     """
 
     # inputs
     class Arguments:
-        # the viewport
-        viewport = graphene.Int(required=True)
+        # the request payload
+        input = ViewZoomResetInput(required=True)
 
-    # the result is the updated view
+    # the result is the updated zoom state
     zoom = graphene.Field(ViewZoom)
 
     # the mutator
     @staticmethod
-    def mutate(root, info, viewport):
+    def mutate(root, info, input):
         """
-        Reset the zoom state
+        Reset the zoom state of {input.viewport}
         """
         # get the store
         store = info.context["store"]
-        # ask it to toggle the selection
-        zoom = store.zoomReset(viewport=viewport)
+        # reset the zoom state
+        zoom = store.zoomReset(viewport=input.viewport)
         # form the mutation resolution context
         context = {"zoom": zoom}
         # and resolve the mutation
