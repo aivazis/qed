@@ -23,14 +23,16 @@ export const useAnchorMove = viewport => {
         commit({
             // input
             variables: {
-                // the payload
-                // the viewport
-                viewport,
-                // the node being dragged
-                handle,
-                // the displacement
-                dx: Math.round(delta.x),
-                dy: Math.round(delta.y),
+                input: {
+                    // the payload
+                    // the viewport
+                    viewport,
+                    // the node being dragged
+                    handle,
+                    // the displacement
+                    dx: Math.round(delta.x),
+                    dy: Math.round(delta.y),
+                }
             },
             onError: errors => {
                 // show me
@@ -54,8 +56,8 @@ export const useAnchorMove = viewport => {
 
 // the mutation that displaces an anchor
 const useAnchorMoveMutation = graphql`
-    mutation useAnchorMoveMutation($viewport: Int!, $handle:  Int!, $dx: Int!, $dy: Int!) {
-        viewMeasureAnchorMove(viewport: $viewport, handle: $handle, dx: $dx, dy: $dy) {
+    mutation useAnchorMoveMutation($input: ViewMeasureAnchorMoveInput!) {
+        viewMeasureAnchorMove(input: $input) {
             measures {
                 dirty
                 path {

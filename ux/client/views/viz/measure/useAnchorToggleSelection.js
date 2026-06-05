@@ -23,11 +23,13 @@ export const useAnchorToggleSelection = viewport => {
         commit({
             // input
             variables: {
-                // the payload
-                // the viewport
-                viewport,
-                // the anchor index
-                index,
+                input: {
+                    // the payload
+                    // the viewport
+                    viewport,
+                    // the anchor index
+                    index,
+                }
             },
             onError: errors => {
                 // show me
@@ -51,8 +53,8 @@ export const useAnchorToggleSelection = viewport => {
 
 // the mutation that toggles the anchor selection in single node mode
 const useAnchorToggleSelectionMutation = graphql`
-    mutation useAnchorToggleSelectionMutation($viewport: Int!, $index: Int!) {
-        viewMeasureAnchorToggleSelection(viewport: $viewport, index: $index) {
+    mutation useAnchorToggleSelectionMutation($input: ViewMeasureAnchorToggleSelectionInput!) {
+        viewMeasureAnchorToggleSelection(input: $input) {
             measures {
                 dirty
                 selection

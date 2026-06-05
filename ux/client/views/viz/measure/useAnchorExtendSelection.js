@@ -23,11 +23,13 @@ export const useAnchorExtendSelection = viewport => {
         commit({
             // input
             variables: {
-                // the payload
-                // the viewport
-                viewport,
-                // the anchor index
-                index,
+                input: {
+                    // the payload
+                    // the viewport
+                    viewport,
+                    // the anchor index
+                    index,
+                }
             },
             onError: errors => {
                 // show me
@@ -51,8 +53,8 @@ export const useAnchorExtendSelection = viewport => {
 
 // the mutation that adds an anchor to the path
 const useAnchorExtendSelectionMutation = graphql`
-    mutation useAnchorExtendSelectionMutation($viewport: Int!, $index: Int!) {
-        viewMeasureAnchorExtendSelection(viewport: $viewport, index: $index) {
+    mutation useAnchorExtendSelectionMutation($input: ViewMeasureAnchorExtendSelectionInput!) {
+        viewMeasureAnchorExtendSelection(input: $input) {
             measures {
                 dirty
                 selection

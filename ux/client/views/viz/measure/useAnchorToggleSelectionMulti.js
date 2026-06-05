@@ -23,11 +23,13 @@ export const useAnchorToggleSelectionMulti = viewport => {
         commit({
             // input
             variables: {
-                // the payload
-                // the viewport
-                viewport,
-                // the anchor index
-                index,
+                input: {
+                    // the payload
+                    // the viewport
+                    viewport,
+                    // the anchor index
+                    index,
+                }
             },
             onError: errors => {
                 // show me
@@ -51,8 +53,8 @@ export const useAnchorToggleSelectionMulti = viewport => {
 
 // toggle the selection in multinode mode
 const useAnchorToggleSelectionMultiMutation = graphql`
-    mutation useAnchorToggleSelectionMultiMutation($viewport: Int!, $index: Int!) {
-        viewMeasureAnchorToggleSelectionMulti(viewport: $viewport, index: $index) {
+    mutation useAnchorToggleSelectionMultiMutation($input: ViewMeasureAnchorToggleSelectionMultiInput!) {
+        viewMeasureAnchorToggleSelectionMulti(input: $input) {
             measures {
                 dirty
                 selection

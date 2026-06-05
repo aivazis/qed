@@ -23,11 +23,13 @@ export const useAnchorSplit = viewport => {
         commit({
             // input
             variables: {
-                // the payload
-                // the viewport
-                viewport,
-                // the node being removed
-                anchor,
+                input: {
+                    // the payload
+                    // the viewport
+                    viewport,
+                    // the node being removed
+                    anchor,
+                }
             },
             onError: errors => {
                 // show me
@@ -51,8 +53,8 @@ export const useAnchorSplit = viewport => {
 
 // the mutation that adds an anchor to the path
 const useAnchorSplitMutation = graphql`
-    mutation useAnchorSplitMutation($viewport: Int!, $anchor:  Int!) {
-        viewMeasureAnchorSplit(viewport: $viewport, anchor: $anchor) {
+    mutation useAnchorSplitMutation($input: ViewMeasureAnchorSplitInput!) {
+        viewMeasureAnchorSplit(input: $input) {
             measures {
                 dirty
                 path {

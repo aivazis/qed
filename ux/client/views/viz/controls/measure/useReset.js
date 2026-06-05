@@ -23,9 +23,11 @@ export const useReset = viewport => {
         commit({
             // input
             variables: {
-                // the payload
-                // the viewport
-                viewport,
+                input: {
+                    // the payload
+                    // the viewport
+                    viewport,
+                }
             },
             onError: errors => {
                 // show me
@@ -50,8 +52,8 @@ export const useReset = viewport => {
 
 // the mutation that adds an anchor to the path
 const useResetMeasureMutation = graphql`
-    mutation useResetMeasureMutation($viewport: Int!) {
-        viewMeasureReset(viewport: $viewport) {
+    mutation useResetMeasureMutation($input: ViewMeasureResetInput!) {
+        viewMeasureReset(input: $input) {
             measure {
                 dirty
                 active

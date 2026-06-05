@@ -23,13 +23,15 @@ export const useAnchorAdd = viewport => {
         commit({
             // input
             variables: {
-                // the payload
-                // the viewport
-                viewport,
-                // the anchor coordinates
-                ...anchor,
-                // the index
-                index,
+                input: {
+                    // the payload
+                    // the viewport
+                    viewport,
+                    // the anchor coordinates
+                    ...anchor,
+                    // the index
+                    index,
+                }
             },
             onError: errors => {
                 // show me
@@ -53,8 +55,8 @@ export const useAnchorAdd = viewport => {
 
 // the mutation that adds an anchor to the path
 const useAnchorAddMutation = graphql`
-    mutation useAnchorAddMutation($viewport: Int!, $x: Int!, $y: Int!, $index: Int) {
-        viewMeasureAnchorAdd(viewport: $viewport, x: $x, y: $y, index: $index) {
+    mutation useAnchorAddMutation($input: ViewMeasureAnchorAddInput!) {
+        viewMeasureAnchorAdd(input: $input) {
             measures {
                 dirty
                 path {

@@ -23,14 +23,16 @@ export const useAnchorPlace = viewport => {
         commit({
             // input
             variables: {
-                // the payload
-                // the viewport
-                viewport,
-                // the node being placed
-                handle,
-                // the displacement
-                x: Math.round(position.x),
-                y: Math.round(position.y),
+                input: {
+                    // the payload
+                    // the viewport
+                    viewport,
+                    // the node being placed
+                    handle,
+                    // the displacement
+                    x: Math.round(position.x),
+                    y: Math.round(position.y),
+                }
             },
             onError: errors => {
                 // show me
@@ -54,8 +56,8 @@ export const useAnchorPlace = viewport => {
 
 // the mutation that places an anchor at a specific location
 const useAnchorPlaceMutation = graphql`
-    mutation useAnchorPlaceMutation($viewport: Int!, $handle:  Int!, $x: Int!, $y: Int!) {
-        viewMeasureAnchorPlace(viewport: $viewport, handle: $handle, x: $x, y: $y) {
+    mutation useAnchorPlaceMutation($input: ViewMeasureAnchorPlaceInput!) {
+        viewMeasureAnchorPlace(input: $input) {
             measures {
                 dirty
                 path {

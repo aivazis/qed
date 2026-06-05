@@ -23,9 +23,11 @@ export const useToggleClosedPath = viewport => {
         commit({
             // input
             variables: {
-                // the payload
-                // the viewport
-                viewport,
+                input: {
+                    // the payload
+                    // the viewport
+                    viewport,
+                }
             },
             onError: errors => {
                 // show me
@@ -49,8 +51,8 @@ export const useToggleClosedPath = viewport => {
 
 // the mutation that toggles the closed path flag
 const useToggleClosedPathMutation = graphql`
-    mutation useToggleClosedPathMutation($viewport: Int!) {
-        viewMeasureToggleClosedPath(viewport: $viewport) {
+    mutation useToggleClosedPathMutation($input: ViewMeasureToggleClosedPathInput!) {
+        viewMeasureToggleClosedPath(input: $input) {
             measures {
                 dirty
                 closed

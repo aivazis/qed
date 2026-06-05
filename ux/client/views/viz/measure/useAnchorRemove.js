@@ -23,11 +23,13 @@ export const useAnchorRemove = viewport => {
         commit({
             // input
             variables: {
-                // the payload
-                // the viewport
-                viewport,
-                // the node being removed
-                anchor,
+                input: {
+                    // the payload
+                    // the viewport
+                    viewport,
+                    // the node being removed
+                    anchor,
+                }
             },
             onError: errors => {
                 // show me
@@ -51,8 +53,8 @@ export const useAnchorRemove = viewport => {
 
 // the mutation that deletes an anchor
 const useAnchorRemoveMutation = graphql`
-    mutation useAnchorRemoveMutation($viewport: Int!, $anchor:  Int!) {
-        viewMeasureAnchorRemove(viewport: $viewport, anchor: $anchor) {
+    mutation useAnchorRemoveMutation($input: ViewMeasureAnchorRemoveInput!) {
+        viewMeasureAnchorRemove(input: $input) {
             measures {
                 dirty
                 path {
