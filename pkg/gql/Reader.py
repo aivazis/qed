@@ -15,7 +15,7 @@ from .Node import Node
 
 # my parts
 from .Dataset import Dataset
-from .Selectors import Selectors
+from .SelectorAxis import SelectorAxis
 
 
 # my node type
@@ -34,8 +34,8 @@ class Reader(graphene.ObjectType):
     name = graphene.ID()
     uri = graphene.String()
     api = graphene.String()
-    selectors = graphene.List(Selectors)
-    available = graphene.List(Selectors)
+    selectors = graphene.List(SelectorAxis)
+    available = graphene.List(SelectorAxis)
     datasets = graphene.List(Dataset)
     # the number of members, if this reader is a stack
     stackExtent = graphene.Int()

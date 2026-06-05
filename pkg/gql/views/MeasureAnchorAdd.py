@@ -10,13 +10,13 @@ import journal
 
 
 # the result types
-from .Measure import Measure
+from .ViewMeasure import ViewMeasure
 
 
 # add an anchor to the path
 class MeasureAnchorAdd(graphene.Mutation):
     """
-    Remove a view
+    Add an anchor to the measure path
     """
 
     # inputs
@@ -28,7 +28,7 @@ class MeasureAnchorAdd(graphene.Mutation):
         index = graphene.Int(required=False)
 
     # the result is the updated view
-    measures = graphene.List(Measure)
+    measures = graphene.List(ViewMeasure)
 
     # the range controller mutator
     @staticmethod

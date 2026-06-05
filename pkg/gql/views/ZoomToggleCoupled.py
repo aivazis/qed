@@ -10,7 +10,7 @@ import journal
 
 
 # response types
-from .Zoom import Zoom
+from .ViewZoom import ViewZoom
 
 
 # toggle the zoom lock flag
@@ -25,7 +25,7 @@ class ZoomToggleCoupled(graphene.Mutation):
         viewport = graphene.Int(required=True)
 
     # the result is the updated view
-    zoom = graphene.List(Zoom)
+    zoom = graphene.List(ViewZoom)
 
     # the mutator
     @staticmethod

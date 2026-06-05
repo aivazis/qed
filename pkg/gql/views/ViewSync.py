@@ -10,11 +10,14 @@ import graphene
 # my interface
 from ..Node import Node
 
+# my parts
+from ..Pixel import Pixel
+
 
 # my node type
-class Zoom(graphene.ObjectType):
+class ViewSync(graphene.ObjectType):
     """
-    The store managed state of a dataset
+    A view's sync state
     """
 
     # {graphene} metadata
@@ -27,26 +30,28 @@ class Zoom(graphene.ObjectType):
     name = graphene.ID()
 
     dirty = graphene.Boolean()
-    coupled = graphene.Boolean()
-    horizontal = graphene.Float()
-    vertical = graphene.Float()
+    channel = graphene.Boolean()
+    zoom = graphene.Boolean()
+    scroll = graphene.Boolean()
+    path = graphene.Boolean()
+    offsets = graphene.Field(Pixel)
 
     # resolvers
     @staticmethod
-    def resolve_id(zoom, *_):
+    def resolve_id(sync, *_):
         """
-        Get the {zoom} id
+        Get the {sync} id
         """
         # splice together the {family} and {name} of the {reader}
-        return f"{zoom.pyre_family()}:{zoom.pyre_name}"
+        return f"{sync.pyre_family()}:{sync.pyre_name}"
 
     @staticmethod
-    def resolve_name(zoom, *_):
+    def resolve_name(sync, *_):
         """
-        Get the name of the {zoom}
+        Get the name of the {sync}
         """
         # easy enough
-        return zoom.pyre_name
+        return sync.pyre_name
 
 
 # end of file

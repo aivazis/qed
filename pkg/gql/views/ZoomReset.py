@@ -10,7 +10,7 @@ import journal
 
 
 # response types
-from .Zoom import Zoom
+from .ViewZoom import ViewZoom
 
 
 # reset the zoom state
@@ -25,7 +25,7 @@ class ZoomReset(graphene.Mutation):
         viewport = graphene.Int(required=True)
 
     # the result is the updated view
-    zoom = graphene.Field(Zoom)
+    zoom = graphene.Field(ViewZoom)
 
     # the mutator
     @staticmethod

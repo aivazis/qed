@@ -10,7 +10,7 @@ import journal
 
 
 # response types
-from .Zoom import Zoom
+from .ViewZoom import ViewZoom
 
 
 # set the zoom level
@@ -27,7 +27,7 @@ class ZoomSetLevel(graphene.Mutation):
         vertical = graphene.Float(required=True)
 
     # the result is the updated view
-    zoom = graphene.List(Zoom)
+    zoom = graphene.List(ViewZoom)
 
     # the mutator
     @staticmethod

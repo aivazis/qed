@@ -10,7 +10,7 @@ import journal
 
 
 # response types
-from .Measure import Measure
+from .ViewMeasure import ViewMeasure
 
 
 # reset the measure state
@@ -25,7 +25,7 @@ class MeasureReset(graphene.Mutation):
         viewport = graphene.Int(required=True)
 
     # the result is the updated view
-    measure = graphene.Field(Measure)
+    measure = graphene.Field(ViewMeasure)
 
     # the mutator
     @staticmethod

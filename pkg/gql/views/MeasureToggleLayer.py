@@ -10,13 +10,13 @@ import journal
 
 
 # the result types
-from .Measure import Measure
+from .ViewMeasure import ViewMeasure
 
 
 # remove a view from the pile
 class MeasureToggleLayer(graphene.Mutation):
     """
-    Toggle the state of the measure layer of a dataset
+    Toggle a reader's participation in the measure layer
     """
 
     # inputs
@@ -26,7 +26,7 @@ class MeasureToggleLayer(graphene.Mutation):
         reader = graphene.String(required=True)
 
     # the result is the new measure layer object
-    measures = graphene.List(Measure)
+    measures = graphene.List(ViewMeasure)
 
     # the range controller mutator
     @staticmethod

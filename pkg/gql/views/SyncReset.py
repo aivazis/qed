@@ -10,7 +10,7 @@ import journal
 
 
 # response types
-from .Sync import Sync
+from .ViewSync import ViewSync
 
 
 # reset the sync state
@@ -25,7 +25,7 @@ class SyncReset(graphene.Mutation):
         viewport = graphene.Int(required=True)
 
     # the result is the updated view
-    sync = graphene.Field(Sync)
+    sync = graphene.Field(ViewSync)
 
     # the mutator
     @staticmethod

@@ -10,13 +10,13 @@ import journal
 
 
 # response types
-from .Measure import Measure
+from .ViewMeasure import ViewMeasure
 
 
 # toggle the closed path flag
 class MeasureToggleClosedPath(graphene.Mutation):
     """
-    Split in two the leg that starts at an anchor
+    Toggle whether the measure path is closed
     """
 
     # inputs
@@ -25,7 +25,7 @@ class MeasureToggleClosedPath(graphene.Mutation):
         viewport = graphene.Int(required=True)
 
     # the result is the updated view
-    measures = graphene.List(Measure)
+    measures = graphene.List(ViewMeasure)
 
     # the mutator
     @staticmethod
