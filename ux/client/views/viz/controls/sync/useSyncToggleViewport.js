@@ -23,9 +23,11 @@ export const useSyncToggleViewport = () => {
         request({
             // input
             variables: {
-                // the payload
-                viewport,
-                aspect
+                input: {
+                    // the payload
+                    viewport,
+                    aspect
+                }
             },
             onError: errors => {
                 // send the error to the console
@@ -48,8 +50,8 @@ export const useSyncToggleViewport = () => {
 
 // the mutation that toggles the scroll sync state
 const useSyncToggleViewportMutation = graphql`
-    mutation useSyncToggleViewportMutation($viewport: Int!, $aspect: String!) {
-        viewSyncToggleViewport(viewport: $viewport, aspect: $aspect) {
+    mutation useSyncToggleViewportMutation($input: ViewSyncToggleViewportInput!) {
+        viewSyncToggleViewport(input: $input) {
             view {
                 channel {
                     tag
