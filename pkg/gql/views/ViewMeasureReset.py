@@ -6,37 +6,38 @@
 
 # externals
 import graphene
-import journal
 
+# the request payload
+from .ViewMeasureResetInput import ViewMeasureResetInput
 
-# response types
+# the result types
 from .ViewMeasure import ViewMeasure
 
 
-# reset the measure state
-class MeasureReset(graphene.Mutation):
+# reset the measure state back to its persisted value
+class ViewMeasureReset(graphene.Mutation):
     """
     Reset the measure state back to its persisted value
     """
 
     # inputs
     class Arguments:
-        # the viewport
-        viewport = graphene.Int(required=True)
+        # the request payload
+        input = ViewMeasureResetInput(required=True)
 
-    # the result is the updated view
+    # the result is the updated measure state
     measure = graphene.Field(ViewMeasure)
 
     # the mutator
     @staticmethod
-    def mutate(root, info, viewport):
+    def mutate(root, info, input):
         """
-        Reset the measure state
+        Reset the measure state back to its persisted value
         """
         # get the store
         store = info.context["store"]
-        # ask it to toggle the selection
-        measure = store.measureReset(viewport=viewport)
+        # delegate to the store
+        measure = store.measureReset(viewport=input.viewport)
         # form the mutation resolution context
         context = {"measure": measure}
         # and resolve the mutation

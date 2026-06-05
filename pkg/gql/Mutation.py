@@ -40,20 +40,20 @@ class Mutation(graphene.ObjectType):
     viewPersist = views.viewPersist.Field()
 
     # measure
-    viewMeasureToggleLayer = views.measureToggleLayer.Field()
+    viewMeasureToggleLayer = views.viewMeasureToggleLayer.Field()
     # anchor management
-    viewMeasureAnchorAdd = views.measureAnchorAdd.Field()
-    viewMeasureAnchorPlace = views.measureAnchorPlace.Field()
-    viewMeasureAnchorMove = views.measureAnchorMove.Field()
-    viewMeasureAnchorRemove = views.measureAnchorRemove.Field()
-    viewMeasureAnchorSplit = views.measureAnchorSplit.Field()
-    viewMeasureAnchorExtendSelection = views.measureAnchorExtendSelection.Field()
-    viewMeasureAnchorToggleSelection = views.measureAnchorToggleSelection.Field()
+    viewMeasureAnchorAdd = views.viewMeasureAnchorAdd.Field()
+    viewMeasureAnchorPlace = views.viewMeasureAnchorPlace.Field()
+    viewMeasureAnchorMove = views.viewMeasureAnchorMove.Field()
+    viewMeasureAnchorRemove = views.viewMeasureAnchorRemove.Field()
+    viewMeasureAnchorSplit = views.viewMeasureAnchorSplit.Field()
+    viewMeasureAnchorExtendSelection = views.viewMeasureAnchorExtendSelection.Field()
+    viewMeasureAnchorToggleSelection = views.viewMeasureAnchorToggleSelection.Field()
     viewMeasureAnchorToggleSelectionMulti = (
-        views.measureAnchorToggleSelectionMulti.Field()
+        views.viewMeasureAnchorToggleSelectionMulti.Field()
     )
-    viewMeasureToggleClosedPath = views.measureToggleClosedPath.Field()
-    viewMeasureReset = views.measureReset.Field()
+    viewMeasureToggleClosedPath = views.viewMeasureToggleClosedPath.Field()
+    viewMeasureReset = views.viewMeasureReset.Field()
 
     # sync
     viewSyncUpdateOffset = views.syncUpdateOffset.Field()

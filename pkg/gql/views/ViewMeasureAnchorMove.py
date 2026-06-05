@@ -6,41 +6,39 @@
 
 # externals
 import graphene
-import journal
 
+# the request payload
+from .ViewMeasureAnchorMoveInput import ViewMeasureAnchorMoveInput
 
-# response types
+# the result types
 from .ViewMeasure import ViewMeasure
 
 
-# toggle the current anchor selection in single node mode
-class MeasureAnchorMove(graphene.Mutation):
+# move a measure handle by a pixel delta
+class ViewMeasureAnchorMove(graphene.Mutation):
     """
     Move a measure handle by a pixel delta
     """
 
     # inputs
     class Arguments:
-        # the viewport
-        viewport = graphene.Int(required=True)
-        handle = graphene.Int(required=True)
-        dx = graphene.Int(required=True)
-        dy = graphene.Int(required=True)
+        # the request payload
+        input = ViewMeasureAnchorMoveInput(required=True)
 
-    # the result is the updated view
+    # the result is the updated measure state
     measures = graphene.List(ViewMeasure)
 
     # the mutator
     @staticmethod
-    def mutate(root, info, viewport, handle, dx, dy):
+    def mutate(root, info, input):
         """
         Move a measure handle by a pixel delta
         """
         # get the store
         store = info.context["store"]
-        # ask it to toggle the selection
+        # delegate to the store
         measures = store.measureAnchorMove(
-            viewport=viewport, handle=handle, dx=dx, dy=dy
+            viewport=input.viewport, handle=input.handle, dx=input.dx, dy=input.dy
         )
         # form the mutation resolution context
         context = {"measures": measures}

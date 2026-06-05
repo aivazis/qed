@@ -6,38 +6,40 @@
 
 # externals
 import graphene
-import journal
 
+# the request payload
+from .ViewMeasureAnchorToggleSelectionInput import ViewMeasureAnchorToggleSelectionInput
 
-# response types
+# the result types
 from .ViewMeasure import ViewMeasure
 
 
-# remove an anchor from the pile
-class MeasureAnchorRemove(graphene.Mutation):
+# toggle the anchor selection in single node mode
+class ViewMeasureAnchorToggleSelection(graphene.Mutation):
     """
-    Remove an anchor from the pile
+    Toggle the anchor selection in single node mode
     """
 
     # inputs
     class Arguments:
-        # the viewport
-        viewport = graphene.Int(required=True)
-        anchor = graphene.Int(required=True)
+        # the request payload
+        input = ViewMeasureAnchorToggleSelectionInput(required=True)
 
-    # the result is the updated view
+    # the result is the updated measure state
     measures = graphene.List(ViewMeasure)
 
     # the mutator
     @staticmethod
-    def mutate(root, info, viewport, anchor):
+    def mutate(root, info, input):
         """
         Toggle the anchor selection in single node mode
         """
         # get the store
         store = info.context["store"]
-        # ask it to toggle the selection
-        measures = store.measureAnchorRemove(viewport=viewport, anchor=anchor)
+        # delegate to the store
+        measures = store.measureAnchorToggleSelection(
+            viewport=input.viewport, index=input.index
+        )
         # form the mutation resolution context
         context = {"measures": measures}
         # and resolve the mutation

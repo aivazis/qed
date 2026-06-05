@@ -6,39 +6,41 @@
 
 # externals
 import graphene
-import journal
 
+# the request payload
+from .ViewMeasureAnchorToggleSelectionMultiInput import (
+    ViewMeasureAnchorToggleSelectionMultiInput,
+)
 
-# response types
+# the result types
 from .ViewMeasure import ViewMeasure
 
 
 # toggle the anchor selection in multinode mode
-class MeasureAnchorToggleSelectionMulti(graphene.Mutation):
+class ViewMeasureAnchorToggleSelectionMulti(graphene.Mutation):
     """
     Toggle the anchor selection in multinode mode
     """
 
     # inputs
     class Arguments:
-        # the viewport
-        viewport = graphene.Int(required=True)
-        index = graphene.Int(required=False)
+        # the request payload
+        input = ViewMeasureAnchorToggleSelectionMultiInput(required=True)
 
-    # the result is the updated view
+    # the result is the updated measure state
     measures = graphene.List(ViewMeasure)
 
     # the mutator
     @staticmethod
-    def mutate(root, info, viewport, index):
+    def mutate(root, info, input):
         """
         Toggle the anchor selection in multinode mode
         """
         # get the store
         store = info.context["store"]
-        # ask it to toggle the anchor selection
+        # delegate to the store
         measures = store.measureAnchorToggleSelectionMulti(
-            viewport=viewport, index=index
+            viewport=input.viewport, index=input.index
         )
         # form the mutation resolution context
         context = {"measures": measures}
