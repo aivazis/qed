@@ -6,39 +6,40 @@
 
 # externals
 import graphene
-import journal
 
+# the request payload
+from .ViewSyncUpdateOffsetInput import ViewSyncUpdateOffsetInput
 
 # the result types
 from .ViewSync import ViewSync
 
 
-# remove a view from the pile
-class SyncUpdateOffset(graphene.Mutation):
+# update the sync scroll offset
+class ViewSyncUpdateOffset(graphene.Mutation):
     """
     Update the sync scroll offset
     """
 
     # inputs
     class Arguments:
-        # the update context
-        viewport = graphene.Int(required=True)
-        x = graphene.Int(required=True)
-        y = graphene.Int(required=True)
+        # the request payload
+        input = ViewSyncUpdateOffsetInput(required=True)
 
-    # the result is the new measure layer object
+    # the result is the updated sync state
     sync = graphene.Field(ViewSync)
 
-    # the range controller mutator
+    # the mutator
     @staticmethod
-    def mutate(root, info, viewport, x, y):
+    def mutate(root, info, input):
         """
-        Remove a reader from the pile
+        Update the sync scroll offset of {input.viewport}
         """
         # get the store
         store = info.context["store"]
-        # ask it for the measure layer of the dataset view
-        sync = store.syncSetAspect(viewport=viewport, aspect="offsets", value=(x, y))
+        # set the offset aspect
+        sync = store.syncSetAspect(
+            viewport=input.viewport, aspect="offsets", value=(input.x, input.y)
+        )
         # form the mutation resolution context
         context = {"sync": sync}
         # and resolve the mutation

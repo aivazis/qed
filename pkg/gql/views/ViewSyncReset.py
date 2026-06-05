@@ -6,37 +6,38 @@
 
 # externals
 import graphene
-import journal
 
+# the request payload
+from .ViewSyncResetInput import ViewSyncResetInput
 
-# response types
+# the result types
 from .ViewSync import ViewSync
 
 
 # reset the sync state
-class SyncReset(graphene.Mutation):
+class ViewSyncReset(graphene.Mutation):
     """
     Reset the sync state back to its persisted value
     """
 
     # inputs
     class Arguments:
-        # the viewport
-        viewport = graphene.Int(required=True)
+        # the request payload
+        input = ViewSyncResetInput(required=True)
 
-    # the result is the updated view
+    # the result is the updated sync state
     sync = graphene.Field(ViewSync)
 
     # the mutator
     @staticmethod
-    def mutate(root, info, viewport):
+    def mutate(root, info, input):
         """
-        Reset the sync state
+        Reset the sync state of {input.viewport}
         """
         # get the store
         store = info.context["store"]
-        # ask it to toggle the selection
-        sync = store.syncReset(viewport=viewport)
+        # reset the sync state
+        sync = store.syncReset(viewport=input.viewport)
         # form the mutation resolution context
         context = {"sync": sync}
         # and resolve the mutation
