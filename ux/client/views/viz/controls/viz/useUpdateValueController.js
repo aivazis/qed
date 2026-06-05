@@ -44,7 +44,7 @@ export const useUpdateValueController = ({ viewport, channel }) => {
             // input
             variables: {
                 // the payload
-                value: {
+                input: {
                     // the viewport
                     viewport,
                     // the channel
@@ -80,8 +80,8 @@ export const useUpdateValueController = ({ viewport, channel }) => {
 
 // the mutation that updates the controller state
 const useUpdateValueControllerMutation = graphql`
-mutation useUpdateValueControllerMutation($value: ValueControllerUpdateInput!) {
-    updateValueController(value: $value) {
+mutation useUpdateValueControllerMutation($input: ViewValueUpdateInput!) {
+    viewValueUpdate(input: $input) {
         view {
             session
         }

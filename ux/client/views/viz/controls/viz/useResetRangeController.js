@@ -24,7 +24,7 @@ export const useResetRangeController = ({ viewport, channel }) => {
             // input
             variables: {
                 // the payload
-                controller: {
+                input: {
                     // the viewport
                     viewport,
                     // the channel
@@ -34,7 +34,7 @@ export const useResetRangeController = ({ viewport, channel }) => {
                 }
             },
             onCompleted: (
-                { resetRangeController: { controller: { min, low, high, max } } }
+                { viewRangeReset: { controller: { min, low, high, max } } }
             ) => {
                 // reset the range
                 setRange({ low, high })
@@ -65,8 +65,8 @@ export const useResetRangeController = ({ viewport, channel }) => {
 
 // the mutation that resets the controller state
 const useResetRangeControllerMutation = graphql`
-mutation useResetRangeControllerMutation($controller: RangeControllerResetInput!) {
-    resetRangeController(controller: $controller) {
+mutation useResetRangeControllerMutation($input: ViewRangeResetInput!) {
+    viewRangeReset(input: $input) {
         view {
             session
         }
