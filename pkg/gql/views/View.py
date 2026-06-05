@@ -34,7 +34,7 @@ class View(graphene.ObjectType):
 
     # metadata
     id = graphene.ID(required=True)
-    name = graphene.ID(required=True)
+    name = graphene.String(required=True)
     session = graphene.String(required=True)
     # dataset selection
     selections = graphene.List(Selector)

@@ -24,7 +24,7 @@ class Item(graphene.ObjectType):
 
     # my fields
     id = graphene.ID()
-    name = graphene.ID()
+    name = graphene.String()
     uri = graphene.String()
     isFolder = graphene.Boolean()
 

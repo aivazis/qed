@@ -27,7 +27,7 @@ class ViewMeasure(graphene.ObjectType):
 
     # my fields
     id = graphene.ID()
-    name = graphene.ID()
+    name = graphene.String()
 
     dirty = graphene.Boolean()
     active = graphene.Boolean()

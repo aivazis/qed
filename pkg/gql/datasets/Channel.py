@@ -27,7 +27,7 @@ class Channel(graphene.ObjectType):
 
     # my fields
     id = graphene.ID()
-    name = graphene.ID()
+    name = graphene.String()
     tag = graphene.String()
     controllers = graphene.List(Controller)
 

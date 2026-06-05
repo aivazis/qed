@@ -20,7 +20,7 @@ class Dataset(graphene.ObjectType):
 
     # my fields
     id = graphene.ID()
-    name = graphene.ID()
+    name = graphene.String()
 
     channels = graphene.List(Channel)
     datatype = graphene.String()
