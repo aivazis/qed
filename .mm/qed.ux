@@ -18,9 +18,10 @@ qed.ux.chunks := vendors-node_modules node_modules
 qed.ux.schema.generator = $(builder.dest.bin)qed-schema
 # the exporter takes its destination through the {stream} trait
 qed.ux.schema.flags := --stream=
-# regenerate whenever the graphene sources change; deferred so the glob runs once the
-# project home is known
-qed.ux.schema.sources = $(wildcard $(qed.home)/pkg/gql/*.py $(qed.home)/pkg/gql/views/*.py)
+# regenerate whenever any graphene source changes, anywhere under the package; deferred
+# so the search runs once the project home is known, and recursive so the {gql}
+# subpackages (archives, readers, datasets, controllers, views) are all tracked
+qed.ux.schema.sources = $(shell find $(qed.home)/pkg/gql -name '*.py')
 # but only after the package the exporter imports has been installed
 qed.ux.schema.requires := qed.pkg
 
