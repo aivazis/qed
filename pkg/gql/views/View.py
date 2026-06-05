@@ -11,11 +11,11 @@ import graphene
 from ..Node import Node
 
 # my parts
-from ..Channel import Channel
-from ..Dataset import Dataset
-from ..Reader import Reader
-from ..Selector import Selector
-from ..SelectorAxis import SelectorAxis
+from ..datasets.Channel import Channel
+from ..datasets.Dataset import Dataset
+from ..readers.Reader import Reader
+from ..readers.Selector import Selector
+from ..readers.SelectorAxis import SelectorAxis
 from .ViewMeasure import ViewMeasure
 from .ViewSync import ViewSync
 from .ViewZoom import ViewZoom

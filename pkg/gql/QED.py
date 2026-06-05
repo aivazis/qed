@@ -15,9 +15,9 @@ import journal
 from .Node import Node
 
 # my parts
-from .Archive import Archive
-from .ArchiveType import ArchiveType
-from .Reader import Reader
+from .archives.Archive import Archive
+from .archives.ArchiveType import ArchiveType
+from .readers.Reader import Reader
 from . import views
 
 

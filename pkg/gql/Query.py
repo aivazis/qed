@@ -13,11 +13,11 @@ import qed
 import journal
 
 # types
-from .Item import Item
-from .ProductMetadata import ProductMetadata
+from .archives.Item import Item
+from .datasets.ProductMetadata import ProductMetadata
 from .QED import QED
-from .Sample import Sample
-from .Shape import Shape
+from .datasets.Sample import Sample
+from .datasets.Shape import Shape
 from .Version import Version
 
 

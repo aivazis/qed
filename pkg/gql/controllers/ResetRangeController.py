@@ -12,7 +12,7 @@ import uuid
 from .RangeControllerResetInput import RangeControllerResetInput
 
 # the result types
-from .views.View import View
+from ..views.View import View
 from .RangeController import RangeController
 
 

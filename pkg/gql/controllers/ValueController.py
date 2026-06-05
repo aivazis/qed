@@ -8,14 +8,14 @@
 import graphene
 
 # my interfaces
-from .Node import Node
+from ..Node import Node
 from .Controller import Controller
 
 
-# a controller that captures a range of values
-class RangeController(graphene.ObjectType):
+# a controller that captures a single value
+class ValueController(graphene.ObjectType):
     """
-    A controller that captures a range of values
+    A controller that captures a single value
     """
 
     # {graphene} metadata
@@ -32,8 +32,7 @@ class RangeController(graphene.ObjectType):
     slot = graphene.String()
     min = graphene.Float()
     max = graphene.Float()
-    low = graphene.Float()
-    high = graphene.Float()
+    value = graphene.Float()
 
     # resolvers
     @staticmethod
@@ -84,24 +83,14 @@ class RangeController(graphene.ObjectType):
         return controller.max
 
     @staticmethod
-    def resolve_low(context, *_):
+    def resolve_value(context, *_):
         """
-        Resolve the low end of the range
-        """
-        # extract the controller
-        controller = context["controller"]
-        # easy enough
-        return controller.low
-
-    @staticmethod
-    def resolve_high(context, *_):
-        """
-        Resolve the high end of the range
+        Resolve the value
         """
         # extract the controller
         controller = context["controller"]
         # easy enough
-        return controller.high
+        return controller.value
 
 
 # end of file

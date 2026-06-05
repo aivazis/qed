@@ -9,7 +9,7 @@ import graphene
 
 # my fields
 from .Channel import Channel
-from .Selector import Selector
+from ..readers.Selector import Selector
 
 
 # my node type

@@ -9,48 +9,45 @@ import graphene
 import uuid
 
 # the input payload
-from .ValueControllerUpdateInput import ValueControllerUpdateInput
+from .RangeControllerUpdateInput import RangeControllerUpdateInput
 
 # the result types
-from .views.View import View
-from .ValueController import ValueController
+from ..views.View import View
+from .RangeController import RangeController
 
 
-# update the value of a controller
-class UpdateValueController(graphene.Mutation):
+# update the range of a controller
+class UpdateRangeController(graphene.Mutation):
     """
-    Update the value of a controller
+    Update the value range of a ranged controller
     """
 
     # inputs
     class Arguments:
         # the update context
-        value = ValueControllerUpdateInput(required=True)
+        range = RangeControllerUpdateInput(required=True)
 
     # the result is a view with a new session token
     view = graphene.Field(View)
     # and a range controller
-    controller = graphene.Field(ValueController)
+    controller = graphene.Field(RangeController)
 
-    # the value controller mutator
+    # the range controller mutator
     @staticmethod
-    def mutate(root, info, value):
+    def mutate(root, info, range):
         """
-        Update the value of a controller
+        Update the range of a controller
         """
         # unpack the input payload
-        viewport = value["viewport"]
-        channelName = value["channel"]
-        controllerName = value["controller"]
+        viewport = range["viewport"]
+        channelName = range["channel"]
+        controllerName = range["controller"]
         configuration = {
-            "min": value["min"],
-            "value": value["value"],
-            "max": value["max"],
+            "min": range["min"],
+            "low": range["low"],
+            "high": range["high"],
+            "max": range["max"],
         }
-
-        # build the resolution context
-        # grab the store
-        store = info.context["store"]
 
         # build the resolution context
         # grab the store

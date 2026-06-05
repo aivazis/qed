@@ -12,17 +12,17 @@ import graphene
 from . import views
 
 # explorer
-from .ConnectArchive import ConnectArchive
-from .ConnectEarthAccessArchive import ConnectEarthAccessArchive
-from .DisconnectArchive import DisconnectArchive
-from .ConnectReader import ConnectReader
-from .DisconnectReader import DisconnectReader
+from .archives.ConnectArchive import ConnectArchive
+from .archives.ConnectEarthAccessArchive import ConnectEarthAccessArchive
+from .archives.DisconnectArchive import DisconnectArchive
+from .readers.ConnectReader import ConnectReader
+from .readers.DisconnectReader import DisconnectReader
 
 # visualization pipeline controls
-from .ResetRangeController import ResetRangeController
-from .ResetValueController import ResetValueController
-from .UpdateRangeController import UpdateRangeController
-from .UpdateValueController import UpdateValueController
+from .controllers.ResetRangeController import ResetRangeController
+from .controllers.ResetValueController import ResetValueController
+from .controllers.UpdateRangeController import UpdateRangeController
+from .controllers.UpdateValueController import UpdateValueController
 
 
 # the mutation anchor

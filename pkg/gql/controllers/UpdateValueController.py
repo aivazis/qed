@@ -9,23 +9,23 @@ import graphene
 import uuid
 
 # the input payload
-from .ValueControllerResetInput import ValueControllerResetInput
+from .ValueControllerUpdateInput import ValueControllerUpdateInput
 
 # the result types
-from .views.View import View
+from ..views.View import View
 from .ValueController import ValueController
 
 
-# reset the value of a controller
-class ResetValueController(graphene.Mutation):
+# update the value of a controller
+class UpdateValueController(graphene.Mutation):
     """
-    Reset the value of a controller
+    Update the value of a controller
     """
 
     # inputs
     class Arguments:
-        # the reset context
-        controller = ValueControllerResetInput(required=True)
+        # the update context
+        value = ValueControllerUpdateInput(required=True)
 
     # the result is a view with a new session token
     view = graphene.Field(View)
@@ -34,23 +34,33 @@ class ResetValueController(graphene.Mutation):
 
     # the value controller mutator
     @staticmethod
-    def mutate(root, info, controller):
+    def mutate(root, info, value):
         """
-        Reset the value of a controller
+        Update the value of a controller
         """
         # unpack the input payload
-        viewport = controller["viewport"]
-        channelName = controller["channel"]
-        controllerName = controller["controller"]
+        viewport = value["viewport"]
+        channelName = value["channel"]
+        controllerName = value["controller"]
+        configuration = {
+            "min": value["min"],
+            "value": value["value"],
+            "max": value["max"],
+        }
+
+        # build the resolution context
+        # grab the store
+        store = info.context["store"]
 
         # build the resolution context
         # grab the store
         store = info.context["store"]
         # ask it to update the controller
-        view, controller = store.vizResetController(
+        view, controller = store.vizUpdateController(
             viewport=viewport,
             channel=channelName,
             name=controllerName,
+            configuration=configuration,
         )
 
         # build the resolution context

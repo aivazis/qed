@@ -11,7 +11,7 @@ import graphene
 from ..Node import Node
 
 # my parts
-from ..Pixel import Pixel
+from ..datasets.Pixel import Pixel
 
 
 # my node type
