@@ -36,14 +36,16 @@ export const useSetMembers = () => {
         commit({
             // input
             variables: {
-                viewport,
-                source: reader.name,
-                members,
+                input: {
+                    viewport,
+                    reader: reader.name,
+                    members,
+                },
             },
             // update the store
             updater: store => {
                 // get the root field of the mutation result
-                const response = store.getRootField("viewSetMembers")
+                const response = store.getRootField("viewMembersSet")
                 // ask for the view
                 const view = response.getLinkedRecord("view")
                 // if it's trivial
@@ -82,8 +84,8 @@ export const useSetMembers = () => {
 
 // the mutation that sets the per-member participation mask
 const setMembersMutation = graphql`
-    mutation useSetMembersMutation($viewport: Int!, $source: String!, $members: [Boolean!]!) {
-        viewSetMembers(viewport: $viewport, source: $source, members: $members) {
+    mutation useSetMembersMutation($input: ViewMembersSetInput!) {
+        viewMembersSet(input: $input) {
             view {
                 id
                 # for synchronized scrolling

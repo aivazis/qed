@@ -31,7 +31,9 @@ export const useCollapseView = () => {
             // input
             variables: {
                 // the payload
-                viewport
+                input: {
+                    viewport
+                }
             },
             // update the store
             updater: store => {
@@ -90,8 +92,8 @@ export const useCollapseView = () => {
 
 // the mutation that collapses a viewport
 const collapseMutation = graphql`
-    mutation useCollapseViewMutation($viewport: Int!) {
-        viewCollapse(viewport: $viewport) {
+    mutation useCollapseViewMutation($input: ViewCollapseInput!) {
+        viewCollapse(input: $input) {
             view {
                 id
                 # for dataset selection

@@ -30,13 +30,9 @@ export const Save = ({ enabled = true }) => {
             // bail
             return
         }
-        // otherwise, post the request
+        // otherwise, post the request; this mutation takes no input
         request({
-            // input
-            variables: {
-                // the payload
-                dummy: null
-            }
+            variables: {}
         })
         // all done
         return
@@ -75,8 +71,8 @@ export const Save = ({ enabled = true }) => {
 
 // the mutation that persists the current readers
 const persistReadersMutation = graphql`
-    mutation saveCurrentReaderMutation($dummy: ID) {
-        viewPersist(dummy: $dummy) {
+    mutation saveCurrentReaderMutation {
+        viewPersist {
             id
         }
     }

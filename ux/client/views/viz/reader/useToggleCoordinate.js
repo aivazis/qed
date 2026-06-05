@@ -37,7 +37,7 @@ export const useToggleCoordinate = (axis, coordinate) => {
             //input
             variables: {
                 // the payload
-                selection: {
+                input: {
                     viewport,
                     reader: reader.name,
                     selector: axis,
@@ -47,7 +47,7 @@ export const useToggleCoordinate = (axis, coordinate) => {
             // update the store
             updater: store => {
                 // get the root field of the mutation result
-                const response = store.getRootField("viewToggleCoordinate")
+                const response = store.getRootField("viewCoordinateToggle")
                 // ask for the view
                 const view = response.getLinkedRecord("view")
                 // if it's trivial
@@ -86,8 +86,8 @@ export const useToggleCoordinate = (axis, coordinate) => {
 
 // the mutation that selects a reader
 const toggleCoordinateMutation = graphql`
-    mutation useToggleCoordinateMutation($selection: ViewSelectorInput!) {
-        viewToggleCoordinate(selection: $selection) {
+    mutation useToggleCoordinateMutation($input: ViewCoordinateToggleInput!) {
+        viewCoordinateToggle(input: $input) {
             view {
                 id
                 # for synchronized scrolling

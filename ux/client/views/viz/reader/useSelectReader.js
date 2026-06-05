@@ -37,13 +37,15 @@ export const useSelectReader = () => {
             // input
             variables: {
                 // the payload
-                viewport,
-                reader: reader.name
+                input: {
+                    viewport,
+                    reader: reader.name
+                }
             },
             // update the store
             updater: store => {
                 // get the root field of the mutation result
-                const response = store.getRootField("viewSelectReader")
+                const response = store.getRootField("viewReaderSelect")
                 // ask for the view
                 const view = response.getLinkedRecord("view")
                 // if it's trivial
@@ -81,8 +83,8 @@ export const useSelectReader = () => {
 
 // the mutation that selects a reader
 const selectReaderMutation = graphql`
-    mutation useSelectReaderMutation($viewport: Int!, $reader: String!) {
-        viewSelectReader(viewport: $viewport, reader: $reader) {
+    mutation useSelectReaderMutation($input: ViewReaderSelectInput!) {
+        viewReaderSelect(input: $input) {
             view {
                 id
                 # for synchronized scrolling

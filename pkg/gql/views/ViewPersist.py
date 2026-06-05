@@ -6,38 +6,28 @@
 
 # externals
 import graphene
-import journal
 
 
-# the result types
-from .View import View
-
-
-# remove a view from the pile
-class Persist(graphene.Mutation):
+# persist the current reader configuration; this mutation takes no input
+class ViewPersist(graphene.Mutation):
     """
     Persist the current reader configuration
     """
 
-    # inputs
-    class Arguments:
-        # the mutation context
-        dummy = graphene.ID(required=False)
-
     # the result is the store id
     id = graphene.ID()
 
-    # the range controller mutator
+    # the mutator
     @staticmethod
-    def mutate(root, info, **kwds):
+    def mutate(root, info):
         """
-        Remove a reader from the pile
+        Dump the store to its persistent backing
         """
         # get the store
         store = info.context["store"]
-        # ask it to split the view
+        # ask it to persist itself
         store.pyre_dump()
-        # and resolve the mutation
+        # and resolve the mutation with the store id
         return store.pyre_name
 
 

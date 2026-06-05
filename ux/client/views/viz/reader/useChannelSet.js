@@ -37,10 +37,9 @@ export const useChannelSet = channel => {
             //input
             variables: {
                 // the payload
-                selection: {
+                input: {
                     viewport,
                     reader: reader.name,
-                    selector: "channels",
                     value: channel.tag,
                 }
             },
@@ -66,8 +65,8 @@ export const useChannelSet = channel => {
 
 // the mutation that selects a reader
 const channelSetMutation = graphql`
-    mutation useChannelSetMutation($selection: ViewSelectorInput!) {
-        viewChannelSet(selection: $selection) {
+    mutation useChannelSetMutation($input: ViewChannelSetInput!) {
+        viewChannelSet(input: $input) {
             views {
                 id
                 # for synchronized scrolling

@@ -6,38 +6,38 @@
 
 # externals
 import graphene
-import journal
 
+# the request payload
+from .ViewSplitInput import ViewSplitInput
 
 # the result types
 from .View import View
 
 
-# remove a view from the pile
-class SelectReader(graphene.Mutation):
+# split a viewport in two
+class ViewSplit(graphene.Mutation):
     """
-    Place a reader in a viewport
+    Split the current viewport
     """
 
     # inputs
     class Arguments:
-        # the update context
-        viewport = graphene.Int(required=True)
-        reader = graphene.String(required=False)
+        # the request payload
+        input = ViewSplitInput(required=True)
 
-    # the result is the updated view
+    # the result is the new view that was added to the pile
     view = graphene.Field(View)
 
-    # the range controller mutator
+    # the mutator
     @staticmethod
-    def mutate(root, info, viewport, reader):
+    def mutate(root, info, input):
         """
-        Remove a reader from the pile
+        Split the view in {input.viewport}
         """
         # get the store
         store = info.context["store"]
-        # ask it to set the reader of the {viewport}
-        view = store.selectSource(viewport=viewport, name=reader)
+        # ask it to split the view
+        view = store.splitViewport(viewport=input.viewport)
         # form the mutation resolution context
         context = {"view": view}
         # and resolve the mutation
