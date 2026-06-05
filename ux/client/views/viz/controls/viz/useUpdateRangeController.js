@@ -44,7 +44,7 @@ export const useUpdateRangeController = ({ viewport, channel }) => {
             // input
             variables: {
                 // the payload
-                range: {
+                input: {
                     // the viewport
                     viewport,
                     // the channel
@@ -80,8 +80,8 @@ export const useUpdateRangeController = ({ viewport, channel }) => {
 
 // the mutation that updates the controller state
 const useUpdateRangeControllerMutation = graphql`
-mutation useUpdateRangeControllerMutation($range: RangeControllerUpdateInput!) {
-    updateRangeController(range: $range) {
+mutation useUpdateRangeControllerMutation($input: ViewRangeUpdateInput!) {
+    viewRangeUpdate(input: $input) {
         view {
             session
         }
