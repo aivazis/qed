@@ -23,9 +23,11 @@ export const useToggleCoupled = viewport => {
         commit({
             // input
             variables: {
-                // the payload
-                // the viewport
-                viewport,
+                input: {
+                    // the payload
+                    // the viewport
+                    viewport,
+                }
             },
             onError: errors => {
                 // show me
@@ -49,9 +51,9 @@ export const useToggleCoupled = viewport => {
 
 // the mutation that adds an anchor to the path
 const useToggleCoupledZoomMutation = graphql`
-    mutation useToggleCoupledZoomMutation($viewport: Int!) {
-        viewZoomToggleCoupled(viewport: $viewport) {
-            zoom {
+    mutation useToggleCoupledZoomMutation($input: ViewZoomToggleCoupledInput!) {
+        viewZoomToggleCoupled(input: $input) {
+            zooms {
                 dirty
                 coupled
             }

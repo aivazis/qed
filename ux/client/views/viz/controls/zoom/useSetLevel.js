@@ -23,12 +23,14 @@ export const useSetLevel = viewport => {
         commit({
             // input
             variables: {
-                // the payload
-                // the viewport
-                viewport,
-                // the zoom levels
-                horizontal,
-                vertical,
+                input: {
+                    // the payload
+                    // the viewport
+                    viewport,
+                    // the zoom levels
+                    horizontal,
+                    vertical,
+                }
             },
             onError: errors => {
                 // show me
@@ -52,9 +54,9 @@ export const useSetLevel = viewport => {
 
 // the mutation that adds an anchor to the path
 const useSetLevelZoomMutation = graphql`
-    mutation useSetLevelZoomMutation($viewport: Int!, $horizontal: Float!, $vertical: Float!) {
-        viewZoomSetLevel(viewport: $viewport, horizontal: $horizontal, vertical: $vertical) {
-            zoom {
+    mutation useSetLevelZoomMutation($input: ViewZoomSetLevelInput!) {
+        viewZoomSetLevel(input: $input) {
+            zooms {
                 dirty
                 horizontal
                 vertical
