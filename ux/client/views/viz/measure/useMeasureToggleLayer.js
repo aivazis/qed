@@ -24,9 +24,11 @@ export const useMeasureToggleLayer = () => {
         request({
             // input
             variables: {
-                // the payload
-                viewport,
-                reader
+                input: {
+                    // the payload
+                    viewport,
+                    reader
+                }
             },
             onError: errors => {
                 // send the error to the console
@@ -48,8 +50,8 @@ export const useMeasureToggleLayer = () => {
 
 // the mutation that toggles the measure layer state
 const measureToggleLayerMutation = graphql`
-    mutation useMeasureToggleLayerMutation($viewport: Int!, $reader: String!) {
-        viewMeasureToggleLayer(viewport: $viewport, reader: $reader) {
+    mutation useMeasureToggleLayerMutation($input: ViewMeasureToggleLayerInput!) {
+        viewMeasureToggleLayer(input: $input) {
             measures{
                 dirty
                 active
