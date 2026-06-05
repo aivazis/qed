@@ -54,7 +54,7 @@ export const useReset = viewport => {
 const useResetMeasureMutation = graphql`
     mutation useResetMeasureMutation($input: ViewMeasureResetInput!) {
         viewMeasureReset(input: $input) {
-            measure {
+            measures {
                 dirty
                 active
                 closed
