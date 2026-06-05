@@ -6,38 +6,38 @@
 
 # externals
 import graphene
-import journal
 
+# the request payload
+from .ViewMeasureToggleLayerInput import ViewMeasureToggleLayerInput
 
 # the result types
 from .ViewMeasure import ViewMeasure
 
 
-# remove a view from the pile
-class MeasureToggleLayer(graphene.Mutation):
+# toggle a reader's participation in the measure layer
+class ViewMeasureToggleLayer(graphene.Mutation):
     """
     Toggle a reader's participation in the measure layer
     """
 
     # inputs
     class Arguments:
-        # the update context
-        viewport = graphene.Int(required=True)
-        reader = graphene.String(required=True)
+        # the request payload
+        input = ViewMeasureToggleLayerInput(required=True)
 
-    # the result is the new measure layer object
+    # the result is the updated measure state
     measures = graphene.List(ViewMeasure)
 
-    # the range controller mutator
+    # the mutator
     @staticmethod
-    def mutate(root, info, viewport, reader):
+    def mutate(root, info, input):
         """
-        Remove a reader from the pile
+        Toggle a reader's participation in the measure layer
         """
         # get the store
         store = info.context["store"]
-        # ask it for the measure layer of the dataset view
-        measures = store.toggleMeasure(viewport=viewport, source=reader)
+        # delegate to the store
+        measures = store.toggleMeasure(viewport=input.viewport, source=input.reader)
         # form the mutation resolution context
         context = {"measures": measures}
         # and resolve the mutation

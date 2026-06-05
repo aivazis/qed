@@ -6,40 +6,40 @@
 
 # externals
 import graphene
-import journal
 
+# the request payload
+from .ViewMeasureAnchorPlaceInput import ViewMeasureAnchorPlaceInput
 
-# response types
+# the result types
 from .ViewMeasure import ViewMeasure
 
 
-# toggle the current anchor selection in single node mode
-class MeasureAnchorPlace(graphene.Mutation):
+# place a measure handle at a pixel
+class ViewMeasureAnchorPlace(graphene.Mutation):
     """
     Place a measure handle at a pixel
     """
 
     # inputs
     class Arguments:
-        # the viewport
-        viewport = graphene.Int(required=True)
-        handle = graphene.Int(required=True)
-        x = graphene.Int(required=True)
-        y = graphene.Int(required=True)
+        # the request payload
+        input = ViewMeasureAnchorPlaceInput(required=True)
 
-    # the result is the updated view
+    # the result is the updated measure state
     measures = graphene.List(ViewMeasure)
 
     # the mutator
     @staticmethod
-    def mutate(root, info, viewport, handle, x, y):
+    def mutate(root, info, input):
         """
         Place a measure handle at a pixel
         """
         # get the store
         store = info.context["store"]
-        # ask it to toggle the selection
-        measures = store.measureAnchorPlace(viewport=viewport, handle=handle, x=x, y=y)
+        # delegate to the store
+        measures = store.measureAnchorPlace(
+            viewport=input.viewport, handle=input.handle, x=input.x, y=input.y
+        )
         # form the mutation resolution context
         context = {"measures": measures}
         # and resolve the mutation

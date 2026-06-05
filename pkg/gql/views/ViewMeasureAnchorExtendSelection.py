@@ -6,38 +6,40 @@
 
 # externals
 import graphene
-import journal
 
+# the request payload
+from .ViewMeasureAnchorExtendSelectionInput import ViewMeasureAnchorExtendSelectionInput
 
 # the result types
 from .ViewMeasure import ViewMeasure
 
 
-# extend the current anchor selection to a given anchor index
-class MeasureAnchorExtendSelection(graphene.Mutation):
+# extend the anchor selection to a given anchor index
+class ViewMeasureAnchorExtendSelection(graphene.Mutation):
     """
     Extend the anchor selection to a given anchor index
     """
 
     # inputs
     class Arguments:
-        # the viewport
-        viewport = graphene.Int(required=True)
-        index = graphene.Int(required=False)
+        # the request payload
+        input = ViewMeasureAnchorExtendSelectionInput(required=True)
 
-    # the result is the updated view
+    # the result is the updated measure state
     measures = graphene.List(ViewMeasure)
 
     # the mutator
     @staticmethod
-    def mutate(root, info, viewport, index):
+    def mutate(root, info, input):
         """
         Extend the anchor selection to a given anchor index
         """
         # get the store
         store = info.context["store"]
-        # ask it to add an anchor to the path
-        measures = store.measureAnchorExtendSelection(viewport=viewport, index=index)
+        # delegate to the store
+        measures = store.measureAnchorExtendSelection(
+            viewport=input.viewport, index=input.index
+        )
         # form the mutation resolution context
         context = {"measures": measures}
         # and resolve the mutation

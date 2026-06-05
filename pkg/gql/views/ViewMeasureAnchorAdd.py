@@ -6,40 +6,40 @@
 
 # externals
 import graphene
-import journal
 
+# the request payload
+from .ViewMeasureAnchorAddInput import ViewMeasureAnchorAddInput
 
 # the result types
 from .ViewMeasure import ViewMeasure
 
 
-# add an anchor to the path
-class MeasureAnchorAdd(graphene.Mutation):
+# add an anchor to the measure path
+class ViewMeasureAnchorAdd(graphene.Mutation):
     """
     Add an anchor to the measure path
     """
 
     # inputs
     class Arguments:
-        # the viewport
-        viewport = graphene.Int(required=True)
-        x = graphene.Int(required=True)
-        y = graphene.Int(required=True)
-        index = graphene.Int(required=False)
+        # the request payload
+        input = ViewMeasureAnchorAddInput(required=True)
 
-    # the result is the updated view
+    # the result is the updated measure state
     measures = graphene.List(ViewMeasure)
 
-    # the range controller mutator
+    # the mutator
     @staticmethod
-    def mutate(root, info, viewport, x, y, index):
+    def mutate(root, info, input):
         """
-        Remove a reader from the pile
+        Add an anchor to the measure path
         """
         # get the store
         store = info.context["store"]
-        # ask it to add an anchor to the path
-        measures = store.measureAddAnchor(viewport=viewport, x=x, y=y, index=index)
+        # delegate to the store
+        measures = store.measureAddAnchor(
+            viewport=input.viewport, x=input.x, y=input.y, index=input.index
+        )
         # form the mutation resolution context
         context = {"measures": measures}
         # and resolve the mutation

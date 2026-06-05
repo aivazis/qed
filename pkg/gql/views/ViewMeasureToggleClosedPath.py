@@ -6,37 +6,38 @@
 
 # externals
 import graphene
-import journal
 
+# the request payload
+from .ViewMeasureToggleClosedPathInput import ViewMeasureToggleClosedPathInput
 
-# response types
+# the result types
 from .ViewMeasure import ViewMeasure
 
 
-# toggle the closed path flag
-class MeasureToggleClosedPath(graphene.Mutation):
+# toggle whether the measure path is closed
+class ViewMeasureToggleClosedPath(graphene.Mutation):
     """
     Toggle whether the measure path is closed
     """
 
     # inputs
     class Arguments:
-        # the viewport
-        viewport = graphene.Int(required=True)
+        # the request payload
+        input = ViewMeasureToggleClosedPathInput(required=True)
 
-    # the result is the updated view
+    # the result is the updated measure state
     measures = graphene.List(ViewMeasure)
 
     # the mutator
     @staticmethod
-    def mutate(root, info, viewport):
+    def mutate(root, info, input):
         """
-        Toggle the closed path flag
+        Toggle whether the measure path is closed
         """
         # get the store
         store = info.context["store"]
-        # ask it to toggle the selection
-        measures = store.measureToggleClosedPath(viewport=viewport)
+        # delegate to the store
+        measures = store.measureToggleClosedPath(viewport=input.viewport)
         # form the mutation resolution context
         context = {"measures": measures}
         # and resolve the mutation
