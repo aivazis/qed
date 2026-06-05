@@ -9,8 +9,8 @@ import graphene
 import journal
 import qed
 
-# my input type
-from .ReaderInput import ReaderInput
+# the request payload
+from .ConnectReaderInput import ConnectReaderInput
 
 # the result types
 from .Reader import Reader
@@ -24,27 +24,28 @@ class ConnectReader(graphene.Mutation):
 
     # inputs
     class Arguments:
-        spec = ReaderInput(required=True)
+        # the request payload
+        input = ConnectReaderInput(required=True)
 
     # the result is always a reader
     reader = graphene.Field(Reader)
 
-    # the range controller mutator
+    # the mutator
     @staticmethod
-    def mutate(root, info, spec):
+    def mutate(root, info, input):
         """
         Add a new reader to the pile
         """
         # get the store
         store = info.context["store"]
         # unpack
-        archive = spec["archive"]
-        reader = spec["reader"]
-        name = spec["name"]
-        uri = spec["uri"]
-        lines = spec["lines"]
-        samples = spec["samples"]
-        cell = spec["cell"]
+        archive = input["archive"]
+        reader = input["reader"]
+        name = input["name"]
+        uri = input["uri"]
+        lines = input["lines"]
+        samples = input["samples"]
+        cell = input["cell"]
         # form the factory arguments
         args = {
             "name": name,

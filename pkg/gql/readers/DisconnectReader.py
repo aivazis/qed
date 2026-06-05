@@ -8,6 +8,8 @@
 import graphene
 import journal
 
+# the request payload
+from .DisconnectReaderInput import DisconnectReaderInput
 
 # the result types
 from .Reader import Reader
@@ -21,18 +23,20 @@ class DisconnectReader(graphene.Mutation):
 
     # inputs
     class Arguments:
-        # the update context
-        name = graphene.String(required=True)
+        # the request payload
+        input = DisconnectReaderInput(required=True)
 
     # the result is the disconnected reader
     reader = graphene.Field(Reader)
 
-    # the range controller mutator
+    # the mutator
     @staticmethod
-    def mutate(root, info, name):
+    def mutate(root, info, input):
         """
         Remove a reader from the pile
         """
+        # unpack the payload
+        name = input.name
         # get the store
         store = info.context["store"]
         # remove it from the pile
