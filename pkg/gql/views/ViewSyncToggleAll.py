@@ -6,38 +6,38 @@
 
 # externals
 import graphene
-import journal
 
+# the request payload
+from .ViewSyncToggleAllInput import ViewSyncToggleAllInput
 
 # the result types
 from .View import View
 
 
-# remove a view from the pile
-class SyncToggleAll(graphene.Mutation):
+# toggle a sync aspect across all viewports
+class ViewSyncToggleAll(graphene.Mutation):
     """
     Toggle a sync aspect across all viewports
     """
 
     # inputs
     class Arguments:
-        # the update context
-        viewport = graphene.Int(required=True)
-        aspect = graphene.String(required=True)
+        # the request payload
+        input = ViewSyncToggleAllInput(required=True)
 
-    # the result is the new measure layer object
+    # the result is the affected views
     views = graphene.List(View)
 
-    # the range controller mutator
+    # the mutator
     @staticmethod
-    def mutate(root, info, viewport, aspect):
+    def mutate(root, info, input):
         """
-        Remove a reader from the pile
+        Toggle the {input.aspect} sync aspect across all viewports
         """
         # get the store
         store = info.context["store"]
-        # ask it for the measure layer of the dataset view
-        views = store.syncToggleAll(viewport=viewport, aspect=aspect)
+        # toggle the aspect everywhere
+        views = store.syncToggleAll(viewport=input.viewport, aspect=input.aspect)
         # form the mutation resolution context
         context = {"views": views}
         # and resolve the mutation

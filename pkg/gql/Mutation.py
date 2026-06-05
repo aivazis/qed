@@ -56,10 +56,10 @@ class Mutation(graphene.ObjectType):
     viewMeasureReset = views.viewMeasureReset.Field()
 
     # sync
-    viewSyncUpdateOffset = views.syncUpdateOffset.Field()
-    viewSyncToggleViewport = views.syncToggleViewport.Field()
-    viewSyncToggleAll = views.syncToggleAll.Field()
-    viewSyncReset = views.syncReset.Field()
+    viewSyncUpdateOffset = views.viewSyncUpdateOffset.Field()
+    viewSyncToggleViewport = views.viewSyncToggleViewport.Field()
+    viewSyncToggleAll = views.viewSyncToggleAll.Field()
+    viewSyncReset = views.viewSyncReset.Field()
 
     # zoom
     viewZoomSetLevel = views.zoomSetLevel.Field()

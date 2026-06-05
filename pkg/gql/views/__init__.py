@@ -36,10 +36,10 @@ from .ViewMeasureToggleClosedPath import (
 from .ViewMeasureReset import ViewMeasureReset as viewMeasureReset
 
 # sync
-from .SyncUpdateOffset import SyncUpdateOffset as syncUpdateOffset
-from .SyncToggleViewport import SyncToggleViewport as syncToggleViewport
-from .SyncToggleAll import SyncToggleAll as syncToggleAll
-from .SyncReset import SyncReset as syncReset
+from .ViewSyncUpdateOffset import ViewSyncUpdateOffset as viewSyncUpdateOffset
+from .ViewSyncToggleViewport import ViewSyncToggleViewport as viewSyncToggleViewport
+from .ViewSyncToggleAll import ViewSyncToggleAll as viewSyncToggleAll
+from .ViewSyncReset import ViewSyncReset as viewSyncReset
 
 # zoom
 from .ZoomSetLevel import ZoomSetLevel as zoomSetLevel
