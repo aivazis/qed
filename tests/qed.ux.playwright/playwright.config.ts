@@ -35,8 +35,13 @@ export default defineConfig({
     testDir: ".",
     // fail the run if a spec is accidentally left focused
     forbidOnly: !!process.env.CI,
-    // the suite is read-only against a server it owns, so it is safe to parallelize
-    fullyParallel: true,
+    // the behavior, nisar, and audit specs operate controls that mutate a SHARED server's global
+    // state (one viewport-0 zoom/measure/split per server), so spec files cannot run concurrently
+    // without racing each other -- {fullyParallel:false} only serializes within a file, not across
+    // them. run on a single worker so the whole suite is strictly serial; the project dependencies
+    // below still order it setup -> gate -> behavior -> nisar/audit
+    fullyParallel: false,
+    workers: 1,
     // one line per spec; silence-on-pass in spirit
     reporter: [["list"]],
 
