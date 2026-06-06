@@ -126,6 +126,28 @@ test.describe.serial("measure markers carry verifiable identity", () => {
         const shifted = page.locator(`[data-qed-panel="measure"] [data-qed-marker-index="2"]`)
         await expect(shifted).toHaveAttribute("data-qed-source", `${row1},${col1}`)
     })
+
+    test("resetting through the control clears the rendered path live, with no reload", async ({ page }) => {
+        // this serial block accumulates anchors across its tests, so start from a known-empty path
+        // (backdoor reset is a fine teardown/setup tool) then place exactly two and render them
+        await page.goto("/controls", { waitUntil: "networkidle" })
+        await gql(page, `mutation { viewMeasureReset(input: {viewport: 0}) { measures { dirty } } }`)
+        await page.goto("/controls", { waitUntil: "networkidle" })
+        for (const [col, row] of points.slice(0, 2)) await place(page, col, row)
+        await page.goto("/controls", { waitUntil: "networkidle" })
+        await showMeasure(page)
+        const markers = page.locator(`[data-qed-panel="measure"] [data-qed-marker-index]`)
+        await expect(markers).toHaveCount(2)
+
+        // reset through the client's OWN control -- a Relay mutation, not a raw fetch. the reset must
+        // update the Relay store, so the rendered path clears WITHOUT a reload. if it does not, the
+        // client reset is broken and this fails: that is the expectation, recorded
+        const reset = page.locator('[data-qed-panel="measure"]')
+            .getByRole("button", { name: "reset the values to their defaults" })
+        await reset.click()
+        await expect(markers).toHaveCount(0)
+        await expect(page.locator(`[role="button"][data-qed-marker-index]`)).toHaveCount(0)
+    })
 })
 
 
