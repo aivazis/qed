@@ -42,8 +42,8 @@ test("a viz view renders on load", async ({ page }) => {
 
         // select it
         const result = await gql(
-            `mutation { viewChannelSet(selection: ` +
-            `{viewport: 0, reader: "${reader}", selector: "channel", value: "${choice}"}) ` +
+            `mutation { viewChannelSet(input: ` +
+            `{viewport: 0, reader: "${reader}", value: "${choice}"}) ` +
             `{ views { channel { tag } } } }`
         )
         // hand back what the server confirms

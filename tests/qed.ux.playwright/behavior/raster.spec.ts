@@ -25,7 +25,7 @@ const gql = (page: Page, query: string) =>
     })).json(), query)
 
 const setZoom = (page: Page, h: number, v: number) =>
-    gql(page, `mutation { viewZoomSetLevel(viewport: 0, horizontal: ${h}, vertical: ${v}) { zoom { horizontal vertical } } }`)
+    gql(page, `mutation { viewZoomSetLevel(input: {viewport: 0, horizontal: ${h}, vertical: ${v}}) { zooms { horizontal vertical } } }`)
 
 // load the readers view and report the rendered mosaic's pixel extent
 const mosaicExtent = async (page: Page) => {
@@ -49,7 +49,7 @@ test.describe.serial("the raster resizes with zoom", () => {
         // make sure a channel is selected so the mosaic renders
         await page.goto("/", { waitUntil: "networkidle" })
         const reader = (await gql(page, "{ qed { views { reader { name } } } }")).data.qed.views[0].reader.name
-        await gql(page, `mutation { viewChannelSet(selection: {viewport: 0, reader: "${reader}", selector: "channel", value: "amplitude"}) { views { channel { tag } } } }`)
+        await gql(page, `mutation { viewChannelSet(input: {viewport: 0, reader: "${reader}", value: "amplitude"}) { views { channel { tag } } } }`)
 
         // the extent at zoom 0
         await setZoom(page, 0, 0)

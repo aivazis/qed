@@ -28,7 +28,7 @@ const viewCount = async (page: Page) =>
 // drive the server back to a single viewport, so the rest of the suite sees the lone fixture view
 const collapseToOne = async (page: Page) => {
     for (let n = await viewCount(page); n > 1; n--) {
-        await gql(page, `mutation { viewCollapse(viewport: ${n - 1}) { view { id } } }`)
+        await gql(page, `mutation { viewCollapse(input: {viewport: ${n - 1}}) { view { id } } }`)
     }
 }
 
@@ -36,7 +36,7 @@ const collapseToOne = async (page: Page) => {
 const setScrollSync = async (page: Page, viewport: number, want: boolean) => {
     const now = (await gql(page, "{ qed { views { sync { scroll } } } }")).data.qed.views[viewport].sync.scroll
     if (now !== want) {
-        await gql(page, `mutation { viewSyncToggleViewport(viewport: ${viewport}, aspect: "scroll") { view { sync { scroll } } } }`)
+        await gql(page, `mutation { viewSyncToggleViewport(input: {viewport: ${viewport}, aspect: "scroll"}) { view { sync { scroll } } } }`)
     }
 }
 
@@ -55,7 +55,7 @@ test.describe.serial("synced scrolling lines up across mismatched zoom", () => {
         // leave the store as the rest of the suite expects it: one viewport, unsynced, at zoom 0
         await collapseToOne(page)
         await setScrollSync(page, 0, false)
-        await gql(page, "mutation { viewZoomSetLevel(viewport: 0, horizontal: 0, vertical: 0) { zoom { horizontal } } }")
+        await gql(page, "mutation { viewZoomSetLevel(input: {viewport: 0, horizontal: 0, vertical: 0}) { zooms { horizontal } } }")
         await page.close()
     })
 
@@ -63,16 +63,16 @@ test.describe.serial("synced scrolling lines up across mismatched zoom", () => {
         await page.goto("/", { waitUntil: "networkidle" })
         // start from a single viewport, then split it so there are exactly two
         await collapseToOne(page)
-        await gql(page, "mutation { viewSplit(viewport: 0) { view { id } } }")
+        await gql(page, "mutation { viewSplit(input: {viewport: 0}) { view { id } } }")
 
         // put the two viewports at different zoom, scroll-sync both, and give the peer an offset
         const offset = { x: 40, y: 20 }
-        await gql(page, "mutation { viewZoomSetLevel(viewport: 0, horizontal: 0, vertical: 0) { zoom { horizontal } } }")
-        await gql(page, "mutation { viewZoomSetLevel(viewport: 1, horizontal: -2, vertical: -2) { zoom { horizontal } } }")
+        await gql(page, "mutation { viewZoomSetLevel(input: {viewport: 0, horizontal: 0, vertical: 0}) { zooms { horizontal } } }")
+        await gql(page, "mutation { viewZoomSetLevel(input: {viewport: 1, horizontal: -2, vertical: -2}) { zooms { horizontal } } }")
         await setScrollSync(page, 0, true)
         await setScrollSync(page, 1, true)
-        await gql(page, "mutation { viewSyncUpdateOffset(viewport: 0, x: 0, y: 0) { sync { offsets { x } } } }")
-        await gql(page, `mutation { viewSyncUpdateOffset(viewport: 1, x: ${offset.x}, y: ${offset.y}) { sync { offsets { x } } } }`)
+        await gql(page, "mutation { viewSyncUpdateOffset(input: {viewport: 0, x: 0, y: 0}) { sync { offsets { x } } } }")
+        await gql(page, `mutation { viewSyncUpdateOffset(input: {viewport: 1, x: ${offset.x}, y: ${offset.y}}) { sync { offsets { x } } } }`)
 
         // load the two-viewport state fresh, so the client picks up the zoom/sync/offsets
         await page.goto("/", { waitUntil: "networkidle" })

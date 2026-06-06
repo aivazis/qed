@@ -65,8 +65,8 @@ test.describe.serial("the NISAR axis selectors are tagged radiogroups", () => {
     test("selecting a value checks exactly that radio, with the state living in ARIA", async ({ page }) => {
         // select the gslc reader, then pick frequency A, through the same endpoint the client uses
         await page.goto("/", { waitUntil: "networkidle" })
-        await gql(page, `mutation { viewSelectReader(viewport: 0, reader: "gslc") { view { id } } }`)
-        await gql(page, `mutation { viewToggleCoordinate(selection: ` +
+        await gql(page, `mutation { viewReaderSelect(input: {viewport: 0, reader: "gslc"}) { view { id } } }`)
+        await gql(page, `mutation { viewCoordinateToggle(input: ` +
             `{viewport: 0, reader: "gslc", selector: "frequency", value: "A"}) { view { id } } }`)
         await page.goto("/", { waitUntil: "networkidle" })
 
@@ -78,7 +78,7 @@ test.describe.serial("the NISAR axis selectors are tagged radiogroups", () => {
         await expect(frequency.locator('[aria-checked="true"]')).toHaveCount(1)
 
         // restore the blank selection so a rerun starts clean: toggling A again clears it
-        await gql(page, `mutation { viewToggleCoordinate(selection: ` +
+        await gql(page, `mutation { viewCoordinateToggle(input: ` +
             `{viewport: 0, reader: "gslc", selector: "frequency", value: "A"}) { view { id } } }`)
     })
 })
