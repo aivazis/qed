@@ -33,7 +33,7 @@ const waitForZoom = async (page: Page, horizontal: number) =>
 // drive the coupled flag to {want} through its mutation (a no-op when it already matches)
 const setCoupled = async (page: Page, want: boolean) => {
     const now = (await gql(page, "{ qed { views { zoom { coupled } } } }")).data.qed.views[0].zoom.coupled
-    if (now !== want) await gql(page, "mutation { viewZoomToggleCoupled(viewport: 0) { zoom { coupled } } }")
+    if (now !== want) await gql(page, "mutation { viewZoomToggleCoupled(input: {viewport: 0}) { zooms { coupled } } }")
 }
 
 // the visible window's source-pixel center, read off the minimap markup
@@ -58,7 +58,7 @@ const setHorizontalZoom = async (page: Page, level: number) => {
 // land at zoom 0 with the requested coupling, scrolled to the middle of the raster, on /controls
 const start = async (page: Page, { coupled }: { coupled: boolean }) => {
     await page.goto("/", { waitUntil: "networkidle" })
-    await gql(page, "mutation { viewZoomSetLevel(viewport: 0, horizontal: 0, vertical: 0) { zoom { horizontal } } }")
+    await gql(page, "mutation { viewZoomSetLevel(input: {viewport: 0, horizontal: 0, vertical: 0}) { zooms { horizontal } } }")
     await setCoupled(page, coupled)
     await page.goto("/controls", { waitUntil: "networkidle" })
     const region = page.locator('[data-qed-region="viewport"]').first()
@@ -85,7 +85,7 @@ test.describe.serial("an in-place zoom change retains the viewport position", ()
         await page.goto("/", { waitUntil: "networkidle" })
         // leave the store as the other specs expect it: coupled, at zoom 0
         await setCoupled(page, true)
-        await gql(page, "mutation { viewZoomSetLevel(viewport: 0, horizontal: 0, vertical: 0) { zoom { horizontal } } }")
+        await gql(page, "mutation { viewZoomSetLevel(input: {viewport: 0, horizontal: 0, vertical: 0}) { zooms { horizontal } } }")
         await page.close()
     })
 

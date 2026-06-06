@@ -46,7 +46,7 @@ test.describe.serial("the minimap tracks the current zoom", () => {
     test.afterAll(async ({ browser }) => {
         const page = await browser.newPage()
         await page.goto("/", { waitUntil: "networkidle" })
-        await gql(page, "mutation { viewZoomSetLevel(viewport: 0, horizontal: 0, vertical: 0) { zoom { horizontal } } }")
+        await gql(page, "mutation { viewZoomSetLevel(input: {viewport: 0, horizontal: 0, vertical: 0}) { zooms { horizontal } } }")
         await page.close()
     })
 
@@ -54,8 +54,8 @@ test.describe.serial("the minimap tracks the current zoom", () => {
         // a channel must be selected and the zoom at 0 to start
         await page.goto("/", { waitUntil: "networkidle" })
         const reader = (await gql(page, "{ qed { views { reader { name } } } }")).data.qed.views[0].reader.name
-        await gql(page, `mutation { viewChannelSet(selection: {viewport: 0, reader: "${reader}", selector: "channel", value: "amplitude"}) { views { channel { tag } } } }`)
-        await gql(page, "mutation { viewZoomSetLevel(viewport: 0, horizontal: 0, vertical: 0) { zoom { horizontal } } }")
+        await gql(page, `mutation { viewChannelSet(input: {viewport: 0, reader: "${reader}", value: "amplitude"}) { views { channel { tag } } } }`)
+        await gql(page, "mutation { viewZoomSetLevel(input: {viewport: 0, horizontal: 0, vertical: 0}) { zooms { horizontal } } }")
         await page.goto("/controls", { waitUntil: "networkidle" })
 
         // the minimap's data rect (Placemat, Data, Viewport -> the second one) and the horizontal

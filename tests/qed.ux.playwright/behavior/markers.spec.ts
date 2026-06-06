@@ -32,7 +32,7 @@ const gql = (page: Page, query: string) =>
 // place an anchor at {col,row} on viewport 0; the api is column-major in its arguments ({x},{y}).
 // {index: null} appends -- the resolver's {index} parameter has no default, so it must be sent
 const place = (page: Page, col: number, row: number) =>
-    gql(page, `mutation { viewMeasureAnchorAdd(viewport: 0, x: ${col}, y: ${row}, index: null) ` +
+    gql(page, `mutation { viewMeasureAnchorAdd(input: {viewport: 0, x: ${col}, y: ${row}, index: null}) ` +
         `{ measures { dirty } } }`)
 
 // the measure toggle glyph on the viewport actions row
@@ -53,7 +53,10 @@ const showMeasure = async (page: Page) => {
 const cleanup = async (browser: import("@playwright/test").Browser) => {
     const page = await browser.newPage()
     await page.goto("/controls", { waitUntil: "networkidle" })
-    await gql(page, `mutation { viewMeasureReset(viewport: 0) { measures { dirty } } }`)
+    await gql(page, `mutation { viewMeasureReset(input: {viewport: 0}) { measures { dirty } } }`)
+    // the raw fetch does not update the page's Relay store, so reload to render the cleared path
+    // before operating the toggle; otherwise it acts on stale anchors and the layer does not hide
+    await page.goto("/controls", { waitUntil: "networkidle" })
     const toggle = measureToggle(page)
     await toggle.waitFor({ timeout: 10_000 })
     if ((await toggle.getAttribute("aria-pressed")) === "true") {
@@ -109,7 +112,7 @@ test.describe.serial("measure markers carry verifiable identity", () => {
 
         // insert a vertex between ordinals 0 and 1 -- the midpoint of the two placed points -- then
         // reload so the renumbered path renders
-        await gql(page, `mutation { viewMeasureAnchorSplit(viewport: 0, anchor: 0) { measures { dirty } } }`)
+        await gql(page, `mutation { viewMeasureAnchorSplit(input: {viewport: 0, anchor: 0}) { measures { dirty } } }`)
         await page.goto("/controls", { waitUntil: "networkidle" })
         await showMeasure(page)
         const [col0, row0] = points[0]

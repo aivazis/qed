@@ -133,9 +133,9 @@ test("driveability audit across routes and states", async ({ page }) => {
     // STATE: the measure layer on, with a couple of anchors -- exposes the measure panel, the peek
     // pad, and the on-raster markers, none of which the gate's default render shows
     await page.goto("/controls", { waitUntil: "networkidle" })
-    await gql(page, `mutation { viewMeasureReset(viewport: 0) { measures { dirty } } }`)
-    await gql(page, `mutation { viewMeasureAnchorAdd(viewport: 0, x: 120, y: 240, index: null) { measures { dirty } } }`)
-    await gql(page, `mutation { viewMeasureAnchorAdd(viewport: 0, x: 180, y: 300, index: null) { measures { dirty } } }`)
+    await gql(page, `mutation { viewMeasureReset(input: {viewport: 0}) { measures { dirty } } }`)
+    await gql(page, `mutation { viewMeasureAnchorAdd(input: {viewport: 0, x: 120, y: 240, index: null}) { measures { dirty } } }`)
+    await gql(page, `mutation { viewMeasureAnchorAdd(input: {viewport: 0, x: 180, y: 300, index: null}) { measures { dirty } } }`)
     const measure = page.locator('[data-qed-control="viewport"][data-qed-action="measure"]').first()
     if ((await measure.getAttribute("aria-pressed")) !== "true") await measure.click()
     await page.waitForTimeout(500)
@@ -149,7 +149,7 @@ test("driveability audit across routes and states", async ({ page }) => {
     // restore: collapse the split and clear the measure layer
     await split.click()
     if ((await measure.getAttribute("aria-pressed")) === "true") await measure.click()
-    await gql(page, `mutation { viewMeasureReset(viewport: 0) { measures { dirty } } }`)
+    await gql(page, `mutation { viewMeasureReset(input: {viewport: 0}) { measures { dirty } } }`)
 
     // STATE: the NISAR reader on its own server -- the band/frequency/polarization selectors
     await page.goto(`${nisarBaseURL}/`, { waitUntil: "networkidle" })
