@@ -9,6 +9,12 @@
 qed.ux.playwright.stem := qed.ux.playwright
 # it delegates discovery, parallelism, and the server-under-test to playwright
 qed.ux.playwright.runner := playwright
+# the framework and its browsers come from the environment-level {playwright} toolchain, installed
+# once per environment with {mm playwright.install}; mm verifies it is present before the suite runs
+# and points the runner at it (NODE_PATH + the browser path), so the suite owns no node_modules of
+# its own. the suite stays CommonJS (.ts, no "type":"module"), since NODE_PATH only feeds playwright's
+# CJS loader; an ESM switch would need a different resolution scheme
+qed.ux.playwright.toolchain := playwright
 # it needs the built client (the server serves it) and the test fixtures the servers read: the
 # native raster ({qed.data.native.d16}) and the two NISAR products ({qed.data.nisar.*}). each file
 # target produces its fixture only when missing -- skip-if-present, so present data is never rebuilt
@@ -20,33 +26,6 @@ qed.ux.playwright.prerequisites := qed.ux \
 qed.ux.playwright.env := \
     QED_DATA_NATIVE=$(dir $(qed.data.native.d16)) \
     QED_DATA_NISAR=$(dir $(qed.data.nisar.gslc))
-
-# the test framework lives in a dedicated node_modules, deliberately kept out of the client
-# bundle; it sits outside the suite tree so the staged runner does not copy it. deferred (=)
-# because {qed.tmpdir} is not defined until this project's init runs, after this file is read
-qed.ux.playwright.modules = $(qed.tmpdir)qed.ux.playwright.modules
-qed.ux.playwright.stage.modules = $(qed.ux.playwright.modules)/node_modules
-
-# run every project: {setup} then the read-only {gate} then the stateful {behavior} specs, with
-# playwright honoring the inter-project dependencies and serialization
-qed.ux.playwright.runner.launch := npx playwright test
-
-# make sure the framework and its browser are installed before the runner launches
-qed.ux.playwright.pre := qed.ux.playwright.deps
-
-
-# install the dedicated test dependencies and the chromium browser on first run; the browser
-# lands in {PLAYWRIGHT_BROWSERS_PATH}, which is set once in the shell profile. a phony target
-# with a guard so the install runs only when the modules are missing
-qed.ux.playwright.deps:
-	@if [ ! -d "$(qed.ux.playwright.stage.modules)" ]; then \
-	    ${call log.action,install,"qed.ux.playwright test dependencies"}; \
-	    mkdir -p $(qed.ux.playwright.modules); \
-	    cp $(qed.home)tests/qed.ux.playwright/config/package.json $(qed.ux.playwright.modules)/package.json; \
-	    cd $(qed.ux.playwright.modules) && npm install --no-fund --no-audit && npx playwright install chromium; \
-	fi
-
-.PHONY: qed.ux.playwright.deps
 
 
 # end of file
