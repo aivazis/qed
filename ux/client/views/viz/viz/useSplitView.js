@@ -10,6 +10,8 @@ import { graphql, useMutation } from 'react-relay/hooks'
 // local
 // hooks
 import { useViewports } from './useViewports'
+// the shared store updater
+import { splitViewUpdater } from './viewListUpdaters'
 
 
 // split a viewport
@@ -35,28 +37,8 @@ export const useSplitView = () => {
                     viewport
                 }
             },
-            // update the store
-            updater: store => {
-                // get the root field of the mutation result
-                const response = store.getRootField("viewSplit")
-                // ask for the view
-                const view = response.getLinkedRecord("view")
-                // if it's trivial
-                if (view === null) {
-                    // something went wrong at the server; not much more to do
-                    return
-                }
-                // get the remote store
-                const qed = store.get("QED")
-                // get the views
-                const views = qed.getLinkedRecords("views")
-                // update
-                const updated = views.toSpliced(viewport + 1, 0, view)
-                // attach the new view
-                qed.setLinkedRecords(updated, "views")
-                // all done
-                return
-            },
+            // update the store: the split-off view lands after the one that split
+            updater: splitViewUpdater(viewport),
             // when the request is complete
             onCompleted: data => {
                 // activate the new view
@@ -84,8 +66,8 @@ export const useSplitView = () => {
 }
 
 
-// the mutation that splits a viewport
-const splitMutation = graphql`
+// the mutation that splits a viewport; exported so the {window.qed} automation facade can commit it
+export const splitMutation = graphql`
     mutation useSplitViewMutation($input: ViewSplitInput!) {
         viewSplit(input: $input) {
             view {

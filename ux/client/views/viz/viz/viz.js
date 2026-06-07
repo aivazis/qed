@@ -19,6 +19,8 @@ import { Flex } from '~/widgets'
 // local
 // context
 import { VizProvider } from './context'
+// the automation-surface bridge that tracks the active viewport (imported directly to avoid a cycle)
+import { ViewportBridge } from '~/automation/ViewportBridge'
 // hooks
 import { useViewports } from './useViewports'
 import { useInitializeViewports } from './useInitializeViewports'
@@ -32,6 +34,7 @@ import styles from './styles'
 // turn my panel into a context provider and publish it
 export const Viz = ({ qed }) => (
     <VizProvider>
+        <ViewportBridge />
         <VizPanel qed={qed} />
     </VizProvider>
 )

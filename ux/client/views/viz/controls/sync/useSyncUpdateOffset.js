@@ -50,7 +50,7 @@ export const useSyncUpdateOffset = () => {
 }
 
 // the mutation that updates the scroll sync state
-const useSyncUpdateOffsetMutation = graphql`
+export const useSyncUpdateOffsetMutation = graphql`
     mutation useSyncUpdateOffsetMutation($input: ViewSyncUpdateOffsetInput!) {
         viewSyncUpdateOffset(input: $input) {
             sync {

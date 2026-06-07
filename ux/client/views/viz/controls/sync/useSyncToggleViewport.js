@@ -49,7 +49,7 @@ export const useSyncToggleViewport = () => {
 }
 
 // the mutation that toggles the scroll sync state
-const useSyncToggleViewportMutation = graphql`
+export const useSyncToggleViewportMutation = graphql`
     mutation useSyncToggleViewportMutation($input: ViewSyncToggleViewportInput!) {
         viewSyncToggleViewport(input: $input) {
             view {
