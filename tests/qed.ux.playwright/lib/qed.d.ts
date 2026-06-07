@@ -53,6 +53,14 @@ interface QED {
         updateOffset(row: number, col: number, viewport?: number): Promise<unknown>
         reset(viewport?: number): Promise<unknown>
     }
+    range: {
+        update(controller: string, bounds: { min: number, low: number, high: number, max: number }, channel?: string, viewport?: number): Promise<unknown>
+        reset(controller: string, channel?: string, viewport?: number): Promise<unknown>
+    }
+    value: {
+        update(controller: string, bounds: { min: number, value: number, max: number }, channel?: string, viewport?: number): Promise<unknown>
+        reset(controller: string, channel?: string, viewport?: number): Promise<unknown>
+    }
 }
 
 interface Window {

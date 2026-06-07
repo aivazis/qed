@@ -79,7 +79,7 @@ export const useUpdateValueController = ({ viewport, channel }) => {
 
 
 // the mutation that updates the controller state
-const useUpdateValueControllerMutation = graphql`
+export const useUpdateValueControllerMutation = graphql`
 mutation useUpdateValueControllerMutation($input: ViewValueUpdateInput!) {
     viewValueUpdate(input: $input) {
         view {

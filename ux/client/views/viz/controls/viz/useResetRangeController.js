@@ -64,7 +64,7 @@ export const useResetRangeController = ({ viewport, channel }) => {
 
 
 // the mutation that resets the controller state
-const useResetRangeControllerMutation = graphql`
+export const useResetRangeControllerMutation = graphql`
 mutation useResetRangeControllerMutation($input: ViewRangeResetInput!) {
     viewRangeReset(input: $input) {
         view {

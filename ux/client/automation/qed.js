@@ -17,6 +17,10 @@ import { useSetLevelZoomMutation as setLevelZoomMutation } from '~/views/viz/con
 import { useToggleCoupledZoomMutation as toggleCoupledZoomMutation } from '~/views/viz/controls/zoom/useToggleCoupled'
 import { useResetZoomMutation as resetZoomMutation } from '~/views/viz/controls/zoom/useReset'
 import { useSyncToggleAllMutation as syncToggleAllMutation } from '~/views/viz/controls/sync/useSyncToggleAll'
+import { useUpdateRangeControllerMutation as updateRangeControllerMutation } from '~/views/viz/controls/viz/useUpdateRangeController'
+import { useResetRangeControllerMutation as resetRangeControllerMutation } from '~/views/viz/controls/viz/useResetRangeController'
+import { useUpdateValueControllerMutation as updateValueControllerMutation } from '~/views/viz/controls/viz/useUpdateValueController'
+import { useResetValueControllerMutation as resetValueControllerMutation } from '~/views/viz/controls/viz/useResetValueController'
 import { useAnchorAddMutation as anchorAddMutation } from '~/views/viz/measure/useAnchorAdd'
 import { useAnchorPlaceMutation as anchorPlaceMutation } from '~/views/viz/measure/useAnchorPlace'
 import { useAnchorSplitMutation as anchorSplitMutation } from '~/views/viz/measure/useAnchorSplit'
@@ -58,6 +62,12 @@ const read = (query, variables = {}) => fetchQuery(environment, query, variables
 const readerOf = async viewport => {
     const { qed } = await read(stateQuery)
     return qed.views[viewport]?.reader?.name
+}
+
+// the tag of the channel shown in {viewport}; the controller inputs carry it
+const channelOf = async viewport => {
+    const { qed } = await read(stateQuery)
+    return qed.views[viewport]?.channel?.tag
 }
 
 
@@ -255,6 +265,27 @@ export const makeQED = () => ({
         // extend the selection through anchor {handle}
         extendSelection: (handle, viewport = getActiveViewport()) =>
             command(anchorExtendSelectionMutation, { viewport, index: handle }),
+    },
+
+    // the colour-stretch range controller of a {channel} (defaulting to the active one); {controller}
+    // names which one, and the bounds are {min,low,high,max}
+    range: {
+        update: async (controller, { min, low, high, max }, channel, viewport = getActiveViewport()) =>
+            command(updateRangeControllerMutation,
+                { viewport, channel: channel ?? await channelOf(viewport), controller, min, low, high, max }),
+        reset: async (controller, channel, viewport = getActiveViewport()) =>
+            command(resetRangeControllerMutation,
+                { viewport, channel: channel ?? await channelOf(viewport), controller }),
+    },
+
+    // the colour-stretch value controller of a {channel}; the bounds are {min,value,max}
+    value: {
+        update: async (controller, { min, value, max }, channel, viewport = getActiveViewport()) =>
+            command(updateValueControllerMutation,
+                { viewport, channel: channel ?? await channelOf(viewport), controller, min, value, max }),
+        reset: async (controller, channel, viewport = getActiveViewport()) =>
+            command(resetValueControllerMutation,
+                { viewport, channel: channel ?? await channelOf(viewport), controller }),
     },
 })
 
