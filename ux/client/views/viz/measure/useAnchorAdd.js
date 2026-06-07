@@ -54,7 +54,7 @@ export const useAnchorAdd = viewport => {
 
 
 // the mutation that adds an anchor to the path
-const useAnchorAddMutation = graphql`
+export const useAnchorAddMutation = graphql`
     mutation useAnchorAddMutation($input: ViewMeasureAnchorAddInput!) {
         viewMeasureAnchorAdd(input: $input) {
             measures {

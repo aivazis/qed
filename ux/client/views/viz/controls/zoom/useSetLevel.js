@@ -53,7 +53,7 @@ export const useSetLevel = viewport => {
 
 
 // the mutation that adds an anchor to the path
-const useSetLevelZoomMutation = graphql`
+export const useSetLevelZoomMutation = graphql`
     mutation useSetLevelZoomMutation($input: ViewZoomSetLevelInput!) {
         viewZoomSetLevel(input: $input) {
             zooms {
