@@ -64,10 +64,11 @@ const readerOf = async viewport => {
     return qed.views[viewport]?.reader?.name
 }
 
-// the tag of the channel shown in {viewport}; the controller inputs carry it
+// the name of the channel shown in {viewport}; the controller inputs key on it (the server uses the
+// channel name, not its display tag)
 const channelOf = async viewport => {
     const { qed } = await read(stateQuery)
-    return qed.views[viewport]?.channel?.tag
+    return qed.views[viewport]?.channel?.name
 }
 
 
@@ -79,7 +80,7 @@ const stateQuery = graphql`
             views {
                 reader { name }
                 dataset { shape origin channels { tag } }
-                channel { tag }
+                channel { tag name }
                 zoom { vertical horizontal coupled }
                 measure { active closed path { x y } selection }
                 sync { scroll channel zoom path }
@@ -94,6 +95,15 @@ const readersQuery = graphql`
     query qedReadersQuery {
         qed {
             readers { name selectors { name values } }
+        }
+    }
+`
+
+// the colour-stretch controllers bound to a viewport's channel, by slot
+const controllersQuery = graphql`
+    query qedControllersQuery {
+        qed {
+            views { channel { controllers { slot min max } } }
         }
     }
 `
@@ -157,6 +167,13 @@ export const makeQED = () => ({
             name: reader.name,
             selectors: Object.fromEntries((reader.selectors ?? []).map(axis => [axis.name, axis.values])),
         }))
+    },
+
+    // the colour-stretch controllers on {viewport}'s channel: each one's slot and bounds
+    controllers: async (viewport = getActiveViewport()) => {
+        const { qed } = await read(controllersQuery)
+        return (qed.views[viewport]?.channel?.controllers ?? [])
+            .map(controller => ({ slot: controller.slot, min: controller.min, max: controller.max }))
     },
 
     // select the reader named {reader} for {viewport}; swapping the view needs the shared updater
