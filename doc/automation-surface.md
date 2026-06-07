@@ -48,21 +48,26 @@ window.qed = {
   },
   viewports() → [state, …],                      // every viewport, for split layouts
   readers()   → [{ name, selectors:{axis:[…]} }],// the reader catalog
+  controllers(viewport?) → [{ slot, min, max }], // the channel's colour-stretch controllers
 
   // --- commands: act without synthesizing clicks ---
   selectReader(reader, viewport?),
   selectValue(selector, value, viewport?),       // a band/frequency/polarization/cov axis value
   setChannel(tag, viewport?),
   setZoom(level, viewport?),                      // a number (both axes) or {vertical, horizontal}
-  toggleCoupled(viewport?),                       // flip whether the zoom axes move together
+  toggleCoupled(viewport?), zoomReset(viewport?),
   centerOn(row, col, viewport?),                  // scroll so {row,col} is at the window center
   split(viewport?), collapse(viewport?), setActive(viewport),
   measure: {
     toggle(viewport?), reset(viewport?),
     add(row, col, index?), move(handle, row, col), split(handle), remove(handle),
+    toggleClosedPath(viewport?),
+    toggleSelection(handle, viewport?), toggleSelectionMulti(handle, viewport?), extendSelection(handle, viewport?),
   },
+  range: { update(controller, {min,low,high,max}, channel?, viewport?), reset(controller, channel?, viewport?) },
+  value: { update(controller, {min,value,max}, channel?, viewport?), reset(controller, channel?, viewport?) },
   sync: {
-    toggle(aspect, viewport?),                    // flip a scroll/channel/zoom/path sync flag
+    toggle(aspect, viewport?), toggleAll(aspect, viewport?), reset(viewport?),  // sync flags
     updateOffset(row, col, viewport?),            // the relative sync offset, in source pixels
   },
 }
@@ -151,13 +156,24 @@ A driver uses the facade to arrange state and the markup to confirm the pixels f
 the two reads — `window.qed.state()` (the Relay model) and a server query — also localize a failure:
 server-right + model-right + DOM-wrong is a render bug; server-right + model-wrong is a client bug.
 
+## Coverage
+
+The whole `tests/qed.ux.playwright` suite arranges state through `window.qed`. Beyond the `behavior/*`
+specs (DOM effects), an **`api/` project** asserts mutations at the *model* level — `state()`,
+`viewports()`, `controllers()` — with no DOM, so a failure localizes to the server/store rather than
+rendering (this is what caught the controller channel-key bug). The `behavior/local-controls.spec`
+covers the client-only controls (detail toggle, tray, nav) that carry no mutation.
+
 ## Deferred
 
+- **Data archives.** `connectArchive` (local/s3/earthaccess variants), `connectReader`, and the
+  disconnects are an admin/data-source flow, not a viewport-state one, and the disconnects are
+  destructive against the shared fixture server. They want a dedicated connect→read→disconnect
+  round-trip on an isolated fixture; not added to the facade yet.
 - **Annotations as first-class state.** Rec 4's markers are the measure path; if a separate
   annotation layer grows (`addAnnotation/removeAnnotation/annotations`), it joins `measure` here.
-- **A standalone API-contract suite.** A thin suite could assert each command/query against the
-  server with no browser UI — the resolver-level coverage noted in `doc/semantic-markup.md`. The
-  facade is the natural seam for it.
+- **Pixel/tile rendering.** The suite asserts DOM extent and the model, not that tiles render correct
+  pixels (the C++ decimate→normalize→colorize→BMP path); a checksum on a known tile would close it.
 
 [the DOM-automation plan]: ./semantic-markup.md
 
