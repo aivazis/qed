@@ -24,17 +24,9 @@ const GSLC = {
     polarization: ["HH", "HV", "VH", "VV"],
 }
 
-// the same GraphQL endpoint the client uses, driven from inside the page; a raw {fetch} does not
-// update the page's Relay store, so callers reload the route afterward to render the change
-const gql = (page: Page, query: string) =>
-    page.evaluate(async (q) => {
-        const response = await fetch("/graphql", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ query: q }),
-        })
-        return response.json()
-    }, query)
+// drive the client's automation surface ({window.qed}) from inside the page; its commands commit
+// through the live Relay store, swapping the view via the shared updater
+const ensureQED = (page: Page) => page.waitForFunction(() => Boolean(window.qed))
 
 // the radiogroup for {axis} within the {reader}'s panel
 const group = (page: Page, reader: string, axis: string): Locator =>
@@ -65,9 +57,9 @@ test.describe.serial("the NISAR axis selectors are tagged radiogroups", () => {
     test("selecting a value checks exactly that radio, with the state living in ARIA", async ({ page }) => {
         // select the gslc reader, then pick frequency A, through the same endpoint the client uses
         await page.goto("/", { waitUntil: "networkidle" })
-        await gql(page, `mutation { viewReaderSelect(input: {viewport: 0, reader: "gslc"}) { view { id } } }`)
-        await gql(page, `mutation { viewCoordinateToggle(input: ` +
-            `{viewport: 0, reader: "gslc", selector: "frequency", value: "A"}) { view { id } } }`)
+        await ensureQED(page)
+        await page.evaluate(() => window.qed.selectReader("gslc"))
+        await page.evaluate(() => window.qed.selectValue("frequency", "A"))
         await page.goto("/", { waitUntil: "networkidle" })
 
         // exactly one radio in the frequency group is checked, and it is A -- state in ARIA, never
@@ -78,8 +70,8 @@ test.describe.serial("the NISAR axis selectors are tagged radiogroups", () => {
         await expect(frequency.locator('[aria-checked="true"]')).toHaveCount(1)
 
         // restore the blank selection so a rerun starts clean: toggling A again clears it
-        await gql(page, `mutation { viewCoordinateToggle(input: ` +
-            `{viewport: 0, reader: "gslc", selector: "frequency", value: "A"}) { view { id } } }`)
+        await ensureQED(page)
+        await page.evaluate(() => window.qed.selectValue("frequency", "A"))
     })
 })
 

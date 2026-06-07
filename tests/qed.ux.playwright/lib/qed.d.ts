@@ -23,6 +23,8 @@ interface QED {
     // queries
     state(viewport?: number): Promise<QEDViewModel | null>
     // commands
+    selectReader(reader: string, viewport?: number): Promise<unknown>
+    selectValue(selector: string, value: string, viewport?: number): Promise<unknown>
     setChannel(tag: string, viewport?: number): Promise<unknown>
     setZoom(level: number | { vertical: number, horizontal: number }, viewport?: number): Promise<unknown>
     toggleCoupled(viewport?: number): Promise<unknown>
