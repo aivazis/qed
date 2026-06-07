@@ -92,6 +92,16 @@ export default defineConfig({
             fullyParallel: false,
             use: { ...devices["Desktop Chrome"], baseURL: nisarBaseURL },
         },
+        // the api-contract project: it drives {window.qed} but asserts the MODEL (state/viewports/
+        // controllers) instead of the DOM, so a failure localizes to the server/store layer rather
+        // than rendering. it mutates shared state, so it is serial and restores what it touches
+        {
+            name: "api",
+            testMatch: /api\/.*\.spec\.ts/,
+            dependencies: ["gate"],
+            fullyParallel: false,
+            use: { ...devices["Desktop Chrome"] },
+        },
         // a live driveability audit (not a gate): it mutates the native store and reaches the nisar
         // server, so it runs LAST and serially, after every other project, restoring what it touches
         {
