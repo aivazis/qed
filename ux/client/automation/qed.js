@@ -20,6 +20,10 @@ import { useAnchorPlaceMutation as anchorPlaceMutation } from '~/views/viz/measu
 import { useAnchorSplitMutation as anchorSplitMutation } from '~/views/viz/measure/useAnchorSplit'
 import { useAnchorRemoveMutation as anchorRemoveMutation } from '~/views/viz/measure/useAnchorRemove'
 import { measureToggleLayerMutation } from '~/views/viz/measure/useMeasureToggleLayer'
+import { useToggleClosedPathMutation as toggleClosedPathMutation } from '~/views/viz/measure/useToggleClosedPath'
+import { useAnchorToggleSelectionMutation as anchorToggleSelectionMutation } from '~/views/viz/measure/useAnchorToggleSelection'
+import { useAnchorToggleSelectionMultiMutation as anchorToggleSelectionMultiMutation } from '~/views/viz/measure/useAnchorToggleSelectionMulti'
+import { useAnchorExtendSelectionMutation as anchorExtendSelectionMutation } from '~/views/viz/measure/useAnchorExtendSelection'
 import { selectReaderMutation } from '~/views/viz/reader/useSelectReader'
 import { toggleCoordinateMutation } from '~/views/viz/reader/useToggleCoordinate'
 // the store updater the reader/coordinate mutations share, since they swap the whole view
@@ -219,6 +223,18 @@ export const makeQED = () => ({
         // delete anchor {handle}
         remove: (handle, viewport = getActiveViewport()) =>
             command(anchorRemoveMutation, { viewport, anchor: handle }),
+        // close or open the path of {viewport}
+        toggleClosedPath: (viewport = getActiveViewport()) =>
+            command(toggleClosedPathMutation, { viewport }),
+        // toggle anchor {handle} in the selection (replacing it)
+        toggleSelection: (handle, viewport = getActiveViewport()) =>
+            command(anchorToggleSelectionMutation, { viewport, index: handle }),
+        // toggle anchor {handle} in the selection (adding to it)
+        toggleSelectionMulti: (handle, viewport = getActiveViewport()) =>
+            command(anchorToggleSelectionMultiMutation, { viewport, index: handle }),
+        // extend the selection through anchor {handle}
+        extendSelection: (handle, viewport = getActiveViewport()) =>
+            command(anchorExtendSelectionMutation, { viewport, index: handle }),
     },
 })
 

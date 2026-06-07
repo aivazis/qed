@@ -52,7 +52,7 @@ export const useAnchorToggleSelection = viewport => {
 
 
 // the mutation that toggles the anchor selection in single node mode
-const useAnchorToggleSelectionMutation = graphql`
+export const useAnchorToggleSelectionMutation = graphql`
     mutation useAnchorToggleSelectionMutation($input: ViewMeasureAnchorToggleSelectionInput!) {
         viewMeasureAnchorToggleSelection(input: $input) {
             measures {

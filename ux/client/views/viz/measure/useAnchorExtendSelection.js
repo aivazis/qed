@@ -52,7 +52,7 @@ export const useAnchorExtendSelection = viewport => {
 
 
 // the mutation that adds an anchor to the path
-const useAnchorExtendSelectionMutation = graphql`
+export const useAnchorExtendSelectionMutation = graphql`
     mutation useAnchorExtendSelectionMutation($input: ViewMeasureAnchorExtendSelectionInput!) {
         viewMeasureAnchorExtendSelection(input: $input) {
             measures {

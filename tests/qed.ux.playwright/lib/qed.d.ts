@@ -41,6 +41,10 @@ interface QED {
         move(handle: number, row: number, col: number, viewport?: number): Promise<unknown>
         split(handle: number, viewport?: number): Promise<unknown>
         remove(handle: number, viewport?: number): Promise<unknown>
+        toggleClosedPath(viewport?: number): Promise<unknown>
+        toggleSelection(handle: number, viewport?: number): Promise<unknown>
+        toggleSelectionMulti(handle: number, viewport?: number): Promise<unknown>
+        extendSelection(handle: number, viewport?: number): Promise<unknown>
     }
     sync: {
         toggle(aspect: string, viewport?: number): Promise<unknown>
