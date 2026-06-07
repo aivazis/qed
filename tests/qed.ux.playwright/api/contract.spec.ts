@@ -20,6 +20,15 @@ test.describe.serial("the window.qed contract", () => {
         await page.waitForFunction(() => Boolean(window.qed))
     })
 
+    // the value test selects the phase channel; leave the suite on amplitude, as the rest expect
+    test.afterAll(async ({ browser }) => {
+        const page = await browser.newPage()
+        await page.goto("/", { waitUntil: "networkidle" })
+        await page.waitForFunction(() => Boolean(window.qed))
+        await page.evaluate(() => window.qed.setChannel("amplitude"))
+        await page.close()
+    })
+
     test("state() returns the documented model shape", async ({ page }) => {
         const s = await page.evaluate(() => window.qed.state())
         expect(s).not.toBeNull()
@@ -43,9 +52,10 @@ test.describe.serial("the window.qed contract", () => {
     })
 
     test("a range controller round-trips its bounds through the server", async ({ page }) => {
-        const controllers = await page.evaluate(() => window.qed.controllers())
-        test.skip(controllers.length === 0, "the active channel exposes no controllers")
-        const { slot, min, max } = controllers[0]
+        // the amplitude channel (the setup default) carries a range controller
+        const range = (await page.evaluate(() => window.qed.controllers())).find(c => c.kind === "range")
+        test.skip(!range, "the active channel exposes no range controller")
+        const { slot, min, max } = range!
         // a low/high inside the extent
         const bounds = { min, low: min + (max - min) / 4, high: min + (3 * (max - min)) / 4, max }
 
@@ -59,6 +69,23 @@ test.describe.serial("the window.qed contract", () => {
 
         // reset restores the defaults (and must not error)
         await page.evaluate(slot => window.qed.range.reset(slot), slot)
+    })
+
+    test("a value controller round-trips its marker through the server", async ({ page }) => {
+        // the phase channel carries value controllers (brightness/saturation)
+        await page.evaluate(() => window.qed.setChannel("phase"))
+        const value = (await page.evaluate(() => window.qed.controllers())).find(c => c.kind === "value")
+        test.skip(!value, "the phase channel exposes no value controller")
+        const { slot, min, max } = value!
+        const bounds = { min, value: min + (max - min) / 2, max }
+
+        const result = await page.evaluate(
+            ([slot, bounds]) => window.qed.value.update(slot, bounds),
+            [slot, bounds] as const,
+        ) as { viewValueUpdate: { controller: { value: number } } }
+        expect(result.viewValueUpdate.controller.value).toBeCloseTo(bounds.value, 3)
+
+        await page.evaluate(slot => window.qed.value.reset(slot), slot)
     })
 })
 
