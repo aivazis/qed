@@ -10,7 +10,7 @@ import { graphql, useMutation } from 'react-relay/hooks'
 // reset the zoom panel to its default state
 export const useReset = viewport => {
     // resetting the measure state modifies the server side store
-    const [commit, pending] = useMutation(useResetMeasureMutation)
+    const [commit, pending] = useMutation(resetMeasureMutation)
 
     // make the handler
     const reset = () => {
@@ -50,8 +50,9 @@ export const useReset = viewport => {
 }
 
 
-// the mutation that adds an anchor to the path
-const useResetMeasureMutation = graphql`
+// the mutation that resets the measure layer; exported so the {window.qed} automation facade can
+// commit it against the live store exactly as this hook does
+export const resetMeasureMutation = graphql`
     mutation useResetMeasureMutation($input: ViewMeasureResetInput!) {
         viewMeasureReset(input: $input) {
             measures {

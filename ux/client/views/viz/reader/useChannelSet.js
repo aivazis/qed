@@ -63,8 +63,9 @@ export const useChannelSet = channel => {
 }
 
 
-// the mutation that selects a reader
-const channelSetMutation = graphql`
+// the mutation that selects a reader; exported so the {window.qed} automation facade can commit it
+// against the live store exactly as this hook does
+export const channelSetMutation = graphql`
     mutation useChannelSetMutation($input: ViewChannelSetInput!) {
         viewChannelSet(input: $input) {
             views {
