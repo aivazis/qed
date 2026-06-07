@@ -52,7 +52,7 @@ export const useAnchorToggleSelectionMulti = viewport => {
 
 
 // toggle the selection in multinode mode
-const useAnchorToggleSelectionMultiMutation = graphql`
+export const useAnchorToggleSelectionMultiMutation = graphql`
     mutation useAnchorToggleSelectionMultiMutation($input: ViewMeasureAnchorToggleSelectionMultiInput!) {
         viewMeasureAnchorToggleSelectionMulti(input: $input) {
             measures {

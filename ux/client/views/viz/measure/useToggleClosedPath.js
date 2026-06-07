@@ -50,7 +50,7 @@ export const useToggleClosedPath = viewport => {
 
 
 // the mutation that toggles the closed path flag
-const useToggleClosedPathMutation = graphql`
+export const useToggleClosedPathMutation = graphql`
     mutation useToggleClosedPathMutation($input: ViewMeasureToggleClosedPathInput!) {
         viewMeasureToggleClosedPath(input: $input) {
             measures {
