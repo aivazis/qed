@@ -24,7 +24,7 @@ interface QED {
     state(viewport?: number): Promise<QEDViewModel | null>
     viewports(): Promise<QEDViewModel[]>
     readers(): Promise<{ name: string, selectors: Record<string, string[]> }[]>
-    controllers(viewport?: number): Promise<{ slot: string, min: number, max: number }[]>
+    controllers(viewport?: number): Promise<{ kind: string, slot: string, min: number, max: number }[]>
     // commands
     setActive(viewport: number): void
     centerOn(row: number, col: number, viewport?: number): Promise<void>
