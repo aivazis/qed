@@ -14,6 +14,7 @@ import { environment } from '~/environment'
 import { channelSetMutation } from '~/views/viz/reader/useChannelSet'
 import { resetMeasureMutation } from '~/views/viz/controls/measure/useReset'
 import { useSetLevelZoomMutation as setLevelZoomMutation } from '~/views/viz/controls/zoom/useSetLevel'
+import { useToggleCoupledZoomMutation as toggleCoupledZoomMutation } from '~/views/viz/controls/zoom/useToggleCoupled'
 import { useAnchorAddMutation as anchorAddMutation } from '~/views/viz/measure/useAnchorAdd'
 import { useAnchorPlaceMutation as anchorPlaceMutation } from '~/views/viz/measure/useAnchorPlace'
 import { useAnchorSplitMutation as anchorSplitMutation } from '~/views/viz/measure/useAnchorSplit'
@@ -58,7 +59,7 @@ const stateQuery = graphql`
                 reader { name }
                 dataset { shape origin channels { tag } }
                 channel { tag }
-                zoom { vertical horizontal }
+                zoom { vertical horizontal coupled }
                 measure { active closed path { x y } selection }
                 sync { scroll channel zoom path }
                 available { name values }
@@ -79,7 +80,9 @@ const modelOf = (view, viewport) => view == null ? null : ({
     },
     channel: view.channel?.tag ?? null,
     selectors: Object.fromEntries((view.available ?? []).map(axis => [axis.name, axis.values])),
-    zoom: view.zoom && { vertical: view.zoom.vertical, horizontal: view.zoom.horizontal },
+    zoom: view.zoom && {
+        vertical: view.zoom.vertical, horizontal: view.zoom.horizontal, coupled: view.zoom.coupled,
+    },
     measure: view.measure && {
         active: view.measure.active,
         closed: view.measure.closed,
@@ -111,6 +114,9 @@ export const makeQED = () => ({
             ? level : { vertical: level, horizontal: level }
         return command(setLevelZoomMutation, { viewport, vertical, horizontal })
     },
+
+    // flip whether the two zoom axes move together on {viewport}
+    toggleCoupled: (viewport = activeViewport) => command(toggleCoupledZoomMutation, { viewport }),
 
     // the measure layer; {row,col} are source pixels, translated here to the mutations' {x,y}
     measure: {

@@ -50,7 +50,7 @@ export const useToggleCoupled = viewport => {
 
 
 // the mutation that adds an anchor to the path
-const useToggleCoupledZoomMutation = graphql`
+export const useToggleCoupledZoomMutation = graphql`
     mutation useToggleCoupledZoomMutation($input: ViewZoomToggleCoupledInput!) {
         viewZoomToggleCoupled(input: $input) {
             zooms {
