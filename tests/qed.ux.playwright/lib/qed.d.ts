@@ -34,6 +34,7 @@ interface QED {
     setChannel(tag: string, viewport?: number): Promise<unknown>
     setZoom(level: number | { vertical: number, horizontal: number }, viewport?: number): Promise<unknown>
     toggleCoupled(viewport?: number): Promise<unknown>
+    zoomReset(viewport?: number): Promise<unknown>
     measure: {
         toggle(viewport?: number): Promise<unknown>
         reset(viewport?: number): Promise<unknown>
@@ -48,7 +49,9 @@ interface QED {
     }
     sync: {
         toggle(aspect: string, viewport?: number): Promise<unknown>
+        toggleAll(aspect: string, viewport?: number): Promise<unknown>
         updateOffset(row: number, col: number, viewport?: number): Promise<unknown>
+        reset(viewport?: number): Promise<unknown>
     }
 }
 

@@ -51,7 +51,7 @@ export const useReset = viewport => {
 
 
 // the mutation that adds an anchor to the path
-const useResetZoomMutation = graphql`
+export const useResetZoomMutation = graphql`
     mutation useResetZoomMutation($input: ViewZoomResetInput!) {
         viewZoomReset(input: $input) {
             zoom {
