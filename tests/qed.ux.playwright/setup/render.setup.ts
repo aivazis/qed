@@ -9,45 +9,26 @@
 import { test, expect } from "@playwright/test"
 
 
-// the server starts with a blank viewport that has auto-selected the single fixture dataset but
-// no channel, so nothing renders. select a channel through the same GraphQL endpoint the client
-// uses, so exactly one Mosaic -- and the zoom slider on {/controls} -- renders for the read-only
-// specs. the selection is server-side state, so it persists for the {gate} and {backlog} pages.
-//
-// the GraphQL call is made from inside the page (browser {fetch}), exactly as the client does it;
-// node's HTTP client (playwright's {request} fixture) is not understood by pyre's minimal server.
+// the server starts with a blank viewport that has auto-selected the single fixture dataset but no
+// channel, so nothing renders. arrange the state through {window.qed}, the scriptable automation
+// surface (doc/automation-surface.md): it reads the model and commits the channel through the live
+// Relay store, so exactly one Mosaic -- and the zoom slider on {/controls} -- renders for the
+// read-only specs, with no raw-fetch reload dance. the selection is server-side state, so it
+// persists for the {gate} pages.
 test("a viz view renders on load", async ({ page }) => {
-    // load the app, which itself drives the same GraphQL endpoint, so {fetch} is known to work
+    // load the app and wait for the facade to publish itself
     await page.goto("/", { waitUntil: "networkidle" })
+    await page.waitForFunction(() => Boolean((window as { qed?: unknown }).qed))
 
-    // discover the auto-selected reader and a channel, then select it on viewport 0
+    // discover a channel the dataset offers, set it, and read back what the server confirms
     const channel = await page.evaluate(async () => {
-        // a small GraphQL helper, same-origin
-        const gql = async (query: string) => {
-            const response = await fetch("/graphql", {
-                method: "POST",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({ query }),
-            })
-            return response.json()
-        }
-
-        // the reader and the channels its dataset offers
-        const state = await gql("{ qed { views { reader { name } dataset { channels { tag } } } } }")
-        const view = state.data.qed.views[0]
-        const reader = view.reader.name
-        const tags = view.dataset.channels.map((c: { tag: string }) => c.tag)
+        const qed = (window as { qed: { state: () => Promise<{ channel: string | null,
+            dataset: { channels: string[] } }>, setChannel: (tag: string) => Promise<unknown> } }).qed
+        const { dataset } = await qed.state()
         // prefer amplitude, the most legible channel, but fall back to whatever the dataset offers
-        const choice = tags.includes("amplitude") ? "amplitude" : tags[0]
-
-        // select it
-        const result = await gql(
-            `mutation { viewChannelSet(input: ` +
-            `{viewport: 0, reader: "${reader}", value: "${choice}"}) ` +
-            `{ views { channel { tag } } } }`
-        )
-        // hand back what the server confirms
-        return result.data.viewChannelSet.views[0].channel.tag
+        const choice = dataset.channels.includes("amplitude") ? "amplitude" : dataset.channels[0]
+        await qed.setChannel(choice)
+        return (await qed.state()).channel
     })
     // the server made a selection
     expect(channel).toBeTruthy()
