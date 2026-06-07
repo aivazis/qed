@@ -20,10 +20,16 @@ import type { Page } from "@playwright/test"
 // client's own slider (a Relay mutation, no remount), then checks the invariant: a click on a
 // fixed minimap spot must scroll to the same place no matter the zoom history.
 
-const gql = (page: Page, query: string) =>
-    page.evaluate(async q => (await fetch("/graphql", {
-        method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ query: q }),
-    })).json(), query)
+// drive the client's automation surface ({window.qed}); it commits through the live Relay store
+const ensureQED = (page: Page) => page.waitForFunction(() => Boolean(window.qed))
+const setChannel = async (page: Page, tag: string) => {
+    await ensureQED(page)
+    await page.evaluate(channel => window.qed.setChannel(channel), tag)
+}
+const setZoom = async (page: Page, horizontal: number, vertical: number) => {
+    await ensureQED(page)
+    await page.evaluate(level => window.qed.setZoom(level), { horizontal, vertical })
+}
 
 // the active viewport is the mosaic's scrollable parent
 const readScrollLeft = (page: Page) =>
@@ -37,25 +43,25 @@ const resetScroll = (page: Page) =>
         if (vp) { vp.scrollLeft = 0; vp.scrollTop = 0 }
     })
 const waitForZoom = async (page: Page, horizontal: number) =>
-    expect.poll(async () =>
-        (await gql(page, "{ qed { views { zoom { horizontal } } } }")).data.qed.views[0].zoom.horizontal
-    ).toBe(horizontal)
+    expect.poll(async () => {
+        await ensureQED(page)
+        return (await page.evaluate(() => window.qed.state()))?.zoom?.horizontal
+    }).toBe(horizontal)
 
 
 test.describe.serial("the minimap tracks the current zoom", () => {
     test.afterAll(async ({ browser }) => {
         const page = await browser.newPage()
         await page.goto("/", { waitUntil: "networkidle" })
-        await gql(page, "mutation { viewZoomSetLevel(input: {viewport: 0, horizontal: 0, vertical: 0}) { zooms { horizontal } } }")
+        await setZoom(page, 0, 0)
         await page.close()
     })
 
     test("a minimap click maps to the same scroll regardless of zoom history", async ({ page }) => {
         // a channel must be selected and the zoom at 0 to start
         await page.goto("/", { waitUntil: "networkidle" })
-        const reader = (await gql(page, "{ qed { views { reader { name } } } }")).data.qed.views[0].reader.name
-        await gql(page, `mutation { viewChannelSet(input: {viewport: 0, reader: "${reader}", value: "amplitude"}) { views { channel { tag } } } }`)
-        await gql(page, "mutation { viewZoomSetLevel(input: {viewport: 0, horizontal: 0, vertical: 0}) { zooms { horizontal } } }")
+        await setChannel(page, "amplitude")
+        await setZoom(page, 0, 0)
         await page.goto("/controls", { waitUntil: "networkidle" })
 
         // the minimap's data rect (Placemat, Data, Viewport -> the second one) and the horizontal

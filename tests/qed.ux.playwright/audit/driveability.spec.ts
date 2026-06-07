@@ -18,15 +18,8 @@ import type { Page } from "@playwright/test"
 
 const nisarBaseURL = process.env.QED_URL_NISAR ?? `http://localhost:${process.env.QED_PORT_NISAR ?? 8138}`
 
-// drive a GraphQL mutation/query from inside the page, the way the client does
-const gql = (page: Page, query: string) =>
-    page.evaluate(async (q) => {
-        const r = await fetch("/graphql", {
-            method: "POST", headers: { "content-type": "application/json" },
-            body: JSON.stringify({ query: q }),
-        })
-        return r.json()
-    }, query)
+// arrange server state through the client's automation surface ({window.qed}), published on mount
+const ensureQED = (page: Page) => page.waitForFunction(() => Boolean(window.qed))
 
 // the audit body runs entirely in the page; it returns a list of human-readable problem lines
 const audit = (): { gaps: string[]; ambiguous: string[]; total: number } => {
@@ -133,9 +126,10 @@ test("driveability audit across routes and states", async ({ page }) => {
     // STATE: the measure layer on, with a couple of anchors -- exposes the measure panel, the peek
     // pad, and the on-raster markers, none of which the gate's default render shows
     await page.goto("/controls", { waitUntil: "networkidle" })
-    await gql(page, `mutation { viewMeasureReset(input: {viewport: 0}) { measures { dirty } } }`)
-    await gql(page, `mutation { viewMeasureAnchorAdd(input: {viewport: 0, x: 120, y: 240, index: null}) { measures { dirty } } }`)
-    await gql(page, `mutation { viewMeasureAnchorAdd(input: {viewport: 0, x: 180, y: 300, index: null}) { measures { dirty } } }`)
+    await ensureQED(page)
+    await page.evaluate(() => window.qed.measure.reset())
+    await page.evaluate(() => window.qed.measure.add(240, 120))
+    await page.evaluate(() => window.qed.measure.add(300, 180))
     const measure = page.locator('[data-qed-control="viewport"][data-qed-action="measure"]').first()
     if ((await measure.getAttribute("aria-pressed")) !== "true") await measure.click()
     await page.waitForTimeout(500)
@@ -149,7 +143,7 @@ test("driveability audit across routes and states", async ({ page }) => {
     // restore: collapse the split and clear the measure layer
     await split.click()
     if ((await measure.getAttribute("aria-pressed")) === "true") await measure.click()
-    await gql(page, `mutation { viewMeasureReset(input: {viewport: 0}) { measures { dirty } } }`)
+    await page.evaluate(() => window.qed.measure.reset())
 
     // STATE: the NISAR reader on its own server -- the band/frequency/polarization selectors
     await page.goto(`${nisarBaseURL}/`, { waitUntil: "networkidle" })
