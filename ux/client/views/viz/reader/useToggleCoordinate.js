@@ -14,6 +14,8 @@ import { useViewports } from '~/views/viz'
 // local
 // context
 import { useReader } from './useReader'
+// the shared store updater
+import { replaceViewUpdater } from './replaceView'
 
 
 // toggle the {coordinate} as the value for {axis}
@@ -44,26 +46,8 @@ export const useToggleCoordinate = (axis, coordinate) => {
                     value: coordinate,
                 }
             },
-            // update the store
-            updater: store => {
-                // get the root field of the mutation result
-                const response = store.getRootField("viewCoordinateToggle")
-                // ask for the view
-                const view = response.getLinkedRecord("view")
-                // if it's trivial
-                if (view === null) {
-                    // something went wrong at the server; not much more to do
-                    return
-                }
-                // get the remote store
-                const qed = store.get("QED")
-                // get the current set of views
-                const views = qed.getLinkedRecords("views")
-                // replace the view at {viewport} with the new one
-                qed.setLinkedRecords(views.toSpliced(viewport, 1, view), "views")
-                // all done
-                return
-            },
+            // update the store: toggling a coordinate swaps the whole view
+            updater: replaceViewUpdater("viewCoordinateToggle", viewport),
             onError: errors => {
                 // send the error to the console
                 console.error(`viz.reader.useToggleCoordinate:`)
@@ -84,8 +68,8 @@ export const useToggleCoordinate = (axis, coordinate) => {
 }
 
 
-// the mutation that selects a reader
-const toggleCoordinateMutation = graphql`
+// the mutation that toggles a coordinate; exported so the {window.qed} automation facade can commit it
+export const toggleCoordinateMutation = graphql`
     mutation useToggleCoordinateMutation($input: ViewCoordinateToggleInput!) {
         viewCoordinateToggle(input: $input) {
             view {

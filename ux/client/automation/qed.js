@@ -20,6 +20,10 @@ import { useAnchorPlaceMutation as anchorPlaceMutation } from '~/views/viz/measu
 import { useAnchorSplitMutation as anchorSplitMutation } from '~/views/viz/measure/useAnchorSplit'
 import { useAnchorRemoveMutation as anchorRemoveMutation } from '~/views/viz/measure/useAnchorRemove'
 import { measureToggleLayerMutation } from '~/views/viz/measure/useMeasureToggleLayer'
+import { selectReaderMutation } from '~/views/viz/reader/useSelectReader'
+import { toggleCoordinateMutation } from '~/views/viz/reader/useToggleCoordinate'
+// the store updater the reader/coordinate mutations share, since they swap the whole view
+import { replaceViewUpdater } from '~/views/viz/reader/replaceView'
 
 
 // the viewport a command targets when the caller names none; kept current by {setActiveViewport},
@@ -103,6 +107,18 @@ export const makeQED = () => ({
         const { qed } = await read(stateQuery)
         return modelOf(qed.views[viewport], viewport)
     },
+
+    // select the reader named {reader} for {viewport}; swapping the view needs the shared updater
+    selectReader: (reader, viewport = activeViewport) =>
+        command(selectReaderMutation, { viewport, reader },
+            replaceViewUpdater("viewReaderSelect", viewport)),
+
+    // toggle {value} of the {selector} axis (band/frequency/polarization) for {viewport}; the input
+    // also carries the reader, and swapping the view needs the shared updater
+    selectValue: async (selector, value, viewport = activeViewport) =>
+        command(toggleCoordinateMutation,
+            { viewport, reader: await readerOf(viewport), selector, value },
+            replaceViewUpdater("viewCoordinateToggle", viewport)),
 
     // select {tag} as the channel of {viewport}; the input also carries the reader
     setChannel: async (tag, viewport = activeViewport) =>
