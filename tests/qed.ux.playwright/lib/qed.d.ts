@@ -23,8 +23,10 @@ interface QED {
     // queries
     state(viewport?: number): Promise<QEDViewModel | null>
     viewports(): Promise<QEDViewModel[]>
+    readers(): Promise<{ name: string, selectors: Record<string, string[]> }[]>
     // commands
     setActive(viewport: number): void
+    centerOn(row: number, col: number, viewport?: number): Promise<void>
     split(viewport?: number): Promise<unknown>
     collapse(viewport?: number): Promise<unknown>
     selectReader(reader: string, viewport?: number): Promise<unknown>

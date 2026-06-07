@@ -50,6 +50,15 @@ export default defineConfig({
         baseURL,
         // collect a trace on first retry to debug flakes
         trace: "on-first-retry",
+        // opt every test context into the automation surface ({window.qed}) by seeding the
+        // {qed.automation} localStorage flag the app's gate checks, for both servers under test
+        storageState: {
+            cookies: [],
+            origins: [baseURL, nisarBaseURL].map(origin => ({
+                origin,
+                localStorage: [{ name: "qed.automation", value: "1" }],
+            })),
+        },
     },
 
     projects: [
