@@ -22,7 +22,11 @@ type QEDViewModel = {
 interface QED {
     // queries
     state(viewport?: number): Promise<QEDViewModel | null>
+    viewports(): Promise<QEDViewModel[]>
     // commands
+    setActive(viewport: number): void
+    split(viewport?: number): Promise<unknown>
+    collapse(viewport?: number): Promise<unknown>
     selectReader(reader: string, viewport?: number): Promise<unknown>
     selectValue(selector: string, value: string, viewport?: number): Promise<unknown>
     setChannel(tag: string, viewport?: number): Promise<unknown>
@@ -35,6 +39,10 @@ interface QED {
         move(handle: number, row: number, col: number, viewport?: number): Promise<unknown>
         split(handle: number, viewport?: number): Promise<unknown>
         remove(handle: number, viewport?: number): Promise<unknown>
+    }
+    sync: {
+        toggle(aspect: string, viewport?: number): Promise<unknown>
+        updateOffset(row: number, col: number, viewport?: number): Promise<unknown>
     }
 }
 
