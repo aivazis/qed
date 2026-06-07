@@ -16,24 +16,16 @@ import type { Page } from "@playwright/test"
 // anchors mutates the shared server store, so this lives in the behavior project (serial, after the
 // read-only gate) and resets the path it touches.
 
-// the same GraphQL endpoint the client uses, driven from inside the page (pyre's minimal server
-// understands the browser's {fetch}, not playwright's node-side {request} fixture). the page's Relay
-// store does not learn of a raw {fetch} mutation, so callers reload the route afterward to render it.
-const gql = (page: Page, query: string) =>
-    page.evaluate(async (q) => {
-        const response = await fetch("/graphql", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ query: q }),
-        })
-        return response.json()
-    }, query)
+// the client's automation surface ({window.qed}), published on mount; its commands commit through
+// the live Relay store, so anchors and resets render immediately, with no raw fetch and no reload
+const ensureQED = (page: Page) => page.waitForFunction(() => Boolean(window.qed))
 
-// place an anchor at {col,row} on viewport 0; the api is column-major in its arguments ({x},{y}).
-// {index: null} appends -- the resolver's {index} parameter has no default, so it must be sent
-const place = (page: Page, col: number, row: number) =>
-    gql(page, `mutation { viewMeasureAnchorAdd(input: {viewport: 0, x: ${col}, y: ${row}, index: null}) ` +
-        `{ measures { dirty } } }`)
+// place an anchor at {col,row} on viewport 0; the facade takes row-major {row,col} source pixels and
+// translates to the column-major mutation itself
+const place = async (page: Page, col: number, row: number) => {
+    await ensureQED(page)
+    await page.evaluate(([row, col]) => window.qed.measure.add(row, col), [row, col])
+}
 
 // the measure toggle glyph on the viewport actions row
 const measureToggle = (page: Page) =>
@@ -49,14 +41,13 @@ const showMeasure = async (page: Page) => {
     }
 }
 
-// reset the path and leave the layer hidden, the blank state the server boots with
+// reset the path and leave the layer hidden, the blank state the server boots with. the facade reset
+// updates the live store, so the toggle then acts on a consistent state, with no reload
 const cleanup = async (browser: import("@playwright/test").Browser) => {
     const page = await browser.newPage()
     await page.goto("/controls", { waitUntil: "networkidle" })
-    await gql(page, `mutation { viewMeasureReset(input: {viewport: 0}) { measures { dirty } } }`)
-    // the raw fetch does not update the page's Relay store, so reload to render the cleared path
-    // before operating the toggle; otherwise it acts on stale anchors and the layer does not hide
-    await page.goto("/controls", { waitUntil: "networkidle" })
+    await ensureQED(page)
+    await page.evaluate(() => window.qed.measure.reset())
     const toggle = measureToggle(page)
     await toggle.waitFor({ timeout: 10_000 })
     if ((await toggle.getAttribute("aria-pressed")) === "true") {
@@ -75,11 +66,10 @@ test.describe.serial("measure markers carry verifiable identity", () => {
     test.afterAll(async ({ browser }) => { await cleanup(browser) })
 
     test("placed markers read back by source coordinate at both ends", async ({ page }) => {
-        // drop the points through the client's own endpoint, then reload so the fresh query renders them
+        // drop the points through the facade, then reveal the layer; the live store renders them with
+        // no reload
         await page.goto("/controls", { waitUntil: "networkidle" })
         for (const [col, row] of points) await place(page, col, row)
-        await page.goto("/controls", { waitUntil: "networkidle" })
-        // reveal the layer and its table
         await showMeasure(page)
 
         // each control-table row mirrors the placement order, keyed by its vertex ordinal, and reads
@@ -110,11 +100,9 @@ test.describe.serial("measure markers carry verifiable identity", () => {
         const second = page.locator(`[data-qed-panel="measure"] [data-qed-marker-index="1"]`)
         await expect(second).toHaveAttribute("data-qed-source", `${row1},${col1}`)
 
-        // insert a vertex between ordinals 0 and 1 -- the midpoint of the two placed points -- then
-        // reload so the renumbered path renders
-        await gql(page, `mutation { viewMeasureAnchorSplit(input: {viewport: 0, anchor: 0}) { measures { dirty } } }`)
-        await page.goto("/controls", { waitUntil: "networkidle" })
-        await showMeasure(page)
+        // insert a vertex between ordinals 0 and 1 through the facade; the renumbered path renders live
+        await ensureQED(page)
+        await page.evaluate(() => window.qed.measure.split(0))
         const [col0, row0] = points[0]
         const mid = `${Math.round((row0 + row1) / 2)},${Math.round((col0 + col1) / 2)}`
 
@@ -129,19 +117,17 @@ test.describe.serial("measure markers carry verifiable identity", () => {
 
     test("resetting through the control clears the rendered path live, with no reload", async ({ page }) => {
         // this serial block accumulates anchors across its tests, so start from a known-empty path
-        // (backdoor reset is a fine teardown/setup tool) then place exactly two and render them
+        // (the facade reset is a fine setup tool) then place exactly two and render them
         await page.goto("/controls", { waitUntil: "networkidle" })
-        await gql(page, `mutation { viewMeasureReset(input: {viewport: 0}) { measures { dirty } } }`)
-        await page.goto("/controls", { waitUntil: "networkidle" })
+        await ensureQED(page)
+        await page.evaluate(() => window.qed.measure.reset())
         for (const [col, row] of points.slice(0, 2)) await place(page, col, row)
-        await page.goto("/controls", { waitUntil: "networkidle" })
         await showMeasure(page)
         const markers = page.locator(`[data-qed-panel="measure"] [data-qed-marker-index]`)
         await expect(markers).toHaveCount(2)
 
-        // reset through the client's OWN control -- a Relay mutation, not a raw fetch. the reset must
-        // update the Relay store, so the rendered path clears WITHOUT a reload. if it does not, the
-        // client reset is broken and this fails: that is the expectation, recorded
+        // reset through the client's OWN control -- the rendered path must clear WITHOUT a reload; if
+        // the reset failed to update the store, this fails. that is the expectation, recorded
         const reset = page.locator('[data-qed-panel="measure"]')
             .getByRole("button", { name: "reset the values to their defaults" })
         await reset.click()

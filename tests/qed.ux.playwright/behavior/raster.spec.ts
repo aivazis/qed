@@ -18,14 +18,17 @@ import type { Page } from "@playwright/test"
 // it mutates shared server state (the zoom level), so it runs in the {behavior} project, which is
 // gated behind the read-only checks and serialized; it restores the zoom on the way out.
 
-// a GraphQL helper, same-origin; selecting {zoom} forces the lazy server-side mutator to run
-const gql = (page: Page, query: string) =>
-    page.evaluate(async q => (await fetch("/graphql", {
-        method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ query: q }),
-    })).json(), query)
-
-const setZoom = (page: Page, h: number, v: number) =>
-    gql(page, `mutation { viewZoomSetLevel(input: {viewport: 0, horizontal: ${h}, vertical: ${v}}) { zooms { horizontal vertical } } }`)
+// drive the client's automation surface ({window.qed}) from inside the page; it commits through the
+// live Relay store, so the state is set without a raw fetch. the app publishes the facade on mount,
+// so wait for it after each navigation
+const setZoom = async (page: Page, horizontal: number, vertical: number) => {
+    await page.waitForFunction(() => Boolean(window.qed))
+    await page.evaluate(level => window.qed.setZoom(level), { horizontal, vertical })
+}
+const setChannel = async (page: Page, tag: string) => {
+    await page.waitForFunction(() => Boolean(window.qed))
+    await page.evaluate(channel => window.qed.setChannel(channel), tag)
+}
 
 // load the readers view and report the rendered mosaic's pixel extent
 const mosaicExtent = async (page: Page) => {
@@ -46,10 +49,9 @@ test.describe.serial("the raster resizes with zoom", () => {
     })
 
     test("the mosaic extent tracks the zoom level", async ({ page }) => {
-        // make sure a channel is selected so the mosaic renders
+        // make sure a channel is selected so the mosaic renders; the facade resolves the reader itself
         await page.goto("/", { waitUntil: "networkidle" })
-        const reader = (await gql(page, "{ qed { views { reader { name } } } }")).data.qed.views[0].reader.name
-        await gql(page, `mutation { viewChannelSet(input: {viewport: 0, reader: "${reader}", value: "amplitude"}) { views { channel { tag } } } }`)
+        await setChannel(page, "amplitude")
 
         // the extent at zoom 0
         await setZoom(page, 0, 0)
