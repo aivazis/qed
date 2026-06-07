@@ -99,11 +99,12 @@ const readersQuery = graphql`
     }
 `
 
-// the colour-stretch controllers bound to a viewport's channel, by slot
+// the colour-stretch controllers bound to a viewport's channel; {__typename} tells a range controller
+// from a value one
 const controllersQuery = graphql`
     query qedControllersQuery {
         qed {
-            views { channel { controllers { slot min max } } }
+            views { channel { controllers { __typename slot min max } } }
         }
     }
 `
@@ -169,11 +170,14 @@ export const makeQED = () => ({
         }))
     },
 
-    // the colour-stretch controllers on {viewport}'s channel: each one's slot and bounds
+    // the colour-stretch controllers on {viewport}'s channel: each one's kind (range|value), slot,
+    // and bounds, so a driver picks one by kind and feeds it to {range}/{value}
     controllers: async (viewport = getActiveViewport()) => {
         const { qed } = await read(controllersQuery)
-        return (qed.views[viewport]?.channel?.controllers ?? [])
-            .map(controller => ({ slot: controller.slot, min: controller.min, max: controller.max }))
+        return (qed.views[viewport]?.channel?.controllers ?? []).map(controller => ({
+            kind: controller.__typename.replace(/Controller$/, "").toLowerCase(),
+            slot: controller.slot, min: controller.min, max: controller.max,
+        }))
     },
 
     // select the reader named {reader} for {viewport}; swapping the view needs the shared updater
