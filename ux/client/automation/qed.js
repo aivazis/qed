@@ -13,6 +13,12 @@ import { environment } from '~/environment'
 // mutation documents reused verbatim from the hooks the ui uses, so the store updates identically
 import { channelSetMutation } from '~/views/viz/reader/useChannelSet'
 import { resetMeasureMutation } from '~/views/viz/controls/measure/useReset'
+import { useSetLevelZoomMutation as setLevelZoomMutation } from '~/views/viz/controls/zoom/useSetLevel'
+import { useAnchorAddMutation as anchorAddMutation } from '~/views/viz/measure/useAnchorAdd'
+import { useAnchorPlaceMutation as anchorPlaceMutation } from '~/views/viz/measure/useAnchorPlace'
+import { useAnchorSplitMutation as anchorSplitMutation } from '~/views/viz/measure/useAnchorSplit'
+import { useAnchorRemoveMutation as anchorRemoveMutation } from '~/views/viz/measure/useAnchorRemove'
+import { measureToggleLayerMutation } from '~/views/viz/measure/useMeasureToggleLayer'
 
 
 // the viewport a command targets when the caller names none; kept current by {setActiveViewport},
@@ -35,6 +41,12 @@ const command = (mutation, input, updater) => new Promise((resolve, reject) => {
 
 // read {query} and resolve with its data, populating the store as a side effect
 const read = (query, variables = {}) => fetchQuery(environment, query, variables).toPromise()
+
+// the name of the reader bound to {viewport}; several inputs (channel, measure toggle) carry it
+const readerOf = async viewport => {
+    const { qed } = await read(stateQuery)
+    return qed.views[viewport]?.reader?.name
+}
 
 
 // the model read: each view's reader, channel, zoom, measure path, and selectors, in the same
@@ -89,17 +101,36 @@ export const makeQED = () => ({
         return modelOf(qed.views[viewport], viewport)
     },
 
-    // select {tag} as the channel of {viewport}; the input also carries the reader, so resolve it first
-    setChannel: async (tag, viewport = activeViewport) => {
-        const { qed } = await read(stateQuery)
-        const reader = qed.views[viewport]?.reader?.name
-        return command(channelSetMutation, { viewport, reader, value: tag })
+    // select {tag} as the channel of {viewport}; the input also carries the reader
+    setChannel: async (tag, viewport = activeViewport) =>
+        command(channelSetMutation, { viewport, reader: await readerOf(viewport), value: tag }),
+
+    // set the zoom of {viewport}; a number applies to both axes, an object sets them independently
+    setZoom: (level, viewport = activeViewport) => {
+        const { vertical, horizontal } = typeof level === "object"
+            ? level : { vertical: level, horizontal: level }
+        return command(setLevelZoomMutation, { viewport, vertical, horizontal })
     },
 
-    // the measure layer
+    // the measure layer; {row,col} are source pixels, translated here to the mutations' {x,y}
     measure: {
+        // show or hide the layer of {viewport}; the input carries the reader
+        toggle: async (viewport = activeViewport) =>
+            command(measureToggleLayerMutation, { viewport, reader: await readerOf(viewport) }),
         // clear the path of {viewport}
         reset: (viewport = activeViewport) => command(resetMeasureMutation, { viewport }),
+        // append an anchor at {row,col}, or insert it at {index}
+        add: (row, col, index = null, viewport = activeViewport) =>
+            command(anchorAddMutation, { viewport, x: col, y: row, index }),
+        // move anchor {handle} to {row,col}
+        move: (handle, row, col, viewport = activeViewport) =>
+            command(anchorPlaceMutation, { viewport, handle, x: col, y: row }),
+        // insert an anchor on the segment after {handle}
+        split: (handle, viewport = activeViewport) =>
+            command(anchorSplitMutation, { viewport, anchor: handle }),
+        // delete anchor {handle}
+        remove: (handle, viewport = activeViewport) =>
+            command(anchorRemoveMutation, { viewport, anchor: handle }),
     },
 })
 

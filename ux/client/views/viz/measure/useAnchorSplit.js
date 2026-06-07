@@ -52,7 +52,7 @@ export const useAnchorSplit = viewport => {
 
 
 // the mutation that adds an anchor to the path
-const useAnchorSplitMutation = graphql`
+export const useAnchorSplitMutation = graphql`
     mutation useAnchorSplitMutation($input: ViewMeasureAnchorSplitInput!) {
         viewMeasureAnchorSplit(input: $input) {
             measures {
