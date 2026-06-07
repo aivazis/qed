@@ -24,12 +24,13 @@ import { selectReaderMutation } from '~/views/viz/reader/useSelectReader'
 import { toggleCoordinateMutation } from '~/views/viz/reader/useToggleCoordinate'
 // the store updater the reader/coordinate mutations share, since they swap the whole view
 import { replaceViewUpdater } from '~/views/viz/reader/replaceView'
-
-
-// the viewport a command targets when the caller names none; kept current by {setActiveViewport},
-// the bridge mounted inside the viewports provider. defaults to the lone viewport the app boots with
-let activeViewport = 0
-export const setActiveViewport = viewport => { activeViewport = viewport }
+import { splitMutation } from '~/views/viz/viz/useSplitView'
+import { collapseMutation } from '~/views/viz/viz/useCollapseView'
+import { splitViewUpdater, collapseViewUpdater } from '~/views/viz/viz/viewListUpdaters'
+import { useSyncToggleViewportMutation as syncToggleViewportMutation } from '~/views/viz/controls/sync/useSyncToggleViewport'
+import { useSyncUpdateOffsetMutation as syncUpdateOffsetMutation } from '~/views/viz/controls/sync/useSyncUpdateOffset'
+// the active viewport, kept in sync with the ui by the {ViewportBridge}
+import { getActiveViewport, activate } from './activeViewport'
 
 
 // commit {mutation} with the single {input} every qed mutation takes and resolve once it settles;
@@ -103,55 +104,86 @@ const modelOf = (view, viewport) => view == null ? null : ({
 // assemble the facade published at {window.qed}
 export const makeQED = () => ({
     // the model of {viewport}, or null when it does not exist
-    state: async (viewport = activeViewport) => {
+    state: async (viewport = getActiveViewport()) => {
         const { qed } = await read(stateQuery)
         return modelOf(qed.views[viewport], viewport)
     },
 
+    // the model of every viewport, for split layouts
+    viewports: async () => {
+        const { qed } = await read(stateQuery)
+        return qed.views.map((view, index) => modelOf(view, index))
+    },
+
     // select the reader named {reader} for {viewport}; swapping the view needs the shared updater
-    selectReader: (reader, viewport = activeViewport) =>
+    selectReader: (reader, viewport = getActiveViewport()) =>
         command(selectReaderMutation, { viewport, reader },
             replaceViewUpdater("viewReaderSelect", viewport)),
 
     // toggle {value} of the {selector} axis (band/frequency/polarization) for {viewport}; the input
     // also carries the reader, and swapping the view needs the shared updater
-    selectValue: async (selector, value, viewport = activeViewport) =>
+    selectValue: async (selector, value, viewport = getActiveViewport()) =>
         command(toggleCoordinateMutation,
             { viewport, reader: await readerOf(viewport), selector, value },
             replaceViewUpdater("viewCoordinateToggle", viewport)),
 
     // select {tag} as the channel of {viewport}; the input also carries the reader
-    setChannel: async (tag, viewport = activeViewport) =>
+    setChannel: async (tag, viewport = getActiveViewport()) =>
         command(channelSetMutation, { viewport, reader: await readerOf(viewport), value: tag }),
 
     // set the zoom of {viewport}; a number applies to both axes, an object sets them independently
-    setZoom: (level, viewport = activeViewport) => {
+    setZoom: (level, viewport = getActiveViewport()) => {
         const { vertical, horizontal } = typeof level === "object"
             ? level : { vertical: level, horizontal: level }
         return command(setLevelZoomMutation, { viewport, vertical, horizontal })
     },
 
     // flip whether the two zoom axes move together on {viewport}
-    toggleCoupled: (viewport = activeViewport) => command(toggleCoupledZoomMutation, { viewport }),
+    toggleCoupled: (viewport = getActiveViewport()) => command(toggleCoupledZoomMutation, { viewport }),
+
+    // make {viewport} the active one (the facade default and, via the bridge, the ui)
+    setActive: viewport => activate(viewport),
+
+    // split {viewport} in two; the new view lands after it and becomes active, as in the ui
+    split: async (viewport = getActiveViewport()) => {
+        await command(splitMutation, { viewport }, splitViewUpdater(viewport))
+        activate(viewport + 1)
+    },
+
+    // remove {viewport}; the active viewport retreats if it was at or past it, as in the ui
+    collapse: async (viewport = getActiveViewport()) => {
+        await command(collapseMutation, { viewport }, collapseViewUpdater(viewport))
+        if (viewport <= getActiveViewport()) activate(Math.max(viewport - 1, 0))
+    },
+
+    // scroll synchronization
+    sync: {
+        // flip the {aspect} (scroll/channel/zoom/path) sync flag of {viewport}
+        toggle: (aspect, viewport = getActiveViewport()) =>
+            command(syncToggleViewportMutation, { viewport, aspect }),
+        // set {viewport}'s relative sync offset to {row,col} source pixels
+        updateOffset: (row, col, viewport = getActiveViewport()) =>
+            command(syncUpdateOffsetMutation, { viewport, x: col, y: row }),
+    },
 
     // the measure layer; {row,col} are source pixels, translated here to the mutations' {x,y}
     measure: {
         // show or hide the layer of {viewport}; the input carries the reader
-        toggle: async (viewport = activeViewport) =>
+        toggle: async (viewport = getActiveViewport()) =>
             command(measureToggleLayerMutation, { viewport, reader: await readerOf(viewport) }),
         // clear the path of {viewport}
-        reset: (viewport = activeViewport) => command(resetMeasureMutation, { viewport }),
+        reset: (viewport = getActiveViewport()) => command(resetMeasureMutation, { viewport }),
         // append an anchor at {row,col}, or insert it at {index}
-        add: (row, col, index = null, viewport = activeViewport) =>
+        add: (row, col, index = null, viewport = getActiveViewport()) =>
             command(anchorAddMutation, { viewport, x: col, y: row, index }),
         // move anchor {handle} to {row,col}
-        move: (handle, row, col, viewport = activeViewport) =>
+        move: (handle, row, col, viewport = getActiveViewport()) =>
             command(anchorPlaceMutation, { viewport, handle, x: col, y: row }),
         // insert an anchor on the segment after {handle}
-        split: (handle, viewport = activeViewport) =>
+        split: (handle, viewport = getActiveViewport()) =>
             command(anchorSplitMutation, { viewport, anchor: handle }),
         // delete anchor {handle}
-        remove: (handle, viewport = activeViewport) =>
+        remove: (handle, viewport = getActiveViewport()) =>
             command(anchorRemoveMutation, { viewport, anchor: handle }),
     },
 })
