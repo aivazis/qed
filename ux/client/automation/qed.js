@@ -15,6 +15,8 @@ import { channelSetMutation } from '~/views/viz/reader/useChannelSet'
 import { resetMeasureMutation } from '~/views/viz/controls/measure/useReset'
 import { useSetLevelZoomMutation as setLevelZoomMutation } from '~/views/viz/controls/zoom/useSetLevel'
 import { useToggleCoupledZoomMutation as toggleCoupledZoomMutation } from '~/views/viz/controls/zoom/useToggleCoupled'
+import { useResetZoomMutation as resetZoomMutation } from '~/views/viz/controls/zoom/useReset'
+import { useSyncToggleAllMutation as syncToggleAllMutation } from '~/views/viz/controls/sync/useSyncToggleAll'
 import { useAnchorAddMutation as anchorAddMutation } from '~/views/viz/measure/useAnchorAdd'
 import { useAnchorPlaceMutation as anchorPlaceMutation } from '~/views/viz/measure/useAnchorPlace'
 import { useAnchorSplitMutation as anchorSplitMutation } from '~/views/viz/measure/useAnchorSplit'
@@ -82,6 +84,16 @@ const readersQuery = graphql`
     query qedReadersQuery {
         qed {
             readers { name selectors { name values } }
+        }
+    }
+`
+
+// the sync reset has no ui control, so the facade carries its own document; the returned {sync}
+// auto-merges by its node id
+const syncResetMutation = graphql`
+    mutation qedSyncResetMutation($input: ViewSyncResetInput!) {
+        viewSyncReset(input: $input) {
+            sync { dirty scroll channel zoom path }
         }
     }
 `
@@ -163,6 +175,9 @@ export const makeQED = () => ({
     // flip whether the two zoom axes move together on {viewport}
     toggleCoupled: (viewport = getActiveViewport()) => command(toggleCoupledZoomMutation, { viewport }),
 
+    // reset {viewport} to its default zoom
+    zoomReset: (viewport = getActiveViewport()) => command(resetZoomMutation, { viewport }),
+
     // make {viewport} the active one (the facade default and, via the bridge, the ui)
     setActive: viewport => activate(viewport),
 
@@ -199,9 +214,14 @@ export const makeQED = () => ({
         // flip the {aspect} (scroll/channel/zoom/path) sync flag of {viewport}
         toggle: (aspect, viewport = getActiveViewport()) =>
             command(syncToggleViewportMutation, { viewport, aspect }),
+        // flip the {aspect} flag across every viewport, using {viewport} as the reference
+        toggleAll: (aspect, viewport = getActiveViewport()) =>
+            command(syncToggleAllMutation, { viewport, aspect }),
         // set {viewport}'s relative sync offset to {row,col} source pixels
         updateOffset: (row, col, viewport = getActiveViewport()) =>
             command(syncUpdateOffsetMutation, { viewport, x: col, y: row }),
+        // reset {viewport}'s sync flags and offset
+        reset: (viewport = getActiveViewport()) => command(syncResetMutation, { viewport }),
     },
 
     // the measure layer; {row,col} are source pixels, translated here to the mutations' {x,y}
