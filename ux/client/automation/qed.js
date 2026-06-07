@@ -73,6 +73,15 @@ const stateQuery = graphql`
     }
 `
 
+// the reader catalog: every reader the server offers and the selector axes it binds
+const readersQuery = graphql`
+    query qedReadersQuery {
+        qed {
+            readers { name selectors { name values } }
+        }
+    }
+`
+
 // reshape one raw {view} record into the facade's model, translating column-major {x,y} pixels to
 // the row-major {row,col} the rest of qed reports
 const modelOf = (view, viewport) => view == null ? null : ({
@@ -115,6 +124,15 @@ export const makeQED = () => ({
         return qed.views.map((view, index) => modelOf(view, index))
     },
 
+    // the reader catalog: each reader's name and its selector axes, keyed by axis name
+    readers: async () => {
+        const { qed } = await read(readersQuery)
+        return (qed.readers ?? []).map(reader => ({
+            name: reader.name,
+            selectors: Object.fromEntries((reader.selectors ?? []).map(axis => [axis.name, axis.values])),
+        }))
+    },
+
     // select the reader named {reader} for {viewport}; swapping the view needs the shared updater
     selectReader: (reader, viewport = getActiveViewport()) =>
         command(selectReaderMutation, { viewport, reader },
@@ -143,6 +161,22 @@ export const makeQED = () => ({
 
     // make {viewport} the active one (the facade default and, via the bridge, the ui)
     setActive: viewport => activate(viewport),
+
+    // scroll {viewport} so the source pixel {row,col} sits at the center of the visible window. this
+    // is a pure client-side scroll -- like a user dragging -- not a server mutation, so it reads the
+    // rendered zoom off the region markup and converts source pixels to rendered ones
+    centerOn: (row, col, viewport = getActiveViewport()) => new Promise(resolve => {
+        const region = document.querySelectorAll('[data-qed-region="viewport"]')[viewport]
+        if (region == null) {
+            resolve()
+            return
+        }
+        const [vertical, horizontal] = region.getAttribute("data-qed-zoom").split(",").map(Number)
+        region.scrollLeft = col * 2 ** horizontal - region.clientWidth / 2
+        region.scrollTop = row * 2 ** vertical - region.clientHeight / 2
+        // resolve once the scroll has had a frame to apply and notify the pan dispatcher
+        requestAnimationFrame(() => resolve())
+    }),
 
     // split {viewport} in two; the new view lands after it and becomes active, as in the ui
     split: async (viewport = getActiveViewport()) => {
