@@ -48,7 +48,7 @@ window.qed = {
   },
   viewports() → [state, …],                      // every viewport, for split layouts
   readers()   → [{ name, selectors:{axis:[…]} }],// the reader catalog
-  controllers(viewport?) → [{ slot, min, max }], // the channel's colour-stretch controllers
+  controllers(viewport?) → [{ kind, slot, min, max }], // colour-stretch controllers; kind = range|value
 
   // --- commands: act without synthesizing clicks ---
   selectReader(reader, viewport?),
@@ -161,8 +161,10 @@ server-right + model-right + DOM-wrong is a render bug; server-right + model-wro
 The whole `tests/qed.ux.playwright` suite arranges state through `window.qed`. Beyond the `behavior/*`
 specs (DOM effects), an **`api/` project** asserts mutations at the *model* level — `state()`,
 `viewports()`, `controllers()` — with no DOM, so a failure localizes to the server/store rather than
-rendering (this is what caught the controller channel-key bug). The `behavior/local-controls.spec`
-covers the client-only controls (detail toggle, tray, nav) that carry no mutation.
+rendering (this is what caught the controller channel-key bug). It round-trips **both** controller
+kinds: the range controller on the amplitude channel and a value controller on the phase channel
+(`controllers()` reports each one's `kind`). The `behavior/local-controls.spec` covers the
+client-only controls (detail toggle, tray, nav) that carry no mutation.
 
 ## Deferred
 
