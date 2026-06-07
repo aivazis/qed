@@ -64,7 +64,7 @@ export const useResetValueController = ({ viewport, channel }) => {
 
 
 // the mutation that resets the controller state
-const useResetValueControllerMutation = graphql`
+export const useResetValueControllerMutation = graphql`
 mutation useResetValueControllerMutation($input: ViewValueResetInput!) {
     viewValueReset(input: $input) {
         view {

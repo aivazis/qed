@@ -79,7 +79,7 @@ export const useUpdateRangeController = ({ viewport, channel }) => {
 
 
 // the mutation that updates the controller state
-const useUpdateRangeControllerMutation = graphql`
+export const useUpdateRangeControllerMutation = graphql`
 mutation useUpdateRangeControllerMutation($input: ViewRangeUpdateInput!) {
     viewRangeUpdate(input: $input) {
         view {
