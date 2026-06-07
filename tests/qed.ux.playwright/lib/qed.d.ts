@@ -14,7 +14,7 @@ type QEDViewModel = {
     dataset: { shape: number[], origin: number[], channels: string[] } | null
     channel: string | null
     selectors: Record<string, string[]>
-    zoom: { vertical: number, horizontal: number } | null
+    zoom: { vertical: number, horizontal: number, coupled: boolean } | null
     measure: { active: boolean, closed: boolean, path: { row: number, col: number }[], selection: number[] } | null
     sync: { scroll: boolean, channel: boolean, zoom: boolean, path: boolean } | null
 }
@@ -25,6 +25,7 @@ interface QED {
     // commands
     setChannel(tag: string, viewport?: number): Promise<unknown>
     setZoom(level: number | { vertical: number, horizontal: number }, viewport?: number): Promise<unknown>
+    toggleCoupled(viewport?: number): Promise<unknown>
     measure: {
         toggle(viewport?: number): Promise<unknown>
         reset(viewport?: number): Promise<unknown>
