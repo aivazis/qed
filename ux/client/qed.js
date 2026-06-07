@@ -28,6 +28,8 @@ import 'lazysizes/plugins/native-loading/ls.native-loading'
 // context
 import { Provider, useQED } from './context'
 import { environment } from './environment'
+// the scriptable automation surface ({window.qed})
+import { Automation } from './automation'
 // components
 import { ErrorBoundary } from './boundary'
 // views
@@ -113,6 +115,8 @@ const Root = () => {
     // render
     return (
         <RelayEnvironmentProvider environment={environment}>
+            {/* publish the scriptable automation surface */}
+            <Automation />
             <ErrorBoundary fallback={<Dead base={base} />}>
                 <Suspense fallback={< Loading />}>
                     <Router basename={base}>
