@@ -14,6 +14,8 @@ import { useViewports } from '~/views/viz'
 // local
 // hooks
 import { useReader } from './useReader'
+// the shared store updater
+import { replaceViewUpdater } from './replaceView'
 
 
 // select the reader that's active in a viewport
@@ -42,26 +44,8 @@ export const useSelectReader = () => {
                     reader: reader.name
                 }
             },
-            // update the store
-            updater: store => {
-                // get the root field of the mutation result
-                const response = store.getRootField("viewReaderSelect")
-                // ask for the view
-                const view = response.getLinkedRecord("view")
-                // if it's trivial
-                if (view === null) {
-                    // something went wrong at the server; not much more to do
-                    return
-                }
-                // get the remote store
-                const qed = store.get("QED")
-                // get the current set of views
-                const views = qed.getLinkedRecords("views")
-                // replace the view at {viewport} with the new one
-                qed.setLinkedRecords(views.toSpliced(viewport, 1, view), "views")
-                // all done
-                return
-            },
+            // update the store: selecting a reader swaps the whole view
+            updater: replaceViewUpdater("viewReaderSelect", viewport),
             onError: errors => {
                 // show me
                 console.log(`viz.reader.useSelectReader:`)
@@ -81,8 +65,8 @@ export const useSelectReader = () => {
     return select
 }
 
-// the mutation that selects a reader
-const selectReaderMutation = graphql`
+// the mutation that selects a reader; exported so the {window.qed} automation facade can commit it
+export const selectReaderMutation = graphql`
     mutation useSelectReaderMutation($input: ViewReaderSelectInput!) {
         viewReaderSelect(input: $input) {
             view {
