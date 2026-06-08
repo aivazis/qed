@@ -17,7 +17,7 @@ import { test, expect } from "@playwright/test"
 // gate) and restores the scroll it touches.
 test.describe.serial("the minimap window tracks the viewport scroll", () => {
     test("scrolling the viewport moves the reported window origin to the scaled scroll", async ({ page }) => {
-        await page.goto("/controls", { waitUntil: "networkidle" })
+        await page.goto("/controls", { waitUntil: "load" })
         const region = page.locator('[data-qed-region="viewport"]').first()
         await region.waitFor({ timeout: 10_000 })
 

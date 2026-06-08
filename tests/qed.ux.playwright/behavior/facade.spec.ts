@@ -14,7 +14,7 @@ import { test, expect } from "@playwright/test"
 // are verified through the same markup the rest of the suite reads, so a broken command fails here.
 test.describe.serial("the automation surface reads the catalog and scrolls", () => {
     test("readers() lists the catalog, including the active reader", async ({ page }) => {
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         await page.waitForFunction(() => Boolean(window.qed))
         // the catalog the facade reports, and the reader the active view is on
         const { active, names } = await page.evaluate(async () => ({
@@ -27,11 +27,19 @@ test.describe.serial("the automation surface reads the catalog and scrolls", () 
     })
 
     test("centerOn scrolls the viewport so the source pixel lands at the window center", async ({ page }) => {
-        await page.goto("/controls", { waitUntil: "networkidle" })
+        await page.goto("/controls", { waitUntil: "load" })
         await page.waitForFunction(() => Boolean(window.qed))
         // a channel is selected (the setup project), so the raster renders; at zoom 0 the whole raster
         // is large enough to scroll a mid-raster pixel to the center
         await page.evaluate(() => window.qed.setZoom(0))
+        // {centerOn} converts source pixels to a scroll offset against the rendered region, so wait
+        // until the mosaic has laid out and the region is actually scrollable before centering --
+        // otherwise the offset is computed against an unsized region and clamped to the origin
+        const region = page.locator('[data-qed-region="viewport"]').first()
+        await region.waitFor()
+        await expect
+            .poll(() => region.evaluate(el => el.scrollHeight - el.clientHeight))
+            .toBeGreaterThan(0)
         const target = { row: 1500, col: 1000 }
         await page.evaluate(t => window.qed.centerOn(t.row, t.col), target)
 

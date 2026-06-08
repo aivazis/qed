@@ -119,13 +119,13 @@ test("driveability audit across routes and states", async ({ page }) => {
 
     // baseline routes -- the same four the coverage gate sweeps
     for (const route of ["/", "/controls", "/explore", "/doc"]) {
-        await page.goto(route, { waitUntil: "networkidle" })
+        await page.goto(route, { waitUntil: "load" })
         await report(page, `native ${route}`)
     }
 
     // STATE: the measure layer on, with a couple of anchors -- exposes the measure panel, the peek
     // pad, and the on-raster markers, none of which the gate's default render shows
-    await page.goto("/controls", { waitUntil: "networkidle" })
+    await page.goto("/controls", { waitUntil: "load" })
     await ensureQED(page)
     await page.evaluate(() => window.qed.measure.reset())
     await page.evaluate(() => window.qed.measure.add(240, 120))
@@ -146,7 +146,7 @@ test("driveability audit across routes and states", async ({ page }) => {
     await page.evaluate(() => window.qed.measure.reset())
 
     // STATE: the NISAR reader on its own server -- the band/frequency/polarization selectors
-    await page.goto(`${nisarBaseURL}/`, { waitUntil: "networkidle" })
+    await page.goto(`${nisarBaseURL}/`, { waitUntil: "load" })
     await report(page, "nisar / (reader selectors)")
 })
 

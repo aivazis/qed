@@ -52,17 +52,17 @@ const waitForZoom = async (page: Page, horizontal: number) =>
 test.describe.serial("the minimap tracks the current zoom", () => {
     test.afterAll(async ({ browser }) => {
         const page = await browser.newPage()
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         await setZoom(page, 0, 0)
         await page.close()
     })
 
     test("a minimap click maps to the same scroll regardless of zoom history", async ({ page }) => {
         // a channel must be selected and the zoom at 0 to start
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         await setChannel(page, "amplitude")
         await setZoom(page, 0, 0)
-        await page.goto("/controls", { waitUntil: "networkidle" })
+        await page.goto("/controls", { waitUntil: "load" })
 
         // the minimap's data rect (Placemat, Data, Viewport -> the second one) and the horizontal
         // zoom slider (the slider with a horizontal thumb whose ticks include -6)

@@ -61,10 +61,10 @@ const setHorizontalZoom = async (page: Page, level: number) => {
 
 // land at zoom 0 with the requested coupling, scrolled to the middle of the raster, on /controls
 const start = async (page: Page, { coupled }: { coupled: boolean }) => {
-    await page.goto("/", { waitUntil: "networkidle" })
+    await page.goto("/", { waitUntil: "load" })
     await setZoom(page, 0, 0)
     await setCoupled(page, coupled)
-    await page.goto("/controls", { waitUntil: "networkidle" })
+    await page.goto("/controls", { waitUntil: "load" })
     const region = page.locator('[data-qed-region="viewport"]').first()
     await region.waitFor({ timeout: 10_000 })
     // scroll to the middle, so there is room to clamp in either direction
@@ -86,7 +86,7 @@ const expectRetained = (after: Awaited<ReturnType<typeof readCenter>>, before: {
 test.describe.serial("an in-place zoom change retains the viewport position", () => {
     test.afterAll(async ({ browser }) => {
         const page = await browser.newPage()
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         // leave the store as the other specs expect it: coupled, at zoom 0
         await setCoupled(page, true)
         await setZoom(page, 0, 0)

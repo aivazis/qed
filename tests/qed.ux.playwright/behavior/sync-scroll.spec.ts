@@ -59,7 +59,7 @@ const sourceOrigin = async (region: Locator) => {
 test.describe.serial("synced scrolling lines up across mismatched zoom", () => {
     test.afterAll(async ({ browser }) => {
         const page = await browser.newPage()
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         // leave the store as the rest of the suite expects it: one viewport, unsynced, at zoom 0
         await collapseToOne(page)
         await setScrollSync(page, 0, false)
@@ -68,7 +68,7 @@ test.describe.serial("synced scrolling lines up across mismatched zoom", () => {
     })
 
     test("panning one viewport lands its peer on the same source pixel", async ({ page }) => {
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         // start from a single viewport, then split it so there are exactly two
         await collapseToOne(page)
         await page.evaluate(() => window.qed.split(0))
@@ -84,7 +84,7 @@ test.describe.serial("synced scrolling lines up across mismatched zoom", () => {
         await page.evaluate(([row, col]) => window.qed.sync.updateOffset(row, col, 1), [offset.y, offset.x])
 
         // load the two-viewport state fresh, so the client picks up the zoom/sync/offsets
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         const regions = page.locator('[data-qed-region="viewport"]')
         await expect(regions).toHaveCount(2)
         const [first, second] = [regions.nth(0), regions.nth(1)]

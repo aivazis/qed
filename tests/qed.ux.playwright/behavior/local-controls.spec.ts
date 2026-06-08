@@ -16,7 +16,7 @@ import { test, expect } from "@playwright/test"
 
 test.describe("client-only controls (no server mutation)", () => {
     test("the detail toggle reveals higher-detail metadata rows", async ({ page }) => {
-        await page.goto("/controls", { waitUntil: "networkidle" })
+        await page.goto("/controls", { waitUntil: "load" })
         // the metadata table carries the detail control in its header
         const table = page.locator('table:has([data-qed-control="detail"])').first()
         await table.waitFor({ timeout: 10_000 })
@@ -33,7 +33,7 @@ test.describe("client-only controls (no server mutation)", () => {
     })
 
     test("a tray header collapses and reveals its panel", async ({ page }) => {
-        await page.goto("/controls", { waitUntil: "networkidle" })
+        await page.goto("/controls", { waitUntil: "load" })
         // the sync panel is always present on /controls; its tray renders its children only when open
         const tray = page.locator('[data-qed-panel="sync"] [data-qed-control="tray"]').first()
         await tray.waitFor({ timeout: 10_000 })
@@ -55,7 +55,7 @@ test.describe("client-only controls (no server mutation)", () => {
     })
 
     test("a nav-rail link routes to its view", async ({ page }) => {
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         // routing is pure client state -- no GraphQL
         await page.locator('[data-qed-nav="explore data archives"]').first().click()
         await expect(page).toHaveURL(/\/explore$/)

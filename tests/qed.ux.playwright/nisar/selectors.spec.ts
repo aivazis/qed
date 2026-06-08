@@ -35,7 +35,7 @@ const group = (page: Page, reader: string, axis: string): Locator =>
 
 test.describe.serial("the NISAR axis selectors are tagged radiogroups", () => {
     test("each gslc axis is a radiogroup whose values are radios named by their text", async ({ page }) => {
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         // the readers panel renders both fixtures; wait for the gslc reader to mount
         await page.locator('[data-qed-reader="gslc"]').waitFor({ timeout: 10_000 })
 
@@ -56,11 +56,11 @@ test.describe.serial("the NISAR axis selectors are tagged radiogroups", () => {
 
     test("selecting a value checks exactly that radio, with the state living in ARIA", async ({ page }) => {
         // select the gslc reader, then pick frequency A, through the same endpoint the client uses
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         await ensureQED(page)
         await page.evaluate(() => window.qed.selectReader("gslc"))
         await page.evaluate(() => window.qed.selectValue("frequency", "A"))
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
 
         // exactly one radio in the frequency group is checked, and it is A -- state in ARIA, never
         // mirrored into a data attribute

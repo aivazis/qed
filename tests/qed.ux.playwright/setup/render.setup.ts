@@ -17,7 +17,7 @@ import { test, expect } from "@playwright/test"
 // persists for the {gate} pages.
 test("a viz view renders on load", async ({ page }) => {
     // load the app and wait for the facade to publish itself
-    await page.goto("/", { waitUntil: "networkidle" })
+    await page.goto("/", { waitUntil: "load" })
     await page.waitForFunction(() => Boolean((window as { qed?: unknown }).qed))
 
     // discover a channel the dataset offers, set it, and read back what the server confirms
@@ -34,7 +34,7 @@ test("a viz view renders on load", async ({ page }) => {
     expect(channel).toBeTruthy()
 
     // sanity: the viz widgets now render, so the gate inspects real controls, not an empty shell
-    await page.goto("/controls", { waitUntil: "networkidle" })
+    await page.goto("/controls", { waitUntil: "load" })
     await expect(page.locator('[data-pyre-widget="mosaic"]')).toHaveCount(1)
     await expect(
         page.locator('[data-pyre-widget="slider"][data-pyre-widget-part="thumb"]').first()

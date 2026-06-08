@@ -15,7 +15,7 @@ import { test, expect } from "@playwright/test"
 // ARIA ({aria-disabled}), never in a data attribute.
 test.describe("the detail toggle", () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         await page.locator('[data-qed-control="detail"]').first().waitFor({ timeout: 10_000 })
     })
 

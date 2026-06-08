@@ -16,14 +16,14 @@ import { test, expect } from "@playwright/test"
 
 test.describe.serial("the window.qed contract", () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         await page.waitForFunction(() => Boolean(window.qed))
     })
 
     // the value test selects the phase channel; leave the suite on amplitude, as the rest expect
     test.afterAll(async ({ browser }) => {
         const page = await browser.newPage()
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         await page.waitForFunction(() => Boolean(window.qed))
         await page.evaluate(() => window.qed.setChannel("amplitude"))
         await page.close()

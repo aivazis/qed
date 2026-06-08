@@ -45,7 +45,7 @@ const showMeasure = async (page: Page) => {
 // updates the live store, so the toggle then acts on a consistent state, with no reload
 const cleanup = async (browser: import("@playwright/test").Browser) => {
     const page = await browser.newPage()
-    await page.goto("/controls", { waitUntil: "networkidle" })
+    await page.goto("/controls", { waitUntil: "load" })
     await ensureQED(page)
     await page.evaluate(() => window.qed.measure.reset())
     const toggle = measureToggle(page)
@@ -68,7 +68,7 @@ test.describe.serial("measure markers carry verifiable identity", () => {
     test("placed markers read back by source coordinate at both ends", async ({ page }) => {
         // drop the points through the facade, then reveal the layer; the live store renders them with
         // no reload
-        await page.goto("/controls", { waitUntil: "networkidle" })
+        await page.goto("/controls", { waitUntil: "load" })
         for (const [col, row] of points) await place(page, col, row)
         await showMeasure(page)
 
@@ -92,7 +92,7 @@ test.describe.serial("measure markers carry verifiable identity", () => {
     })
 
     test("splitting a segment renumbers the vertices while sources verify the move", async ({ page }) => {
-        await page.goto("/controls", { waitUntil: "networkidle" })
+        await page.goto("/controls", { waitUntil: "load" })
         await showMeasure(page)
 
         // the second point's identity before the edit: ordinal 1, at its placed source
@@ -118,7 +118,7 @@ test.describe.serial("measure markers carry verifiable identity", () => {
     test("resetting through the control clears the rendered path live, with no reload", async ({ page }) => {
         // this serial block accumulates anchors across its tests, so start from a known-empty path
         // (the facade reset is a fine setup tool) then place exactly two and render them
-        await page.goto("/controls", { waitUntil: "networkidle" })
+        await page.goto("/controls", { waitUntil: "load" })
         await ensureQED(page)
         await page.evaluate(() => window.qed.measure.reset())
         for (const [col, row] of points.slice(0, 2)) await place(page, col, row)
