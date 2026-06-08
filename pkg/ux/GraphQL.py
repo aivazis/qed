@@ -8,6 +8,9 @@
 import json
 import traceback
 
+# third party
+import graphql
+
 # support
 import qed
 import journal
@@ -113,6 +116,13 @@ class GraphQL:
             # finally, add the error report to the document
             doc["errors"] = [{"message": "\n".join(messages)}]
 
+        # if this request was a mutation that succeeded, the server state changed; notify every
+        # live client so it can refetch. this is the single broadcast choke point: every state
+        # change arrives as a mutation POST, and they all funnel through here
+        if not result.errors and self._isMutation(query=query):
+            # push a minimal change notification to all subscribers
+            self._notify(server=server)
+
         # encode it using JSON and serve it
         return server.documents.JSON(server=server, value=doc)
 
@@ -133,6 +143,37 @@ class GraphQL:
         journal.error("qed.ux.graphql").fatal = False
         # all done
         return
+
+    # implementation details
+    def _isMutation(self, query):
+        """
+        Determine whether {query} carries a mutation operation
+        """
+        # parse the query; this is safe because we only ask after a successful execution
+        document = graphql.parse(query)
+        # report whether any of its operations is a mutation
+        return any(
+            getattr(definition, "operation", None) is graphql.OperationType.MUTATION
+            for definition in document.definitions
+        )
+
+    def _notify(self, server):
+        """
+        Push a change notification to every live client subscribed to {server}'s hub
+        """
+        # the notification frame is constant, so build it once
+        if self._changeFrame is None:
+            # use the {EventStream} framing so the wire format lives in one place
+            stream = server.eventStream(server=server)
+            # a minimal payload: clients treat any message as "refetch your state"
+            self._changeFrame = stream.event(json.dumps({"type": "change"}))
+        # broadcast it on the global topic
+        server.hub.publish(self._changeFrame)
+        # all done
+        return
+
+    # private data
+    _changeFrame = None
 
 
 # end of file

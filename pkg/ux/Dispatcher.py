@@ -261,6 +261,13 @@ class Dispatcher:
         return response
 
     # basic handlers
+    def events(self, server, **kwds):
+        """
+        Open a server-sent event stream so the client receives live state-change notifications
+        """
+        # hand back a streaming response; the server subscribes this connection to its hub
+        return server.eventStream(server=server)
+
     def stop(self, plexus, server, **kwds):
         """
         The client is asking me to die
@@ -400,6 +407,8 @@ class Dispatcher:
                 r"/(?P<graphql>graphql)",
                 # the schema in SDL form, for external clients
                 r"/(?P<schema>schema)",
+                # the live server-sent event stream
+                r"/(?P<events>events)",
                 # the kill command
                 r"/(?P<stop>stop)",
                 # document requests
