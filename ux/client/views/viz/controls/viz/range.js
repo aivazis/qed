@@ -33,10 +33,44 @@ export const RangeController = ({ channel, configuration }) => {
     } = useFragment(rangeVizGetControllerStateFragment, configuration)
     // get the active viewport
     const { activeViewport } = useViewports()
-    // initialize my range
+    // the slider is fully controlled, so local state drives the thumbs and lets them track the
+    // pointer smoothly during a drag; it is reconciled with the server below
     const [range, setRange] = React.useState({ low, high })
     // and my extent
     const [extent, setExtent] = React.useState({ min, max })
+    // true while the user is dragging THIS control; server updates are throttled, so the store
+    // trails the pointer and we must not let an in-flight echo of our own edit yank the thumb back
+    const interacting = React.useRef(false)
+
+    // adopt server-side values that arrive while we are not dragging: a reset, or -- the point of
+    // live sync -- a change another client made that the server pushed to us over the event stream
+    React.useEffect(() => {
+        // do not fight the pointer
+        if (interacting.current) {
+            return
+        }
+        // adopt the server range
+        setRange({ low, high })
+    }, [low, high])
+    React.useEffect(() => {
+        // do not fight the pointer
+        if (interacting.current) {
+            return
+        }
+        // adopt the server extent
+        setExtent({ min, max })
+    }, [min, max])
+    // a drag ends when the pointer is released anywhere; clear the flag so the next server value
+    // is reconciled. listen in the capture phase so a child that stops propagation cannot hide it
+    React.useEffect(() => {
+        const release = () => { interacting.current = false }
+        window.addEventListener("pointerup", release, true)
+        window.addEventListener("pointercancel", release, true)
+        return () => {
+            window.removeEventListener("pointerup", release, true)
+            window.removeEventListener("pointercancel", release, true)
+        }
+    }, [])
 
     // build the state reset handler
     const { reset: defaults } = useResetRangeController({ viewport: activeViewport, channel })
@@ -48,6 +82,8 @@ export const RangeController = ({ channel, configuration }) => {
     // and passes it as an argument a function that expects the current range and returns
     // the updated value
     const set = callback => {
+        // we are driving this control; suppress server reconciliation until the drag ends
+        interacting.current = true
         // get the updated values
         const [newLow, newHigh] = callback([range.low, range.high])
         // make a new range
