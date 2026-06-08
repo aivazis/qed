@@ -9,53 +9,46 @@ import React from 'react'
 import { graphql, useMutation } from 'react-relay/hooks'
 
 
-// send the updated state of a vale controller to the server side store
+// send the updated state of a value controller to the server side store
 export const useUpdateValueController = ({ viewport, channel }) => {
     // updating the controller state mutates the server side store
-    const [commit, pending] = useMutation(useUpdateValueControllerMutation)
+    const [commit] = useMutation(useUpdateValueControllerMutation)
 
-    // leave this here, for now
-    // make some room for the performance stats
-    const [served, setServed] = React.useState(0)
-    const [dropped, setDropped] = React.useState(0)
-    // make a handler that updates the performance stats
-    const monitor = flag => {
-        // pick an updater
-        const update = flag ? setDropped : setServed
-        // and invoke it
-        update(old => old + 1)
-        // show me
-        // console.log(`viz.useUpdateValueController: served: ${served}, dropped: ${dropped}`)
-        // all done
-        return
-    }
+    // a drag fires updates far faster than the server round trip, so we keep at most one mutation
+    // in flight and, while it is, remember only the LATEST update; when the in-flight one settles
+    // we send that latest value. this coalesces the storm yet guarantees the final resting value is
+    // never dropped (the bug fixed here), regardless of where in the round trip the drag ends
+    const inflight = React.useRef(false)
+    const queued = React.useRef(null)
 
-    // make the state update handler
-    const update = ({ controller, value, extent }) => {
-        // update the statistics
-        monitor(pending)
-        // if there is a pending operation
-        if (pending) {
-            // nothing to do
-            return
+    // send one update to the server
+    const send = args => {
+        // unpack
+        const { controller, value, extent } = args
+        // mark the channel busy
+        inflight.current = true
+        // flush whatever the in-flight commit left queued, once it settles either way
+        const settle = () => {
+            // the channel is free again
+            inflight.current = false
+            // if a later update arrived while we were busy, send the most recent one now
+            const next = queued.current
+            if (next) {
+                // consume it
+                queued.current = null
+                // and send it
+                send(next)
+            }
         }
-        // otherwise, send the mutation to the server
+        // commit the mutation
         commit({
-            // input
+            // the payload
             variables: {
-                // the payload
-                input: {
-                    // the viewport
-                    viewport,
-                    // the channel
-                    channel,
-                    // the controller
-                    controller,
-                    // the parameters
-                    value,
-                    ...extent,
-                }
+                input: { viewport, channel, controller, value, ...extent },
             },
+            // on success, flush the latest queued update
+            onCompleted: settle,
+            // on failure, report and still flush, so a transient error does not strand the value
             onError: errors => {
                 // show me
                 console.log(`viz.controls.viz.useUpdateValueController:`)
@@ -65,12 +58,24 @@ export const useUpdateValueController = ({ viewport, channel }) => {
                 console.log(`for channel ${channel}`)
                 console.log(errors)
                 console.groupEnd()
-                // all done
-                return
-            }
+                // still flush the latest
+                settle()
+            },
         })
-        // all done
-        return
+    }
+
+    // the public handler: send now if the channel is idle, otherwise hold only the latest update
+    // and let the in-flight commit's completion flush it
+    const update = args => {
+        // if a commit is in flight
+        if (inflight.current) {
+            // remember only the most recent request
+            queued.current = args
+            // and wait for the in-flight one to flush it
+            return
+        }
+        // otherwise, send it right away
+        send(args)
     }
 
     // all done
