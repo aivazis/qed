@@ -6,6 +6,8 @@
 
 // the mount component that publishes {window.qed}
 export { Automation } from './Automation'
+// the mount component that keeps this client in sync with the server over the event stream
+export { LiveSync } from './LiveSync'
 
 
 // end of file
