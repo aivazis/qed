@@ -19,7 +19,7 @@ import { useStartSliding } from './useStartSliding'
 
 
 // render the value indicator
-export const Marker = ({ value, id = 0, ...rest }) => {
+export const Marker = ({ value, id = 0, name, ...rest }) => {
     // make a handler that indicates the user is dragging the marker to pick a new value
     const startSliding = useStartSliding()
 
@@ -55,7 +55,8 @@ export const Marker = ({ value, id = 0, ...rest }) => {
         "aria-valuenow": value,
         "aria-valuemin": min,
         "aria-valuemax": max,
-        "aria-label": label,
+        // a per-thumb {name} (a range's low/high) wins over the control-wide {label} (one thumb)
+        "aria-label": name ?? label,
         "aria-disabled": enabled ? undefined : true,
         "data-pyre-widget": "slider",
         "data-pyre-widget-part": "thumb",

@@ -18,8 +18,9 @@ export const Provider = ({ config, children }) => {
 
     // state
     const { enabled } = config
-    // the accessible name the client gives this control
-    const { label } = config
+    // the accessible name the client gives this control: {label} names a single-thumb control,
+    // {names} carries one accessible name per thumb for a multi-thumb control (a range's low/high)
+    const { label, names } = config
     // directional configuration
     const { direction, flipped = false, arrows, labels, markers } = config
     // the layout of the controller in client coordinates
@@ -196,8 +197,8 @@ export const Provider = ({ config, children }) => {
 
         // state
         enabled,
-        // the accessible name
-        label,
+        // the accessible name(s)
+        label, names,
         // directional configuration
         direction, arrows, labels, markers,
         // the layout of the controller in client coordinates
@@ -257,8 +258,8 @@ export const Context = React.createContext(
 
         // state
         enabled: null,
-        // the accessible name
-        label: null,
+        // the accessible name(s)
+        label: null, names: null,
         // directional configuration
         direction: null, arrows: null, labels: null, markers: null,
         // the layout of the controller in client coordinates

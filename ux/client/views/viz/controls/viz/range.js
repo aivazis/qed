@@ -113,6 +113,9 @@ export const RangeController = ({ channel, configuration }) => {
     const opt = {
         value: [range.low, range.high],
         setValue: set,
+        // name the two thumbs after the server controller {slot}, so each is uniquely addressable
+        // by assistive tech and drivers alike
+        names: [`${slot} low`, `${slot} high`],
         min, max, major,
         direction: "row", labels: "bottom", arrows: "top", markers: true,
         height: 100, width: 250,
@@ -127,7 +130,7 @@ export const RangeController = ({ channel, configuration }) => {
                 <Save save={save} enabled={false} />
                 <Reset reset={reset} enabled={dirty} />
             </Header>
-            <Housing height={opt.height} width={opt.width}>
+            <Housing height={opt.height} width={opt.width} data-qed-control={slot}>
                 <Controller enabled={true} {...opt} />
             </Housing>
         </>

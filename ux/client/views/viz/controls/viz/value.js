@@ -109,6 +109,8 @@ export const ValueController = ({ channel, configuration }) => {
     const opt = {
         value: marker,
         setValue: set,
+        // name the single thumb after the server controller {slot}, so it is uniquely addressable
+        label: slot,
         min, max, major,
         direction: "row", labels: "bottom", arrows: "top", markers: true,
         height: 100, width: 250,
@@ -123,7 +125,7 @@ export const ValueController = ({ channel, configuration }) => {
                 <Save save={save} enabled={false} />
                 <Reset reset={reset} enabled={dirty} />
             </Header>
-            <Housing height={opt.height} width={opt.width}>
+            <Housing height={opt.height} width={opt.width} data-qed-control={slot}>
                 <Controller enabled={true} {...opt} />
             </Housing>
         </>

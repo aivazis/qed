@@ -80,12 +80,16 @@ export const Zoom = ({ viewport, view, min = -6, max = 4, ils = 200 }) => {
     // slider configuration
     const xSlider = {
         value: zoom.horizontal, setValue: setHorizontalZoom,
+        // name the thumb after the axis it controls, so it is uniquely addressable
+        label: "zoom horizontal",
         min, max, major, minor, tickPrecision: 0, markerPrecision: 1,
         direction: "row", labels: "top", arrows: "bottom", markers: true,
         height: ils / 2, width: ils,
     }
     const ySlider = {
         value: zoom.vertical, setValue: setVerticalZoom,
+        // name the thumb after the axis it controls, so it is uniquely addressable
+        label: "zoom vertical",
         min, max, major, minor, tickPrecision: 0, markerPrecision: 1,
         direction: "column", flipped: true, labels: "right", arrows: "left", markers: true,
         height: ils, width: ils / 2,
@@ -105,7 +109,7 @@ export const Zoom = ({ viewport, view, min = -6, max = 4, ils = 200 }) => {
                 <Reset reset={reset} enabled={zoom.dirty} />
             </Header>
             {/* the control housing */}
-            <Housing height={height} width={width}>
+            <Housing height={height} width={width} data-qed-control="zoom">
                 {/* the vertical slider */}
                 <g transform="translate(10 0)">
                     <Controller enabled={enabled} {...ySlider} />
