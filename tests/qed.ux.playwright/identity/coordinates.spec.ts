@@ -18,7 +18,7 @@ import { test, expect } from "@playwright/test"
 // part of the read-only gate; the behavior project proves the live window tracks a scroll.
 test.describe("the viewport coordinate metadata", () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto("/controls", { waitUntil: "networkidle" })
+        await page.goto("/controls", { waitUntil: "load" })
         await page.locator('[data-qed-region="viewport"]').first().waitFor({ timeout: 10_000 })
     })
 

@@ -15,7 +15,7 @@ import { test, expect } from "@playwright/test"
 // group and the thumb stays in the accessible tree. the zoom slider renders on the controls view.
 test.describe("the slider scale", () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto("/controls", { waitUntil: "networkidle" })
+        await page.goto("/controls", { waitUntil: "load" })
         await page.locator('[data-pyre-widget="slider"][data-pyre-widget-part="thumb"]')
             .first().waitFor({ timeout: 10_000 })
     })

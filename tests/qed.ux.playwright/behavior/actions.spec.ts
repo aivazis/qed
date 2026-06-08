@@ -24,7 +24,7 @@ const clickUntilPressed = async (button: Locator, value: string) => {
 
 test.describe.serial("the viewport toggle actions govern their panels", () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto("/controls", { waitUntil: "networkidle" })
+        await page.goto("/controls", { waitUntil: "load" })
         await page.locator('[data-qed-control="viewport"][data-qed-action="measure"]')
             .first().waitFor({ timeout: 10_000 })
     })

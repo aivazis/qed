@@ -26,7 +26,7 @@ export const sweep = async (
     // sweep each route
     for (const route of routes) {
         // load it and let the client settle
-        await page.goto(route, { waitUntil: "networkidle" })
+        await page.goto(route, { waitUntil: "load" })
         // wait for the app shell to mount before inspecting
         await page.locator("[data-pyre-widget]").first().waitFor({ timeout: 10_000 })
         // run the read-only check and tag each problem with its route

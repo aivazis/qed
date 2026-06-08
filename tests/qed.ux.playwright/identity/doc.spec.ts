@@ -14,7 +14,7 @@ import { test, expect } from "@playwright/test"
 // page currently shown is marked with {aria-current} rather than a {data-*} state mirror.
 test.describe("the doc table of contents", () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto("/doc", { waitUntil: "networkidle" })
+        await page.goto("/doc", { waitUntil: "load" })
         await page.locator('[data-qed-control="doc-topic"]').first().waitFor({ timeout: 10_000 })
     })
 

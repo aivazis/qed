@@ -15,7 +15,7 @@ import { test, expect } from "@playwright/test"
 test.describe("the channel selector", () => {
     // it renders on the readers view, beside the active reader
     test.beforeEach(async ({ page }) => {
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         await page.locator('[data-qed-control="channel"]').first().waitFor({ timeout: 10_000 })
     })
 

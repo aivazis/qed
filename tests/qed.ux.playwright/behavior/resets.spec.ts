@@ -19,7 +19,7 @@ const ensureQED = (page: Page) => page.waitForFunction(() => Boolean(window.qed)
 
 // drive the server back to a single, unsynced, zoom-0 viewport
 const restore = async (page: Page) => {
-    await page.goto("/", { waitUntil: "networkidle" })
+    await page.goto("/", { waitUntil: "load" })
     await ensureQED(page)
     await page.evaluate(async () => {
         for (let n = (await window.qed.viewports()).length; n > 1; n--) await window.qed.collapse(n - 1)
@@ -37,7 +37,7 @@ test.describe.serial("the reset and toggle-all commands", () => {
     })
 
     test("zoomReset returns the viewport to the default zoom", async ({ page }) => {
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         await ensureQED(page)
         const horizontal = () => page.evaluate(async () => (await window.qed.state())!.zoom!.horizontal)
 
@@ -48,7 +48,7 @@ test.describe.serial("the reset and toggle-all commands", () => {
     })
 
     test("sync toggleAll flips the aspect on every viewport; reset clears one", async ({ page }) => {
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         await ensureQED(page)
         const scroll = () => page.evaluate(async () => (await window.qed.viewports()).map(v => v.sync!.scroll))
 

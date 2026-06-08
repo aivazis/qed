@@ -16,7 +16,7 @@ test.describe("the sync controls", () => {
     const aspects = ["channel", "zoom", "scroll", "path"]
 
     test.beforeEach(async ({ page }) => {
-        await page.goto("/controls", { waitUntil: "networkidle" })
+        await page.goto("/controls", { waitUntil: "load" })
         await page.locator('[data-qed-control="sync"]').first().waitFor({ timeout: 10_000 })
     })
 

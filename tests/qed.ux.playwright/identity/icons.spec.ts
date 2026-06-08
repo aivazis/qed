@@ -15,7 +15,7 @@ import { test, expect } from "@playwright/test"
 // accessible name + identity live on the control.
 test.describe("icon controls", () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         await page.locator('[data-qed-nav]').first().waitFor({ timeout: 10_000 })
     })
 

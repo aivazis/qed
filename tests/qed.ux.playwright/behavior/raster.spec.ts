@@ -32,7 +32,7 @@ const setChannel = async (page: Page, tag: string) => {
 
 // load the readers view and report the rendered mosaic's pixel extent
 const mosaicExtent = async (page: Page) => {
-    await page.goto("/", { waitUntil: "networkidle" })
+    await page.goto("/", { waitUntil: "load" })
     const box = page.locator('[data-pyre-widget="mosaic"]').first()
     await box.waitFor({ timeout: 10_000 })
     return box.evaluate(m => ({ w: (m as HTMLElement).offsetWidth, h: (m as HTMLElement).offsetHeight }))
@@ -43,14 +43,14 @@ test.describe.serial("the raster resizes with zoom", () => {
     test.afterAll(async ({ browser }) => {
         // leave the shared server at the default zoom for anything that reuses it
         const page = await browser.newPage()
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         await setZoom(page, 0, 0)
         await page.close()
     })
 
     test("the mosaic extent tracks the zoom level", async ({ page }) => {
         // make sure a channel is selected so the mosaic renders; the facade resolves the reader itself
-        await page.goto("/", { waitUntil: "networkidle" })
+        await page.goto("/", { waitUntil: "load" })
         await setChannel(page, "amplitude")
 
         // the extent at zoom 0

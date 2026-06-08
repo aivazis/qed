@@ -17,7 +17,7 @@ import { test, expect } from "@playwright/test"
 // renders on the controls view and carries its own client identity ({data-qed-panel}).
 test.describe("the viewport actions", () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto("/controls", { waitUntil: "networkidle" })
+        await page.goto("/controls", { waitUntil: "load" })
         await page.locator('[data-qed-control="viewport"][data-qed-action="measure"]')
             .first().waitFor({ timeout: 10_000 })
     })

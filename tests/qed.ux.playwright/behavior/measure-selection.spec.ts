@@ -23,7 +23,7 @@ const measureToggle = (page: Page) =>
 
 // a clean three-anchor path with the layer shown
 const arrange = async (page: Page) => {
-    await page.goto("/controls", { waitUntil: "networkidle" })
+    await page.goto("/controls", { waitUntil: "load" })
     await ensureQED(page)
     await page.evaluate(async () => {
         await window.qed.measure.reset()
@@ -38,7 +38,7 @@ const arrange = async (page: Page) => {
 
 // reset the path and hide the layer
 const cleanup = async (page: Page) => {
-    await page.goto("/controls", { waitUntil: "networkidle" })
+    await page.goto("/controls", { waitUntil: "load" })
     await ensureQED(page)
     await page.evaluate(() => window.qed.measure.reset())
     const toggle = measureToggle(page)
