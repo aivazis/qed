@@ -24,7 +24,8 @@ export const useFetchQED = () => {
 }
 
 
-const query = graphql`
+// the compiled operation is exported so the live-sync layer can refetch it imperatively
+export const query = graphql`
     query useFetchQEDQuery {
         qed {
             # the server side store id

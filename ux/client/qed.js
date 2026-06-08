@@ -28,8 +28,8 @@ import 'lazysizes/plugins/native-loading/ls.native-loading'
 // context
 import { Provider, useQED } from './context'
 import { environment } from './environment'
-// the scriptable automation surface ({window.qed})
-import { Automation } from './automation'
+// the scriptable automation surface ({window.qed}) and the live server-sync mount
+import { Automation, LiveSync } from './automation'
 // components
 import { ErrorBoundary } from './boundary'
 // views
@@ -117,6 +117,8 @@ const Root = () => {
         <RelayEnvironmentProvider environment={environment}>
             {/* publish the scriptable automation surface */}
             <Automation />
+            {/* keep this client in sync with the server over the event stream */}
+            <LiveSync />
             <ErrorBoundary fallback={<Dead base={base} />}>
                 <Suspense fallback={< Loading />}>
                     <Router basename={base}>
