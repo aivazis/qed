@@ -167,8 +167,9 @@ class GraphQL:
             stream = server.eventStream(server=server)
             # a minimal payload: clients treat any message as "refetch your state"
             self._changeFrame = stream.event(json.dumps({"type": "change"}))
-        # broadcast it on the global topic
-        server.hub.publish(self._changeFrame)
+        # broadcast it on the global topic; coalesce, since every change frame is identical, so a
+        # burst of mutations collapses to a single pending "refetch" per client rather than a storm
+        server.hub.publish(self._changeFrame, coalesce=True)
         # all done
         return
 
