@@ -275,7 +275,7 @@ class Dispatcher:
         # log it
         plexus.info.log("shutting down")
         # and exit
-        return server.documents.Exit(server=server, code=128 + signal.SIGQUIT)
+        return server.documents.Exit(server=server, exitCode=128 + signal.SIGQUIT)
 
     def document(self, plexus, server, request, **kwds):
         """
