@@ -16,6 +16,7 @@ from ..datasets.Dataset import Dataset
 from ..readers.Reader import Reader
 from ..readers.Selector import Selector
 from ..readers.SelectorAxis import SelectorAxis
+from .ViewCenter import ViewCenter
 from .ViewMeasure import ViewMeasure
 from .ViewSync import ViewSync
 from .ViewZoom import ViewZoom
@@ -43,6 +44,7 @@ class View(graphene.ObjectType):
     dataset = graphene.Field(Dataset)
     channel = graphene.Field(Channel)
     # dataset specific configuration
+    center = graphene.Field(ViewCenter)
     measure = graphene.Field(ViewMeasure)
     sync = graphene.Field(ViewSync)
     zoom = graphene.Field(ViewZoom)

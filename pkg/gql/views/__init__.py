@@ -41,6 +41,9 @@ from .ViewSyncToggleViewport import ViewSyncToggleViewport as viewSyncToggleView
 from .ViewSyncToggleAll import ViewSyncToggleAll as viewSyncToggleAll
 from .ViewSyncReset import ViewSyncReset as viewSyncReset
 
+# look-at center
+from .ViewLookAt import ViewLookAt as viewLookAt
+
 # zoom
 from .ViewZoomSetLevel import ViewZoomSetLevel as viewZoomSetLevel
 from .ViewZoomToggleCoupled import ViewZoomToggleCoupled as viewZoomToggleCoupled
