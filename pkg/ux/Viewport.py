@@ -248,6 +248,15 @@ class Viewport(
         # and hand off the pair
         return view, controller
 
+    def lookAt(self, row, col):
+        """
+        Set the source pixel that sits at the center of the viewport
+        """
+        # get the view
+        view = self._view
+        # and delegate
+        return view.lookAt(row=row, col=col)
+
     def zoomSetLevel(self, horizontal, vertical):
         """
         Set the zoom levels
