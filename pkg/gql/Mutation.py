@@ -61,6 +61,9 @@ class Mutation(graphene.ObjectType):
     viewSyncToggleAll = views.viewSyncToggleAll.Field()
     viewSyncReset = views.viewSyncReset.Field()
 
+    # look-at center
+    viewLookAt = views.viewLookAt.Field()
+
     # zoom
     viewZoomSetLevel = views.viewZoomSetLevel.Field()
     viewZoomToggleCoupled = views.viewZoomToggleCoupled.Field()
