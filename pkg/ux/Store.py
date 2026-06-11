@@ -558,6 +558,18 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # and delegate
         return port.vizUpdateController(**kwds)
 
+    def lookAt(self, viewport, row, col):
+        """
+        Set the source pixel at the center of {viewport}
+        """
+        # get the viewport configuration; the look-at is per-viewport, so unlike scroll-sync
+        # across a user's own viewports (handled client side) nothing else is touched here
+        port = self._viewports[viewport]
+        # set the center
+        view = port.lookAt(row=row, col=col)
+        # hand off the center
+        return view.center
+
     def zoomSetLevel(self, viewport, horizontal, vertical):
         """
         Set the zoom levels

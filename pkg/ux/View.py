@@ -40,6 +40,9 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
     selections.default = {}
     selections.doc = "a key/value store of the user choices towards a dataset selection"
 
+    center = qed.protocols.ux.center()
+    center.doc = "the look-at center"
+
     measure = qed.protocols.ux.measure()
     measure.doc = "the measure layer indicator"
 
@@ -475,6 +478,37 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
+    def lookAt(self, row, col):
+        """
+        Set the source pixel that sits at the center of the viewport
+        """
+        # get the center
+        center = self.center
+        # set
+        center.row = row
+        center.col = col
+        # all done
+        return self
+
+    def lookAtReset(self):
+        """
+        Reset the state of the look-at configuration
+        """
+        # get my reader
+        reader = self.reader
+        # if i don't have on
+        if not reader:
+            # nothing more to do
+            return
+        # get the reader name
+        sourceName = reader.pyre_name
+        # pull its configuration
+        config = Source(name=f"{sourceName}.view")
+        # use it to adjust mine
+        self.center.reset(defaults=config.center)
+        # all done
+        return self
+
     def setMembers(self, members):
         """
         Set my per-member participation mask; at least one member must stay active
@@ -628,6 +662,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             dataset=self.dataset,
             channel=self.channel.pyre_family() if self.channel else None,
             selections=dict(self.selections),
+            center=self.center.clone(),
             measure=self.measure.clone(),
             sync=self.sync.clone(),
             zoom=self.zoom.clone(),
@@ -817,6 +852,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # pull its configuration
         config = Source(name=f"{sourceName}.view")
         # clone the persistent state
+        self.center = config.center.clone(name=f"{name}.center")
         self.measure = config.measure.clone(name=f"{name}.measure")
         self.sync = config.sync.clone(name=f"{name}.sync")
         self.zoom = config.zoom.clone(name=f"{name}.zoom")
