@@ -16,6 +16,7 @@ import { resetMeasureMutation } from '~/views/viz/controls/measure/useReset'
 import { useSetLevelZoomMutation as setLevelZoomMutation } from '~/views/viz/controls/zoom/useSetLevel'
 import { useToggleCoupledZoomMutation as toggleCoupledZoomMutation } from '~/views/viz/controls/zoom/useToggleCoupled'
 import { useResetZoomMutation as resetZoomMutation } from '~/views/viz/controls/zoom/useReset'
+import { useLookAtMutation as lookAtMutation } from '~/views/viz/viewer/useLookAt'
 import { useSyncToggleAllMutation as syncToggleAllMutation } from '~/views/viz/controls/sync/useSyncToggleAll'
 import { useUpdateRangeControllerMutation as updateRangeControllerMutation } from '~/views/viz/controls/viz/useUpdateRangeController'
 import { useResetRangeControllerMutation as resetRangeControllerMutation } from '~/views/viz/controls/viz/useResetRangeController'
@@ -213,8 +214,9 @@ export const makeQED = () => ({
     setActive: viewport => activate(viewport),
 
     // scroll {viewport} so the source pixel {row,col} sits at the center of the visible window. this
-    // is a pure client-side scroll -- like a user dragging -- not a server mutation, so it reads the
-    // rendered zoom off the region markup and converts source pixels to rendered ones
+    // moves the local DOM scroll directly -- like a user dragging -- reading the rendered zoom off the
+    // region markup and converting source pixels to rendered ones. the viewport's scroll handler turns
+    // that into a {viewLookAt} mutation, so the move now also syncs to every other client
     centerOn: (row, col, viewport = getActiveViewport()) => new Promise(resolve => {
         const region = document.querySelectorAll('[data-qed-region="viewport"]')[viewport]
         if (region == null) {
@@ -227,6 +229,12 @@ export const makeQED = () => ({
         // resolve once the scroll has had a frame to apply and notify the pan dispatcher
         requestAnimationFrame(() => resolve())
     }),
+
+    // set the look-at center of {viewport} to the source pixel {row,col} directly through the server,
+    // bypassing the local scroll; every client (this one included, over live sync) recenters there.
+    // this is the deterministic path for automation -- no scroll throttle to wait on
+    lookAt: (row, col, viewport = getActiveViewport()) =>
+        command(lookAtMutation, { viewport, row, col }),
 
     // split {viewport} in two; the new view lands after it and becomes active, as in the ui
     split: async (viewport = getActiveViewport()) => {
