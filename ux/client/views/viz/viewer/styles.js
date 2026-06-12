@@ -274,6 +274,49 @@ const sync = {
 }
 
 
+// the button that opts a data viewport into live sync
+const live = {
+    // inherit
+    ...badge,
+
+    // the icon container
+    badge: {
+        ...badge.badge,
+        base: {
+            ...badge.badge.base,
+            // for me
+            justifySelf: "end",
+        },
+    },
+
+    icon: {
+        ...badge.icon,
+        selected: {
+            ...badge.icon.selected,
+            stroke: theme.page.highlight,
+        },
+        available: {
+            ...badge.icon.available,
+            stroke: theme.page.highlight,
+        },
+    },
+
+    decoration: {
+        ...badge.decoration,
+
+        selected: {
+            ...badge.decoration.selected,
+            fill: theme.page.highlight,
+            stroke: theme.page.highlight,
+        },
+        available: {
+            ...badge.decoration.available,
+            stroke: theme.page.highlight,
+        },
+    }
+}
+
+
 // the button that prints the screen
 const print = {
     // inherit
@@ -352,6 +395,7 @@ const blank = {
 export default {
     blank,
     collapse,
+    live,
     measure,
     print,
     selector,

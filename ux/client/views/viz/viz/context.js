@@ -18,6 +18,25 @@ export const VizProvider = ({ children }) => {
     // the corresponding entry in the array of {viewports}; each panel gets its own registrar
     // that knows its positioning in the flex container
     const viewportRegistrar = idx => ref => viewports.current[idx] = ref
+    // the per-viewport opt-in to live sync: a client-only preference that makes a viewport push its
+    // interactions to the server live -- on every scroll tick, so peers follow smoothly -- instead
+    // of once the gesture settles. off by default; a fast link can turn it on from the viewport bar
+    const [live, setLive] = React.useState(() => new Set())
+    // flip a viewport's opt-in
+    const toggleLive = viewport => setLive(prev => {
+        // copy the set so react sees a new reference
+        const next = new Set(prev)
+        // if the viewport is currently opted in
+        if (next.has(viewport)) {
+            // opt it out
+            next.delete(viewport)
+        } else {
+            // otherwise, opt it in
+            next.add(viewport)
+        }
+        // hand back the updated set
+        return next
+    })
 
     // build the current value of the context
     const context = {
@@ -25,6 +44,8 @@ export const VizProvider = ({ children }) => {
         activeViewport, setActiveViewport,
         // the set of active viewports (actually, the {mosaic} placemats)
         viewports, viewportRegistrar,
+        // the per-viewport live-sync opt-in and its toggle
+        live, toggleLive,
     }
     // provide for my children
     return (
@@ -46,6 +67,9 @@ export const Context = React.createContext(
         viewports: null,
         // the registrar
         viewportRegistrar: () => { throw new Error(complaint) },
+        // the per-viewport live-sync opt-in and its toggle
+        live: new Set(),
+        toggleLive: () => { throw new Error(complaint) },
     }
 )
 
