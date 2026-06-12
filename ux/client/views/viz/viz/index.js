@@ -10,6 +10,7 @@ export { Viz } from './viz'
 // hooks
 export { useViewports } from './useViewports'
 export { useCenterViewport } from './useCenterViewport'
+export { useLive } from './useLive'
 
 
 // end of file
