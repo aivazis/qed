@@ -16,6 +16,7 @@ import { Spacer } from '~/widgets'
 import { useViewports } from '~/views/viz'
 // components
 import { Collapse } from './collapse'
+import { Live } from './Live'
 import { Measure } from './measure'
 import { Print } from './print'
 import { Selector } from './selector'
@@ -46,6 +47,8 @@ export const Tab = ({ viewport, view, behaviors }) => {
             {view && <Measure viewport={viewport} view={view} />}
             {/* the button that toggles the sync status of the data viewport */}
             {view && <Sync viewport={viewport} view={view} />}
+            {/* the button that opts this viewport into live sync */}
+            {view && <Live viewport={viewport} />}
             {/* the button that prints the viewport */}
             {view && <Print viewport={viewport} view={view} />}
             {/* the button that adds a new view to the {viz} panel */}

@@ -11,7 +11,7 @@ export { Controls } from './controls'
 export { Readers } from './readers'
 
 // hooks
-export { useViewports, useCenterViewport } from './viz'
+export { useViewports, useCenterViewport, useLive } from './viz'
 
 // functions
 export { tileURI } from './viewer'

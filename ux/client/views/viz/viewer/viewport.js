@@ -15,7 +15,7 @@ import { Mosaic } from '~/widgets'
 // colors
 import { theme } from "~/palette"
 // hooks
-import { useViewports, useCenterViewport } from '~/views/viz'
+import { useViewports, useCenterViewport, useLive } from '~/views/viz'
 
 // locals
 import { tileURI } from '.'
@@ -54,13 +54,6 @@ const lookAtCenter = (placemat, { row, col }) => {
 const same = (a, b) =>
     a != null && b != null && Math.abs(a.row - b.row) < EPSILON && Math.abs(a.col - b.col) < EPSILON
 
-// ask lazysizes to load whatever is now visible. it defers loads during a fast scroll and keys off
-// its own scroll detection; when we move the view -- the originator coming to rest, or a peer being
-// recentered from the server -- that detection can be outrun, leaving freshly-revealed tiles blank.
-// nudging it once the view is settled loads them without waiting for another scroll
-const loadVisibleTiles = () => window.lazySizes?.loader?.checkElems?.()
-
-
 // export the data viewport
 export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     // unpack the view
@@ -73,6 +66,8 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     const centerViewport = useCenterViewport(viewport)
     // a handler that pushes my look-at center to the server, so my scroll syncs to every client
     const { set: lookAt } = useLookAt(viewport)
+    // whether this viewport is opted into live sync: push on every tick vs once the gesture settles
+    const { enabled: live } = useLive(viewport)
     // get the base URI for tiles
     const uri = tileURI({ reader, dataset, channel, zoom, viewport })
     // unpack what i need from the dataset
@@ -97,12 +92,17 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     // raised while the user is actively scrolling, so a server echo cannot yank the view mid-gesture;
     // a scroll has no clean "pointer up", so we lower it on a short idle timer instead
     const interacting = React.useRef(false)
-    // the latest center seen while scrolling, flushed to the server only once the scroll settles
+    // the latest center seen while scrolling; in the debounced default it is flushed to the server
+    // once the scroll settles, in live mode it has already been pushed and is used only to settle
     const pendingCenter = React.useRef(null)
+    // the settle timer: fires once a scroll goes quiet, to flush the final center (debounced default)
+    // and lower the {interacting} guard
     const settleTimer = React.useRef(null)
-    // {lookAt} is a fresh closure each render; keep it in a ref so the scroll listener stays stable
+    // {lookAt} and the live flag are fresh each render; keep them in refs so the listener stays stable
     const lookAtRef = React.useRef(lookAt)
     React.useEffect(() => { lookAtRef.current = lookAt })
+    const liveRef = React.useRef(live)
+    React.useEffect(() => { liveRef.current = live })
     React.useEffect(() => {
         // get my scrolling container
         const placemat = viewports[viewport]
@@ -111,25 +111,23 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
             // bail
             return
         }
-        // every scroll event fires a mutation, and every mutation triggers a full-state refetch on
-        // every client over live sync; pushing on each tick of a drag would be a refetch storm that
-        // re-renders the viewport faster than its tiles can lazy-load. so we track the position live
-        // but flush only the FINAL center, once the scroll has been still for a beat -- the look-at
-        // sync cares where you land, not the path you took to get there
+        // a scroll pushes the look-at center so every client follows. by default we flush only the
+        // FINAL center, once the scroll has been still for a beat -- one mutation per gesture, sync
+        // where you land. when this viewport is opted into live sync, we push on every tick instead,
+        // so peers follow the motion smoothly ({useLookAt} already caps the in-flight mutation rate)
         const flush = () => {
-            // the scroll has settled
+            // the scroll has settled; lower the guard so a server echo can adopt again
             interacting.current = false
             // the place we came to rest
             const center = pendingCenter.current
             pendingCenter.current = null
-            // push the final center, unless there is nothing pending or it is where we already are
+            // in the debounced default the final center has not been pushed yet, so push it now; in
+            // live mode the last tick already pushed it, so {same} short-circuits and this is a no-op
             if (center != null && !same(center, lastCenter.current)) {
                 // remember it as ours and push it
                 lastCenter.current = center
                 lookAtRef.current(center)
             }
-            // the view has come to rest; load whatever scrolled into view but lazysizes deferred
-            loadVisibleTiles()
             // all done
             return
         }
@@ -148,10 +146,16 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
             if (same(here, lastCenter.current)) {
                 return
             }
-            // a real move: hold off server echoes, remember the latest spot, and (re)arm the flush
-            // so the push lands only after the scroll goes quiet
+            // a real move: hold off server echoes and remember the latest spot
             interacting.current = true
             pendingCenter.current = here
+            // in live mode, push it right away so peers follow this tick
+            if (liveRef.current) {
+                lastCenter.current = here
+                lookAtRef.current(here)
+            }
+            // (re)arm the settle timer: it flushes the final center in the debounced default, and
+            // only lowers the interacting guard in live mode
             if (settleTimer.current) {
                 clearTimeout(settleTimer.current)
             }
@@ -159,10 +163,10 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
             // all done
             return
         }
-        // seed it, then follow along; passive, so we never delay the scroll or starve lazysizes
+        // seed it, then follow along; passive, so we never delay the scroll
         track()
         placemat.addEventListener("scroll", track, { passive: true })
-        // clean up; drop any pending flush so it cannot fire after unmount
+        // clean up; drop any pending idle timer so it cannot fire after unmount
         return () => {
             placemat.removeEventListener("scroll", track)
             if (settleTimer.current) {
@@ -224,8 +228,6 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
         // record where i actually landed (the scroll may clamp at an edge) so the scroll event this
         // triggers is recognized as an echo rather than pushed back to the server
         lastCenter.current = centerOf(placemat)
-        // load whatever this recenter brought into view
-        loadVisibleTiles()
         // all done
         return
     }, [viewport, viewports, serverCenter?.row, serverCenter?.col])
