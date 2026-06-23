@@ -17,10 +17,10 @@
         "language": "typescript"
     },
     "devDependencies": {
-        "@babel/core": "latest",
-        "@babel/preset-env": "latest",
-        "@babel/preset-react": "latest",
-        "@babel/plugin-proposal-export-default-from": "latest",
+        "@babel/core": "<8",
+        "@babel/preset-env": "<8",
+        "@babel/preset-react": "<8",
+        "@babel/plugin-proposal-export-default-from": "<8",
         "babel-loader": "latest",
         "babel-plugin-relay": "latest",
         "babel-plugin-styled-components": "latest",
@@ -42,8 +42,8 @@
         "react": "<19",
         "react-dom": "<19",
         "react-relay": "latest",
-        "react-router": "latest",
-        "react-router-dom": "latest",
+        "react-router": "<8",
+        "react-router-dom": "<8",
         "react-syntax-highlighter": "latest",
         "regenerator-runtime": "latest"
     }
