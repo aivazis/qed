@@ -37,6 +37,17 @@ def inspect():
     return Inspect
 
 
+@foundry(implements=action, tip="export the qed GraphQL schema")
+def schema():
+    # get the action
+    from .Schema import Schema
+
+    # borrow its docstring
+    __doc__ = Schema.__doc__
+    # and publish it
+    return Schema
+
+
 # application introspection
 @foundry(implements=action, tip="information about this application")
 def about():

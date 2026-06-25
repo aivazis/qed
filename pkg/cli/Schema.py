@@ -1,28 +1,28 @@
-#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # (c) 1998-2026 all rights reserved
 
 
-# get the package
+# support
 import qed
 
 
 # declaration
-class Schema(qed.application, family="qed.shells.schema"):
+class Schema(qed.shells.command, family="qed.cli.schema"):
     """
-    Export the qed GraphQL schema as SDL
+    Export the qed GraphQL schema
     """
 
-    # the destination file; standard output when omitted
+    # user configurable state
     stream = qed.properties.ostream()
     stream.doc = "the file to write; stdout by default"
 
-    # main entry point
-    def main(self, *args, **kwds):
+    # interface
+    @qed.export(tip="render the GraphQL schema as SDL")
+    def sdl(self, **kwds):
         """
-        Render the schema and emit it to my {stream}
+        Render the schema as SDL and emit it to my {stream}
         """
         # render the schema body
         body = qed.gql.sdl().strip()
@@ -41,19 +41,9 @@ class Schema(qed.application, family="qed.shells.schema"):
         "# (c) 1998-2026 all rights reserved",
         "#",
         "# GENERATED FILE -- do not edit by hand",
-        "# regenerate with `qed-schema` or `npm run schema`",
-        "# source of truth: qed.pkg.sdl",
+        "# regenerate with `qed schema sdl`",
+        "# source of truth: qed.gql.sdl",
     )
-
-
-# bootstrap
-if __name__ == "__main__":
-    # instantiate
-    app = Schema(name="qed.apps.schema")
-    # invoke
-    status = app.run()
-    # and share the status code with the shell
-    raise SystemExit(status)
 
 
 # end of file

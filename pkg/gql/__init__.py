@@ -22,7 +22,7 @@ schema = graphene.Schema(
 
 
 # render the schema as SDL text; the single source of truth shared by the generated
-# {ux/schema/qed.gql} relay artifact, the {qed-schema} exporter, and the {/schema}
+# {ux/schema/qed.gql} relay artifact, the {qed schema sdl} panel, and the {/schema}
 # server route
 def sdl() -> str:
     """

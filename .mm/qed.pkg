@@ -8,8 +8,8 @@
 # its name matches the name of the project, so it will get set correctly by default
 # its path relative to the project
 qed.pkg.root := pkg/
-# its plexus wrapper and the schema exporter in the {bin} directory
-qed.pkg.drivers := qed qed-schema
+# its plexus wrapper in the {bin} directory; the schema exporter is now the {qed schema} panel
+qed.pkg.drivers := qed
 
 
 # end of file
