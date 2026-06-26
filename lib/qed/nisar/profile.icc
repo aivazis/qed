@@ -108,23 +108,23 @@ qed::nisar::profile(
 
     // get the last point on the path
     auto & last = closed ? path.front() : path.back();
-    // we read from
-    hsize_t readFrom[2] = {
+    // the address of the pixel we read from
+    auto readFrom = pyre::h5::index_t {
         static_cast<hsize_t>(std::get<0>(last)),
         static_cast<hsize_t>(std::get<1>(last)),
     };
     // the shape of a pixel
-    hsize_t count[2] = { 1, 1 };
+    auto count = pyre::h5::shape_t { 1, 1 };
     // get the dataspace of the dataset
-    auto readSpace = dataset.getSpace();
+    auto readSpace = dataset.dataspace();
     // select the hyperslab that corresponds to the pixel we want to extract
-    readSpace.selectHyperslab(H5S_SELECT_SET, count, readFrom);
+    readSpace.slab(readFrom, count);
     // make a dataspace for the destination
-    auto writeSpace = dataspace_t(2, count);
+    auto writeSpace = dataspace_t(count);
     // make room for the value
     value_t value;
     // transfer
-    dataset.read(&value, datatype, writeSpace, readSpace);
+    dataset.read(datatype.id(), &value, writeSpace.id(), readSpace.id());
     // and build the last entry
     values.emplace_back(std::get<0>(last), std::get<1>(last), value);
 
@@ -270,22 +270,22 @@ qed::nisar::profileBFPQ(
     // get the last point on the path
     const auto & [lastLine, lastSample] = (closed && path.size() > 2) ? path.front() : path.back();
     // build the address of the point
-    hsize_t index[2] = {
+    auto index = pyre::h5::index_t {
         static_cast<hsize_t>(lastLine),
         static_cast<hsize_t>(lastSample),
     };
     // the shape of a pixel
-    hsize_t shape[2] = { 1, 1 };
+    auto shape = pyre::h5::shape_t { 1, 1 };
     // get the dataspace of the dataset
-    auto readSpace = dataset.getSpace();
+    auto readSpace = dataset.dataspace();
     // select the hyperslab that corresponds to the pixel we want to extract
-    readSpace.selectHyperslab(H5S_SELECT_SET, shape, index);
+    readSpace.slab(index, shape);
     // make a dataspace for the destination
-    auto writeSpace = dataspace_t(2, shape);
+    auto writeSpace = dataspace_t(shape);
     // allocate room for the value
     bfpq_slc_cell_t value;
     // transfer
-    dataset.read(&value, datatype, writeSpace, readSpace);
+    dataset.read(datatype.id(), &value, writeSpace.id(), readSpace.id());
     // decode
     auto decoded = decoder(value);
     // and build the last entry

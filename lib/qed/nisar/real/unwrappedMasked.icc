@@ -55,7 +55,7 @@ qed::nisar::real::unwrappedMasked(
     auto source = pyre::h5::read<source_t>(dataset, datatype, zoomedOrigin, tile, stride);
     // and the mask
     auto mask =
-        pyre::h5::read<mask_t>(maskDataset, maskDataset.getDataType(), zoomedOrigin, tile, stride);
+        pyre::h5::read<mask_t>(maskDataset, maskDataset.datatype(), zoomedOrigin, tile, stride);
 
     // build the wrokflow
     auto workflow = MaskedPhase(source, mask, min, max, brightness);
