@@ -389,7 +389,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         # get the h5 bindings
         libh5 = qed.h5.libh5
         # make an access property list
-        fapl = libh5.FAPL()
+        fapl = libh5.properties.fapl()
         # get my page size
         page = self.page
         # if it's non-trivial
@@ -423,7 +423,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         # get the h5 bindings
         libh5 = qed.h5.libh5
         # make a creation property list
-        fcpl = libh5.FCPL()
+        fcpl = libh5.properties.fcpl()
         # get the page size
         page = self.page
         # if it's non-trivial

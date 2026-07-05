@@ -85,7 +85,7 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
         # if the caller didn't provide an access property list
         if fapl is None:
             # make a default one
-            fapl = qed.h5.libh5.FAPL()
+            fapl = qed.h5.libh5.properties.fapl()
         # get the number of pages to set aside for the page aggregator
         pages = self.pages
         # if it is non-trivial
