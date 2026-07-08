@@ -43,12 +43,12 @@ qed::nisar::mask::RawMask<sourceT>::RawMask(source_const_reference source) :
             // moderate chroma
             float C = 0.16f;
             // encode and store
-            _palette[code] = pyre::viz::colorspaces::oklch(L, C, h);
+            _palette[code] = pyre::chroma::rgb::oklch(L, C, h);
         }
     }
 
     // generic water
-    _palette[100] = pyre::viz::colorspaces::oklch(0.78f, 0.08f, 240.f);
+    _palette[100] = pyre::chroma::rgb::oklch(0.78f, 0.08f, 240.f);
 
     // water values: 100 + 10*{ref} + {sec}
     // go through the possible reference subswath values
@@ -64,7 +64,7 @@ qed::nisar::mask::RawMask<sourceT>::RawMask(source_const_reference source) :
             float L = 0.88f - 0.08f * float(sec - 1);
             float C = 0.10f;
             // enode and store
-            _palette[code] = pyre::viz::colorspaces::oklch(L, C, h);
+            _palette[code] = pyre::chroma::rgb::oklch(L, C, h);
         }
     }
 
