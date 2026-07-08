@@ -11,6 +11,7 @@
 #include <array>
 // support
 #include <pyre/viz.h>
+#include <pyre/chroma.h>
 
 
 // map a single value to a shade of gray
