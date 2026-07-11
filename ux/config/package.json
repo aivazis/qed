@@ -27,7 +27,7 @@
         "html-webpack-plugin": "latest",
         "relay-compiler": "latest",
         "ts-loader": "latest",
-        "typescript": "latest",
+        "typescript": "<7",
         "webpack": "latest",
         "webpack-cli": "latest",
         "@types/react": "latest",
