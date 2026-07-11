@@ -29,8 +29,10 @@ qed::nisar::real::MaskedCoherence<sourceT, maskT>::operator*() const ->
 {
     // get the mask
     auto mask = *_mask;
+    // keep only the subswath/water byte; the upper bytes carry independent bit-flags
+    mask &= 0xff;
     // isolate the last two decimal digits
-    mask = mask % 100;
+    mask %= 100;
     // if either digit is zero
     if (mask % 10 == 0 || mask / 10 == 0) {
         // show black

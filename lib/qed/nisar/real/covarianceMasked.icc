@@ -37,8 +37,8 @@ qed::nisar::real::covarianceMasked(
     // and its parts
     using index_t = typename source_t::index_type;
     using shape_t = typename source_t::shape_type;
-    // type aliases for the mask data
-    using mask_storage_t = pyre::memory::heap_t<std::uint8_t>;
+    // type aliases for the mask data; hold the full mask value (U8 or U32 on disk)
+    using mask_storage_t = pyre::memory::heap_t<std::uint32_t>;
     using mask_t = pyre::grid::grid_t<typename source_t::packing_type, mask_storage_t>;
 
     // compute the zoomed origin
@@ -50,9 +50,9 @@ qed::nisar::real::covarianceMasked(
     }
     // read the data
     auto source = pyre::h5::read<source_t>(dataset, datatype, zoomedOrigin, tile, stride);
-    // and the mask
-    auto mask =
-        pyre::h5::read<mask_t>(maskDataset, maskDataset.datatype(), zoomedOrigin, tile, stride);
+    // and the mask, read into our storage width whatever the on-disk type
+    auto mask = pyre::h5::read<mask_t>(
+        maskDataset, pyre::h5::datatype<std::uint32_t>(), zoomedOrigin, tile, stride);
 
     // build the wrokflow
     auto workflow = MaskedCovariance(source, mask, min, max);
