@@ -22,7 +22,7 @@
 #include "slc/slc.h"
 #include "stack/stack.h"
 #include "bfpq/bfpq.h"
-#include "mask/mask.h"
+#include "masks/masks.h"
 // profile
 #include "profile.h"
 // statistics

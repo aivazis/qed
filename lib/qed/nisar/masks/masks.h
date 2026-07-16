@@ -7,8 +7,9 @@
 // code guard
 #pragma once
 
-// channels
-#include "raw.h"
+// per-product mask renderers
+#include "gunw.h"
+#include "gcov.h"
 
 
 // end of file

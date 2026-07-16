@@ -8,15 +8,15 @@
 
 
 // the declarations
-#include "raw.h"
-// the redener
-#include "RawMask.h"
+#include "gcov.h"
+// the renderer
+#include "GCOVMask.h"
 
 
-// the value part tile generator
+// the GCOV mask tile generator
 template <typename sourceT>
 auto
-qed::nisar::mask::raw(
+qed::nisar::masks::gcov(
     // the source
     const dataset_t & dataset,
     // the layout
@@ -31,7 +31,7 @@ qed::nisar::mask::raw(
     // type aliases
     using index_t = typename sourceT::index_type;
     using shape_t = typename sourceT::shape_type;
-    using renderer_t = RawMask<sourceT>;
+    using renderer_t = GCOVMask<sourceT>;
 
     // compute the zoomed origin
     auto zoomedOrigin = origin;

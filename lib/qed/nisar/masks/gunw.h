@@ -7,15 +7,15 @@
 #pragma once
 
 
-// the value part tile generator
-namespace qed::nisar::mask {
+// the GUNW mask tile generator
+namespace qed::nisar::masks {
     // renderers
     template <class sourceT>
-    class RawMask;
+    class GUNWMask;
 
-    // the tile generator for the value part of a complex HDF5 source
+    // the tile generator for the mask of a GUNW product
     template <typename sourceT>
-    inline auto raw(
+    inline auto gunw(
         // the source
         const dataset_t & source,
         // the data layout
@@ -30,7 +30,7 @@ namespace qed::nisar::mask {
 
 
 // pull in the implementations
-#include "raw.icc"
+#include "gunw.icc"
 
 
 // end of file

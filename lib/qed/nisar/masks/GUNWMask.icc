@@ -8,12 +8,12 @@
 
 
 // the declaration
-#include "RawMask.h"
+#include "GUNWMask.h"
 
 
 // metamethods
 template <class sourceT>
-qed::nisar::mask::RawMask<sourceT>::RawMask(source_const_reference source) :
+qed::nisar::masks::GUNWMask<sourceT>::GUNWMask(source_const_reference source) :
     _source { source.cbegin() },
     _palette {}
 {
@@ -23,7 +23,7 @@ qed::nisar::mask::RawMask<sourceT>::RawMask(source_const_reference source) :
         value = { 0.f, 0.f, 0.f };
     }
 
-    // render the fill value as light gray
+    // render the fill value as faint red
     _palette[255] = { 0.150, 0.050, 0.050 };
 
     // five evenly spaced hues
@@ -63,7 +63,7 @@ qed::nisar::mask::RawMask<sourceT>::RawMask(source_const_reference source) :
             float h = 0.65f * h0 + 0.35f * 240.f;
             float L = 0.88f - 0.08f * float(sec - 1);
             float C = 0.10f;
-            // enode and store
+            // encode and store
             _palette[code] = pyre::chroma::rgb::oklch(L, C, h);
         }
     }
@@ -76,7 +76,7 @@ qed::nisar::mask::RawMask<sourceT>::RawMask(source_const_reference source) :
 // accessors
 template <class sourceT>
 auto
-qed::nisar::mask::RawMask<sourceT>::palette(int code) const -> rgb_type
+qed::nisar::masks::GUNWMask<sourceT>::palette(int code) const -> rgb_type
 {
     // clamp the code
     code = std::max(0, std::min(code, 0xff));
@@ -88,7 +88,7 @@ qed::nisar::mask::RawMask<sourceT>::palette(int code) const -> rgb_type
 // mutators
 template <class sourceT>
 auto
-qed::nisar::mask::RawMask<sourceT>::palette(int code, rgb_type color) -> void
+qed::nisar::masks::GUNWMask<sourceT>::palette(int code, rgb_type color) -> void
 {
     // clamp the code
     code = std::max(0, std::min(code, 0xff));
@@ -102,7 +102,7 @@ qed::nisar::mask::RawMask<sourceT>::palette(int code, rgb_type color) -> void
 // interface
 template <class sourceT>
 auto
-qed::nisar::mask::RawMask<sourceT>::operator*() const -> rgb_type
+qed::nisar::masks::GUNWMask<sourceT>::operator*() const -> rgb_type
 {
     // get the value from the data source and clip it
     auto value = *_source & 0xFF;
@@ -113,7 +113,7 @@ qed::nisar::mask::RawMask<sourceT>::operator*() const -> rgb_type
 
 template <class sourceT>
 auto
-qed::nisar::mask::RawMask<sourceT>::operator++() -> void
+qed::nisar::masks::GUNWMask<sourceT>::operator++() -> void
 {
     // make {_source} point to the next value
     ++_source;

@@ -1,0 +1,100 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// the declaration
+#include "GCOVMask.h"
+
+
+// metamethods
+template <class sourceT>
+qed::nisar::masks::GCOVMask<sourceT>::GCOVMask(source_const_reference source) :
+    _source { source.cbegin() },
+    _palette {}
+{
+    // fill
+    for (auto & value : _palette) {
+        // with black; this also covers code 0, the invalid/partially-focused sample class
+        value = { 0.f, 0.f, 0.f };
+    }
+
+    // render the fill value as faint red, matching the GUNW mask
+    _palette[255] = { 0.150, 0.050, 0.050 };
+
+    // five evenly spaced hues, one per subswath
+    constexpr float step = 360.f / 5.f;
+
+    // subswath values: a single digit {d} in [1, 5], since a GCOV has no secondary acquisition
+    // give each the color the GUNW mask assigns to its diagonal code {11, 22, ..., 55}, i.e.
+    // reference subswath == secondary subswath == {d}, so the two products stay visually consistent
+    for (int d = 1; d <= 5; ++d) {
+        // pick the hue for this subswath
+        float h = (d - 1) * step;
+        // the diagonal lightness, darkening with the subswath number
+        float L = 0.82f - 0.10f * float(d - 1);
+        // moderate chroma
+        float C = 0.16f;
+        // encode and store
+        _palette[d] = pyre::chroma::rgb::oklch(L, C, h);
+    }
+
+    // all done
+    return;
+}
+
+
+// accessors
+template <class sourceT>
+auto
+qed::nisar::masks::GCOVMask<sourceT>::palette(int code) const -> rgb_type
+{
+    // clamp the code
+    code = std::max(0, std::min(code, 0xff));
+    // look the color and return it
+    return _palette[code];
+}
+
+
+// mutators
+template <class sourceT>
+auto
+qed::nisar::masks::GCOVMask<sourceT>::palette(int code, rgb_type color) -> void
+{
+    // clamp the code
+    code = std::max(0, std::min(code, 0xff));
+    // set the color
+    _palette[code] = color;
+    // all done
+    return;
+}
+
+
+// interface
+template <class sourceT>
+auto
+qed::nisar::masks::GCOVMask<sourceT>::operator*() const -> rgb_type
+{
+    // get the value from the data source and clip it
+    auto value = *_source & 0xFF;
+    // look up and return
+    return _palette[value];
+}
+
+
+template <class sourceT>
+auto
+qed::nisar::masks::GCOVMask<sourceT>::operator++() -> void
+{
+    // make {_source} point to the next value
+    ++_source;
+    // all done
+    return;
+}
+
+
+// end of file
