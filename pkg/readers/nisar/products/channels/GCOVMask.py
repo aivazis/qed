@@ -11,10 +11,10 @@ import qed
 from .Channel import Channel
 
 
-# a channel for masks
-class Raw(Channel, family="qed.channels.nisar.raw"):
+# a channel for GCOV product masks
+class GCOVMask(Channel, family="qed.channels.nisar.gcovmask"):
     """
-    Make a visualization pipeline to display masks
+    Make a visualization pipeline to display a GCOV product mask
     """
 
     # interface
@@ -34,7 +34,7 @@ class Raw(Channel, family="qed.channels.nisar.raw"):
 
     def project(self, pixel):
         """
-        Compute the real part of a {pixel}
+        Compute the representation of a {pixel}
         """
         # only one rep
         yield pixel, ""
@@ -42,8 +42,8 @@ class Raw(Channel, family="qed.channels.nisar.raw"):
         return
 
     # constants
-    tag = "raw"
-    category = "mask"
+    tag = "gcov"
+    category = "masks"
 
 
 # end of file

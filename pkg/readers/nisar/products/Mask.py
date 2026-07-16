@@ -14,7 +14,7 @@ from .Product import Product
 # the base class for NISAR bit masks
 class Mask(Product, family="qed.datasets.nisar.products.mask"):
     """
-    A bit mask
+    A bit mask; the base for the per-product mask renderers, which each nominate their own channel
     """
 
     # public data
@@ -46,16 +46,5 @@ class Mask(Product, family="qed.datasets.nisar.products.mask"):
 
         # all done
         return
-
-    # implementation details
-    def _retrieveChannels(self):
-        """
-        Generate a sequence of channel pipelines for this product
-        """
-        # i only have one
-        yield "raw"
-        # all done
-        return
-
 
 # end of file

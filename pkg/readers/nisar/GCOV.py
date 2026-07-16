@@ -13,7 +13,7 @@ from .H5 import H5
 
 # my datasets
 from .products.Covariance import Covariance
-from .products.Mask import Mask
+from .products.GCOVMask import GCOVMask
 from .products.SLC import SLC
 
 
@@ -135,7 +135,7 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                         "selector": selector,
                     }
                     # instantiate it
-                    dataset = Mask(name=name, data=mask, **config)
+                    dataset = GCOVMask(name=name, data=mask, **config)
                     # add the dataset to my pile
                     registered.append(dataset)
 

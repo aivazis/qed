@@ -13,7 +13,7 @@ from .H5 import H5
 
 # my dataset
 from .products.Coherence import Coherence
-from .products.Mask import Mask
+from .products.GUNWMask import GUNWMask
 from .products.Real import Real
 from .products.SLC import SLC
 from .products.UNW import UNW
@@ -173,7 +173,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 "selector": selector,
             }
             # instantiate it
-            dataset = Mask(name=name, data=mask, **config)
+            dataset = GUNWMask(name=name, data=mask, **config)
             # add the dataset to my pile
             registered.append(dataset)
 
@@ -360,7 +360,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 "selector": selector,
             }
             # instantiate it
-            dataset = Mask(name=name, data=mask, **config)
+            dataset = GUNWMask(name=name, data=mask, **config)
             # add the dataset to my pile
             registered.append(dataset)
 

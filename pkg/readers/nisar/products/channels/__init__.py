@@ -34,6 +34,7 @@ from .BFPQPhase import BFPQPhase as phaseBFPQ
 from .BFPQReal import BFPQReal as realBFPQ
 
 # bitmasks
-from .Raw import Raw as raw
+from .GUNWMask import GUNWMask as gunw
+from .GCOVMask import GCOVMask as gcov
 
 # end of file
