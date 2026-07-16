@@ -19,7 +19,7 @@ namespace qed::py::nisar {
     void slc(py::module &);
     void stack(py::module &);
     void bfpq(py::module &);
-    void mask(py::module &);
+    void masks(py::module &);
     // profile
     void profile(py::module &);
     // stats

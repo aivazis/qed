@@ -26,7 +26,7 @@ qed::py::nisar::nisar(py::module & m)
     slc(nisar);
     stack(nisar);
     bfpq(nisar);
-    mask(nisar);
+    masks(nisar);
     // profile
     profile(nisar);
     // stats
