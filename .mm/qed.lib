@@ -8,6 +8,9 @@
 qed.lib.stem := qed
 qed.lib.root := lib/qed/
 
+# qed depends on pyre
+qed.lib.extern := pyre
+
 # use c++20
 qed.lib.c++.flags += $($(compiler.c++).std.c++20)
 

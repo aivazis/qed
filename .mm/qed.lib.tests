@@ -1,0 +1,19 @@
+# -*- makefile -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2026 all rights reserved
+
+
+# the testsuite for the qed library
+qed.lib.tests.stem := qed.lib
+# depends on
+qed.ext.tests.prerequisites := qed.lib
+# external dependencies
+qed.lib.tests.extern := $(qed.lib.extern)
+
+# each generator emits its fixture beside itself; record the outputs for the clean rules
+tests.qed.lib.nisar.masks.gcov.clean += gcov.bmp
+tests.qed.lib.nisar.masks.gunw.clean += gunw.bmp
+
+
+# end of file
