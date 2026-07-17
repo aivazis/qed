@@ -90,7 +90,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
                 channel.log("no web id token")
                 # and bail
                 return 0
-            # open the file and extract the toke
+            # open the file and extract the token
             token = open(path, mode="r").read()
         # access the security token service
         sts = boto3.Session(profile_name=self.profile).client(service_name="sts")

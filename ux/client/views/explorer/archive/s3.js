@@ -29,7 +29,7 @@ export const S3 = ({ view, setType, hide }) => {
     const [error, setError] = React.useState(null)
     // set up my state
     const [form, setForm] = React.useState({
-        // the nickname of the archive; get's used to generate the name of the component
+        // the nickname of the archive; gets used to generate the name of the component
         name: "",
         // the connection profile with the AWS credentials
         profile: "",

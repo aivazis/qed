@@ -20,7 +20,7 @@ import styles from './styles'
 
 // save the state of a controller
 export const Save = ({ enabled = true }) => {
-    // saving te state invokes a mutation
+    // saving the state invokes a mutation
     const [request, pending] = useMutation(persistReadersMutation)
 
     // make a handler that invokes the mutation

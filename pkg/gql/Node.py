@@ -42,7 +42,7 @@ class Node(graphene.relay.Node):
     @staticmethod
     def to_global_id(gtype, eid):
         """
-        Encode the {tgype} and {eid} of a {node} implementor
+        Encode the {gtype} and {eid} of a {node} implementer
         """
         # just splice them together
         return f"{gtype}:{eid}"

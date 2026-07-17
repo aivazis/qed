@@ -45,7 +45,7 @@ class Profiler(qed.component, family="qed.inspect.profiler"):
 
         # build the target tiles
         tiles = [(2**pow,) * 2 for pow in range(*self.tiles)]
-        # and the target zoon levels
+        # and the target zoom levels
         zoomLevels = tuple(range(*self.zoom))
         # go through the datasets
         for dataset, discovery, stats in self.datasets():

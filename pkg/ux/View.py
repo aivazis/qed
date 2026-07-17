@@ -105,7 +105,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
 
     def setChannel(self, tag):
         """
-        Set my channel to the one wih {tag}
+        Set my channel to the one with {tag}
         """
         # if the tag is trivial
         if tag is None:
@@ -120,7 +120,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             # it's a bug
             firewall = journal.firewall("qed.ux.store")
             # complain
-            firewall.line(f"cannot ser the channel to '{tag}'")
+            firewall.line(f"cannot set the channel to '{tag}'")
             firewall.line(f"no dataset selection for {self.reader}")
             # flush
             firewall.log()

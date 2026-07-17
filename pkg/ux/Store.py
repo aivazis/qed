@@ -139,7 +139,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         port = viewports.pop(viewport)
         # if the pile of viewports is now empty
         if not viewports:
-            # make a new onw
+            # make a new one
             port = Viewport(name=str(uuid.uuid1()))
             # add it to the pile
             viewports.append(port)

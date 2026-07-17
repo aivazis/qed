@@ -32,7 +32,7 @@ export const Provider = ({ qed, children }) => {
         }`,
         qed
     )
-    // the set of known views; it starts out with one empty vew
+    // the set of known views; it starts out with one empty view
     const [views, setViews] = React.useState([emptyView()])
     // the active viewport is an index into the set of views
     const [activeViewport, setActiveViewport] = React.useState(0)

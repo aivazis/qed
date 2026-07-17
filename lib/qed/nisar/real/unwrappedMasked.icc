@@ -57,7 +57,7 @@ qed::nisar::real::unwrappedMasked(
     auto mask = pyre::h5::read<mask_t>(
         maskDataset, pyre::h5::datatype<std::uint32_t>(), zoomedOrigin, tile, stride);
 
-    // build the wrokflow
+    // build the workflow
     auto workflow = MaskedPhase(source, mask, min, max, brightness);
     // make a bitmap
     bmp_t bmp(tile[0], tile[1]);

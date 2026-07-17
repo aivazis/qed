@@ -17,7 +17,7 @@ import {
 
 // build a handler that collapses a given view
 export const useCollapseViewport = viewport => {
-    // grab the mutators for the set of views and teh active viewport
+    // grab the mutators for the set of views and the active viewport
     const {
         // mutators
         setActiveViewport, setViews,
