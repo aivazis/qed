@@ -27,14 +27,19 @@ auto
 qed::nisar::real::MaskedCovariance<sourceT, maskT>::operator*() const ->
     typename colormap_type::rgb_type
 {
-    // get the mask
+    // get the mask value
     auto mask = *_mask;
-    // if it's the fill value
+    // pixels outside the acquisition extent carry the fill code {255}, shown as a faint red
     if (mask == 0xff) {
-        // show black
+        // hand back the fill color
         return typename colormap_type::rgb_type { 0.10, 0.05, 0.05 };
     }
-    // otherwise, invoke the workflow
+    // the code {0} marks an invalid/partially-focused sample
+    if (mask == 0) {
+        // which we paint black
+        return typename colormap_type::rgb_type { 0, 0, 0 };
+    }
+    // any other non-zero code names the subswath the sample came from; show its covariance color
     return *_color;
 }
 
