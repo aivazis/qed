@@ -1,0 +1,15 @@
+# -*- gitignore -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2026 all rights reserved
+
+
+# the inspectable bitmaps the mask tests emit beside themselves: regenerated on demand, never committed
+*.bmp
+
+# the compiled test drivers (one per test source, no extension)
+nisar/masks/cov
+nisar/masks/gcov
+nisar/masks/gunw
+
+# end of file
