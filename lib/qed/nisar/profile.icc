@@ -225,14 +225,14 @@ qed::nisar::profileBFPQ(
             // read the BFPQ encode data
             auto encoded = pyre::h5::read<bfpq_slc_t>(dataset, datatype, origin, shape, strides);
             // report
-            channel << "encoded tile shape: " << encoded.layout().shape() << pyre::journal::endl;
+            channel << "encoded tile shape: " << encoded.packing().shape() << pyre::journal::endl;
 
             // describe the decoded tile
             auto layout = layout_t { shape };
             // allocate storage
             auto decoded = sourceT(layout, layout.cells());
             // report
-            channel << "decoded tile shape: " << decoded.layout().shape() << pyre::journal::endl;
+            channel << "decoded tile shape: " << decoded.packing().shape() << pyre::journal::endl;
             // decode the tile
             std::transform(encoded.cbegin(), encoded.cend(), decoded.begin(), decoder);
 
