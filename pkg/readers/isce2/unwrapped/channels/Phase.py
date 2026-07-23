@@ -98,11 +98,11 @@ class Phase(Channel, family="qed.channels.isce2.int.phase"):
         lines, samples = shape
 
         # turn the shape into a {pyre::grid::shape_t}
-        shape = qed.libpyre.grid.Shape3D(shape=(lines, 1, samples))
+        shape = list((lines, 1, samples))
         # the origin into a {pyre::grid::index_t}
-        origin = qed.libpyre.grid.Index3D(index=(line, 1, sample))
+        origin = list((line, 1, sample))
         # and the zoom level into a {pyre::grid::index_t}
-        stride = qed.libpyre.grid.Index3D(index=(2 ** zoom[0], 1, 2 ** zoom[1]))
+        stride = list((2 ** zoom[0], 1, 2 ** zoom[1]))
         # look for the tile maker in {libqed}
         tileMaker = qed.libqed.isce2.unwrapped.channels.phase
         # and ask it to make a tile

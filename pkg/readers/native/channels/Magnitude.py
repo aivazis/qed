@@ -74,7 +74,7 @@ class Magnitude(Channel, family="qed.channels.native.abs"):
         # look for the tile maker in {libqed}
         pipeline = qed.libqed.native.channels.abs
         # turn the shape into a {pyre::grid::shape_t}
-        shape = qed.libpyre.grid.Shape2D(shape=shape)
+        shape = list(shape)
         # and invoke it
         return pipeline(source=source, shape=shape, low=low, high=high)
 

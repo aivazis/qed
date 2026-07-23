@@ -14,6 +14,9 @@ class Float(Real, family="qed.datatypes.real32"):
     The specification for single precision floating point numbers
     """
 
+    # the pyre memory cell name
+    cell = "float32"
+
     # size
     bytes = 4
 

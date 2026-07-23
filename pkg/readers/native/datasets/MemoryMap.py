@@ -177,23 +177,11 @@ class MemoryMap(
 
         # grab the path to the dataset
         path = str(uri.address)
-        # build the name of the buffer factory
-        memoryType = f"{self.cell.tag}ConstMap"
-        # look up the factory in the {pyre::memory} bindings
-        bufferFactory = getattr(qed.libpyre.memory, memoryType)
-        # make the memory buffer
-        buffer = bufferFactory(path)
-
-        # realize the dataset shape
-        shape = qed.libpyre.grid.Shape2D(shape=self.shape)
-        # build the packing
-        packing = qed.libpyre.grid.Canonical2D(shape=shape)
-        # grab the grid factory
-        gridFactory = getattr(qed.libpyre.grid, f"{memoryType}Grid2D")
-        # put it all together
-        data = gridFactory(packing, buffer)
-        # and return it
-        return data
+        # lay an erased grid of my cell type over the memory-mapped file and return it; it presents
+        # the buffer protocol, which is what the tile generators consume
+        return qed.libpyre.grid.map(
+            uri=path, shape=list(self.shape), cell=self.cell.cell, create=False
+        )
 
     def _collectStatistics(self):
         """
@@ -210,9 +198,9 @@ class MemoryMap(
         center = tuple((s - t) // 2 for s, t in zip(shape, tile))
 
         # convert to a grid index
-        center = qed.libpyre.grid.Index2D(index=center)
+        center = list(center)
         # and a shape
-        tile = qed.libpyre.grid.Shape2D(shape=tile)
+        tile = list(tile)
         # compute the stats
         stats = qed.libqed.native.stats(source=data, origin=center, shape=tile)
         # and return them
