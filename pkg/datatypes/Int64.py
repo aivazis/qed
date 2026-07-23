@@ -14,6 +14,9 @@ class Int64(Integer, family="qed.datatypes.int64"):
     The specification for eight byte integers
     """
 
+    # the pyre memory cell name
+    cell = "int64"
+
     # size
     bytes = 8
 

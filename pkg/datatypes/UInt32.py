@@ -14,6 +14,9 @@ class UInt32(Integer, family="qed.datatypes.uint32"):
     The specification for four byte unsigned integers
     """
 
+    # the pyre memory cell name
+    cell = "uint32"
+
     # size
     bytes = 4
 

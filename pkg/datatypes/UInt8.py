@@ -14,6 +14,9 @@ class UInt8(Integer, family="qed.datatypes.uint8"):
     The specification for one byte unsigned integers
     """
 
+    # the pyre memory cell name
+    cell = "uint8"
+
     # size
     bytes = 1
 

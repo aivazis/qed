@@ -14,6 +14,9 @@ class Char(Integer, family="qed.datatypes.Char"):
     The specification for one byte integers
     """
 
+    # the pyre memory cell name
+    cell = "int8"
+
     # size
     bytes = 1
 

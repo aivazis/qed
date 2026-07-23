@@ -14,6 +14,9 @@ class UInt16(Integer, family="qed.datatypes.uint16"):
     The specification for two byte unsigned integers
     """
 
+    # the pyre memory cell name
+    cell = "uint16"
+
     # size
     bytes = 2
 

@@ -15,6 +15,9 @@ class ComplexFloat(Complex, family="qed.datatypes.complex64"):
     floating point numbers
     """
 
+    # the pyre memory cell name
+    cell = "complex64"
+
     # size
     bytes = 8
 

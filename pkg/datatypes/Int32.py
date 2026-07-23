@@ -14,6 +14,9 @@ class Int32(Integer, family="qed.datatypes.int32"):
     The specification for four byte integers
     """
 
+    # the pyre memory cell name
+    cell = "int32"
+
     # size
     bytes = 4
 

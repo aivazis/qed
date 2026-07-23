@@ -14,6 +14,9 @@ class Int16(Integer, family="qed.datatypes.int16"):
     The specification for two byte integers
     """
 
+    # the pyre memory cell name
+    cell = "int16"
+
     # size
     bytes = 2
 
