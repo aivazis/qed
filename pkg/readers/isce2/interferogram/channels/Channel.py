@@ -55,12 +55,8 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         # look for the tile maker in {libqed}
         pipeline = getattr(qed.libqed.isce2.interferogram.channels, name)
 
-        # turn the shape into a {pyre::grid::shape_t}
-        shape = qed.libpyre.grid.Shape2D(shape=shape)
-        # the origin into a {pyre::grid::index_t}
-        origin = qed.libpyre.grid.Index2D(index=origin)
-        # and the zoom level into a {pyre::grid::index_t}
-        stride = qed.libpyre.grid.Index2D(index=tuple(2**level for level in zoom))
+        # turn the zoom levels into per-axis strides
+        stride = tuple(2**level for level in zoom)
 
         # ask it to make a tile and return it
         return pipeline(

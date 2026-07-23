@@ -173,23 +173,11 @@ class Dataset(
 
         # grab the path to the dataset
         path = str(uri.address)
-        # build the name of the buffer factory
-        memoryType = f"{self.cell.tag}ConstMap"
-        # look up the factory in the {pyre::memory} bindings
-        bufferFactory = getattr(qed.libpyre.memory, memoryType)
-        # make the memory buffer
-        buffer = bufferFactory(path)
-
-        # realize the layout
-        layout = qed.libpyre.grid.Shape3D(shape=self.layout)
-        # build the packing
-        packing = qed.libpyre.grid.Canonical3D(shape=layout)
-        # grab the grid factory
-        gridFactory = getattr(qed.libpyre.grid, f"{memoryType}Grid3D")
-        # put it all together
-        data = gridFactory(packing, buffer)
-        # and return it
-        return data
+        # lay an erased grid of my cell type over the memory-mapped file and return it; it presents
+        # the buffer protocol, which is what the tile generators consume
+        return qed.libpyre.grid.map(
+            uri=path, shape=self.layout, cell=self.cell.cell, create=False
+        )
 
     def _collectStatistics(self):
         """
@@ -209,10 +197,10 @@ class Dataset(
         stats = []
         # go through my two channels
         for channel in range(2):
-            # inject the index of the {channel} into the center index
-            origin = qed.libpyre.grid.Index3D(index=(center[0], channel, center[1]))
-            # extend the tile shape
-            shape = qed.libpyre.grid.Shape3D(shape=(tile[0], 1, tile[1]))
+            # anchor the sample at this band of the line-interleaved layout
+            origin = (center[0], channel, center[1])
+            # spanning that one band
+            shape = (tile[0], 1, tile[1])
             # compute the stats
             channelStats = qed.libqed.isce2.unwrapped.stats(
                 source=data, origin=origin, shape=shape

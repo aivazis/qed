@@ -14,6 +14,9 @@ class Double(Real, family="qed.datatypes.real64"):
     The specification for double precision floating point numbers
     """
 
+    # the pyre memory cell name
+    cell = "float64"
+
     # size
     bytes = 8
 

@@ -1,4 +1,5 @@
-// -*- c++ -*-
+// -*- C++ -*-
+// -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 // (c) 1998-2026 all rights reserved
@@ -21,27 +22,43 @@ qed::py::nisar::masks(py::module & m)
         // its docstring
         "support for nisar {mask} datasets");
 
-    // {uint8_t} GUNW bitmasks
-    masks.def(
-        // the name of the function
-        "gunw",
-        // the handler
-        &qed::nisar::masks::gunw<heapgrid_t<uint8_t>>,
-        // the signature
-        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a,
-        // the docstring
-        "render a tile of a GUNW product mask");
+    // the nisar kernels read a tile out of an h5 dataset (using {datatype} for the on-disk layout)
+    // into a grid of a fixed cell type, then render it
+    using grid_t = heapgrid_t<uint8_t>;
 
-    // {uint8_t} GCOV bitmasks
+    // render a gcov mask tile
     masks.def(
-        // the name of the function
+        // the name
         "gcov",
         // the handler
-        &qed::nisar::masks::gcov<heapgrid_t<uint8_t>>,
+        [](const dataset_t & source, const datatype_t & datatype,
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride) -> bmp_t {
+            // read the tile and render it
+            return qed::nisar::masks::gcov<grid_t>(
+                source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride));
+        },
         // the signature
         "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a,
         // the docstring
-        "render a tile of a GCOV product mask");
+        "render a gcov mask tile");
+
+    // render a gunw mask tile
+    masks.def(
+        // the name
+        "gunw",
+        // the handler
+        [](const dataset_t & source, const datatype_t & datatype,
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride) -> bmp_t {
+            // read the tile and render it
+            return qed::nisar::masks::gunw<grid_t>(
+                source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride));
+        },
+        // the signature
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a,
+        // the docstring
+        "render a gunw mask tile");
 
     // all done
     return;

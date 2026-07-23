@@ -15,6 +15,9 @@ class ComplexDouble(Complex, family="qed.datatypes.complex128"):
     floating point numbers
     """
 
+    # the pyre memory cell name
+    cell = "complex128"
+
     # size
     bytes = 16
 

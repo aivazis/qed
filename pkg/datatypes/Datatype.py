@@ -29,15 +29,19 @@ class Datatype(qed.flow.product, implements=qed.protocols.datatype):
     # constants
     summary = ("value",)
 
+    # the pyre memory cell name for this datatype; each concrete datatype sets its own, and it is
+    # what {pyre.grid} wants when it lays a grid over a block of memory
+    cell = None
+
 
     @property
     def tag(self):
         """
         Generate my type tag
         """
-        # use the class name as the tag; this is currently consistent with the {pyre.memory}
-        # bindings, so it can be interpolated into class names when requesting specific
-        # template instantiations
+        # use the class name as the tag; it is interpolated into the names of the {libqed} tile
+        # generators that are specialized by cell type, e.g. {profileFloat}. the connection to
+        # {pyre.grid}, on the other hand, goes through {cell}, the pyre memory cell name
         return self.__class__.__name__
 
 
