@@ -177,7 +177,7 @@ class Dataset(
         # lay an erased grid of my cell type over the memory-mapped file and return it; it presents
         # the buffer protocol, which is what the tile generators consume
         return qed.libpyre.grid.map(
-            uri=path, shape=list(self.shape), cell=self.cell.cell, create=False
+            uri=path, shape=self.shape, cell=self.cell.cell, create=False
         )
 
     def _collectStatistics(self):
@@ -194,10 +194,6 @@ class Dataset(
         # center it in my shape
         center = tuple((s - t) // 2 for s, t in zip(shape, tile))
 
-        # convert to a grid index
-        center = list(center)
-        # and a shape
-        tile = list(tile)
         # compute the stats
         stats = qed.libqed.isce2.interferogram.stats(
             source=data, origin=center, shape=tile

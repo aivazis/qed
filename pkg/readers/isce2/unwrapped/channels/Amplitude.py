@@ -90,12 +90,12 @@ class Amplitude(Channel, family="qed.channels.isce2.int.amplitude"):
         # and its shape
         lines, samples = shape
 
-        # turn the shape into a {pyre::grid::shape_t}
-        shape = list((lines, 1, samples))
-        # and the origin into a {pyre::grid::index_t}
-        origin = list((line, 0, sample))
-        # and the zoom level into a {pyre::grid::index_t}
-        stride = list((2 ** zoom[0], 1, 2 ** zoom[1]))
+        # the tile spans a single band of the line-interleaved layout
+        shape = (lines, 1, samples)
+        # anchored at the amplitude band
+        origin = (line, 0, sample)
+        # decimated by the zoom, leaving the band axis untouched
+        stride = (2 ** zoom[0], 1, 2 ** zoom[1])
         # look for the tile maker in {libqed}
         tileMaker = qed.libqed.isce2.unwrapped.channels.amplitude
         # and ask it to make a tile

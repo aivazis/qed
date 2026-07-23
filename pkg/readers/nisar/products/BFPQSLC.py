@@ -114,10 +114,6 @@ class BFPQSLC(Product, family="qed.datasets.nisar.products.bfpqslc"):
         # center it in my shape
         center = tuple((s - t) // 2 for s, t in zip(shape, tile))
 
-        # convert to a grid index
-        center = list(center)
-        # and a shape
-        tile = list(tile)
         # compute the stats
         stats = qed.libqed.nisar.statsBFPQ(
             source=source,

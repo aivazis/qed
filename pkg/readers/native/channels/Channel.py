@@ -55,12 +55,8 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         # look for the tile maker in {libqed}
         pipeline = getattr(qed.libqed.native.channels, name)
 
-        # turn the shape into a {pyre::grid::shape_t}
-        shape = list(shape)
-        # the origin into a {pyre::grid::index_t}
-        origin = list(origin)
-        # and the zoom into strides
-        stride = list(tuple(2**level for level in zoom))
+        # turn the zoom levels into per-axis strides
+        stride = tuple(2**level for level in zoom)
         # build the visualization pipeline and return it
         return pipeline(
             source=source.data, origin=origin, shape=shape, stride=stride, **kwds
