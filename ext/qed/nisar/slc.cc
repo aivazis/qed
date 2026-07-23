@@ -1,4 +1,5 @@
-// -*- c++ -*-
+// -*- C++ -*-
+// -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 // (c) 1998-2026 all rights reserved
@@ -10,7 +11,7 @@
 #include "forward.h"
 
 
-// submodule with the bindings for the nisar tile generators
+// submodule with the bindings for the nisar slc tile generators
 void
 qed::py::nisar::slc(py::module & m)
 {
@@ -21,114 +22,105 @@ qed::py::nisar::slc(py::module & m)
         // its docstring
         "support for nisar {slc} datasets");
 
-    // {c8} amplitude
-    slc.def(
-        // the name of the function
-        "amplitude",
-        // the handler
-        &qed::nisar::slc::amplitude<heapgrid_t<std::complex<float>>>,
-        // the signature
-        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-        // the docstring
-        "render the amplitude of a complex float tile");
-    // {c16} amplitude
-    slc.def(
-        // the name of the function
-        "amplitude",
-        // the handler
-        &qed::nisar::slc::amplitude<heapgrid_t<std::complex<double>>>,
-        // the signature
-        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-        // the docstring
-        "render the amplitude of a complex double tile");
+    // the nisar kernels read a tile out of an h5 dataset (using {datatype} for the on-disk layout)
+    // into a grid of a fixed cell type, then render it; the grid type is a compile-time detail, so
+    // each wrapper just threads the dataset and layout through and turns the geometry into grid
+    // coordinates
+    using grid_t = heapgrid_t<std::complex<float>>;
 
-    // {c8}
+    // render the amplitude of a complex slc tile
     slc.def(
-        // the name of the function
+        // the name
+        "amplitude",
+        // the handler
+        [](const dataset_t & source, const datatype_t & datatype,
+           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
+           std::vector<std::ptrdiff_t> stride, double min, double max) -> bmp_t {
+            // read the tile and render it
+            return qed::nisar::slc::amplitude<grid_t>(
+                source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
+                max);
+        },
+        // the signature
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        // the docstring
+        "render the amplitude of a complex slc tile");
+
+    // render the value of a complex slc tile
+    slc.def(
+        // the name
         "complex",
         // the handler
-        &qed::nisar::slc::complex<heapgrid_t<std::complex<float>>>,
+        [](const dataset_t & source, const datatype_t & datatype,
+           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
+           std::vector<std::ptrdiff_t> stride, double min, double max, double minPhase,
+           double maxPhase, double saturation) -> bmp_t {
+            // read the tile and render it
+            return qed::nisar::slc::complex<grid_t>(
+                source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
+                max, minPhase, maxPhase, saturation);
+        },
         // the signature
         "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "minPhase"_a,
         "maxPhase"_a, "saturation"_a,
         // the docstring
-        "render the value of a complex float tile");
-    // {c16}
-    slc.def(
-        // the name of the function
-        "complex",
-        // the handler
-        &qed::nisar::slc::complex<heapgrid_t<std::complex<double>>>,
-        // the signature
-        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "minPhase"_a,
-        "maxPhase"_a, "saturation"_a,
-        // the docstring
-        "render the value of a complex double tile");
+        "render the value of a complex slc tile");
 
-    // imaginary part of {c8}
+    // render the imaginary part of a complex slc tile
     slc.def(
-        // the name of the function
+        // the name
         "imaginary",
         // the handler
-        &qed::nisar::slc::imaginary<heapgrid_t<std::complex<float>>>,
+        [](const dataset_t & source, const datatype_t & datatype,
+           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
+           std::vector<std::ptrdiff_t> stride, double min, double max) -> bmp_t {
+            // read the tile and render it
+            return qed::nisar::slc::imaginary<grid_t>(
+                source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
+                max);
+        },
         // the signature
         "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
-        "render the imaginary part of a complex float tile");
-    // imaginary part of {c16}
-    slc.def(
-        // the name of the function
-        "imaginary",
-        // the handler
-        &qed::nisar::slc::imaginary<heapgrid_t<std::complex<double>>>,
-        // the signature
-        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-        // the docstring
-        "render the imaginary part of a complex double tile");
+        "render the imaginary part of a complex slc tile");
 
-    // phase of {c8}
+    // render the phase of a complex slc tile
     slc.def(
-        // the name of the function
+        // the name
         "phase",
         // the handler
-        &qed::nisar::slc::phase<heapgrid_t<std::complex<float>>>,
+        [](const dataset_t & source, const datatype_t & datatype,
+           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
+           std::vector<std::ptrdiff_t> stride, double low, double high, double saturation,
+           double brightness) -> bmp_t {
+            // read the tile and render it
+            return qed::nisar::slc::phase<grid_t>(
+                source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), low,
+                high, saturation, brightness);
+        },
         // the signature
         "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "low"_a, "high"_a,
         "saturation"_a, "brightness"_a,
         // the docstring
-        "render the phase of a complex float tile");
-    // phase of {c16}
-    slc.def(
-        // the name of the function
-        "phase",
-        // the handler
-        &qed::nisar::slc::phase<heapgrid_t<std::complex<double>>>,
-        // the signature
-        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "low"_a, "high"_a,
-        "saturation"_a, "brightness"_a,
-        // the docstring
-        "render the phase of a complex double tile");
+        "render the phase of a complex slc tile");
 
-    // real part of {c8}
+    // render the real part of a complex slc tile
     slc.def(
-        // the name of the function
+        // the name
         "real",
         // the handler
-        &qed::nisar::slc::real<heapgrid_t<std::complex<float>>>,
+        [](const dataset_t & source, const datatype_t & datatype,
+           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
+           std::vector<std::ptrdiff_t> stride, double min, double max) -> bmp_t {
+            // read the tile and render it
+            return qed::nisar::slc::real<grid_t>(
+                source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
+                max);
+        },
         // the signature
         "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
-        "render the real part of a complex float tile");
-    // real part of {c16}
-    slc.def(
-        // the name of the function
-        "real",
-        // the handler
-        &qed::nisar::slc::real<heapgrid_t<std::complex<double>>>,
-        // the signature
-        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-        // the docstring
-        "render the real part of a complex double tile");
+        "render the real part of a complex slc tile");
 
     // all done
     return;

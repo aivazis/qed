@@ -1,4 +1,5 @@
-// -*- c++ -*-
+// -*- C++ -*-
+// -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 // (c) 1998-2026 all rights reserved
@@ -21,68 +22,61 @@ qed::py::nisar::stack(py::module & m)
         // its docstring
         "support for aggregate views over stacks of nisar datasets");
 
-    // {c8} mean power
+    // the stack kernels read a tile out of each of a pile of h5 datasets (using {datatype} for the
+    // on-disk layout) into grids of a fixed cell type, then aggregate and render them
+    using grid_t = heapgrid_t<std::complex<float>>;
+
+    // render the mean power of a stack tile
     stack.def(
-        // the name of the function
+        // the name
         "meanpower",
         // the handler
-        &qed::nisar::stack::meanpower<heapgrid_t<std::complex<float>>>,
+        [](const std::vector<dataset_t> & sources, const datatype_t & datatype,
+           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
+           std::vector<std::ptrdiff_t> stride, double min, double max) -> bmp_t {
+            // read the tiles and render their mean power
+            return qed::nisar::stack::meanpower<grid_t>(
+                sources, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
+                max);
+        },
         // the signature
         "sources"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
-        "render the mean power of a stack of complex float tiles");
-    // {c16} mean power
-    stack.def(
-        // the name of the function
-        "meanpower",
-        // the handler
-        &qed::nisar::stack::meanpower<heapgrid_t<std::complex<double>>>,
-        // the signature
-        "sources"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-        // the docstring
-        "render the mean power of a stack of complex double tiles");
+        "render the mean power of a stack tile");
 
-    // {c8} coherence
+    // render the coherence of a stack tile
     stack.def(
-        // the name of the function
+        // the name
         "coherence",
         // the handler
-        &qed::nisar::stack::coherence<heapgrid_t<std::complex<float>>>,
+        [](const std::vector<dataset_t> & sources, const datatype_t & datatype,
+           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
+           std::vector<std::ptrdiff_t> stride, double min, double max) -> bmp_t {
+            // read the tiles and render their coherence
+            return qed::nisar::stack::coherence<grid_t>(
+                sources, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
+                max);
+        },
         // the signature
         "sources"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
-        "render the coherence of a stack of complex float tiles");
-    // {c16} coherence
-    stack.def(
-        // the name of the function
-        "coherence",
-        // the handler
-        &qed::nisar::stack::coherence<heapgrid_t<std::complex<double>>>,
-        // the signature
-        "sources"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-        // the docstring
-        "render the coherence of a stack of complex double tiles");
+        "render the coherence of a stack tile");
 
-    // {c8} mean-power statistics
+    // compute the statistics of a stack tile
     stack.def(
-        // the name of the function
+        // the name
         "stats",
         // the handler
-        &qed::nisar::stack::stats<heapgrid_t<std::complex<float>>>,
+        [](const std::vector<dataset_t> & sources, const datatype_t & datatype,
+           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape) -> stats_t {
+            // read the tiles and collect their statistics
+            return qed::nisar::stack::stats<grid_t>(
+                sources, datatype, asIndex<2>(origin), asShape<2>(shape));
+        },
         // the signature
         "sources"_a, "datatype"_a, "origin"_a, "shape"_a,
         // the docstring
-        "sample the mean power over a stack of complex float tiles");
-    // {c16} mean-power statistics
-    stack.def(
-        // the name of the function
-        "stats",
-        // the handler
-        &qed::nisar::stack::stats<heapgrid_t<std::complex<double>>>,
-        // the signature
-        "sources"_a, "datatype"_a, "origin"_a, "shape"_a,
-        // the docstring
-        "sample the mean power over a stack of complex double tiles");
+        "compute the statistics of a stack tile");
 
     // all done
     return;
