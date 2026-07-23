@@ -21,8 +21,8 @@ qed::py::isce2::unwrapped::stats(py::module & m)
         // the name of the function
         "stats",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape) -> stats_t {
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape) -> stats_t {
             // rebuild the tile geometry as rank-3 grid coordinates
             auto o = asIndex<3>(origin);
             auto t = asShape<3>(shape);

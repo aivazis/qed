@@ -34,8 +34,8 @@ qed::py::nisar::slc(py::module & m)
         "amplitude",
         // the handler
         [](const dataset_t & source, const datatype_t & datatype,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
-           std::vector<std::ptrdiff_t> stride, double min, double max) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max) -> bmp_t {
             // read the tile and render it
             return qed::nisar::slc::amplitude<grid_t>(
                 source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
@@ -52,8 +52,8 @@ qed::py::nisar::slc(py::module & m)
         "complex",
         // the handler
         [](const dataset_t & source, const datatype_t & datatype,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
-           std::vector<std::ptrdiff_t> stride, double min, double max, double minPhase,
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max, double minPhase,
            double maxPhase, double saturation) -> bmp_t {
             // read the tile and render it
             return qed::nisar::slc::complex<grid_t>(
@@ -72,8 +72,8 @@ qed::py::nisar::slc(py::module & m)
         "imaginary",
         // the handler
         [](const dataset_t & source, const datatype_t & datatype,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
-           std::vector<std::ptrdiff_t> stride, double min, double max) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max) -> bmp_t {
             // read the tile and render it
             return qed::nisar::slc::imaginary<grid_t>(
                 source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
@@ -90,8 +90,8 @@ qed::py::nisar::slc(py::module & m)
         "phase",
         // the handler
         [](const dataset_t & source, const datatype_t & datatype,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
-           std::vector<std::ptrdiff_t> stride, double low, double high, double saturation,
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double low, double high, double saturation,
            double brightness) -> bmp_t {
             // read the tile and render it
             return qed::nisar::slc::phase<grid_t>(
@@ -110,8 +110,8 @@ qed::py::nisar::slc(py::module & m)
         "real",
         // the handler
         [](const dataset_t & source, const datatype_t & datatype,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
-           std::vector<std::ptrdiff_t> stride, double min, double max) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max) -> bmp_t {
             // read the tile and render it
             return qed::nisar::slc::real<grid_t>(
                 source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,

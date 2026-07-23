@@ -21,8 +21,8 @@ qed::py::isce2::interferogram::stats(py::module & m)
         // the name of the function
         "stats",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape) -> stats_t {
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape) -> stats_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);

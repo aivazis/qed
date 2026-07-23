@@ -25,13 +25,13 @@ namespace qed::py {
     template <typename cellT, int dim>
     auto asGrid(const py::buffer_info & info) -> viewgrid_t<cellT, dim>;
 
-    // interpret a python sequence as a grid index of rank {dim}
+    // interpret any python iterable (tuple, list, generator, ...) as a grid index of rank {dim}
     template <int dim>
-    auto asIndex(const std::vector<std::ptrdiff_t> & seq) -> pyre::grid::index_t<dim>;
+    auto asIndex(const py::iterable & seq) -> pyre::grid::index_t<dim>;
 
-    // interpret a python sequence as a grid shape of rank {dim}
+    // interpret any python iterable (tuple, list, generator, ...) as a grid shape of rank {dim}
     template <int dim>
-    auto asShape(const std::vector<std::ptrdiff_t> & seq) -> pyre::grid::shape_t<dim>;
+    auto asShape(const py::iterable & seq) -> pyre::grid::shape_t<dim>;
 
     // dispatch on a python buffer's cell format across the candidate cell types {cellTs}: rebuild
     // a read-only grid of rank {dim} over the buffer's block and hand it to {f}, whichever cell
