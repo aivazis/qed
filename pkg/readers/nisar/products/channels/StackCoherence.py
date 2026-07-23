@@ -69,12 +69,8 @@ class StackCoherence(Channel, family="qed.channels.nisar.stack.coherence"):
         """
         # my pipeline reduces several sources at once
         pipeline = qed.libqed.nisar.stack.coherence
-        # turn the shape into a {pyre::grid::shape_t}
-        shape = list(shape)
-        # the origin into a {pyre::grid::index_t}
-        origin = list(origin)
-        # and the zoom into strides
-        stride = list(tuple(2**level for level in zoom))
+        # turn the zoom levels into per-axis strides
+        stride = tuple(2**level for level in zoom)
         # collect the data handle of each participating member
         sources = [member.data.dataset for member in members]
         # build the visualization pipeline and return it; the coherence range is already linear

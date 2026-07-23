@@ -66,12 +66,8 @@ class MeanPower(Channel, family="qed.channels.nisar.meanpower"):
         """
         # my pipeline reduces several sources at once
         pipeline = qed.libqed.nisar.stack.meanpower
-        # turn the shape into a {pyre::grid::shape_t}
-        shape = list(shape)
-        # the origin into a {pyre::grid::index_t}
-        origin = list(origin)
-        # and the zoom into strides
-        stride = list(tuple(2**level for level in zoom))
+        # turn the zoom levels into per-axis strides
+        stride = tuple(2**level for level in zoom)
         # collect the data handle of each participating member
         sources = [member.data.dataset for member in members]
         # lift my range out of log scale

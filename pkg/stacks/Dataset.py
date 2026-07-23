@@ -169,10 +169,6 @@ class Dataset(
         tile = tuple(min(256, extent) for extent in self.shape)
         # centered in my shape
         center = tuple((extent - t) // 2 for extent, t in zip(self.shape, tile))
-        # as a grid index
-        center = qed.libpyre.grid.Index2D(index=center)
-        # and a grid shape
-        tile = qed.libpyre.grid.Shape2D(shape=tile)
         # sample the per-pixel mean power over my members
         return qed.libqed.nisar.stack.stats(
             sources=sources, datatype=self.datatype.htype, origin=center, shape=tile

@@ -214,10 +214,6 @@ class Product(
         # center it in my shape
         center = tuple((s - t) // 2 for s, t in zip(shape, tile))
 
-        # convert to a grid index
-        center = list(center)
-        # and a shape
-        tile = list(tile)
         # compute the stats
         stats = qed.libqed.nisar.stats(
             source=source, datatype=self.datatype.htype, origin=center, shape=tile
