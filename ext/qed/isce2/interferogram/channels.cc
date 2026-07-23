@@ -1,4 +1,5 @@
-// -*- c++ -*-
+// -*- C++ -*-
+// -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 // (c) 1998-2026 all rights reserved
@@ -10,7 +11,7 @@
 #include "forward.h"
 
 
-// submodule with the bindings for the native tile generators
+// submodule with the bindings for the interferogram tile generators
 void
 qed::py::isce2::interferogram::channels(py::module & m)
 {
@@ -19,114 +20,128 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the name of the module
         "channels",
         // its docstring
-        "support for native {channels}");
+        "support for interferogram {channels}");
 
+    // every source arrives as a buffer — pyre's type-erased grid, or anything else that speaks the
+    // buffer protocol — so one wrapper per channel rebuilds a read-only rank-2 grid over it and
+    // dispatches on its cell type
 
-    // add the individual channel bindings
-    // {c8} amplitude
+    // render the amplitude of a complex tile
     channels.def(
-        // the name of the function
+        // the name
         "amplitude",
         // the handler
-        &qed::isce2::interferogram::channels::amplitude<mapgrid_t<std::complex<float>>>,
+        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
+           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double min,
+           double max) -> bmp_t {
+            // rebuild the tile geometry as rank-2 grid coordinates
+            auto o = asIndex<2>(origin);
+            auto t = asShape<2>(shape);
+            auto s = asIndex<2>(stride);
+            // dispatch on the buffer's cell type and run the kernel over the matching grid
+            return onGrid<2, std::complex<float>, std::complex<double>>(
+                source, [&](const auto & grid) {
+                    return qed::isce2::interferogram::channels::amplitude(grid, o, t, s, min, max);
+                });
+        },
         // the signature
         "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
-        "render the amplitude of a complex float tile");
-    // {c16} amplitude
-    channels.def(
-        // the name of the function
-        "amplitude",
-        // the handler
-        &qed::isce2::interferogram::channels::amplitude<mapgrid_t<std::complex<double>>>,
-        // the signature
-        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-        // the docstring
-        "render the amplitude of a complex double tile");
+        "render the amplitude of a complex tile");
 
-    // {c8}
+    // render the value of a complex tile
     channels.def(
-        // the name of the function
+        // the name
         "complex",
         // the handler
-        &qed::isce2::interferogram::channels::complex<mapgrid_t<std::complex<float>>>,
+        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
+           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double min,
+           double max, double minPhase, double maxPhase) -> bmp_t {
+            // rebuild the tile geometry as rank-2 grid coordinates
+            auto o = asIndex<2>(origin);
+            auto t = asShape<2>(shape);
+            auto s = asIndex<2>(stride);
+            // dispatch on the buffer's cell type and run the kernel over the matching grid
+            return onGrid<2, std::complex<float>, std::complex<double>>(
+                source, [&](const auto & grid) {
+                    return qed::isce2::interferogram::channels::complex(
+                        grid, o, t, s, min, max, minPhase, maxPhase);
+                });
+        },
         // the signature
         "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
         // the docstring
-        "render the value of a complex float tile");
-    // {c16}
-    channels.def(
-        // the name of the function
-        "complex",
-        // the handler
-        &qed::isce2::interferogram::channels::complex<mapgrid_t<std::complex<double>>>,
-        // the signature
-        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "minPhase"_a, "maxPhase"_a,
-        // the docstring
-        "render the value of a complex double tile");
+        "render the value of a complex tile");
 
-    // imaginary part of {c8}
+    // render the imaginary part of a complex tile
     channels.def(
-        // the name of the function
+        // the name
         "imaginary",
         // the handler
-        &qed::isce2::interferogram::channels::imaginary<mapgrid_t<std::complex<float>>>,
+        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
+           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double min,
+           double max) -> bmp_t {
+            // rebuild the tile geometry as rank-2 grid coordinates
+            auto o = asIndex<2>(origin);
+            auto t = asShape<2>(shape);
+            auto s = asIndex<2>(stride);
+            // dispatch on the buffer's cell type and run the kernel over the matching grid
+            return onGrid<2, std::complex<float>, std::complex<double>>(
+                source, [&](const auto & grid) {
+                    return qed::isce2::interferogram::channels::imaginary(grid, o, t, s, min, max);
+                });
+        },
         // the signature
         "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
-        "render the imaginary part a complex float tile");
-    // imaginary part of {c16}
-    channels.def(
-        // the name of the function
-        "imaginary",
-        // the handler
-        &qed::isce2::interferogram::channels::imaginary<mapgrid_t<std::complex<double>>>,
-        // the signature
-        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-        // the docstring
-        "render the imaginary part of a complex double tile");
+        "render the imaginary part of a complex tile");
 
-    // phase of {c8}
+    // render the phase of a complex tile
     channels.def(
-        // the name of the function
+        // the name
         "phase",
         // the handler
-        &qed::isce2::interferogram::channels::phase<mapgrid_t<std::complex<float>>>,
+        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
+           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double low,
+           double high, double brightness) -> bmp_t {
+            // rebuild the tile geometry as rank-2 grid coordinates
+            auto o = asIndex<2>(origin);
+            auto t = asShape<2>(shape);
+            auto s = asIndex<2>(stride);
+            // dispatch on the buffer's cell type and run the kernel over the matching grid
+            return onGrid<2, std::complex<float>, std::complex<double>>(
+                source, [&](const auto & grid) {
+                    return qed::isce2::interferogram::channels::phase(
+                        grid, o, t, s, low, high, brightness);
+                });
+        },
         // the signature
         "source"_a, "origin"_a, "shape"_a, "stride"_a, "low"_a, "high"_a, "brightness"_a,
         // the docstring
-        "render the phase of a complex float tile");
-    // phase of {c16}
-    channels.def(
-        // the name of the function
-        "phase",
-        // the handler
-        &qed::isce2::interferogram::channels::phase<mapgrid_t<std::complex<double>>>,
-        // the signature
-        "source"_a, "origin"_a, "shape"_a, "stride"_a, "low"_a, "high"_a, "brightness"_a,
-        // the docstring
-        "render the phase of a complex double tile");
+        "render the phase of a complex tile");
 
-    // real part of {c8}
+    // render the real part of a complex tile
     channels.def(
-        // the name of the function
+        // the name
         "real",
         // the handler
-        &qed::isce2::interferogram::channels::real<mapgrid_t<std::complex<float>>>,
+        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
+           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double min,
+           double max) -> bmp_t {
+            // rebuild the tile geometry as rank-2 grid coordinates
+            auto o = asIndex<2>(origin);
+            auto t = asShape<2>(shape);
+            auto s = asIndex<2>(stride);
+            // dispatch on the buffer's cell type and run the kernel over the matching grid
+            return onGrid<2, std::complex<float>, std::complex<double>>(
+                source, [&](const auto & grid) {
+                    return qed::isce2::interferogram::channels::real(grid, o, t, s, min, max);
+                });
+        },
         // the signature
         "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
-        "render the real part a complex float tile");
-    // real part of {c16}
-    channels.def(
-        // the name of the function
-        "real",
-        // the handler
-        &qed::isce2::interferogram::channels::real<mapgrid_t<std::complex<double>>>,
-        // the signature
-        "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-        // the docstring
-        "render the real part of a complex double tile");
+        "render the real part of a complex tile");
 
     // all done
     return;
