@@ -1,0 +1,94 @@
+// -*- C++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// my declarations
+#include "grid.h"
+
+
+// interpret a python buffer as a read-only grid of rank {dim} and cell type {cellT}
+template <typename cellT, int dim>
+auto
+qed::py::asGrid(const py::buffer_info & info) -> viewgrid_t<cellT, dim>
+{
+    // the extents, copied out of the buffer description axis by axis
+    typename viewgrid_t<cellT, dim>::shape_type shape;
+    for (int axis = 0; axis < dim; ++axis) {
+        shape[axis] = info.shape[axis];
+    }
+    // the canonical packing over that shape
+    auto packing = pyre::grid::canonical_t<dim>(shape);
+    // a read-only view over the buffer's block, sized to the packing
+    auto storage = view_t<cellT>(static_cast<const cellT *>(info.ptr), packing.cells());
+    // paired into a grid
+    return viewgrid_t<cellT, dim>(packing, storage);
+}
+
+
+// interpret a python sequence as a grid index of rank {dim}
+template <int dim>
+auto
+qed::py::asIndex(const std::vector<std::ptrdiff_t> & seq) -> pyre::grid::index_t<dim>
+{
+    // fill it axis by axis
+    pyre::grid::index_t<dim> index;
+    for (int axis = 0; axis < dim; ++axis) {
+        index[axis] = seq[axis];
+    }
+    return index;
+}
+
+
+// interpret a python sequence as a grid shape of rank {dim}
+template <int dim>
+auto
+qed::py::asShape(const std::vector<std::ptrdiff_t> & seq) -> pyre::grid::shape_t<dim>
+{
+    // fill it axis by axis
+    pyre::grid::shape_t<dim> shape;
+    for (int axis = 0; axis < dim; ++axis) {
+        shape[axis] = seq[axis];
+    }
+    return shape;
+}
+
+
+// dispatch on a python buffer's cell format across the candidate cell types {cellTs}
+template <int dim, typename... cellTs, typename F>
+auto
+qed::py::onGrid(const py::buffer & source, F && f)
+{
+    // read the buffer description, read-only
+    auto info = source.request();
+    // its rank has to be the one the caller expects
+    if (info.ndim != dim) {
+        // otherwise the caller and the data disagree
+        throw py::value_error("grid rank does not match the expected dimensionality");
+    }
+    // the result type is the same whatever cell we dispatch to; take it from the first candidate
+    using first_t = typename std::tuple_element<0, std::tuple<cellTs...>>::type;
+    using result_t = decltype(f(std::declval<viewgrid_t<first_t, dim>>()));
+    // a slot for it
+    std::optional<result_t> result;
+    // try each candidate; the first whose struct code matches the buffer wins
+    bool matched = (((info.format == py::format_descriptor<cellTs>::format())
+                         ? (result.emplace(f(asGrid<cellTs, dim>(info))), true)
+                         : false)
+                    || ...);
+    // an unmatched cell type is a caller mistake
+    if (!matched) {
+        // say which one
+        throw py::value_error("unsupported grid cell type '" + info.format + "'");
+    }
+    // hand back what {f} produced, moved out since the result may be move-only
+    return std::move(*result);
+}
+
+
+// end of file
