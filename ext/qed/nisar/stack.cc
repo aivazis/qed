@@ -32,8 +32,8 @@ qed::py::nisar::stack(py::module & m)
         "meanpower",
         // the handler
         [](const std::vector<dataset_t> & sources, const datatype_t & datatype,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
-           std::vector<std::ptrdiff_t> stride, double min, double max) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max) -> bmp_t {
             // read the tiles and render their mean power
             return qed::nisar::stack::meanpower<grid_t>(
                 sources, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
@@ -50,8 +50,8 @@ qed::py::nisar::stack(py::module & m)
         "coherence",
         // the handler
         [](const std::vector<dataset_t> & sources, const datatype_t & datatype,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
-           std::vector<std::ptrdiff_t> stride, double min, double max) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max) -> bmp_t {
             // read the tiles and render their coherence
             return qed::nisar::stack::coherence<grid_t>(
                 sources, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
@@ -68,7 +68,7 @@ qed::py::nisar::stack(py::module & m)
         "stats",
         // the handler
         [](const std::vector<dataset_t> & sources, const datatype_t & datatype,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape) -> stats_t {
+           const py::iterable & origin, const py::iterable & shape) -> stats_t {
             // read the tiles and collect their statistics
             return qed::nisar::stack::stats<grid_t>(
                 sources, datatype, asIndex<2>(origin), asShape<2>(shape));

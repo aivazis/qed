@@ -31,8 +31,8 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the name
         "amplitude",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double min,
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double min,
            double max) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
@@ -54,8 +54,8 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the name
         "complex",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double min,
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double min,
            double max, double minPhase, double maxPhase) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
@@ -78,8 +78,8 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the name
         "imaginary",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double min,
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double min,
            double max) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
@@ -101,8 +101,8 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the name
         "phase",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double low,
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double low,
            double high, double brightness) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
@@ -125,8 +125,8 @@ qed::py::isce2::interferogram::channels(py::module & m)
         // the name
         "real",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double min,
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double min,
            double max) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);

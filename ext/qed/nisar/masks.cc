@@ -32,8 +32,8 @@ qed::py::nisar::masks(py::module & m)
         "gcov",
         // the handler
         [](const dataset_t & source, const datatype_t & datatype,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
-           std::vector<std::ptrdiff_t> stride) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride) -> bmp_t {
             // read the tile and render it
             return qed::nisar::masks::gcov<grid_t>(
                 source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride));
@@ -49,8 +49,8 @@ qed::py::nisar::masks(py::module & m)
         "gunw",
         // the handler
         [](const dataset_t & source, const datatype_t & datatype,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
-           std::vector<std::ptrdiff_t> stride) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride) -> bmp_t {
             // read the tile and render it
             return qed::nisar::masks::gunw<grid_t>(
                 source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride));

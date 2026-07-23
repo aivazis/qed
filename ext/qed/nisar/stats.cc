@@ -27,7 +27,7 @@ qed::py::nisar::stats(py::module & m)
         "stats",
         // the handler
         [](const dataset_t & source, const datatype_t & datatype,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape) -> stats_t {
+           const py::iterable & origin, const py::iterable & shape) -> stats_t {
             // read the tile and collect its statistics
             return qed::nisar::stats<grid_t>(source, datatype, asIndex<2>(origin), asShape<2>(shape));
         },
@@ -42,7 +42,7 @@ qed::py::nisar::stats(py::module & m)
         "statsBFPQ",
         // the handler
         [](const dataset_t & source, const datatype_t & datatype, const py::buffer & lut,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape) -> stats_t {
+           const py::iterable & origin, const py::iterable & shape) -> stats_t {
             // read and decode the tile, then collect its statistics
             return qed::nisar::statsBFPQ<grid_t>(
                 source, datatype, asBFPQ(lut), asIndex<2>(origin), asShape<2>(shape));

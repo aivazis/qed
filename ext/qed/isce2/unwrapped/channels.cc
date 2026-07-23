@@ -31,8 +31,8 @@ qed::py::isce2::unwrapped::channels(py::module & m)
         // the name
         "amplitude",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double mean,
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double mean,
            double scale, double exponent) -> bmp_t {
             // rebuild the tile geometry as rank-3 grid coordinates
             auto o = asIndex<3>(origin);
@@ -54,8 +54,8 @@ qed::py::isce2::unwrapped::channels(py::module & m)
         // the name
         "complex",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double mean,
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double mean,
            double scale, double exponent, double minPhase, double maxPhase) -> bmp_t {
             // rebuild the tile geometry as rank-3 grid coordinates
             auto o = asIndex<3>(origin);
@@ -78,8 +78,8 @@ qed::py::isce2::unwrapped::channels(py::module & m)
         // the name
         "phase",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double low,
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double low,
            double high, double brightness) -> bmp_t {
             // rebuild the tile geometry as rank-3 grid coordinates
             auto o = asIndex<3>(origin);

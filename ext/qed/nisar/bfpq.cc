@@ -35,8 +35,8 @@ qed::py::nisar::bfpq(py::module & m)
         "amplitude",
         // the handler
         [](const dataset_t & source, const datatype_t & datatype, const py::buffer & lut,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
-           std::vector<std::ptrdiff_t> stride, double min, double max) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max) -> bmp_t {
             // read and decode the tile, then render it
             return qed::nisar::bfpq::amplitude<grid_t>(
                 source, datatype, asBFPQ(lut), asIndex<2>(origin), asShape<2>(shape),
@@ -53,8 +53,8 @@ qed::py::nisar::bfpq(py::module & m)
         "complex",
         // the handler
         [](const dataset_t & source, const datatype_t & datatype, const py::buffer & lut,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
-           std::vector<std::ptrdiff_t> stride, double min, double max, double minPhase,
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max, double minPhase,
            double maxPhase, double saturation) -> bmp_t {
             // read and decode the tile, then render it
             return qed::nisar::bfpq::complex<grid_t>(
@@ -73,8 +73,8 @@ qed::py::nisar::bfpq(py::module & m)
         "imaginary",
         // the handler
         [](const dataset_t & source, const datatype_t & datatype, const py::buffer & lut,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
-           std::vector<std::ptrdiff_t> stride, double min, double max) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max) -> bmp_t {
             // read and decode the tile, then render it
             return qed::nisar::bfpq::imaginary<grid_t>(
                 source, datatype, asBFPQ(lut), asIndex<2>(origin), asShape<2>(shape),
@@ -91,8 +91,8 @@ qed::py::nisar::bfpq(py::module & m)
         "phase",
         // the handler
         [](const dataset_t & source, const datatype_t & datatype, const py::buffer & lut,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
-           std::vector<std::ptrdiff_t> stride, double low, double high, double saturation,
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double low, double high, double saturation,
            double brightness) -> bmp_t {
             // read and decode the tile, then render it
             return qed::nisar::bfpq::phase<grid_t>(
@@ -111,8 +111,8 @@ qed::py::nisar::bfpq(py::module & m)
         "real",
         // the handler
         [](const dataset_t & source, const datatype_t & datatype, const py::buffer & lut,
-           std::vector<std::ptrdiff_t> origin, std::vector<std::ptrdiff_t> shape,
-           std::vector<std::ptrdiff_t> stride, double min, double max) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max) -> bmp_t {
             // read and decode the tile, then render it
             return qed::nisar::bfpq::real<grid_t>(
                 source, datatype, asBFPQ(lut), asIndex<2>(origin), asShape<2>(shape),

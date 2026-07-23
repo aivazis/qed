@@ -31,8 +31,8 @@ qed::py::native::channels(py::module & m)
         // the name
         "value",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double min,
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double min,
            double max) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
@@ -54,8 +54,8 @@ qed::py::native::channels(py::module & m)
         // the name
         "abs",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double min,
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double min,
            double max) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
@@ -78,7 +78,7 @@ qed::py::native::channels(py::module & m)
         "value",
         // the handler
         [](py::array_t<float, py::array::c_style | py::array::forcecast> source,
-           std::vector<std::ptrdiff_t> shape, float low, float high) -> bmp_t {
+           const py::iterable & shape, float low, float high) -> bmp_t {
             // the normalizer maps a range of values to the unit interval
             using norm_t = parametric_t<const float *>;
             // and the color map turns that into gray
@@ -89,8 +89,10 @@ qed::py::native::channels(py::module & m)
             auto norm = norm_t(buffer, norm_t::interval_type(low, high));
             // generate the color
             auto colormap = colormap_t(norm);
-            // make a bitmap of the requested shape
-            bmp_t bmp(shape[0], shape[1]);
+            // realize the requested shape as rank-2 grid extents
+            auto s = asShape<2>(shape);
+            // make a bitmap of that shape
+            bmp_t bmp(s[0], s[1]);
             // render into it
             bmp.encode(colormap);
             // and hand it back
@@ -106,8 +108,8 @@ qed::py::native::channels(py::module & m)
         // the name
         "complex",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double min,
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double min,
            double max, double minPhase, double maxPhase, double saturation) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
@@ -131,8 +133,8 @@ qed::py::native::channels(py::module & m)
         // the name
         "amplitude",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double min,
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double min,
            double max) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
@@ -154,8 +156,8 @@ qed::py::native::channels(py::module & m)
         // the name
         "phase",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double low,
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double low,
            double high, double saturation, double brightness) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
@@ -178,8 +180,8 @@ qed::py::native::channels(py::module & m)
         // the name
         "real",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double min,
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double min,
            double max) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
@@ -201,8 +203,8 @@ qed::py::native::channels(py::module & m)
         // the name
         "imaginary",
         // the handler
-        [](const py::buffer & source, std::vector<std::ptrdiff_t> origin,
-           std::vector<std::ptrdiff_t> shape, std::vector<std::ptrdiff_t> stride, double min,
+        [](const py::buffer & source, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double min,
            double max) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
