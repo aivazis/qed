@@ -10,8 +10,10 @@
 
 // STL
 #include <memory>
+#include <optional>
 #include <string>
 #include <tuple>
+#include <vector>
 
 // journal
 #include <pyre/journal.h>
@@ -88,6 +90,11 @@ namespace qed::py {
     template <typename sourceT>
     using parametric_t = pyre::viz::iterators::filters::parametric_t<sourceT>;
 }
+
+
+// the helpers that rebuild a typed grid over a python buffer and dispatch on its cell type; these
+// depend on the grid aliases above, so they come last
+#include "grid.h"
 
 
 #endif
