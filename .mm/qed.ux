@@ -17,7 +17,7 @@ qed.ux.chunks := vendors-node_modules node_modules
 # deferred so {builder.dest.bin} resolves at rule-evaluation time
 qed.ux.schema.generator = $(builder.dest.bin)qed
 # the panel takes its destination through the {stream} trait
-qed.ux.schema.flags := schema sdl --stream=
+qed.ux.schema.flags := --shell=script schema sdl --stream=
 # regenerate whenever any graphene source changes, anywhere under the package; deferred
 # so the search runs once the project home is known, and recursive so the {gql}
 # subpackages (archives, readers, datasets, controllers, views) are all tracked
