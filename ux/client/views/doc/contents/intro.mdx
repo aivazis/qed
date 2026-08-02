@@ -15,7 +15,7 @@ already be installed. Please contact the system administrators for instructions 
 it, and skip to the end of this section.
 
 If you are comfortable with `jupyter` notebooks, the current
-[release tarball](https://github.com/aivazis/qed/archive/refs/tags/v0.9.3.tar.gz)
+[release tarball](https://github.com/aivazis/qed/archive/refs/tags/v0.9.5.tar.gz)
 contains a notebook that can walk you through the installation procedure with minimal tweaking.
 It is located in `etc/mamba/qed.ipynb`. Please report any difficulties you encounter.
 
@@ -74,7 +74,9 @@ before moving on to build `qed` so that you use the `conda-forge` provided compi
 
 It is also possible to use other package managers to install these dependencies. Both `pyre` and
 `qed` have been tested on both `ubuntu` and `macOS` using their native environments, as well as
-`macports`, `homebrew`, `spack`. Please keep in mind that most enterprise systems provide compilers
+`macports`, `homebrew`, `spack`. The automatic dependency discovery described below also supports
+`macports` and the `debian`/`ubuntu` package manager, via `pkgdb: macports` and `pkgdb: dpkg`
+respectively. Please keep in mind that most enterprise systems provide compilers
 and packages that are too old to build this code, so you will have to lean on something else to
 satisfy the dependencies. Further, you may have to adjust your `PATH`, `LD_LIBRARY_PATH`,
 `PYTHONPATH`, and perhaps other environment variables that control access to binaries, shared
@@ -116,8 +118,11 @@ pull from, as they are thoroughly tested.
 
 ### <a name="intro.mm" />Setting up the build system
 
-The most involved step of the installation process is the configuration of the build system.
-We will place configuration files in two locations:
+The build system needs to know two things: where to deposit the build products, and where to find
+the headers and libraries of the `qed` dependencies. When you work in a `conda` environment, `mm`
+can figure out both on its own: `--mode=conda` installs the build products directly into the active
+environment, and `--pkgdb=conda` discovers the dependencies by reading the environment's package
+database. Record these choices in a configuration file so every invocation of `mm` picks them up:
 
 ``` text
 ~/dv> cd ~
@@ -132,66 +137,37 @@ The configuration for the build system lives in `~/.config/pyre/mm.yaml`:
 # mm configuration
 mm:
 
+  # install the build products into the active conda environment
+  mode: conda
+  # resolve external dependencies by reading the conda package database
+  pkgdb: conda
+
   # targets
   target: "opt, shared"
 
   # compilers
   compilers: "gcc, python/python3"
 
-  # the following two settings get replaced with actual values by the notebook
-  # the location of final products
-  prefix: "{pyre.environ.CONDA_PREFIX}"
-  # the installation location of the python packages, relative to {prefix}
-  pycPrefix: "lib/python3.13/site-packages"
-  # the location of the temporary intermediate build products
-  bldroot: "{pyre.environ.HOME}/tmp/builds/mm/{pyre.environ.CONDA_DEFAULT_ENV}"
-
-  # misc
-  # the name of GNU make
-  make: make
-  # local makefiles
-  local: Make.mmm
-
 # end of file
 ```
 
-You may need to replace `gcc` and the `python` version with whatever is available in your
-environment. Incidentally, the directory `~/.config/pyre` is the home for configuration files for
-all `pyre` applications, including `qed`, so we will be adding more files here later on.
+On `macOS`, replace `gcc` with `clang`. Incidentally, the directory `~/.config/pyre` is the home
+for configuration files for all `pyre` applications, including `qed`, so we will be adding more
+files here later on.
 
-The build system needs to know where to find headers and libraries for the `qed` dependencies. The
-package database lives in `~/.config/mm/config.mm`:
+The one dependency `conda` cannot discover is `pyre` itself, since we are about to build it from
+source rather than install it as a `conda` package. Let `mm` know where it will end up by placing
+the following in `~/.config/mm/config.mm`:
 
 ``` make
 # -*- Makefile -*-
 
 # external dependencies
-# system tools
-sys.prefix := ${CONDA_PREFIX}
-
-# hdf5
-hdf5.version := 1.14.6
-hdf5.dir := ${sys.prefix}
-hdf5.parallel := off
-
-# pybind11
-pybind11.version := 3.0.1
-pybind11.dir = ${sys.prefix}
-
-# python: just major.minor
-python.version := 3.13
-python.dir := ${sys.prefix}
-
-# pyre
-pyre.version := 1.12.5
-pyre.dir := ${sys.prefix}
+# pyre is built from source and installed into the conda environment
+pyre.dir := ${CONDA_PREFIX}
 
 # end of file
 ```
-
-Most of the indicated package versions are there for documentation purposes, with the exception
-of the `python` version that is used by `mm` to find the various locations where the interpreter
-and its packages deposit files it needs.
 
 ### <a name="intro.building" />Building
 
@@ -206,30 +182,45 @@ You might want to make this more permanent by also adding it to your shell start
 `~/.bash_profile`.
 
 Let's verify that everything is ok so far. Let's go to the `pyre` source directory and ask `mm` to
-show details about the build. This should generate a few lines of output similar to the
-following:
+show details about the build. The first invocation also generates the package database, so `mm`
+will report the dependencies it discovered in your environment before printing the directory
+layout. The output should look similar to the following:
 
 ``` text
 ~/dv> cd pyre
 ~/dv/pyre> mm builder.info
+mm (mm.pkgdb):
+ -- building conda package database
+ --   environment: qed
+ --   prefix: /Users/mga/.local/envs/qed
+ --   db: /Users/mga/dv/pyre/builds/qed/opt-shared-darwin-arm64/pkg-conda.db
+mm (mm.pkgdb):
+ -- found 3 of 32 supported packages
+ --   hdf5: 2.1.0
+ --   pybind11: 3.0.3
+ --   python: 3.14
 
-    mm 5.0.0
+    mm 5.3.0
     Michael Aïvázis <michael.aivazis@para-sim.com>
     copyright 1998-2026 all rights reserved
 
 builder directory layout:
   staging layout:
-           tmp = /Users/mga/tmp/builds/mm/clang/opt-shared-darwin-arm64/
+           tmp = /Users/mga/dv/pyre/builds/qed/opt-shared-darwin-arm64/
   install layout:
-        prefix = /Users/mga/.local/envs/qed
+        prefix = /Users/mga/.local/envs/qed/
            bin = /Users/mga/.local/envs/qed/bin/
            doc = /Users/mga/.local/envs/qed/doc/
            inc = /Users/mga/.local/envs/qed/include/
            lib = /Users/mga/.local/envs/qed/lib/
          share = /Users/mga/.local/envs/qed/share/
-           pyc = /Users/mga/.local/envs/qed/lib/python3.13/site-packages/
+           pyc = /Users/mga/.local/envs/qed/lib/python3.14/site-packages/
 ~/dv/pyre>
 ```
+
+The exact paths and package versions reflect your environment, of course. Make sure the install
+prefix points to your `conda` environment, and that `hdf5`, `pybind11`, and `python` show up in
+the list of discovered packages.
 
 You may see `mm` download a `pyre` archive from `github` to bootstrap the process. This is normal,
 as `mm` is itself a `pyre` application.
@@ -238,23 +229,15 @@ If anything goes wrong at this stage that cannot be resolved by retracing your s
 typos, please file an [issue](https://github.com/aivazis/qed/issues) at the `qed` repository,
 and attach a log file or a screenshot to help diagnose the problem.
 
-If everything looks ok, let's build and install `pyre`. If you are on a `linux` system, `mm` will
-automatically discover the number of cores on your machine and launch a parallel build:
+If everything looks ok, let's build and install `pyre`. By default, `mm` launches a parallel build
+using all the cores on your machine; use `--slots=<n>` if you'd like to restrict the load:
 
 ``` text
 ~/dv/pyre> mm
 ```
 
-On `macOS`, it needs some help until `pyre` is built, so use something like:
-
-``` text
-~/dv/pyre> mm --slots=20
-```
-
-Don't worry if you don't have twenty cores on your machine. Most modern machines will be able to
-handle this load. Feel free to up the count if you are on a machine with more cores. If all goes
-well, you will have a functional `pyre` in the `site-packages` directory of your `python`
-installation. Let's verify:
+If all goes well, you will have a functional `pyre` in the `site-packages` directory of your
+`python` installation. Let's verify:
 
 ``` text
 ~/dv/pyre> python3
@@ -278,9 +261,9 @@ can gather.
 
 ### <a name="intro.launching" />Launching
 
-If you are installing in a `conda` environment, `mm` deposits `qed` in a directory that is already
-on your path so there are no additional steps to take to make it accessible. If not, you will have to
-tweak your environment variables.
+In `conda` mode, `mm` deposits `qed` in the `bin` directory of your environment, which is already
+on your path, so there are no additional steps to make it accessible. If you chose a different
+installation strategy, you may have to tweak your environment variables.
 
 By default, the application operates as a command line tool:
 
