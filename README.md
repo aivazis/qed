@@ -173,6 +173,8 @@ the following in `~/.config/mm/config.mm`:
 # external dependencies
 # pyre is built from source and installed into the conda environment
 pyre.dir := ${CONDA_PREFIX}
+# qed uses the pyre hdf5 support, so add {pyre-h5} to the default set of libraries
+pyre.libraries := pyre-h5 pyre journal
 
 # end of file
 ```
