@@ -158,7 +158,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                         channel.indent()
                         channel.line(f"no 'wrappedInterferogram' dataset ")
                         channel.line(
-                            f"in band '{band}', frequency '{frequency}, polarization '{polarization}"
+                            f"in band '{band}', frequency '{frequency}', polarization '{polarization}'"
                         )
                         channel.outdent()
                         # flush
@@ -198,7 +198,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                         channel.indent()
                         channel.line(f"no 'coherenceMagnitude' dataset ")
                         channel.line(
-                            f"in band '{band}', frequency '{frequency}, polarization '{polarization}"
+                            f"in band '{band}', frequency '{frequency}', polarization '{polarization}'"
                         )
                         channel.outdent()
                         # flush

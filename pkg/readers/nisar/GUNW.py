@@ -190,7 +190,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
             channel.indent()
             channel.line(f"no 'unwrappedPhase' dataset ")
             channel.line(
-                f"in band '{band}', frequency '{frequency}, polarization '{polarization}"
+                f"in band '{band}', frequency '{frequency}', polarization '{polarization}'"
             )
             channel.outdent()
             # flush
@@ -230,7 +230,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
             channel.indent()
             channel.line(f"no 'coherenceMagnitude' dataset ")
             channel.line(
-                f"in band '{band}', frequency '{frequency}, polarization '{polarization}"
+                f"in band '{band}', frequency '{frequency}', polarization '{polarization}'"
             )
             channel.outdent()
             # flush
@@ -270,7 +270,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
             channel.indent()
             channel.line(f"no 'ionospherePhaseScreen' dataset ")
             channel.line(
-                f"in band '{band}', frequency '{frequency}, polarization '{polarization}"
+                f"in band '{band}', frequency '{frequency}', polarization '{polarization}'"
             )
             channel.outdent()
             # flush
@@ -377,7 +377,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
             channel.indent()
             channel.line(f"no 'wrappedInterferogram' dataset ")
             channel.line(
-                f"in band '{band}', frequency '{frequency}, polarization '{polarization}"
+                f"in band '{band}', frequency '{frequency}', polarization '{polarization}'"
             )
             channel.outdent()
             # flush
@@ -417,7 +417,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
             channel.indent()
             channel.line(f"no wrapped 'coherenceMagnitude' dataset ")
             channel.line(
-                f"in band '{band}', frequency '{frequency}, polarization '{polarization}"
+                f"in band '{band}', frequency '{frequency}', polarization '{polarization}'"
             )
             channel.outdent()
             # flush
