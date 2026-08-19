@@ -164,7 +164,7 @@ class Product(
         # save the dataset
         self.data = data
         # ask {h5} for its on-disk layout
-        layout = data.dcpl.getLayout()
+        layout = data.dcpl.layout
         # if it is chunked
         if layout == qed.h5.libh5.Layout.chunked:
             # adjust my tile to match the dataset chunk size
