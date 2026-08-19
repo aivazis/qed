@@ -12,7 +12,9 @@ import qed
 
 
 # the basic reader for products in HDF5 format
-class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protocols.reader):
+class H5(
+    qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protocols.reader
+):
     """
     The base class for readers of HDF5 files
     """
@@ -93,7 +95,9 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
             # form the cache size
             size = 4 * 1024 * pages
             # adjust the {fapl}
-            fapl.setPageBufferSize(page=size, meta=5, raw=50)
+            fapl.pageBufferSize = qed.h5.libh5.properties.PageBuffer(
+                bytes=size, metadata=5, raw=50
+            )
         # if i'm managed, get access credentials from the archive
         credentials = archive.credentials() if archive else {}
         # open my file

@@ -397,7 +397,9 @@ class S3(qed.shells.command, family="qed.cli.s3"):
             # convert it into K, and make it a little bigger
             cache = self.cache * 1024 * page
             # set the paging characteristics
-            fapl.setPageBufferSize(page=cache, meta=50, raw=50)
+            fapl.pageBufferSize = libh5.properties.PageBuffer(
+                bytes=cache, metadata=50, raw=50
+            )
         # make a reader
         reader = qed.h5.reader(uri=uri, fapl=fapl)
 
@@ -407,7 +409,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         channel.line(f"opened '{uri}'")
         channel.indent()
         channel.line(
-            f"page size: {reader._file._pyre_id.fapl.getPageBufferSize()} bytes"
+            f"page buffer: {reader._file._pyre_id.fapl.pageBufferSize.bytes} bytes"
         )
         channel.outdent()
         # flush
@@ -429,11 +431,11 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         # if it's non-trivial
         if page:
             # ask for the paged strategy
-            fcpl.setFilespaceStrategy(
+            fcpl.filespaceStrategy = libh5.properties.FilespaceStrategy(
                 strategy=libh5.FilespaceStrategy.page, persist=False, threshold=1
             )
             # set the page size
-            fcpl.setPageSize(size=1024 * page)
+            fcpl.pageSize = 1024 * page
         # make a tag
         tag = "default" if page == 0 else f"{page}k"
         # assemble the filename
