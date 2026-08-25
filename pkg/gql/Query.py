@@ -214,6 +214,23 @@ class Query(graphene.ObjectType):
         store = info.context["store"]
         # resolve the dataset
         dataset = store.dataset(name=dataset)
+        # the native machinery reads the pixel directly, so it must name a real cell;
+        # go through the coordinates
+        for coordinate, extent in zip((line, sample), dataset.shape):
+            # if one falls outside the raster
+            if coordinate < 0 or coordinate >= extent:
+                # the client tracks the cursor within the dataset it is displaying, so an
+                # overstep is a bug in whoever built the query
+                firewall = journal.firewall("qed.gql.sample")
+                # complain
+                firewall.line(f"sample point out of bounds")
+                firewall.line(f"while sampling '{dataset.pyre_name}'")
+                firewall.line(f"at line {line}, sample {sample}")
+                firewall.line(f"of a dataset with shape {dataset.shape}")
+                # flush
+                firewall.log()
+                # and refuse, in case firewalls aren't fatal
+                return None
         # assemble the sample resolution context
         context = {
             "dataset": dataset,
