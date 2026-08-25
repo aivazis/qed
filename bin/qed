@@ -15,6 +15,7 @@ journal.error("qed.ux.dispatch").fatal = False
 # journal.debug("qed.ux").active = False
 # firewalls
 journal.firewall("qed.ux.dispatch").fatal = False
+journal.firewall("qed.gql.sample").fatal = False
 
 # get the package
 import qed
