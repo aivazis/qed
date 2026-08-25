@@ -26,4 +26,7 @@ from .Team import Team as team
 # the manager of the tile rendering teams, one per data source
 from .Fleet import Fleet as fleet
 
+# the http server that renders tiles concurrently
+from .Server import Server as server
+
 # end of file

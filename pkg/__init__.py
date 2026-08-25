@@ -18,8 +18,6 @@ from pyre import (
     provides,
     # the manager of the pyre runtime
     executive,
-    # support for concurrency
-    nexus,
     # support for workflows, products, and factories
     flow,
     # shells
@@ -65,6 +63,9 @@ from . import datatypes
 from . import controllers
 from . import readers
 from . import stacks
+
+# support for concurrent tile production
+from . import nexus
 
 # schema
 from . import gql

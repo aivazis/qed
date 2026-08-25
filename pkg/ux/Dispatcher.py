@@ -157,62 +157,86 @@ class Dispatcher:
         spec = match.group("data_tile")
         origin = tuple(map(int, match.group("data_origin").split("x")))
         shape = tuple(map(int, match.group("data_shape").split("x")))
+        # bundle the request details so the helpers can share them
+        tilespec = {
+            "viewport": viewport,
+            "datasetName": datasetName,
+            "channelName": channelName,
+            "zoomSpec": zoomSpec,
+            "zoom": zoom,
+            "spec": spec,
+            "origin": origin,
+            "shape": shape,
+        }
 
         # attempt to
         try:
-            # get the tile
-            tile = self.store.tile(
-                viewport=viewport,
+            # get the view behind the request
+            view = self.store.view(viewport=viewport)
+        # if the viewport is unknown
+        except IndexError:
+            # let the inline path complain
+            return self._dataInline(server=server, **tilespec)
+
+        # get the dataset behind the request; the render machinery trusts its callers, so a
+        # tile that hangs over the edge of the raster crashes the native pipeline
+        dataset = view.dataset
+        # if there is a dataset to check against and the request oversteps it
+        if dataset is not None and not self._dataInBounds(
+            dataset=dataset, zoom=zoom, origin=origin, shape=shape
+        ):
+            # our own client computes its tile grid from the dataset shape this server
+            # published, so an overstep is a bug in whoever built the request
+            firewall = journal.firewall("qed.ux.dispatch")
+            # complain
+            firewall.line(f"tile out of bounds")
+            firewall.line(
+                f"while fetching a tile of '{channelName}' from '{datasetName}'"
+            )
+            firewall.line(f"with shape {shape} at {origin}, zoom {zoom}")
+            firewall.line(f"of a dataset with shape {dataset.shape}")
+            # flush
+            firewall.log()
+            # and refuse, in case firewalls aren't fatal
+            return server.responses.NotFound(server=server)
+
+        # look for the fleet of tile rendering teams; only the qed flavor of the server has one
+        fleet = getattr(server, "fleet", None)
+        # if there is no fleet
+        if fleet is None:
+            # render on the spot
+            return self._dataInline(server=server, **tilespec)
+
+        # aggregates render over live member state, so stacks stay on the inline path for now
+        if isinstance(view.dataset, qed.stacks.dataset):
+            # render on the spot
+            return self._dataInline(server=server, **tilespec)
+
+        # attempt to
+        try:
+            # describe the tile as a task that can travel to a worker
+            task = qed.nexus.tile(
+                view=view,
                 channel=f"{datasetName}.{channelName}",
                 zoom=zoom,
                 origin=origin,
                 shape=shape,
             )
-        # if anything else goes wrong
-        except Exception as error:
-            # we have a problem
-            chnl = journal.error("qed.ux.dispatch")
-            # show me
-            chnl.line(str(error))
-            chnl.line(f"while fetching a tile of '{channelName}' from '{datasetName}'")
-            chnl.line(f"with shape {shape} at {origin}")
-            chnl.line(f"at zoom level {zoom}")
-            # and flush
-            chnl.log()
-            # let the client know
-            return server.responses.NotFound(server=server)
+        # if the description cannot be built, e.g. there is no dataset selection
+        except Exception:
+            # fall back to the inline path, which knows how to complain
+            return self._dataInline(server=server, **tilespec)
 
-        # if all went well, we have a {tile} in memory; attempt to
-        try:
-            # build the response
-            response = server.documents.BMP(server=server, bmp=memoryview(tile))
-            # suggest a file name, in case the user wants to save the tile
-            filename = f"{datasetName}.{channelName}.{zoomSpec}.{spec}.bmp"
-            # encode it
-            encoded = urllib.parse.quote(filename)
-            # decorate it
-            response.headers["Content-disposition"] = (
-                f'attachment; filename="{filename}"; filename*={encoded}'
-            )
-            # grab a channel
-            chnl = journal.debug("qed.ux.dispatch")
-            # show me
-            chnl.log(f"serving '{filename}'")
-            # and return it
-            return response
-        # if anything goes wrong
-        except Exception as error:
-            # we have a problem
-            chnl = journal.error("qed.ux.dispatch")
-            # show me
-            chnl.line(str(error))
-            chnl.line(f"while generating a '{channelName}' tile of '{datasetName}'")
-            chnl.line(f"with shape {shape} at {origin}")
-            chnl.line(f"at zoom level {zoom}")
-            # and flush
-            chnl.log()
-        # let the client know
-        return server.responses.NotFound(server=server)
+        # make a placeholder response that parks the connection
+        deferred = server.deferred()
+        # build the delivery callback
+        callback = functools.partial(
+            self._dataDeliver, server=server, deferred=deferred, **tilespec
+        )
+        # queue the task with the team dedicated to its data source
+        fleet.render(task=task, callback=callback)
+        # and hand the placeholder to the server
+        return deferred
 
     def _dataInBounds(self, dataset, zoom, origin, shape):
         """
@@ -261,6 +285,186 @@ class Dispatcher:
                     return False
         # all points check out
         return True
+
+    def _dataInline(
+        self,
+        server,
+        viewport,
+        datasetName,
+        channelName,
+        zoomSpec,
+        zoom,
+        spec,
+        origin,
+        shape,
+    ):
+        """
+        Render a tile synchronously and wrap it up as a response document
+        """
+        # attempt to
+        try:
+            # get the tile
+            tile = self.store.tile(
+                viewport=viewport,
+                channel=f"{datasetName}.{channelName}",
+                zoom=zoom,
+                origin=origin,
+                shape=shape,
+            )
+        # if anything else goes wrong
+        except Exception as error:
+            # we have a problem
+            chnl = journal.error("qed.ux.dispatch")
+            # show me
+            chnl.line(str(error))
+            chnl.line(f"while fetching a tile of '{channelName}' from '{datasetName}'")
+            chnl.line(f"with shape {shape} at {origin}")
+            chnl.line(f"at zoom level {zoom}")
+            # and flush
+            chnl.log()
+            # let the client know
+            return server.responses.NotFound(server=server)
+
+        # if all went well, we have a {tile} in memory; wrap it up
+        return self._dataDocument(
+            server=server,
+            tile=memoryview(tile),
+            datasetName=datasetName,
+            channelName=channelName,
+            zoomSpec=zoomSpec,
+            zoom=zoom,
+            spec=spec,
+            origin=origin,
+            shape=shape,
+        )
+
+    def _dataDeliver(
+        self,
+        result,
+        error,
+        server,
+        deferred,
+        viewport,
+        datasetName,
+        channelName,
+        zoomSpec,
+        zoom,
+        spec,
+        origin,
+        shape,
+    ):
+        """
+        The team has reported the outcome of a tile task; resolve the parked response
+        """
+        # if the task took its crew member down, the task itself may be the killer, e.g. a
+        # request that crashes the native pipeline; retrying it inline would gamble the server
+        if isinstance(error, qed.nexus.exceptions.Casualty):
+            # tell me
+            chnl = journal.warning("qed.nexus.tiles")
+            # what happened
+            chnl.line(str(error))
+            chnl.line(f"while rendering a '{channelName}' tile of '{datasetName}'")
+            chnl.line(f"with shape {shape} at {origin}")
+            chnl.line(f"the task is suspect; refusing to retry it in the server")
+            # and flush
+            chnl.log()
+            # let the client know; it can always ask again
+            return deferred.resolve(response=server.responses.NotFound(server=server))
+        # if the worker could not produce the tile for a benign reason
+        if error is not None:
+            # tell me
+            chnl = journal.warning("qed.nexus.tiles")
+            # what happened
+            chnl.line(str(error))
+            chnl.line(f"while rendering a '{channelName}' tile of '{datasetName}'")
+            chnl.line(f"with shape {shape} at {origin}")
+            chnl.line(f"falling back to the inline renderer")
+            # and flush
+            chnl.log()
+            # render on the spot so reconstruction gaps degrade gracefully
+            response = self._dataInline(
+                server=server,
+                viewport=viewport,
+                datasetName=datasetName,
+                channelName=channelName,
+                zoomSpec=zoomSpec,
+                zoom=zoom,
+                spec=spec,
+                origin=origin,
+                shape=shape,
+            )
+            # and deliver whatever came out
+            return deferred.resolve(response=response)
+
+        # on success, the tile arrives parked in a spool; map its payload
+        view = result.view()
+        # and wrap it up as a document
+        response = self._dataDocument(
+            server=server,
+            tile=view,
+            datasetName=datasetName,
+            channelName=channelName,
+            zoomSpec=zoomSpec,
+            zoom=zoom,
+            spec=spec,
+            origin=origin,
+            shape=shape,
+        )
+        # deliver it; the write to the client happens within
+        status = deferred.resolve(response=response)
+        # the payload is on the wire; release the mapping
+        view.close()
+        # and the spool, so the kernel reclaims the storage
+        result.close()
+        # all done
+        return status
+
+    def _dataDocument(
+        self,
+        server,
+        tile,
+        datasetName,
+        channelName,
+        zoomSpec,
+        zoom,
+        spec,
+        origin,
+        shape,
+    ):
+        """
+        Wrap a rendered {tile} in a BMP response document
+        """
+        # attempt to
+        try:
+            # build the response
+            response = server.documents.BMP(server=server, bmp=tile)
+            # suggest a file name, in case the user wants to save the tile
+            filename = f"{datasetName}.{channelName}.{zoomSpec}.{spec}.bmp"
+            # encode it
+            encoded = urllib.parse.quote(filename)
+            # decorate it
+            response.headers["Content-disposition"] = (
+                f'attachment; filename="{filename}"; filename*={encoded}'
+            )
+            # grab a channel
+            chnl = journal.debug("qed.ux.dispatch")
+            # show me
+            chnl.log(f"serving '{filename}'")
+            # and return it
+            return response
+        # if anything goes wrong
+        except Exception as error:
+            # we have a problem
+            chnl = journal.error("qed.ux.dispatch")
+            # show me
+            chnl.line(str(error))
+            chnl.line(f"while generating a '{channelName}' tile of '{datasetName}'")
+            chnl.line(f"with shape {shape} at {origin}")
+            chnl.line(f"at zoom level {zoom}")
+            # and flush
+            chnl.log()
+        # let the client know
+        return server.responses.NotFound(server=server)
 
     def graphql(self, **kwds):
         """

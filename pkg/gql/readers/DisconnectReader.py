@@ -41,6 +41,12 @@ class DisconnectReader(graphene.Mutation):
         store = info.context["store"]
         # remove it from the pile
         reader = store.disconnectSource(name=name)
+        # look for the fleet of tile rendering teams; only the qed server flavor has one
+        fleet = getattr(info.context["server"], "fleet", None)
+        # if there is one
+        if fleet is not None:
+            # disband the team dedicated to this reader, releasing its worker caches
+            fleet.dismiss(reader=name)
         # form the mutation resolution context
         context = {"reader": reader}
         # and resolve the mutation

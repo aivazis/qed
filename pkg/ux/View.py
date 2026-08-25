@@ -62,14 +62,19 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
     )
 
     # interface
+    def pipeline(self, channel):
+        """
+        Locate the visualization pipeline for the given {channel} spec
+        """
+        # form the pipeline name and look it up
+        return self._pipelines[f"{self.pyre_name}.{channel}"]
+
     def tile(self, channel, zoom, origin, shape):
         """
         Render a tile of data using the {channel} visualization pipeline
         """
-        # form the channel name
-        name = f"{self.pyre_name}.{channel}"
         # locate the pipeline
-        pipeline = self._pipelines[name]
+        pipeline = self.pipeline(channel=channel)
         # an aggregate dataset renders over only the members my mask leaves active; a
         # single-member dataset is a plain reader dataset that knows nothing of masks
         extra = (

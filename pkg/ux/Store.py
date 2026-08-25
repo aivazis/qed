@@ -119,6 +119,15 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         return self._dataSources.dataset(name=name)
 
     # views
+    def view(self, viewport):
+        """
+        Retrieve the view configuration of {viewport}
+        """
+        # get the port
+        port = self._viewports[viewport]
+        # and ask it for its view
+        return port.view()
+
     @property
     def viewports(self):
         """
