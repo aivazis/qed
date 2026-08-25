@@ -14,4 +14,16 @@ from .Tile import Tile as tile
 # the parking place for rendered payloads
 from .Spool import Spool as spool
 
+# the crew member that renders tiles
+from .Crew import Crew as crew
+
+# the recruiter that manages crews over unix domain socket pairs
+from .Fork import Fork as fork
+
+# the pool of persistent tile rendering processes
+from .Team import Team as team
+
+# the manager of the tile rendering teams, one per data source
+from .Fleet import Fleet as fleet
+
 # end of file
