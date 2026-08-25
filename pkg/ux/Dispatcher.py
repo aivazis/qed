@@ -119,7 +119,23 @@ class Dispatcher:
         reader = cls(**config)
         # get its first dataset
         data, *_ = reader.datasets
-        # and the first registered channel
+        # if the requested view oversteps the raster, the native pipeline would crash
+        if not self._dataInBounds(
+            dataset=data, zoom=(zoom, zoom), origin=(0, 0), shape=view
+        ):
+            # the client derives the preview geometry from the product metadata, so an
+            # overstep is a bug in whoever built the request
+            firewall = journal.firewall("qed.ux.dispatch")
+            # complain
+            firewall.line(f"preview out of bounds")
+            firewall.line(f"while previewing '{uri}'")
+            firewall.line(f"with view {view} at zoom {zoom}")
+            firewall.line(f"of a dataset with shape {data.shape}")
+            # flush
+            firewall.log()
+            # and refuse, in case firewalls aren't fatal
+            return server.responses.NotFound(server=server)
+        # get the first registered channel
         channel, *_ = data.channels.values()
         # render the tile
         tile = data.render(
@@ -198,6 +214,54 @@ class Dispatcher:
         # let the client know
         return server.responses.NotFound(server=server)
 
+    def _dataInBounds(self, dataset, zoom, origin, shape):
+        """
+        Check that the tile at {origin}+{shape} lies within {dataset} at the given {zoom}
+
+        Tile requests are in zoomed coordinates: the render pipeline scales both the origin
+        and the shape by the stride, so the source footprint of the tile is what must fit
+        """
+        # go through the axes
+        for level, start, extent, bound in zip(zoom, origin, shape, dataset.shape):
+            # a tile of empty or negative extent is meaningless
+            if extent <= 0:
+                # reject
+                return False
+            # the stride the render pipeline derives from the zoom level
+            stride = 2**level
+            # the source footprint must start within the raster
+            if start < 0:
+                # reject
+                return False
+            # and end within it
+            if (start + extent) * stride > bound:
+                # reject
+                return False
+        # all axes check out
+        return True
+
+    def _profileInBounds(self, dataset, points):
+        """
+        Check that every profile point lies within {dataset}
+
+        Points arrive as (line, sample) pairs, matching the dataset shape; the native profiler
+        reads each interpolated pixel individually, so every point must name a real cell
+        """
+        # go through the points
+        for point in points:
+            # a point must have exactly one coordinate per axis
+            if len(point) != len(dataset.shape):
+                # reject
+                return False
+            # go through its coordinates
+            for coordinate, extent in zip(point, dataset.shape):
+                # each must name a cell within the raster
+                if coordinate < 0 or coordinate >= extent:
+                    # reject
+                    return False
+        # all points check out
+        return True
+
     def graphql(self, **kwds):
         """
         Handle a {graphql} request
@@ -242,6 +306,20 @@ class Dispatcher:
 
         # get the dataset
         dataset = self.store.dataset(name=name)
+        # if any point of interest lies outside the raster, the per-pixel reads would crash
+        if not self._profileInBounds(dataset=dataset, points=points):
+            # the client clips its anchors to the dataset shape, so an overstep is a bug in
+            # whoever built the request
+            firewall = journal.firewall("qed.ux.dispatch")
+            # complain
+            firewall.line(f"profile point out of bounds")
+            firewall.line(f"while profiling '{name}'")
+            firewall.line(f"along {points}")
+            firewall.line(f"of a dataset with shape {dataset.shape}")
+            # flush
+            firewall.log()
+            # and refuse, in case firewalls aren't fatal
+            return server.responses.NotFound(server=server)
         # get the profile
         profile = dataset.profile(points=points, closed=closed)
         # form the file name
