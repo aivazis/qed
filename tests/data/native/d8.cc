@@ -40,7 +40,7 @@ main(int argc, char * argv[])
     // pick a shape; based on my display resolution...
     grid_t::shape_type shape { 1964 * 2 + 1, 3024 * 2 + 1 };
     // center it
-    grid_t::index_type origin = -shape / 2;
+    grid_t::index_type origin { -shape / 2 };
     // layout
     packing_t packing { shape, origin };
     // storage
@@ -60,7 +60,7 @@ main(int argc, char * argv[])
     };
 
     // fill the grid
-    for (auto idx : data.layout()) {
+    for (auto idx : data.packing()) {
         // convert the indices into a complex number in our space
         auto z = project(idx);
         // compute f(z)
