@@ -198,9 +198,10 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
                 continue
             # get the anchor position
             x, y = anchors[index]
-            # clip and update
-            x = min(shape[1], max(0, x + dx))
-            y = min(shape[0], max(0, y + dy))
+            # clip and update; the largest legal coordinate is one less than the extent,
+            # since an anchor names a cell of the raster
+            x = min(shape[1] - 1, max(0, x + dx))
+            y = min(shape[0] - 1, max(0, y + dy))
             # and store
             anchors[index] = (x, y)
         # all done
