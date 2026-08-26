@@ -74,7 +74,7 @@ def deliver(result, error):
 
 
 # register the callback
-team.pending[task] = deliver
+team.pending[task] = [deliver]
 # the worker dies mid-report: a header, a fragment of the body, then nothing
 child.write(bytes=struct.pack("<L", 64) + b"partial")
 # and the channel closes

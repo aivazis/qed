@@ -54,8 +54,15 @@ def deliver(result, error):
     """
     Record the outcome of the task and stop the event loop
     """
-    # record what the team delivered
-    outcome["result"] = result
+    # a successful render arrives parked in a spool the team still holds open; map it now,
+    # since the team releases the spool as soon as every subscriber has been served
+    if result is not None:
+        # take a private copy of the payload
+        view = result.view()
+        outcome["payload"] = bytes(view)
+        # and release the mapping
+        view.close()
+    # record the verdict
     outcome["error"] = error
     # and wind down the event loop
     team.dispatcher.stop()
@@ -73,14 +80,7 @@ team.disband()
 # check that the render succeeded
 assert outcome["error"] is None
 # and that the crew render matches the inline reference
-# the tile arrives parked in a spool whose descriptor crossed the crew channel; map it
-spool = outcome["result"]
-view = spool.view()
-# and compare with the inline reference
-assert bytes(view) == reference
-# release the mapping and the spool
-view.close()
-spool.close()
+assert outcome["payload"] == reference
 
 
 # end of file
