@@ -7,14 +7,11 @@
 # the marker the marshaler raises when its peer dies mid-conversation
 from pyre.ipc.exceptions import EndOfStream
 
-# the stock crew member; not re-exported by {pyre.nexus}, so reach into the package
+# the stock crew member; re-exported by {pyre.nexus} since the persistent-team graduation
 from pyre.nexus.Crew import Crew as crew
 
 # the parking place for rendered payloads
 from .Spool import Spool
-
-# the marker for tasks that took their crew member down
-from .exceptions import Casualty
 
 
 # the tile rendering crew member
@@ -22,10 +19,9 @@ class Crew(crew, family="qed.nexus.crews.tile"):
     """
     A crew member that renders tiles
 
-    On the worker side, it maintains a registry of open readers so file handles are owned by
-    this process and reused across tiles; on the team side, it delivers task outcomes to the
-    team instead of discarding them, and treats a broken channel at every stage of its
-    lifecycle as the death of its twin
+    The lifecycle machinery is inherited; this flavor contributes the worker side reader
+    registry, so file handles are owned by the worker and reused across tiles, and the spool
+    protocol, which ships rendered payloads by descriptor instead of through the byte stream
     """
 
     # interface - worker side
@@ -35,22 +31,6 @@ class Crew(crew, family="qed.nexus.crews.tile"):
         """
         # execute the task with my open readers on hand
         return task(readers=self.readers, **kwds)
-
-    def perform(self, channel, **kwds):
-        """
-        Pick up the next task, winding down quietly if the team is gone
-        """
-        # my recruiter closes the stray channel copies, so a hard team death reaches me as
-        # end-of-file, which the marshaler trips over while unpacking the message
-        try:
-            # carry on as usual
-            return super().perform(channel=channel, **kwds)
-        # if the channel delivered a truncated message
-        except EndOfStream:
-            # the team is gone; wind down my event loop
-            self.stop()
-            # and stop listening
-            return False
 
     def report(self, channel, crewstatus, taskstatus, result, **kwds):
         """
@@ -74,89 +54,25 @@ class Crew(crew, family="qed.nexus.crews.tile"):
         return False
 
     # interface - team side
-    def activate(self, channel, team):
+    def harvest(self, channel):
         """
-        My worker twin is reporting ready to work, unless it died before checking in
+        Extract a completion report from {channel}, collecting any spooled payload
         """
-        # carefully, since the member may have died before its registration arrived
-        try:
-            # get the status of my twin
-            status = self.marshaler.recv(channel=channel)
-        # if the channel delivered a truncated message, the member is gone
-        except EndOfStream:
-            # clean up after it; a replacement gets recruited
-            team.bury(crew=self)
-            # and stop listening
-            return False
-        # if all is good
-        if status is self.crewcodes.healthy:
-            # let the team know
-            team.activate(crew=self)
-            # and add me to the execution schedule
-            team.schedule(crew=self)
-        # otherwise
-        else:
-            # the member is compromised; clean up, and let a replacement take its place
-            team.bury(crew=self)
-        # this handler is one-shot
-        return False
-
-    def assess(self, channel, team, task, **kwds):
-        """
-        Harvest the completion report of {task} and deliver its outcome to the {team}
-        """
-        # carefully, since the member may have died mid-task instead of reporting
-        try:
-            # grab the report
-            memberstatus, taskstatus, result = self.marshaler.recv(channel=channel)
-        # if the channel delivered a truncated message, the member is gone
-        except EndOfStream:
-            # deliver the bad news for the task it was carrying
-            team.abandon(
-                task=task,
-                error=Casualty(description=f"crew {self.pid} died"),
-            )
-            # clean up after the member
-            team.bury(crew=self)
-            # and stop listening
-            return False
+        # chain up for the report itself
+        memberstatus, taskstatus, result = super().harvest(channel=channel)
         # a spooled result is just a size so far; its payload descriptor follows the report
         if isinstance(result, Spool):
             # receive it
             _, descriptors = channel.recvDescriptors(limit=1)
-            # if the member died between the report and the descriptor
+            # a missing descriptor means the member died between the report and its trailer,
+            # which is a death like any other
             if not descriptors:
-                # deliver the bad news for the task it was carrying
-                team.abandon(
-                    task=task,
-                    error=Casualty(description=f"crew {self.pid} died"),
-                )
-                # clean up after the member
-                team.bury(crew=self)
-                # and stop listening
-                return False
+                # so report it as such
+                raise EndOfStream(channel=channel)
             # otherwise, attach the payload
             result.adopt(descriptor=descriptors[0])
-        # if the task ran to completion
-        if taskstatus is self.taskcodes.completed:
-            # deliver the tile
-            team.collect(task=task, result=result)
-        # otherwise
-        else:
-            # deliver the bad news; tiles are not retried, the client can always re-ask
-            team.abandon(task=task, error=result)
-        # if i'm still healthy
-        if memberstatus is self.crewcodes.healthy:
-            # put me back on the schedule
-            team.schedule(crew=self)
-        # otherwise
-        else:
-            # report the damage
-            self.reportUnrecoverableError(team=team, task=task, error=result)
-            # and take me out of the rotation
-            team.dismiss(crew=self)
-        # this handler is one-shot; scheduling decides my fate
-        return False
+        # hand off the report
+        return memberstatus, taskstatus, result
 
     # metamethods
     def __init__(self, **kwds):
