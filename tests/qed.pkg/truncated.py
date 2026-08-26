@@ -87,8 +87,10 @@ assert keep is False
 result, error = outcomes[0]
 assert result is None
 assert error is not None
-# and the member was buried
-assert list(team.crews()) == []
+# and the member was buried, with a replacement recruited on the spot
+survivors = list(team.crews())
+assert crew not in survivors
+assert len(survivors) == 1
 
 # send everybody home
 team.disband()
