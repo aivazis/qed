@@ -5,8 +5,9 @@
 
 
 # publish
-# the local exceptions
-from . import exceptions
+# the exceptions; qed uses pyre's directly, since the persistent-team graduation moved
+# {Casualty} there
+from pyre.nexus import exceptions
 
 # the unit of work
 from .Tile import Tile as tile

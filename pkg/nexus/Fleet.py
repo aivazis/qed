@@ -32,7 +32,7 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         # locate the team, building it on first contact
         team = self.team(reader=task.reader)
         # and hand it the work
-        team.render(task=task, callback=callback)
+        team.assign(task=task, callback=callback)
         # all done
         return self
 
