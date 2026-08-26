@@ -14,9 +14,6 @@ import signal
 import pyre
 import journal
 
-# the unit of time
-from pyre.units.SI import second
-
 # the stock team; not re-exported by {pyre.nexus}, so reach into the package
 from pyre.nexus.Pool import Pool
 
@@ -152,25 +149,23 @@ class Team(Pool, family="qed.nexus.teams.tile"):
         except (OSError, ChildProcessError):
             # nothing further
             pass
-        # recruiting a replacement right away would let the descriptor just freed be reused
-        # and re-registered within the dispatch cycle that closed it, before the event loop
-        # has purged the dead registration; defer the recovery to a fresh cycle
-        self.dispatcher.alarm(interval=0 * second, call=self.recover)
+        # restore the team to full strength; the dispatchers survive descriptor reuse within
+        # a dispatch cycle, so the replacement can be recruited on the spot
+        self.recover()
         # all done
         return self
 
-    def recover(self, timestamp):
+    def recover(self, **kwds):
         """
         Restore the team to full strength after a casualty
         """
-        # a disbanded team stays disbanded; a recovery that was pending when the team was
-        # sent home must not resurrect it
+        # a disbanded team stays disbanded; a recovery must not resurrect it
         if self._disbanded:
             # so it does nothing
             return None
         # otherwise, recruit replacements and wake the bench, in case there is work waiting
         self.assemble(workplan=set())
-        # do not reschedule this alarm
+        # all done
         return None
 
     def disband(self):
