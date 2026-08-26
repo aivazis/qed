@@ -4,9 +4,8 @@
 # (c) 1998-2026 all rights reserved
 
 
-# externals
-import pickle
-import struct
+# the marker the marshaler raises when its peer dies mid-conversation
+from pyre.ipc.exceptions import EndOfStream
 
 # the stock crew member; not re-exported by {pyre.nexus}, so reach into the package
 from pyre.nexus.Crew import Crew as crew
@@ -29,11 +28,6 @@ class Crew(crew, family="qed.nexus.crews.tile"):
     lifecycle as the death of its twin
     """
 
-    # types
-    # the errors the marshaler raises when its peer dies and the channel delivers a truncated
-    # message: a short header trips {struct}, a short body trips {pickle}
-    truncation = (struct.error, pickle.UnpicklingError, EOFError)
-
     # interface - worker side
     def engage(self, task, **kwds):
         """
@@ -52,7 +46,7 @@ class Crew(crew, family="qed.nexus.crews.tile"):
             # carry on as usual
             return super().perform(channel=channel, **kwds)
         # if the channel delivered a truncated message
-        except self.truncation:
+        except EndOfStream:
             # the team is gone; wind down my event loop
             self.stop()
             # and stop listening
@@ -89,7 +83,7 @@ class Crew(crew, family="qed.nexus.crews.tile"):
             # get the status of my twin
             status = self.marshaler.recv(channel=channel)
         # if the channel delivered a truncated message, the member is gone
-        except self.truncation:
+        except EndOfStream:
             # clean up after it; a replacement gets recruited
             team.bury(crew=self)
             # and stop listening
@@ -116,7 +110,7 @@ class Crew(crew, family="qed.nexus.crews.tile"):
             # grab the report
             memberstatus, taskstatus, result = self.marshaler.recv(channel=channel)
         # if the channel delivered a truncated message, the member is gone
-        except self.truncation:
+        except EndOfStream:
             # deliver the bad news for the task it was carrying
             team.abandon(
                 task=task,
