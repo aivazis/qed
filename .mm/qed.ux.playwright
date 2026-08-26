@@ -16,15 +16,15 @@ qed.ux.playwright.runner := playwright
 # CJS loader; an ESM switch would need a different resolution scheme
 qed.ux.playwright.toolchain := playwright
 # it needs the built client (the server serves it) and the test fixtures the servers read: the
-# native raster ({qed.data.native.d16}) and the two NISAR products ({qed.data.nisar.*}). each file
+# native raster ({qed.data.native.c16}) and the two NISAR products ({qed.data.nisar.*}). each file
 # target produces its fixture only when missing -- skip-if-present, so present data is never rebuilt
 qed.ux.playwright.prerequisites := qed.ux \
-    $(qed.data.native.d16) $(qed.data.nisar.gslc) $(qed.data.nisar.gcov)
+    $(qed.data.native.c16) $(qed.data.nisar.gslc) $(qed.data.nisar.gcov)
 
 # tell the runner where the test data lives so playwright.config can point each webServer's {qed} at
 # it; the suite runs staged, away from the source tree, so it needs the absolute paths
 qed.ux.playwright.env := \
-    QED_DATA_NATIVE=$(dir $(qed.data.native.d16)) \
+    QED_DATA_NATIVE=$(dir $(qed.data.native.c16)) \
     QED_DATA_NISAR=$(dir $(qed.data.nisar.gslc))
 
 

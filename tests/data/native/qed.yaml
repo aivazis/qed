@@ -7,10 +7,10 @@
 # the archive root: the directory that holds the generated rasters (this directory)
 qed.native: .
 
-# the c16 (complex-double) fixture, emitted by the {d16} generator: a 3929x6049 raster of
+# the c16 (complex-double) fixture, emitted by the {c16} generator: a 3929x6049 raster of
 # f(z) = (z-1)/(z^2+z+1) over (-2,2)^2 -- poles and a zero make every channel visually distinct
-d16:
-    uri: "{qed.native}/d16.dat"
+data_c16:
+    uri: "{qed.native}/c16.dat"
     shape: 3929, 6049
     cell: c16
 
@@ -51,7 +51,7 @@ d16:
 
 # attach the dataset to the application
 datasets:
-    - native.flat#d16
+    - native.flat#data_c16
 
 
 # run as a web app on a default test port; a runner launches {qed} from this directory and may
