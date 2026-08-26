@@ -81,7 +81,7 @@ def deliver(result, error):
 
 
 # phase 1: get a crew member parked
-team.render(task=Echo(), callback=record)
+team.assign(task=Echo(), callback=record)
 # let the loop run long enough for the member to render and get parked
 team.dispatcher.alarm(interval=1 * second, call=expire)
 # spin
@@ -105,7 +105,7 @@ while True:
         # move on
         break
 # queue a task; this wakes the corpse and schedules it, so the submission will misfire
-team.render(task=Echo(), callback=deliver)
+team.assign(task=Echo(), callback=deliver)
 # spin; the submission fails, the task is re-queued, and the replacement delivers it
 team.dispatcher.watch()
 

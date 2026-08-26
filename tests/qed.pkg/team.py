@@ -64,7 +64,7 @@ def deliver(result, error):
 
 
 # queue the task
-team.render(task=task, callback=deliver)
+team.assign(task=task, callback=deliver)
 # spin the event loop until the callback fires
 team.dispatcher.watch()
 # send the crews home

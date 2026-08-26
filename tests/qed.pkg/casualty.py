@@ -70,7 +70,7 @@ def deliver(result, error):
 
 
 # queue the lethal task
-team.render(task=Boom(), callback=deliver)
+team.assign(task=Boom(), callback=deliver)
 # spin the event loop until the outcome is delivered
 team.dispatcher.watch()
 
@@ -82,7 +82,7 @@ assert result is None
 assert error is not None
 
 # now queue a normal task; the replacement crew member should handle it
-team.render(task=Echo(), callback=deliver)
+team.assign(task=Echo(), callback=deliver)
 # spin again
 team.dispatcher.watch()
 
