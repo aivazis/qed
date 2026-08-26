@@ -12,7 +12,9 @@
 *.h5
 
 # the compiled generator binaries (one per generator source, no extension)
-native/d8
-native/d16
+native/c8
+native/c16
+native/r4
+native/r8
 
 # end of file

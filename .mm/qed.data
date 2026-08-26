@@ -14,37 +14,45 @@ qed.data.extern := pyre
 qed.data.c++.flags += $($(compiler.c++).std.c++20)
 
 # each generator emits its fixture beside itself; record the outputs for the clean rules
-tests.data.native.d8.clean += d8.dat
-tests.data.native.d16.clean += d16.dat
+tests.data.native.c8.clean += c8.dat
+tests.data.native.c16.clean += c16.dat
+tests.data.native.r4.clean += r4.dat
+tests.data.native.r8.clean += r8.dat
 
-# expose the generated fixtures as file targets so any suite can depend on them and regenerate
-# only when the fixture is missing or its generator changed -- skip-if-present is just make's
-# normal staleness check. {CURDIR} is the project root (set before any makefile is read; the
-# per-project {home} is not available this early). each .dat is produced by running its generator
-# binary -- which the {qed.data} suite compiles -- from the data directory, beside the generator
-qed.data.native.d16 := $(CURDIR)/tests/data/native/d16.dat
-qed.data.native.d8 := $(CURDIR)/tests/data/native/d8.dat
+# expose the generated fixtures as file targets so any suite can depend on them
+qed.data.native.c16 := $(project.home)/tests/data/native/c16.dat
+qed.data.native.c8 := $(project.home)/tests/data/native/c8.dat
+qed.data.native.r4 := $(project.home)/tests/data/native/r4.dat
+qed.data.native.r8 := $(project.home)/tests/data/native/r8.dat
 
-$(qed.data.native.d16): $(CURDIR)/tests/data/native/d16
-	@${call log.action,generate,${subst $(CURDIR)/,,$@}}
-	@cd ${dir $@} && ./d16
+$(qed.data.native.c16): $(project.home)/tests/data/native/c16
+	@${call log.action,generate,${subst $(project.home)/,,$@}}
+	@cd ${dir $@} && ./c16
 
-$(qed.data.native.d8): $(CURDIR)/tests/data/native/d8
-	@${call log.action,generate,${subst $(CURDIR)/,,$@}}
-	@cd ${dir $@} && ./d8
+$(qed.data.native.c8): $(project.home)/tests/data/native/c8
+	@${call log.action,generate,${subst $(project.home)/,,$@}}
+	@cd ${dir $@} && ./c8
+
+$(qed.data.native.r4): $(project.home)/tests/data/native/r4
+	@${call log.action,generate,${subst $(project.home)/,,$@}}
+	@cd ${dir $@} && ./r4
+
+$(qed.data.native.r8): $(project.home)/tests/data/native/r8
+	@${call log.action,generate,${subst $(project.home)/,,$@}}
+	@cd ${dir $@} && ./r8
 
 
 # the NISAR fixtures: a GSLC and a GCOV the {qed.ux.playwright} suite reads. synthetic generation
 # is DEFERRED (a future generator -- likely python over {pyre.h5.api.Writer} with an articulated
 # NISAR product schema -- will synthesize tiny valid products); until then real products stand in.
-qed.data.nisar.gslc := $(CURDIR)/tests/data/nisar/gslc.h5
-qed.data.nisar.gcov := $(CURDIR)/tests/data/nisar/gcov.h5
+qed.data.nisar.gslc := $(project.home)/tests/data/nisar/gslc.h5
+qed.data.nisar.gcov := $(project.home)/tests/data/nisar/gcov.h5
 
 # no generator yet, so these targets only assert presence: with the fixture there (the real stand-in
 # or a future synthetic), make sees it up to date and does nothing -- the real data is never touched.
 # the recipe runs ONLY when the fixture is absent, failing with a pointer rather than clobbering
 $(qed.data.nisar.gslc) $(qed.data.nisar.gcov):
-	@echo "qed.data: missing NISAR fixture '${subst $(CURDIR)/,,$@}'" >&2
+	@echo "qed.data: missing NISAR fixture '${subst $(project.home)/,,$@}'" >&2
 	@echo "qed.data: synthetic generation is deferred -- drop a real NISAR product there" >&2
 	@exit 1
 

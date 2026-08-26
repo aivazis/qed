@@ -8,6 +8,8 @@
 #include <cassert>
 #include <complex>
 #include <algorithm>
+#include <string>
+#include <vector>
 #include <pyre/journal.h>
 
 // get the grid
@@ -25,6 +27,12 @@ using storage_t = pyre::memory::map_t<data_t>;
 using grid_t = pyre::grid::grid_t<packing_t, storage_t>;
 
 
+// forward declarations
+// override the default {shape} with the first two positional command line arguments, when present
+static auto shapeFromCommandLine(int argc, char * argv[], grid_t::shape_type shape)
+    -> grid_t::shape_type;
+
+
 // build a dataset
 int
 main(int argc, char * argv[])
@@ -37,14 +45,16 @@ main(int argc, char * argv[])
     // face centered pixels such that {data[0,0]} is at the origin
 
     // first, set up the discretization
-    // pick a shape; based on my display resolution...
+    // pick a default shape, large enough to exceed a typical display resolution
     grid_t::shape_type shape { 1964 * 2 + 1, 3024 * 2 + 1 };
+    // let the command line override it
+    shape = shapeFromCommandLine(argc, argv, shape);
     // center it
     grid_t::index_type origin { -shape / 2 };
     // layout
     packing_t packing { shape, origin };
     // storage
-    storage_t map("d16.dat", packing.cells());
+    storage_t map("c16.dat", packing.cells());
     // grid
     grid_t data { packing, map };
 
@@ -71,6 +81,33 @@ main(int argc, char * argv[])
 
     // all done
     return 0;
+}
+
+
+// override the default {shape} with the first two positional command line arguments, when present
+static auto
+shapeFromCommandLine(int argc, char * argv[], grid_t::shape_type shape) -> grid_t::shape_type
+{
+    // collect the positional arguments that follow the program name
+    auto dims = std::vector<int> {};
+    // by scanning the command line
+    for (auto arg = 1; arg < argc; ++arg) {
+        // grab the token
+        auto token = std::string(argv[arg]);
+        // journal configuration flags start with '-', so skip them
+        if (!token.empty() && token.front() == '-') {
+            continue;
+        }
+        // anything else is interpreted as a dimension
+        dims.push_back(std::stoi(token));
+    }
+    // if the user supplied both a row and a column count
+    if (dims.size() >= 2) {
+        // build the shape from them
+        shape = grid_t::shape_type { dims[0], dims[1] };
+    }
+    // return the resolved shape
+    return shape;
 }
 
 
