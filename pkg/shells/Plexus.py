@@ -222,20 +222,19 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         else:
             # instantiate and attach my dispatcher
             self._ux = qed.ux.dispatcher(plexus=self, docroot=docroot, pfs=pfs)
-            # pre-register the tile server under the name the web shell resolves, so the
-            # nexus picks up the flavor that renders tiles concurrently
-            http = qed.nexus.server(name="http")
-            # pre-registration bypasses the configuration context of the service slot, so
-            # mirror the address users deposit under the conventional location
-            key = f"{self.pyre_name}.nexus.services.web.address"
-            # get the nameserver
-            nameserver = self.pyre_nameserver
-            # if the user configured the web service address
-            if key in nameserver:
-                # adopt it
-                http.address = nameserver[key]
-            # attach the server
-            self._http = http
+            # get my shell
+            shell = self.shell
+            # web shells field requests through a configurable service
+            if shell.model == "web":
+                # find out where the current service spec came from
+                priority = shell.pyre_inventory.getTraitPriority(
+                    shell.pyre_trait("service")
+                )
+                # if nobody has expressed an opinion
+                if priority.name in ("uninitialized", "defaults"):
+                    # serve tiles with the flavor that renders them concurrently; users can
+                    # override with a 'service' setting on the shell in their configuration
+                    shell.service = "import:qed.nexus.server"
 
         # all done
         return pfs
@@ -440,7 +439,6 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     # private data
     _ds = 0
     _ux = None  # the UX manager
-    _http = None  # the tile server, pre-registered for the web shell to find
 
 
 # end of file
