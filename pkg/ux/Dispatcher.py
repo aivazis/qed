@@ -233,6 +233,10 @@ class Dispatcher:
         callback = functools.partial(
             self._dataDeliver, server=server, deferred=deferred, **tilespec
         )
+        # if the client hangs up while the tile is queued, withdraw the request
+        deferred.abandoned = functools.partial(
+            fleet.revoke, task=task, callback=callback
+        )
         # queue the task with the team dedicated to its data source
         fleet.render(task=task, callback=callback)
         # and hand the placeholder to the server
@@ -412,10 +416,9 @@ class Dispatcher:
         )
         # deliver it; the write to the client happens within
         status = deferred.resolve(response=response)
-        # the payload is on the wire; release the mapping
+        # the payload is on the wire; release my mapping of it. the spool itself is owned by
+        # the team, which releases it once every subscriber has been served
         view.close()
-        # and the spool, so the kernel reclaims the storage
-        result.close()
         # all done
         return status
 

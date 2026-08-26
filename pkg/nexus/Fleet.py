@@ -61,6 +61,19 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         # and hand it off
         return team
 
+    def revoke(self, task, callback):
+        """
+        Withdraw {callback} from the outcome of {task}, e.g. because its requester hung up
+        """
+        # find the team responsible for the task's data source
+        team = self.teams.get(task.reader)
+        # if it exists
+        if team is not None:
+            # pass the word
+            team.revoke(task=task, callback=callback)
+        # all done
+        return self
+
     def dismiss(self, reader):
         """
         Disband the team dedicated to {reader}, e.g. because its data source was disconnected

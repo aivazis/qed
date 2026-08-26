@@ -73,8 +73,32 @@ class Tile(pyre.nexus.task):
         pipeline = view.pipeline(channel=channel)
         # and harvest its configuration
         self.controllers = self._harvestComponent(component=pipeline)
+        # my identity is the complete request specification: two tiles are the same work
+        # only when everything that shapes the render agrees, controller state included, so
+        # equal tasks can share a single execution
+        self.identity = self._freeze(
+            value=(
+                self.reader,
+                self.factory,
+                self.config,
+                self.selector,
+                self.tag,
+                self.zoom,
+                self.origin,
+                self.shape,
+                self.controllers,
+            )
+        )
         # all done
         return
+
+    def __hash__(self):
+        # my identity is my specification
+        return hash(self.identity)
+
+    def __eq__(self, other):
+        # two tiles are the same work when their full specifications agree
+        return type(other) is type(self) and other.identity == self.identity
 
     # implementation details - team side
     def _harvestReader(self, reader):
@@ -171,6 +195,23 @@ class Tile(pyre.nexus.task):
             return self._opaque
         # otherwise, e.g. for the uris in reader recipes, fall back to the string form
         return str(value)
+
+    def _freeze(self, value):
+        """
+        Reduce {value} to a hashable form, so specifications can be compared
+        """
+        # tables freeze entry by entry, in a canonical order
+        if isinstance(value, dict):
+            # as sorted tuples of frozen pairs
+            return tuple(
+                (key, self._freeze(value=item)) for key, item in sorted(value.items())
+            )
+        # sequences freeze member by member
+        if isinstance(value, (tuple, list)):
+            # in a tuple
+            return tuple(self._freeze(value=item) for item in value)
+        # everything else is already a hashable primitive
+        return value
 
     # the marker for values that cannot travel
     _opaque = object()
