@@ -24,6 +24,9 @@ from .Fork import Fork as fork
 # the pool of persistent tile rendering processes
 from .Team import Team as team
 
+# the cache of rendered tiles
+from .Cache import Cache as cache
+
 # the manager of the tile rendering teams, one per data source
 from .Fleet import Fleet as fleet
 

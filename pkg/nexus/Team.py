@@ -46,17 +46,26 @@ class Team(Staff, family="qed.nexus.teams.tile"):
     # implementation details
     def collect(self, task, result):
         """
-        Deliver the {result} of {task}, releasing its payload if it arrived spooled
+        Deliver the {result} of {task} and settle the ownership of its payload
         """
         # chain up to deliver the result to every subscriber; each maps its own view
         super().collect(task=task, result=result)
         # if the result is spooled
         if isinstance(result, Spool):
             # everybody has been served, including the case where every subscriber withdrew;
-            # release the spool so the kernel reclaims the payload
-            result.close()
+            # if a cache is attached
+            if self.cache is not None:
+                # it takes ownership of the payload, so identical requests become hits
+                self.cache.insert(task=task, spool=result)
+            # otherwise
+            else:
+                # release the spool so the kernel reclaims the payload
+                result.close()
         # all done
         return self
+
+    # private data
+    cache = None  # the shared tile cache, attached by the fleet that builds me
 
 
 # end of file

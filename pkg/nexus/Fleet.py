@@ -11,6 +11,9 @@ import journal
 # the teams i manage
 from .Team import Team
 
+# the cache of rendered tiles they share
+from .Cache import Cache
+
 
 # the manager of the tile rendering teams
 class Fleet(qed.component, family="qed.nexus.fleets.tile"):
@@ -24,6 +27,13 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
     """
 
     # interface
+    def lookup(self, task):
+        """
+        Retrieve the cached render of {task}, if it is on hand
+        """
+        # consult the cache
+        return self.cache.lookup(task=task)
+
     def render(self, task, callback):
         """
         Route {task} to the team dedicated to its data source and arrange for {callback} to
@@ -52,6 +62,8 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         team = Team(name=f"{self.pyre_name}.{reader}")
         # the team's crew traffic rides the shared event loop
         team.dispatcher = self.dispatcher
+        # and its successful renders land in the shared cache
+        team.cache = self.cache
         # register it
         self.teams[reader] = team
         # show me
@@ -84,6 +96,8 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         if team is not None:
             # send its crews home
             team.disband()
+        # and drop the departed product's renders from the cache
+        self.cache.purge(reader=reader)
         # all done
         return self
 
@@ -97,6 +111,8 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
             team.disband()
         # empty the registry
         self.teams.clear()
+        # and release every cached render
+        self.cache.clear()
         # all done
         return self
 
@@ -106,6 +122,9 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         super().__init__(**kwds)
         # the table of teams, keyed by the name of their data source
         self.teams = {}
+        # the cache of rendered tiles, shared by all of them; its name places its
+        # configuration under my namespace, e.g. '{fleet}.cache.capacity'
+        self.cache = Cache(name=f"{self.pyre_name}.cache")
         # the shared event loop; whoever builds me is responsible for setting it before any
         # tiles are rendered
         self.dispatcher = None
