@@ -9,7 +9,6 @@
 Exercise the per-member participation logic a view carries for a stack reader
 """
 
-
 # externals
 import types
 
@@ -46,7 +45,9 @@ def setMembers():
 
     # turning every member off would empty the stack, so it is rejected
     calls = []
-    standin = types.SimpleNamespace(members=[True, True], resolve=lambda: calls.append(1))
+    standin = types.SimpleNamespace(
+        members=[True, True], resolve=lambda: calls.append(1)
+    )
     # ask to turn everyone off
     setter(standin, members=[False, False])
     # the mask is left untouched
@@ -55,7 +56,9 @@ def setMembers():
     assert calls == []
 
     # a non-empty mask is accepted, stored, and triggers a re-resolution
-    standin = types.SimpleNamespace(members=[True, False], resolve=lambda: calls.append(1))
+    standin = types.SimpleNamespace(
+        members=[True, False], resolve=lambda: calls.append(1)
+    )
     # ask to turn the second member back on
     setter(standin, members=[True, True])
     # the new mask is stored
