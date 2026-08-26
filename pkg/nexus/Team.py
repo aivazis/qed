@@ -14,6 +14,9 @@ from pyre.nexus.Staff import Staff
 # my crew members
 from .Crew import Crew
 
+# the parking place for rendered payloads
+from .Spool import Spool
+
 # my recruiter
 from .Fork import Fork
 
@@ -39,6 +42,21 @@ class Team(Staff, family="qed.nexus.teams.tile"):
 
     recruiter = pyre.nexus.recruiter(default=Fork)
     recruiter.doc = "the strategy for recruiting crew members"
+
+    # implementation details
+    def collect(self, task, result):
+        """
+        Deliver the {result} of {task}, releasing its payload if it arrived spooled
+        """
+        # chain up to deliver the result to every subscriber; each maps its own view
+        super().collect(task=task, result=result)
+        # if the result is spooled
+        if isinstance(result, Spool):
+            # everybody has been served, including the case where every subscriber withdrew;
+            # release the spool so the kernel reclaims the payload
+            result.close()
+        # all done
+        return self
 
 
 # end of file
