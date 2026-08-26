@@ -10,6 +10,7 @@ import functools
 import io
 import re
 import signal
+import time
 import urllib
 import uuid
 
@@ -144,7 +145,7 @@ class Dispatcher:
         # and send it to the client
         return server.documents.BMP(server=server, bmp=memoryview(tile))
 
-    def data(self, server, match, **kwds):
+    def data(self, server, request, match, **kwds):
         """
         Handle a data request
         """
@@ -169,6 +170,27 @@ class Dispatcher:
             "shape": shape,
         }
 
+        # diagnostic: when the {qed.ux.tiles} channel is active (off by default), each tile
+        # request gets one compact line -- client, session, outcome, and timings
+        tiles = journal.debug("qed.ux.tiles")
+        # capture the request clocks only when someone is listening, so the common inactive
+        # case pays nothing; per-request captures, unlike shared named timers, survive the
+        # concurrency of the deferred path
+        clocks = (time.perf_counter(), time.process_time()) if tiles.active else None
+        # bind the diagnostic to this request; a no-op while the channel is inactive
+        record = functools.partial(
+            self._logTile,
+            tiles=tiles,
+            clocks=clocks,
+            request=request,
+            viewport=viewport,
+            dataset=datasetName,
+            channel=channelName,
+            zoom=zoom,
+            origin=origin,
+            shape=shape,
+        )
+
         # attempt to
         try:
             # get the view behind the request
@@ -176,7 +198,11 @@ class Dispatcher:
         # if the viewport is unknown
         except IndexError:
             # let the inline path complain
-            return self._dataInline(server=server, **tilespec)
+            response = self._dataInline(server=server, **tilespec)
+            # record the outcome
+            record(code=response.code, via="inline")
+            # and pass it along
+            return response
 
         # get the dataset behind the request; the render machinery trusts its callers, so a
         # tile that hangs over the edge of the raster crashes the native pipeline
@@ -197,6 +223,8 @@ class Dispatcher:
             firewall.line(f"of a dataset with shape {dataset.shape}")
             # flush
             firewall.log()
+            # record the refusal
+            record(code=404, via="refused")
             # and refuse, in case firewalls aren't fatal
             return server.responses.NotFound(server=server)
 
@@ -205,7 +233,11 @@ class Dispatcher:
         # if there is no fleet
         if fleet is None:
             # render on the spot
-            return self._dataInline(server=server, **tilespec)
+            response = self._dataInline(server=server, **tilespec)
+            # record the outcome
+            record(code=response.code, via="inline")
+            # and pass it along
+            return response
 
         # when a stack is pinned to a single member, the view swaps in the member's own
         # dataset; its render belongs to the member reader, which the task recipe cannot
@@ -214,7 +246,11 @@ class Dispatcher:
             view.dataset, qed.stacks.dataset
         ):
             # render on the spot
-            return self._dataInline(server=server, **tilespec)
+            response = self._dataInline(server=server, **tilespec)
+            # record the outcome
+            record(code=response.code, via="inline")
+            # and pass it along
+            return response
 
         # attempt to
         try:
@@ -229,12 +265,18 @@ class Dispatcher:
         # if the description cannot be built, e.g. there is no dataset selection
         except Exception:
             # fall back to the inline path, which knows how to complain
-            return self._dataInline(server=server, **tilespec)
+            response = self._dataInline(server=server, **tilespec)
+            # record the outcome
+            record(code=response.code, via="inline")
+            # and pass it along
+            return response
 
         # a cached render of this exact specification can be served on the spot
         cached = fleet.lookup(task=task)
         # if there is one
         if cached is not None:
+            # record the hit
+            record(code=200, via="hit")
             # map it; the response document holds the view until the payload is on the wire
             return self._dataDocument(
                 server=server,
@@ -252,12 +294,24 @@ class Dispatcher:
         deferred = server.deferred()
         # build the delivery callback
         callback = functools.partial(
-            self._dataDeliver, server=server, deferred=deferred, **tilespec
+            self._dataDeliver,
+            server=server,
+            deferred=deferred,
+            record=record,
+            **tilespec,
         )
-        # if the client hangs up while the tile is queued, withdraw the request
-        deferred.abandoned = functools.partial(
-            fleet.revoke, task=task, callback=callback
-        )
+
+        # if the client hangs up while the tile is queued
+        def abandoned():
+            # withdraw the request
+            fleet.revoke(task=task, callback=callback)
+            # and record the departure
+            record(code=499, via="hangup")
+            # all done
+            return
+
+        # arm the hangup hook
+        deferred.abandoned = abandoned
         # queue the task with the team dedicated to its data source
         fleet.render(task=task, callback=callback)
         # and hand the placeholder to the server
@@ -377,6 +431,7 @@ class Dispatcher:
         spec,
         origin,
         shape,
+        record=None,
     ):
         """
         The team has reported the outcome of a tile task; resolve the parked response
@@ -393,6 +448,9 @@ class Dispatcher:
             chnl.line(f"the task is suspect; refusing to retry it in the server")
             # and flush
             chnl.log()
+            # record the casualty
+            if record is not None:
+                record(code=404, via="crew")
             # let the client know; it can always ask again
             return deferred.resolve(response=server.responses.NotFound(server=server))
         # if the worker could not produce the tile for a benign reason
@@ -418,6 +476,9 @@ class Dispatcher:
                 origin=origin,
                 shape=shape,
             )
+            # record the fallback outcome
+            if record is not None:
+                record(code=response.code, via="inline")
             # and deliver whatever came out
             return deferred.resolve(response=response)
 
@@ -435,6 +496,9 @@ class Dispatcher:
             origin=origin,
             shape=shape,
         )
+        # record the delivery
+        if record is not None:
+            record(code=200, via="crew")
         # deliver it; the write to the client happens within
         status = deferred.resolve(response=response)
         # the payload is on the wire; release my mapping of it. the spool itself is owned by
@@ -654,6 +718,76 @@ class Dispatcher:
 
         # all done
         return buffer.getvalue()
+
+    # debugging and logging support
+    @staticmethod
+    def _tileClient(agent):
+        """
+        Map a {User-Agent} string to a short client label for the tile journal
+        """
+        # our headless probe marks itself explicitly
+        if "qed-probe" in agent:
+            return "probe"
+        # edge identifies with {Edg}, but also carries {Chrome} and {Safari}, so test it first
+        if "Edg" in agent:
+            return "edge"
+        # chrome carries {Safari} too, so it must come before the safari test
+        if "Chrome" in agent or "Chromium" in agent:
+            return "chrome"
+        # safari last
+        if "Safari" in agent:
+            return "safari"
+        # anything else, including our probe's fallback
+        return "other"
+
+    def _logTile(
+        self,
+        tiles,
+        clocks,
+        request,
+        viewport,
+        dataset,
+        channel,
+        zoom,
+        origin,
+        shape,
+        code,
+        via,
+    ):
+        """
+        Record one tile request on the {qed.ux.tiles} diagnostic channel, when it is active
+        """
+        # nothing to do unless someone has turned the channel on; this guard keeps the
+        # gathering and formatting below -- the only real cost -- out of the hot path in the
+        # common inactive case
+        if not tiles.active:
+            return
+        # read the request clocks; {dt} is elapsed latency, including any time spent queued
+        # and rendered in a worker, while {cpu} is this server's own compute
+        dt = (time.perf_counter() - clocks[0]) * 1000 if clocks else 0.0
+        cpu = (time.process_time() - clocks[1]) * 1000 if clocks else 0.0
+        # identify the requesting client from its user agent
+        try:
+            agent = request.headers["User-Agent"]
+        except (KeyError, TypeError):
+            agent = ""
+        client = self._tileClient(agent=agent)
+        # the session token rides in the query string; it is what pierces the tile {Mosaic} memo
+        query = urllib.parse.parse_qs(urllib.parse.urlsplit(request.url).query)
+        session = query.get("session", ["?"])[0]
+        # the current shared look-at, for context on whether this tile sits near the viewport
+        try:
+            center = self.store.view(viewport=viewport).center
+            lookAt = (round(center.row), round(center.col))
+        except (IndexError, AttributeError, TypeError):
+            lookAt = None
+        # one compact, greppable line
+        tiles.log(
+            f"client={client} vp={viewport} {dataset}.{channel} "
+            f"zoom={zoom} origin={origin[0]}x{origin[1]} "
+            f"shape={shape[0]}x{shape[1]} session={session[:8]} "
+            f"lookAt={lookAt} code={code} via={via} dt={dt:.1f}ms cpu={cpu:.1f}ms"
+        )
 
     # private data
     # recognizer fragments
