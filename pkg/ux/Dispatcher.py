@@ -227,6 +227,23 @@ class Dispatcher:
             # fall back to the inline path, which knows how to complain
             return self._dataInline(server=server, **tilespec)
 
+        # a cached render of this exact specification can be served on the spot
+        cached = fleet.lookup(task=task)
+        # if there is one
+        if cached is not None:
+            # map it; the response document holds the view until the payload is on the wire
+            return self._dataDocument(
+                server=server,
+                tile=cached.view(),
+                datasetName=datasetName,
+                channelName=channelName,
+                zoomSpec=zoomSpec,
+                zoom=zoom,
+                spec=spec,
+                origin=origin,
+                shape=shape,
+            )
+
         # make a placeholder response that parks the connection
         deferred = server.deferred()
         # build the delivery callback
