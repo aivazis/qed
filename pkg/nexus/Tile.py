@@ -87,11 +87,16 @@ class Tile(pyre.nexus.task):
         # my identity is the complete request specification: two tiles are the same work
         # only when everything that shapes the render agrees, controller state included, so
         # equal tasks can share a single execution
+        # access credentials are not part of what is rendered: a rotated token must not
+        # invalidate cached work
+        spec = {
+            name: value for name, value in self.config.items() if name != "credentials"
+        }
         self.identity = self._freeze(
             value=(
                 self.reader,
                 self.factory,
-                self.config,
+                spec,
                 self.selector,
                 self.tag,
                 self.zoom,
@@ -163,6 +168,13 @@ class Tile(pyre.nexus.task):
                 continue
             # bound ones, e.g. the cell type of flat readers, travel as their family name
             config[name] = value.pyre_family()
+        # archive-backed readers retain access credentials, which are not traits; a worker
+        # cannot reach the archive, but it can present the credentials
+        credentials = getattr(reader, "credentials", None)
+        # if there are any
+        if credentials:
+            # add them to the recipe
+            config["credentials"] = dict(credentials)
         # hand off the recipe
         return config
 

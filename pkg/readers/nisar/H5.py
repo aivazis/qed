@@ -81,7 +81,7 @@ class H5(
         return
 
     # metamethods
-    def __init__(self, archive=None, fapl=None, **kwds):
+    def __init__(self, archive=None, credentials=None, fapl=None, **kwds):
         # chain up
         super().__init__(**kwds)
         # if the caller didn't provide an access property list
@@ -98,8 +98,11 @@ class H5(
             fapl.pageBufferSize = qed.h5.libh5.properties.PageBuffer(
                 bytes=size, metadata=5, raw=50
             )
-        # if i'm managed, get access credentials from the archive
-        credentials = archive.credentials() if archive else {}
+        # if i'm managed, get access credentials from the archive; otherwise settle for
+        # whatever the caller supplied, e.g. a worker rebuilding me from a recipe
+        credentials = archive.credentials() if archive else (credentials or {})
+        # retain them, so my recipe can carry them to a worker that cannot reach the archive
+        self.credentials = credentials
         # open my file
         self.product = qed.h5.reader(
             uri=self.uri, credentials=credentials, fapl=fapl
