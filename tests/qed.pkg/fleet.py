@@ -75,8 +75,17 @@ def deliver(key):
         """
         Record the outcome
         """
+        # a successful render arrives parked in a spool the team still holds open; map it
+        # now, since the team releases the spool once every subscriber has been served
+        payload = None
+        if result is not None:
+            # take a private copy of the payload
+            view = result.view()
+            payload = bytes(view)
+            # and release the mapping
+            view.close()
         # file the report
-        outcomes[key] = (result, error)
+        outcomes[key] = (payload, error)
         # if everybody has reported
         if len(outcomes) == len(tasks):
             # wind down the event loop
@@ -105,13 +114,8 @@ for name, (task, reference) in tasks.items():
     result, error = outcomes[name]
     # every render succeeded
     assert error is None
-    # the tile arrives parked in a spool; map it
-    view = result.view()
-    # and compare with its inline reference
-    assert bytes(view) == reference
-    # release the mapping and the spool
-    view.close()
-    result.close()
+    # and matches its inline reference
+    assert result == reference
 
 # send everybody home
 fleet.disband()
