@@ -55,8 +55,10 @@ team.registered.add(crew)
 keep = crew.activate(channel=crew.channel, team=team)
 # the handler winds down quietly
 assert keep is False
-# the member was buried: no roster holds it
-assert list(team.crews()) == []
+# the member was buried and a replacement recruited on the spot
+survivors = list(team.crews())
+assert crew not in survivors
+assert len(survivors) == 1
 # and the corpse was reaped
 try:
     # so a second wait
@@ -92,8 +94,10 @@ team.registered.add(crew)
 keep = crew.activate(channel=parent, team=team)
 # the handler winds down quietly
 assert keep is False
-# and the member was buried
-assert list(team.crews()) == []
+# and the member was buried, with a replacement recruited on the spot
+survivors = list(team.crews())
+assert crew not in survivors
+assert len(survivors) == 1
 
 # send everybody home
 team.disband()

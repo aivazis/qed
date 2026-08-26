@@ -62,8 +62,8 @@ team.disband()
 # nobody is left
 assert list(team.crews()) == []
 
-# a recovery that was pending at disband time must not resurrect the team
-team.recover(timestamp=0)
+# a recovery arriving after disband must not resurrect the team
+team.recover()
 # still nobody
 assert list(team.crews()) == []
 
