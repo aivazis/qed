@@ -37,9 +37,15 @@ class Tile(pyre.nexus.task):
             pipeline = self._configure(
                 component=dataset.channel(name=self.tag), config=self.controllers
             )
+            # aggregates render over the participating members
+            extra = {"mask": self.mask} if self.stacked else {}
             # render the tile
             tile = dataset.render(
-                channel=pipeline, zoom=self.zoom, origin=self.origin, shape=self.shape
+                channel=pipeline,
+                zoom=self.zoom,
+                origin=self.origin,
+                shape=self.shape,
+                **extra,
             )
         # any failure at all
         except Exception as error:
@@ -73,6 +79,11 @@ class Tile(pyre.nexus.task):
         pipeline = view.pipeline(channel=channel)
         # and harvest its configuration
         self.controllers = self._harvestComponent(component=pipeline)
+        # aggregates render over a member participation mask
+        self.stacked = isinstance(view.dataset, qed.stacks.dataset)
+        # which travels with the request when there is one
+        members = getattr(view, "members", None)
+        self.mask = list(members) if self.stacked and members is not None else None
         # my identity is the complete request specification: two tiles are the same work
         # only when everything that shapes the render agrees, controller state included, so
         # equal tasks can share a single execution
@@ -87,6 +98,8 @@ class Tile(pyre.nexus.task):
                 self.origin,
                 self.shape,
                 self.controllers,
+                self.stacked,
+                self.mask,
             )
         )
         # all done
@@ -120,6 +133,17 @@ class Tile(pyre.nexus.task):
             # trivial settings contribute nothing
             if value is None:
                 # so skip them
+                continue
+            # a list of components, e.g. the members of a stack, travels as recipes
+            if isinstance(value, (list, tuple)) and all(
+                hasattr(item, "pyre_family") for item in value
+            ):
+                # each member contributes its factory and its own recipe
+                config[name] = tuple(
+                    (item.pyre_family(), self._harvestReader(reader=item))
+                    for item in value
+                )
+                # on to the next trait
                 continue
             # everything else travels in wire-friendly form
             config[name] = self._scrub(value=value)
@@ -227,9 +251,30 @@ class Tile(pyre.nexus.task):
             return readers[self.reader]
         # otherwise, resolve my factory
         factory = qed.protocols.reader.pyre_resolveSpecification(spec=self.factory)
+        # work on a copy of the recipe, since member recipes get materialized in place
+        config = dict(self.config)
+        # go through the settings
+        for name, value in config.items():
+            # looking for member recipes, e.g. the readers of a stack
+            if (
+                isinstance(value, tuple)
+                and value
+                and all(isinstance(item, tuple) and len(item) == 2 for item in value)
+                and all(
+                    isinstance(item[0], str) and isinstance(item[1], dict)
+                    for item in value
+                )
+            ):
+                # resurrect each member with its own file handles
+                config[name] = [
+                    qed.protocols.reader.pyre_resolveSpecification(spec=family)(
+                        name=f"{self.reader}.crew.{index}", **recipe
+                    )
+                    for index, (family, recipe) in enumerate(value)
+                ]
         # build a fresh instance so this process owns its file handles; the derived name
         # avoids clashing with the team side instance this process may have inherited
-        reader = factory(name=f"{self.reader}.crew", **self.config)
+        reader = factory(name=f"{self.reader}.crew", **config)
         # register it
         readers[self.reader] = reader
         # and hand it off

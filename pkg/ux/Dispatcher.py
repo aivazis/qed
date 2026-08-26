@@ -207,8 +207,12 @@ class Dispatcher:
             # render on the spot
             return self._dataInline(server=server, **tilespec)
 
-        # aggregates render over live member state, so stacks stay on the inline path for now
-        if isinstance(view.dataset, qed.stacks.dataset):
+        # when a stack is pinned to a single member, the view swaps in the member's own
+        # dataset; its render belongs to the member reader, which the task recipe cannot
+        # name, so it stays on the inline path
+        if isinstance(view.reader, qed.stacks.stack) and not isinstance(
+            view.dataset, qed.stacks.dataset
+        ):
             # render on the spot
             return self._dataInline(server=server, **tilespec)
 
