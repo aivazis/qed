@@ -68,7 +68,7 @@ def deliver(result, error):
 
 
 # queue a task
-team.render(task=Echo(), callback=deliver)
+team.assign(task=Echo(), callback=deliver)
 # let the loop run long enough for the member to render and get parked
 team.dispatcher.alarm(interval=1 * second, call=expire)
 # spin

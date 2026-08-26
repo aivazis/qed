@@ -52,7 +52,7 @@ def deliver(result, error):
 
 
 # queue a task and spin until it is delivered
-team.render(task=Echo(), callback=deliver)
+team.assign(task=Echo(), callback=deliver)
 team.dispatcher.watch()
 # the task succeeded
 assert outcomes[0] == ("echo", None)
@@ -68,7 +68,7 @@ team.recover()
 assert list(team.crews()) == []
 
 # and new work is refused on the spot
-team.render(task=Echo(), callback=deliver)
+team.assign(task=Echo(), callback=deliver)
 # with the bad news delivered synchronously
 result, error = outcomes[1]
 assert result is None
