@@ -9,7 +9,6 @@
 Exercise the stacks package: the aggregate channels and the dataset that serves them
 """
 
-
 # externals
 import types
 
@@ -96,7 +95,11 @@ def subsetRender():
     channel = types.SimpleNamespace(tile=tile)
     # render with a mask that drops the middle member
     dataset.render(
-        channel=channel, zoom=(0, 0), origin=(0, 0), shape=(8, 8), mask=[True, False, True]
+        channel=channel,
+        zoom=(0, 0),
+        origin=(0, 0),
+        shape=(8, 8),
+        mask=[True, False, True],
     )
     # the channel must see exactly the first and third members, in order
     assert seen["members"] == [members[0], members[2]]

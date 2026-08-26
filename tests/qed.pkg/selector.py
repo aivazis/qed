@@ -9,7 +9,6 @@
 Exercise dataset selection
 """
 
-
 # support
 import qed
 

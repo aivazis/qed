@@ -12,6 +12,7 @@ def test():
     """
     # access check
     import qed
+
     # all done
     return 0
 

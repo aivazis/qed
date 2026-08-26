@@ -9,7 +9,6 @@
 Check that we can load view persistent state
 """
 
-
 # support
 import qed
 
