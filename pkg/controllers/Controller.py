@@ -30,6 +30,18 @@ class Controller(qed.component, implements=qed.protocols.controller):
         # all done
         return
 
+    def widen(self, stats: tuple) -> bool:
+        """
+        Expand my display bounds to accommodate {stats}, the accumulated whole-dataset
+        statistics, without ever touching the user's picks
+        """
+        # controllers pinned by the user stay exactly where they were put
+        if not self.auto:
+            # untouched
+            return False
+        # otherwise, let my flavor decide; it reports whether anything actually moved
+        return self._widen(stats=stats)
+
     # metamethods
     def __init__(self, **kwds):
         # chain up
@@ -68,8 +80,18 @@ class Controller(qed.component, implements=qed.protocols.controller):
         # i don't know much about how to do that
         return
 
+    def _widen(self, stats: tuple) -> bool:
+        """
+        Expand my display bounds to accommodate {stats}
+        """
+        # by default, there is nothing to expand
+        return False
+
     # constants
     tag = "controller"
+    # traits that shape the presentation but not the rendered pixels; they are excluded from
+    # tile identities, so adjusting them does not invalidate cached work
+    cosmetic = ("min", "max")
 
 
 # end of file

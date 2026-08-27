@@ -4,6 +4,9 @@
 # (c) 1998-2026 all rights reserved
 
 
+# externals
+import json
+
 # support
 import pyre
 
@@ -45,8 +48,30 @@ class Server(http, family="qed.nexus.servers.http"):
             # the statistical samples the crews take drain into the store, where they
             # accumulate into whole-dataset statistics
             fleet.stats = ux.store.accumulate
+            # and when the accumulation moves controller bounds, the store broadcasts a
+            # change notification so live clients refetch their state
+            ux.store.notifier = self.notifyChange
         # attach the fleet
         self.fleet = fleet
+        # all done
+        return
+
+    # interface
+    def notifyChange(self):
+        """
+        Push a change notification to every live client subscribed to my hub
+        """
+        # the notification frame is constant, so build it once; the framing matches the one
+        # the graphql handler broadcasts after successful mutations, so clients treat both
+        # identically: any message means "refetch your state"
+        if self._changeFrame is None:
+            # use the {EventStream} framing so the wire format lives in one place
+            stream = self.eventStream(server=self)
+            # a minimal payload
+            self._changeFrame = stream.event(json.dumps({"type": "change"}))
+        # broadcast it on the global topic; coalesce, so a burst collapses into a single
+        # pending refetch per client rather than a storm
+        self.hub.publish(self._changeFrame, coalesce=True)
         # all done
         return
 
@@ -67,6 +92,7 @@ class Server(http, family="qed.nexus.servers.http"):
     # implementation details
     # private data
     fleet = None  # the manager of the tile rendering teams, built at activation
+    _changeFrame = None  # the constant change notification frame, built on first use
 
 
 # end of file

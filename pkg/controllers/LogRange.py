@@ -76,6 +76,38 @@ class LogRange(Controller, family="qed.controllers.logrange"):
         # all done
         return
 
+    def _widen(self, stats: tuple) -> bool:
+        """
+        Expand my bounds to accommodate {stats}, the accumulated whole-dataset statistics
+        """
+        # unpack the stats, which arrive in linear scale
+        low, mean, high = stats
+        # a degenerate sample has nothing to teach a log scale
+        if high <= 0:
+            # so leave things alone
+            return False
+        # protect the low end from zeros and excessive dynamic range, like {_autotune} does
+        if low <= 0 or low / high < 1e-3:
+            # by clipping it
+            low = high / 1e3
+        # form the candidate bounds on whole decades, which provides natural hysteresis:
+        # the bounds only move when the data escapes the current decade
+        lowest = math.floor(math.log10(low))
+        highest = math.ceil(math.log10(high))
+        # if the current bounds already accommodate the data
+        if lowest >= self.min and highest <= self.max:
+            # nothing to do
+            return False
+        # bounds adjustments are presentation only, so my dirty flag must survive them
+        marked = self.dirty
+        # widen, and only ever widen, each end
+        self.min = min(self.min, lowest)
+        self.max = max(self.max, highest)
+        # restore the flag
+        self.dirty = marked
+        # report the move
+        return True
+
     # constants
     tag = "range"
 

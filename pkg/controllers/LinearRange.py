@@ -65,6 +65,39 @@ class LinearRange(Controller, family="qed.controllers.linearrange"):
         # all done
         return
 
+    def _widen(self, stats: tuple) -> bool:
+        """
+        Expand my bounds to accommodate {stats}, the accumulated whole-dataset statistics
+        """
+        # unpack the stats
+        low, mean, high = stats
+        # measure the current span
+        span = self.max - self.min
+        # small escapes are tolerated; the slack provides hysteresis
+        slack = 0.05 * span if span > 0 else 0.0
+        # if the current bounds accommodate the data to within the slack
+        if low >= self.min - slack and high <= self.max + slack:
+            # nothing to do
+            return False
+        # form the widened extent
+        lowest = min(self.min, low)
+        highest = max(self.max, high)
+        # with some breathing room, so the next small escape doesn't move them again
+        margin = 0.05 * (highest - lowest)
+        # bounds adjustments are presentation only, so my dirty flag must survive them
+        marked = self.dirty
+        # widen whichever end the data escaped
+        if low < self.min - slack:
+            # the bottom
+            self.min = lowest - margin
+        if high > self.max + slack:
+            # the top
+            self.max = highest + margin
+        # restore the flag
+        self.dirty = marked
+        # report the move
+        return True
+
     # constants
     tag = "range"
 
