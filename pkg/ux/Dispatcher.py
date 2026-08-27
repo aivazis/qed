@@ -330,6 +330,12 @@ class Dispatcher:
             if extent <= 0:
                 # reject
                 return False
+            # the recognizer admits signed zoom levels, but the render pipeline only knows how
+            # to decimate; a negative level would produce a fractional stride and die deep in
+            # the extension, so refuse it here
+            if level < 0:
+                # reject
+                return False
             # the stride the render pipeline derives from the zoom level
             stride = 2**level
             # the source footprint must start within the raster
