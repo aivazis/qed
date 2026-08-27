@@ -68,8 +68,8 @@ qed::nisar::statsBFPQ(
     // decode the tile
     std::transform(source.cbegin(), source.cend(), decoded.begin(), decoder);
 
-    // compute the statistics and pass them on
-    return native::collectStatistics(source);
+    // compute the statistics of the decoded tile and pass them on
+    return native::collectStatistics(decoded);
 }
 
 
