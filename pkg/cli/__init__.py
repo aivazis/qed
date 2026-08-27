@@ -26,6 +26,17 @@ def s3():
     return S3
 
 
+@foundry(implements=action, tip="measure the cost structure of tile generation")
+def measure():
+    # get the action
+    from .Measure import Measure
+
+    # borrow its docstring
+    __doc__ = Measure.__doc__
+    # and publish it
+    return Measure
+
+
 @foundry(implements=action, tip="export the qed GraphQL schema")
 def schema():
     # get the action
