@@ -47,27 +47,46 @@ class Reader(
     datasets = qed.properties.list(schema=qed.protocols.dataset.output())
     datasets.doc = "the list of data sets provided by the reader"
 
-    # metamethods
-    def __init__(self, name, archive=None, **kwds):
+    # interface
+    @qed.export
+    def open(self):
+        """
+        Establish first contact with the data source: complete my shape, open the file,
+        and build my dataset
+        """
+        # if i have already made contact
+        if self._opened:
+            # there is nothing further to do
+            return self
+        # leave a mark
+        self._opened = True
+
         # make a timer that measures the layout discovery time
-        discovery = qed.timers.wall(f"qed.profiler.discovery.{name}")
-        # start the discovery timer
+        discovery = qed.timers.wall(f"qed.profiler.discovery.{self.pyre_name}")
+        # start it
         discovery.start()
-        # chain up
-        super().__init__(name=name, **kwds)
-        # stop the discovery timer
+        # complete my shape, interrogating the metadata for whatever is missing
+        self._resolveShape()
+        # stop the timer
         discovery.stop()
+
+        # get my shape
+        shape = self.shape
+        # i need it fully resolved to continue
+        if not shape or not shape[0] or not shape[1]:
+            # bail; my configuration troubles have already been reported
+            return self
 
         # unpack my state into a dataset configuration
         config = {
             "uri": self.uri,
-            "shape": self.shape,
+            "shape": shape,
             "cell": self.cell,
             "tile": self.cell.tile,
         }
 
         # make a timer that measures the amount of time it takes to collect statistics
-        stats = qed.timers.wall(f"qed.profiler.stats.{name}")
+        stats = qed.timers.wall(f"qed.profiler.stats.{self.pyre_name}")
         # and start it
         stats.start()
         # there is only one dataset in the file and it is structurally trivial; build it
@@ -77,16 +96,23 @@ class Reader(
 
         # add the dataset to the pile
         self.datasets.append(dataset)
-        # build my availability map
-        self.available = {}
 
+        # all done
+        return self
+
+    # metamethods
+    def __init__(self, name, archive=None, **kwds):
+        # chain up; construction is passive, so nothing touches the file until {open}
+        super().__init__(name=name, **kwds)
+        # initialize the availability map so the panel can render before first contact
+        self.available = {}
         # all done
         return
 
-    # framework hooks
-    def pyre_configured(self):
+    # implementation details
+    def _resolveShape(self):
         """
-        Hook invoked after the reader configuration is complete
+        Complete my shape, interrogating the auxiliary metadata for whatever is missing
         """
         # get the current value of my shape
         shape = list(self.shape) if self.shape else [0, 0]
@@ -141,10 +167,11 @@ class Reader(
                 # flush
                 channel.log()
 
-        # chain up
-        yield from super().pyre_configured()
         # all done
         return
+
+    # private data
+    _opened = False  # whether first contact has been made
 
 
 # end of file

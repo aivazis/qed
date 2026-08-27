@@ -26,6 +26,16 @@ class L0A(
     selectors = qed.protocols.selectors()
     selectors.doc = "a map of selector names to their allowed values"
 
+    # interface
+    @qed.export
+    def open(self):
+        """
+        Establish first contact with the data source; L0A support is a placeholder, so
+        there is nothing to discover yet
+        """
+        # nothing to do
+        return self
+
     # metamethods
     def __init__(self, **kwds):
         # chain up

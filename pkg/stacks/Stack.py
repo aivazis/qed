@@ -93,9 +93,39 @@ class Stack(
         # a pinned member can realize more combos than the aggregate; hand off its own map
         return self.readers[index].available
 
+    @qed.export
+    def open(self):
+        """
+        Establish first contact with my members and build the aggregate datasets
+        """
+        # if i have already made contact
+        if self._opened:
+            # there is nothing further to do
+            return self
+        # leave a mark
+        self._opened = True
+        # get my members
+        readers = self.readers
+        # if i somehow have none
+        if not readers:
+            # there is nothing to aggregate
+            return self
+        # ask each member to make first contact with its own data source
+        for reader in readers:
+            # one at a time; repeated opens are harmless
+            reader.open()
+        # build my aggregate datasets, one per combo that every member realizes
+        self._loadDatasets()
+        # my availability is what those aggregate datasets actually realize: the intersection
+        # across all members, NOT any one member's; derive it from the datasets themselves, the
+        # way a reader derives its own availability (this also auto-selects single-valued axes)
+        self.available = self._checkAvailability()
+        # all done
+        return self
+
     # metamethods
     def __init__(self, **kwds):
-        # chain up
+        # chain up; construction is passive: my members don't touch their files until {open}
         super().__init__(**kwds)
         # get my members
         readers = self.readers
@@ -103,22 +133,16 @@ class Stack(
         self.extent = len(readers)
         # resolve the participation mask my views start from; empty membership means all
         self.defaultMask = self._resolveMask()
-        # if i somehow have none
-        if not readers:
-            # there is nothing to aggregate
-            return
-        # the selector SPEC is shared by every member by construction, so i can borrow it
-        head, *_ = readers
-        # from the first member
-        self.selectors = head.selectors
         # synthesize a uri that identifies me
         self.uri = f"stack:{self.pyre_name}"
-        # build my aggregate datasets, one per combo that every member realizes
-        self._loadDatasets()
-        # my availability is what those aggregate datasets actually realize: the intersection
-        # across all members, NOT any one member's; derive it from the datasets themselves, the
-        # way a reader derives its own availability (this also auto-selects single-valued axes)
-        self.available = self._checkAvailability()
+        # initialize the availability map so the panel can render before first contact
+        self.available = {}
+        # if i have members
+        if readers:
+            # the selector SPEC is shared by every member by construction, a class default
+            # that requires no file contact, so i can borrow it from the first one
+            head, *_ = readers
+            self.selectors = head.selectors
         # all done
         return
 
@@ -202,6 +226,9 @@ class Stack(
                 selections[axis] = option
         # all done
         return available
+
+    # private data
+    _opened = False  # whether first contact has been made
 
 
 # end of file

@@ -80,11 +80,21 @@ class H5(
         # all done
         return
 
-    # metamethods
-    def __init__(self, archive=None, credentials=None, fapl=None, **kwds):
-        # chain up
-        super().__init__(**kwds)
-        # if the caller didn't provide an access property list
+    @qed.export
+    def open(self):
+        """
+        Establish first contact with the data source: open the file, walk its structure,
+        discover the datasets, and derive the selector availability
+        """
+        # if i have already made contact
+        if self._opened:
+            # there is nothing further to do
+            return self
+        # leave a mark
+        self._opened = True
+        # get the access property list i was constructed with
+        fapl = self._fapl
+        # if the caller didn't provide one
         if fapl is None:
             # make a default one
             fapl = qed.h5.libh5.properties.fapl()
@@ -100,7 +110,8 @@ class H5(
             )
         # if i'm managed, get access credentials from the archive; otherwise settle for
         # whatever the caller supplied, e.g. a worker rebuilding me from a recipe
-        credentials = archive.credentials() if archive else (credentials or {})
+        archive = self._archive
+        credentials = archive.credentials() if archive else (self.credentials or {})
         # retain them, so my recipe can carry them to a worker that cannot reach the archive
         self.credentials = credentials
         # open my file
@@ -113,6 +124,21 @@ class H5(
         # and build the selector availability map
         self.available = self._checkAvailability()
 
+        # all done
+        return self
+
+    # metamethods
+    def __init__(self, archive=None, credentials=None, fapl=None, **kwds):
+        # chain up; construction is passive, so nothing touches the file until {open}
+        super().__init__(**kwds)
+        # squirrel away what first contact needs
+        self._archive = archive
+        self._fapl = fapl
+        # retain whatever credentials the caller supplied; {open} may refresh them from
+        # the archive
+        self.credentials = credentials or {}
+        # initialize the availability map so the panel can render before first contact
+        self.available = {}
         # all done
         return
 
@@ -144,6 +170,11 @@ class H5(
                 selections[axis] = option
         # all done
         return available
+
+    # private data
+    _opened = False  # whether first contact has been made
+    _archive = None  # the archive that manages my data source, when there is one
+    _fapl = None  # the file access property list i was constructed with
 
 
 # end of file

@@ -40,10 +40,19 @@ class GDAL(
     datasets = qed.properties.list(schema=qed.protocols.dataset.output())
     datasets.doc = "the list of data sets provided by the reader"
 
-    # metamethods
-    def __init__(self, name, archive=None, **kwds):
-        # chain up
-        super().__init__(name=name, **kwds)
+    # interface
+    @qed.export
+    def open(self):
+        """
+        Establish first contact with the data source: open the file, discover the bands,
+        and derive the selector availability
+        """
+        # if i have already made contact
+        if self._opened:
+            # there is nothing further to do
+            return self
+        # leave a mark
+        self._opened = True
         # open the file
         dataset = self._open()
         # if something went wrong
@@ -55,7 +64,7 @@ class GDAL(
             # complain
             channel.log()
             # and bail
-            return
+            return self
         # if all is good with the data source, figure out how many rasters are available
         rasters = dataset.RasterCount
         # get my selector
@@ -74,14 +83,21 @@ class GDAL(
         self.product = dataset
         # update the selectors
         self.selectors["band"] = bands
-        # initialize the availability map
-        self.available = {}
-        # and populate it
+        # populate the availability map
         self.available["band"] = bands
         # if there is only one available band
         if len(bands) == 1:
             # force this selection
             self.selections["band"] = 0
+        # all done
+        return self
+
+    # metamethods
+    def __init__(self, name, archive=None, **kwds):
+        # chain up; construction is passive, so nothing touches the file until {open}
+        super().__init__(name=name, **kwds)
+        # initialize the availability map so the panel can render before first contact
+        self.available = {}
         # all done
         return
 
@@ -125,6 +141,9 @@ class GDAL(
         channel.log()
         # and bail, just in case errors aren't fatal
         return
+
+    # private data
+    _opened = False  # whether first contact has been made
 
 
 # end of file
