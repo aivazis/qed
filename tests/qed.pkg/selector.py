@@ -38,18 +38,26 @@ class Select(qed.application, family="qed.apps.selector"):
         """
         The main entry point
         """
+        # locate the product
+        path = qed.primitives.path(str(self.uri.address))
+        # if the fixture has not been generated
+        if not path.exists():
+            # there is nothing to check
+            return 0
         # unpack my state into a selector
         selector = {"frequency": self.frequency, "polarization": self.polarization}
         # make a reader
         reader = qed.readers.nisar.rslc(name=f"{self.pyre_name}.reader", uri=self.uri)
+        # make first contact
+        reader.open()
         # ask it for matching datasets
         for dataset in reader.select(selector=selector):
             # show me
             print(f"select: {dataset.pyre_name}: {dataset.selector}")
-        # pick the first one
-        dataset = reader.pick(selector=selector)
+        # find the first one
+        dataset = reader.find(selector=selector)
         # show me
-        print(f"pick: {dataset.pyre_name}: {dataset.selector}")
+        print(f"find: {dataset.pyre_name}: {dataset.selector}")
         # all done
         return
 

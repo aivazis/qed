@@ -35,13 +35,18 @@ grant = {"region": "us-west-2", "access_key": "AKIATEST", "secret_key": "sekrit"
 # a stand-in for an archive
 archive = types.SimpleNamespace(credentials=lambda: dict(grant))
 
-# a managed reader pulls its credentials from its archive
+# a managed reader pulls its credentials from its archive at first contact
 managed = qed.readers.nisar.gslc(name="cred_managed", uri=product, archive=archive)
-# and retains them
+# construction is passive, so nothing has been granted yet
+assert managed.credentials == {}
+# make first contact
+managed.open()
+# and check that the grant was retained
 assert managed.credentials == grant
 
 # an unmanaged reader has none
 plain = qed.readers.nisar.gslc(name="cred_plain", uri=product)
+plain.open()
 assert plain.credentials == {}
 
 # describe a tile of the managed reader

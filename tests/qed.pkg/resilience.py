@@ -58,12 +58,20 @@ ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.local(root="."), pfs=a
 
 # the store survived
 store = ux.store
-# holding exactly the good source
-assert [source.pyre_name for source in store.sources] == ["good"]
-# whose dataset resolved against the fixture
-assert store.dataset(name="good.data") is not None
-# and the plexus pile was emptied by the handoff
+# construction is passive, so only the unresolvable family was discarded at the handoff;
+# the reader with the missing file constructs fine and survives until first contact
+assert [source.pyre_name for source in store.sources] == ["good", "broken"]
+# and no dataset exists yet, since nothing has touched a file
+assert store.dataset(name="good.data") is None
+# the plexus pile was emptied by the handoff
 assert app.datasets == []
+
+# initiate first contact, the way the server does when it is ready to serve
+store.open()
+# the reader with the missing file was discarded
+assert [source.pyre_name for source in store.sources] == ["good"]
+# and the survivor discovered its dataset
+assert store.dataset(name="good.data") is not None
 
 
 # end of file

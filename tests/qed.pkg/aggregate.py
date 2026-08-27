@@ -32,6 +32,8 @@ if not os.path.exists(product):
 one = qed.readers.nisar.gslc(name="agg_one", uri=product)
 two = qed.readers.nisar.gslc(name="agg_two", uri=product)
 stack = qed.stacks.stack(name="agg", readers=[one, two])
+# make first contact, which also opens the members
+stack.open()
 # find the aggregate dataset
 dataset = stack.find(selector={"band": "L", "frequency": "A", "polarization": "HH"})
 # grab its mean power pipeline

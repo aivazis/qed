@@ -21,6 +21,8 @@ import qed
 app = qed.shells.qed(name="qed.app")
 # build its dispatcher, which assembles the store with the local {d16} reader
 ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.local(root="."), pfs=app.pfs)
+# initiate first contact with the sources, the way the server does when it is ready
+ux.store.open()
 # get the reader
 reader, *_ = ux.store.sources
 # and its dataset
