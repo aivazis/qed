@@ -150,8 +150,9 @@ class Sources:
         """
         # get its name
         name = dataset.pyre_name
-        # and remove it
-        del self._datasets[name]
+        # and remove it; tolerate entries that were never indexed, e.g. datasets discovered
+        # after their source was registered but before it was re-registered
+        self._datasets.pop(name, None)
         # all done
         return dataset
 
