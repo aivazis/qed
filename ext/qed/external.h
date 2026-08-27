@@ -49,6 +49,8 @@ namespace qed::py {
 
     // a collection of tile statstics
     using stats_t = std::tuple<double, double, double>;
+    // a mergeable statistical sample: count, min, mean, m2, max
+    using sample_t = std::tuple<double, double, double, double, double>;
 
     // aliases for hdf5 entities
     using dataset_t = pyre::h5::dataset_t;

@@ -73,4 +73,83 @@ qed::nisar::statsBFPQ(
 }
 
 
+// collect a mergeable sample of a strided tile
+template <typename sourceT>
+auto
+qed::nisar::sample(
+    // the source
+    const dataset_t & dataset,
+    // the layout
+    const datatype_t & datatype,
+    // the origin of the tile
+    typename sourceT::index_type origin,
+    // the tile shape
+    typename sourceT::shape_type tile,
+    // the strides
+    typename sourceT::index_type stride) -> native::sample_t
+{
+    // the origin of the data region is scaled by the stride
+    auto from = origin;
+    // by going through its entries
+    for (int axis = 0; axis < decltype(from)::rank(); ++axis) {
+        // and multiplying them by the stride
+        from[axis] *= stride[axis];
+    }
+    // read the decimated tile; the hyperslab machinery applies the stride
+    auto source = pyre::h5::read<sourceT>(dataset, datatype, from, tile, stride);
+    // the data is now dense in memory, so sample it at unit stride
+    return native::sample(source, { 0, 0 }, tile, { 1, 1 });
+}
+
+
+// collect a mergeable sample of a strided BFPQ encoded tile
+template <typename sourceT>
+auto
+qed::nisar::sampleBFPQ(
+    // the source
+    const dataset_t & dataset,
+    // the layout
+    const datatype_t & datatype,
+    // the BFPQ lookup table
+    bfpq_lut_t bfpq,
+    // the origin of the tile
+    typename sourceT::index_type origin,
+    // the tile shape
+    typename sourceT::shape_type tile,
+    // the strides
+    typename sourceT::index_type stride) -> native::sample_t
+{
+    // type aliases
+    using value_t = typename sourceT::value_type;
+    using layout_t = typename sourceT::packing_type;
+
+    // the origin of the data region is scaled by the stride
+    auto from = origin;
+    // by going through its entries
+    for (int axis = 0; axis < decltype(from)::rank(); ++axis) {
+        // and multiplying them by the stride
+        from[axis] *= stride[axis];
+    }
+    // read the decimated BFPQ encoded data into a grid
+    auto source = pyre::h5::read<bfpq_slc_t>(dataset, datatype, from, tile, stride);
+    // describe the decoded tile
+    auto packing = layout_t { tile };
+    // build storage for the decoded tile
+    auto decoded = sourceT(packing, packing.cells());
+    // the decoder
+    auto decoder = [&](bfpq_slc_cell_t encoded) -> value_t {
+        // unpack and decode
+        auto r = bfpq.at(encoded.real());
+        auto i = bfpq.at(encoded.imag());
+        // pack and ship
+        return value_t { r, i };
+    };
+    // decode the tile
+    std::transform(source.cbegin(), source.cend(), decoded.begin(), decoder);
+
+    // the data is now dense in memory, so sample it at unit stride
+    return native::sample(decoded, { 0, 0 }, tile, { 1, 1 });
+}
+
+
 // end of file

@@ -52,6 +52,40 @@ qed::py::nisar::stats(py::module & m)
         // the docstring
         "compute the statistics of a BFPQ encoded slc tile");
 
+    // collect a mergeable sample of a strided complex slc tile
+    m.def(
+        // the name
+        "sample",
+        // the handler
+        [](const dataset_t & source, const datatype_t & datatype, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride) -> sample_t {
+            // read the decimated tile and sample it
+            return qed::nisar::sample<grid_t>(
+                source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride));
+        },
+        // the signature
+        "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a,
+        // the docstring
+        "collect a mergeable statistical sample of the strided slc tile at {origin}+{shape}");
+
+    // collect a mergeable sample of a strided BFPQ encoded slc tile
+    m.def(
+        // the name
+        "sampleBFPQ",
+        // the handler
+        [](const dataset_t & source, const datatype_t & datatype, const py::buffer & lut,
+           const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride) -> sample_t {
+            // read and decode the decimated tile, then sample it
+            return qed::nisar::sampleBFPQ<grid_t>(
+                source, datatype, asBFPQ(lut), asIndex<2>(origin), asShape<2>(shape),
+                asIndex<2>(stride));
+        },
+        // the signature
+        "source"_a, "datatype"_a, "bfpq"_a, "origin"_a, "shape"_a, "stride"_a,
+        // the docstring
+        "collect a mergeable statistical sample of the strided BFPQ tile at {origin}+{shape}");
+
     // all done
     return;
 }
