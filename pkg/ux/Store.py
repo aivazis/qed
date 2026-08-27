@@ -5,6 +5,7 @@
 
 
 # support
+import pyre
 import qed
 import journal
 import uuid
@@ -725,12 +726,19 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         # build the map
         archives = Archives()
-        # go through the plexus sources
-        for archive in plexus.archives:
-            # and connect them
+        # go through the plexus archives, resolving each entry on its own
+        for archive in self._drain(plexus=plexus, alias="archives"):
+            # and connect the survivors
             archives.addArchive(archive=archive)
-        # clear out the plexus pile
-        plexus.archives = []
+        # the store is now the authority on the connected archives; empty the plexus pile,
+        # recording the handoff as the provenance
+        plexus.pyre_setTrait(
+            alias="archives",
+            value=[],
+            locator=pyre.tracking.simple(
+                "while handing the data archives to the store"
+            ),
+        )
         # all done
         return archives
 
@@ -740,20 +748,109 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         # build the map
         sources = Sources()
-        # go through the plexus sources
-        for reader in plexus.datasets:
-            # and connect them
+        # go through the plexus datasets, resolving each entry on its own so a bad one is
+        # discarded with a warning instead of taking the application down
+        for reader in self._drain(plexus=plexus, alias="datasets"):
+            # and connect the survivors
             sources.addSource(source=reader)
-        # clear out the plexus pile
-        plexus.datasets = []
+        # readers built from bare command line uris arrive as live components on a side
+        # pile, since the command line processor must not disturb the configured entries
+        for reader in plexus._cliSources or []:
+            # connect them alongside the configured ones
+            sources.addSource(source=reader)
         # go through the plexus stacks, which present as reader-like sources
-        for stack in plexus.stacks:
-            # and connect them alongside the readers
+        for stack in self._drain(plexus=plexus, alias="stacks"):
+            # and connect them as well
             sources.addSource(source=stack)
-        # clear out the plexus stack pile
-        plexus.stacks = []
+        # the store is now the authority on the connected sources; empty the plexus piles,
+        # recording the handoff as the provenance
+        locator = pyre.tracking.simple("while handing the data sources to the store")
+        plexus.pyre_setTrait(alias="datasets", value=[], locator=locator)
+        plexus.pyre_setTrait(alias="stacks", value=[], locator=locator)
         # all done
         return sources
+
+    def _drain(self, plexus, alias):
+        """
+        Resolve the entries of the plexus trait bound to {alias} one at a time, so that a
+        bad entry is discarded with a warning instead of aborting the boot
+
+        Reading the trait normally converts the whole pile as a unit, and one bad entry
+        raises while the application is still being constructed; reading the raw
+        configuration instead gives every entry its own chance to resolve
+        """
+        # find the trait descriptor
+        trait = plexus.pyre_trait(alias)
+        # its per-entry schema is the facility that resolves specs into components
+        schema = trait.schema
+        # carefully
+        try:
+            # locate the slot that holds the trait configuration
+            node = plexus.pyre_nameserver.getNode(plexus.pyre_inventory.key[trait.name])
+            # save its converter
+            saved = node.postprocessor
+            # disable it
+            node.postprocessor = pyre.schemata.identity().coerce
+            # so the read produces the raw configuration
+            raw = node.value
+            # and restore the converter
+            node.postprocessor = saved
+        # if the raw configuration is unreachable, e.g. an anonymous plexus
+        except Exception:
+            # fall back to the normal conversion, preserving the historical behavior
+            yield from getattr(plexus, alias)
+            # and done
+            return
+
+        # normalize the raw value into a pile of entries: a missing setting
+        if raw is None:
+            # contributes nothing
+            entries = []
+        # a string carries comma separated specs, possibly wrapped in grouping delimiters
+        elif isinstance(raw, str):
+            # split it the way the framework does
+            entries = [
+                entry.strip()
+                for entry in raw.strip("[]{}()").split(",")
+                if entry.strip()
+            ]
+        # a sequence is already a pile
+        elif isinstance(raw, (list, tuple)):
+            # take it as is
+            entries = list(raw)
+        # anything else
+        else:
+            # is a single entry
+            entries = [raw]
+
+        # go through the entries
+        for entry in entries:
+            # live components, e.g. the default archives, pass through unharmed
+            if hasattr(entry, "pyre_family"):
+                # hand it off
+                yield entry
+                # and move on
+                continue
+            # everything else is a spec that must be resolved; carefully
+            try:
+                # exactly the way the framework resolves a single pile entry
+                component = schema.process(value=entry, incognito=True)
+            # any failure at all
+            except Exception as error:
+                # make a channel
+                channel = journal.warning("qed.cli")
+                # complain
+                channel.line(f"could not load '{entry}'")
+                channel.line(f"while processing the '{alias}' configuration")
+                channel.line(f"got: {error}")
+                # flush
+                channel.log()
+                # and discard the entry
+                continue
+            # a survivor joins the pile
+            yield component
+        # all done
+        return
 
     def _loadPersistentViewports(self, plexus, sources):
         """

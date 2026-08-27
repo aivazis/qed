@@ -411,9 +411,14 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
                 yield f"could not instantiate '{reader}'"
                 # and move on
                 continue
-            # if all goes well, register the reader
-            self.datasets.append(reader)
-        # clear out
+            # prime the side pile on first use; this hook runs before {__init__}
+            if self._cliSources is None:
+                # so the pile is born here
+                self._cliSources = []
+            # if all goes well, set the reader aside for the store; appending to the
+            # {datasets} trait would force the wholesale conversion of the configured
+            # entries, which the store later performs one entry at a time
+            self._cliSources.append(reader)
         # all done
         return
 
@@ -452,6 +457,9 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     # private data
     _ds = 0
     _ux = None  # the UX manager
+    _cliSources = (
+        None  # readers built from bare command line uris, drained by the store
+    )
 
 
 # end of file
