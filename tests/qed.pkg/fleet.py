@@ -20,10 +20,14 @@ import qed
 app = qed.shells.qed(name="qed.app")
 # build its dispatcher, which assembles the store with the local {d16} reader
 ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.local(root="."), pfs=app.pfs)
+# initiate first contact with the sources, the way the server does when it is ready
+ux.store.open()
 # get the configured reader
 one, *_ = ux.store.sources
 # and open the same raster a second time as an independent data product
 two = qed.readers.native.flat(name="d16b", uri="./c16.dat", shape=(65, 65), cell="c16")
+# construction is passive, so make first contact explicitly
+two.open()
 
 
 # build a task for a {reader}, along with the reference tile it should produce
