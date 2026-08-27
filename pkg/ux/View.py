@@ -69,6 +69,18 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # form the pipeline name and look it up
         return self._pipelines[f"{self.pyre_name}.{channel}"]
 
+    def refresh(self):
+        """
+        Rebuild my pipeline registry and re-resolve my selections, e.g. after my reader has
+        established first contact with its data source and discovered its datasets
+        """
+        # go through the pipelines my reader's datasets support
+        for pipeline in self.pipelines():
+            # register the new ones, keeping any existing clone with its live state
+            self._pipelines.setdefault(pipeline.pyre_name, pipeline)
+        # and re-resolve my selections against the discovered datasets
+        return self.resolve()
+
     def widen(self, dataset: str, stats: tuple) -> bool:
         """
         Expand the controller bounds of my pipeline clones for {dataset} to accommodate

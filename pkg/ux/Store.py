@@ -36,6 +36,46 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # and delegate
         return port.tile(**kwds)
 
+    # first contact
+    def open(self):
+        """
+        Initiate first contact with the connected data sources, discarding the ones that
+        fail with a warning, and refresh the viewports so their views reflect whatever the
+        survivors discovered
+        """
+        # go through a snapshot of the sources, since casualties get disconnected
+        for source in list(self.sources):
+            # carefully
+            try:
+                # establish first contact
+                source.open()
+            # if the source is unreachable or malformed
+            except Exception as error:
+                # make a channel
+                channel = journal.warning("qed.cli")
+                # complain
+                channel.line(f"could not open '{source.pyre_name}'")
+                channel.line(f"while establishing first contact with '{source.uri}'")
+                channel.line(f"got: {error}")
+                # flush
+                channel.log()
+                # disconnect the casualty
+                self.disconnectSource(name=source.pyre_name)
+                # and move on
+                continue
+            # re-register the survivor, so the dataset index reflects what it discovered
+            self.connectSource(source=source)
+        # the views built before first contact hold no pipelines; rebuild them
+        for port in self._viewports:
+            # get the view
+            view = port.view()
+            # the ones bound to a source
+            if view.reader is not None:
+                # get to refresh themselves against the discovered datasets
+                view.refresh()
+        # all done
+        return
+
     # statistics
     def accumulate(self, task, record):
         """
