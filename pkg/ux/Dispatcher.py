@@ -118,6 +118,8 @@ class Dispatcher:
         cls = functools.reduce(getattr, reader, qed.readers)
         # instantiate it
         reader = cls(**config)
+        # construction is passive; a preview exists to produce pixels, so make first contact
+        reader.open()
         # get its first dataset
         data, *_ = reader.datasets
         # if the requested view oversteps the raster, the native pipeline would crash

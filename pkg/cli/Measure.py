@@ -389,6 +389,9 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             if only and reader.pyre_name not in only:
                 # by skipping everybody else
                 continue
+            # construction is passive; measuring needs the data, so make first contact,
+            # which also charges the discovery and stats timers this panel reports
+            reader.open()
             # go through the reader's datasets
             for dataset in reader.datasets:
                 # and each dataset's channels
