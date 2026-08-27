@@ -226,15 +226,17 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
             shell = self.shell
             # web shells field requests through a configurable service
             if shell.model == "web":
-                # find out where the current service spec came from
-                priority = shell.pyre_inventory.getTraitPriority(
-                    shell.pyre_trait("service")
+                # qed prefers the flavor that renders tiles concurrently; deposit the
+                # preference at {package} priority, so it overrides the stock default but
+                # loses to any user or command line configuration of the service
+                shell.pyre_setTrait(
+                    alias="service",
+                    value="import:qed.nexus.server",
+                    priority=self.pyre_executive.priority.package(),
+                    locator=pyre.tracking.simple(
+                        "while mounting the qed application folders"
+                    ),
                 )
-                # if nobody has expressed an opinion
-                if priority.name in ("uninitialized", "defaults"):
-                    # serve tiles with the flavor that renders them concurrently; users can
-                    # override with a 'service' setting on the shell in their configuration
-                    shell.service = "import:qed.nexus.server"
 
         # all done
         return pfs
@@ -259,8 +261,10 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         """
         Resolve the configuration of my cell type
         """
-        # process the cell by running a competition among all the ways it could be specified
-        # first, collect my type traits in a pile
+        # the cell type has many spellings: the {cell} facility plus a boolean shorthand
+        # per supported type; each active shorthand re-deposits its value onto {cell} at
+        # the shorthand's own recorded standing, and the configuration store arbitrates
+        # the competition, so a direct {cell} assignment wins or loses on its own merits
         types = [
             "uint8",
             "uint16",
@@ -275,23 +279,18 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
             "complex64",
             "complex128",
         ]
-        # find the ones that are active
-        active = [name for name in types if getattr(self, name)]
-        # sort the list
-        ranked = sorted(
-            # include {cell} in the pile so we know where it stands
-            active + ["cell"],
-            # the key is the trait priority
-            key=lambda name: self.pyre_inventory.getTraitPriority(
-                self.pyre_trait(name)
-            ),
-        )
-        # the winner is
-        winner = ranked[-1]
-        # if it's not an explicit cell assignment
-        if winner != "cell":
-            # override
-            self.cell = winner
+        # go through the shorthands
+        for name in types:
+            # skip the inactive ones
+            if not getattr(self, name):
+                # on to the next one
+                continue
+            # find out where this setting came from
+            priority, locator = self._traitProvenance(alias=name)
+            # and deposit onto {cell} at the shorthand's own standing
+            self.pyre_setTrait(
+                alias="cell", value=name, priority=priority, locator=locator
+            )
         # return with no configuration errors
         return []
 
@@ -299,39 +298,30 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         """
         Resolve the configuration of my shape
         """
-        # initialize my shape candidate
-        shape = list(self.shape) if self.shape else [0, 0]
-        # get the priority of the shape setting
-        shapePriority = self.pyre_inventory.getTraitPriority(self.pyre_trait("shape"))
-        # get the number of lines
-        lines = self.lines
-        # if it's non-trivial
-        if lines:
-            # get its priority
-            linesPriority = self.pyre_inventory.getTraitPriority(
-                self.pyre_trait("lines")
+        # the scalar shorthands compete with the rank of {shape} each one controls; every
+        # active scalar deposits a merged shape at the scalar's own recorded standing and
+        # the configuration store arbitrates, so a direct {shape} assignment wins or loses
+        # on its own merits; note that a lone scalar deposits a PARTIAL shape, with a zero
+        # in the unspecified rank: readers with size-based inference consume it to fill in
+        # the missing extent, and everybody else must reject it during validation
+        for name, rank in [("lines", 0), ("samples", 1)]:
+            # get the value of the scalar
+            value = getattr(self, name)
+            # skip the unset ones
+            if not value:
+                # on to the next one
+                continue
+            # start with the current shape, which reflects the arbitration so far
+            merged = list(self.shape) if self.shape else [0, 0]
+            # fold in the scalar
+            merged[rank] = value
+            # find out where the scalar came from
+            priority, locator = self._traitProvenance(alias=name)
+            # and deposit the merged shape at the scalar's own standing
+            self.pyre_setTrait(
+                alias="shape", value=tuple(merged), priority=priority, locator=locator
             )
-            # if it's greater than shape's
-            if linesPriority > shapePriority:
-                # override
-                shape[0] = lines
-        # get the number of samples
-        samples = self.samples
-        # if it's non-trivial
-        if samples:
-            # get its priority
-            samplesPriority = self.pyre_inventory.getTraitPriority(
-                self.pyre_trait("samples")
-            )
-            # if it's greater than shape's
-            if samplesPriority > shapePriority:
-                # override
-                shape[1] = samples
-        # if the resulting shape has a non-trivial entry
-        if shape[0] or shape[1]:
-            # store it
-            self.shape = shape
-        # all done
+        # return with no configuration errors
         return []
 
     def _loadDatasets(self):
@@ -435,6 +425,29 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         self._ds += 1
         # make a name and return it
         return f"qed_{self._ds:02}"
+
+    def _traitProvenance(self, alias):
+        """
+        Look up the recorded priority and locator of the trait bound to {alias}
+        """
+        # get my inventory
+        inventory = self.pyre_inventory
+        # and the trait descriptor
+        trait = self.pyre_trait(alias)
+        # ask for the recorded standing
+        priority = inventory.getTraitPriority(trait)
+        # and the recorded provenance
+        locator = inventory.getTraitLocator(trait)
+        # anonymous components record no metadata; treat their settings as construction ones
+        if priority is None:
+            # by picking the matching priority
+            priority = self.pyre_executive.priority.construction()
+        # similarly for the provenance
+        if locator is None:
+            # mark it as ours
+            locator = pyre.tracking.simple(f"while arbitrating the '{alias}' setting")
+        # hand back the pair
+        return priority, locator
 
     # private data
     _ds = 0
