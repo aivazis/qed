@@ -70,6 +70,11 @@ class Flat(
         if not cell or not shape or not shape[0] or not shape[1]:
             # bail; my configuration troubles have already been reported
             return self
+        # the file must be large enough to hold the declared shape; a short file would let
+        # the render machinery read past the end of the map and crash the process
+        if not self._validateSize(cell=cell, shape=shape, cellsPerSample=1):
+            # the complaint has been lodged
+            return self
 
         # unpack my state into a dataset configuration
         config = {
@@ -176,6 +181,30 @@ class Flat(
             channel.log()
         # all done
         return
+
+    def _validateSize(self, cell, shape, cellsPerSample):
+        """
+        Check that my file is large enough to hold {shape} samples of {cellsPerSample}
+        {cell} instances each
+        """
+        # compute the size the declared shape requires
+        required = shape[0] * shape[1] * cellsPerSample * cell.bytes
+        # measure the file
+        actual = qed.primitives.path(self.uri.address).stat().st_size
+        # if it holds enough
+        if actual >= required:
+            # we are good
+            return True
+        # otherwise, make a channel
+        channel = journal.warning("qed.readers.native.flat")
+        # complain
+        channel.line(f"'{self.uri.address}' is too small for the declared shape")
+        channel.line(f"shape {tuple(shape)} requires {required} bytes")
+        channel.line(f"but the file holds only {actual}")
+        # flush
+        channel.log()
+        # and reject
+        return False
 
     # private data
     _opened = False  # whether first contact has been made
