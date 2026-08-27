@@ -25,10 +25,10 @@ class SLC(native.flat, family="qed.readers.isce2.slc"):
     cell.default = "complex64"
     cell.doc = "the type of the dataset payload"
 
-    # framework hooks
-    def pyre_configured(self):
+    # implementation details
+    def _resolveShape(self):
         """
-        Hook invoked after the reader configuration is complete
+        Complete my shape, consulting the auxiliary metadata file first
         """
         # get the current value of my shape
         shape = list(self.shape) if self.shape else [0, 0]
@@ -48,8 +48,8 @@ class SLC(native.flat, family="qed.readers.isce2.slc"):
             if shape[0] and shape[1]:
                 # set it
                 self.shape = tuple(shape)
-        # and chain up
-        yield from super().pyre_configured()
+        # chain up for the size-based fallback
+        super()._resolveShape()
         # all done
         return
 

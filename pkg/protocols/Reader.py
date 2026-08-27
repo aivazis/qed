@@ -33,5 +33,17 @@ class Reader(Producer, family="qed.readers"):
     datasets = qed.properties.list(schema=Dataset())
     datasets.doc = "the list of data sets provided by the reader"
 
+    # requirements
+    @qed.provides
+    def open(self):
+        """
+        Establish first contact with the data source: open the file, discover the datasets,
+        and derive the selector availability
+
+        Construction is passive, so a reader can be built, cataloged, and shipped without
+        touching its file; whoever needs the data initiates the contact, and repeated calls
+        are harmless
+        """
+
 
 # end of file
