@@ -26,17 +26,6 @@ def s3():
     return S3
 
 
-@foundry(implements=action, tip="a collection of introspection utilities")
-def inspect():
-    # get the action
-    from .Inspect import Inspect
-
-    # borrow its docstring
-    __doc__ = Inspect.__doc__
-    # and publish it
-    return Inspect
-
-
 @foundry(implements=action, tip="export the qed GraphQL schema")
 def schema():
     # get the action

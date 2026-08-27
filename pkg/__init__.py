@@ -75,9 +75,6 @@ from . import shells  # the supported application shells
 from . import cli  # the command line interface
 from . import ux  # support for the web client
 
-# inspectors
-from . import inspect
-
 
 # administrivia
 def copyright():
