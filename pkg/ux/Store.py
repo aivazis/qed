@@ -43,6 +43,8 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         fail with a warning, and refresh the viewports so their views reflect whatever the
         survivors discovered
         """
+        # keep track of the casualties, so viewports bound to them can be reset
+        lost = set()
         # go through a snapshot of the sources, since casualties get disconnected
         for source in list(self.sources):
             # carefully
@@ -61,18 +63,30 @@ class Store(qed.shells.command, family="qed.cli.ux"):
                 channel.log()
                 # disconnect the casualty
                 self.disconnectSource(name=source.pyre_name)
+                # remember it
+                lost.add(source.pyre_name)
                 # and move on
                 continue
             # re-register the survivor, so the dataset index reflects what it discovered
             self.connectSource(source=source)
-        # the views built before first contact hold no pipelines; rebuild them
-        for port in self._viewports:
+        # go through the viewports
+        for index, port in enumerate(self._viewports):
             # get the view
             view = port.view()
-            # the ones bound to a source
-            if view.reader is not None:
-                # get to refresh themselves against the discovered datasets
-                view.refresh()
+            # views without a source have nothing to reconcile
+            if view.reader is None:
+                # so leave them alone
+                continue
+            # a view still bound to a casualty would show the client a selection that no
+            # longer exists in the panel
+            if view.reader.pyre_name in lost:
+                # so replace its viewport with a blank one
+                self._viewports[index] = Viewport(name=str(uuid.uuid1()))
+                # and move on
+                continue
+            # everybody else was built before first contact and holds no pipelines, so
+            # they get to refresh themselves against the discovered datasets
+            view.refresh()
         # all done
         return
 
@@ -898,11 +912,29 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         # make a pile
         viewports = []
-        # go through the plexus views
-        for view in plexus.views:
-            # make a viewport with each one
-            viewport = Viewport(name=str(uuid.uuid1()), view=view.clone())
-            # and add it to the pile
+        # go through the plexus views, resolving each entry on its own so a bad one is
+        # discarded with a warning instead of taking the application down; note that,
+        # unlike the source piles, the {views} trait is not emptied afterwards: it is a
+        # startup seed that nothing re-reads, and live view state persists through the
+        # configuration store rather than the trait
+        for view in self._drain(plexus=plexus, alias="views"):
+            # carefully, since cloning exercises the view configuration
+            try:
+                # make a viewport with a clone of each one
+                viewport = Viewport(name=str(uuid.uuid1()), view=view.clone())
+            # if the view configuration is broken
+            except Exception as error:
+                # make a channel
+                channel = journal.warning("qed.cli")
+                # complain
+                channel.line(f"could not build a viewport for '{view}'")
+                channel.line(f"while processing the 'views' configuration")
+                channel.line(f"got: {error}")
+                # flush
+                channel.log()
+                # and discard the entry
+                continue
+            # add the survivor to the pile
             viewports.append(viewport)
         # if there weren't any
         if not viewports:
