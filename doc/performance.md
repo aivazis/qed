@@ -120,6 +120,22 @@ useful number, and it is already collected per request in `pkg/ux/Dispatcher.py`
 
 ---
 
+## The instrument
+
+The `qed measure` panel drives the program: `measure tile` sweeps tile generation over shape,
+zoom, and channel, recording one flat record per request — wall and cpu clocks, both denominators,
+a cache-state label; `measure fit` fits the accumulated records to `a + b·pixels` on both axes and
+reports the wall−cpu character per group; `measure swarm` launches the installed server, fires
+concurrent clients at a workload of distinct tiles with the tile cache disabled, and records the
+throughput at each concurrency level, while the `qed.ux.tiles` diagnostic captures the server-side
+view of every request. Invocation from a directory whose `qed.yaml` names the datasets:
+
+```
+qed --shell=script measure tile
+qed --shell=script measure fit
+qed --shell=script measure swarm --team=4 --clients=1,2,4,8
+```
+
 ## Measurement categories
 
 Each section records its own setup, raw numbers, the `a`/`b` fit, the wall/cpu character, and the
@@ -127,7 +143,29 @@ serial-fraction reading that feeds Amdahl.
 
 ### 1. Data fetch
 
-> Status: **not yet measured.**
+> Status: **first numbers, flat/memmap only** (2026-08-27, 16-core arm64, 128 GB). The
+> measurements below cover ONLY the native reader, whose memory-mapped source makes the fetch
+> nearly free once pages are resident; nothing here transfers to HDF5, and even less to HDF5 over
+> S3, where the fetch is expected to dominate. Those modalities are the next sweeps.
+
+**Flat/memmap, warm** (c16 fixture, 3929×6049 complex64, all pages resident): on the vary-zoom
+axis the slope is indistinguishable from zero — at fixed 512² output, growing the source footprint
+4× and 16× moves the request time by fractions of a millisecond, with poor r² because there is no
+line to fit. `wall ≈ cpu` throughout (gap 0%), confirming the fetch is compute, not waiting.
+Warm memmap fetch is, as predicted, free; the cold/faulted-in case is not yet measured (requires
+eviction discipline the harness does not yet have).
+
+**HDF5, local disk, warm** (7.6 GB NISAR GSLC, complex64, 4 GB page buffer, file resident in the
+page cache after the first pass): at zoom 0 the slopes match memmap exactly — amplitude ~3.4,
+phase ~16.4 ns/px — the fetch disappears into the pipeline. Zooming out changes that: at zoom 1
+amplitude jumps to ~24 ns/px and phase to ~36; at zoom 2, ~30 and ~43. The fetch is no longer
+free even fully warm: the strided hyperslab must run the libhdf5 machinery over 4× and 16× the
+source cells, and it multiplies the zoomed-out render cost by up to ~9× over memmap. Read per
+*source cell* the marginal cost falls with zoom (~5.2 ns/cell at zoom 1, ~1.6 at zoom 2),
+pointing at chunk-granularity costs amortizing — the decimate-during-fetch question of category 2
+is live for this modality. Still `wall ≈ cpu` throughout: warm HDF5 is bound on decompression and
+library work, not waiting. The cold first-touch and the S3/`ros3` cases — where the wall−cpu gap
+should finally open — remain unmeasured.
 
 Four modalities, swept against storage layout, on the *vary-zoom* axis (per-source-element):
 
@@ -152,7 +190,24 @@ time.
 
 ### 3. Visualization pipelines
 
-> Status: **not yet measured.**
+> Status: **first numbers, flat/memmap source** (2026-08-27; source cost is ~zero warm, so these
+> slopes are nearly pure pipeline+encode).
+
+On the vary-output-shape axis (256–2048, fixed zoom, warm), per output pixel:
+
+| channel   | `b`          | throughput   | `a`       | r²      | wall−cpu |
+|-----------|--------------|--------------|-----------|---------|----------|
+| amplitude | 3.1–4.1 ns   | ~250–330 Mpx/s | ≈ 0.1 ms | ≥ 0.98 (zoom 0,1) | 0% |
+| phase     | 15.6–16.4 ns | ~61–64 Mpx/s | ≈ −0.8–−0.1 ms | ≥ 0.999 | 0% |
+
+The fits are clean lines; the fixed cost `a` is negligible at real tile sizes, so this stage is
+purely marginal-cost. Phase pays ~5× over amplitude — the `atan2` — which also prices the complex
+channel (amplitude + phase + the double source traversal). Everything is `cpu ≈ wall`: the
+pipeline parallelizes across cores until cores run out. A byproduct worth recording: at these
+rates, REAL statistics are cheap — a full pass over the fixture's 24 Mcells at the amplitude
+throughput is ~80 ms, and accumulating min/max/histogram during a render adds a few ops per pixel
+(well under 0.5 ms on a 512² tile). The open-time center-sample shortcut saves essentially nothing
+on this modality.
 
 Measure each implemented channel pipeline separately on the *vary-output-shape* axis
 (per-output-pixel). Expected to be small until stack reductions, with two asterisks: the complex
@@ -177,6 +232,36 @@ but fat on the wire. The trade to measure against it:
 - The one non-bandwidth reason to move is **alpha**, for nodata/masked regions (NISAR masks).
 
 ---
+
+## First parallel validation
+
+> Status: **measured, flat/memmap workload only** (2026-08-27, 16 cores/12P+4E, 128 GB).
+
+`measure swarm`, 64 distinct 256² tiles of the complex channel, cache disabled, 8 concurrent
+clients, sweeping the team size:
+
+| team | throughput |
+|------|------------|
+| 1    | 107 tiles/s |
+| 2    | 120 |
+| 4    | 135.5 |
+| 8    | 142.8 |
+| 12   | 138.8 |
+
+One crew already delivers 75% of peak; 1→8 crews buys only 1.33×; 12 regresses. Amdahl fitted to
+the curve gives a serial fraction near **0.7**: the ceiling (~143 tiles/s ≈ 7 ms/tile) is the
+single-threaded server event loop — request parse, task build, spool adoption, mmap, response
+write — not render capacity. The server-side diagnostic confirms it: under load, ~50 ms wall
+against ~4 ms cpu per request is queueing, not work. Two consequences: on this machine and this
+workload the optimal team size is **4** (within 5% of the ceiling), and the next win is thinning
+the serialized path, not recruiting more crews. Expensive tiles (larger shapes, HDF5 sources,
+stack reductions) grow the parallel fraction and shift the optimum up — to be measured, not
+assumed.
+
+Cache sizing, from the same numbers: a rendered tile costs ~3 bytes per output pixel (×4/3 for a
+zoom pyramid), so full coverage of the c16 fixture is ~96 MB per channel and a NISAR GSLC-scale
+product runs ~1.2 GB per channel. The 128 MB default is conservative; on a 128 GB machine a
+multi-GB budget is comfortable, and the spools live in the page cache, so the pressure is soft.
 
 ## Toward the conclusion
 
