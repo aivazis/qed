@@ -52,6 +52,10 @@ class Team(Staff, family="qed.nexus.teams.tile"):
         super().collect(task=task, result=result)
         # if the result is spooled
         if isinstance(result, Spool):
+            # if the worker took a statistical sample and a sink is attached
+            if result.stats is not None and self.stats is not None:
+                # hand over the record so it accumulates into whole-dataset statistics
+                self.stats(task=task, record=result.stats)
             # everybody has been served, including the case where every subscriber withdrew;
             # if a cache is attached
             if self.cache is not None:
@@ -66,6 +70,7 @@ class Team(Staff, family="qed.nexus.teams.tile"):
 
     # private data
     cache = None  # the shared tile cache, attached by the fleet that builds me
+    stats = None  # the statistics sink, attached by the fleet that builds me
 
 
 # end of file

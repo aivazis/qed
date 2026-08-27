@@ -62,8 +62,10 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         team = Team(name=f"{self.pyre_name}.{reader}")
         # the team's crew traffic rides the shared event loop
         team.dispatcher = self.dispatcher
-        # and its successful renders land in the shared cache
+        # its successful renders land in the shared cache
         team.cache = self.cache
+        # and their statistical samples drain into the shared sink
+        team.stats = self.stats
         # register it
         self.teams[reader] = team
         # show me
@@ -128,6 +130,9 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         # the shared event loop; whoever builds me is responsible for setting it before any
         # tiles are rendered
         self.dispatcher = None
+        # the statistics sink; whoever builds me wires it, and teams formed afterwards
+        # drain their samples into it
+        self.stats = None
         # all done
         return
 

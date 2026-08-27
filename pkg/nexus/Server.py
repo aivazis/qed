@@ -38,7 +38,14 @@ class Server(http, family="qed.nexus.servers.http"):
         # its teams must never spin their own event loops: crew traffic is serviced by the
         # node's selector, so hand the fleet the shared dispatcher
         fleet.dispatcher = dispatcher
-        # and attach it
+        # find the ux manager, mounted while the application folders were being assembled
+        ux = getattr(app, "_ux", None)
+        # if it is there
+        if ux is not None:
+            # the statistical samples the crews take drain into the store, where they
+            # accumulate into whole-dataset statistics
+            fleet.stats = ux.store.accumulate
+        # attach the fleet
         self.fleet = fleet
         # all done
         return
