@@ -11,6 +11,7 @@ from .Dispatcher import Dispatcher as dispatcher
 from .Store import Store as store
 from .Viewport import Viewport as viewport
 from .View import View as view
+from .Sample import Sample as sample
 
 # configurable state
 from .Source import Source as source

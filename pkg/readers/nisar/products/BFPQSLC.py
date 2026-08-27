@@ -87,6 +87,23 @@ class BFPQSLC(Product, family="qed.datasets.nisar.products.bfpqslc"):
         # all done
         return
 
+    def sample(self, zoom: tuple, origin: tuple, shape: tuple) -> tuple:
+        """
+        Collect a mergeable statistical sample of the tile at {origin}+{shape}, decoding the
+        BFPQ encoded values before measuring them
+        """
+        # the render pipeline decimates by striding
+        stride = tuple(2**level for level in zoom)
+        # sample the decoded strided footprint and return the mergeable record
+        return qed.libqed.nisar.sampleBFPQ(
+            source=self.data.dataset,
+            datatype=self.datatype.htype,
+            bfpq=self.bfpq,
+            origin=origin,
+            shape=shape,
+            stride=stride,
+        )
+
     # metamethods
     def __init__(self, bfpq, **kwds):
         # save the lookup table; do this before chaining up so my overrides have access

@@ -102,6 +102,18 @@ class MemoryMap(
         # render a tile and return it
         return channel.tile(source=self, zoom=zoom, origin=origin, shape=shape)
 
+    def sample(self, zoom: tuple, origin: tuple, shape: tuple) -> tuple:
+        """
+        Collect a mergeable statistical sample of the tile at {origin}+{shape}, visiting
+        exactly the decimated footprint the render at this {zoom} sees
+        """
+        # the render pipeline decimates by striding
+        stride = tuple(2**level for level in zoom)
+        # sample the strided footprint and return the mergeable record
+        return qed.libqed.native.sample(
+            source=self.data, origin=origin, shape=shape, stride=stride
+        )
+
     def summary(self):
         """
         Build a sequence of the important channels that form my summary view

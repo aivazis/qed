@@ -71,13 +71,15 @@ class Spool:
         return
 
     # metamethods
-    def __init__(self, size, file=None, **kwds):
+    def __init__(self, size, file=None, stats=None, **kwds):
         # chain up
         super().__init__(**kwds)
         # the payload size
         self.size = size
         # the file that holds the payload
         self.file = file
+        # the statistical sample of the rendered source region, when the worker took one
+        self.stats = stats
         # all done
         return
 
@@ -85,8 +87,9 @@ class Spool:
         """
         Prepare for the trip over the wire
         """
-        # descriptors cannot travel in the byte stream; only the size gets pickled
-        return {"size": self.size}
+        # descriptors cannot travel in the byte stream; the size and the statistics record,
+        # a small tuple of floats, are the only pickled cargo
+        return {"size": self.size, "stats": self.stats}
 
     def __setstate__(self, state):
         """
@@ -94,6 +97,8 @@ class Spool:
         """
         # restore the size
         self.size = state["size"]
+        # and the statistics record, tolerating reports from workers that took no sample
+        self.stats = state.get("stats")
         # the descriptor arrives separately, as ancillary data
         self.file = None
         # all done

@@ -53,7 +53,24 @@ class Tile(pyre.nexus.task):
             raise self.RecoverableError(description=str(error)) from None
         # on success, park the encoded tile in a spool; its descriptor travels as ancillary
         # data on the crew channel, so the payload itself never crosses the wire
-        return Spool.stash(data=memoryview(tile))
+        spool = Spool.stash(data=memoryview(tile))
+        # datasets that know how to measure themselves contribute source statistics
+        sample = getattr(dataset, "sample", None)
+        # if this one does
+        if sample is not None:
+            # carefully, since the render is the deliverable and the sample is a bonus
+            try:
+                # revisit the footprint this render saw and attach the mergeable record to
+                # the report, so the team side can accumulate whole-dataset statistics
+                spool.stats = sample(
+                    zoom=self.zoom, origin=self.origin, shape=self.shape
+                )
+            # let the sample die quietly on any failure
+            except Exception:
+                # the tile is still good; it just doesn't contribute statistics
+                pass
+        # hand off the report
+        return spool
 
     # metamethods
     def __init__(self, view, channel, zoom, origin, shape, **kwds):
@@ -75,6 +92,9 @@ class Tile(pyre.nexus.task):
         self.config = self._harvestReader(reader=reader)
         # the dataset is identified by its selector, which is stable across reader rebuilds
         self.selector = dict(view.dataset.selector)
+        # record the dataset name as well; it keys the statistics accumulator on the team
+        # side, and is deliberately not part of the identity, being derived state
+        self.dataset = view.dataset.pyre_name
         # locate the visualization pipeline that carries the live controller state
         pipeline = view.pipeline(channel=channel)
         # and harvest its configuration

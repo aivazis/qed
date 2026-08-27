@@ -14,6 +14,7 @@ from .Harvester import Harvester
 
 # my parts
 from .Archives import Archives
+from .Sample import Sample
 from .Sources import Sources
 from .Viewport import Viewport
 
@@ -33,6 +34,36 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         port = self._viewports[viewport]
         # and delegate
         return port.tile(**kwds)
+
+    # statistics
+    def accumulate(self, task, record):
+        """
+        Fold the statistical {record} of a tile rendered for {task} into the running
+        whole-dataset statistics of the task's dataset
+        """
+        # get the name of the dataset the tile belongs to
+        name = getattr(task, "dataset", None)
+        # tasks from before the statistics era don't carry one
+        if name is None or record is None:
+            # and contribute nothing
+            return
+        # look up the accumulator of the dataset, creating it on first contact
+        sample = self._statistics.setdefault(name, Sample())
+        # fold in the record
+        sample.merge(record=record)
+        # make a channel
+        channel = journal.debug("qed.ux.stats")
+        # and show me the running state
+        channel.log(f"{name}: {sample}")
+        # all done
+        return
+
+    def statistics(self, name):
+        """
+        Retrieve the accumulated statistics of the dataset called {name}, if any
+        """
+        # look it up
+        return self._statistics.get(name)
 
     # archives
     @property
@@ -639,6 +670,9 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         self._dataArchives = archives
         self._dataSources = sources
         self._viewports = viewports
+        # the whole-dataset statistics accumulators, keyed by dataset name, populated as
+        # rendered tiles report their samples
+        self._statistics = {}
 
         # all done
         return
