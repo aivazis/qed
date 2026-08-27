@@ -62,13 +62,18 @@ qed.app:
     shell: web
     nexus.services.web:
         address: ip4:0.0.0.0:8123
-    # place the tile diagnostic under user control
+    # place the tile and stats diagnostics under user control
     journal:
         channels:
           - debug, qed.ux.tiles
+          - debug, qed.ux.stats
 
-# and turn it on: one line per tile request, with outcome and timings
+# and turn them on: one line per tile request, with outcome and timings
 qed.journal.debug.qed.ux.tiles:
+    active: yes
+
+# and one line per statistics merge, with the running whole-dataset accumulation
+qed.journal.debug.qed.ux.stats:
     active: yes
 
 # never spawn a browser; the test driver owns the browser
