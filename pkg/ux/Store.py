@@ -55,6 +55,13 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         channel = journal.debug("qed.ux.stats")
         # and show me the running state
         channel.log(f"{name}: {sample}")
+        # reconcile the controllers of the dataset with the accumulated range
+        touched = self._reconcile(name=name, sample=sample)
+        # if any bounds moved and someone is listening
+        if touched and self.notifier is not None:
+            # let every live client know so it refetches its state; the notification is
+            # coalesced, so a burst of adjustments collapses into a single refetch
+            self.notifier()
         # all done
         return
 
@@ -64,6 +71,35 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         # look it up
         return self._statistics.get(name)
+
+    def _reconcile(self, name, sample):
+        """
+        Widen the controller bounds of the dataset called {name} to accommodate the
+        accumulated {sample}: the slider ranges stretch, but the user's picks are never
+        touched, and the session token never rolls, since the rendered pixels are unchanged
+        """
+        # find the dataset
+        dataset = self.dataset(name=name)
+        # it may have been disconnected while its tiles were in flight
+        if dataset is None:
+            # in which case there is nothing to adjust
+            return False
+        # reduce the sample to the triple the controllers understand
+        stats = (sample.min, sample.mean, sample.max)
+        # nothing has moved yet
+        touched = False
+        # go through the reference pipelines of the dataset
+        for channel in dataset.channels.values():
+            # and their controllers
+            for controller, _ in channel.controllers():
+                # giving each one a chance to stretch
+                touched = controller.widen(stats=stats) or touched
+        # the per-view clones mirror the reference configuration, so they stretch too
+        for port in self._viewports:
+            # one viewport at a time
+            touched = port.view().widen(dataset=name, stats=stats) or touched
+        # report whether anything moved
+        return touched
 
     # archives
     @property
@@ -650,6 +686,11 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         view = port.zoomReset()
         # all done
         return view.zoom
+
+    # private data
+    # the change broadcaster, wired by whoever owns the client connections; when set, it is
+    # invoked after controller bounds move so live clients refetch their state
+    notifier = None
 
     # metamethods
     def __init__(self, plexus, docroot, **kwds):

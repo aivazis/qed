@@ -69,6 +69,28 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # form the pipeline name and look it up
         return self._pipelines[f"{self.pyre_name}.{channel}"]
 
+    def widen(self, dataset: str, stats: tuple) -> bool:
+        """
+        Expand the controller bounds of my pipeline clones for {dataset} to accommodate
+        {stats}, the accumulated whole-dataset statistics
+        """
+        # nothing has moved yet
+        touched = False
+        # my clones for this dataset live under its namespace
+        prefix = f"{self.pyre_name}.{dataset}."
+        # go through my pipelines
+        for name, pipeline in self._pipelines.items():
+            # skipping the ones that belong to other datasets
+            if not name.startswith(prefix):
+                # on to the next one
+                continue
+            # go through the controllers of this pipeline
+            for controller, _ in pipeline.controllers():
+                # and give each one a chance to stretch
+                touched = controller.widen(stats=stats) or touched
+        # report whether anything moved
+        return touched
+
     def tile(self, channel, zoom, origin, shape):
         """
         Render a tile of data using the {channel} visualization pipeline

@@ -204,8 +204,16 @@ class Tile(pyre.nexus.task):
         """
         # initialize the pile
         config = {}
+        # components may declare traits that shape the presentation but not the rendered
+        # pixels, e.g. the display bounds of controllers; they are left out, so adjusting
+        # them neither perturbs the tile identity nor invalidates cached work
+        cosmetic = getattr(component, "cosmetic", ())
         # go through the properties
         for trait in component.pyre_properties():
+            # skip the presentation-only ones
+            if trait.name in cosmetic:
+                # they do not travel
+                continue
             # reduce each value to wire-friendly form, insisting on primitives so that
             # infrastructure state, e.g. the flow bookkeeping sets, gets left behind
             value = self._scrub(value=getattr(component, trait.name), strict=True)
