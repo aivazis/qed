@@ -81,4 +81,61 @@ qed::native::collectStatistics(
 }
 
 
+// collect a mergeable sample of the magnitudes of a strided tile
+template <typename sourceT>
+auto
+qed::native::sample(
+    // the source
+    const sourceT & source,
+    // the origin of the tile
+    typename sourceT::index_type origin,
+    // the tile shape
+    typename sourceT::shape_type tile,
+    // the strides
+    typename sourceT::index_type stride) -> sample_t
+{
+    // my counters: the number of samples and the running mean and second moment
+    double count = 0.0, mean = 0.0, m2 = 0.0;
+    // the running extrema
+    double min = std::numeric_limits<double>::max();
+    double max = std::numeric_limits<double>::lowest();
+
+    // go through the rows of the tile
+    for (auto i = 0l; i < static_cast<long>(tile[0]); ++i) {
+        // and its columns
+        for (auto j = 0l; j < static_cast<long>(tile[1]); ++j) {
+            // project the tile cell onto the source, the way the render kernels do: the
+            // origin is in decimated coordinates, and the stride spaces the samples
+            auto idx = typename sourceT::index_type { (origin[0] + i) * stride[0],
+                                                      (origin[1] + j) * stride[1] };
+            // compute the magnitude
+            double r = std::abs(source[idx]);
+            // if this is a nan
+            if (std::isnan(r)) {
+                // don't let it pollute the sample
+                continue;
+            }
+            // count the contribution
+            count += 1.0;
+            // fold it into the running mean and second moment, a la Welford
+            double delta = r - mean;
+            mean += delta / count;
+            m2 += delta * (r - mean);
+            // and update the extrema
+            min = std::min(min, r);
+            max = std::max(max, r);
+        }
+    }
+
+    // an empty sample, e.g. a tile of nothing but nans
+    if (count == 0.0) {
+        // contributes nothing; the accumulator skips it
+        return { 0.0, 0.0, 0.0, 0.0, 0.0 };
+    }
+
+    // all done
+    return { count, min, mean, m2, max };
+}
+
+
 // end of file

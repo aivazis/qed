@@ -34,6 +34,37 @@ namespace qed::nisar {
         typename sourceT::index_type origin,
         // the tile shape
         typename sourceT::shape_type tile) -> native::stats_t;
+
+    // a mergeable sample of a strided tile of a complex HDF5 source; {origin} and {tile} are
+    // in decimated coordinates, exactly as the render kernels see them
+    template <typename sourceT>
+    auto sample(
+        // the source
+        const dataset_t & source,
+        // the data layout
+        const datatype_t & datatype,
+        // the origin of the tile
+        typename sourceT::index_type origin,
+        // the tile shape
+        typename sourceT::shape_type tile,
+        // the strides
+        typename sourceT::index_type stride) -> native::sample_t;
+
+    // a mergeable sample of a strided tile of a BFPQ encoded complex HDF5 source
+    template <typename sourceT>
+    auto sampleBFPQ(
+        // the source
+        const dataset_t & source,
+        // the data layout
+        const datatype_t & datatype,
+        // the BFPQ lookup table
+        bfpq_lut_t bfpq,
+        // the origin of the tile
+        typename sourceT::index_type origin,
+        // the tile shape
+        typename sourceT::shape_type tile,
+        // the strides
+        typename sourceT::index_type stride) -> native::sample_t;
 }
 
 

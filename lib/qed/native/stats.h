@@ -11,6 +11,10 @@
 namespace qed::native {
     // the layout of the collected statistics
     using stats_t = std::tuple<double, double, double>;
+    // the layout of a mergeable statistical sample: count, min, mean, m2, max; samples from
+    // different tiles combine with the parallel form of Welford's update, so workers can
+    // contribute partial results that accumulate into whole-dataset statistics
+    using sample_t = std::tuple<double, double, double, double, double>;
 
     // stats for a complex grid source
     template <typename sourceT>
@@ -25,6 +29,19 @@ namespace qed::native {
     // the helper that collects the statistics
     template <typename sourceT>
     auto collectStatistics(const sourceT & source) -> stats_t;
+
+    // a mergeable sample of the magnitudes of a strided tile; {origin} and {tile} are in
+    // decimated coordinates, exactly as the render kernels see them
+    template <typename sourceT>
+    auto sample(
+        // the source
+        const sourceT & source,
+        // the origin of the tile
+        typename sourceT::index_type origin,
+        // the tile shape
+        typename sourceT::shape_type tile,
+        // the strides
+        typename sourceT::index_type stride) -> sample_t;
 }
 
 
