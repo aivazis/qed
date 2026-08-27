@@ -315,6 +315,8 @@ class Tile(pyre.nexus.task):
         # build a fresh instance so this process owns its file handles; the derived name
         # avoids clashing with the team side instance this process may have inherited
         reader = factory(name=f"{self.reader}.crew", **config)
+        # construction is passive; a worker exists to render, so make first contact now
+        reader.open()
         # register it
         readers[self.reader] = reader
         # and hand it off

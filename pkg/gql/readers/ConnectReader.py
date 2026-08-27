@@ -63,10 +63,24 @@ class ConnectReader(graphene.Mutation):
         factory = qed.protocols.reader.pyre_resolveSpecification(spec=reader)
         # get the archive
         archive = store.archive(uri=archive)
-        # instantiate
-        source = factory(archive=archive, **args)
-        # get the store
-        store = info.context["store"]
+        # carefully, since the source may be malformed or unreachable
+        try:
+            # instantiate
+            source = factory(archive=archive, **args)
+            # construction is passive; the user asked to connect, so make first contact
+            source.open()
+        # if anything goes wrong
+        except Exception as error:
+            # make a channel
+            channel = journal.warning("qed.gql.connect")
+            # complain
+            channel.line(f"could not connect '{uri}'")
+            channel.line(f"while building a '{reader}' instance")
+            channel.line(f"got: {error}")
+            # flush
+            channel.log()
+            # and report the failure to the client as a trivial reader
+            return {"reader": None}
         # add the new source to the store
         store.connectSource(source=source)
         # make a resolution context
