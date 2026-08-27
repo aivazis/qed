@@ -7,7 +7,7 @@
 # the testsuite for the qed bindings
 qed.ext.tests.stem := qed.ext
 # depends on
-qed.ext.tests.prerequisites := qed.ext
+qed.ext.tests.prerequisites := qed.pkg qed.ext
 # external dependencies
 qed.ext.tests.extern := $(qed.ext.extern)
 
