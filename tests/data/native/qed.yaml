@@ -55,8 +55,9 @@ datasets:
 
 
 # run as a web app on a default test port; a runner launches {qed} from this directory and may
-# override the port on the command line so parallel suites do not collide, e.g.
-#     qed --nexus.services.web.address=ip4:0.0.0.0:<port>
+# override the port on the command line so parallel suites do not collide; the {nexus} node is
+# not an application trait, so the override must use the fully qualified name, e.g.
+#     qed --qed.app.nexus.services.web.address=ip4:0.0.0.0:<port>
 qed.app:
     shell: web
     nexus.services.web:
