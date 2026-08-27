@@ -28,7 +28,9 @@ import { Save } from './save'
 //  display the zoom control
 export const Zoom = ({ viewport, view, min = -6, max = 4, ils = 200 }) => {
     // unpack the view
-    const { reader, dataset, channel, zoom } = useFragment(zoomControlsGetZoomStateFragment, view)
+    const { session, reader, dataset, channel, zoom } = useFragment(
+        zoomControlsGetZoomStateFragment, view
+    )
 
     // inspect the view components to initialize my state
     const enabled = (reader && dataset && channel) ? true : false
@@ -120,7 +122,8 @@ export const Zoom = ({ viewport, view, min = -6, max = 4, ils = 200 }) => {
                 </g>
                 {/* the minimap */}
                 <g transform={`translate(100 0) scale(${ils})`}>
-                    <Minimap ils={ils} zoom={zoom} shape={dataset.shape} />
+                    <Minimap viewport={viewport} ils={ils} zoom={zoom} shape={dataset.shape}
+                        reader={reader} dataset={dataset} channel={channel} session={session} />
                 </g>
                 {/* the lock */}
                 <g transform="translate(60 240)">
@@ -154,15 +157,20 @@ const Controller = styled(Slider)`
 // the fragment
 const zoomControlsGetZoomStateFragment = graphql`
     fragment zoomControlsGetZoomStateFragment on View {
+        session
         reader {
             id
+            api
         }
         dataset {
             id
+            name
             shape
+            tile
         }
         channel {
             id
+            tag
         }
         zoom {
             dirty
