@@ -62,6 +62,14 @@ qed.app:
     shell: web
     nexus.services.web:
         address: ip4:0.0.0.0:8123
+    # place the tile diagnostic under user control
+    journal:
+        channels:
+          - debug, qed.ux.tiles
+
+# and turn it on: one line per tile request, with outcome and timings
+qed.journal.debug.qed.ux.tiles:
+    active: yes
 
 # never spawn a browser; the test driver owns the browser
 pyre.shells.web#qed.app.shell:
