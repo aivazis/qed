@@ -7,7 +7,7 @@
 # the test suite for the qed package
 qed.pkg.tests.stem := qed.pkg
 # depends on
-qed.pkg.tests.prerequisites := qed.pkg
+qed.pkg.tests.prerequisites := qed.pkg qed.ext
 
 
 # end of file

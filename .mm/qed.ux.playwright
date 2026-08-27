@@ -18,7 +18,7 @@ qed.ux.playwright.toolchain := playwright
 # it needs the built client (the server serves it) and the test fixtures the servers read: the
 # native raster ({qed.data.native.c16}) and the two NISAR products ({qed.data.nisar.*}). each file
 # target produces its fixture only when missing -- skip-if-present, so present data is never rebuilt
-qed.ux.playwright.prerequisites := qed.ux \
+qed.ux.playwright.prerequisites := qed.pkg qed.ext qed.ux \
     $(qed.data.native.c16) $(qed.data.nisar.gslc) $(qed.data.nisar.gcov)
 
 # tell the runner where the test data lives so playwright.config can point each webServer's {qed} at
