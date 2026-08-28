@@ -74,6 +74,13 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         Rebuild my pipeline registry and re-resolve my selections, e.g. after my reader has
         established first contact with its data source and discovered its datasets
         """
+        # first contact may have auto-picked the single-valued selector axes; a view built
+        # before its reader opened copied an empty pile, and the client deliberately makes
+        # single-valued axes inert, so unless the picks are adopted here the selection can
+        # never be completed interactively
+        if not self.selections:
+            # adopt the reader's picks; a copy, so later edits stay local to me
+            self.selections = dict(self.reader.selections)
         # go through the pipelines my reader's datasets support
         for pipeline in self.pipelines():
             # register the new ones, keeping any existing clone with its live state
