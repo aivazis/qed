@@ -26,6 +26,13 @@ const nisarPort = Number(process.env.QED_PORT_NISAR ?? 8138)
 const nisarBaseURL = process.env.QED_URL_NISAR ?? `http://localhost:${nisarPort}`
 const nisarDataDir = process.env.QED_DATA_NISAR ?? "../data/nisar"
 
+// a third server with a SINGLE source: the boot path auto-selects a lone source into the blank
+// viewport before the reader makes first contact, which is the staging condition the {solo} specs
+// guard -- it cannot be reproduced on the multi-source servers above
+const soloPort = Number(process.env.QED_PORT_SOLO ?? 8139)
+const soloBaseURL = process.env.QED_URL_SOLO ?? `http://localhost:${soloPort}`
+const soloDataDir = process.env.QED_DATA_NISAR_SOLO ?? "../data/nisar/solo"
+
 
 // the qed.ux suite drives the built client in a headless browser to enforce the semantic-markup
 // convention (doc/semantic-markup.md). playwright owns discovery, parallelism, and -- via the
@@ -54,7 +61,7 @@ export default defineConfig({
         // {qed.automation} localStorage flag the app's gate checks, for both servers under test
         storageState: {
             cookies: [],
-            origins: [baseURL, nisarBaseURL].map(origin => ({
+            origins: [baseURL, nisarBaseURL, soloBaseURL].map(origin => ({
                 origin,
                 localStorage: [{ name: "qed.automation", value: "1" }],
             })),
@@ -91,6 +98,15 @@ export default defineConfig({
             testMatch: /nisar\/.*\.spec\.ts/,
             fullyParallel: false,
             use: { ...devices["Desktop Chrome"], baseURL: nisarBaseURL },
+        },
+        // the solo suite runs against the single-source server; it guards the boot-time selection
+        // adoption -- views built before first contact must inherit the reader's auto-picked axes.
+        // it operates the polarization control, so it is serial and restores what it touches
+        {
+            name: "solo",
+            testMatch: /solo\/.*\.spec\.ts/,
+            fullyParallel: false,
+            use: { ...devices["Desktop Chrome"], baseURL: soloBaseURL },
         },
         // the api-contract project: it drives {window.qed} but asserts the MODEL (state/viewports/
         // controllers) instead of the DOM, so a failure localizes to the server/store layer rather
@@ -130,6 +146,15 @@ export default defineConfig({
             command: `qed --qed.app.nexus.services.web.address=ip4:0.0.0.0:${nisarPort}`,
             cwd: nisarDataDir,
             url: nisarBaseURL,
+            reuseExistingServer: !process.env.CI,
+            timeout: 60_000,
+            stdout: "ignore",
+            stderr: "pipe",
+        },
+        {
+            command: `qed --qed.app.nexus.services.web.address=ip4:0.0.0.0:${soloPort}`,
+            cwd: soloDataDir,
+            url: soloBaseURL,
             reuseExistingServer: !process.env.CI,
             timeout: 60_000,
             stdout: "ignore",
