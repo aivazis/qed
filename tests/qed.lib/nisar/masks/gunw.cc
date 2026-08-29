@@ -63,7 +63,7 @@ main(int argc, char * argv[])
     grid_t mask { packing, store };
 
     // fill the grid
-    for (auto idx : mask.layout()) {
+    for (auto idx : mask.packing()) {
         // the strip this pixel falls in, from top to bottom
         const int strip = static_cast<int>(idx[0]) / stripHeight;
         // the secondary subswath is selected by the column, evenly split into five bands
