@@ -9,16 +9,25 @@
 import { test, expect } from "@playwright/test"
 
 
-// the server starts with a blank viewport that has auto-selected the single fixture dataset but no
-// channel, so nothing renders. arrange the state through {window.qed}, the scriptable automation
-// surface (doc/automation-surface.md): it reads the model and commits the channel through the live
-// Relay store, so exactly one Mosaic -- and the zoom slider on {/controls} -- renders for the
-// read-only specs, with no raw-fetch reload dance. the selection is server-side state, so it
-// persists for the {gate} pages.
+// the server boots passive and stages its catalog when the viz activity declares it relevant, so
+// the blank viewport auto-selects the single fixture dataset only after the staging round trip
+// lands. arrange the state through {window.qed}, the scriptable automation surface
+// (doc/automation-surface.md): it reads the model and commits the channel through the live Relay
+// store, so exactly one Mosaic -- and the zoom slider on {/controls} -- renders for the read-only
+// specs, with no raw-fetch reload dance. the selection is server-side state, so it persists for
+// the {gate} pages.
 test("a viz view renders on load", async ({ page }) => {
     // load the app and wait for the facade to publish itself
     await page.goto("/", { waitUntil: "load" })
     await page.waitForFunction(() => Boolean((window as { qed?: unknown }).qed))
+    // mounting the viz activity asks the server to stage the catalog; wait for the
+    // auto-selected dataset to arrive with the discovered state
+    await page.waitForFunction(async () => {
+        // grab the facade
+        const qed = (window as unknown as { qed: { state: () => Promise<{ dataset: unknown }> } }).qed
+        // and check whether the staged catalog has bound the dataset
+        return Boolean((await qed.state()).dataset)
+    })
 
     // discover a channel the dataset offers, set it, and read back what the server confirms
     const channel = await page.evaluate(async () => {
