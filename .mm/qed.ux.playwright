@@ -30,5 +30,9 @@ qed.ux.playwright.env := \
     QED_DATA_NISAR=$(dir $(qed.data.nisar.gslc)) \
     QED_DATA_NISAR_SOLO=$(dir $(qed.data.nisar.gslc))solo
 
+# a hand-run of playwright from the suite directory drops its report tree in the source tree;
+# mm-driven runs are staged, so theirs is removed with the staging area
+qed.ux.playwright.clean := test-results
+
 
 # end of file
