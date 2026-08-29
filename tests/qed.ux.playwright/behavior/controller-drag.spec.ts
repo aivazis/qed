@@ -24,7 +24,16 @@ import type { Locator, Page } from "@playwright/test"
 const throttle = (page: Page) =>
     page.route("**/graphql", async route => {
         await new Promise(resolve => setTimeout(resolve, 400))
-        return route.continue()
+        // the client cancels requests it no longer needs -- a superseded state refetch, a
+        // query disposed when its component unmounts -- and a cancelled request arrives
+        // here already handled. that is the client behaving correctly rather than a
+        // failure of the behavior under test, so let it go by
+        try {
+            // hand the request on to the server
+            await route.continue()
+        } catch {
+            // the request is gone, so there is nothing left to forward
+        }
     })
 
 // drag {thumb} by {dx} pixels along the horizontal axis, in many small steps
