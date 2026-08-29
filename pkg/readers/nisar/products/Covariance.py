@@ -53,7 +53,7 @@ class Covariance(Product, family="qed.datasets.nisar.products.covariance"):
         # render a tile and return it
         return super().render(mask=self.mask.dataset, **kwds)
 
-    def __init__(self, mask, **kwds):
+    def __init__(self, mask=None, **kwds):
         # chain up
         super().__init__(**kwds)
         # record the mask

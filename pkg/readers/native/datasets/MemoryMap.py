@@ -148,13 +148,21 @@ class MemoryMap(
         return
 
     # metamethods
-    def __init__(self, **kwds):
+    def __init__(self, hydrated=False, seed=None, **kwds):
         # chain up
         super().__init__(**kwds)
-        # build my data object
-        self.data = self._open()
-        # get stats on a sample of my data
-        self.stats = self._collectStatistics()
+        # if i am a live dataset
+        if not hydrated:
+            # build my data object
+            self.data = self._open()
+            # get stats on a sample of my data
+            self.stats = self._collectStatistics()
+        # otherwise, i am being hydrated from a survey
+        else:
+            # so i have no map of my own
+            self.data = None
+            # and the seed the surveying worker measured stands in for the sample
+            self.stats = seed
 
         # build my default pipelines
         for pipeline in self.pipelines(context=self.pyre_name):
@@ -163,6 +171,26 @@ class MemoryMap(
 
         # all done
         return
+
+    def survey(self):
+        """
+        Report what a client needs to know about me, without any of my payload
+        """
+        # my metadata travels as a finding i author myself, so my seed statistics arrive
+        # in exactly the shape my channels expect
+        return qed.nexus.finding(
+            # the factory that materializes my twin
+            factory=self.pyre_family(),
+            # my layout
+            cell=self.cell.pyre_family(),
+            shape=tuple(self.shape),
+            origin=tuple(self.origin),
+            tile=tuple(self.tile),
+            # the channels i support
+            channels=tuple(self.channels.keys()),
+            # and the statistics my channels tuned themselves against
+            stats=self.stats,
+        )
 
     # implementation details
     def _open(self):
