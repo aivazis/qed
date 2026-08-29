@@ -47,4 +47,5 @@ class Mask(Product, family="qed.datasets.nisar.products.mask"):
         # all done
         return
 
+
 # end of file

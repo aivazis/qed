@@ -174,24 +174,51 @@ class Product(
         return
 
     # metamethods
-    def __init__(self, data, **kwds):
+    def __init__(self, data=None, hydrated=False, seed=None, **kwds):
         # chain up
         super().__init__(**kwds)
-        # save the dataset
+        # save the dataset; a metadata-only twin has none
         self.data = data
-        # ask {h5} for its on-disk layout
-        layout = data.dcpl.layout
-        # if it is chunked
-        if layout == qed.h5.libh5.Layout.chunked:
-            # adjust my tile to match the dataset chunk size
-            self.tile = data.chunk
-        # collect statistics from a sample of my data
-        self.stats = self._collectStatistics()
+        # if i am a live dataset
+        if not hydrated:
+            # ask {h5} for its on-disk layout
+            layout = data.dcpl.layout
+            # if it is chunked
+            if layout == qed.h5.libh5.Layout.chunked:
+                # adjust my tile to match the dataset chunk size
+                self.tile = data.chunk
+            # collect statistics from a sample of my data
+            self.stats = self._collectStatistics()
+        # otherwise, i am being hydrated from a survey
+        else:
+            # so the seed the surveying worker measured stands in for the sample; it was
+            # authored by my own flavor, so it already has the shape my channels expect
+            self.stats = seed
         # populate my channel pipelines
         self._registerChannels()
 
         # all done
         return
+
+    def survey(self):
+        """
+        Report what a client needs to know about me, without any of my payload
+        """
+        # my metadata travels as a finding i author myself, so my seed statistics arrive
+        # in exactly the shape my channels expect
+        return qed.nexus.finding(
+            # the factory that materializes my twin
+            factory=self.pyre_family(),
+            # my layout
+            cell=self.cell.pyre_family(),
+            shape=tuple(self.shape),
+            origin=tuple(self.origin),
+            tile=tuple(self.tile),
+            # the channels i support
+            channels=tuple(self.channels.keys()),
+            # and the statistics my channels tuned themselves against
+            stats=self.stats,
+        )
 
     # implementation details
     def _registerChannels(self):

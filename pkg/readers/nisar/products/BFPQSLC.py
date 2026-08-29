@@ -105,7 +105,7 @@ class BFPQSLC(Product, family="qed.datasets.nisar.products.bfpqslc"):
         )
 
     # metamethods
-    def __init__(self, bfpq, **kwds):
+    def __init__(self, bfpq=None, **kwds):
         # save the lookup table; do this before chaining up so my overrides have access
         # to the BFPQ lookup table
         self.bfpq = bfpq
