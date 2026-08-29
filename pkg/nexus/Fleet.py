@@ -14,6 +14,9 @@ from .Team import Team
 # the cache of rendered tiles they share
 from .Cache import Cache
 
+# the unit of work that establishes first contact
+from .Survey import Survey
+
 
 # the manager of the tile rendering teams
 class Fleet(qed.component, family="qed.nexus.fleets.tile"):
@@ -46,6 +49,22 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         # all done
         return self
 
+    def stage(self, reader, callback):
+        """
+        Send {reader} to its team for first contact, and arrange for {callback} to receive
+        the discovery record
+        """
+        # describe the product as a task that can travel to a worker
+        task = Survey(reader=reader)
+        # form the team now, rather than at first tile: the worker that opens the product
+        # for the survey keeps it open, so the first tile finds a warm process
+        team = self.team(reader=task.reader)
+        # hand it the work; the workplan serves newest first, which is harmless here,
+        # since the survey is assigned before any tile of this product can exist
+        team.assign(task=task, callback=callback)
+        # all done
+        return self
+
     def team(self, reader):
         """
         Retrieve the team dedicated to {reader}, building it on first contact
@@ -64,8 +83,10 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         team.dispatcher = self.dispatcher
         # its successful renders land in the shared cache
         team.cache = self.cache
-        # and their statistical samples drain into the shared sink
+        # their statistical samples drain into the shared sink
         team.stats = self.stats
+        # and the discovery records their surveys produce drain into the staging sink
+        team.staging = self.staging
         # register it
         self.teams[reader] = team
         # show me
@@ -133,6 +154,8 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         # the statistics sink; whoever builds me wires it, and teams formed afterwards
         # drain their samples into it
         self.stats = None
+        # the staging sink, where the discovery records of surveys land; wired the same way
+        self.staging = None
         # all done
         return
 
