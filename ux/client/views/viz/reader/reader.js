@@ -23,6 +23,7 @@ import { useSelectReader } from './useSelectReader'
 import { Axis } from './axis'
 import { Channels } from './channels'
 import { Stack } from './stack'
+import { Standing } from './standing'
 import { Disconnect } from './disconnect'
 // styles
 import styles from './styles'
@@ -92,6 +93,8 @@ const Panel = ({ qed }) => {
                 <Meta.Entry attribute="uri" style={paint.meta}>
                     {uri}
                 </Meta.Entry>
+                {/* what the source is doing, while it is not yet viewable */}
+                <Standing />
                 {selectors.map(selector => {
                     // unpack
                     const { name: axis, values } = selector

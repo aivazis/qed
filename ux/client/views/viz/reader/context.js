@@ -145,6 +145,9 @@ export const contextGetReaderFragment = graphql`
         id
         name
         uri
+        # where this source stands on its way to being viewable, and why, if it failed
+        status
+        error
         selectors {
             name
             values
