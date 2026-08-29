@@ -5,6 +5,7 @@
 
 
 # support
+import functools
 import pyre
 import qed
 import journal
@@ -37,79 +38,167 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         return port.tile(**kwds)
 
     # first contact
-    def open(self, name: str | None = None):
+    def stage(self, name: str | None = None):
         """
-        Initiate first contact with the connected data sources, discarding the ones that
-        fail with a warning, and refresh the viewports so their views reflect whatever the
-        survivors discovered; a non-trivial {name} confines the staging to that source
+        Initiate first contact with the connected data sources, preferring the crew: a
+        surveyable source is handed to its team and this call returns at once, leaving the
+        event loop free; a non-trivial {name} confines the staging to that source
+
+        Sources whose flavor cannot yet be surveyed, and every source when no fleet has
+        been attached, fall back to opening in this process, which blocks
         """
-        # if the caller named a specific source
-        if name is not None:
-            # look it up
-            source = self.source(name=name)
-            # a name that matches nothing is a bug in whoever built the request
-            if source is None:
+        # assemble the pile of sources this request covers
+        pile = self._stagePile(name=name)
+        # a name that matched nothing has already been reported
+        if pile is None:
+            # so there is nothing to do
+            return self
+        # the ones that cannot travel to a crew
+        blocking = []
+        # nothing has moved yet
+        touched = False
+        # go through the pile
+        for source in pile:
+            # get the standing of this source
+            standing = self.lifecycle(name=source.pyre_name)
+            # a survey already under way covers this request
+            if standing.status == standing.staging:
+                # so leave it alone
+                continue
+            # this source is about to move
+            touched = True
+            # find out whether this source can be surveyed by a crew
+            if self.fleet is None or not getattr(source, "surveyable", False):
+                # if not, it opens in this process
+                blocking.append(source)
+                # on to the next one
+                continue
+            # otherwise, mark the survey as under way
+            standing.begin()
+            # and hand the product to its team; the callback receives the discovery
+            # record, or the reason the survey failed
+            self.fleet.stage(
+                reader=source,
+                callback=functools.partial(self._surveyed, name=source.pyre_name),
+            )
+        # the sources that cannot be surveyed open the old way
+        for source in blocking:
+            # each one in turn, blocking whichever thread runs this
+            self._openSource(source=source)
+        # if any standing moved
+        if touched:
+            # let the clients know; a request that found every source already under way
+            # changed nothing, so it stays silent rather than costing everyone a refetch
+            self._announce()
+        # all done
+        return self
+
+    def lifecycle(self, name):
+        """
+        Retrieve the staging record of the source called {name}
+        """
+        # delegate to my source catalog
+        return self._dataSources.lifecycle(name=name)
+
+    def realize(self, dataset):
+        """
+        Guarantee that {dataset} can supply pixels, opening its product in this process if
+        it is a metadata-only twin left behind by a survey
+
+        Rendering never comes through here: tiles are produced by crews that hold their own
+        copy of the product. This is the escape hatch for the handful of paths that read
+        individual values on the spot -- the pixel peek, the profile -- and it costs one
+        real open per product, the first time somebody asks
+        """
+        # a dataset that already holds a payload needs nothing
+        if getattr(dataset, "data", None) is not None:
+            # so hand it back
+            return dataset
+        # find the source that owns it
+        source = self._ownerOf(dataset=dataset)
+        # a dataset with no owner cannot be rebuilt
+        if source is None:
+            # so hand it back untouched and let the caller cope
+            return dataset
+        # get the name of the source
+        name = source.pyre_name
+        # look for a live copy of the product, opened by an earlier peek
+        live = self._realized.get(name)
+        # if this is the first ask
+        if live is None:
+            # carefully, since the product may have become unreachable since the survey
+            try:
+                # harvest the recipe the same way a survey does
+                recipe = qed.nexus.survey(reader=source)
+                # resolve the factory
+                factory = qed.protocols.reader.pyre_resolveSpecification(
+                    spec=recipe.factory
+                )
+                # build a live instance with file handles of its own; the derived name
+                # keeps it clear of the passive source it stands in for
+                live = factory(name=f"{name}.local", **recipe.config)
+                # and make first contact
+                live.open()
+            # if anything goes wrong
+            except Exception as error:
                 # make a channel
                 channel = journal.warning("qed.ux.staging")
                 # complain
-                channel.line(f"could not stage '{name}'")
-                channel.line(f"there is no such source")
-                # flush
-                channel.log()
-                # and bail
-                return
-            # otherwise, the pile is just this source
-            pile = [source]
-        # with no name
-        else:
-            # the pile is a snapshot of all the sources, since casualties get disconnected
-            pile = list(self.sources)
-        # keep track of the casualties, so viewports bound to them can be reset
-        lost = set()
-        # go through the pile
-        for source in pile:
-            # carefully
-            try:
-                # establish first contact
-                source.open()
-            # if the source is unreachable or malformed
-            except Exception as error:
-                # make a channel
-                channel = journal.warning("qed.cli")
-                # complain
-                channel.line(f"could not open '{source.pyre_name}'")
-                channel.line(f"while establishing first contact with '{source.uri}'")
+                channel.line(f"could not read values from '{name}'")
+                channel.line(f"while opening '{source.uri}' for a direct read")
                 channel.line(f"got: {error}")
                 # flush
                 channel.log()
-                # disconnect the casualty
-                self.disconnectSource(name=source.pyre_name)
-                # remember it
-                lost.add(source.pyre_name)
-                # and move on
+                # and give up on this product
+                return dataset
+            # remember it, so the next peek costs nothing
+            self._realized[name] = live
+        # find the live counterpart of the twin, which is the one with the same identity
+        for peer in live.datasets:
+            # if this is not it
+            if dict(peer.selector) != dict(dataset.selector):
+                # keep looking
                 continue
-            # re-register the survivor, so the dataset index reflects what it discovered
-            self.connectSource(source=source)
-        # go through the viewports
-        for index, port in enumerate(self._viewports):
-            # get the view
-            view = port.view()
-            # views without a source have nothing to reconcile
-            if view.reader is None:
-                # so leave them alone
-                continue
-            # a view still bound to a casualty would show the client a selection that no
-            # longer exists in the panel
-            if view.reader.pyre_name in lost:
-                # so replace its viewport with a blank one
-                self._viewports[index] = Viewport(name=str(uuid.uuid1()))
-                # and move on
-                continue
-            # everybody else was built before first contact and holds no pipelines, so
-            # they get to refresh themselves against the discovered datasets
-            view.refresh()
+            # otherwise, lend the twin the payload and whatever companions it renders with
+            dataset.data = peer.data
+            # aggregates read through a mask, and packed products through a lookup table
+            for companion in ("mask", "bfpq"):
+                # if the live dataset carries one
+                if getattr(peer, companion, None) is not None:
+                    # lend it too
+                    setattr(dataset, companion, getattr(peer, companion))
+            # the twin can now supply pixels
+            return dataset
+        # not finding a counterpart means the product changed under us
+        channel = journal.warning("qed.ux.staging")
+        # complain
+        channel.line(f"could not read values from '{dataset.pyre_name}'")
+        channel.line(f"the product no longer holds a dataset with its identity")
+        # flush
+        channel.log()
+        # hand it back untouched
+        return dataset
+
+    def open(self, name: str | None = None):
+        """
+        Initiate first contact with the connected data sources in this process, which
+        blocks; a non-trivial {name} confines the contact to that source
+
+        This is the fallback for flavors whose products cannot yet travel to a crew, and
+        the path the non-serving shells take; {stage} is what the server uses
+        """
+        # assemble the pile of sources this request covers
+        pile = self._stagePile(name=name)
+        # a name that matched nothing has already been reported
+        if pile is None:
+            # so there is nothing to do
+            return self
+        # go through the pile
+        for source in pile:
+            # and establish first contact with each one in turn
+            self._openSource(source=source)
         # all done
-        return
+        return self
 
     # statistics
     def accumulate(self, task, record):
@@ -767,6 +856,9 @@ class Store(qed.shells.command, family="qed.cli.ux"):
     # the change broadcaster, wired by whoever owns the client connections; when set, it is
     # invoked after controller bounds move so live clients refetch their state
     notifier = None
+    # the manager of the crews, wired by whoever assembles them; when set, first contact
+    # happens on a worker instead of in this process
+    fleet = None
 
     # metamethods
     def __init__(self, plexus, docroot, **kwds):
@@ -790,11 +882,158 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # the whole-dataset statistics accumulators, keyed by dataset name, populated as
         # rendered tiles report their samples
         self._statistics = {}
+        # the live copies of surveyed products, keyed by source name, opened on demand by
+        # the handful of paths that read individual values in this process
+        self._realized = {}
 
         # all done
         return
 
     # implementation details
+    # staging
+    def _ownerOf(self, dataset):
+        """
+        Find the source that owns {dataset}
+        """
+        # go through my sources
+        for source in self.sources:
+            # looking for the one that lists this dataset
+            if any(candidate is dataset for candidate in source.datasets):
+                # hand it off
+                return source
+        # not finding one leaves the dataset orphaned
+        return None
+
+    def _stagePile(self, name):
+        """
+        Assemble the sequence of sources a staging request covers
+        """
+        # with no name, the request covers a snapshot of every registered source
+        if name is None:
+            # so hand them all off
+            return list(self.sources)
+        # otherwise, look up the one that was named
+        source = self.source(name=name)
+        # if there is such a source
+        if source is not None:
+            # the request covers it alone
+            return [source]
+        # a name that matches nothing is a bug in whoever built the request
+        channel = journal.warning("qed.ux.staging")
+        # complain
+        channel.line(f"could not stage '{name}'")
+        channel.line(f"there is no such source")
+        # flush
+        channel.log()
+        # and report that there is nothing to do
+        return None
+
+    def _openSource(self, source):
+        """
+        Establish first contact with {source} in this process
+        """
+        # get its standing
+        standing = self.lifecycle(name=source.pyre_name)
+        # first contact is under way
+        standing.begin()
+        # carefully, since the product may be unreachable or malformed
+        try:
+            # establish first contact
+            source.open()
+        # if anything goes wrong
+        except Exception as error:
+            # make a channel
+            channel = journal.warning("qed.cli")
+            # complain
+            channel.line(f"could not open '{source.pyre_name}'")
+            channel.line(f"while establishing first contact with '{source.uri}'")
+            channel.line(f"got: {error}")
+            # flush
+            channel.log()
+            # record the failure, retaining the reason; the source stays listed, so the
+            # client can show what went wrong and offer a retry
+            standing.fail(error=error)
+            # and hand it back
+            return source
+        # re-register the survivor, so the dataset index reflects what it discovered
+        self.connectSource(source=source)
+        # the source is viewable
+        standing.succeed()
+        # let the views catch up with what it found
+        self._refreshViewports()
+        # all done
+        return source
+
+    def _surveyed(self, name, result=None, error=None):
+        """
+        Take delivery of the outcome of the survey of the source called {name}
+        """
+        # get its standing
+        standing = self.lifecycle(name=name)
+        # look up the source; it may have been disconnected while the survey ran
+        source = self.source(name=name)
+        # if it is gone
+        if source is None:
+            # its report has nowhere to land
+            return self
+        # if the survey failed
+        if error is not None:
+            # make a channel
+            channel = journal.warning("qed.ux.staging")
+            # complain
+            channel.line(f"could not stage '{name}'")
+            channel.line(f"while surveying '{source.uri}'")
+            channel.line(f"got: {error}")
+            # flush
+            channel.log()
+            # record the failure, retaining the reason for the client to display
+            standing.fail(error=error)
+        # otherwise
+        else:
+            # hydrate the passive reader from what the survey found; nothing in this
+            # process touches the product
+            result.hydrate(reader=source)
+            # re-register it, so the dataset index reflects what the survey discovered
+            self.connectSource(source=source)
+            # the source is viewable
+            standing.succeed()
+            # let the views catch up with what it found
+            self._refreshViewports()
+        # either way, the standing moved, so let the clients know
+        self._announce()
+        # all done
+        return self
+
+    def _refreshViewports(self):
+        """
+        Let every bound view reconcile itself with the datasets its reader now exposes
+        """
+        # go through the viewports
+        for port in self._viewports:
+            # get the view
+            view = port.view()
+            # views without a source have nothing to reconcile
+            if view.reader is None:
+                # so leave them alone
+                continue
+            # everybody else was built before first contact and holds no pipelines, so
+            # they get to refresh themselves against the discovered datasets
+            view.refresh()
+        # all done
+        return self
+
+    def _announce(self):
+        """
+        Let every live client know that something it displays has moved
+        """
+        # if anybody is listening
+        if self.notifier is not None:
+            # let them know; the notification is coalesced, so a burst of standings
+            # moving collapses into a single refetch per client
+            self.notifier()
+        # all done
+        return self
+
     def _loadPersistentArchives(self, plexus):
         """
         Transfer the persistent data sources and their datasets from the plexus

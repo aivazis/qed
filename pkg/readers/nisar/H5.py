@@ -36,6 +36,11 @@ class H5(
     pages.default = 1024**2
     pages.doc = "the number of 4K pages in the aggregation cache"
 
+    # constants
+    # my datasets can describe themselves in a discovery record and materialize as
+    # metadata-only twins, so my first contact can happen on a crew member
+    surveyable = True
+
     # interface
     def select(self, selector):
         """

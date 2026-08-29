@@ -20,9 +20,6 @@ from .Spool import Spool
 # my recruiter
 from .Fork import Fork
 
-# what a survey reports
-from .Discovery import Discovery
-
 
 # the tile rendering team
 class Team(Staff, family="qed.nexus.teams.tile"):
@@ -51,12 +48,10 @@ class Team(Staff, family="qed.nexus.teams.tile"):
         """
         Deliver the {result} of {task} and settle the ownership of its payload
         """
-        # chain up to deliver the result to every subscriber; each maps its own view
+        # chain up to deliver the result to every subscriber; each maps its own view. a
+        # discovery record needs nothing further here: the callback of a survey carries
+        # both outcomes, so the requester hydrates and settles the lifecycle itself
         super().collect(task=task, result=result)
-        # if the result is a discovery record and a staging sink is attached
-        if isinstance(result, Discovery) and self.staging is not None:
-            # hand it over so the team side reader hydrates from what the survey found
-            self.staging(task=task, record=result)
         # if the result is spooled
         if isinstance(result, Spool):
             # if the worker took a statistical sample and a sink is attached
@@ -78,7 +73,6 @@ class Team(Staff, family="qed.nexus.teams.tile"):
     # private data
     cache = None  # the shared tile cache, attached by the fleet that builds me
     stats = None  # the statistics sink, attached by the fleet that builds me
-    staging = None  # the discovery sink, attached by the fleet that builds me
 
 
 # end of file

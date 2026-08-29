@@ -83,10 +83,8 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         team.dispatcher = self.dispatcher
         # its successful renders land in the shared cache
         team.cache = self.cache
-        # their statistical samples drain into the shared sink
+        # and their statistical samples drain into the shared sink
         team.stats = self.stats
-        # and the discovery records their surveys produce drain into the staging sink
-        team.staging = self.staging
         # register it
         self.teams[reader] = team
         # show me
@@ -154,8 +152,6 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         # the statistics sink; whoever builds me wires it, and teams formed afterwards
         # drain their samples into it
         self.stats = None
-        # the staging sink, where the discovery records of surveys land; wired the same way
-        self.staging = None
         # all done
         return
 
