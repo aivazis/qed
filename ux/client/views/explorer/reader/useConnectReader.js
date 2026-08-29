@@ -79,6 +79,13 @@ export const useConnectReader = (setForm, hide) => {
                 }
                 // ask for the new reader
                 const reader = payload.getLinkedRecord("reader")
+                // a server that could not build the reader reports an error rather than a
+                // trivial payload, so this should never be empty; splicing a null into the
+                // catalog would kill the panel that maps over it, so refuse to
+                if (!reader) {
+                    // and say why
+                    throw new Error("the server did not return a reader")
+                }
                 // get the session manager
                 const qed = store.get("QED")
                 // get its connected archives
@@ -123,8 +130,10 @@ export const useConnectReader = (setForm, hide) => {
         return
     }
 
-    // return the handlers
-    return { error, update, makeConnector, cancel }
+    // return the handlers, along with the flag that says a request is on its way; the
+    // forms fold it into their readiness, so the connect control goes inert while the
+    // server is working rather than silently dropping repeat clicks
+    return { error, update, makeConnector, cancel, isInFlight }
 }
 
 

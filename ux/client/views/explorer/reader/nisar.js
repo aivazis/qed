@@ -65,7 +65,7 @@ const Spec = ({ qref, view, setType, hide }) => {
         product,
     })
     // get the reader connection support
-    const { error, update, makeConnector, cancel } = useConnectReader(setForm, hide)
+    const { error, update, makeConnector, cancel, isInFlight } = useConnectReader(setForm, hide)
     // build the payload
     const spec = {
         archive: view.reader.archive,
@@ -79,7 +79,9 @@ const Spec = ({ qref, view, setType, hide }) => {
     // use it to build the connector
     const connect = makeConnector(spec)
     // determine whether i have enough information to make the connection
-    const ready = (
+    // a request already on its way makes the control inert, so a repeat click
+    // cannot be silently dropped
+    const ready = !isInFlight && (
         form.name !== null && form.name.length &&
         form.product !== null && form.product.length
     )

@@ -19,9 +19,10 @@ import { Viewport } from './viewport'
 // export the data viewer
 export const Viewer = ({ viewport, view, registrar }) => {
     // unpack the view
-    const { reader, dataset, channel } = useFragment(viewerGetViewFragment, view)
-    // check for the trivial cases
-    if (!reader || !dataset || !channel) {
+    const { ready } = useFragment(viewerGetViewFragment, view)
+    // the server settles what a render requires, so ask it rather than inferring
+    // readiness from the nullable joins it settled it from
+    if (!ready) {
         // to show a blank panel
         return (
             <>
@@ -48,15 +49,9 @@ export const Viewer = ({ viewport, view, registrar }) => {
 const viewerGetViewFragment = graphql`
     fragment viewerGetViewFragment on View {
         id
-        reader {
-            id
-        }
-        dataset {
-            id
-        }
-        channel {
-            id
-        }
+        # whether everything a tile request needs has been settled, as computed by the
+        # server; it is the only gate this component consults
+        ready
     }
 `
 
