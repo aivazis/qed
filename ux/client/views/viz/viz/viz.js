@@ -25,6 +25,7 @@ import { ViewportBridge } from '~/automation/ViewportBridge'
 import { useViewports } from './useViewports'
 import { useInitializeViewports } from './useInitializeViewports'
 import { useMakePanDispatcher } from './useMakePanDispatcher'
+import { useStageReaders } from './useStageReaders'
 // components
 import { Viewer } from '../viewer'
 // paint
@@ -41,6 +42,9 @@ export const Viz = ({ qed }) => (
 
 // the flex panel factory
 const VizPanel = ({ qed }) => {
+    // engaging the viz activity declares the catalog relevant, so ask the server to
+    // stage whatever sources have not yet made first contact
+    useStageReaders(qed)
     // ask the server side store for all known data readers and attach them as read-only state
     const { views } = useFragment(vizGetViewsFragment, qed)
     // extract an array with the scroll sync flag for each viewport
