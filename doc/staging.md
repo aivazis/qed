@@ -362,11 +362,20 @@ path uses it.
   time somebody reads values in the server process. Readers advertise `surveyable`;
   flavors without it (GDAL, stacks) and every shell without a fleet keep the blocking
   `open()`, which is now the documented fallback rather than the main path.
-- **Phase 4 — statistics retirement.** Seed-from-survey autotune; `autotune(stats=None)`
-  guards everywhere (the flavor-authored record handles the unwrapped list-of-two); GDAL
-  gets worker-side statistics in its survey record and a render decoupled from
-  `self.stats`; delete `_collectStatistics` and the worker throwaway autotune;
-  stripe-refinement tasks; `doc/statistics.md` updated.
+- **Phase 4 — statistics retirement.** DONE. Measurement left dataset construction for an
+  explicit `measure()`, so the worker's throwaway sample is gone rather than flagged
+  around; `autotune(stats=None)` is a no-op in `Controller.autotune` and in the three isce2
+  unwrapped channels that index before delegating; GDAL renders from its channel's `range`
+  controller instead of `self.stats` and gained `survey()` and a hydrated path, so every
+  flavor is now surveyable; `doc/statistics.md` records the outcome.
+
+  Two things went differently from the plan. The stripe-refinement tasks are not needed for
+  seeding — the survey supplies the seed before any view can bind a dataset, which is what
+  those tasks existed to guarantee — so they were not built; whole-extent coverage still
+  arrives through the minimap thumbnail and ordinary viewing still widens. And
+  `_collectStatistics` was not deleted: it is the body of `measure()`, because the seed has
+  to come from somewhere and a better estimator is separable work. Replacing the center
+  window is now the only real deficiency left, and it is confined to one method per flavor.
 - **Phase 5 — client tile lifecycle** (optional, scoped separately): the mosaic adopts the
   thumbnail's ledger/generation model; per-tile error and retry; a loading affordance in
   the viewport.
