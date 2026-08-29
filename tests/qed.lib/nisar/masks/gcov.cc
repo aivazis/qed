@@ -84,7 +84,7 @@ main(int argc, char * argv[])
     grid_t mask { packing, store };
 
     // fill the grid with horizontal strips
-    for (auto idx : mask.layout()) {
+    for (auto idx : mask.packing()) {
         // the row index selects the strip; each strip is exactly {stripHeight} rows tall
         const int strip = static_cast<int>(idx[0]) / stripHeight;
         // stamp this pixel with the strip's mask code

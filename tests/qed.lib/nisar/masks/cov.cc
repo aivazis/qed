@@ -81,7 +81,7 @@ main(int argc, char * argv[])
     // and assemble the source grid
     source_t source { packing, sourceStore };
     // fill it with a constant mid-range value so a valid sample never normalizes to black
-    for (auto idx : source.layout()) {
+    for (auto idx : source.packing()) {
         // stamp the midpoint of our {0, 1} brightness interval
         source[idx] = 0.5f;
     }
@@ -91,7 +91,7 @@ main(int argc, char * argv[])
     // and assemble the mask grid
     mask_t mask { packing, maskStore };
     // stamp each column with its probe code
-    for (auto idx : mask.layout()) {
+    for (auto idx : mask.packing()) {
         // the column index selects the code
         mask[idx] = codes[idx[1]];
     }
