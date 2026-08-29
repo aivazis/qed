@@ -173,13 +173,38 @@ class Product(
         # all done
         return
 
+    # interface
+    def measure(self):
+        """
+        Collect the statistics my channels tune themselves from, and tune them
+
+        Construction deliberately leaves me unmeasured: reading my payload is the expensive
+        part, and the two contexts that build me without needing it -- a worker rendering a
+        tile, which is about to be handed the client's controller state, and a twin
+        hydrated from a survey, which carries statistics already -- would both pay for
+        nothing. Whoever wants me tuned from my own data asks for it
+        """
+        # a metadata-only twin has no payload to measure
+        if self.data is None:
+            # so it keeps the seed it was hydrated with
+            return self.stats
+        # sample my data
+        self.stats = self._collectStatistics()
+        # and let my channels tune themselves against what i found
+        self._tuneChannels()
+        # hand off the record
+        return self.stats
+
     # metamethods
     def __init__(self, data=None, hydrated=False, seed=None, **kwds):
         # chain up
         super().__init__(**kwds)
         # save the dataset; a metadata-only twin has none
         self.data = data
-        # if i am a live dataset
+        # my statistics are whatever i was handed: a survey seed when i am a twin, and
+        # nothing at all when i am live, until somebody asks me to measure
+        self.stats = seed
+        # a live dataset takes its tiling from the file
         if not hydrated:
             # ask {h5} for its on-disk layout
             layout = data.dcpl.layout
@@ -187,13 +212,6 @@ class Product(
             if layout == qed.h5.libh5.Layout.chunked:
                 # adjust my tile to match the dataset chunk size
                 self.tile = data.chunk
-            # collect statistics from a sample of my data
-            self.stats = self._collectStatistics()
-        # otherwise, i am being hydrated from a survey
-        else:
-            # so the seed the surveying worker measured stands in for the sample; it was
-            # authored by my own flavor, so it already has the shape my channels expect
-            self.stats = seed
         # populate my channel pipelines
         self._registerChannels()
 
@@ -221,6 +239,17 @@ class Product(
         )
 
     # implementation details
+    def _tuneChannels(self):
+        """
+        Let my channel pipelines adjust themselves to my statistics
+        """
+        # go through my pipelines
+        for pipeline in self.channels.values():
+            # and let each one tune itself; a pipeline pinned by the user stays put
+            pipeline.autotune(stats=self.stats)
+        # all done
+        return
+
     def _registerChannels(self):
         """
         Build the channel pipelines

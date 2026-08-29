@@ -10,5 +10,4 @@ from .Stack import Stack as stack
 # the aggregate dataset its members are rendered through
 from .Dataset import Dataset as dataset
 
-
 # end of file

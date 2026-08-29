@@ -128,6 +128,25 @@ class Dataset(
         # all done
         return
 
+    def measure(self):
+        """
+        Collect the statistics my channels tune themselves from, and tune them
+
+        Construction deliberately leaves me unmeasured; whoever wants me tuned from my own
+        data asks for it, so the contexts that do not need it -- a worker about to receive
+        the client's controller state, a twin that carries a survey seed -- pay nothing
+        """
+        # a metadata-only twin has no payload to measure
+        if self.data is None:
+            # so it keeps the seed it was hydrated with
+            return self.stats
+        # sample my data
+        self.stats = self._collectStatistics()
+        # and let my channels tune themselves against what i found
+        self._tuneChannels()
+        # hand off the record
+        return self.stats
+
     # metamethods
     def __init__(self, hydrated=False, seed=None, **kwds):
         # chain up
@@ -138,20 +157,12 @@ class Dataset(
         # inject the amplitude/phase index as line interleaved
         self.layout = lines, 2, samples
 
-        # if i am a live dataset
-        if not hydrated:
-            # build my data object
-            self.data = self._open()
-            # get stats on a sample of my data
-            self.stats = self._collectStatistics()
-        # otherwise, i am being hydrated from a survey
-        else:
-            # so i have no map of my own
-            self.data = None
-            # and the seed the surveying worker measured stands in for the sample; my
-            # statistics are a record per interleaved band, and the seed arrives in that
-            # same shape, since the finding was authored by my own flavor
-            self.stats = seed
+        # my statistics are whatever i was handed: a survey seed when i am a twin -- a
+        # record per interleaved band, since the finding was authored by my own flavor --
+        # and nothing at all when i am live, until somebody asks me to measure
+        self.stats = seed
+        # a live dataset lays a grid over its file; a twin holds no payload at all
+        self.data = None if hydrated else self._open()
         # populate my channels
         self._registerChannels()
 
@@ -179,6 +190,17 @@ class Dataset(
         )
 
     # implementation details
+    def _tuneChannels(self):
+        """
+        Let my channel pipelines adjust themselves to my statistics
+        """
+        # go through my pipelines
+        for pipeline in self.channels.values():
+            # and let each one tune itself; a pipeline pinned by the user stays put
+            pipeline.autotune(stats=self.stats)
+        # all done
+        return
+
     def _open(self):
         """
         Initialize my data source

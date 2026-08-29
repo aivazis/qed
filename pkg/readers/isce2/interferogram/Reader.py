@@ -54,7 +54,7 @@ class Reader(
 
     # interface
     @qed.export
-    def open(self):
+    def open(self, measure=True):
         """
         Establish first contact with the data source: complete my shape, open the file,
         and build my dataset
@@ -106,6 +106,14 @@ class Reader(
 
         # add the dataset to the pile
         self.datasets.append(dataset)
+
+        # unless my caller is a worker that will be handed the client's controller state,
+        # let each dataset sample itself, so its channels start out tuned to its data
+        if measure:
+            # go through the datasets i discovered
+            for dataset in self.datasets:
+                # and let each one measure itself
+                dataset.measure()
 
         # all done
         return self

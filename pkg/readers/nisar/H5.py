@@ -86,7 +86,7 @@ class H5(
         return
 
     @qed.export
-    def open(self):
+    def open(self, measure=True):
         """
         Establish first contact with the data source: open the file, walk its structure,
         discover the datasets, and derive the selector availability
@@ -128,6 +128,14 @@ class H5(
         self._loadDatasets()
         # and build the selector availability map
         self.available = self._checkAvailability()
+
+        # unless my caller is a worker that will be handed the client's controller state,
+        # let each dataset sample itself, so its channels start out tuned to its data
+        if measure:
+            # go through the datasets i discovered
+            for dataset in self.datasets:
+                # and let each one measure itself
+                dataset.measure()
 
         # all done
         return self
