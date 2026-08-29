@@ -129,7 +129,7 @@ class Dataset(
         return
 
     # metamethods
-    def __init__(self, **kwds):
+    def __init__(self, hydrated=False, seed=None, **kwds):
         # chain up
         super().__init__(**kwds)
 
@@ -138,15 +138,45 @@ class Dataset(
         # inject the amplitude/phase index as line interleaved
         self.layout = lines, 2, samples
 
-        # build my data object
-        self.data = self._open()
-        # get stats on a sample of my data
-        self.stats = self._collectStatistics()
+        # if i am a live dataset
+        if not hydrated:
+            # build my data object
+            self.data = self._open()
+            # get stats on a sample of my data
+            self.stats = self._collectStatistics()
+        # otherwise, i am being hydrated from a survey
+        else:
+            # so i have no map of my own
+            self.data = None
+            # and the seed the surveying worker measured stands in for the sample; my
+            # statistics are a record per interleaved band, and the seed arrives in that
+            # same shape, since the finding was authored by my own flavor
+            self.stats = seed
         # populate my channels
         self._registerChannels()
 
         # all done
         return
+
+    def survey(self):
+        """
+        Report what a client needs to know about me, without any of my payload
+        """
+        # my metadata travels as a finding i author myself, so my seed statistics arrive
+        # as the list of per-band records my channels expect, rather than a single record
+        return qed.nexus.finding(
+            # the factory that materializes my twin
+            factory=self.pyre_family(),
+            # my layout
+            cell=self.cell.pyre_family(),
+            shape=tuple(self.shape),
+            origin=tuple(self.origin),
+            tile=tuple(self.tile),
+            # the channels i support
+            channels=tuple(self.channels.keys()),
+            # and the statistics my channels tuned themselves against
+            stats=self.stats,
+        )
 
     # implementation details
     def _open(self):
