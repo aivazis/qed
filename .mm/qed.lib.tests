@@ -7,7 +7,9 @@
 # the testsuite for the qed library
 qed.lib.tests.stem := qed.lib
 # depends on
-qed.ext.tests.prerequisites := qed.lib
+qed.lib.tests.prerequisites := qed.lib
+# the drivers compile the way the library does, so they see the same language standard
+qed.lib.tests.c++.flags += $(qed.lib.c++.flags)
 # external dependencies
 qed.lib.tests.extern := $(qed.lib.extern)
 
