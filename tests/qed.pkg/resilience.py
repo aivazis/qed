@@ -87,17 +87,36 @@ store.selectSource(viewport=0, name="broken")
 # and check that it took
 assert store.view(viewport=0).reader is not None
 
-# initiate first contact, the way the server does when it is ready to serve
+# initiate first contact in this process, the way a shell with no crews must
 store.open()
-# the reader with the missing file was discarded; the one with the oversized shape was
-# contained and stays connected, exposing no datasets
-assert [source.pyre_name for source in store.sources] == ["good", "short"]
+# every source stays listed: a failure is a state a source is in, not a reason to drop it,
+# so the client can show what went wrong and offer a retry; the order is not meaningful,
+# since a source that completes first contact is re-registered to refresh the dataset index
+assert sorted(source.pyre_name for source in store.sources) == [
+    "broken",
+    "good",
+    "short",
+]
 # the good survivor discovered its dataset
 assert store.dataset(name="good.data") is not None
-# the short one did not
+# and is marked viewable
+assert store.lifecycle(name="good").status == "ready"
+
+# the reader with the missing file failed
+assert store.lifecycle(name="broken").status == "failed"
+# retaining the reason, which is what the client displays
+assert store.lifecycle(name="broken").error is not None
+# and it exposes no datasets
+assert store.dataset(name="broken.data") is None
+
+# the one with the oversized shape contained its own trouble, so its contact succeeded
+assert store.lifecycle(name="short").status == "ready"
+# but it exposes no datasets either
 assert store.dataset(name="short.data") is None
-# and the viewport bound to the casualty was reset
-assert store.view(viewport=0).reader is None
+
+# the viewport bound to the failed source keeps its binding: the source is still listed,
+# so the view is not dangling; it simply has nothing to show until a retry succeeds
+assert store.view(viewport=0).reader is not None
 
 
 # end of file

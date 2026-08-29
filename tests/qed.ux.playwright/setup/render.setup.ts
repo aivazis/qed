@@ -20,14 +20,20 @@ test("a viz view renders on load", async ({ page }) => {
     // load the app and wait for the facade to publish itself
     await page.goto("/", { waitUntil: "load" })
     await page.waitForFunction(() => Boolean((window as { qed?: unknown }).qed))
-    // mounting the viz activity asks the server to stage the catalog; wait for the
-    // auto-selected dataset to arrive with the discovered state
-    await page.waitForFunction(async () => {
-        // grab the facade
-        const qed = (window as unknown as { qed: { state: () => Promise<{ dataset: unknown }> } }).qed
-        // and check whether the staged catalog has bound the dataset
-        return Boolean((await qed.state()).dataset)
-    })
+    // mounting the viz activity asks the server to stage the catalog, and the survey runs
+    // on a crew, so the auto-selected dataset arrives a round trip later; poll the facade
+    // until the discovered state has reached this client
+    await expect.poll(
+        async () => await page.evaluate(async () => {
+            // grab the facade
+            const qed = (window as unknown as {
+                qed: { state: () => Promise<{ dataset: { channels: string[] } | null }> }
+            }).qed
+            // and report how many channels the bound dataset offers, if there is one
+            return (await qed.state()).dataset?.channels.length ?? 0
+        }),
+        { timeout: 20_000 }
+    ).toBeGreaterThan(0)
 
     // discover a channel the dataset offers, set it, and read back what the server confirms
     const channel = await page.evaluate(async () => {
