@@ -33,7 +33,9 @@ class L0A(
         Establish first contact with the data source; L0A support is a placeholder, so
         there is nothing to discover yet
         """
-        # nothing to do
+        # leave the mark, so my lifecycle status reports honestly
+        self._opened = True
+        # nothing further to do
         return self
 
     # metamethods
@@ -42,6 +44,9 @@ class L0A(
         super().__init__(**kwds)
         # all done
         return
+
+    # private data
+    _opened = False  # whether first contact has been made
 
 
 # end of file
