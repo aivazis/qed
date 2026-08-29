@@ -125,14 +125,26 @@ survey established, so the first picture the user sees is correctly tuned; there
 visible moment of retuning. Finished tiles are cached, and later requests for the same
 tile are served from the cache without involving the crew.
 
+## Reading values on the spot
+
+Rendering never happens in the server: tiles come from the crew, whose members hold their
+own copy of the product. A few features, however, read individual values rather than
+pictures — the pixel inspector that reports what lies under the cursor, and the profile
+that samples along a path. These run in the server, where the datasets are metadata only.
+The first time such a request arrives for a product, the server opens its own copy of that
+file and keeps it for subsequent requests. This is the one place where the server reads a
+data file, it happens only when a person asks for a value, and it costs one open per
+product for the life of the session.
+
 ## When something goes wrong
 
 Failure is a first-class state, not an anomaly. A product whose survey fails is retained
-in the catalog with its error message, visibly marked in the client, and equipped with
-retry and disconnect actions. A worker lost during rendering is reported and its work
-reassigned. In every case the damage is confined to the product involved: the server
-keeps serving, the other products remain usable, and the client interface never goes
-dark because one file was unreadable.
+in the catalog with the reason it failed, shown in the panel beside the product, together
+with a control that asks for another attempt. A view already bound to that product keeps
+its binding and simply has nothing to show, because the product is still listed and the
+binding still means something. In every case the damage is confined to the product
+involved: the server keeps serving, the other products remain usable, and the interface
+never goes dark because one file was unreadable.
 
 
 <!-- end of file -->

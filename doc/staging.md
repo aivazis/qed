@@ -345,13 +345,23 @@ path uses it.
   (metadata-only datasets plus the lazy-open escape hatch); `Fleet.stage(reader)` forming
   the team eagerly. The LIFO workplan is harmless here: the survey is assigned before any
   tile can exist.
-- **Phase 3 — lifecycle state, schema, and client affordances.** The per-source record in
-  `Sources` (status, error, timings); `Reader.error` and `View.ready` join the schema
-  (`Reader.status` arrived in phase 1); the stage resolver delegates to the fleet instead
-  of running the blocking open; the connect mutation goes asynchronous (returns the
-  staging reader); the client panel gains busy/failed/retry states (retry is the `stage`
-  verb pointed at one source); the null-reader poison and the unrendered `isInFlight` are
-  fixed; the viewer gate reads `View.ready`.
+- **Phase 3 — lifecycle state, schema, and client affordances.** DONE. The per-source
+  `Lifecycle` record in `Sources` (status, error, elapsed); `Reader.error` and `View.ready`
+  joined the schema (`Reader.status` arrived in phase 1, and now reads the record); the
+  stage resolver delegates to the fleet, so the mutation returns in milliseconds and the
+  outcome arrives over SSE; the connect mutation constructs passively and stages; the
+  panel gained busy/failed/retry (retry is the `stage` verb pointed at one source); the
+  null-reader poison and the unrendered `isInFlight` are fixed; the viewer gate reads
+  `View.ready`.
+
+  Two policies changed, deliberately: a source whose first contact fails **stays listed**
+  with its reason instead of being disconnected, and a view bound to it keeps its binding,
+  since the source is no longer dangling. The escape hatch had to land here rather than
+  later: a hydrated twin holds no payload, so the pixel peek and the profile broke until
+  `Store.realize` was added — it opens one live copy of a product, on demand, the first
+  time somebody reads values in the server process. Readers advertise `surveyable`;
+  flavors without it (GDAL, stacks) and every shell without a fleet keep the blocking
+  `open()`, which is now the documented fallback rather than the main path.
 - **Phase 4 — statistics retirement.** Seed-from-survey autotune; `autotune(stats=None)`
   guards everywhere (the flavor-authored record handles the unwrapped list-of-two); GDAL
   gets worker-side statistics in its survey record and a render decoupled from
