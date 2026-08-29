@@ -35,6 +35,7 @@ class Reader(graphene.ObjectType):
     uri = graphene.String()
     api = graphene.String()
     status = graphene.String()
+    error = graphene.String()
     selectors = graphene.List(SelectorAxis)
     available = graphene.List(SelectorAxis)
     datasets = graphene.List(Dataset)
@@ -77,15 +78,24 @@ class Reader(graphene.ObjectType):
         return "data"
 
     @staticmethod
-    def resolve_status(reader, *_):
+    def resolve_status(reader, info, **kwds):
         """
         Report where the {reader} is in its staging lifecycle
         """
-        # until the source catalog carries a full per-source lifecycle record, the status
-        # derives from the reader's own first-contact guard: a reader is {ready} once it
-        # has opened its product and discovered its datasets, and merely {connected}
-        # before that
-        return "ready" if getattr(reader, "_opened", False) else "connected"
+        # get the store
+        store = info.context["store"]
+        # and hand off the standing the catalog keeps for this source
+        return store.lifecycle(name=reader.pyre_name).status
+
+    @staticmethod
+    def resolve_error(reader, info, **kwds):
+        """
+        Report why first contact with the {reader} failed, when it did
+        """
+        # get the store
+        store = info.context["store"]
+        # a source that is not in trouble has nothing to report
+        return store.lifecycle(name=reader.pyre_name).error
 
     @staticmethod
     def resolve_selectors(reader, *_):

@@ -39,10 +39,13 @@ class Stage(graphene.Mutation):
         store = info.context["store"]
         # unpack the optional target; a trivial value means the whole catalog
         name = input.get("reader") or None
-        # initiate first contact; sources that have already made it return immediately,
-        # so staging is idempotent, and casualties are disconnected with a warning
-        store.open(name=name)
-        # resolve the mutation with the catalog of survivors
+        # hand the sources to their crews for first contact; surveyable products return
+        # immediately, leaving the event loop free while their teams do the opening, and
+        # a source whose survey is already under way is left alone, so staging is
+        # idempotent. the outcome arrives later and reaches the client over the event
+        # stream, as either {ready} with datasets or {failed} with the reason retained
+        store.stage(name=name)
+        # resolve the mutation with the catalog as it stands right now
         return {"readers": list(store.sources)}
 
 

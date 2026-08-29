@@ -214,6 +214,9 @@ class Query(graphene.ObjectType):
         store = info.context["store"]
         # resolve the dataset
         dataset = store.dataset(name=dataset)
+        # a peek reads the product on the spot, so a dataset left metadata-only by a
+        # survey has to open its file before it can answer
+        dataset = store.realize(dataset=dataset)
         # the native machinery reads the pixel directly, so it must name a real cell;
         # go through the coordinates
         for coordinate, extent in zip((line, sample), dataset.shape):
