@@ -16,9 +16,14 @@ import { Context } from './context'
 export const useAvailableSelectors = (axis) => {
     // grab the table of candidates
     const { available } = React.useContext(Context)
-    // and return the set of possible values for {axis}
-    return available.get(axis)
+    // and return the set of possible values for {axis}; an axis with no known values,
+    // e.g. on a reader that has not yet completed first contact, gets the empty set, so
+    // its coordinates render as unavailable until the discovered catalog arrives
+    return available.get(axis) ?? empty
 }
+
+// the shared empty set, so passive renders get a referentially stable value
+const empty = new Set()
 
 
 // end of file
