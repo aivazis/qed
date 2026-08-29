@@ -47,6 +47,11 @@ class Reader(
     datasets = qed.properties.list(schema=qed.protocols.dataset.output())
     datasets.doc = "the list of data sets provided by the reader"
 
+    # constants
+    # my dataset can describe itself in a discovery record and materialize as a
+    # metadata-only twin, so my first contact can happen on a crew member
+    surveyable = True
+
     # interface
     @qed.export
     def open(self):

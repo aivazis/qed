@@ -51,6 +51,9 @@ class Server(http, family="qed.nexus.servers.http"):
             # and when the accumulation moves controller bounds, the store broadcasts a
             # change notification so live clients refetch their state
             ux.store.notifier = self.notifyChange
+            # the store hands its sources to the fleet for first contact, so a survey
+            # happens on a crew member rather than on this loop
+            ux.store.fleet = fleet
             # the data sources stay passive: the server boots without touching any data
             # files, and first contact waits for a client to declare the catalog relevant
             # through the {stage} mutation

@@ -606,6 +606,9 @@ class Dispatcher:
 
         # get the dataset
         dataset = self.store.dataset(name=name)
+        # a profile reads the product on the spot, so a dataset left metadata-only by a
+        # survey has to open its file before it can answer
+        dataset = self.store.realize(dataset=dataset)
         # if any point of interest lies outside the raster, the per-pixel reads would crash
         if not self._profileInBounds(dataset=dataset, points=points):
             # the client clips its anchors to the dataset shape, so an overstep is a bug in

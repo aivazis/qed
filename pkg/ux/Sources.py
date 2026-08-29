@@ -4,10 +4,15 @@
 # (c) 1998-2026 all rights reserved
 
 
+# support
+from .Lifecycle import Lifecycle
+
+
 # a catalog of known data sources
 class Sources:
     """
-    A catalog of known data sources and their datasets
+    A catalog of known data sources, their datasets, and where each one stands on its way
+    to being viewable
     """
 
     # interface
@@ -18,6 +23,14 @@ class Sources:
         """
         # look up the data source safely
         return self._sources.get(name)
+
+    def lifecycle(self, name):
+        """
+        Retrieve the staging record of the source called {name}, making one on first ask
+        """
+        # look it up, recording a fresh {connected} standing for sources that have never
+        # been asked about
+        return self._lifecycles.setdefault(name, Lifecycle())
 
     def sources(self):
         """
@@ -51,6 +64,9 @@ class Sources:
         if source:
             # remove it
             self._removeSource(source=source)
+        # a departed source takes its staging record with it, so a later reconnection
+        # starts out {connected} rather than inheriting a stale standing
+        self._lifecycles.pop(name, None)
         # all done
         return source
 
@@ -101,6 +117,9 @@ class Sources:
         self._sources = {}
         # map : name -> dataset
         self._datasets = {}
+        # map: name -> the staging record of the source; keyed by name rather than held by
+        # the source itself, so a record survives the re-registration that follows a survey
+        self._lifecycles = {}
         # all done
         return
 
@@ -140,6 +159,8 @@ class Sources:
         name = source.pyre_name
         # remove it from the pile
         del self._sources[name]
+        # the staging record stays: this is also the path a survivor takes when it is
+        # re-registered after a survey, and its standing must survive that
         # all done
         return source
 
