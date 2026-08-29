@@ -9,8 +9,20 @@
 # {Casualty} there
 from pyre.nexus import exceptions
 
+# the shared core of the units of work
+from .Chore import Chore as chore
+
 # the unit of work
 from .Tile import Tile as tile
+
+# the unit of work that establishes first contact with a data product
+from .Survey import Survey as survey
+
+# what a survey learns about one dataset
+from .Finding import Finding as finding
+
+# the record a survey ships back
+from .Discovery import Discovery as discovery
 
 # the parking place for rendered payloads
 from .Spool import Spool as spool
