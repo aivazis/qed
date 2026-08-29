@@ -17,6 +17,7 @@ from .archives.ConnectEarthAccessArchive import ConnectEarthAccessArchive
 from .archives.DisconnectArchive import DisconnectArchive
 from .readers.ConnectReader import ConnectReader
 from .readers.DisconnectReader import DisconnectReader
+from .readers.Stage import Stage
 
 # visualization pipeline controls
 from .controllers.ViewRangeReset import ViewRangeReset
@@ -80,6 +81,8 @@ class Mutation(graphene.ObjectType):
     # data reader connection management
     connectReader = ConnectReader.Field()
     disconnectReader = DisconnectReader.Field()
+    # first contact with connected data sources
+    stage = Stage.Field()
 
     # updates to viz controllers
     viewRangeUpdate = ViewRangeUpdate.Field()

@@ -34,6 +34,7 @@ class Reader(graphene.ObjectType):
     name = graphene.String()
     uri = graphene.String()
     api = graphene.String()
+    status = graphene.String()
     selectors = graphene.List(SelectorAxis)
     available = graphene.List(SelectorAxis)
     datasets = graphene.List(Dataset)
@@ -74,6 +75,17 @@ class Reader(graphene.ObjectType):
         """
         # requests are resolved against {data}
         return "data"
+
+    @staticmethod
+    def resolve_status(reader, *_):
+        """
+        Report where the {reader} is in its staging lifecycle
+        """
+        # until the source catalog carries a full per-source lifecycle record, the status
+        # derives from the reader's own first-contact guard: a reader is {ready} once it
+        # has opened its product and discovered its datasets, and merely {connected}
+        # before that
+        return "ready" if getattr(reader, "_opened", False) else "connected"
 
     @staticmethod
     def resolve_selectors(reader, *_):

@@ -37,16 +37,37 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         return port.tile(**kwds)
 
     # first contact
-    def open(self):
+    def open(self, name: str | None = None):
         """
         Initiate first contact with the connected data sources, discarding the ones that
         fail with a warning, and refresh the viewports so their views reflect whatever the
-        survivors discovered
+        survivors discovered; a non-trivial {name} confines the staging to that source
         """
+        # if the caller named a specific source
+        if name is not None:
+            # look it up
+            source = self.source(name=name)
+            # a name that matches nothing is a bug in whoever built the request
+            if source is None:
+                # make a channel
+                channel = journal.warning("qed.ux.staging")
+                # complain
+                channel.line(f"could not stage '{name}'")
+                channel.line(f"there is no such source")
+                # flush
+                channel.log()
+                # and bail
+                return
+            # otherwise, the pile is just this source
+            pile = [source]
+        # with no name
+        else:
+            # the pile is a snapshot of all the sources, since casualties get disconnected
+            pile = list(self.sources)
         # keep track of the casualties, so viewports bound to them can be reset
         lost = set()
-        # go through a snapshot of the sources, since casualties get disconnected
-        for source in list(self.sources):
+        # go through the pile
+        for source in pile:
             # carefully
             try:
                 # establish first contact
