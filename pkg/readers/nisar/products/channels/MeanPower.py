@@ -71,9 +71,9 @@ class MeanPower(Channel, family="qed.channels.nisar.meanpower"):
         # collect the data handle of each participating member
         sources = [member.data.dataset for member in members]
         # lift my range out of log scale
-        low = 10 ** self.power.low
+        low = 10**self.power.low
         # at both ends
-        high = 10 ** self.power.high
+        high = 10**self.power.high
         # build the visualization pipeline and return it
         return pipeline(
             sources=sources,

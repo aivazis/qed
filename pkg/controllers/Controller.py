@@ -19,14 +19,20 @@ class Controller(qed.component, implements=qed.protocols.controller):
     auto.doc = "adjust my parameters by running statistics on a sample of the data"
 
     # interface
-    def autotune(self, **kwds):
+    def autotune(self, stats=None, **kwds):
         """
         Adjust my values based on a sample of my dataset
         """
+        # a dataset that arrives without statistics leaves me at my configured values;
+        # this happens whenever nobody has measured the product yet, e.g. in a worker
+        # that is about to receive the client's controller state anyway
+        if stats is None:
+            # so there is nothing to tune against
+            return
         # if i'm supposed to do it automatically
         if self.auto:
-            # process the sample and asjust the parameters
-            self._autotune(**kwds)
+            # process the sample and adjust the parameters
+            self._autotune(stats=stats, **kwds)
         # all done
         return
 

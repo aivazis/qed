@@ -31,8 +31,10 @@ class Tile(Chore):
         """
         # carefully, since failures here should not poison the crew member
         try:
-            # locate my reader, building it on first contact
-            reader = self._locateReader(readers=readers)
+            # locate my reader, building it on first contact; a render installs the
+            # client's controller state below, so measuring the datasets here would buy
+            # numbers that are overwritten before a single pixel is produced
+            reader = self._locateReader(readers=readers, measure=False)
             # find the dataset i'm after
             dataset = self._locateDataset(reader=reader)
             # get its channel pipeline and mirror the controller state of the client view

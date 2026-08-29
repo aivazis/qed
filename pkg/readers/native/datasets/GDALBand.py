@@ -104,8 +104,11 @@ class GDALBand(
         tile = self.data.ReadAsArray(
             scaledOrigin[1], scaledOrigin[0], scaledShape[1], scaledShape[0]
         )
-        # unpack my range
-        low, _, high = self.stats
+        # the range to stretch across comes from the controller the client manipulates,
+        # not from my own sample: a worker renders with the client's settings, and reading
+        # my statistics here would silently ignore them
+        low = channel.range.low
+        high = channel.range.high
         # zoom
         zoomedTile = tile[:: scale[1], :: scale[0]]
         # render a tile and return it
@@ -141,23 +144,68 @@ class GDALBand(
         # all done
         return
 
+    def measure(self):
+        """
+        Collect the statistics my channels tune themselves from, and tune them
+
+        Construction deliberately leaves me unmeasured; whoever wants me tuned from my own
+        data asks for it, so the contexts that do not need it -- a worker about to receive
+        the client's controller state, a twin that carries a survey seed -- pay nothing
+        """
+        # a metadata-only twin has no payload to measure
+        if self.data is None:
+            # so it keeps the seed it was hydrated with
+            return self.stats
+        # ask gdal for the band statistics
+        self.stats = self._collectStatistics()
+        # and let my channels tune themselves against what it reported
+        self._tuneChannels()
+        # hand off the record
+        return self.stats
+
+    def survey(self):
+        """
+        Report what a client needs to know about me, without any of my payload
+        """
+        # my metadata travels as a finding i author myself, so my seed statistics arrive
+        # in exactly the shape my channels expect
+        return qed.nexus.finding(
+            # the factory that materializes my twin
+            factory=self.pyre_family(),
+            # my layout
+            cell=self.cell.pyre_family(),
+            shape=tuple(self.shape),
+            origin=tuple(self.origin),
+            tile=tuple(self.tile),
+            # the channels i support
+            channels=tuple(self.channels.keys()),
+            # and the statistics my channels tuned themselves against
+            stats=self.stats,
+        )
+
     # metamethods
-    def __init__(self, rid, dataset, **kwds):
+    def __init__(self, rid=None, dataset=None, hydrated=False, seed=None, **kwds):
         # chain up
         super().__init__(**kwds)
-        # get my band
-        band = dataset.GetRasterBand(rid + 1)
-        # store my data object
-        self.data = band
-        # set up my cell
-        self.cell = gdal.GetDataTypeName(band.DataType).lower()
-        # store my shape
-        self.shape = dataset.RasterYSize, dataset.RasterXSize
-        # set up my selector
-        self.selector["band"] = rid
-
-        # get stats on a sample of my data
-        self.stats = self._collectStatistics()
+        # my statistics are whatever i was handed: a survey seed when i am a twin, and
+        # nothing at all when i am live, until somebody asks me to measure
+        self.stats = seed
+        # a live band reads its layout out of the file
+        if not hydrated:
+            # get my band
+            band = dataset.GetRasterBand(rid + 1)
+            # store my data object
+            self.data = band
+            # set up my cell
+            self.cell = gdal.GetDataTypeName(band.DataType).lower()
+            # store my shape
+            self.shape = dataset.RasterYSize, dataset.RasterXSize
+            # set up my selector
+            self.selector["band"] = rid
+        # a twin holds no payload; its layout arrived in the record that built it
+        else:
+            # so there is nothing to open
+            self.data = None
 
         # build my default pipelines
         for pipeline in self.pipelines(context=self.pyre_name):
@@ -168,11 +216,22 @@ class GDALBand(
         return
 
     # implementation details
+    def _tuneChannels(self):
+        """
+        Let my channel pipelines adjust themselves to my statistics
+        """
+        # go through my pipelines
+        for pipeline in self.channels.values():
+            # and let each one tune itself; a pipeline pinned by the user stays put
+            pipeline.autotune(stats=self.stats)
+        # all done
+        return
+
     def _collectStatistics(self):
         """
         Compute statistics on a sample of my data
         """
-        # get my stats
+        # ask gdal, which reports over the whole band rather than a window of it
         min, max, mean, *_ = self.data.GetStatistics(True, True)
         # and return them
         return min, mean, max

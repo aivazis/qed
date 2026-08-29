@@ -94,7 +94,7 @@ class Stack(
         return self.readers[index].available
 
     @qed.export
-    def open(self):
+    def open(self, measure=True):
         """
         Establish first contact with my members and build the aggregate datasets
         """
@@ -112,14 +112,23 @@ class Stack(
             return self
         # ask each member to make first contact with its own data source
         for reader in readers:
-            # one at a time; repeated opens are harmless
-            reader.open()
+            # one at a time; repeated opens are harmless. my members are measured on the
+            # same terms i am: an aggregate samples across them, so their own samples are
+            # of no use to me
+            reader.open(measure=measure)
         # build my aggregate datasets, one per combo that every member realizes
         self._loadDatasets()
         # my availability is what those aggregate datasets actually realize: the intersection
         # across all members, NOT any one member's; derive it from the datasets themselves, the
         # way a reader derives its own availability (this also auto-selects single-valued axes)
         self.available = self._checkAvailability()
+        # unless my caller is a worker that will be handed the client's controller state,
+        # let each aggregate sample itself, so its channels start out tuned to its data
+        if measure:
+            # go through the aggregates i built
+            for dataset in self.datasets:
+                # and let each one measure itself
+                dataset.measure()
         # all done
         return self
 

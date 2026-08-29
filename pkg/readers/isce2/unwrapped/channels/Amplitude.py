@@ -25,12 +25,17 @@ class Amplitude(Channel, family="qed.channels.isce2.int.amplitude"):
     exponent.doc = "the amplitude exponent"
 
     # interface
-    def autotune(self, stats, **kwds):
+    def autotune(self, stats=None, **kwds):
         """
         Use the {stats} gathered on a data sample to adjust the range configuration
         """
         # chain up
         super().autotune(**kwds)
+        # my statistics are a record per interleaved band; a product nobody has measured
+        # yet arrives without them, and there is nothing to index into
+        if stats is None:
+            # so leave my controllers at their configured values
+            return
 
         # if i'm supposed to
         if self.scale.auto:

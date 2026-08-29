@@ -28,7 +28,7 @@ class L0A(
 
     # interface
     @qed.export
-    def open(self):
+    def open(self, measure=True):
         """
         Establish first contact with the data source; L0A support is a placeholder, so
         there is nothing to discover yet

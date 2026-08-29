@@ -173,9 +173,14 @@ class Chore(pyre.nexus.task):
     _opaque = object()
 
     # implementation details - worker side
-    def _locateReader(self, readers):
+    def _locateReader(self, readers, measure=True):
         """
         Retrieve my reader from the {readers} registry, building it on first contact
+
+        {measure} says whether the datasets should sample themselves as they are
+        discovered: a survey wants the numbers, since they are its deliverable, while a
+        render is about to install the client's controller state over anything they would
+        produce, and paying for a sample it discards is pure waste
         """
         # if my reader is already in the registry
         if self.reader in readers:
@@ -209,7 +214,7 @@ class Chore(pyre.nexus.task):
         reader = factory(name=f"{self.reader}.crew", **config)
         # construction is passive; a worker exists to touch the data, so make first
         # contact now
-        reader.open()
+        reader.open(measure=measure)
         # register it
         readers[self.reader] = reader
         # and hand it off

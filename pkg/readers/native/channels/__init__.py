@@ -16,5 +16,4 @@ from .Phase import Phase as phase
 from .Real import Real as real
 from .Value import Value as value
 
-
 # end of file

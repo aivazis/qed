@@ -145,12 +145,26 @@ class Dataset(
         self.origin = head.origin
         # its preferred tile
         self.tile = head.tile
-        # sample the aggregate to get statistics to autotune against
-        self.stats = self._collectStatistics()
+        # my statistics wait for somebody to ask, the way my members' do
+        self.stats = None
         # populate my channel pipelines
         self._registerChannels()
         # all done
         return
+
+    # interface
+    def measure(self):
+        """
+        Sample the aggregate and let my channels tune themselves against what i find
+        """
+        # sample the per-pixel mean power over my members
+        self.stats = self._collectStatistics()
+        # go through my pipelines
+        for pipeline in self.channels.values():
+            # and let each one tune itself; a pipeline pinned by the user stays put
+            pipeline.autotune(stats=self.stats)
+        # hand off the record
+        return self.stats
 
     # implementation details
     def _collectStatistics(self):

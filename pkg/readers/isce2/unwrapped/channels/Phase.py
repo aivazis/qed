@@ -26,10 +26,15 @@ class Phase(Channel, family="qed.channels.isce2.int.phase"):
     brightness.doc = "the brightness"
 
     # interface
-    def autotune(self, stats, **kwds):
+    def autotune(self, stats=None, **kwds):
         # chain up
         super().autotune(**kwds)
-        # notify my range
+        # my statistics are a record per interleaved band; a product nobody has measured
+        # yet arrives without them, and there is nothing to index into
+        if stats is None:
+            # so leave my controllers at their configured values
+            return
+        # notify my range, which reads the band that carries the phase
         self.phase.autotune(stats=stats[1], **kwds)
         # if i'm supposed to
         if self.brightness.auto:
