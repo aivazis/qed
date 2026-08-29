@@ -9,20 +9,26 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 
 > Status: **reference**. This document records what has been measured and built around dataset
 > statistics — the numbers that drive the visualization controllers — and the invariants any
-> further work must respect. It exists to prepare the retirement of the construction-time
-> statistics sample, the one remaining piece of the original design.
+> further work must respect. The construction-time sample has since been retired as a
+> construction-time cost; what remains of it, and what replaced it, is recorded below.
+> Companion: `doc/staging.md` for the lifecycle that now owns the seeding moment.
 
 ## The two generations of statistics
 
 qed has two statistics mechanisms side by side.
 
-The **legacy sample** is a single 256×256 tile read from the center of each dataset when the
-reader establishes first contact (`_collectStatistics` in the dataset constructors). Its
-`(min, mean, max)` triple feeds `autotune`, which sets both the controller *picks* (`low`,
-`high` — the values that shape pixels) and the *bounds* (`min`, `max` — the slider range).
-It is a poor estimator: it sees one fixed window, so features outside it — bright
-scatterers, the poles of a synthetic raster, anything off-center — are invisible, and the
-initial color stretch is wrong everywhere the center is unrepresentative.
+The **seed sample** is a single 256×256 tile read from the center of each dataset. It used
+to be taken inside every dataset constructor, so it was paid by anyone who built a dataset
+for any reason. It is now taken only when somebody asks, through `measure()`, and the
+callers that ask are the ones that need the numbers: a reader opening on the blocking path,
+and a crew member conducting a survey, whose record carries the result to the server as the
+seed a hydrated twin tunes itself from. Its `(min, mean, max)` triple feeds `autotune`,
+which sets both the controller *picks* (`low`, `high` — the values that shape pixels) and
+the *bounds* (`min`, `max` — the slider range). It remains a poor estimator: it sees one
+fixed window, so features outside it — bright scatterers, the poles of a synthetic raster,
+anything off-center — are invisible, and the initial stretch is wrong wherever the center
+is unrepresentative. Replacing *what* it measures is the work that remains; *when* it is
+measured is settled.
 
 The **accumulator** arrived with the minimap thumbnail work. Every tile a crew renders is
 also sampled: the worker revisits the exact decimated footprint the render saw and ships a
@@ -74,22 +80,28 @@ These are the rules the current code enforces, and that any change must preserve
    identity.
 3. **Pinned controllers never move.** `auto: no` gates both `autotune` and `widen`; the test
    fixtures pin their pipelines for determinism and rely on this absolutely.
-4. **The autotuners are shape-sensitive and unguarded.** `LinearRange._autotune` and
+4. **The autotuners are shape-sensitive, and now guarded.** `LinearRange._autotune` and
    `LogRange._autotune` unpack a bare `(low, mean, high)`; the channel wrappers index into
    the sample, and the isce2 unwrapped flavor expects a *list of two* triples for its
-   line-interleaved bands. `autotune(stats=None)` must become a no-op before the legacy
-   sample can retire.
-5. **`GDALBand.render` reads `self.stats` on every tile** — the one render-time consumer.
-   GDAL needs lazy statistics or another range source before retirement.
-6. **Seeding cannot rely on ordinary tile traffic.** `LinearRange` defaults its picks to
-   `None`; an untuned render of a linear channel crashes in the worker before it produces a
-   statistics record — the record that would have seeded the controller. This chicken-and-egg
-   is why initial statistics belong at **crew assembly**: when a team forms, stats-only
-   stripe tasks (deep stride, chunk-aligned, one per worker) run ahead of renders and seed
-   the accumulator without needing a working pipeline.
-7. **The worker-side autotune is waste.** Workers rebuild readers and pay the legacy sample
-   only to have `_configure` overwrite the tuned values with the client's controller state.
-   Retirement deletes this cost; nothing consumes it today.
+   line-interleaved bands. `autotune(stats=None)` is a no-op — in `Controller.autotune` for
+   every leaf controller, and in the three isce2 unwrapped channels that index before
+   delegating — so a dataset nobody has measured keeps its configured values instead of
+   raising. Any new shape-sensitive autotuner must carry the same guard.
+5. **`GDALBand.render` takes its range from the controller.** It used to read `self.stats`
+   on every tile, which silently ignored the client's settings; it now reads `low` and
+   `high` off the channel's `range` controller, which is what the worker installs the
+   client's state onto.
+6. **Seeding does not rely on tile traffic.** `LinearRange` defaults its picks to `None`,
+   and an untuned render of a linear channel would crash in the worker before it could
+   produce the record that would have seeded the controller. The survey dissolves this: a
+   crew member measures the product during first contact, and the twin the server hydrates
+   is tuned before any view can bind it, so no render is ever attempted against an untuned
+   pipeline. This is why the seeding moment belongs to staging rather than to crew assembly,
+   which is where an earlier draft of this document placed it.
+7. **Workers do not measure.** A worker rebuilding a reader for a render passes
+   `measure=False`, so no dataset samples itself; `_configure` then installs the client's
+   controller state, which is what the render must honor anyway. A survey passes
+   `measure=True`, because the numbers are its deliverable.
 8. **Accumulation runs on the server event loop.** `Team.collect` calls `Store.accumulate`
    inline; the merge is a handful of float operations and must stay that cheap. The client
    notification is coalesced, so a burst of adjustments collapses into one refetch.
@@ -97,26 +109,41 @@ These are the rules the current code enforces, and that any change must preserve
    outside its identity; statistics are per dataset, shared across channels, over `|value|` —
    the same convention the legacy sample established, so the two feeds are interchangeable.
 
-## The retirement plan
+## What the retirement actually did
 
-The agreed direction, in order:
+The plan this document once carried has been overtaken by the staging redesign, which
+supplied a better answer to the question the plan was trying to solve. What was done:
 
-- **Seed once, widen after.** The first records to arrive for a dataset whose controllers
-  have never been tuned run the full `autotune` — picks included — on the reference channels
-  and every view clone, roll the affected sessions, and notify; every later record widens
-  bounds only. This is the one moment statistics may move picks, and it is loud by design.
-- **Initial statistics at crew assembly.** Team formation enqueues stats-only stripe tasks
-  ahead of the first render, so seeding does not depend on a renderable pipeline (invariant
-  6) and arrives concurrently, with per-worker file handles.
-- **Guards before deletion.** `autotune` tolerates a missing sample in every flavor,
-  including the list-shaped unwrapped case (4); GDAL gets lazy statistics (5). Only then
-  does `_collectStatistics` leave the dataset constructors.
-- **Open UX question**: whether the first tiles render untuned and re-render when the seed
-  lands, or the first paint waits briefly for the seed. To be decided before implementation.
+- **Seeding moved to the survey.** A crew member measures each dataset during first contact
+  and the record carries the numbers; hydration tunes the twin's channels from them. This is
+  the one moment statistics may set picks, and it is guaranteed to precede any view binding
+  the dataset, so no session is ever rolled on account of a seed and no user watches a
+  re-tune. The stats-only stripe tasks the plan proposed are no longer needed for seeding.
+- **Measurement left construction.** `_collectStatistics` survives, but as the body of
+  `measure()`, called by whoever wants numbers rather than by everyone who builds a dataset.
+- **The worker's throwaway sample is gone.** A render no longer pays for statistics it
+  discards; measured directly, an unmeasured open of the GSLC fixture is meaningfully
+  cheaper and produces identical pixels, since the client's controller state governs.
+- **Guards landed.** Invariant 4 holds in every flavor, including the list-shaped unwrapped
+  case; GDAL renders from its controller rather than from `self.stats`, and gained a
+  `survey()` and a hydrated construction path, so it is no longer the flavor that cannot be
+  surveyed.
+- **The open UX question dissolved.** First tiles cannot render untuned, because the panel
+  does not populate until the survey lands.
 
-Further out: fuse the sample pass into the render kernels (removes the double read on cold
-HDF5), extend `sample()` to GDAL and stack datasets, and the optional log-histogram for
-amplitude from the original design sketch.
+What remains, in rough order of value:
+
+- **A better seed than the center window.** This is now the only real deficiency. The
+  measurement is deliberate and confined to one method per flavor, so replacing it — with a
+  strided pass over the whole extent, or a small set of windows spread across it — is a
+  local change. The cost to weigh is that a strided read of a compressed product touches
+  every chunk, which is why it was not simply done here: the survey is asynchronous, so it
+  can afford more than it used to, but not without measurement.
+- **Fuse the sample pass into the render kernels.** Still worthwhile: the per-tile sample
+  re-reads the decimated footprint, which doubles the cost on cold HDF5.
+- **`sample()` for GDAL and stack datasets**, so their tiles contribute to the accumulator
+  the way memmap and NISAR tiles do.
+- The optional log-histogram for amplitude from the original design sketch.
 
 
 <!-- end of file -->
