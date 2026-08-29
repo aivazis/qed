@@ -34,6 +34,8 @@ export const query = graphql`
             ...context_archives
             # reader information for populating the panel of datasets
             ...readersGetReadersFragment
+            # reader lifecycle information for the staging trigger
+            ...vizStageReadersFragment
             # reader information for disconnecting readers from the panel
             ...disconnectReaderViewsFragment
             # for the panel of controls
