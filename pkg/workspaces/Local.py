@@ -40,7 +40,24 @@ class Local(
         Retrieve the directory that holds derived data of the given {name}, making it on
         first use
         """
-        # assemble the location
+        # my directory belongs to the user: it is where they are working, and the default
+        # is wherever they launched from, so it exists. one that does not is a mistake in
+        # the configuration, and making it silently would turn a typo into a tree
+        if not self.path.isDirectory():
+            # make a channel
+            channel = journal.error("qed.workspace")
+            # complain
+            channel.line(f"the workspace at '{self.path}' is not a directory")
+            channel.line(f"so there is nowhere to keep the '{name}' cache")
+            channel.line(
+                f"make it, or point '{self.pyre_family()}.path' somewhere else"
+            )
+            # flush
+            channel.log()
+            # and report that there is nowhere to keep anything
+            return None
+        # what lies below is mine to make: the folder that gathers everything qed derives,
+        # and the one within it that holds this kind of derived data
         location = self.path / self.caches / name
         # carefully, since the workspace may not be writable
         try:

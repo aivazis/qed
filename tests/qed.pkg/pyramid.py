@@ -202,6 +202,19 @@ assert str(pyramid.path).startswith("./.qed/pyramids/")
 os.rmdir("./.qed/pyramids")
 os.rmdir("./.qed")
 
+# the workspace directory belongs to the user; a workspace pointed at one that does not
+# exist says so rather than making it, since making it silently would turn a typo in the
+# configuration into a tree of empty directories
+stray = qed.workspaces.local(name="pyramid.stray")
+stray.path = "no/such/place"
+# the complaint is the point, so let it out where a human would see it, but not here
+journal.error("qed.workspace").fatal = False
+journal.error("qed.workspace").deactivate()
+# there is nowhere to keep anything
+assert stray.cache(name="pyramids") is None
+# and nothing was made on the way to finding that out
+assert not os.path.exists("no")
+
 # the application owns the workspace, so everything that derives anything can be pointed
 # at the same one
 app = qed.shells.qed(name="pyramid.app")
