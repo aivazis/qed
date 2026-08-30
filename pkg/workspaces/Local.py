@@ -10,7 +10,9 @@ import qed
 
 
 # a workspace rooted in a directory on local disk
-class Local(qed.component, family="qed.workspaces.local"):
+class Local(
+    qed.component, family="qed.workspaces.local", implements=qed.protocols.workspace
+):
     """
     The local directory qed works out of, and the keeper of everything it derives
 
@@ -31,7 +33,8 @@ class Local(qed.component, family="qed.workspaces.local"):
     caches.default = ".qed"
     caches.doc = "the name of the folder, within my path, that holds derived data"
 
-    # interface
+    # obligations
+    @qed.export
     def cache(self, name: str):
         """
         Retrieve the directory that holds derived data of the given {name}, making it on
