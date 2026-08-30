@@ -49,6 +49,9 @@ shape = tuple(base.shape)
 tile = tuple(base.tile)
 # and the in-memory type both levels share
 datatype = base.datatype.htype
+# a raster is read into a buffer of its own cells, so the kernels come from the dataset
+# rather than from a fixed instantiation that happens to suit one product
+kernels = base.kernels
 
 # the level above the base is half the extent on each axis
 extent = [axis // 2 for axis in shape]
@@ -81,7 +84,7 @@ origins = [(16384, 5120), (16384, 5632), (16896, 5120), (16896, 5632)]
 # go through them
 for origin in origins:
     # build the tile of the level by decimating the base
-    deposited = qed.libqed.nisar.decimate(
+    deposited = kernels.decimate(
         source=base.data.dataset,
         destination=level,
         datatype=datatype,
@@ -90,11 +93,11 @@ for origin in origins:
         stride=(2, 2),
     )
     # read the level back at unit stride
-    stored = qed.libqed.nisar.sample(
+    stored = kernels.sample(
         source=level, datatype=datatype, origin=origin, shape=tile, stride=(1, 1)
     )
     # and read the base the way a client would have, striding by two
-    strided = qed.libqed.nisar.sample(
+    strided = kernels.sample(
         source=base.data.dataset,
         datatype=datatype,
         origin=origin,
@@ -120,7 +123,7 @@ second = cache.create(
 # take a tile of it whose ancestry runs through the tiles built above
 origin = (8192, 2560)
 # build it from the level below
-qed.libqed.nisar.decimate(
+kernels.decimate(
     source=level,
     destination=second,
     datatype=datatype,
@@ -129,11 +132,11 @@ qed.libqed.nisar.decimate(
     stride=(2, 2),
 )
 # read it back at unit stride
-stored = qed.libqed.nisar.sample(
+stored = kernels.sample(
     source=second, datatype=datatype, origin=origin, shape=tile, stride=(1, 1)
 )
 # and read the base the way a client at that zoom would have, striding by four
-strided = qed.libqed.nisar.sample(
+strided = kernels.sample(
     source=base.data.dataset,
     datatype=datatype,
     origin=origin,
@@ -154,7 +157,7 @@ empty = (0, 0)
 # decimating a region the product never wrote deposits nothing, and says so: the record it
 # reports counts no cells at all
 assert (
-    qed.libqed.nisar.decimate(
+    kernels.decimate(
         source=base.data.dataset,
         destination=level,
         datatype=datatype,
@@ -166,7 +169,7 @@ assert (
 )
 # and reading that region back finds nothing, rather than a field of zeros
 assert (
-    qed.libqed.nisar.sample(
+    kernels.sample(
         source=level, datatype=datatype, origin=empty, shape=tile, stride=(1, 1)
     )[0]
     == 0
@@ -207,9 +210,11 @@ assert len(set(straight)) > 1
 # put the dataset back the way it was
 base.pyramid = None
 
-# a render that carries a companion raster must not take its data from a level: the kernels
-# read the data and the mask with one origin and one stride, so a level for one and the
-# product for the other would pair every cell with the wrong mask value
+# a render that reads a companion raster alongside its data -- a mask -- reads both with one
+# origin and one stride, so the two have to come from the same depth. this is where a
+# covariance term, whose cells are real and whose mask is a single byte per cell, exercises
+# both halves of that: the levels of the two rasters are built by different kernels, and the
+# render must pair them correctly or refuse the level altogether
 covariances = (
     pyre.primitives.path(__file__).parent / ".." / "data" / "nisar" / "gcov.h5"
 )
@@ -218,36 +223,122 @@ if covariances.exists():
     # open it
     gcov = qed.readers.nisar.gcov(name="pyramid.gcov", uri=f"file:{covariances}")
     gcov.open(measure=False)
-    # take a covariance term, which carries a mask alongside its data
+    # take a covariance term of the smaller frequency, which carries a mask alongside its
+    # data; it is the same arrangement as the larger one and there is less of it to decimate
     covariance = [
-        entry for entry in gcov.datasets if dict(entry.selector).get("cov") == "HHHH"
+        entry
+        for entry in gcov.datasets
+        if dict(entry.selector) == {"band": "L", "frequency": "B", "cov": "HHHH"}
     ][0]
+    # and the mask it is read with
+    mask = covariance.mask
 
-    # a pyramid that would visibly corrupt the picture if it were ever consulted: it hands
-    # back the mask in place of the data, which is a raster of a different kind entirely
-    class Saboteur:
+    # the two rasters hold different kinds of number, so each is decimated by the kernels
+    # of its own cell type; reading either into a buffer laid out for the other would
+    # deposit pairs, or halves, of what the file actually holds
+    assert covariance.datatype.cell == "float32"
+    assert mask.datatype.cell == "uint8"
+
+    # the tile to draw, one halving out
+    where = {"zoom": (1, 1), "origin": (1024, 1024), "shape": (128, 128)}
+    # a file to keep the levels of both rasters in
+    derived = str(pyre.primitives.path(__file__).parent / "companions.h5")
+    # starting from nothing, in case an earlier run left something behind
+    if os.path.exists(derived):
+        # by removing it
+        os.unlink(derived)
+    # make it
+    store = libh5.File(derived, "w")
+
+    # build the first level of one raster over the region the render will read
+    def decimate(dataset, name):
         """
-        A pyramid whose level is deliberately the wrong raster
+        Halve {dataset} over the footprint of the tile above, and hand back the level
         """
+        # the level covers the whole raster, halved on each axis
+        extent = [axis // 2 for axis in tuple(dataset.shape)]
+        # lay it out in chunks the size of the tile being drawn
+        plan = libh5.properties.dcpl()
+        plan.chunk = list(where["shape"])
+        # spelling absence exactly the way the raster it comes from does
+        plan.fillValue = dataset.data.dataset.fillValue
+        # make it
+        target = store.create(
+            path=name,
+            type=dataset.datatype.htype,
+            space=libh5.DataSpace(extent),
+            dcpl=plan,
+        )
+        # fill the one tile the render will ask for, with the kernels of its own cell type
+        record = dataset.kernels.decimate(
+            source=dataset.data.dataset,
+            destination=target,
+            datatype=dataset.datatype.htype,
+            origin=where["origin"],
+            shape=where["shape"],
+            stride=(2, 2),
+        )
+        # the region has to hold data, or none of the comparisons below prove anything
+        assert record[0] > 0
+        # hand off the level
+        return target
+
+    # a pyramid holding the single level built for one raster
+    class Stub:
+        """
+        A pyramid whose only level is the base decimated once
+        """
+
+        # metamethods
+        def __init__(self, level, **kwds):
+            # chain up
+            super().__init__(**kwds)
+            # remember the level i hold
+            self.first = level
+            # all done
+            return
 
         # interface
         def level(self, zoom):
             """
-            Answer with something no render should accept while it carries a mask
+            Serve everything from my one level, which owes one halving less than the request
             """
-            # the mask, owing nothing, which would be nonsense as covariance data
-            return covariance.mask.dataset, (0, 0)
+            # the level is the base decimated once, so it owes whatever is left
+            return self.first, tuple(step - 1 for step in zoom)
 
-    # the tile to draw
-    where = {"zoom": (1, 1), "origin": (0, 0), "shape": (128, 128)}
-    # render the masked channel off the product
+        def at(self, exponent):
+            """
+            Answer the exact request, which i can do at exactly one depth
+            """
+            # i hold the first level and nothing else
+            return self.first if exponent == 1 else None
+
+    # render the masked channel the way the reader always has, striding the product
     channel = covariance.channel(name="covarianceMasked")
-    untouched = bytes(memoryview(covariance.render(channel=channel, **where)))
-    # now offer it a level, which it must refuse because it reads a mask alongside
-    covariance.pyramid = Saboteur()
+    straight = bytes(memoryview(covariance.render(channel=channel, **where)))
+    # the picture has to have some structure in it, or comparing it proves nothing
+    assert len(set(straight)) > 1
+
+    # now offer the data a level while the mask has none. the render must decline it: a
+    # level for one raster and the product for the other would pair every data cell with
+    # the mask value of a cell half the distance away
+    covariance.pyramid = Stub(level=decimate(dataset=covariance, name="data"))
     guarded = bytes(memoryview(covariance.render(channel=channel, **where)))
-    # the picture must be the same, which it can only be if the level was declined
-    assert untouched == guarded
+    # so the picture is unchanged
+    assert straight == guarded
+
+    # give the mask its own level, at the same depth and built by its own kernels
+    mask.pyramid = Stub(level=decimate(dataset=mask, name="mask"))
+    served = bytes(memoryview(covariance.render(channel=channel, **where)))
+    # now the render can take both from their levels, and the picture is still the one the
+    # product would have given: a level is cell for cell what striding the base produces
+    assert straight == served
+
+    # put the datasets back the way they were and let the file go
+    covariance.pyramid = None
+    mask.pyramid = None
+    store.close()
+    os.unlink(derived)
 
 # close the file before it goes away
 cache.close()

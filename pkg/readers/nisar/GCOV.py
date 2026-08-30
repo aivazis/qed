@@ -102,6 +102,10 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                 # look up the grid group for this frequency
                 grid = getattr(grids, f"frequency{frequency}")
 
+                # a product that turns out to have no mask leaves the datasets it would
+                # have applied to without one, rather than with the one from the last
+                # frequency we looked at
+                companion = None
                 # attempt to
                 try:
                     # get the mask
@@ -134,10 +138,12 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                         "shape": mask.shape,
                         "selector": selector,
                     }
-                    # instantiate it
-                    dataset = GCOVMask(name=name, data=mask, **config)
+                    # instantiate it; the datasets it applies to are handed the mask
+                    # product rather than its payload, so a masked render can ask it
+                    # for the decimated level that matches the one the data came from
+                    companion = GCOVMask(name=name, data=mask, **config)
                     # add the dataset to my pile
-                    registered.append(dataset)
+                    registered.append(companion)
 
                 # get the list of polarizations present
                 terms = grid.listOfCovarianceTerms
@@ -179,7 +185,9 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                     # the diagonal terms
                     else:
                         # are real
-                        data = Covariance(name=name, data=dataset, mask=mask, **config)
+                        data = Covariance(
+                            name=name, data=dataset, mask=companion, **config
+                        )
                     # add the dataset to my pile
                     registered.append(data)
         # all done

@@ -22,11 +22,11 @@ namespace qed::py::nisar {
     void masks(py::module &);
     // profile
     void profile(py::module &);
-    // stats
+    // the statistics of the encoded products, whose decoders make their own cells
     void stats(py::module &);
 
-    // the decimation that builds pyramid levels
-    void pyramid(py::module &);
+    // the kernels that read a raster of a given cell type
+    void cells(py::module &);
 }
 
 

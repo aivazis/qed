@@ -49,8 +49,17 @@ class Prepare(Chore):
             pyramid.build(depth=self.depth)
             # collect what the pass measured
             statistics = pyramid.statistics
+            # how deep it actually went, which is the depth its companions must reach
+            reach = pyramid.reach()
             # and let the file go, so the levels are on disk before anybody is told
             pyramid.close()
+            # the rasters a render of this dataset reads alongside its payload -- the mask
+            # of a masked channel -- are decimated too, and to exactly the same depth: the
+            # kernel reads all of them with one origin and one stride, so a level the mask
+            # lacks is a level the data cannot use either
+            self._prepareCompanions(
+                reader=reader, dataset=dataset, workspace=workspace, depth=reach
+            )
         # any failure at all
         except Exception as error:
             # is reported as a task failure that leaves the worker healthy
@@ -58,6 +67,32 @@ class Prepare(Chore):
         # hand back the record of what the raster holds, which is the part the server
         # cannot get any other way
         return statistics
+
+    # implementation details - worker side
+    def _prepareCompanions(self, reader, dataset, workspace, depth: int) -> None:
+        """
+        Decimate the rasters {dataset} is read alongside, to a depth of {depth}
+        """
+        # a payload that got no levels of its own has nothing for its companions to match
+        if depth == 0:
+            # so leave them alone
+            return
+        # go through them
+        for companion in dataset.companions().values():
+            # each gets its own levels, in its own group of the same cache; they are built
+            # one after another rather than together, so the file is opened once at a time
+            pyramid = qed.readers.nisar.pyramid(
+                reader=reader, dataset=companion, workspace=workspace
+            )
+            # to exactly the depth the payload reached, whatever its own extent would have
+            # supported: a companion that stopped short would cost the data its deepest
+            # levels, and one that went further would hold levels nobody can pair with
+            pyramid.build(depth=depth)
+            # its statistics describe the mask rather than the data, so they are not
+            # reported; let the file go
+            pyramid.close()
+        # all done
+        return
 
     # metamethods
     def __init__(self, reader, dataset, workspace, depth=0, **kwds):
