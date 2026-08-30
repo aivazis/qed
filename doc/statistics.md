@@ -42,6 +42,60 @@ broadcasts the coalesced change frame so live clients refetch and their sliders 
 place. The dataset thumbnail, a few-thousand-pixel mosaic of chunk-aligned slices, is the
 pass that guarantees full-extent coverage; ordinary viewing keeps refining.
 
+## The seed: what it probes, and what that costs
+
+The seed is no longer a single window in the middle of the raster. It is a grid of windows
+spread across the full extent, each one the dataset's own tile — the chunk shape, for a
+product that has one — with its origin snapped to a multiple of that shape. Alignment is
+not a detail: a window that straddles a boundary obliges the library to decompress as many
+as four chunks to deliver the cells of one.
+
+Measured on a 7.6 GB NISAR GSLC whose data occupies a stripe in one corner, sixteen windows
+per dataset:
+
+| strategy | time | non-fill cells found |
+|---|---|---|
+| one 256² window in the center (what this replaced) | — | 0 |
+| 256² windows, unaligned | 23.1 ms | 65,536 |
+| 512² windows, unaligned | 28.5 ms | 262,144 |
+| 512² windows on chunk boundaries | 13.7 ms | 262,144 |
+
+Chunk alignment is worth 2.1× against windows of the same size, and the aligned probe is
+still 1.7× faster than the smaller unaligned one while sampling four times the data. The
+whole four-dataset product is probed in about 15 ms per dataset. The center window, for
+comparison, found nothing at all on **every one of the four datasets** and fell back to
+nominal values — the display range of that product was previously a fabrication.
+
+## The whole-dataset pass, and whether crews help
+
+The pass that touches every chunk is the minimap thumbnail: it decimates the raster until
+its long axis is about two thousand pixels and chops the result into chunk-aligned slices,
+each an ordinary tile request. It is the only workload that sees all the data, and its
+statistics already flow into the accumulator. `qed measure crew` sweeps it across team
+sizes. On the same product, twenty-five slices at stride 32, local disk:
+
+| team | wall | speedup |
+|---|---|---|
+| 1 | 33.2 s | 1.00× |
+| 2 | 17.4 s | 1.91× |
+| 4 | 10.7 s | 3.10× |
+| 8 | 9.1 s | 3.65× |
+| 16 | 9.0 s | 3.69× |
+
+Sixteen workers are no faster than eight, and the knee is at four. The reason is not
+bandwidth but load imbalance: eight of the twenty-five slices carry 94% of the work, and
+the slowest single one takes 7.8 s, so no crew can finish the pass faster than that plus
+overhead — which is the 9 s plateau, arrived at from below. The cheap slices cover fill,
+which HDF5 returns without reading anything. Raising the ceiling therefore means cutting
+the slices finer, not hiring more workers.
+
+Two caveats worth carrying. First, this is a local, uncompressed-cache measurement: a
+repeat of the single-worker pass at the end of the sweep took 34.9 s against 33.2 s cold,
+so with 128 GB of memory and a 7.6 GB file the cost is plainly decompression rather than
+I/O. Second, and consequently, **none of this transfers to S3**, where the pass starts out
+I/O bound and additional workers buy overlap of fetch latency rather than of CPU; the
+shape of that curve has not been measured.
+
 ## What has been measured
 
 - Statistics are cheap where data is already flowing. A full pass runs at amplitude
@@ -131,14 +185,20 @@ supplied a better answer to the question the plan was trying to solve. What was 
 - **The open UX question dissolved.** First tiles cannot render untuned, because the panel
   does not populate until the survey lands.
 
+- **The center window is gone.** The seed now probes a chunk-aligned grid across the whole
+  extent, as recorded above, and an all-fill product is told it is all fill instead of
+  being handed an invented range in silence.
+
 What remains, in rough order of value:
 
-- **A better seed than the center window.** This is now the only real deficiency. The
-  measurement is deliberate and confined to one method per flavor, so replacing it — with a
-  strided pass over the whole extent, or a small set of windows spread across it — is a
-  local change. The cost to weigh is that a strided read of a compressed product touches
-  every chunk, which is why it was not simply done here: the survey is asynchronous, so it
-  can afford more than it used to, but not without measurement.
+- **Statistics from the whole-dataset pass may set picks, not just widen bounds.** The
+  probe is a good estimator, but the thumbnail pass is a better one and it already runs.
+  Its records currently widen bounds only, because moving a pick after a view is bound
+  would roll sessions (invariant 1). Letting the pass run during staging, before anything
+  is bound, would remove that objection — at the cost of the seconds measured above, which
+  is why the cheap probe seeds and the expensive pass refines.
+- **Cut the whole-dataset pass into finer slices.** Its parallel ceiling is set by its
+  slowest slice, not by the crew size; smaller slices would raise it.
 - **Fuse the sample pass into the render kernels.** Still worthwhile: the per-tile sample
   re-reads the decimated footprint, which doubles the cost on cold HDF5.
 - **`sample()` for GDAL and stack datasets**, so their tiles contribute to the accumulator
