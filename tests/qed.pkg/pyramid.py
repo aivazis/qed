@@ -182,7 +182,7 @@ os.unlink(scratch)
 workspace = qed.workspaces.local(name="pyramid.workspace")
 # the pyramid of a dataset knows how deep it can go: the top is the level whose whole
 # raster fits in a single tile
-pyramid = qed.readers.nisar.pyramid(dataset=base, workspace=workspace)
+pyramid = qed.readers.nisar.pyramid(reader=reader, dataset=base, workspace=workspace)
 # this fixture is large enough to support several halvings
 assert pyramid.depth() > 1
 # with nothing built, every request falls back to the base at the full stride, which is
@@ -204,7 +204,10 @@ twin, *_ = other.datasets
 # the two readers disagree about what to call themselves
 assert twin.pyre_name != base.pyre_name
 # but their pyramids agree on where everything goes
-assert qed.readers.nisar.pyramid(dataset=twin, workspace=workspace).path == pyramid.path
+assert (
+    qed.readers.nisar.pyramid(reader=other, dataset=twin, workspace=workspace).path
+    == pyramid.path
+)
 
 # the workspace keeps derived data beside the configuration the user launched from,
 # rather than out of sight under a home directory

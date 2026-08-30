@@ -41,6 +41,27 @@ class H5(
     # metadata-only twins, so my first contact can happen on a crew member
     surveyable = True
 
+    # public data
+    @property
+    def granule(self):
+        """
+        The identifier the product carries for itself
+        """
+        # a product that has not been opened cannot say
+        if self.product is None:
+            # so it does not
+            return None
+        # carefully, since a malformed product may be missing the group that says so
+        try:
+            # every NISAR product identifies itself here, and the granule id is unique,
+            # versioned, and meaningful to the people who produced it -- which makes it
+            # the right name for anything derived from this product
+            return str(self.product.science.LSAR.identification.granuleId)
+        # a product that does not carry one
+        except AttributeError:
+            # cannot be named this way
+            return None
+
     # interface
     def select(self, selector):
         """
@@ -185,6 +206,7 @@ class H5(
         return available
 
     # private data
+    product = None  # the opened data product, once first contact has been made
     _opened = False  # whether first contact has been made
     _archive = None  # the archive that manages my data source, when there is one
     _fapl = None  # the file access property list i was constructed with
