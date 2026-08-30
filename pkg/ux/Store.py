@@ -16,6 +16,7 @@ from .Harvester import Harvester
 
 # my parts
 from .Archives import Archives
+from .Preparation import Preparation
 from .Sample import Sample
 from .Sources import Sources
 from .Viewport import Viewport
@@ -99,6 +100,22 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         # delegate to my source catalog
         return self._dataSources.lifecycle(name=name)
+
+    def preparation(self, name):
+        """
+        Retrieve the preparation record of the dataset called {name}
+        """
+        # a dataset nobody has asked about has not been prepared
+        return self._preparations.get(name)
+
+    def prepared(self, dataset) -> bool:
+        """
+        Report whether {dataset} has everything a view of it wants
+        """
+        # look up its record
+        record = self.preparation(name=dataset.pyre_name)
+        # and report whether it has finished
+        return record is not None and record.status == record.ready
 
     def realize(self, dataset):
         """
@@ -411,7 +428,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # get the viewport configuration
         port = self._viewports[viewport]
         # and ask it to select the named reader
-        return port.selectSource(source=source)
+        return self._ensurePrepared(view=port.selectSource(source=source))
 
     def channelSet(self, viewport, source, tag):
         """
@@ -457,7 +474,9 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # get the viewport configuration
         port = self._viewports[viewport]
         # and delegate
-        return port.toggleCoordinate(source=source, axis=axis, coordinate=coordinate)
+        return self._ensurePrepared(
+            view=port.toggleCoordinate(source=source, axis=axis, coordinate=coordinate)
+        )
 
     def setMembers(self, viewport, source, members):
         """
@@ -859,6 +878,9 @@ class Store(qed.shells.command, family="qed.cli.ux"):
     # the manager of the crews, wired by whoever assembles them; when set, first contact
     # happens on a worker instead of in this process
     fleet = None
+    # the place derived data goes, wired by whoever owns it; the crews are told where it is,
+    # so the levels they build land where this process will look for them
+    workspace = None
 
     # metamethods
     def __init__(self, plexus, docroot, **kwds):
@@ -885,6 +907,8 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # the live copies of surveyed products, keyed by source name, opened on demand by
         # the handful of paths that read individual values in this process
         self._realized = {}
+        # what has been done to make each dataset worth looking at, keyed by dataset name
+        self._preparations = {}
 
         # all done
         return
@@ -999,6 +1023,82 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             standing.succeed()
             # let the views catch up with what it found
             self._refreshViewports()
+        # either way, the standing moved, so let the clients know
+        self._announce()
+        # all done
+        return self
+
+    def _ensurePrepared(self, view):
+        """
+        Make sure the dataset {view} has landed on is being made worth looking at
+        """
+        # a view without a dataset has nothing to prepare
+        dataset = getattr(view, "dataset", None)
+        # so leave it alone
+        if dataset is None:
+            # and hand the view back untouched
+            return view
+        # the name that keys its record
+        name = dataset.pyre_name
+        # a dataset somebody already asked about is already being seen to
+        if name in self._preparations:
+            # so there is nothing to start
+            return view
+        # a product that cannot travel to a crew cannot be prepared by one either, and
+        # without a fleet there is nobody to do the work
+        source = view.reader
+        # so check both
+        if self.fleet is None or not getattr(source, "surveyable", False):
+            # and leave the view as it has always been: rendered straight off the product
+            return view
+        # open a record and mark the work as under way
+        record = Preparation()
+        # remember it before dispatching, so a second request finds it
+        self._preparations[name] = record
+        # and hand the dataset to its team; the callback receives what the pass measured,
+        # or the reason it failed
+        self.fleet.prepare(
+            reader=source,
+            dataset=dataset,
+            workspace=self.workspace,
+            callback=functools.partial(self._preparedDataset, name=name),
+        )
+        # let the clients know there is now something to wait for
+        self._announce()
+        # hand the view back
+        return view
+
+    def _preparedDataset(self, name, result=None, error=None):
+        """
+        Take delivery of the outcome of preparing the dataset called {name}
+        """
+        # get its record
+        record = self._preparations.get(name)
+        # a dataset that has been disconnected has nowhere to put this
+        if record is None:
+            # so drop it
+            return self
+        # if the preparation failed
+        if error is not None:
+            # make a channel
+            channel = journal.warning("qed.ux.preparation")
+            # complain
+            channel.line(f"could not prepare '{name}'")
+            channel.line(f"got: {error}")
+            # flush
+            channel.log()
+            # record the failure, retaining the reason
+            record.fail(error=error)
+        # otherwise
+        else:
+            # the pass measured the whole raster, which is a better answer than the seed
+            # the survey guessed from a handful of windows; fold it in and let it move
+            # the display, since nothing has been rendered from it yet
+            self._statistics[name] = result
+            # reconcile the controllers with what was actually found
+            self._reconcile(name=name, sample=result)
+            # and mark the dataset ready to be looked at
+            record.succeed()
         # either way, the standing moved, so let the clients know
         self._announce()
         # all done
