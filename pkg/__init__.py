@@ -55,6 +55,9 @@ from .ext import libqed, libqed_cuda
 # protocols
 from . import protocols
 
+# the directory qed works out of, and the keeper of what it derives
+from .Workspace import Workspace as workspace
+
 # support for data archives
 from . import archives
 
