@@ -147,7 +147,6 @@ class MemoryMap(
         # all done
         return
 
-    # interface
     def measure(self):
         """
         Collect the statistics my channels tune themselves from, and tune them
@@ -166,6 +165,26 @@ class MemoryMap(
         self._tuneChannels()
         # hand off the record
         return self.stats
+
+    def survey(self):
+        """
+        Report what a client needs to know about me, without any of my payload
+        """
+        # my metadata travels as a finding i author myself, so my seed statistics arrive
+        # in exactly the shape my channels expect
+        return qed.nexus.finding(
+            # the factory that materializes my twin
+            factory=self.pyre_family(),
+            # my layout
+            cell=self.cell.pyre_family(),
+            shape=tuple(self.shape),
+            origin=tuple(self.origin),
+            tile=tuple(self.tile),
+            # the channels i support
+            channels=tuple(self.channels.keys()),
+            # and the statistics my channels tuned themselves against
+            stats=self.stats,
+        )
 
     # metamethods
     def __init__(self, hydrated=False, seed=None, **kwds):
@@ -197,27 +216,6 @@ class MemoryMap(
         # all done
         return
 
-    def survey(self):
-        """
-        Report what a client needs to know about me, without any of my payload
-        """
-        # my metadata travels as a finding i author myself, so my seed statistics arrive
-        # in exactly the shape my channels expect
-        return qed.nexus.finding(
-            # the factory that materializes my twin
-            factory=self.pyre_family(),
-            # my layout
-            cell=self.cell.pyre_family(),
-            shape=tuple(self.shape),
-            origin=tuple(self.origin),
-            tile=tuple(self.tile),
-            # the channels i support
-            channels=tuple(self.channels.keys()),
-            # and the statistics my channels tuned themselves against
-            stats=self.stats,
-        )
-
-    # implementation details
     def _open(self):
         """
         Initialize my data source
@@ -252,20 +250,9 @@ class MemoryMap(
         """
         Compute statistics on a sample of my data
         """
-        # get my data
-        data = self.data
-        # and my shape
-        shape = self.shape
-
-        # make a tile that fits within my shape
-        tile = tuple(min(256, s) for s in shape)
-        # center it in my shape
-        center = tuple((s - t) // 2 for s, t in zip(shape, tile))
-
-        # compute the stats
-        stats = qed.libqed.native.stats(source=data, origin=center, shape=tile)
-        # and return them
-        return stats
+        # a single window in the middle finds nothing on a raster whose data sits off
+        # center; probe a spread of windows instead, which costs about the same
+        return qed.readers.probe(dataset=self)
 
 
 # end of file
