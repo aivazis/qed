@@ -20,7 +20,8 @@ import { Viewport } from './viewport'
 // export the data viewer
 export const Viewer = ({ viewport, view, registrar }) => {
     // unpack the view
-    const { ready, preparing } = useFragment(viewerGetViewFragment, view)
+    const { ready, preparing, reader, dataset, channel } = useFragment(
+        viewerGetViewFragment, view)
     // a dataset that has been chosen but not yet prepared would render badly: no pyramid,
     // so a zoomed out view strides the whole product, and a display range guessed from a
     // handful of windows rather than measured over everything. wait for the pass instead
@@ -35,9 +36,13 @@ export const Viewer = ({ viewport, view, registrar }) => {
             </>
         )
     }
-    // the server settles what a render requires, so ask it rather than inferring
-    // readiness from the nullable joins it settled it from
-    if (!ready) {
+    // the server settles what a render requires, so ask it rather than deciding for
+    // ourselves what readiness means. the three joins are checked too, and deliberately:
+    // {ready} is computed from them, but it travels in its own field, and a payload that
+    // clears one of them without carrying the flag would leave a stale {ready} standing
+    // for a render -- long enough for what follows to dereference a null. the flag says
+    // what the server means; the joins say what this component may safely touch
+    if (!ready || !reader || !dataset || !channel) {
         // to show a blank panel
         return (
             <>
@@ -65,10 +70,21 @@ const viewerGetViewFragment = graphql`
     fragment viewerGetViewFragment on View {
         id
         # whether everything a tile request needs has been settled, as computed by the
-        # server; it is the only gate this component consults
+        # server, which is the authority on what a render requires
         ready
         # and whether the work that makes the dataset worth looking at is still running
         preparing
+        # the joins the components below dereference; carried so this component can refuse
+        # to render onto a null even if {ready} has not caught up yet
+        reader {
+            id
+        }
+        dataset {
+            id
+        }
+        channel {
+            id
+        }
     }
 `
 
