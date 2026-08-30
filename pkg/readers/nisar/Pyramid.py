@@ -219,13 +219,13 @@ class Pyramid:
         if not selector:
             # so anything stable will do
             return ("data",)
-        # otherwise, one group per coordinate, each naming its own axis so the file can be
-        # read without knowing how it was written. the order is the selector's own, which
-        # the reader builds in the order the product nests its groups -- band, then
-        # frequency, then the polarization or covariance term -- so the cache reads the way
-        # the product does. sorting the axes instead would be just as deterministic and
-        # would scramble that into something alphabetical and meaningless
-        return tuple(f"{axis}={value}" for axis, value in selector.items())
+        # otherwise, one group per coordinate, named by the coordinate itself, the way the
+        # product names its own groups. the order is the selector's own, which the reader
+        # builds in the order the product nests them -- band, then frequency, then the
+        # polarization or covariance term -- so position says which axis a group belongs
+        # to and the value need not repeat it. sorting the axes instead would be just as
+        # deterministic and would scramble that into something alphabetical
+        return tuple(str(value) for value in selector.values())
 
     def _identify(self, reader, uri) -> str:
         """
