@@ -16,6 +16,12 @@ namespace qed::native {
     // contribute partial results that accumulate into whole-dataset statistics
     using sample_t = std::tuple<double, double, double, double, double>;
 
+    // the magnitude of one cell, whatever kind of number it holds; a raster may be complex,
+    // signed, or unsigned, and the reduction to a display value has to mean the same thing
+    // in all three cases
+    template <typename cellT>
+    auto magnitude(const cellT & value) -> double;
+
     // stats for a complex grid source
     template <typename sourceT>
     auto stats(

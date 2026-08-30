@@ -7,6 +7,24 @@
 #pragma once
 
 
+// the magnitude of one cell
+template <typename cellT>
+auto
+qed::native::magnitude(const cellT & value) -> double
+{
+    // an unsigned cell is already its own magnitude, and handing it to {abs} would at best
+    // promote it needlessly and at worst leave the overload ambiguous
+    if constexpr (std::is_unsigned_v<cellT>) {
+        // so take it as it stands
+        return static_cast<double>(value);
+    } else {
+        // everything else -- signed integers, floating point numbers, and the complex
+        // pairs, whose {abs} is the modulus -- reduces the way the library already does
+        return static_cast<double>(std::abs(value));
+    }
+}
+
+
 // collect statistics on a grid tile
 template <typename sourceT>
 auto
@@ -41,7 +59,7 @@ qed::native::collectStatistics(
     // by looking through the data
     for (auto value : source) {
         // compute the magnitude
-        double r = std::abs(value);
+        double r = magnitude(value);
         // the first non-nan
         if (!std::isnan(r)) {
             // is good enough; remember it
@@ -62,7 +80,7 @@ qed::native::collectStatistics(
     // go through the data
     for (auto z : source) {
         // compute the magnitude
-        double r = std::abs(z);
+        double r = magnitude(z);
         // if this is a nan
         if (std::isnan(r)) {
             // don't let it pollute our sample
@@ -109,7 +127,7 @@ qed::native::sample(
             auto idx = typename sourceT::index_type { (origin[0] + i) * stride[0],
                                                       (origin[1] + j) * stride[1] };
             // compute the magnitude
-            double r = std::abs(source[idx]);
+            double r = magnitude(source[idx]);
             // if this is a nan
             if (std::isnan(r)) {
                 // don't let it pollute the sample

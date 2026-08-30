@@ -104,6 +104,10 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                         # and move on
                         continue
 
+                    # a product that turns out to have no mask leaves the datasets it would
+                    # have applied to without one, rather than with the one from the last
+                    # frequency we looked at
+                    companion = None
                     # attempt to
                     try:
                         # get the mask from the frequency swath; this is common to all polarizations
@@ -140,10 +144,12 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                             "shape": mask.shape,
                             "selector": selector,
                         }
-                        # instantiate it
-                        dataset = Mask(name=name, data=mask, **config)
+                        # instantiate it; the datasets it applies to are handed the mask
+                        # product rather than its payload, so a masked render can ask it
+                        # for the decimated level that matches the one the data came from
+                        companion = Mask(name=name, data=mask, **config)
                         # add the dataset to my pile
-                        self.datasets.append(dataset)
+                        self.datasets.append(companion)
 
                     # attempt to
                     try:
@@ -222,7 +228,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                         }
                         # instantiate it
                         dataset = Coherence(
-                            name=name, data=coherence, mask=mask, **config
+                            name=name, data=coherence, mask=companion, **config
                         )
                         # add the dataset to my pile
                         self.datasets.append(dataset)

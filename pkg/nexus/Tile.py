@@ -84,6 +84,10 @@ class Tile(Chore):
     def _attachPyramid(self, reader, dataset):
         """
         Give {dataset} the decimated levels of its product, when they exist
+
+        The rasters it is read alongside get theirs at the same time: the kernel reads all
+        of them with one origin and one stride, so a mask that arrived without its levels
+        would hold the data at full resolution however deep its own pyramid went
         """
         # a dataset that already has them needs nothing
         if getattr(dataset, "pyramid", None) is not None:
@@ -94,6 +98,11 @@ class Tile(Chore):
         if self.workspace is None or not hasattr(dataset, "resolve"):
             # straight off the product
             return dataset
+        # go through the rasters this one is read alongside
+        for companion in dataset.companions().values():
+            # and give each of them their levels first, so they are in hand by the time the
+            # data resolves a zoom and asks whether they can match it
+            self._attachPyramid(reader=reader, dataset=companion)
         # carefully, since a cache that cannot be opened must not cost us the tile
         try:
             # point a workspace at where the server keeps what it derives

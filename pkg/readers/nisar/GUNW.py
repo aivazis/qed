@@ -138,6 +138,10 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
         # get the pile of registered datasets
         registered = self.datasets
 
+        # a product that turns out to have no mask leaves the datasets it would
+        # have applied to without one, rather than with the one from the last
+        # frequency we looked at
+        companion = None
         # attempt to
         try:
             # get the mask from the frequency swath; this is common to all polarizations
@@ -172,10 +176,12 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 "shape": mask.shape,
                 "selector": selector,
             }
-            # instantiate it
-            dataset = GUNWMask(name=name, data=mask, **config)
+            # instantiate it; the datasets it applies to are handed the mask
+            # product rather than its payload, so a masked render can ask it
+            # for the decimated level that matches the one the data came from
+            companion = GUNWMask(name=name, data=mask, **config)
             # add the dataset to my pile
-            registered.append(dataset)
+            registered.append(companion)
 
         # attempt to
         try:
@@ -213,7 +219,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 "selector": selector,
             }
             # instantiate it
-            dataset = UNW(name=name, data=unwrappedPhase, mask=mask, **config)
+            dataset = UNW(name=name, data=unwrappedPhase, mask=companion, **config)
             # add the dataset to my pile
             registered.append(dataset)
 
@@ -253,7 +259,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 "selector": selector,
             }
             # instantiate it
-            dataset = Coherence(name=name, data=coherence, mask=mask, **config)
+            dataset = Coherence(name=name, data=coherence, mask=companion, **config)
             # add the dataset to my pile
             registered.append(dataset)
 
@@ -293,7 +299,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 "selector": selector,
             }
             # instantiate it
-            dataset = UNW(name=name, data=ionosphere, mask=mask, **config)
+            dataset = UNW(name=name, data=ionosphere, mask=companion, **config)
             # add the dataset to my pile
             registered.append(dataset)
 
@@ -325,6 +331,10 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
         # get the pile of registered datasets
         registered = self.datasets
 
+        # a product that turns out to have no mask leaves the datasets it would
+        # have applied to without one, rather than with the one from the last
+        # frequency we looked at
+        companion = None
         # attempt to
         try:
             # get the mask from the frequency swath; this is common to all polarizations
@@ -359,10 +369,12 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 "shape": mask.shape,
                 "selector": selector,
             }
-            # instantiate it
-            dataset = GUNWMask(name=name, data=mask, **config)
+            # instantiate it; the datasets it applies to are handed the mask
+            # product rather than its payload, so a masked render can ask it
+            # for the decimated level that matches the one the data came from
+            companion = GUNWMask(name=name, data=mask, **config)
             # add the dataset to my pile
-            registered.append(dataset)
+            registered.append(companion)
 
         # attempt to
         try:
@@ -442,7 +454,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                 "selector": selector,
             }
             # instantiate it
-            dataset = Coherence(name=name, data=coherence, mask=mask, **config)
+            dataset = Coherence(name=name, data=coherence, mask=companion, **config)
             # add the dataset to my pile
             registered.append(dataset)
 

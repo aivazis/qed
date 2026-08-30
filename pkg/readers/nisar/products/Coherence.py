@@ -46,17 +46,25 @@ class Coherence(Product, family="qed.datasets.nisar.products.coherence"):
         # all done
         return
 
-    def render(self, **kwds):
+    def companions(self):
         """
-        Render a tile of the given specification
+        Report the rasters a render of mine reads alongside my payload
         """
-        # render a tile and return it
-        return super().render(mask=self.mask.dataset, **kwds)
+        # a product that arrived without a mask has nothing to offer; its masked channels
+        # cannot be rendered, and saying so here is better than handing them a raster that
+        # does not exist
+        if self.mask is None:
+            # so report none
+            return {}
+        # otherwise, my mask travels with every render of mine, masked or not: the kernels
+        # of my cell type all take one, and the unmasked ones simply ignore it
+        return {"mask": self.mask}
 
     def __init__(self, mask=None, **kwds):
         # chain up
         super().__init__(**kwds)
-        # record the mask
+        # record the mask; it is the dataset, not its payload, so that resolving a zoom can
+        # ask it for the decimated level that matches the one my own data came from
         self.mask = mask
         # all done
         return

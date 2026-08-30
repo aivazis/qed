@@ -86,6 +86,10 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                 polarizations = swath.listOfPolarizations
                 # go through them
                 for polarization in polarizations:
+                    # a product that turns out to have no mask leaves the datasets it would
+                    # have applied to without one, rather than with the one from the last
+                    # frequency we looked at
+                    companion = None
                     # attempt to
                     try:
                         # get the mask from the frequency swath; this is common to all polarizations
@@ -122,10 +126,12 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                             "shape": mask.shape,
                             "selector": selector,
                         }
-                        # instantiate it
-                        dataset = Mask(name=name, data=mask, **config)
+                        # instantiate it; the datasets it applies to are handed the mask
+                        # product rather than its payload, so a masked render can ask it
+                        # for the decimated level that matches the one the data came from
+                        companion = Mask(name=name, data=mask, **config)
                         # add the dataset to my pile
-                        self.datasets.append(dataset)
+                        self.datasets.append(companion)
 
                     # some datasets lie, so attempt to
                     try:
@@ -182,7 +188,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         }
                         # instantiate it
                         dataset = UNW(
-                            name=name, data=unwrappedPhase, mask=mask, **config
+                            name=name, data=unwrappedPhase, mask=companion, **config
                         )
                         # add the dataset to my pile
                         self.datasets.append(dataset)
@@ -223,7 +229,9 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                             "selector": selector,
                         }
                         # instantiate it
-                        dataset = UNW(name=name, data=ionosphere, mask=mask, **config)
+                        dataset = UNW(
+                            name=name, data=ionosphere, mask=companion, **config
+                        )
                         # add the dataset to my pile
                         self.datasets.append(dataset)
 
@@ -264,7 +272,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                         }
                         # instantiate it
                         coherence = Coherence(
-                            name=name, data=coherence, mask=mask, **config
+                            name=name, data=coherence, mask=companion, **config
                         )
                         # add the dataset to my pile
                         self.datasets.append(coherence)

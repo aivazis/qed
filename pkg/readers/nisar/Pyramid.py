@@ -69,6 +69,25 @@ class Pyramid:
         # nothing was built, so the base owes the whole decimation
         return self._base, tuple(zoom)
 
+    def at(self, exponent: int):
+        """
+        Report the level decimated by exactly {exponent} halvings, or nothing when i do not
+        hold one that deep
+
+        This is the exact request, as opposed to {level}, which answers every zoom with the
+        best it can do. A companion raster is asked this way, because a render that reads
+        several rasters together must have all of them at one depth or none of them
+        """
+        # hand back what i hold, if anything
+        return self._levels.get(exponent)
+
+    def reach(self) -> int:
+        """
+        Report the depth of the deepest level i actually hold
+        """
+        # the levels are numbered by their depth, so the deepest is the largest
+        return max(self._levels, default=0)
+
     def attach(self) -> "Pyramid":
         """
         Take hold of the levels an earlier pass built, without building any
@@ -96,6 +115,17 @@ class Pyramid:
         the one above at a quarter the size, so the whole pyramid costs about a third more
         than the single pass that built its first level
         """
+        # a dataset no kernel can read as it stands gets no levels at all
+        if self._kernels is None:
+            # make a channel
+            channel = journal.warning("qed.readers.pyramid")
+            # explain, since the absence will show as a view that is slow rather than wrong
+            channel.line(f"no levels built for '{self._name}'")
+            channel.line(f"its cells are encoded, and only a decoder can read them")
+            # flush
+            channel.log()
+            # and leave without building anything
+            return self
         # figure out how deep to go
         depth = depth if depth > 0 else self.depth()
         # open the cache for writing
@@ -128,7 +158,7 @@ class Pyramid:
             for origin, shape in self._tiles(extent=extent):
                 # and fill each one by decimating the level below; a tile of pure fill is
                 # skipped, so the level stays as sparse as the product it came from
-                record = qed.libqed.nisar.decimate(
+                record = self._kernels.decimate(
                     source=source,
                     destination=level,
                     datatype=self._datatype,
@@ -210,6 +240,11 @@ class Pyramid:
         self._tile = tuple(dataset.tile)
         self._datatype = dataset.datatype.htype
         self._base = dataset.data.dataset
+        # the kernels that read cells of this type. a raster whose samples are encoded
+        # rather than stored has none, and it must not get levels: decimation is a read and
+        # a write, and a read into a buffer laid out for the wrong cell type deposits
+        # something that is not the data
+        self._kernels = dataset.kernels
         # what the product writes where it has nothing to say; a dataset made without one
         # reports nothing, and then my levels are made without one too, so the two still
         # agree

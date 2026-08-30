@@ -29,10 +29,10 @@ qed::py::nisar::nisar(py::module & m)
     masks(nisar);
     // profile
     profile(nisar);
-    // stats
+    // the statistics of the encoded products
     stats(nisar);
-    // the decimation that builds pyramid levels
-    pyramid(nisar);
+    // the kernels that read a raster of a given cell type
+    cells(nisar);
 
     // all done
     return;
