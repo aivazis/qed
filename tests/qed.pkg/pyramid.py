@@ -19,7 +19,6 @@ striding composes: halving twice is striding by four
 """
 
 # externals
-import math
 import os
 
 # support
@@ -65,8 +64,9 @@ cache = libh5.File(scratch, "w")
 # the level keeps the chunking of the base, so a tile of it is still one chunk
 dcpl = libh5.properties.dcpl()
 dcpl.chunk = [min(width, axis) for width, axis in zip(tile, extent)]
-# cells nobody writes must read back as fill, the way the product spells it
-dcpl.fillValue = complex(math.nan, math.nan)
+# cells nobody writes must read back as fill, and the product is the only authority on
+# what its absence looks like, so take the value from it rather than assume one
+dcpl.fillValue = base.data.dataset.fillValue
 # create the level
 level = cache.create(
     path="level1", type=datatype, space=libh5.DataSpace(extent), dcpl=dcpl
@@ -183,6 +183,17 @@ assert stride == 8
 source, stride = pyramid.level(zoom=0)
 assert source is base.data.dataset
 assert stride == 1
+
+# left to itself, a pyramid keeps its levels wherever the workspace says: beside the
+# configuration the user launched from, rather than out of sight under a home directory
+workspace = qed.workspace(name="pyramid.workspace")
+# which is the working directory by default
+assert str(workspace.path) == "."
+# with the derived data gathered under one folder
+assert str(workspace.cache(name="pyramids")) == "./.qed/pyramids"
+# and the driver leaves nothing behind
+os.rmdir("./.qed/pyramids")
+os.rmdir("./.qed")
 
 
 # end of file
