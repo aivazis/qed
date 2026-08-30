@@ -64,6 +64,8 @@ const readersGetReadersFragment = graphql`
         }
         views {
             ...vizGetScrollSyncedViewsFragment
+            # the viewport, and the gate that decides whether it renders at all
+            ...viewerGetViewFragment
             ...viewportViewerGetViewFragment
             ...contextReaderGetViewFragment
             ...measureViewerGetMeasureLayerStateFragment

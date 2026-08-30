@@ -92,7 +92,10 @@ const setMembersMutation = graphql`
                 ...vizGetScrollSyncedViewsFragment
                 # for the measure layer
                 ...measureGetMeasureLayerFragment
-                # for the viewport
+                # for the viewport, and for the gate that decides whether it renders at
+                # all: the two must arrive together, or a payload that clears the channel
+                # leaves a stale readiness behind and the viewport reads a null
+                ...viewerGetViewFragment
                 ...viewportViewerGetViewFragment
                 # for the info widget with the dataset metadata
                 ...infoViewerGetViewFragment
