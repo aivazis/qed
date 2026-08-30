@@ -6,7 +6,6 @@
 
 # externals
 import hashlib
-import math
 
 # support
 import journal
@@ -164,11 +163,16 @@ class Pyramid:
         self._tile = tuple(dataset.tile)
         self._datatype = dataset.datatype.htype
         self._base = dataset.data.dataset
+        # what the product writes where it has nothing to say; a dataset made without one
+        # reports nothing, and then my levels are made without one too, so the two still
+        # agree
+        self._fill = self._base.fillValue
         # the identity of the product this dataset came from, so a cache built against one
         # version of a file is never read against another
         self._stamp = self._identify(uri=dataset.uri)
-        # where the cache lives
-        self._root = pyre.primitives.path(root) if root else self.root
+        # where the cache lives; the workspace decides, so derived data sits beside the
+        # configuration it belongs to rather than accumulating out of sight
+        self._root = pyre.primitives.path(root) if root else None
         # the file, once attached, and the levels it holds
         self._cache = None
         self._levels = {}
@@ -206,10 +210,12 @@ class Pyramid:
             return self._cache
         # the file that holds my levels
         path = self.path
+        # a workspace that could not make its cache has already complained
+        if path is None:
+            # so there is nowhere to keep anything
+            return None
         # carefully, since the cache lives on a filesystem that may refuse us
         try:
-            # make sure the directory is there
-            self._root.mkdir(parents=True, exist_ok=True)
             # open the file, making it if this is the first time
             cache = qed.h5.libh5.File(str(path), mode if path.exists() else "w")
         # if anything goes wrong
@@ -261,11 +267,15 @@ class Pyramid:
         # start the creation plan
         dcpl = qed.h5.libh5.properties.dcpl()
         dcpl.chunk = chunk
-        # cells nobody writes must read back the way the product spells absence, which is
-        # NaN; the library's own default is zero, and zero is a perfectly good measurement.
-        # a level built over that default would hand the level above it a raster with no
-        # fill in it at all, and the whole pyramid would densify one step at a time
-        dcpl.fillValue = complex(math.nan, math.nan)
+        # cells nobody writes must read back exactly the way the product spells absence.
+        # there is no freedom here: the library's own default is zero, and zero is a
+        # perfectly good measurement, so a level built over that default would hand the
+        # level above it a raster with no fill in it at all, and the pyramid would densify
+        # one step at a time. the product is the only authority on what its absence looks
+        # like, so ask it rather than assume
+        if self._fill is not None:
+            # adopt it
+            dcpl.fillValue = self._fill
         # a level is derived data we will read far more often than we write, and the
         # products it comes from are compressed; store it the same way, or a pyramid of a
         # sparse product ends up larger than the product. shuffle first, which groups the
@@ -341,17 +351,35 @@ class Pyramid:
 
     # public data
     @property
+    def root(self):
+        """
+        The directory that holds my cache
+        """
+        # whoever built me may have named one
+        if self._root is not None:
+            # in which case it wins
+            return self._root
+        # otherwise the workspace decides where derived data goes
+        return self.workspace.cache(name="pyramids")
+
+    @property
     def path(self):
         """
         The file that holds my levels
         """
-        # one cache per product version, holding a group per dataset
-        return self._root / f"{self._stamp}.h5"
+        # the workspace may have nowhere to keep anything
+        root = self.root
+        # in which case neither do i
+        if root is None:
+            # so say so
+            return None
+        # one cache per product version, holding the levels of all its datasets
+        return root / f"{self._stamp}.h5"
 
     # constants
-    # where caches live unless somebody says otherwise; derived data, so it belongs in a
-    # cache rather than beside a product we usually cannot write to
-    root = pyre.primitives.path("~/.cache/qed/pyramids").expanduser()
+    # the workspace that decides where derived data goes; shared, since every pyramid in a
+    # run belongs to the same piece of work
+    workspace = qed.workspace(name="qed.workspace")
     # how hard to squeeze a level; the levels are written once and read many times, so a
     # middling setting buys most of the space at a fraction of the time the highest costs
     compression = 4
