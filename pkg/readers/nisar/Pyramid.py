@@ -32,26 +32,38 @@ class Pyramid:
     """
 
     # interface
-    def level(self, zoom: int) -> tuple:
+    def level(self, zoom: tuple) -> tuple:
         """
         Report the source that serves a view at {zoom}, and the stride still to apply to it
 
-        A request always gets an answer: the deepest level at or below the one it asked for,
-        with whatever decimation remains. With no levels at all that is the base at the full
-        stride, which is exactly what the reader did before any of this existed
+        {zoom} is a decimation exponent per axis, because the two axes are not required to
+        agree: the client can decouple them, and a view zoomed out horizontally while held
+        at full resolution vertically is an ordinary thing to ask for. My levels halve both
+        axes together, so an asymmetric request is served by the deepest level that
+        over-decimates neither axis -- which is the smaller of the two exponents -- and the
+        difference is made up by striding what is read, per axis.
+
+        A request always gets an answer: with no levels at all that is the base at the full
+        stride, which is exactly what the reader did before any of this existed. Fractional
+        zoom never reaches here; the client asks for a whole level and scales the result
+        itself
         """
-        # the base serves itself, undecimated
-        if zoom <= 0:
-            # so hand it back
-            return self._base, 1
-        # look for the level that matches, then for progressively shallower ones
-        for candidate in range(zoom, 0, -1):
+        # the deepest level that would not over-decimate either axis
+        wanted = min(zoom)
+        # a request at or above full resolution on either axis is served by the base
+        if wanted <= 0:
+            # which supplies whatever striding each axis still needs
+            return self._base, tuple(2**level for level in zoom)
+        # look for that level, then for progressively shallower ones
+        for candidate in range(wanted, 0, -1):
             # if i hold this one
             if candidate in self._levels:
-                # it serves the request, with whatever decimation is left over
-                return self._levels[candidate], 2 ** (zoom - candidate)
+                # it serves the request, and each axis makes up its own difference
+                return self._levels[candidate], tuple(
+                    2 ** (level - candidate) for level in zoom
+                )
         # nothing was built, so the base answers at the full stride
-        return self._base, 2**zoom
+        return self._base, tuple(2**level for level in zoom)
 
     def build(self, depth: int = 0) -> "Pyramid":
         """
@@ -78,7 +90,7 @@ class Pyramid:
                 # leave it alone; a level is immutable once written
                 continue
             # the level it is built from
-            source, _ = self.level(zoom=exponent - 1)
+            source, _ = self.level(zoom=(exponent - 1, exponent - 1))
             # its extent, half the one below it on each axis
             extent = [axis // 2 for axis in self._extent(exponent=exponent - 1)]
             # an extent that has collapsed cannot be halved again
@@ -168,7 +180,9 @@ class Pyramid:
         # its product, not the name this process happens to have given its reader: a crew
         # member calls the same reader something else, and a later run may call it a third
         # thing, and none of them could read a cache written under another's name
-        self._name = self._designate(dataset=dataset)
+        self._path = self._designate(dataset=dataset)
+        # and a readable spelling of it, for the diagnostics
+        self._name = "/".join(self._path)
         self._shape = tuple(dataset.shape)
         self._tile = tuple(dataset.tile)
         self._datatype = dataset.datatype.htype
@@ -194,19 +208,24 @@ class Pyramid:
         return
 
     # implementation details
-    def _designate(self, dataset) -> str:
+    def _designate(self, dataset) -> tuple:
         """
-        Build the name a dataset goes by inside a cache
+        Build the path a dataset's levels live under, one step per coordinate
         """
         # its selector says which dataset of the product this is, in terms the product
         # itself supplies, so every process that opens the file agrees on the answer
         selector = dict(dataset.selector)
-        # a product with no selector has one dataset, and needs no name to tell it apart
+        # a product with no selector has one dataset, and needs no path to tell it apart
         if not selector:
             # so anything stable will do
-            return "data"
-        # otherwise, spell out the coordinates in a fixed order
-        return ".".join(f"{axis}={selector[axis]}" for axis in sorted(selector))
+            return ("data",)
+        # otherwise, one group per coordinate, each naming its own axis so the file can be
+        # read without knowing how it was written. the order is the selector's own, which
+        # the reader builds in the order the product nests its groups -- band, then
+        # frequency, then the polarization or covariance term -- so the cache reads the way
+        # the product does. sorting the axes instead would be just as deterministic and
+        # would scramble that into something alphabetical and meaningless
+        return tuple(f"{axis}={value}" for axis, value in selector.items())
 
     def _identify(self, reader, uri) -> str:
         """
@@ -281,16 +300,22 @@ class Pyramid:
         """
         # the pile
         levels = {}
+        # walk to my group, without making one
+        group = self._openGroup(cache=cache, make=False)
+        # a cache that has never held my levels has nothing to report
+        if group is None:
+            # so the pile stays empty
+            return levels
         # go through the levels the extent could support
         for exponent in range(1, self.depth() + 1):
-            # the name this level would go by
+            # the name this level goes by within the group
             name = self._levelName(exponent=exponent)
-            # if the cache does not have it
-            if not cache.has(name=name):
+            # if the group does not have it
+            if not group.has(name=name):
                 # neither do i
                 continue
             # otherwise, take hold of it
-            levels[exponent] = cache.dataset(path=name)
+            levels[exponent] = group.dataset(path=name)
         # hand off the pile
         return levels
 
@@ -330,8 +355,8 @@ class Pyramid:
             bytes=self.slots * self._chunkBytes(chunk=chunk),
             preemption=0.75,
         )
-        # make it
-        return cache.create(
+        # make it, in the group that says which dataset it belongs to
+        return self._openGroup(cache=cache, make=True).create(
             path=self._levelName(exponent=exponent),
             type=self._datatype,
             space=qed.h5.libh5.DataSpace(extent),
@@ -360,16 +385,18 @@ class Pyramid:
         if self.statistics.count == 0:
             # leave the cache alone
             return self
+        # the group my levels live in
+        group = self._openGroup(cache=cache, make=True)
         # go through the parts of the record
         for part, value in self._parts().items():
-            # the name it goes by
-            name = f"{self._name}.{part}"
+            # each one hangs on the group, which already says which dataset it describes
+            name = part
             # a number already there was written by the run that built the levels
-            if cache.hasAttribute(name=name):
+            if group.hasAttribute(name=name):
                 # and a level is built once, so it still stands
                 continue
             # otherwise, make the attribute
-            attribute = cache.createAttribute(
+            attribute = group.createAttribute(
                 name=name,
                 type=qed.h5.memtypes.double.htype,
                 space=qed.h5.libh5.DataSpace([]),
@@ -383,16 +410,20 @@ class Pyramid:
         """
         Take back the statistics an earlier run measured while it built my levels
         """
+        # walk to my group, without making one
+        group = self._openGroup(cache=cache, make=False)
+        # a cache that has never held my levels holds no numbers either
+        if group is None:
+            # so there is nothing to take back
+            return self
         # go through the parts of the record
         for part in self._parts():
-            # the name it goes by
-            name = f"{self._name}.{part}"
-            # a cache that does not carry this part carries none of them
-            if not cache.hasAttribute(name=name):
+            # a group that does not carry this part carries none of them
+            if not group.hasAttribute(name=part):
                 # so there is nothing to take back
                 return self
             # otherwise, install it
-            setattr(self.statistics, part, cache.getAttribute(name=name).double())
+            setattr(self.statistics, part, group.getAttribute(name=part).double())
         # all done
         return self
 
@@ -408,12 +439,34 @@ class Pyramid:
 
     def _levelName(self, exponent: int) -> str:
         """
-        Build the name a level goes by inside the cache
+        Build the name a level goes by within its group
         """
-        # the cache holds one product, whose dataset names are already distinct, so the
-        # levels live in a flat namespace: no groups to create, and membership is a
-        # direct lookup
-        return f"{self._name}.level{exponent}"
+        # the group already says which dataset this is, so the level says only how deep
+        return f"level{exponent}"
+
+    def _openGroup(self, cache, make: bool):
+        """
+        Walk to the group that holds my levels, making it when asked to
+        """
+        # start at the root of the cache
+        group = cache
+        # and walk one coordinate at a time, so the file has the shape of the selector
+        # rather than one flat name per dataset with the whole selector spelled into it
+        for step in self._path:
+            # a step that is already there is walked into
+            if group.has(name=step):
+                # by opening it
+                group = group.group(path=step)
+                # and moving on
+                continue
+            # a step that is missing ends the walk, unless i am building
+            if not make:
+                # in which case there is no group
+                return None
+            # otherwise, make it
+            group = group.create(path=step)
+        # hand back where the walk ended
+        return group
 
     def _extent(self, exponent: int) -> tuple:
         """
