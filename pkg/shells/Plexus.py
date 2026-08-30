@@ -29,6 +29,10 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     archives.default = [qed.archives.local(name="local:workspace")]
     archives.doc = "the list of registered data archives"
 
+    # the place i keep whatever i derive from the products i am shown
+    workspace = qed.protocols.workspace()
+    workspace.doc = "the directory i work out of, and the keeper of what i derive"
+
     # the pile of known datasets
     datasets = qed.properties.list(schema=qed.protocols.reader())
     datasets.aliases = {"ds"}
