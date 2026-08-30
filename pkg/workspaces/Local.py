@@ -9,10 +9,10 @@ import journal
 import qed
 
 
-# the place qed keeps whatever it derives from the products it is shown
-class Workspace(qed.component, family="qed.workspaces.local"):
+# a workspace rooted in a directory on local disk
+class Local(qed.component, family="qed.workspaces.local"):
     """
-    The directory qed works out of, and the keeper of everything it derives
+    The local directory qed works out of, and the keeper of everything it derives
 
     Products are read-only, and often not even local, so anything qed computes and wants to
     keep -- decimated pyramid levels today, whatever comes next -- has to live somewhere

@@ -379,7 +379,7 @@ class Pyramid:
     # constants
     # the workspace that decides where derived data goes; shared, since every pyramid in a
     # run belongs to the same piece of work
-    workspace = qed.workspace(name="qed.workspace")
+    workspace = qed.workspaces.local(name="qed.workspace")
     # how hard to squeeze a level; the levels are written once and read many times, so a
     # middling setting buys most of the space at a fraction of the time the highest costs
     compression = 4
