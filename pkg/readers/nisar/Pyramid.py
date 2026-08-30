@@ -161,7 +161,7 @@ class Pyramid:
         return self
 
     # metamethods
-    def __init__(self, dataset, workspace, **kwds):
+    def __init__(self, reader, dataset, workspace, **kwds):
         # chain up
         super().__init__(**kwds)
         # remember what i am a pyramid of. the name has to be the dataset's identity within
@@ -179,7 +179,7 @@ class Pyramid:
         self._fill = self._base.fillValue
         # the identity of the product this dataset came from, so a cache built against one
         # version of a file is never read against another
-        self._stamp = self._identify(uri=dataset.uri)
+        self._stamp = self._identify(reader=reader, uri=dataset.uri)
         # where the cache lives is not mine to decide: the workspace the application owns
         # is the one authority on where derived data goes, and it is handed to me
         self._workspace = workspace
@@ -208,11 +208,19 @@ class Pyramid:
         # otherwise, spell out the coordinates in a fixed order
         return ".".join(f"{axis}={selector[axis]}" for axis in sorted(selector))
 
-    def _identify(self, uri) -> str:
+    def _identify(self, reader, uri) -> str:
         """
-        Build a stamp that identifies the exact bytes this pyramid was derived from
+        Build the name that identifies the product this pyramid was derived from
         """
-        # the address of the product
+        # a product that carries an identifier for itself has already answered this
+        # question, and answered it better than we could: a granule id is unique,
+        # versioned, and means something to the people who produced the data
+        granule = getattr(reader, "granule", None)
+        # if there is one
+        if granule:
+            # it names the cache, with anything that cannot appear in a file name removed
+            return "".join(c if c.isalnum() or c in "-_." else "_" for c in granule)
+        # otherwise, fall back on the bytes: the address of the product
         address = str(getattr(uri, "address", uri))
         # attempt to
         try:
