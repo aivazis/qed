@@ -207,6 +207,48 @@ assert len(set(straight)) > 1
 # put the dataset back the way it was
 base.pyramid = None
 
+# a render that carries a companion raster must not take its data from a level: the kernels
+# read the data and the mask with one origin and one stride, so a level for one and the
+# product for the other would pair every cell with the wrong mask value
+covariances = (
+    pyre.primitives.path(__file__).parent / ".." / "data" / "nisar" / "gcov.h5"
+)
+# when that fixture has been generated
+if covariances.exists():
+    # open it
+    gcov = qed.readers.nisar.gcov(name="pyramid.gcov", uri=f"file:{covariances}")
+    gcov.open(measure=False)
+    # take a covariance term, which carries a mask alongside its data
+    covariance = [
+        entry for entry in gcov.datasets if dict(entry.selector).get("cov") == "HHHH"
+    ][0]
+
+    # a pyramid that would visibly corrupt the picture if it were ever consulted: it hands
+    # back the mask in place of the data, which is a raster of a different kind entirely
+    class Saboteur:
+        """
+        A pyramid whose level is deliberately the wrong raster
+        """
+
+        # interface
+        def level(self, zoom):
+            """
+            Answer with something no render should accept while it carries a mask
+            """
+            # the mask, owing nothing, which would be nonsense as covariance data
+            return covariance.mask.dataset, (0, 0)
+
+    # the tile to draw
+    where = {"zoom": (1, 1), "origin": (0, 0), "shape": (128, 128)}
+    # render the masked channel off the product
+    channel = covariance.channel(name="covarianceMasked")
+    untouched = bytes(memoryview(covariance.render(channel=channel, **where)))
+    # now offer it a level, which it must refuse because it reads a mask alongside
+    covariance.pyramid = Saboteur()
+    guarded = bytes(memoryview(covariance.render(channel=channel, **where)))
+    # the picture must be the same, which it can only be if the level was declined
+    assert untouched == guarded
+
 # close the file before it goes away
 cache.close()
 # and clean up after the driver

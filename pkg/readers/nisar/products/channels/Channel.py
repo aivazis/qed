@@ -57,9 +57,19 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         category = getattr(qed.libqed.nisar, self.category)
         # look for the tile maker in {libqed}
         pipeline = getattr(category, self.tag)
-        # ask the dataset which of its sources serves this zoom; a product with decimated
-        # levels answers with one of them and a smaller zoom, and the pixels are the same
-        data, residual = source.resolve(zoom=zoom)
+        # a render that reads a companion raster alongside the data -- a mask -- reads both
+        # with one origin and one stride, so the two must be at the same resolution. the
+        # companions have no decimated levels of their own yet, so a render that carries
+        # one stays on the product: taking the data from a level while the mask came from
+        # the product would pair every cell with the wrong mask value
+        if "mask" in kwds:
+            # read both at full resolution, the way this always worked
+            data, residual = source.data.dataset, tuple(zoom)
+        # otherwise ask the dataset which of its sources serves this zoom; a product with
+        # decimated levels answers with one of them and a smaller zoom, same pixels
+        else:
+            # let it choose
+            data, residual = source.resolve(zoom=zoom)
         # turn what is left of the zoom into per-axis strides
         stride = tuple(2**level for level in residual)
         # build the visualization pipeline and return it
