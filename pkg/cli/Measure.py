@@ -9,6 +9,7 @@ import concurrent.futures
 import csv
 import journal
 import json
+import math
 import os
 import subprocess
 import time
@@ -86,6 +87,15 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     tiles = qed.properties.int()
     tiles.default = 64
     tiles.doc = "the number of distinct tiles in the swarm workload"
+
+    # crew configuration
+    crews = qed.properties.tuple(schema=qed.properties.int())
+    crews.default = (1, 2, 4, 8, 16)
+    crews.doc = "the sequence of team sizes to sweep in the whole-dataset pass"
+
+    resolution = qed.properties.int()
+    resolution.default = 2048
+    resolution.doc = "the target long axis of the decimated whole-dataset pass"
 
     # interface
     @qed.export(tip="sweep tile generation and record the cost of each request")
@@ -231,6 +241,152 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         channel.log()
         # all done
         return 0
+
+    @qed.export(tip="measure the whole-dataset pass as a function of crew size")
+    def crew(self, plexus, **kwds):
+        """
+        Replay the whole-dataset pass against servers of increasing team size and record
+        the wall time of each
+
+        The pass is the one the minimap thumbnail already performs: decimate the raster
+        until its long axis is a few thousand pixels, chop the result into chunk-aligned
+        slices, and render them all. It is the only workload that touches every chunk of a
+        product, which makes it both the natural seed for whole-dataset statistics and the
+        thing worth knowing the parallel cost of
+        """
+        # make a channel
+        channel = journal.info("qed.measure.crew")
+        # pick the first target the restrictions allow
+        first = next(self._targets(plexus=plexus), None)
+        # if there is none
+        if first is None:
+            # complain
+            error = journal.error("qed.measure.crew")
+            error.log(
+                "no dataset to measure; check the configuration and the restrictions"
+            )
+            # and bail
+            return 1
+        # unpack the target
+        reader, dataset, name, _ = first
+        # lay out the pass
+        exp, slices = self._thumbnail(dataset=dataset)
+        # if the raster cannot be decomposed
+        if not slices:
+            # complain
+            error = journal.error("qed.measure.crew")
+            error.log(f"'{dataset.pyre_name}' yielded no slices")
+            # and bail
+            return 1
+        # report the geometry, so the numbers below can be read against it
+        channel.line(
+            f"{dataset.pyre_name}: {len(slices)} slices at zoom {exp}, "
+            f"stride {2**exp}, tile {tuple(dataset.tile)}"
+        )
+        # assemble the request urls
+        urls = [
+            f"http://127.0.0.1:{self.port}"
+            f"/data/0/{dataset.pyre_name}/{name}/{exp}x{exp}/{r}x{c}+{h}x{w}"
+            for r, c, h, w in slices
+        ]
+        # the collected results, one entry per team size
+        results = []
+        # sweep the team sizes
+        for size in self.crews:
+            # the launcher reads the team size off me, so install this one
+            self.team = size
+            # launch a server that renders with a team of this size
+            process, log = self._launch(reader=reader)
+            # from here on, the server must come down no matter what happens
+            try:
+                # wait for it to accept connections
+                if not self._ready():
+                    # if it never came up, complain
+                    error = journal.error("qed.measure.crew")
+                    error.log(
+                        f"the server on port {self.port} never came up; see '{log.name}'"
+                    )
+                    # and bail
+                    return 1
+                # the tile path resolves its reader through server side view state, so
+                # drive the selections the way the client would
+                self._select(reader=reader, channel=name)
+                # fire the whole pass at once, the way the thumbnail does; every slice is
+                # distinct, so nothing collapses in the workplan
+                elapsed, latencies, failures = self._batch(urls=urls, workers=len(urls))
+            # no matter how the pass went
+            finally:
+                # bring the server down
+                self._stop(process=process, log=log)
+            # failed requests void the level; say so rather than reporting on the rest
+            if failures:
+                # complain
+                warning = journal.warning("qed.measure.crew")
+                warning.log(f"{failures} slices failed with a team of {size}")
+            # collect the level
+            results.append((size, elapsed, latencies))
+            # the slowest single slice is the floor no amount of workers can go below
+            slowest = max(latencies) if latencies else 0
+            # show me
+            channel.line(
+                f"team {size:3}: {elapsed / 1000:7.2f} s"
+                f"   slowest slice {slowest / 1000:6.2f} s"
+            )
+        # the smallest team sets the reference the speedups are measured against
+        _, base, _ = results[0]
+        # report the shape of the curve
+        channel.line("")
+        channel.line("speedup against the smallest team, and the load balance:")
+        # go through the levels
+        for size, elapsed, latencies in results:
+            # the speedup this team achieved
+            speedup = base / elapsed if elapsed else 0
+            # the ceiling load balance allows: no pass can finish before its slowest slice
+            total = sum(latencies)
+            ceiling = total / max(latencies) if latencies else 0
+            # show me
+            channel.line(
+                f"  team {size:3}: {speedup:5.2f}x"
+                f"   work concentration: slowest slice is "
+                f"{max(latencies) / total * 100 if total else 0:4.1f}% of the total, "
+                f"so no team beats {ceiling:5.2f}x"
+            )
+        # flush the report
+        channel.log()
+        # all done
+        return 0
+
+    # implementation details: the whole dataset pass
+    def _thumbnail(self, dataset):
+        """
+        Lay out the whole-dataset pass the way the minimap thumbnail does: decimate until
+        the long axis fits my {resolution}, then chop into slices of the dataset's own tile
+        """
+        # unpack the extent
+        shape = tuple(dataset.shape)
+        # pick the decimation that brings the long axis down to the target
+        exp = max(0, int(math.log2(max(shape) / self.resolution)))
+        # deduce the stride
+        stride = 2**exp
+        # form the decimated extent; floor division keeps the footprint in bounds
+        decimated = [extent // stride for extent in shape]
+        # the slice unit is the dataset's preferred tile, which is the chunk shape for
+        # products that have one, so no chunk is decompressed by two different workers
+        unit = tuple(dataset.tile)
+        # collect the slices
+        slices = []
+        # walk the decimated raster
+        for row in range(0, decimated[0], unit[0]):
+            # the rows this slice covers
+            height = min(unit[0], decimated[0] - row)
+            # and its columns
+            for col in range(0, decimated[1], unit[1]):
+                # the columns this slice covers
+                width = min(unit[1], decimated[1] - col)
+                # record it
+                slices.append((row, col, height, width))
+        # hand off the geometry
+        return exp, slices
 
     # implementation details: the single process sweep
     def _sweep(self, plexus):
