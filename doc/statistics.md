@@ -91,7 +91,23 @@ the twenty-five slices carry 94% of the work, the cheap ones being fill that HDF
 without reading anything. Raising the ceiling therefore means cutting the slices finer, not
 hiring more workers.
 
-Two caveats worth carrying. First, this is a local-disk measurement, and the cost is
+**The decomposition itself is suspect, and the ceiling above may be an artifact of it.**
+The unit of work here is a *tile*: a fixed-size square of output. For a chunked product that
+is the wrong unit, because the cost of a request is set by the chunks its source footprint
+covers, not by the pixels it emits — and the two diverge violently with zoom. At stride 1 a
+512² tile is one chunk; at the stride 32 this pass uses, the same 512² tile pulls a 16384²
+footprint spanning 32×32 = 1024 chunks. The product measured above is 22,500 chunks of work
+carved into 25 tasks, a decomposition some three orders of magnitude coarser than the
+natural grain, and the observed imbalance is simply which tasks happened to cover the
+allocated chunks. So the numbers are an honest measurement of what the thumbnail does
+today, but they are **not** a measurement of how well a whole-dataset pass can be made to
+parallelize; a unit of work proportional to chunks touched would divide this job far more
+evenly and lift the ceiling well above 3.97×. What makes this more than a tuning knob is
+that the client and the crew want different units — the browser needs output-space tiles to
+place in its mosaic, while the crew needs input-space work to balance — which suggests the
+two should be decoupled rather than reconciled. Revisiting this is on the to-do pile.
+
+Two further caveats. First, this is a local-disk measurement, and the cost is
 decompression rather than I/O: repeating the single-worker pass at the end of a sweep took
 34.9 s against 33.2 s cold, which on a machine with 128 GB of memory and a 7.6 GB file
 means the page cache was not what mattered. Second, and consequently, **none of this

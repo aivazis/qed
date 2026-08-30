@@ -398,7 +398,15 @@ hatch; asynchronous connect.
 2. **Availability narrowing**: move it server-side while the panel is open for surgery, or
    leave the client-side scan?
 3. **Tile-lifecycle scope** (phase 5): adopt the tile ledger now or defer?
-4. **Warming the rest of the team**: the survey leaves only one worker with an open
+4. **The unit of work for chunked products**: every workload qed builds — the tile request,
+   the thumbnail slice, the measurement sweeps — is a fixed square of *output*, while the
+   cost of serving one is set by the *chunks* its source footprint covers. The two diverge
+   with zoom, so a whole-dataset pass at deep decimation is carved into a handful of tasks
+   of wildly unequal cost. This is recorded against the crew measurements in
+   `doc/statistics.md`, whose parallel ceiling is probably an artifact of it. The likely
+   answer is to decouple the crew's unit from the client's: tasks sized in chunks, mosaics
+   assembled from whatever set of them covers a display tile.
+5. **Warming the rest of the team**: the survey leaves only one worker with an open
    product; the others pay a cold open on their first tile, which lands on the critical
    path of the first mosaic. Candidate: post-survey warm-up tasks that fan out to the
    remaining members under cover of human selection time — noting that the workplan's
