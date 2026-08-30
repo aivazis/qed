@@ -263,6 +263,7 @@ class Dispatcher:
                 zoom=zoom,
                 origin=origin,
                 shape=shape,
+                workspace=self.store.workspace,
             )
         # if the description cannot be built, e.g. there is no dataset selection
         except Exception:

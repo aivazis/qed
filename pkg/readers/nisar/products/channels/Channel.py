@@ -57,11 +57,14 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         category = getattr(qed.libqed.nisar, self.category)
         # look for the tile maker in {libqed}
         pipeline = getattr(category, self.tag)
-        # turn the zoom levels into per-axis strides
-        stride = tuple(2**level for level in zoom)
+        # ask the dataset which of its sources serves this zoom; a product with decimated
+        # levels answers with one of them and a smaller zoom, and the pixels are the same
+        data, residual = source.resolve(zoom=zoom)
+        # turn what is left of the zoom into per-axis strides
+        stride = tuple(2**level for level in residual)
         # build the visualization pipeline and return it
         return pipeline(
-            source=source.data.dataset,
+            source=data,
             datatype=datatype,
             origin=origin,
             shape=shape,

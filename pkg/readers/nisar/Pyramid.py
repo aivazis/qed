@@ -34,7 +34,7 @@ class Pyramid:
     # interface
     def level(self, zoom: tuple) -> tuple:
         """
-        Report the source that serves a view at {zoom}, and the stride still to apply to it
+        Report the source that serves a view at {zoom}, and the zoom still to apply to it
 
         {zoom} is a decimation exponent per axis, because the two axes are not required to
         agree: the client can decouple them, and a view zoomed out horizontally while held
@@ -43,8 +43,9 @@ class Pyramid:
         over-decimates neither axis -- which is the smaller of the two exponents -- and the
         difference is made up by striding what is read, per axis.
 
-        A request always gets an answer: with no levels at all that is the base at the full
-        stride, which is exactly what the reader did before any of this existed. Fractional
+        A request always gets an answer: with no levels at all that is the base owing the
+        whole decimation, which is exactly what the reader did before any of this existed.
+        Fractional
         zoom never reaches here; the client asks for a whole level and scales the result
         itself
         """
@@ -52,18 +53,40 @@ class Pyramid:
         wanted = min(zoom)
         # a request at or above full resolution on either axis is served by the base
         if wanted <= 0:
-            # which supplies whatever striding each axis still needs
-            return self._base, tuple(2**level for level in zoom)
+            # which still owes the whole decimation
+            return self._base, tuple(zoom)
         # look for that level, then for progressively shallower ones
         for candidate in range(wanted, 0, -1):
             # if i hold this one
             if candidate in self._levels:
-                # it serves the request, and each axis makes up its own difference
+                # it serves the request, and each axis owes the difference. the origin of
+                # the tile does not move: it is in decimated coordinates, and the render
+                # scales it by whatever stride it is given, so the same origin lands on the
+                # same cells whichever level supplies them
                 return self._levels[candidate], tuple(
-                    2 ** (level - candidate) for level in zoom
+                    level - candidate for level in zoom
                 )
-        # nothing was built, so the base answers at the full stride
-        return self._base, tuple(2**level for level in zoom)
+        # nothing was built, so the base owes the whole decimation
+        return self._base, tuple(zoom)
+
+    def attach(self) -> "Pyramid":
+        """
+        Take hold of the levels an earlier pass built, without building any
+
+        This is what a worker rendering a tile does: it reads what is there and renders off
+        the product when there is nothing. The cache is opened read only, because many
+        workers may be reading the same levels at once and none of them may write
+        """
+        # where my levels would be
+        path = self.path
+        # a workspace with nowhere to keep anything, or a product nobody has prepared
+        if path is None or not path.exists():
+            # has no levels to offer, and this must not be the thing that makes one
+            return self
+        # otherwise, take hold of what is there
+        self._attach(mode="r")
+        # all done
+        return self
 
     def build(self, depth: int = 0) -> "Pyramid":
         """

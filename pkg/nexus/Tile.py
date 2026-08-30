@@ -5,6 +5,7 @@
 
 
 # support
+import journal
 import qed
 
 # the shared task core
@@ -37,6 +38,9 @@ class Tile(Chore):
             reader = self._locateReader(readers=readers, measure=False)
             # find the dataset i'm after
             dataset = self._locateDataset(reader=reader)
+            # and make sure it knows about its decimated levels, if there are any; the
+            # reader registry is persistent, so this happens once per worker per product
+            self._attachPyramid(reader=reader, dataset=dataset)
             # get its channel pipeline and mirror the controller state of the client view
             pipeline = self._configure(
                 component=dataset.channel(name=self.tag), config=self.controllers
@@ -76,8 +80,53 @@ class Tile(Chore):
         # hand off the report
         return spool
 
+    # implementation details - worker side
+    def _attachPyramid(self, reader, dataset):
+        """
+        Give {dataset} the decimated levels of its product, when they exist
+        """
+        # a dataset that already has them needs nothing
+        if getattr(dataset, "pyramid", None) is not None:
+            # so leave it alone
+            return dataset
+        # a dataset whose flavor knows nothing of levels, or a task built before the
+        # server had a workspace, renders the way it always did
+        if self.workspace is None or not hasattr(dataset, "resolve"):
+            # straight off the product
+            return dataset
+        # carefully, since a cache that cannot be opened must not cost us the tile
+        try:
+            # point a workspace at where the server keeps what it derives
+            workspace = qed.workspaces.local(name=f"{self.reader}.crew.workspace")
+            workspace.path = self.workspace
+            # take hold of the pyramid and find out which levels it holds
+            pyramid = qed.readers.nisar.pyramid(
+                reader=reader, dataset=dataset, workspace=workspace
+            )
+            # take hold of whatever levels are there; a pyramid that finds none answers
+            # every request with the base, which is what this dataset did anyway
+            pyramid.attach()
+        # if anything goes wrong
+        except Exception as error:
+            # the tile is the deliverable, so render it off the product; but say so where
+            # somebody looking for the reason can find it, since a pyramid that silently
+            # fails to attach is indistinguishable from one that was never built
+            channel = journal.debug("qed.nexus.pyramid")
+            # explain
+            channel.log(f"{self.dataset}: no levels attached: {error}")
+            # and render the way this dataset always did
+            return dataset
+        # show me what came back
+        channel = journal.debug("qed.nexus.pyramid")
+        # naming the levels, since that is what decides whether a zoomed out tile is cheap
+        channel.log(f"{self.dataset}: levels {sorted(pyramid._levels)}")
+        # hand it over
+        dataset.pyramid = pyramid
+        # all done
+        return dataset
+
     # metamethods
-    def __init__(self, view, channel, zoom, origin, shape, **kwds):
+    def __init__(self, view, channel, zoom, origin, shape, workspace=None, **kwds):
         # chain up
         super().__init__(**kwds)
         # record the tile specification
@@ -103,6 +152,11 @@ class Tile(Chore):
         pipeline = view.pipeline(channel=channel)
         # and harvest its configuration
         self.controllers = self._harvestComponent(component=pipeline)
+        # where the decimated levels of this product live, if any have been built; a
+        # worker cannot be left to decide that for itself, or it would look somewhere the
+        # server never wrote. deliberately not part of my identity: a level is cell for
+        # cell what striding the base gives, so a tile served from one is the same tile
+        self.workspace = str(workspace.path) if workspace is not None else None
         # aggregates render over a member participation mask
         self.stacked = isinstance(view.dataset, qed.stacks.dataset)
         # which travels with the request when there is one

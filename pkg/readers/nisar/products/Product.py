@@ -130,11 +130,15 @@ class Product(
         Collect a mergeable statistical sample of the tile at {origin}+{shape}, visiting
         exactly the decimated footprint the render at this {zoom} sees
         """
-        # the render pipeline decimates by striding
-        stride = tuple(2**level for level in zoom)
+        # take the same source the render took: a sample that strided the product while
+        # the render read a decimated level would undo the saving entirely, and would be
+        # measuring the same cells the long way round
+        data, residual = self.resolve(zoom=zoom)
+        # what is left of the zoom becomes the striding
+        stride = tuple(2**level for level in residual)
         # sample the strided footprint and return the mergeable record
         return qed.libqed.nisar.sample(
-            source=self.data.dataset,
+            source=data,
             datatype=self.datatype.htype,
             origin=origin,
             shape=shape,
@@ -172,6 +176,26 @@ class Product(
             yield pipeline
         # all done
         return
+
+    def resolve(self, zoom: tuple) -> tuple:
+        """
+        Report the source that serves a render at {zoom}, and the zoom still to apply to it
+
+        Ordinarily that is my own payload, owing the whole decimation. When a pyramid has
+        been built for me, a zoomed out request is served instead by the level nearest to
+        what it asked for, which holds the decimated cells already: the render then reads a
+        small dataset at a small stride rather than striding a large one, and a strided read
+        of a chunked product decompresses every chunk its footprint covers whether it keeps
+        the cells or not. The pixels are the same either way -- a level is cell for cell
+        what striding the base produces -- so nothing above here needs to know which
+        answered
+        """
+        # a dataset with no pyramid answers for itself
+        if self.pyramid is None:
+            # owing the whole decimation
+            return self.data.dataset, tuple(zoom)
+        # otherwise, let the pyramid pick the level and say what is left over
+        return self.pyramid.level(zoom=zoom)
 
     def measure(self):
         """
@@ -223,6 +247,8 @@ class Product(
         # my statistics are whatever i was handed: a survey seed when i am a twin, and
         # nothing at all when i am live, until somebody asks me to measure
         self.stats = seed
+        # the decimated levels of my data, when somebody has built and handed me them
+        self.pyramid = None
         # a live dataset takes its tiling from the file
         if not hydrated:
             # ask {h5} for its on-disk layout
