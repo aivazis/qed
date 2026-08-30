@@ -19,6 +19,7 @@ striding composes: halving twice is striding by four
 """
 
 # externals
+import math
 import os
 
 # support
@@ -64,6 +65,8 @@ cache = libh5.File(scratch, "w")
 # the level keeps the chunking of the base, so a tile of it is still one chunk
 dcpl = libh5.properties.dcpl()
 dcpl.chunk = [min(width, axis) for width, axis in zip(tile, extent)]
+# cells nobody writes must read back as fill, the way the product spells it
+dcpl.fillValue = complex(math.nan, math.nan)
 # create the level
 level = cache.create(
     path="level1", type=datatype, space=libh5.DataSpace(extent), dcpl=dcpl
@@ -72,7 +75,9 @@ level = cache.create(
 # the fixture frames its data inside a much larger grid of fill, so a tile taken anywhere
 # would likely hold nothing and compare equal for the wrong reason; these destination
 # origins have source footprints that land on the data
-origins = [(14336, 4608), (16384, 5120), (15360, 5632)]
+# they are also exactly the four that feed the level two tile checked below, so the
+# composition has a fully populated ancestry
+origins = [(16384, 5120), (16384, 5632), (16896, 5120), (16896, 5632)]
 # go through them
 for origin in origins:
     # build the tile of the level by decimating the base
@@ -101,10 +106,83 @@ for origin in origins:
     # and the two readings must be indistinguishable
     assert stored == strided
 
+# now build the level above from the level just written, and check that decimation
+# composes: striding by two twice must land exactly where striding by four would
+second = cache.create(
+    path="level2",
+    type=datatype,
+    space=libh5.DataSpace([axis // 4 for axis in shape]),
+    dcpl=dcpl,
+)
+# take a tile of it whose ancestry runs through the tiles built above
+origin = (8192, 2560)
+# build it from the level below
+qed.libqed.nisar.decimate(
+    source=level,
+    destination=second,
+    datatype=datatype,
+    origin=origin,
+    shape=tile,
+    stride=(2, 2),
+)
+# read it back at unit stride
+stored = qed.libqed.nisar.sample(
+    source=second, datatype=datatype, origin=origin, shape=tile, stride=(1, 1)
+)
+# and read the base the way a client at that zoom would have, striding by four
+strided = qed.libqed.nisar.sample(
+    source=base.data.dataset, datatype=datatype, origin=origin, shape=tile, stride=(4, 4)
+)
+# the tile must hold real data, or the comparison proves nothing
+assert stored[0] == tile[0] * tile[1]
+# and two halvings must be indistinguishable from one quartering
+assert stored == strided
+
+# a tile of pure fill is never written, so its chunk stays unallocated; what it reads back
+# as is what the level above will see, and it has to be fill. the library's own default is
+# zero, which is a perfectly good measurement, and a level built over that default would
+# hand the next one a raster with no fill in it at all -- the pyramid would densify one
+# level at a time, each holding four times the cells of the one below instead of a quarter
+empty = (0, 0)
+# decimating a region the product never wrote deposits nothing, and says so
+assert (
+    qed.libqed.nisar.decimate(
+        source=base.data.dataset,
+        destination=level,
+        datatype=datatype,
+        origin=empty,
+        shape=tile,
+        stride=(2, 2),
+    )
+    == 0
+)
+# and reading that region back finds nothing, rather than a field of zeros
+assert (
+    qed.libqed.nisar.sample(
+        source=level, datatype=datatype, origin=empty, shape=tile, stride=(1, 1)
+    )[0]
+    == 0
+)
+
 # close the file before it goes away
 cache.close()
 # and clean up after the driver
 os.unlink(scratch)
+
+# the pyramid of a dataset knows how deep it can go: the top is the level whose whole
+# raster fits in a single tile
+pyramid = qed.readers.nisar.pyramid(dataset=base, root=scratch + ".d")
+# this fixture is large enough to support several halvings
+assert pyramid.depth() > 1
+# with nothing built, every request falls back to the base at the full stride, which is
+# exactly what the reader did before any of this existed
+source, stride = pyramid.level(zoom=3)
+assert source is base.data.dataset
+assert stride == 8
+# and the base always serves itself undecimated
+source, stride = pyramid.level(zoom=0)
+assert source is base.data.dataset
+assert stride == 1
 
 
 # end of file
