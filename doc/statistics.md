@@ -76,25 +76,29 @@ sizes. On the same product, twenty-five slices at stride 32, local disk:
 
 | team | wall | speedup |
 |---|---|---|
-| 1 | 33.2 s | 1.00× |
-| 2 | 17.4 s | 1.91× |
-| 4 | 10.7 s | 3.10× |
-| 8 | 9.1 s | 3.65× |
-| 16 | 9.0 s | 3.69× |
+| 1 | 35.7 s | 1.00× |
+| 2 | 18.7 s | 1.91× |
+| 4 | 11.1 s | 3.22× |
+| 8 | 9.4 s | 3.78× |
+| 16 | 8.7 s | 4.09× |
 
-Sixteen workers are no faster than eight, and the knee is at four. The reason is not
-bandwidth but load imbalance: eight of the twenty-five slices carry 94% of the work, and
-the slowest single one takes 7.8 s, so no crew can finish the pass faster than that plus
-overhead — which is the 9 s plateau, arrived at from below. The cheap slices cover fill,
-which HDF5 returns without reading anything. Raising the ceiling therefore means cutting
-the slices finer, not hiring more workers.
+The knee is at four. Eight buys another 15%, sixteen another 8%, and there the curve stops,
+because the work is not evenly divisible: a serial calibration pass measures 37.9 s of work
+spread over twenty-five slices of which the slowest alone costs 9.6 s, and a slice is the
+unit of work, so no crew can finish the pass faster than 3.97× however many workers it has.
+The panel reports that ceiling beside the curve; the measured 4.09× sits on it. Eight of
+the twenty-five slices carry 94% of the work, the cheap ones being fill that HDF5 returns
+without reading anything. Raising the ceiling therefore means cutting the slices finer, not
+hiring more workers.
 
-Two caveats worth carrying. First, this is a local, uncompressed-cache measurement: a
-repeat of the single-worker pass at the end of the sweep took 34.9 s against 33.2 s cold,
-so with 128 GB of memory and a 7.6 GB file the cost is plainly decompression rather than
-I/O. Second, and consequently, **none of this transfers to S3**, where the pass starts out
-I/O bound and additional workers buy overlap of fetch latency rather than of CPU; the
-shape of that curve has not been measured.
+Two caveats worth carrying. First, this is a local-disk measurement, and the cost is
+decompression rather than I/O: repeating the single-worker pass at the end of a sweep took
+34.9 s against 33.2 s cold, which on a machine with 128 GB of memory and a 7.6 GB file
+means the page cache was not what mattered. Second, and consequently, **none of this
+transfers to S3**, where the pass begins I/O bound and extra workers buy overlap of fetch
+latency rather than of CPU. There the curve should keep climbing past the point where it
+flattens here, and the ceiling above — which counts only work, not waiting — is not the
+one that would bind. That measurement has not been made.
 
 ## What has been measured
 
