@@ -25,17 +25,20 @@ export const useStageReaders = (qed) => {
     // the signature of the last request, so a source the server cannot flip out of
     // {connected} is asked about only once per distinct pile rather than in a loop
     const attempted = React.useRef(null)
-    // when the pile drains, forget the last attempt, so a catalog that regresses to
-    // {connected}, e.g. after a server restart, triggers a fresh staging request
-    if (pending.length === 0) {
-        // clear the mark
-        attempted.current = null
-    }
     // schedule the staging request
     React.useEffect(() => {
-        // if every source has made contact, or a request is already on its way, or this
-        // pile has already been asked about
-        if (pending.length === 0 || isInFlight || attempted.current === signature) {
+        // when the pile drains, forget the last attempt, so a catalog that regresses to
+        // {connected}, e.g. after a server restart, asks again. this belongs here rather
+        // than in the body: a render may be discarded or repeated, and a mark moved
+        // during one would be moved twice or not at all
+        if (pending.length === 0) {
+            // clear the mark
+            attempted.current = null
+            // and there is nothing to ask for
+            return
+        }
+        // if a request is already on its way, or this pile has already been asked about
+        if (isInFlight || attempted.current === signature) {
             // there is nothing to do
             return
         }
