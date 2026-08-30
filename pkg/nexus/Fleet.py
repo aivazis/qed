@@ -17,6 +17,9 @@ from .Cache import Cache
 # the unit of work that establishes first contact
 from .Survey import Survey
 
+# the unit of work that makes a dataset worth looking at
+from .Prepare import Prepare
+
 
 # the manager of the tile rendering teams
 class Fleet(qed.component, family="qed.nexus.fleets.tile"):
@@ -61,6 +64,23 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         team = self.team(reader=task.reader)
         # hand it the work; the workplan serves newest first, which is harmless here,
         # since the survey is assigned before any tile of this product can exist
+        team.assign(task=task, callback=callback)
+        # all done
+        return self
+
+    def prepare(self, reader, dataset, workspace, callback):
+        """
+        Send the {dataset} of {reader} to its team to be made worth looking at, and arrange
+        for {callback} to receive what the pass measured
+        """
+        # describe the work as a task that can travel to a worker
+        task = Prepare(reader=reader, dataset=dataset, workspace=workspace)
+        # find the team that owns this product; it exists already, since a dataset cannot
+        # be selected before its source has been surveyed
+        team = self.team(reader=task.reader)
+        # hand it the work; the workplan serves newest first, so a preparation queued
+        # behind a burst of tile requests waits for them, which is the right order: the
+        # user is looking at those tiles now
         team.assign(task=task, callback=callback)
         # all done
         return self

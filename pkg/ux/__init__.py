@@ -12,6 +12,7 @@ from .Store import Store as store
 from .Viewport import Viewport as viewport
 from .View import View as view
 from .Sample import Sample as sample
+from .Preparation import Preparation as preparation
 
 # configurable state
 from .Source import Source as source

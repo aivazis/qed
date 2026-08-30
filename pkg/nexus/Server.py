@@ -54,6 +54,9 @@ class Server(http, family="qed.nexus.servers.http"):
             # the store hands its sources to the fleet for first contact, so a survey
             # happens on a crew member rather than on this loop
             ux.store.fleet = fleet
+            # and the crews are told where the application keeps what it derives, so the
+            # levels they build land where this process will look for them
+            ux.store.workspace = app.workspace
             # the data sources stay passive: the server boots without touching any data
             # files, and first contact waits for a client to declare the catalog relevant
             # through the {stage} mutation

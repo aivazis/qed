@@ -54,6 +54,8 @@ class View(graphene.ObjectType):
     available = graphene.List(SelectorAxis)
     # whether everything a tile request needs has been settled
     ready = graphene.Boolean(required=True)
+    # and whether the work that makes it worth looking at has finished
+    preparing = graphene.Boolean(required=True)
 
     # resolvers
     @staticmethod
@@ -69,6 +71,30 @@ class View(graphene.ObjectType):
             and view.dataset is not None
             and view.channel is not None
         )
+
+    @staticmethod
+    def resolve_preparing(view, info, **kwds):
+        """
+        Report whether this view is waiting on the work that makes its dataset worth
+        looking at
+        """
+        # get the store
+        store = info.context["store"]
+        # a view with no dataset is waiting on a selection, not on any work
+        dataset = view.dataset
+        # so it is not preparing
+        if dataset is None:
+            # and says so
+            return False
+        # look up what has been done for this dataset
+        record = store.preparation(name=dataset.pyre_name)
+        # a dataset nobody is preparing keeps the client waiting for nothing
+        if record is None:
+            # so it is not preparing either
+            return False
+        # otherwise, it is preparing while the work is still under way; a failure is not
+        # worth waiting for, since the view renders anyway, just less well
+        return record.status == record.working
 
     @staticmethod
     def resolve_id(view, info, **kwds):
