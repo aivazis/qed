@@ -131,7 +131,11 @@ stored = qed.libqed.nisar.sample(
 )
 # and read the base the way a client at that zoom would have, striding by four
 strided = qed.libqed.nisar.sample(
-    source=base.data.dataset, datatype=datatype, origin=origin, shape=tile, stride=(4, 4)
+    source=base.data.dataset,
+    datatype=datatype,
+    origin=origin,
+    shape=tile,
+    stride=(4, 4),
 )
 # the tile must hold real data, or the comparison proves nothing
 assert stored[0] == tile[0] * tile[1]
@@ -169,9 +173,12 @@ cache.close()
 # and clean up after the driver
 os.unlink(scratch)
 
+# a pyramid is told where it lives rather than going looking: the workspace the
+# application owns is the one authority on where derived data goes
+workspace = qed.workspaces.local(name="pyramid.workspace")
 # the pyramid of a dataset knows how deep it can go: the top is the level whose whole
 # raster fits in a single tile
-pyramid = qed.readers.nisar.pyramid(dataset=base, root=scratch + ".d")
+pyramid = qed.readers.nisar.pyramid(dataset=base, workspace=workspace)
 # this fixture is large enough to support several halvings
 assert pyramid.depth() > 1
 # with nothing built, every request falls back to the base at the full stride, which is
@@ -184,16 +191,22 @@ source, stride = pyramid.level(zoom=0)
 assert source is base.data.dataset
 assert stride == 1
 
-# left to itself, a pyramid keeps its levels wherever the workspace says: beside the
-# configuration the user launched from, rather than out of sight under a home directory
-workspace = qed.workspaces.local(name="pyramid.workspace")
-# which is the working directory by default
+# the workspace keeps derived data beside the configuration the user launched from,
+# rather than out of sight under a home directory
 assert str(workspace.path) == "."
-# with the derived data gathered under one folder
+# gathered under one folder
 assert str(workspace.cache(name="pyramids")) == "./.qed/pyramids"
+# which is where the pyramid puts its levels
+assert str(pyramid.path).startswith("./.qed/pyramids/")
 # and the driver leaves nothing behind
 os.rmdir("./.qed/pyramids")
 os.rmdir("./.qed")
+
+# the application owns the workspace, so everything that derives anything can be pointed
+# at the same one
+app = qed.shells.qed(name="pyramid.app")
+# it resolves to the local flavor by default
+assert isinstance(app.workspace, qed.workspaces.local)
 
 
 # end of file

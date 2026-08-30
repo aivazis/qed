@@ -154,7 +154,7 @@ class Pyramid:
         return self
 
     # metamethods
-    def __init__(self, dataset, root=None, **kwds):
+    def __init__(self, dataset, workspace, **kwds):
         # chain up
         super().__init__(**kwds)
         # remember what i am a pyramid of
@@ -170,9 +170,9 @@ class Pyramid:
         # the identity of the product this dataset came from, so a cache built against one
         # version of a file is never read against another
         self._stamp = self._identify(uri=dataset.uri)
-        # where the cache lives; the workspace decides, so derived data sits beside the
-        # configuration it belongs to rather than accumulating out of sight
-        self._root = pyre.primitives.path(root) if root else None
+        # where the cache lives is not mine to decide: the workspace the application owns
+        # is the one authority on where derived data goes, and it is handed to me
+        self._workspace = workspace
         # the file, once attached, and the levels it holds
         self._cache = None
         self._levels = {}
@@ -355,12 +355,8 @@ class Pyramid:
         """
         The directory that holds my cache
         """
-        # whoever built me may have named one
-        if self._root is not None:
-            # in which case it wins
-            return self._root
-        # otherwise the workspace decides where derived data goes
-        return self.workspace.cache(name="pyramids")
+        # the workspace decides where derived data goes
+        return self._workspace.cache(name="pyramids")
 
     @property
     def path(self):
@@ -377,9 +373,6 @@ class Pyramid:
         return root / f"{self._stamp}.h5"
 
     # constants
-    # the workspace that decides where derived data goes; shared, since every pyramid in a
-    # run belongs to the same piece of work
-    workspace = qed.workspaces.local(name="qed.workspace")
     # how hard to squeeze a level; the levels are written once and read many times, so a
     # middling setting buys most of the space at a fraction of the time the highest costs
     compression = 4
