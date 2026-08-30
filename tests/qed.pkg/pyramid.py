@@ -186,7 +186,7 @@ assert stride == 1
 
 # left to itself, a pyramid keeps its levels wherever the workspace says: beside the
 # configuration the user launched from, rather than out of sight under a home directory
-workspace = qed.workspace(name="pyramid.workspace")
+workspace = qed.workspaces.local(name="pyramid.workspace")
 # which is the working directory by default
 assert str(workspace.path) == "."
 # with the derived data gathered under one folder
