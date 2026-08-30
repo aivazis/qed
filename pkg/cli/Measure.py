@@ -201,7 +201,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 return 1
             # the tile path resolves its reader through server side view state, so drive the
             # selections the way the client would
-            self._select(reader=reader, channel=name)
+            self._select(reader=reader, dataset=dataset, channel=name)
             # warm up with one full pass so every concurrency level sees the same cache state
             self._batch(urls=urls, workers=max(self.clients))
             # the collected results, one entry per concurrency level
@@ -291,6 +291,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         ]
         # the collected results, one entry per team size
         results = []
+        # the intrinsic cost of each slice, measured once, serially
+        costs = None
         # sweep the team sizes
         for size in self.crews:
             # the launcher reads the team size off me, so install this one
@@ -310,7 +312,13 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                     return 1
                 # the tile path resolves its reader through server side view state, so
                 # drive the selections the way the client would
-                self._select(reader=reader, channel=name)
+                self._select(reader=reader, dataset=dataset, channel=name)
+                # on the first level, walk the slices one at a time: under concurrency a
+                # request waits behind its peers, so its latency measures queueing rather
+                # than work, and the intrinsic cost of a slice shows only serially
+                if costs is None:
+                    # pay for one serial pass; the load balance is read from it
+                    _, costs, _ = self._batch(urls=urls, workers=1)
                 # fire the whole pass at once, the way the thumbnail does; every slice is
                 # distinct, so nothing collapses in the workplan
                 elapsed, latencies, failures = self._batch(urls=urls, workers=len(urls))
@@ -325,31 +333,39 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 warning.log(f"{failures} slices failed with a team of {size}")
             # collect the level
             results.append((size, elapsed, latencies))
-            # the slowest single slice is the floor no amount of workers can go below
-            slowest = max(latencies) if latencies else 0
             # show me
-            channel.line(
-                f"team {size:3}: {elapsed / 1000:7.2f} s"
-                f"   slowest slice {slowest / 1000:6.2f} s"
-            )
+            channel.line(f"team {size:3}: {elapsed / 1000:7.2f} s")
         # the smallest team sets the reference the speedups are measured against
         _, base, _ = results[0]
         # report the shape of the curve
         channel.line("")
-        channel.line("speedup against the smallest team, and the load balance:")
+        channel.line("speedup against the smallest team:")
         # go through the levels
-        for size, elapsed, latencies in results:
+        for size, elapsed, _ in results:
             # the speedup this team achieved
             speedup = base / elapsed if elapsed else 0
-            # the ceiling load balance allows: no pass can finish before its slowest slice
-            total = sum(latencies)
-            ceiling = total / max(latencies) if latencies else 0
             # show me
+            channel.line(f"  team {size:3}: {speedup:5.2f}x")
+        # if the serial calibration produced anything
+        if costs:
+            # the work is only as divisible as its largest indivisible piece: a slice is
+            # the unit of work, so no crew can finish the pass faster than its slowest one
+            total = sum(costs)
+            slowest = max(costs)
+            # which sets a ceiling on the speedup, whatever the crew size
+            channel.line("")
             channel.line(
-                f"  team {size:3}: {speedup:5.2f}x"
-                f"   work concentration: slowest slice is "
-                f"{max(latencies) / total * 100 if total else 0:4.1f}% of the total, "
-                f"so no team beats {ceiling:5.2f}x"
+                f"load balance: {len(costs)} slices, "
+                f"{total / 1000:.2f} s of work in total, "
+                f"slowest {slowest / 1000:.2f} s"
+            )
+            # count the slices that carry the bulk of it
+            heavy = [cost for cost in costs if cost > total / len(costs)]
+            # and say how concentrated the work is
+            channel.line(
+                f"  {len(heavy)} of {len(costs)} slices carry "
+                f"{sum(heavy) / total * 100:.0f}% of the work, "
+                f"so no crew beats {total / slowest:.2f}x"
             )
         # flush the report
         channel.log()
@@ -801,10 +817,13 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # the server never came up
         return False
 
-    def _select(self, reader, channel):
+    def _select(self, reader, dataset, channel):
         """
-        Drive the server side view state to the target {reader} and {channel}
+        Drive the server side view state to the target {reader}, {dataset}, and {channel}
         """
+        # the server boots without touching any data file, so its catalog is empty until a
+        # client declares it relevant; ask it to stage, the way the viz activity does
+        self._stage()
         # select the reader in viewport 0
         self._graphql(
             query=(
@@ -812,6 +831,31 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 f'reader: "{reader.pyre_name}"}}) {{ view {{ dataset {{ name }} }} }} }}'
             )
         )
+        # a product whose axes are not all single valued does not resolve from the reader
+        # selection alone, so pin each axis to the coordinate that identifies my target
+        for axis, value in dict(dataset.selector).items():
+            # read back what the view currently holds for this axis
+            reply = self._graphql(
+                query="{ qed { views { selections { name value } } } }"
+            )
+            # unpack the selections of viewport 0
+            current = {
+                entry["name"]: entry["value"]
+                for entry in reply["data"]["qed"]["views"][0]["selections"]
+            }
+            # an axis already sitting on the value i want needs no help; toggling it would
+            # clear the selection rather than confirm it
+            if current.get(axis) == value:
+                # so leave it alone
+                continue
+            # otherwise, pin it
+            self._graphql(
+                query=(
+                    f"mutation {{ viewCoordinateToggle(input: {{viewport: 0, "
+                    f'reader: "{reader.pyre_name}", selector: "{axis}", '
+                    f'value: "{value}"}}) {{ view {{ dataset {{ name }} }} }} }}'
+                )
+            )
         # and pick the channel
         self._graphql(
             query=(
@@ -822,6 +866,33 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         )
         # all done
         return
+
+    def _stage(self):
+        """
+        Ask the launched server to establish first contact with its data sources, and wait
+        for the surveys to land
+        """
+        # ask
+        self._graphql(query="mutation { stage(input: {}) { readers { name } } }")
+        # the surveys run on the crews, so the answer arrives later; wait for it
+        for _ in range(600):
+            # read the catalog
+            reply = self._graphql(query="{ qed { readers { name status } } }")
+            # unpack the standings
+            rows = reply["data"]["qed"]["readers"]
+            # a source that failed will never become ready, so stop waiting on the pile
+            # once nobody is still working
+            if all(row["status"] in ("ready", "failed") for row in rows):
+                # everybody has settled
+                return True
+            # otherwise, wait a beat
+            time.sleep(0.5)
+        # the surveys never settled
+        warning = journal.warning("qed.measure")
+        # say so
+        warning.log("the launched server never finished staging its sources")
+        # and report it
+        return False
 
     def _graphql(self, query):
         """
