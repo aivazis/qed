@@ -24,6 +24,9 @@ namespace qed::py::nisar {
     void profile(py::module &);
     // stats
     void stats(py::module &);
+
+    // the decimation that builds pyramid levels
+    void pyramid(py::module &);
 }
 
 

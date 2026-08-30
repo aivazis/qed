@@ -31,6 +31,8 @@ qed::py::nisar::nisar(py::module & m)
     profile(nisar);
     // stats
     stats(nisar);
+    // the decimation that builds pyramid levels
+    pyramid(nisar);
 
     // all done
     return;

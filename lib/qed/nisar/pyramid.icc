@@ -1,0 +1,60 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// build a tile of a pyramid level by decimating the level below it
+template <typename sourceT>
+auto
+qed::nisar::decimate(
+    // the level being read
+    const dataset_t & source,
+    // the level being written
+    const dataset_t & destination,
+    // the data layout, shared by both
+    const datatype_t & datatype,
+    // the origin of the tile, in the coordinates of the destination
+    typename sourceT::index_type origin,
+    // the shape of the tile, in the coordinates of the destination
+    typename sourceT::shape_type tile,
+    // the decimation, applied to the source
+    typename sourceT::index_type stride) -> void
+{
+    // the region of the source this tile covers starts at the destination origin scaled by
+    // the decimation; go through the axes
+    auto from = origin;
+    // and scale each one
+    for (int axis = 0; axis < decltype(from)::rank(); ++axis) {
+        // by the stride, since one destination cell stands for {stride} source cells
+        from[axis] *= stride[axis];
+    }
+
+    // read the strided tile; the hyperslab machinery applies the decimation, so what comes
+    // back is dense in memory and already the shape of the destination tile
+    auto data = pyre::h5::read<sourceT>(source, datatype, from, tile, stride);
+
+    // express the destination region the way the writer wants it
+    auto cast = [](auto extent) -> std::size_t {
+        return static_cast<std::size_t>(extent);
+    };
+    // the rank of the request
+    constexpr auto rank = sourceT::shape_type::rank();
+    // the placement of the tile within the destination, and its extent
+    pyre::h5::shape_t at(rank), span(rank);
+    std::transform(origin.begin(), origin.end(), at.begin(), cast);
+    std::transform(tile.begin(), tile.end(), span.begin(), cast);
+
+    // deposit it; the buffer is dense and matches the region exactly, so this is a
+    // straight copy into the destination chunks
+    pyre::h5::write(destination, data, datatype, at, span);
+
+    // all done
+    return;
+}
+
+
+// end of file

@@ -27,6 +27,8 @@
 #include "profile.h"
 // statistics
 #include "stats.h"
+// the decimation that builds pyramid levels
+#include "pyramid.h"
 
 
 // end of file
