@@ -8,6 +8,8 @@
 import qed
 
 # publish the readers
+from .Pyramid import Pyramid as pyramid
+
 from .L0A import L0A as l0a
 
 # level 0
