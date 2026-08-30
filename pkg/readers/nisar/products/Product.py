@@ -173,7 +173,6 @@ class Product(
         # all done
         return
 
-    # interface
     def measure(self):
         """
         Collect the statistics my channels tune themselves from, and tune them
@@ -194,6 +193,26 @@ class Product(
         self._tuneChannels()
         # hand off the record
         return self.stats
+
+    def survey(self):
+        """
+        Report what a client needs to know about me, without any of my payload
+        """
+        # my metadata travels as a finding i author myself, so my seed statistics arrive
+        # in exactly the shape my channels expect
+        return qed.nexus.finding(
+            # the factory that materializes my twin
+            factory=self.pyre_family(),
+            # my layout
+            cell=self.cell.pyre_family(),
+            shape=tuple(self.shape),
+            origin=tuple(self.origin),
+            tile=tuple(self.tile),
+            # the channels i support
+            channels=tuple(self.channels.keys()),
+            # and the statistics my channels tuned themselves against
+            stats=self.stats,
+        )
 
     # metamethods
     def __init__(self, data=None, hydrated=False, seed=None, **kwds):
@@ -217,26 +236,6 @@ class Product(
 
         # all done
         return
-
-    def survey(self):
-        """
-        Report what a client needs to know about me, without any of my payload
-        """
-        # my metadata travels as a finding i author myself, so my seed statistics arrive
-        # in exactly the shape my channels expect
-        return qed.nexus.finding(
-            # the factory that materializes my twin
-            factory=self.pyre_family(),
-            # my layout
-            cell=self.cell.pyre_family(),
-            shape=tuple(self.shape),
-            origin=tuple(self.origin),
-            tile=tuple(self.tile),
-            # the channels i support
-            channels=tuple(self.channels.keys()),
-            # and the statistics my channels tuned themselves against
-            stats=self.stats,
-        )
 
     # implementation details
     def _tuneChannels(self):
@@ -272,27 +271,12 @@ class Product(
 
     def _collectStatistics(self):
         """
-        Collect statistics from a sample of my data
+        Collect statistics by probing my data in several places
         """
-        # get my data
-        data = self.data
-        # extract the underlying dataset
-        source = data.dataset
-        # and its shape
-        shape = data.shape
-
-        # make a tile that fits within my shape
-        tile = tuple(min(256, s) for s in shape)
-        # center it in my shape
-        center = tuple((s - t) // 2 for s, t in zip(shape, tile))
-
-        # compute the stats
-        stats = qed.libqed.nisar.stats(
-            source=source, datatype=self.datatype.htype, origin=center, shape=tile
-        )
-
-        # and return them
-        return stats
+        # geocoded products frame their data inside a much larger grid of fill, so a single
+        # window in the middle finds nothing at all on some of them; probe a spread of
+        # windows instead, which costs about the same and finds data wherever it sits
+        return qed.readers.probe(dataset=self)
 
 
 # end of file

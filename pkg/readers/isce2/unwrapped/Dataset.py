@@ -147,6 +147,26 @@ class Dataset(
         # hand off the record
         return self.stats
 
+    def survey(self):
+        """
+        Report what a client needs to know about me, without any of my payload
+        """
+        # my metadata travels as a finding i author myself, so my seed statistics arrive
+        # as the list of per-band records my channels expect, rather than a single record
+        return qed.nexus.finding(
+            # the factory that materializes my twin
+            factory=self.pyre_family(),
+            # my layout
+            cell=self.cell.pyre_family(),
+            shape=tuple(self.shape),
+            origin=tuple(self.origin),
+            tile=tuple(self.tile),
+            # the channels i support
+            channels=tuple(self.channels.keys()),
+            # and the statistics my channels tuned themselves against
+            stats=self.stats,
+        )
+
     # metamethods
     def __init__(self, hydrated=False, seed=None, **kwds):
         # chain up
@@ -168,26 +188,6 @@ class Dataset(
 
         # all done
         return
-
-    def survey(self):
-        """
-        Report what a client needs to know about me, without any of my payload
-        """
-        # my metadata travels as a finding i author myself, so my seed statistics arrive
-        # as the list of per-band records my channels expect, rather than a single record
-        return qed.nexus.finding(
-            # the factory that materializes my twin
-            factory=self.pyre_family(),
-            # my layout
-            cell=self.cell.pyre_family(),
-            shape=tuple(self.shape),
-            origin=tuple(self.origin),
-            tile=tuple(self.tile),
-            # the channels i support
-            channels=tuple(self.channels.keys()),
-            # and the statistics my channels tuned themselves against
-            stats=self.stats,
-        )
 
     # implementation details
     def _tuneChannels(self):

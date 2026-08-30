@@ -154,21 +154,6 @@ class Dataset(
         # hand off the record
         return self.stats
 
-    # metamethods
-    def __init__(self, hydrated=False, seed=None, **kwds):
-        # chain up
-        super().__init__(**kwds)
-        # my statistics are whatever i was handed: a survey seed when i am a twin, and
-        # nothing at all when i am live, until somebody asks me to measure
-        self.stats = seed
-        # a live dataset lays a grid over its file; a twin holds no payload at all
-        self.data = None if hydrated else self._open()
-        # populate my channels
-        self._registerChannels()
-
-        # all done
-        return
-
     def survey(self):
         """
         Report what a client needs to know about me, without any of my payload
@@ -188,6 +173,21 @@ class Dataset(
             # and the statistics my channels tuned themselves against
             stats=self.stats,
         )
+
+    # metamethods
+    def __init__(self, hydrated=False, seed=None, **kwds):
+        # chain up
+        super().__init__(**kwds)
+        # my statistics are whatever i was handed: a survey seed when i am a twin, and
+        # nothing at all when i am live, until somebody asks me to measure
+        self.stats = seed
+        # a live dataset lays a grid over its file; a twin holds no payload at all
+        self.data = None if hydrated else self._open()
+        # populate my channels
+        self._registerChannels()
+
+        # all done
+        return
 
     # implementation details
     def _tuneChannels(self):
