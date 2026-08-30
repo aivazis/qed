@@ -172,6 +172,41 @@ assert (
     == 0
 )
 
+
+# the point of the whole exercise: a render served from a level must be the same picture
+# as one that strides the base. stand in for a pyramid with the level built above, which
+# covers the tiles this render reads
+class Stub:
+    """
+    A pyramid holding the one level this driver built
+    """
+
+    # interface
+    def level(self, zoom):
+        """
+        Serve everything from the level, which owes one halving less than the request
+        """
+        # the level is the base decimated once, so it owes whatever is left
+        return level, tuple(step - 1 for step in zoom)
+
+
+# a tile whose footprint lies inside the level tiles built above
+spec = {"zoom": (1, 1), "origin": (16384, 5120), "shape": (256, 256)}
+# the channel that renders it
+amplitude = base.channel(name="amplitude")
+# render it the way the reader always has, striding the product
+straight = bytes(memoryview(base.render(channel=amplitude, **spec)))
+# hand the dataset its levels and render again
+base.pyramid = Stub()
+served = bytes(memoryview(base.render(channel=amplitude, **spec)))
+# the pictures must be indistinguishable, or the pyramid would change what a user sees
+# depending on whether it happened to have been built
+assert straight == served
+# and the tile must hold something, or the comparison proves nothing
+assert len(set(straight)) > 1
+# put the dataset back the way it was
+base.pyramid = None
+
 # close the file before it goes away
 cache.close()
 # and clean up after the driver
@@ -187,19 +222,19 @@ pyramid = qed.readers.nisar.pyramid(reader=reader, dataset=base, workspace=works
 assert pyramid.depth() > 1
 # with nothing built, every request falls back to the base at the full stride, which is
 # exactly what the reader did before any of this existed
-source, stride = pyramid.level(zoom=(3, 3))
+source, residual = pyramid.level(zoom=(3, 3))
 assert source is base.data.dataset
-assert stride == (8, 8)
-# and the base always serves itself undecimated
-source, stride = pyramid.level(zoom=(0, 0))
+assert residual == (3, 3)
+# and a request at full resolution owes nothing
+source, residual = pyramid.level(zoom=(0, 0))
 assert source is base.data.dataset
-assert stride == (1, 1)
+assert residual == (0, 0)
 # the two axes are not required to agree, since the client can decouple them; a request
 # that zooms one axis further than the other is served by the level that over-decimates
 # neither, and each axis makes up its own difference by striding what it reads
-source, stride = pyramid.level(zoom=(3, 1))
+source, residual = pyramid.level(zoom=(3, 1))
 assert source is base.data.dataset
-assert stride == (8, 2)
+assert residual == (3, 1)
 
 # a cache is written by one process and read by others -- a crew member calls the same
 # reader something else, and a later run may call it a third thing -- so the names inside
