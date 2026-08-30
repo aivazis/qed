@@ -26,7 +26,7 @@ qed::py::nisar::pyramid(py::module & m)
         // the handler
         [](const dataset_t & source, const dataset_t & destination,
            const datatype_t & datatype, const py::iterable & origin,
-           const py::iterable & shape, const py::iterable & stride) -> std::size_t {
+           const py::iterable & shape, const py::iterable & stride) -> sample_t {
             // read the strided tile and deposit it in the destination
             return qed::nisar::decimate<grid_t>(
                 source, destination, datatype, asIndex<2>(origin), asShape<2>(shape),
@@ -36,7 +36,7 @@ qed::py::nisar::pyramid(py::module & m)
         "source"_a, "destination"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a,
         // the docstring
         "fill the {destination} tile at {origin}+{shape} by decimating {source} by "
-        "{stride}, and report how many of its cells were not fill");
+        "{stride}, and report a mergeable statistical record of what it held");
 
     // all done
     return;

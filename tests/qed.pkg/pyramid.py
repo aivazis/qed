@@ -81,7 +81,7 @@ origins = [(16384, 5120), (16384, 5632), (16896, 5120), (16896, 5632)]
 # go through them
 for origin in origins:
     # build the tile of the level by decimating the base
-    qed.libqed.nisar.decimate(
+    deposited = qed.libqed.nisar.decimate(
         source=base.data.dataset,
         destination=level,
         datatype=datatype,
@@ -105,6 +105,9 @@ for origin in origins:
     assert stored[0] == tile[0] * tile[1]
     # and the two readings must be indistinguishable
     assert stored == strided
+    # the decimation measured the very cells it moved, so its own record agrees with both
+    # without anybody reading them a second time
+    assert deposited == stored
 
 # now build the level above from the level just written, and check that decimation
 # composes: striding by two twice must land exactly where striding by four would
@@ -148,7 +151,8 @@ assert stored == strided
 # hand the next one a raster with no fill in it at all -- the pyramid would densify one
 # level at a time, each holding four times the cells of the one below instead of a quarter
 empty = (0, 0)
-# decimating a region the product never wrote deposits nothing, and says so
+# decimating a region the product never wrote deposits nothing, and says so: the record it
+# reports counts no cells at all
 assert (
     qed.libqed.nisar.decimate(
         source=base.data.dataset,
@@ -157,7 +161,7 @@ assert (
         origin=empty,
         shape=tile,
         stride=(2, 2),
-    )
+    )[0]
     == 0
 )
 # and reading that region back finds nothing, rather than a field of zeros
@@ -190,6 +194,17 @@ assert stride == 8
 source, stride = pyramid.level(zoom=0)
 assert source is base.data.dataset
 assert stride == 1
+
+# a cache is written by one process and read by others -- a crew member calls the same
+# reader something else, and a later run may call it a third thing -- so the names inside
+# it must come from the product rather than from whatever this process named its reader
+other = qed.readers.nisar.gslc(name="pyramid.other", uri=f"file:{product}")
+other.open(measure=False)
+twin, *_ = other.datasets
+# the two readers disagree about what to call themselves
+assert twin.pyre_name != base.pyre_name
+# but their pyramids agree on where everything goes
+assert qed.readers.nisar.pyramid(dataset=twin, workspace=workspace).path == pyramid.path
 
 # the workspace keeps derived data beside the configuration the user launched from,
 # rather than out of sight under a home directory
