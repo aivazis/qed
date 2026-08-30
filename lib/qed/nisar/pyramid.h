@@ -17,6 +17,10 @@ namespace qed::nisar {
     // cell it keeps. decimation here is plain striding, exactly what the render kernels do,
     // so a level built by repeated halving is cell for cell identical to a strided read of
     // the base; that is what lets a pyramid read stand in for the real thing
+    //
+    // reports the number of cells the tile held that were not fill; a tile of pure fill is
+    // not written at all, so the destination chunk stays unallocated and a sparse product
+    // does not become a dense one
     template <typename sourceT>
     auto decimate(
         // the level being read
@@ -30,7 +34,7 @@ namespace qed::nisar {
         // the shape of the tile, in the coordinates of the destination
         typename sourceT::shape_type tile,
         // the decimation, applied to the source
-        typename sourceT::index_type stride) -> void;
+        typename sourceT::index_type stride) -> std::size_t;
 }
 
 
