@@ -187,13 +187,19 @@ pyramid = qed.readers.nisar.pyramid(reader=reader, dataset=base, workspace=works
 assert pyramid.depth() > 1
 # with nothing built, every request falls back to the base at the full stride, which is
 # exactly what the reader did before any of this existed
-source, stride = pyramid.level(zoom=3)
+source, stride = pyramid.level(zoom=(3, 3))
 assert source is base.data.dataset
-assert stride == 8
+assert stride == (8, 8)
 # and the base always serves itself undecimated
-source, stride = pyramid.level(zoom=0)
+source, stride = pyramid.level(zoom=(0, 0))
 assert source is base.data.dataset
-assert stride == 1
+assert stride == (1, 1)
+# the two axes are not required to agree, since the client can decouple them; a request
+# that zooms one axis further than the other is served by the level that over-decimates
+# neither, and each axis makes up its own difference by striding what it reads
+source, stride = pyramid.level(zoom=(3, 1))
+assert source is base.data.dataset
+assert stride == (8, 2)
 
 # a cache is written by one process and read by others -- a crew member calls the same
 # reader something else, and a later run may call it a third thing -- so the names inside
