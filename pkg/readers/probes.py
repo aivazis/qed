@@ -9,35 +9,39 @@ import journal
 
 
 # estimate the statistics of a dataset by probing it in several places
-def probe(dataset, windows: int = 4, extent: int = 256) -> tuple:
+def probe(dataset, windows: int = 4) -> tuple:
     """
     Estimate the display range of {dataset} from a grid of {windows}x{windows} sample
-    windows of up to {extent} cells on a side, spread across its full extent
+    windows spread across its full extent
 
     A single window in the middle of the raster is a poor estimator: a geocoded product
     frames its data inside a much larger grid of fill, so the middle is often empty, and a
     swath that runs along one edge is invisible from the center no matter how large the
-    window is. Spreading a few small windows over the whole extent costs about as much and
-    finds data wherever it happens to sit.
+    window is. Spreading a few windows over the whole extent costs about as much and finds
+    data wherever it happens to sit.
 
     Windows are used rather than a strided pass over everything because stride touches
     every chunk of the file: on a compressed product that means decompressing all of it,
     which is minutes of work for a seed. Each window, by contrast, touches only the chunks
-    it lands in
+    it lands in -- and it lands in exactly one, because the window is the dataset's own
+    tile, which is the chunk shape for products that have one, and its origin is snapped
+    to a multiple of that shape. A window that straddled a boundary would oblige the
+    library to decompress as many as four chunks to deliver the cells of one
     """
     # unpack the extent of the raster
     shape = tuple(dataset.shape)
-    # size a window, keeping it inside the raster on both axes
-    span = tuple(min(extent, axis) for axis in shape)
+    # the window is the dataset's preferred tile, kept inside the raster on both axes
+    span = tuple(min(width, axis) for width, axis in zip(tuple(dataset.tile), shape))
     # the last origin that still fits a whole window on each axis
     last = tuple(axis - width for axis, width in zip(shape, span))
     # the number of stops per axis, never more than the axis can hold distinctly
     stops = tuple(min(windows, axis // width + 1) for axis, width in zip(last, span))
-    # plan the origins: evenly spaced from the first row to the last that fits
+    # plan the origins: evenly spaced from the first row to the last that fits, each one
+    # snapped back to a multiple of the window so it sits inside a single chunk
     origins = [
         (
-            last[0] * i // max(stops[0] - 1, 1),
-            last[1] * j // max(stops[1] - 1, 1),
+            (last[0] * i // max(stops[0] - 1, 1)) // span[0] * span[0],
+            (last[1] * j // max(stops[1] - 1, 1)) // span[1] * span[1],
         )
         for i in range(stops[0])
         for j in range(stops[1])
