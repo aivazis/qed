@@ -22,7 +22,7 @@ qed::nisar::decimate(
     // the shape of the tile, in the coordinates of the destination
     typename sourceT::shape_type tile,
     // the decimation, applied to the source
-    typename sourceT::index_type stride) -> std::size_t
+    typename sourceT::index_type stride) -> native::sample_t
 {
     // the region of the source this tile covers starts at the destination origin scaled by
     // the decimation; go through the axes
@@ -37,16 +37,11 @@ qed::nisar::decimate(
     // back is dense in memory and already the shape of the destination tile
     auto data = pyre::h5::read<sourceT>(source, datatype, from, tile, stride);
 
-    // count what the tile actually holds
-    std::size_t cells = 0;
-    // by going through it
-    for (auto value : data) {
-        // and counting everything that is not fill
-        if (!std::isnan(std::abs(value))) {
-            // one more
-            ++cells;
-        }
-    }
+    // measure what the tile holds. every cell of it is in hand already, so the statistics
+    // of the level, and through it of the whole raster, cost nothing beyond the arithmetic
+    auto measured = native::sample(data, { 0, 0 }, tile, decltype(stride)::one());
+    // the count comes first in the record
+    auto cells = std::get<0>(measured);
     // a geocoded product frames its data inside a much larger grid of fill, and the
     // library does not allocate a chunk nobody writes; writing a tile of pure fill would
     // therefore turn a sparse product into a dense one, which costs both the space and the
@@ -54,7 +49,7 @@ qed::nisar::decimate(
     if (cells == 0) {
         // leave the destination chunk unallocated; it reads back as fill, which is what
         // the tile held anyway
-        return cells;
+        return measured;
     }
 
     // express the destination region the way the writer wants it
@@ -73,7 +68,7 @@ qed::nisar::decimate(
     pyre::h5::write(destination, data, datatype, at, span);
 
     // report what the tile held
-    return cells;
+    return measured;
 }
 
 

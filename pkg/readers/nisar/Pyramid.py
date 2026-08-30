@@ -64,7 +64,7 @@ class Pyramid:
         # figure out how deep to go
         depth = depth if depth > 0 else self.depth()
         # open the cache for writing
-        cache = self._attach(mode="a")
+        cache = self._attach(mode="r+")
         # if it could not be opened, the complaint has been lodged
         if cache is None:
             # so there is nothing to do
@@ -87,13 +87,13 @@ class Pyramid:
                 break
             # make the level
             level = self._create(cache=cache, exponent=exponent, extent=extent)
-            # count what the level turns out to hold
-            cells, written = 0, 0
+            # count the tiles that turn out to hold anything
+            written = 0
             # walk it in tiles, which are chunks, so no chunk is written twice
             for origin, shape in self._tiles(extent=extent):
                 # and fill each one by decimating the level below; a tile of pure fill is
                 # skipped, so the level stays as sparse as the product it came from
-                yields = qed.libqed.nisar.decimate(
+                record = qed.libqed.nisar.decimate(
                     source=source,
                     destination=level,
                     datatype=self._datatype,
@@ -101,17 +101,24 @@ class Pyramid:
                     shape=shape,
                     stride=(2, 2),
                 )
-                # fold in what it deposited
-                cells += yields
-                # counting the tiles that held anything
-                written += 1 if yields else 0
+                # the first level is the only one that reads the product, so it is the one
+                # whose records describe the data rather than a decimation of it
+                if exponent == 1:
+                    # fold its measurement into the running statistics of the raster
+                    self.statistics.merge(record=record)
+                # count the tiles that held anything
+                written += 1 if record[0] else 0
             # record it
             self._levels[exponent] = level
             # show me
             channel.log(
                 f"{self._name}: level {exponent} of extent {extent}, "
-                f"{written} tiles written, {cells} cells"
+                f"{written} tiles written"
             )
+        # the statistics were measured while the first level was being built, and a level
+        # is built once; keep them beside it, or a pyramid found on disk would arrive
+        # without the very numbers it was the cheapest way to compute
+        self._remember(cache=cache)
         # all done
         return self
 
@@ -157,8 +164,11 @@ class Pyramid:
     def __init__(self, dataset, workspace, **kwds):
         # chain up
         super().__init__(**kwds)
-        # remember what i am a pyramid of
-        self._name = dataset.pyre_name
+        # remember what i am a pyramid of. the name has to be the dataset's identity within
+        # its product, not the name this process happens to have given its reader: a crew
+        # member calls the same reader something else, and a later run may call it a third
+        # thing, and none of them could read a cache written under another's name
+        self._name = self._designate(dataset=dataset)
         self._shape = tuple(dataset.shape)
         self._tile = tuple(dataset.tile)
         self._datatype = dataset.datatype.htype
@@ -176,10 +186,28 @@ class Pyramid:
         # the file, once attached, and the levels it holds
         self._cache = None
         self._levels = {}
+        # what the product turns out to hold; building the first level reads every cell of
+        # it, so the statistics of the whole raster accumulate as a byproduct rather than
+        # costing a pass of their own
+        self.statistics = qed.ux.sample()
         # all done
         return
 
     # implementation details
+    def _designate(self, dataset) -> str:
+        """
+        Build the name a dataset goes by inside a cache
+        """
+        # its selector says which dataset of the product this is, in terms the product
+        # itself supplies, so every process that opens the file agrees on the answer
+        selector = dict(dataset.selector)
+        # a product with no selector has one dataset, and needs no name to tell it apart
+        if not selector:
+            # so anything stable will do
+            return "data"
+        # otherwise, spell out the coordinates in a fixed order
+        return ".".join(f"{axis}={selector[axis]}" for axis in sorted(selector))
+
     def _identify(self, uri) -> str:
         """
         Build a stamp that identifies the exact bytes this pyramid was derived from
@@ -234,6 +262,8 @@ class Pyramid:
         self._cache = cache
         # take stock of the levels it already holds
         self._levels = self._survey(cache=cache)
+        # and of what an earlier run measured while it built them
+        self._recall(cache=cache)
         # hand it off
         return cache
 
@@ -313,6 +343,60 @@ class Pyramid:
             cells *= width
         # each cell is a complex pair of singles; ask the type rather than assume
         return cells * self._datatype.bytes
+
+    def _remember(self, cache) -> "Pyramid":
+        """
+        Keep my statistics beside my levels
+        """
+        # nothing was measured, so there is nothing to keep
+        if self.statistics.count == 0:
+            # leave the cache alone
+            return self
+        # go through the parts of the record
+        for part, value in self._parts().items():
+            # the name it goes by
+            name = f"{self._name}.{part}"
+            # a number already there was written by the run that built the levels
+            if cache.hasAttribute(name=name):
+                # and a level is built once, so it still stands
+                continue
+            # otherwise, make the attribute
+            attribute = cache.createAttribute(
+                name=name,
+                type=qed.h5.memtypes.double.htype,
+                space=qed.h5.libh5.DataSpace([]),
+            )
+            # and record the number
+            attribute.double(float(value))
+        # all done
+        return self
+
+    def _recall(self, cache) -> "Pyramid":
+        """
+        Take back the statistics an earlier run measured while it built my levels
+        """
+        # go through the parts of the record
+        for part in self._parts():
+            # the name it goes by
+            name = f"{self._name}.{part}"
+            # a cache that does not carry this part carries none of them
+            if not cache.hasAttribute(name=name):
+                # so there is nothing to take back
+                return self
+            # otherwise, install it
+            setattr(self.statistics, part, cache.getAttribute(name=name).double())
+        # all done
+        return self
+
+    def _parts(self) -> dict:
+        """
+        The pieces of my statistical record, by the name each goes by
+        """
+        # the accumulator carries a population, its extrema, and the running moments
+        return {
+            part: getattr(self.statistics, part)
+            for part in ("count", "min", "mean", "m2", "max")
+        }
 
     def _levelName(self, exponent: int) -> str:
         """
