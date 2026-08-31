@@ -49,6 +49,12 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         team = self.team(reader=task.reader)
         # and hand it the work
         team.assign(task=task, callback=callback)
+        # make a channel
+        channel = journal.debug("qed.nexus.fleet")
+        # and say what the team looks like the moment after it was given work; taken here
+        # rather than before the assignment, so the line describes the state the task is
+        # actually entering
+        channel.log(f"{task.reader}: assigned a tile; {team.census()}")
         # all done
         return self
 
