@@ -22,9 +22,8 @@ class Datatype(qed.flow.product, implements=qed.protocols.datatype):
     channels.doc = "the names of channels provided by this datatype"
 
     tile = qed.properties.tuple(schema=qed.properties.int())
-    tile.default = 512,512
+    tile.default = 512, 512
     tile.doc = "the preferred shape of dataset subsets"
-
 
     # constants
     summary = ("value",)
@@ -33,6 +32,11 @@ class Datatype(qed.flow.product, implements=qed.protocols.datatype):
     # what {pyre.grid} wants when it lays a grid over a block of memory
     cell = None
 
+    # the value my cells use to say "there is nothing here", or {None} when they have no way to
+    # say it. this is the vocabulary the statistics kernels speak: they skip a cell whose
+    # magnitude is a nan and count every other one, so a raster that can hold a nan spells
+    # absence with one, and a raster that cannot has no absent cells at all
+    blank = None
 
     @property
     def tag(self):

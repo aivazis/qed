@@ -334,6 +334,47 @@ if covariances.exists():
     # product would have given: a level is cell for cell what striding the base produces
     assert straight == served
 
+    # a level is built by skipping the tiles that hold nothing, so what an unwritten chunk
+    # reads back as decides whether the level is the raster it came from. this product is
+    # the case that matters: it frames its data in nans while declaring the library's
+    # default fill of zero, and a level built on that declaration would answer a zoomed out
+    # request with a margin of perfectly good zeros where the product has nothing at all
+    assert covariance.data.dataset.fillValue == 0.0
+    assert covariance.cell.blank != covariance.cell.blank
+    # a raster whose cells cannot hold a nan never has a tile skipped, so it keeps the
+    # value the product declared
+    assert mask.cell.blank is None
+
+    # build a real level, the way a preparation does
+    scratchWorkspace = qed.workspaces.local(name="pyramid.companions.workspace")
+    scratchWorkspace.path = str(pyre.primitives.path(__file__).parent)
+    levels = qed.readers.nisar.pyramid(
+        reader=gcov, dataset=covariance, workspace=scratchWorkspace
+    )
+    levels.build(depth=1)
+    # the corner of a geocoded product is nothing but fill, so the base finds no cell there
+    corner = {"origin": (0, 0), "shape": (64, 64), "stride": (1, 1)}
+    kernels = covariance.kernels
+    assert (
+        kernels.sample(
+            source=covariance.data.dataset, datatype=covariance.datatype.htype, **corner
+        )[0]
+        == 0
+    )
+    # and neither must the level: every tile there was skipped, and a skipped tile has to
+    # read back as what was skipped
+    assert (
+        kernels.sample(
+            source=levels._levels[1], datatype=covariance.datatype.htype, **corner
+        )[0]
+        == 0
+    )
+    # let the cache go and take it with us
+    levels.close()
+    os.unlink(str(levels.path))
+    os.rmdir(str(scratchWorkspace.cache(name="pyramids")))
+    os.rmdir(str(scratchWorkspace.path / ".qed"))
+
     # put the datasets back the way they were and let the file go
     covariance.pyramid = None
     mask.pyramid = None

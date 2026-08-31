@@ -14,7 +14,7 @@ from .Datatype import Datatype
 # base class for integral types
 class Integer(Datatype):
     """
-    The base specification for real numbers
+    The base specification for integral numbers
     """
 
     # configurable state

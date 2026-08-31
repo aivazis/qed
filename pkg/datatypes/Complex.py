@@ -25,5 +25,9 @@ class Complex(Datatype):
     # constants
     summary = "real", "imaginary", "amplitude", "phase"
 
+    # a complex cell says "nothing here" with a nan in each of its parts, which is what the
+    # geocoded products write and what {abs} turns back into a nan
+    blank = complex(float("nan"), float("nan"))
+
 
 # end of file
