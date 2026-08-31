@@ -69,6 +69,9 @@ class Coherence(Channel, family="qed.channels.nisar.coherence"):
         return super().tile(min=low, max=high, **kwds)
 
     # constants
+    # my kernel builds its own pipeline, so it can be told what the product
+    # declared and paint the two kinds of absence apart
+    absence = True
     tag = "coherence"
     category = "real"
 

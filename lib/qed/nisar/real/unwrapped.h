@@ -27,7 +27,9 @@ namespace qed::nisar::real {
         // the hue interval
         double min, double max,
         // the range of values to render
-        double brightness) -> bmp_t;
+        double brightness,
+        // the magnitude of the value the product declared as its fill
+        double fill) -> bmp_t;
 }
 
 

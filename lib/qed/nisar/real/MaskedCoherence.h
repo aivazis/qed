@@ -35,6 +35,8 @@ public:
     using norm_type = parametric_t<source_iterator_type>;
     // the color map
     using colormap_type = gray_t<norm_type>;
+    // the colors i produce, named the way every pipeline node names them
+    using rgb_type = typename colormap_type::rgb_type;
 
     // metamethods
 public:

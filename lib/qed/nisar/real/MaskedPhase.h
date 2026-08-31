@@ -36,6 +36,8 @@ public:
     using scale_type = affine_t<selector_type>;
     // the color map
     using colormap_type = hl_t<scale_type, constant_t>;
+    // the colors i produce, named the way every pipeline node names them
+    using rgb_type = typename colormap_type::rgb_type;
 
     // metamethods
 public:

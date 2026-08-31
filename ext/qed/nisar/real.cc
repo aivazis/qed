@@ -32,9 +32,9 @@ qed::py::nisar::real(py::module & m)
         // the name
         "value",
         // the handler
-        [](const dataset_t & source, const datatype_t & datatype,
-           const py::iterable & origin, const py::iterable & shape,
-           const py::iterable & stride, double min, double max) -> bmp_t {
+        [](const dataset_t & source, const datatype_t & datatype, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double min,
+           double max) -> bmp_t {
             // read the tile and render it
             return qed::nisar::real::value<grid_t>(
                 source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
@@ -50,9 +50,9 @@ qed::py::nisar::real(py::module & m)
         // the name
         "abs",
         // the handler
-        [](const dataset_t & source, const datatype_t & datatype,
-           const py::iterable & origin, const py::iterable & shape,
-           const py::iterable & stride, double min, double max) -> bmp_t {
+        [](const dataset_t & source, const datatype_t & datatype, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double min,
+           double max) -> bmp_t {
             // read the tile and render it
             return qed::nisar::real::abs<grid_t>(
                 source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
@@ -69,15 +69,16 @@ qed::py::nisar::real(py::module & m)
         "coherence",
         // the handler
         [](const dataset_t & source, const dataset_t & mask, const datatype_t & datatype,
-           const py::iterable & origin, const py::iterable & shape,
-           const py::iterable & stride, double min, double max) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape, const py::iterable & stride,
+           double min, double max, double fill) -> bmp_t {
             // read the tile and its mask and render them
             return qed::nisar::real::coherence<grid_t>(
                 source, mask, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride),
-                min, max);
+                min, max, fill);
         },
         // the signature
         "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        "fill"_a,
         // the docstring
         "render the coherence of a real tile");
 
@@ -87,15 +88,16 @@ qed::py::nisar::real(py::module & m)
         "coherenceMasked",
         // the handler
         [](const dataset_t & source, const dataset_t & mask, const datatype_t & datatype,
-           const py::iterable & origin, const py::iterable & shape,
-           const py::iterable & stride, double min, double max) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape, const py::iterable & stride,
+           double min, double max, double fill) -> bmp_t {
             // read the tile and its mask and render them
             return qed::nisar::real::coherenceMasked<grid_t>(
                 source, mask, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride),
-                min, max);
+                min, max, fill);
         },
         // the signature
         "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        "fill"_a,
         // the docstring
         "render the coherence of a real tile, masked");
 
@@ -105,15 +107,16 @@ qed::py::nisar::real(py::module & m)
         "covariance",
         // the handler
         [](const dataset_t & source, const dataset_t & mask, const datatype_t & datatype,
-           const py::iterable & origin, const py::iterable & shape,
-           const py::iterable & stride, double min, double max) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape, const py::iterable & stride,
+           double min, double max, double fill) -> bmp_t {
             // read the tile and its mask and render them
             return qed::nisar::real::covariance<grid_t>(
                 source, mask, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride),
-                min, max);
+                min, max, fill);
         },
         // the signature
         "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        "fill"_a,
         // the docstring
         "render the covariance of a real tile");
 
@@ -123,15 +126,16 @@ qed::py::nisar::real(py::module & m)
         "covarianceMasked",
         // the handler
         [](const dataset_t & source, const dataset_t & mask, const datatype_t & datatype,
-           const py::iterable & origin, const py::iterable & shape,
-           const py::iterable & stride, double min, double max) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape, const py::iterable & stride,
+           double min, double max, double fill) -> bmp_t {
             // read the tile and its mask and render them
             return qed::nisar::real::covarianceMasked<grid_t>(
                 source, mask, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride),
-                min, max);
+                min, max, fill);
         },
         // the signature
         "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        "fill"_a,
         // the docstring
         "render the covariance of a real tile, masked");
 
@@ -141,16 +145,16 @@ qed::py::nisar::real(py::module & m)
         "unwrapped",
         // the handler
         [](const dataset_t & source, const dataset_t & mask, const datatype_t & datatype,
-           const py::iterable & origin, const py::iterable & shape,
-           const py::iterable & stride, double min, double max, double brightness) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape, const py::iterable & stride,
+           double min, double max, double brightness, double fill) -> bmp_t {
             // read the tile and its mask and render them
             return qed::nisar::real::unwrapped<grid_t>(
                 source, mask, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride),
-                min, max, brightness);
+                min, max, brightness, fill);
         },
         // the signature
         "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-        "brightness"_a,
+        "brightness"_a, "fill"_a,
         // the docstring
         "render the unwrapped phase of a real tile");
 
@@ -160,16 +164,16 @@ qed::py::nisar::real(py::module & m)
         "unwrappedMasked",
         // the handler
         [](const dataset_t & source, const dataset_t & mask, const datatype_t & datatype,
-           const py::iterable & origin, const py::iterable & shape,
-           const py::iterable & stride, double min, double max, double brightness) -> bmp_t {
+           const py::iterable & origin, const py::iterable & shape, const py::iterable & stride,
+           double min, double max, double brightness, double fill) -> bmp_t {
             // read the tile and its mask and render them
             return qed::nisar::real::unwrappedMasked<grid_t>(
                 source, mask, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride),
-                min, max, brightness);
+                min, max, brightness, fill);
         },
         // the signature
         "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-        "brightness"_a,
+        "brightness"_a, "fill"_a,
         // the docstring
         "render the unwrapped phase of a real tile, masked");
 

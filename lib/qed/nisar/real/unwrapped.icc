@@ -30,7 +30,9 @@ qed::nisar::real::unwrapped(
     // the hue interval
     double min, double max,
     // the range of values to render
-    double brightness) -> bmp_t
+    double brightness,
+    // the magnitude of the value the product declared as its fill
+    double fill) -> bmp_t
 {
     // type aliases for the source
     using source_t = sourceT;
@@ -45,6 +47,8 @@ qed::nisar::real::unwrapped(
     using scale_t = affine_t<selector_t>;
     // the color map
     using colormap_t = hl_t<scale_t, constant_t>;
+    // and the decorator that paints the cells holding no measurement at all
+    using absence_t = Absence<typename source_t::const_iterator, colormap_t>;
 
     // compute the zoomed origin
     auto zoomedOrigin = origin;
@@ -69,7 +73,10 @@ qed::nisar::real::unwrapped(
     // generate color
     auto colormap = colormap_t(h, b);
     // encode
-    bmp.encode(colormap);
+    // and the marker that intercepts the cells where the raster has nothing to say, so an
+    // empty margin reads as empty rather than as whatever the arithmetic made of a nan
+    auto marked = absence_t { source.cbegin(), colormap, fill };
+    bmp.encode(marked);
     // and return the tile
     return bmp;
 }

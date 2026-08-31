@@ -69,6 +69,26 @@ class Product(
         # otherwise, hand back the set that matches
         return getattr(qed.libqed.nisar.cells, cell, None)
 
+    @property
+    def fill(self) -> float:
+        """
+        The magnitude of the value my product declared it writes where it has nothing to say
+
+        A render uses this to tell the two kinds of absence apart: a cell holding exactly
+        this value is absence the file admits to, while a nan where this is something else
+        is absence it does not -- which is a bug in whatever wrote the product, and invisible
+        from the metadata alone. It is the magnitude rather than the value because a complex
+        fill and a real one have to be judged by the same measure, and the parts of a fill
+        carry no meaning of their own
+        """
+        # a metadata-only twin has no file to ask; it also never renders, since tiles are
+        # produced by crews holding their own copy of the product
+        if self.data is None:
+            # so nothing it could be asked about would match
+            return float("nan")
+        # ask the product, and reduce the answer the way the kernels reduce a cell
+        return abs(self.data.dataset.fillValue)
+
     # interface
     def channel(self, name):
         """

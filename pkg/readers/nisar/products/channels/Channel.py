@@ -17,6 +17,10 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
     # constants
     tag = None
     category = None
+    # whether my kernel knows how to paint the cells where the raster has nothing to say.
+    # the channels that build their own pipeline do; the ones that delegate to the shared
+    # {native} kernels do not yet, and asking them would be an argument they cannot take
+    absence = False
 
     # interface
     def autotune(self, **kwds):
@@ -64,6 +68,10 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         data, companions, residual = source.resolve(zoom=zoom)
         # turn what is left of the zoom into per-axis strides
         stride = tuple(2**level for level in residual)
+        # a kernel that can tell absence from measurement is told what the product declared
+        # it writes where it has nothing to say; the declaration belongs to the product, so
+        # it is the same answer whichever of its levels supplied the cells
+        marking = {"fill": source.fill} if self.absence else {}
         # build the visualization pipeline and return it
         return pipeline(
             source=data,
@@ -72,6 +80,7 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
             shape=shape,
             stride=stride,
             **companions,
+            **marking,
             **kwds,
         )
 

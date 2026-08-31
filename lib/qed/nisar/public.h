@@ -16,6 +16,9 @@
 // published type aliases; this is the file you are looking for...
 #include "api.h"
 
+// the decorator that paints the cells where a raster has nothing to say
+#include "Absence.h"
+
 // implementation
 // data products
 #include "real/real.h"
