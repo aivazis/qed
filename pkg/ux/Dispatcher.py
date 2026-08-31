@@ -87,6 +87,15 @@ class Dispatcher:
         # instantiate the {GraphQL} handler
         self.gql = GraphQL(plexus=plexus, dispatcher=self, store=self.store)
 
+        # the ledger of tile requests that have been parked and not yet answered, and the
+        # counter that gives each one a name. a tile that misses the cache parks its
+        # connection and waits for a worker; nothing else in the server knows how many are
+        # waiting or for how long, so a request that is never delivered is invisible -- and
+        # a browser whose connection pool fills with them cannot ask for anything at all,
+        # which looks exactly like a server that has stopped serving
+        self._parked = {}
+        self._sequence = 0
+
         # all done
         return
 
@@ -179,11 +188,17 @@ class Dispatcher:
         # case pays nothing; per-request captures, unlike shared named timers, survive the
         # concurrency of the deferred path
         clocks = (time.perf_counter(), time.process_time()) if tiles.active else None
+        # name this request, so its arrival and its outcome can be paired in the log; a
+        # request that arrives and never completes is otherwise indistinguishable from one
+        # that never arrived, and those are opposite faults
+        self._sequence += 1
+        sequence = self._sequence
         # bind the diagnostic to this request; a no-op while the channel is inactive
         record = functools.partial(
             self._logTile,
             tiles=tiles,
             clocks=clocks,
+            sequence=sequence,
             request=request,
             viewport=viewport,
             dataset=datasetName,
@@ -192,6 +207,10 @@ class Dispatcher:
             origin=origin,
             shape=shape,
         )
+
+        # say that it got here; everything below this point can fail to produce a line, so
+        # this is the only evidence that the request existed at all
+        record(code=None, via="arrive")
 
         # attempt to
         try:
@@ -756,6 +775,7 @@ class Dispatcher:
         self,
         tiles,
         clocks,
+        sequence,
         request,
         viewport,
         dataset,
@@ -768,8 +788,20 @@ class Dispatcher:
     ):
         """
         Record one tile request on the {qed.ux.tiles} diagnostic channel, when it is active
+
+        Called twice per request: once on arrival, and once with the outcome. The pair is
+        tied together by {sequence}, so a request that arrived and never finished can be
+        found by looking for a name that appears once
         """
-        # nothing to do unless someone has turned the channel on; this guard keeps the
+        # the ledger is kept whatever the channel is doing, since it is the only place that
+        # knows how many requests are waiting; it costs one dictionary operation per request
+        if via == "arrive":
+            # remember when this one got here and what it was after
+            self._parked[sequence] = (time.time(), f"{dataset}.{channel} at {origin}")
+        else:
+            # every other outcome retires it, including the ones that fail
+            self._parked.pop(sequence, None)
+        # nothing further unless someone has turned the channel on; this guard keeps the
         # gathering and formatting below -- the only real cost -- out of the hot path in the
         # common inactive case
         if not tiles.active:
@@ -793,12 +825,22 @@ class Dispatcher:
             lookAt = (round(center.row), round(center.col))
         except (IndexError, AttributeError, TypeError):
             lookAt = None
+        # how many requests are waiting, and how long the most patient of them has waited;
+        # a queue that grows and an age that never resets are the signature of tiles that
+        # are being accepted and never answered
+        waiting = len(self._parked)
+        oldest = (
+            f"{time.time() - min(when for when, _ in self._parked.values()):.1f}s"
+            if self._parked
+            else "-"
+        )
         # one compact, greppable line
         tiles.log(
-            f"client={client} vp={viewport} {dataset}.{channel} "
+            f"seq={sequence} client={client} vp={viewport} {dataset}.{channel} "
             f"zoom={zoom} origin={origin[0]}x{origin[1]} "
             f"shape={shape[0]}x{shape[1]} session={session[:8]} "
-            f"lookAt={lookAt} code={code} via={via} dt={dt:.1f}ms cpu={cpu:.1f}ms"
+            f"lookAt={lookAt} code={code if code is not None else '-'} via={via} "
+            f"dt={dt:.1f}ms cpu={cpu:.1f}ms parked={waiting} oldest={oldest}"
         )
 
     # private data

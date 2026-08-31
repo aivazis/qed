@@ -70,6 +70,23 @@ class Team(Staff, family="qed.nexus.teams.tile"):
         # all done
         return self
 
+    def census(self) -> str:
+        """
+        Report what my roster and my schedule are doing, in one line
+
+        This is the answer to "the tiles stopped and nobody is working": a workplan that does
+        not drain while every member sits on the bench means the work was never handed out,
+        and a workplan that is empty while every member is marked busy means the results were
+        never harvested. Neither is visible from anywhere else
+        """
+        # the schedule, the ledger of who is waiting for what, and the roster in its three
+        # states: checking in, on a task, and parked on the bench
+        return (
+            f"queued={len(self.workplan)} pending={len(self.pending)} "
+            f"active={len(self.active)} idle={len(self.idle)} "
+            f"registered={len(self.registered)} vigils={len(self.vigils)}"
+        )
+
     # private data
     cache = None  # the shared tile cache, attached by the fleet that builds me
     stats = None  # the statistics sink, attached by the fleet that builds me
