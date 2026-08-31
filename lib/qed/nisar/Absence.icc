@@ -1,0 +1,68 @@
+// -*- c++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// the declaration
+#include "Absence.h"
+
+
+// metamethods
+template <class sourceT, class pipelineT>
+qed::nisar::Absence<sourceT, pipelineT>::Absence(
+    source_type source, pipeline_type pipeline, fill_type fill) :
+    _source { source },
+    _pipeline { pipeline },
+    _fill { fill }
+{}
+
+
+// interface
+template <class sourceT, class pipelineT>
+auto
+qed::nisar::Absence<sourceT, pipelineT>::operator*() const -> rgb_type
+{
+    // reduce the cell the way everything else in qed does, so a complex pair and a real
+    // number are judged by the same measure
+    auto value = qed::native::magnitude(*_source);
+
+    // a product that declared a nan and wrote one is consistent with itself, and the two
+    // tests below would otherwise disagree about it, since a nan is equal to nothing at all
+    if (std::isnan(_fill) && std::isnan(value)) {
+        // so it is spelling absence exactly as it said it would
+        return declared;
+    }
+    // a cell holding the value the product declared is likewise absence, announced
+    if (value == _fill) {
+        // and painted the way a masked margin is
+        return declared;
+    }
+    // a nan where the product declared something else is absence the file does not admit to
+    if (std::isnan(value)) {
+        // and it gets its own color, so it can be seen rather than guessed at
+        return undeclared;
+    }
+
+    // anything else is a measurement, and my pipeline knows what color it should be
+    return *_pipeline;
+}
+
+
+template <class sourceT, class pipelineT>
+auto
+qed::nisar::Absence<sourceT, pipelineT>::operator++() -> void
+{
+    // advance the raster
+    ++_source;
+    // and the pipeline that colors it
+    ++_pipeline;
+    // all done
+    return;
+}
+
+
+// end of file

@@ -8,6 +8,10 @@
 #pragma once
 
 namespace qed::nisar {
+    // a pipeline decorator that paints the cells where a raster has nothing to say
+    template <class sourceT, class pipelineT>
+    class Absence;
+
     // the BFPQ lookup table
     using bfqp_lut_storage_t = pyre::memory::heap_t<float>;
     using bfpq_lut_layout_t = pyre::grid::canonical_t<1>;

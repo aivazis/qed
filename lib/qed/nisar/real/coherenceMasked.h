@@ -25,7 +25,9 @@ namespace qed::nisar::real {
         // the stride
         typename sourceT::index_type stride,
         // the value interval
-        double min, double max) -> bmp_t;
+        double min, double max,
+        // the magnitude of the value the product declared as its fill
+        double fill) -> bmp_t;
 }
 
 
