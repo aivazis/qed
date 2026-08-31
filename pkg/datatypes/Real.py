@@ -25,5 +25,8 @@ class Real(Datatype):
     # constants
     summary = ("value", "abs")
 
+    # a real cell says "nothing here" with a nan
+    blank = float("nan")
+
 
 # end of file

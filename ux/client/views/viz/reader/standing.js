@@ -43,25 +43,35 @@ export const Standing = () => {
             // all done
             return
         }
-        // render the reason and the control
+        // render the reason and the control, in a row that spans the whole table: my
+        // siblings here are {Meta.Entry} rows, so anything that is not a row of its own is
+        // invalid markup wherever the browser decides to put it
         return (
-            <Failure data-qed-reader-status="failed">
-                <Reason>{error ?? "first contact failed"}</Reason>
-                <Retry onClick={retry} disabled={isInFlight}
-                    aria-label={`retry first contact with '${name}'`}>
-                    retry
-                </Retry>
-            </Failure>
+            <tr data-qed-reader-status="failed">
+                <td colSpan={3}>
+                    <Failure>
+                        <Reason>{error ?? "first contact failed"}</Reason>
+                        <Retry onClick={retry} disabled={isInFlight}
+                            aria-label={`retry first contact with '${name}'`}>
+                            retry
+                        </Retry>
+                    </Failure>
+                </td>
+            </tr>
         )
     }
 
     // everything else is work in progress: the source is either waiting for its survey to
     // be assigned or being surveyed right now
     return (
-        <Progress data-qed-reader-status={status}>
-            <Ring />
-            <Note>opening...</Note>
-        </Progress>
+        <tr data-qed-reader-status={status}>
+            <td colSpan={3}>
+                <Progress>
+                    <Ring />
+                    <Note>opening...</Note>
+                </Progress>
+            </td>
+        </tr>
     )
 }
 

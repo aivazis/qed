@@ -245,10 +245,25 @@ class Pyramid:
         # a write, and a read into a buffer laid out for the wrong cell type deposits
         # something that is not the data
         self._kernels = dataset.kernels
-        # what the product writes where it has nothing to say; a dataset made without one
-        # reports nothing, and then my levels are made without one too, so the two still
-        # agree
-        self._fill = self._base.fillValue
+        # what an unwritten chunk of a level must read back as. the decimation leaves a tile
+        # unwritten exactly when it found no valid cell in it, and the only cell its kernels
+        # call invalid is a nan -- so for a raster that can hold one, the fill is a nan and
+        # nothing else, or a skipped chunk would come back holding a measurement the product
+        # never made. this is not a free choice but the condition that makes a level
+        # indistinguishable from the raster it was decimated from
+        blank = dataset.cell.blank
+        # the product's own declaration is deliberately not the authority here. on the
+        # geocoded NISAR products it is actively wrong: they frame their data in nans while
+        # declaring the library's default fill of zero, and a level built on that
+        # declaration shows a black margin where the product shows nothing at all
+        if blank is not None:
+            # so the cell type decides
+            self._fill = blank
+        # a raster whose cells have no way to say "nothing" never has a tile skipped, since
+        # every value it can hold is a measurement
+        else:
+            # so whatever the product declared stands, and nothing ever reads it back
+            self._fill = self._base.fillValue
         # the identity of the product this dataset came from, so a cache built against one
         # version of a file is never read against another
         self._stamp = self._identify(reader=reader, uri=dataset.uri)
