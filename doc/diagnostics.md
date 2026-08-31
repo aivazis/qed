@@ -222,4 +222,126 @@ accident.
    across two repositories rather than a design question.
 
 
+## Appendix: diagnosing a server that has stopped serving tiles
+
+This is an inventory of what can be switched on today when tiles stop arriving, and of the
+places along the path where nothing would be said at all. It was collected against the
+`staging` branch on 2026-08-31.
+
+### Turning a channel on
+
+Two steps, both in the `qed.yaml` of the directory the server is launched from. The first
+places the channel under user control, the second switches it on; there is a worked example
+in `tests/data/native/qed.yaml`.
+
+```yaml
+qed.app:
+    journal:
+        channels:
+          - debug, qed.ux.tiles
+          - debug, qed.nexus.cache
+          - debug, qed.nexus.fleet
+          - debug, qed.nexus.pyramid
+          - debug, qed.ux.dispatch
+          - debug, qed.ux.stats
+
+qed.journal.debug.qed.ux.tiles: { active: yes }
+qed.journal.debug.qed.nexus.cache: { active: yes }
+qed.journal.debug.qed.nexus.fleet: { active: yes }
+qed.journal.debug.qed.nexus.pyramid: { active: yes }
+qed.journal.debug.qed.ux.dispatch: { active: yes }
+qed.journal.debug.qed.ux.stats: { active: yes }
+```
+
+Warnings, errors and firewalls are on by default, so the channels below marked as such are
+already speaking.
+
+### The path a tile takes, and what each stage says
+
+**The request arrives — `pkg/ux/Dispatcher.py`**
+
+| Channel | Severity | What it tells you |
+|---|---|---|
+| `qed.ux.dispatch.url` | debug | the recognizer's verdict on each incoming url |
+| `qed.ux.tiles` | debug | one compact line per tile: client, viewport, `dataset.channel`, zoom, origin, shape, session, look-at, HTTP code, `via`, wall and cpu milliseconds |
+| `qed.ux.dispatch` | debug, error, firewall | what was served; failures during generation; a tile refused for falling outside the raster |
+| `qed.nexus.tiles` | warning | a task that took its crew member down, and a task that failed benignly and fell back to the inline renderer |
+
+`qed.ux.tiles` is the one to reach for first. Its `via` field names the route the tile
+actually took, and the vocabulary is the whole story: `hit` (served from the cache), `crew`
+(rendered by a worker), `inline` (rendered on the server's own thread, which means the crew
+path declined or failed), `refused` (out of bounds), `hangup` (the client left before the
+tile was ready).
+
+**The view and the store — `pkg/ux/Store.py`, `pkg/ux/View.py`**
+
+| Channel | Severity | What it tells you |
+|---|---|---|
+| `qed.ux.staging` | warning | first contact failures, and a product that could not be reopened for a direct read |
+| `qed.ux.preparation` | warning | a pyramid preparation that failed |
+| `qed.ux.stats` | debug | each statistics merge and the running whole-dataset accumulation |
+| `qed.ux.store` | info, firewall | view bookkeeping, and inconsistencies in it |
+
+**The fleet, the team, the crew — `pkg/nexus/`**
+
+| Channel | Severity | What it tells you |
+|---|---|---|
+| `qed.nexus.fleet` | debug | a team being formed for a product, and dismissed |
+| `qed.nexus.cache` | debug | tile cache lookups and inserts |
+| `qed.nexus.pyramid` | debug | which levels a worker attached, per product, and why an attach failed |
+| `qed.nexus.survey` | debug | the survey round trip |
+| `pyre.nexus.staff` | firewall | the only two things pyre's worker pool says at all |
+
+**The readers**
+
+`qed.readers.pyramid` (debug, warning), `qed.readers.statistics` (warning),
+`qed.readers.native` (error), `qed.readers.native.flat`, `qed.readers.native.gdal`,
+`qed.readers.isce2.xml`, `qed.readers.unw`, and one warning channel per NISAR flavor:
+`qed.nisar.gcov`, `.gunw`, `.runw`, `.rifg`, `.rslc`, `.gslc`, `.roff`, `.goff`, `.rrsd`.
+
+**The transport — `pyre`**
+
+`pyre.http.server` and `pyre.http.headers` (debug) for the connection itself;
+`pyre.ipc.selector` and `pyre.ipc.psl` (debug) for the event loop and the pickler that
+carries tasks and results between processes.
+
+### Where nothing is said at all
+
+These are the gaps, ordered by how likely each is to be the reason tiles stopped.
+
+1. **A parked response has no timeout and no census.** A tile that cannot be served from the
+   cache parks the connection with `server.deferred()` and waits for the team. Nothing times
+   that out, and nothing counts how many connections are parked. If a task is lost anywhere
+   downstream, the connection hangs until the client gives up, and the server says nothing.
+   This is the most plausible mechanism for "the server stopped serving tiles" and it is
+   entirely silent. Wants a periodic census of parked responses and their ages.
+
+2. **`qed.ux.tiles` logs completions, not arrivals.** Every `record(...)` call sits on an
+   outcome path. A request that arrives and never finishes produces no line, so when tiles
+   stop the log simply goes quiet — and a quiet log cannot distinguish "no requests are
+   arriving" from "requests arrive and never complete". These are completely different
+   faults. Wants an arrival line, or a sequence number paired across arrival and outcome.
+
+3. **`pyre.nexus.Staff` is silent.** The entire worker lifecycle — `assign`, `assemble`,
+   `vacancies`, `collect`, `requeue`, `abandon`, `bury`, `dismiss`, `recover` — carries two
+   firewalls and nothing else. If every crew member is busy, if a casualty was never
+   replaced, or if the workplan stops draining, there is no way to see it. This is a `pyre`
+   change, and it is the deepest blind spot on the path.
+
+4. **`pkg/nexus/Team.py` is silent.** `collect` is where a result is delivered, where the
+   statistics are merged, and where the payload is either handed to the cache or released.
+   A spool that is neither cached nor closed leaks; nothing reports it.
+
+5. **`pkg/nexus/Spool.py` is silent.** The payload travels as a file descriptor over the
+   crew channel. Descriptor exhaustion would stop tiles instantly and say nothing.
+
+6. **`pkg/nexus/Crew.py` and `pkg/nexus/Server.py` are silent.**
+
+7. **No queue depth or crew occupancy anywhere.** There is no line that says how many tasks
+   are queued, how many crew members are busy, and how many responses are waiting.
+
+8. **`Fleet.render` does not log the handoff.** Only team formation speaks, so a task
+   accepted by the fleet and never assigned leaves no trace.
+
+
 <!-- end of file -->
