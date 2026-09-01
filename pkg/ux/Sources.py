@@ -41,7 +41,7 @@ class Sources:
 
     def addSource(self, source):
         """
-        Add a data {source}
+        Add a data {source}, or replace the one already registered under its name
         """
         # get the name of the source
         name = source.pyre_name
@@ -49,8 +49,13 @@ class Sources:
         current = self.source(name=name)
         # if there is one
         if current:
-            # remove it
-            self._removeSource(source=current)
+            # retire its datasets, since the replacement may have discovered a different
+            # set. its place in the pile is deliberately left alone: my order is the order
+            # the user registered their products in, and assigning over an existing key
+            # keeps it. a source is re-registered when its survey completes, and surveys
+            # complete in whatever order the crews get to them, so removing and re-adding
+            # would quietly sort the catalog by whichever product finished first
+            self._retireDatasets(source=current)
         # add the new source to the pile
         return self._addSource(source=source)
 
@@ -147,14 +152,23 @@ class Sources:
         # all done
         return source
 
-    def _removeSource(self, source):
+    def _retireDatasets(self, source):
         """
-        Remove a source and its datasets
+        Drop the datasets of {source} from the index, leaving the source itself alone
         """
         # go through the source datasets
         for dataset in source.datasets:
             # and remove them
             self._removeDataset(dataset=dataset)
+        # all done
+        return source
+
+    def _removeSource(self, source):
+        """
+        Remove a source and its datasets
+        """
+        # its datasets go
+        self._retireDatasets(source=source)
         # get the name of the source
         name = source.pyre_name
         # remove it from the pile
