@@ -156,6 +156,38 @@ class Dispatcher:
         # and send it to the client
         return server.documents.BMP(server=server, bmp=memoryview(tile))
 
+    def peek(self, server, request, match, **kwds):
+        """
+        Render a tile for the peek window, on this thread
+
+        The peek follows the cursor, so it asks for a small tile at an arbitrary origin many
+        times a second and never asks for the same one twice. Those renders have no business
+        going to a crew: each would park a connection, occupy a worker, and leave behind a
+        cached payload holding a file descriptor that nothing will ever read again. They are
+        small and quick, so they are drawn here and forgotten
+        """
+        # unpack
+        viewport = int(match.group("peek_viewport"))
+        datasetName = match.group("peek_dataset")
+        channelName = match.group("peek_channel")
+        zoomSpec = match.group("peek_zoom")
+        zoom = tuple(map(int, zoomSpec.split("x")))
+        spec = match.group("peek_tile")
+        origin = tuple(map(int, match.group("peek_origin").split("x")))
+        shape = tuple(map(int, match.group("peek_shape").split("x")))
+        # draw it here and now; nothing about this tile is worth keeping
+        return self._dataInline(
+            server=server,
+            viewport=viewport,
+            datasetName=datasetName,
+            channelName=channelName,
+            zoomSpec=zoomSpec,
+            zoom=zoom,
+            spec=spec,
+            origin=origin,
+            shape=shape,
+        )
+
     def data(self, server, request, match, **kwds):
         """
         Handle a data request
@@ -866,6 +898,19 @@ class Dispatcher:
                         rf"(?P<data_channel>\w+)",
                         rf"(?P<data_zoom>{zoom})",
                         rf"(?P<data_tile>(?P<data_origin>{origin})\+(?P<data_shape>{shape}))",
+                    ]
+                )
+                + ")",
+                # the peek window's tiles; a route of their own so those renders can be kept
+                # off the crews and out of the cache
+                r"/(?P<peek>peek/"
+                + "/".join(
+                    [
+                        rf"(?P<peek_viewport>\d+)",
+                        rf"(?P<peek_dataset>{pyreid})",
+                        rf"(?P<peek_channel>\w+)",
+                        rf"(?P<peek_zoom>{zoom})",
+                        rf"(?P<peek_tile>(?P<peek_origin>{origin})\+(?P<peek_shape>{shape}))",
                     ]
                 )
                 + ")",
