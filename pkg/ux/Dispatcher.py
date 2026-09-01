@@ -803,6 +803,20 @@ class Dispatcher:
         # anything else, including our probe's fallback
         return "other"
 
+    def backlog(self) -> tuple:
+        """
+        Report how many tile requests are waiting for an answer, and how long the most
+        patient of them has been waiting
+        """
+        # nothing waiting is the ordinary case
+        if not self._parked:
+            # and there is no age to report either
+            return 0, 0.0
+        # otherwise, the size of the pile and the age of its oldest member
+        oldest = time.time() - min(when for when, _ in self._parked.values())
+        # hand both back
+        return len(self._parked), oldest
+
     def _logTile(
         self,
         tiles,
