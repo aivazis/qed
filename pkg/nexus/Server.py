@@ -6,9 +6,15 @@
 
 # externals
 import json
+import os
+import resource
 
 # support
 import pyre
+import journal
+
+# the unit the heartbeat period is expressed in
+from pyre.units.SI import second
 
 # the stock http server; its package does not re-export it, so reach in
 from pyre.http.Server import Server as http
@@ -27,6 +33,10 @@ class Server(http, family="qed.nexus.servers.http"):
     from the stock server's deferred response machinery
     """
 
+    # user configurable state
+    period = pyre.properties.dimensional(default=1 * second)
+    period.doc = "how often the heartbeat reports that the event loop is still turning"
+
     # protocol obligations
     @pyre.export(tip="register this service with the nexus")
     def activate(self, app, dispatcher):
@@ -35,6 +45,14 @@ class Server(http, family="qed.nexus.servers.http"):
         """
         # chain up to grab a port and build the event hub
         super().activate(app=app, dispatcher=dispatcher)
+        # hold on to the application; it is the only thing in reach of everything the
+        # heartbeat wants to report on
+        self._app = app
+        # start the heartbeat. it is the one instrument that tells a server whose loop has
+        # died apart from one whose loop is turning while the work sits still: if the beats
+        # stop, the loop is gone; if they keep coming while requests go unanswered, the loop
+        # is fine and something downstream is not moving
+        dispatcher.alarm(interval=self.period, call=self._heartbeat)
         # build my fleet of tile rendering teams; its name places its configuration under
         # mine, so users can adjust it, e.g. '{server}.fleet.capacity'
         fleet = Fleet(name=f"{self.pyre_name}.fleet")
@@ -64,6 +82,89 @@ class Server(http, family="qed.nexus.servers.http"):
         self.fleet = fleet
         # all done
         return
+
+    # implementation details
+    def _heartbeat(self, timestamp, **kwds):
+        """
+        Report that the event loop is still turning, and what it is carrying
+
+        N.B.: this is an alarm handler; whatever interval it returns is how long until it is
+        raised again. It always asks to be raised, whatever the channel is doing, so that a
+        missing beat means the loop and never the configuration
+        """
+        # count the beats, so a gap shows as a jump in the numbers rather than having to be
+        # read out of timestamps
+        self._beat += 1
+        # make a channel
+        channel = journal.debug("qed.nexus.heartbeat")
+        # say how the loop is and what it is carrying
+        channel.log(f"beat {self._beat}: {self._workload()}")
+        # ask to be raised again
+        return self.period
+
+    def _descriptors(self) -> str:
+        """
+        Report how many file descriptors this process holds, against how many it may
+
+        This is the number that turns a server which has stopped answering into a diagnosis
+        rather than a mystery. Everything that serves a static asset or renders a tile needs
+        a descriptor, so a count creeping up on the ceiling explains a freeze that no amount
+        of staring at the tile path ever will -- while the one request that needs no
+        descriptor, a graphql query against state already in memory, keeps answering and
+        makes the server look healthy
+        """
+        # the ceiling is inherited from whichever shell launched the server, so ask rather
+        # than assume the system default
+        ceiling, _ = resource.getrlimit(resource.RLIMIT_NOFILE)
+        # carefully, since the count is a convenience and its absence must not cost the beat
+        try:
+            # every open descriptor appears here, on the platforms that have it; the listing
+            # itself holds one while it runs, so this reads one high
+            held = len(os.listdir("/dev/fd"))
+        # a platform without it
+        except OSError:
+            # says nothing rather than guessing
+            return f"?/{ceiling}"
+        # otherwise, the count against the ceiling
+        return f"{held}/{ceiling}"
+
+    def _workload(self) -> str:
+        """
+        Describe what the server is carrying, in one line
+
+        Two numbers matter while a freeze is being hunted: how many tile requests are parked
+        waiting for an answer, and what each team's roster and queue look like. A loop that
+        keeps beating while the first climbs and the second does not move is a loop that is
+        fine and work that is not
+        """
+        # carefully, since this runs on a timer and must never be the thing that breaks
+        try:
+            # the ux manager owns the ledger of parked requests
+            ux = getattr(self._app, "_ux", None)
+            # ask it how many are waiting and how long the oldest has waited
+            waiting, oldest = ux.backlog() if ux is not None else (0, 0.0)
+            # the fleet owns the teams that do the work
+            fleet = getattr(ux.store, "fleet", None) if ux is not None else None
+            # describe each team that has been formed
+            teams = (
+                " | ".join(
+                    f"{name}: {team.census()}" for name, team in fleet.teams.items()
+                )
+                if fleet is not None and fleet.teams
+                else "no teams yet"
+            )
+            # the cache is what turns rendered tiles into held descriptors, so it reports
+            # beside them
+            cache = fleet.cache.census() if fleet is not None else "no cache"
+            # hand back the whole picture
+            return (
+                f"fds={self._descriptors()} waiting={waiting} oldest={oldest:.1f}s "
+                f"| cache: {cache} | {teams}"
+            )
+        # if anything at all goes wrong
+        except Exception as error:
+            # say so, rather than losing the beat that proves the loop is alive
+            return f"workload unavailable: {error}"
 
     # interface
     def notifyChange(self):
@@ -102,6 +203,8 @@ class Server(http, family="qed.nexus.servers.http"):
     # private data
     fleet = None  # the manager of the tile rendering teams, built at activation
     _changeFrame = None  # the constant change notification frame, built on first use
+    _app = None  # the application, held so the heartbeat can describe what it is carrying
+    _beat = 0  # how many times the heartbeat has been raised
 
 
 # end of file

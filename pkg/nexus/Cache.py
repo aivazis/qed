@@ -29,6 +29,23 @@ class Cache(qed.component, family="qed.nexus.caches.tile"):
     capacity.doc = "the total payload size to hold, in bytes; zero disables the cache"
 
     # interface
+    def census(self) -> str:
+        """
+        Describe what i am holding, in one line
+
+        Each entry is a payload parked in a file that stays open for as long as i keep it, so
+        my size is measured in descriptors as well as bytes -- and only the bytes are budgeted.
+        A run of small tiles can therefore exhaust a process's descriptors long before it comes
+        anywhere near the capacity that is supposed to bound me, which is worth being able to
+        see rather than deduce
+        """
+        # report the population, what it weighs against its budget, and how it is doing
+        return (
+            f"{len(self.entries)} entries, "
+            f"{self.held / (1024 * 1024):.1f}MB of {self.capacity / (1024 * 1024):.0f}MB, "
+            f"{self.hits} hits {self.misses} misses"
+        )
+
     def lookup(self, task):
         """
         Retrieve the spool that holds the render of {task}, if it is on hand
