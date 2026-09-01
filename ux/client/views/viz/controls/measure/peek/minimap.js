@@ -35,9 +35,13 @@ export const Minimap = ({ viewport, view, point }) => {
     const { reader, dataset, channel, zoom, measure } = useFragment(
         minimapControlsGetMeasureLayerStateFragment, view
     )
-    // form the base tile uri at zoom level 0, suitable for the minimap
+    // form the base tile uri at zoom level 0, suitable for the minimap; my tiles follow the
+    // cursor, so each one is asked for once and never again. they go to the {peek} route,
+    // which draws them on the server's own thread and forgets them, rather than sending
+    // them to a crew and leaving each render parked in a cache nobody will read from
     const uri = tileURI({
-        viewport, reader, dataset, channel, zoom: { horizontal: 0, vertical: 0 }
+        viewport, reader, dataset, channel, zoom: { horizontal: 0, vertical: 0 },
+        api: "peek",
     })
 
     // get the active dataset extent
