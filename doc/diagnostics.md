@@ -305,6 +305,32 @@ tile was ready).
 `pyre.ipc.selector` and `pyre.ipc.psl` (debug) for the event loop and the pickler that
 carries tasks and results between processes.
 
+### Event loop instrumentation coupled to a channel — to be done properly
+
+The heartbeat added while hunting the tile freeze is deliberately throwaway. It is an alarm
+registered on the shared dispatcher when the http service activates, raised once a second,
+which logs on `qed.nexus.heartbeat` and always asks to be raised again. Its value is that a
+missing beat can only mean the event loop, never the configuration.
+
+It also holds a reference to the application so that it can report the backlog and the team
+rosters together. That is a cycle python's collector cannot break, and it is only tolerable
+because the instrument is temporary; a permanent version would take a weak reference, or ask
+for its numbers through something that does not own it.
+
+The always-running property is bought by leaving the alarm registered whether anybody is
+listening or not. The alternative — an alarm that retires itself when its channel is inactive — is more
+appealing, because deactivating the channel would then be exactly equivalent to removing the
+instrument, at no cost. It cannot work as written: the service activates once, so the channel
+would have to be active *before* the server starts, and a beat that never arrived would be
+ambiguous between a dead loop and a channel switched on too late.
+
+The shape worth building is instrumentation whose *registration* follows a channel's state
+rather than being settled once at startup: a channel that becomes active arms its probes, one
+that goes quiet retires them. That makes diagnostic timers free when unused and switchable
+while the server runs, which is also what the console needs. It belongs with the
+channel-toggling question raised under the IPC device above, since both are about controlling
+instrumentation after launch rather than before it.
+
 ### Where nothing is said at all
 
 These are the gaps, ordered by how likely each is to be the reason tiles stopped.
