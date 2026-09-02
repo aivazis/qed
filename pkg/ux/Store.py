@@ -909,6 +909,8 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         self._realized = {}
         # what has been done to make each dataset worth looking at, keyed by dataset name
         self._preparations = {}
+        # the pyramid builds behind them, keyed the same way, while they are under way
+        self._builds = {}
 
         # all done
         return
@@ -1055,51 +1057,127 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         record = Preparation()
         # remember it before dispatching, so a second request finds it
         self._preparations[name] = record
-        # and hand the dataset to its team; the callback receives what the pass measured,
-        # or the reason it failed
-        self.fleet.prepare(
-            reader=source,
-            dataset=dataset,
-            workspace=self.workspace,
-            callback=functools.partial(self._preparedDataset, name=name),
-        )
+        # the rasters the dataset is read alongside get their levels too, since a masked
+        # render reads all of them at one depth or none of them
+        rasters = [dataset] + list(dataset.companions().values())
+        # the builds, one per raster
+        builds = []
+        # go through them
+        for raster in rasters:
+            # the pyramid, laid over a dataset this process never reads
+            pyramid = qed.readers.nisar.pyramid(
+                reader=source, dataset=raster, workspace=self.workspace
+            )
+            # the accumulator its first level folds into, shared with the widen path
+            statistics = self._statistics.setdefault(raster.pyre_name, Sample())
+            # the build; only the dataset itself reports the seed, since the companions
+            # have nothing to say about when the view is worth looking at
+            build = qed.nexus.build(
+                reader=source,
+                dataset=raster,
+                pyramid=pyramid,
+                fleet=self.fleet,
+                statistics=statistics,
+                onProgress=functools.partial(self._progressed, name=raster.pyre_name),
+                onSeeded=(
+                    functools.partial(self._seeded, name=name)
+                    if raster is dataset
+                    else None
+                ),
+                onDone=functools.partial(self._built, name=name),
+                onFailed=functools.partial(self._buildFailed, name=name),
+            )
+            # add it to the pile
+            builds.append(build)
+        # keep the pile, so completion can be judged over all of them
+        self._builds[name] = builds
+        # and start them
+        for build in builds:
+            # each hands out its first level
+            build.start()
         # let the clients know there is now something to wait for
         self._announce()
         # hand the view back
         return view
 
-    def _preparedDataset(self, name, result=None, error=None):
+    def _progressed(self, name, build):
         """
-        Take delivery of the outcome of preparing the dataset called {name}
+        The statistics of the dataset called {name} have moved, since more of its first
+        level has reported
         """
-        # get its record
+        # widen the controller bounds; the picks and the session token stay put
+        touched = self._reconcile(name=name, sample=build.statistics)
+        # if anything moved, let the clients know
+        if touched:
+            # by announcing
+            self._announce()
+        # all done
+        return self
+
+    def _seeded(self, name, build):
+        """
+        The first tiles of the dataset called {name} have reported, so its statistics are
+        an estimate rather than a guess
+        """
+        # get the record
         record = self._preparations.get(name)
-        # a dataset that has been disconnected has nowhere to put this
+        # a preparation nobody is tracking is nobody's business
         if record is None:
-            # so drop it
+            # so leave it alone
             return self
-        # if the preparation failed
-        if error is not None:
-            # make a channel
-            channel = journal.warning("qed.ux.preparation")
-            # complain
-            channel.line(f"could not prepare '{name}'")
-            channel.line(f"got: {error}")
-            # flush
-            channel.log()
-            # record the failure, retaining the reason
-            record.fail(error=error)
-        # otherwise
-        else:
-            # the pass measured the whole raster, which is a better answer than the seed
-            # the survey guessed from a handful of windows; fold it in and let it move
-            # the display, since nothing has been rendered from it yet
-            self._statistics[name] = result
-            # reconcile the controllers with what was actually found
-            self._reconcile(name=name, sample=result)
-            # and mark the dataset ready to be looked at
-            record.succeed()
-        # either way, the standing moved, so let the clients know
+        # mark it
+        record.seed()
+        # and let the clients know the view is worth looking at
+        self._announce()
+        # all done
+        return self
+
+    def _built(self, name, build):
+        """
+        One of the builds behind the preparation of the dataset called {name} is complete
+        """
+        # get the record
+        record = self._preparations.get(name)
+        # a preparation nobody is tracking is nobody's business
+        if record is None:
+            # so leave it alone
+            return self
+        # the preparation is done when every build is
+        if all(build.done for build in self._builds.get(name, ())):
+            # a build that failed has already marked the record
+            if record.status != record.failed:
+                # otherwise, the work succeeded
+                record.succeed()
+            # let go of the builds
+            self._builds.pop(name, None)
+            # and let the clients know
+            self._announce()
+        # all done
+        return self
+
+    def _buildFailed(self, name, build, error):
+        """
+        One of the builds behind the preparation of the dataset called {name} failed
+        """
+        # make a channel
+        channel = journal.warning("qed.ux.preparation")
+        # complain
+        channel.line(f"could not prepare '{name}'")
+        channel.line(f"got: {error}")
+        # flush
+        channel.log()
+        # get the record
+        record = self._preparations.get(name)
+        # a preparation nobody is tracking is nobody's business
+        if record is None:
+            # so leave it alone
+            return self
+        # mark it; a failure is not worth waiting for, since the view renders anyway, just
+        # less well
+        record.fail(error=error)
+        # let go of the builds
+        self._builds.pop(name, None)
+        # and let the clients know
         self._announce()
         # all done
         return self
