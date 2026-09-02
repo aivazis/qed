@@ -6,6 +6,9 @@
 
 # externals
 import hashlib
+import json
+import math
+import os
 
 # support
 import journal
@@ -93,17 +96,21 @@ class Pyramid:
         Take hold of the levels an earlier pass built, without building any
 
         This is what a worker rendering a tile does: it reads what is there and renders off
-        the product when there is nothing. The cache is opened read only, because many
-        workers may be reading the same levels at once and none of them may write
+        the product when there is nothing. A level is a mapped file, so many workers may
+        hold the same level at once and none of them is in anybody's way. Attaching again
+        later picks up the levels that have appeared since, which is how a worker learns
+        that a build it did not take part in has reached deeper
         """
         # where my levels would be
-        path = self.path
+        home = self.home
         # a workspace with nowhere to keep anything, or a product nobody has prepared
-        if path is None or not path.exists():
+        if home is None or not home.exists():
             # has no levels to offer, and this must not be the thing that makes one
             return self
-        # otherwise, take hold of what is there
-        self._attach(mode="r")
+        # otherwise, take hold of what is there that i do not hold already
+        self._survey()
+        # and of what an earlier run measured while it built it
+        self._recall()
         # all done
         return self
 
@@ -116,7 +123,7 @@ class Pyramid:
         than the single pass that built its first level
         """
         # a dataset no kernel can read as it stands gets no levels at all
-        if self._kernels is None:
+        if self._kernels is None or self._storage is None:
             # make a channel
             channel = journal.warning("qed.readers.pyramid")
             # explain, since the absence will show as a view that is slow rather than wrong
@@ -126,14 +133,18 @@ class Pyramid:
             channel.log()
             # and leave without building anything
             return self
-        # figure out how deep to go
-        depth = depth if depth > 0 else self.depth()
-        # open the cache for writing
-        cache = self._attach(mode="r+")
-        # if it could not be opened, the complaint has been lodged
-        if cache is None:
+        # where my levels live
+        home = self.home
+        # a workspace that could not make its cache has already complained
+        if home is None:
             # so there is nothing to do
             return self
+        # make my directory, if this is the first time
+        home.mkdir(parents=True, exist_ok=True)
+        # figure out how deep to go
+        depth = depth if depth > 0 else self.depth()
+        # take hold of whatever an earlier run left behind, so it is not built twice
+        self.attach()
         # make a channel
         channel = journal.debug("qed.readers.pyramid")
         # go through the levels, shallowest first, since each one feeds the next
@@ -145,22 +156,26 @@ class Pyramid:
             # the level it is built from
             source, _ = self.level(zoom=(exponent - 1, exponent - 1))
             # its extent, half the one below it on each axis
-            extent = [axis // 2 for axis in self._extent(exponent=exponent - 1)]
+            extent = self._extent(exponent=exponent)
             # an extent that has collapsed cannot be halved again
             if min(extent) < 1:
                 # so this is the top of the pyramid
                 break
-            # make the level
-            level = self._create(cache=cache, exponent=exponent, extent=extent)
-            # count the tiles that turn out to hold anything
-            written = 0
+            # the tile the level is diced into
+            tile = self._tileOf(extent=extent)
+            # make the file at its full padded size and take hold of it for writing
+            draft = self._create(exponent=exponent, extent=extent, tile=tile)
+            # the tiles of the level, in tile order; nothing is written yet
+            occupancy = bytearray(self._tileCount(extent=extent, tile=tile))
+            # the width of the grid of tiles, for placing an entry in the record
+            columns = (extent[1] + tile[1] - 1) // tile[1]
             # walk it in tiles, which are chunks, so no chunk is written twice
-            for origin, shape in self._tiles(extent=extent):
+            for origin, shape in self._tiles(extent=extent, tile=tile):
                 # and fill each one by decimating the level below; a tile of pure fill is
                 # skipped, so the level stays as sparse as the product it came from
                 record = self._kernels.decimate(
                     source=source,
-                    destination=level,
+                    destination=draft,
                     datatype=self._datatype,
                     origin=origin,
                     shape=shape,
@@ -171,57 +186,63 @@ class Pyramid:
                 if exponent == 1:
                     # fold its measurement into the running statistics of the raster
                     self.statistics.merge(record=record)
-                # count the tiles that held anything
-                written += 1 if record[0] else 0
-            # record it
-            self._levels[exponent] = level
+                # a tile that held anything was written
+                if record[0]:
+                    # so name it in the record, at its place in tile order
+                    occupancy[
+                        (origin[0] // tile[0]) * columns + origin[1] // tile[1]
+                    ] = 1
+            # let go of the writable mapping; the level is complete
+            del draft
+            # commit the occupancy record, which is what makes the level exist
+            self._commit(exponent=exponent, occupancy=occupancy)
+            # and take hold of the level the way a reader would
+            self._levels[exponent] = self._open(
+                exponent=exponent, extent=extent, tile=tile
+            )
             # show me
             channel.log(
                 f"{self._name}: level {exponent} of extent {extent}, "
-                f"{written} tiles written"
+                f"{sum(occupancy)} tiles written"
             )
-        # the statistics were measured while the first level was being built, and a level
-        # is built once; keep them beside it, or a pyramid found on disk would arrive
-        # without the very numbers it was the cheapest way to compute
-        self._remember(cache=cache)
+            # the statistics were measured while the first level was being built, and a
+            # level is built once; keep them beside it, or a pyramid found on disk would
+            # arrive without the very numbers it was the cheapest way to compute
+            if exponent == 1:
+                # so write them down
+                self._remember()
         # all done
         return self
 
     def depth(self) -> int:
         """
-        Report how many levels the extent supports: the top of the pyramid is the level
-        whose whole raster fits in a single tile
+        Report how many levels my extent supports
+
+        Halving stops when the smaller axis would drop below one cell, which is all the
+        pyramid has to promise: a client asking for a deeper zoom is served by the deepest
+        level there is, striding it for the rest
         """
         # start at the base
+        depth = 0
+        # and the full extent
         extent = list(self._shape)
-        # and the tile it is chopped into
-        tile = self._tile
-        # count the halvings
-        levels = 0
-        # until the raster fits in one tile
-        while any(axis > width for axis, width in zip(extent, tile)):
-            # halve it
+        # halve until an axis collapses
+        while min(axis // 2 for axis in extent) >= 1:
+            # one more level
+            depth += 1
+            # and the extent shrinks
             extent = [axis // 2 for axis in extent]
-            # an extent that has collapsed cannot be halved again
-            if min(extent) < 1:
-                # so stop
-                break
-            # count the level
-            levels += 1
-        # hand off the count
-        return levels
+        # all done
+        return depth
 
     def close(self) -> "Pyramid":
         """
-        Release the cache file
+        Release my levels
+
+        Each one is a mapping, and letting go of the last reference to it unmaps the file
         """
-        # if i am attached
-        if self._cache is not None:
-            # let it go
-            self._cache.close()
-            # and forget it
-            self._cache = None
-            self._levels = {}
+        # forget them
+        self._levels = {}
         # all done
         return self
 
@@ -245,6 +266,12 @@ class Pyramid:
         # a write, and a read into a buffer laid out for the wrong cell type deposits
         # something that is not the data
         self._kernels = dataset.kernels
+        # the storage classes for cells of this type, the level a reader maps and the draft
+        # a builder writes, gathered under the same cell name as the kernels
+        self._cell = dataset.datatype.cell
+        self._storage = (
+            getattr(qed.libqed.pyramid, self._cell, None) if self._cell else None
+        )
         # what an unwritten chunk of a level must read back as. the decimation leaves a tile
         # unwritten exactly when it found no valid cell in it, and the only cell its kernels
         # call invalid is a nan -- so for a raster that can hold one, the fill is a nan and
@@ -260,18 +287,18 @@ class Pyramid:
             # so the cell type decides
             self._fill = blank
         # a raster whose cells have no way to say "nothing" never has a tile skipped, since
-        # every value it can hold is a measurement
+        # every value it can hold is a measurement; whatever the product declared stands,
+        # and nothing ever reads it back, so a product that declared nothing gets a zero
         else:
-            # so whatever the product declared stands, and nothing ever reads it back
-            self._fill = self._base.fillValue
+            # so the declaration stands
+            self._fill = self._base.fillValue if self._base.fillValue is not None else 0
         # the identity of the product this dataset came from, so a cache built against one
         # version of a file is never read against another
         self._stamp = self._identify(reader=reader, uri=dataset.uri)
         # where the cache lives is not mine to decide: the workspace the application owns
         # is the one authority on where derived data goes, and it is handed to me
         self._workspace = workspace
-        # the file, once attached, and the levels it holds
-        self._cache = None
+        # the levels i hold, by depth
         self._levels = {}
         # what the product turns out to hold; building the first level reads every cell of
         # it, so the statistics of the whole raster accumulate as a byproduct rather than
@@ -328,175 +355,177 @@ class Pyramid:
         # reduce it to something that can be a file name
         return hashlib.sha256(mark.encode("utf-8")).hexdigest()[:16]
 
-    def _attach(self, mode: str):
+    def _survey(self) -> dict:
         """
-        Open the cache file, making it and its directory on first use
+        Take hold of the levels my directory holds that i do not hold already
+
+        A level exists when its occupancy record does: the record is the last thing a build
+        writes, so a tile file without one is a build in progress or the remains of one that
+        died, and neither is a level
         """
-        # if i am already attached
-        if self._cache is not None:
-            # hand it back
-            return self._cache
-        # the file that holds my levels
-        path = self.path
-        # a workspace that could not make its cache has already complained
-        if path is None:
-            # so there is nowhere to keep anything
-            return None
-        # carefully, since the cache lives on a filesystem that may refuse us
+        # go through the levels the extent could support
+        for exponent in range(1, self.depth() + 1):
+            # a level i already hold needs nothing
+            if exponent in self._levels:
+                # so skip it
+                continue
+            # a level without its record does not exist
+            if not self._occupancyPath(exponent=exponent).exists():
+                # so neither does anything above it, since each level is built from the
+                # one below; but keep looking, in case a stale record is all that is left
+                continue
+            # the extent of the level and its tile
+            extent = self._extent(exponent=exponent)
+            tile = self._tileOf(extent=extent)
+            # carefully, since the files may not be what the record promises
+            try:
+                # take hold of it
+                self._levels[exponent] = self._open(
+                    exponent=exponent, extent=extent, tile=tile
+                )
+            # a file of the wrong size, or one that has gone missing, is refused
+            except journal.ApplicationError as error:
+                # make a channel
+                channel = journal.warning("qed.readers.pyramid")
+                # complain
+                channel.line(f"could not attach level {exponent} of '{self._name}'")
+                channel.line(f"at '{self.home}'")
+                channel.line(f"got: {error}")
+                # flush
+                channel.log()
+                # and move on without it
+                continue
+        # hand off the pile
+        return self._levels
+
+    def _open(self, exponent: int, extent: tuple, tile: tuple):
+        """
+        Map the level at {exponent} the way a reader does
+        """
+        # a level over cells of my type, with my fill standing in for whatever was not
+        # written
+        return self._storage.Level(
+            tiles=str(self._tilesPath(exponent=exponent)),
+            occupancy=str(self._occupancyPath(exponent=exponent)),
+            shape=extent,
+            tile=tile,
+            fill=self._fill,
+        )
+
+    def _create(self, exponent: int, extent: tuple, tile: tuple):
+        """
+        Make the file that holds the level at {exponent}, and take hold of it for writing
+        """
+        # the file
+        path = str(self._tilesPath(exponent=exponent))
+        # make it at its full padded size; it is sparse, so this costs nothing until tiles
+        # land in it, and a file left behind by a build that died starts over
+        self._storage.Draft.create(tiles=path, shape=extent, tile=tile)
+        # and map it
+        return self._storage.Draft(tiles=path, shape=extent, tile=tile)
+
+    def _commit(self, exponent: int, occupancy: bytearray) -> None:
+        """
+        Write the occupancy record of the level at {exponent}, which is what makes it exist
+
+        The record lands under a temporary name and is renamed into place, so a reader
+        never sees a partial one and a build that dies leaves no record at all
+        """
+        # where the record goes, and where it is assembled
+        final = self._occupancyPath(exponent=exponent)
+        partial = final.parent / (final.name + ".partial")
+        # write it
+        with open(str(partial), "wb") as record:
+            # in one piece
+            record.write(bytes(occupancy))
+        # and move it into place; the rename is atomic, and replaces a stale record
+        os.replace(str(partial), str(final))
+        # all done
+        return
+
+    def _remember(self) -> "Pyramid":
+        """
+        Keep my statistics, and the layout they describe, beside my levels
+        """
+        # nothing was measured, so there is nothing to keep
+        if self.statistics.count == 0:
+            # leave the sidecar alone
+            return self
+        # the record: the layout, so a reader can tell a cache built for another layout
+        # from its own, and the numbers
+        record = {
+            "format": self.format,
+            "cell": self._cell,
+            "shape": list(self._shape),
+            "tile": list(self._tile),
+            "statistics": {part: float(value) for part, value in self._parts().items()},
+        }
+        # where it goes, and where it is assembled
+        final = self.sidecar
+        partial = final.parent / (final.name + ".partial")
+        # write it
+        with open(str(partial), "w") as sidecar:
+            # as text anyone can read
+            json.dump(record, sidecar, indent=2)
+        # and move it into place
+        os.replace(str(partial), str(final))
+        # all done
+        return self
+
+    def _recall(self) -> "Pyramid":
+        """
+        Take back the statistics an earlier run measured while it built my levels
+        """
+        # numbers i already hold stand
+        if self.statistics.count > 0:
+            # so there is nothing to take back
+            return self
+        # the sidecar
+        path = self.sidecar
+        # a directory without one holds no numbers
+        if not path.exists():
+            # so there is nothing to take back
+            return self
+        # carefully, since the file is text and anyone may have touched it
         try:
-            # open the file, making it if this is the first time
-            cache = qed.h5.libh5.File(str(path), mode if path.exists() else "w")
-        # if anything goes wrong
-        except Exception as error:
+            # read it
+            with open(str(path), "r") as sidecar:
+                # as a record
+                record = json.load(sidecar)
+        # a file that is not a record is ignored
+        except (OSError, ValueError) as error:
             # make a channel
             channel = journal.warning("qed.readers.pyramid")
             # complain
-            channel.line(f"could not open the pyramid cache of '{self._name}'")
+            channel.line(f"could not read the sidecar of '{self._name}'")
             channel.line(f"at '{path}'")
             channel.line(f"got: {error}")
             # flush
             channel.log()
-            # and report that there is none
-            return None
-        # remember it
-        self._cache = cache
-        # take stock of the levels it already holds
-        self._levels = self._survey(cache=cache)
-        # and of what an earlier run measured while it built them
-        self._recall(cache=cache)
-        # hand it off
-        return cache
-
-    def _survey(self, cache) -> dict:
-        """
-        Find the levels the cache already holds
-        """
-        # the pile
-        levels = {}
-        # walk to my group, without making one
-        group = self._openGroup(cache=cache, make=False)
-        # a cache that has never held my levels has nothing to report
-        if group is None:
-            # so the pile stays empty
-            return levels
-        # go through the levels the extent could support
-        for exponent in range(1, self.depth() + 1):
-            # the name this level goes by within the group
-            name = self._levelName(exponent=exponent)
-            # if the group does not have it
-            if not group.has(name=name):
-                # neither do i
-                continue
-            # otherwise, take hold of it
-            levels[exponent] = group.dataset(path=name)
-        # hand off the pile
-        return levels
-
-    def _create(self, cache, exponent: int, extent: list):
-        """
-        Make the dataset that holds one level
-        """
-        # the chunk of a level is the tile the client asks for, so a request reads exactly
-        # one chunk and decompresses nothing it does not use; at the top of the pyramid,
-        # where the raster is smaller than a tile, the chunk shrinks with it
-        chunk = [min(width, axis) for width, axis in zip(self._tile, extent)]
-        # start the creation plan
-        dcpl = qed.h5.libh5.properties.dcpl()
-        dcpl.chunk = chunk
-        # cells nobody writes must read back exactly the way the product spells absence.
-        # there is no freedom here: the library's own default is zero, and zero is a
-        # perfectly good measurement, so a level built over that default would hand the
-        # level above it a raster with no fill in it at all, and the pyramid would densify
-        # one step at a time. the product is the only authority on what its absence looks
-        # like, so ask it rather than assume
-        if self._fill is not None:
-            # adopt it
-            dcpl.fillValue = self._fill
-        # a level is derived data we will read far more often than we write, and the
-        # products it comes from are compressed; store it the same way, or a pyramid of a
-        # sparse product ends up larger than the product. shuffle first, which groups the
-        # bytes of like significance and is what makes deflate worth running on floats
-        dcpl.addShuffle()
-        dcpl.addDeflate(self.compression)
-        # a compressed chunk cannot be touched without decompressing all of it, so the
-        # library must be able to hold whole chunks; its default is a single megabyte,
-        # which does not fit even one chunk of a complex product, and every access would
-        # pay to inflate what the last one just discarded
-        dapl = qed.h5.libh5.properties.dapl()
-        dapl.chunkCache = qed.h5.libh5.properties.ChunkCache(
-            slots=self.slots,
-            bytes=self.slots * self._chunkBytes(chunk=chunk),
-            preemption=0.75,
-        )
-        # make it, in the group that says which dataset it belongs to
-        return self._openGroup(cache=cache, make=True).create(
-            path=self._levelName(exponent=exponent),
-            type=self._datatype,
-            space=qed.h5.libh5.DataSpace(extent),
-            dcpl=dcpl,
-            dapl=dapl,
-        )
-
-    def _chunkBytes(self, chunk: list) -> int:
-        """
-        Report how much memory one chunk of {chunk} cells occupies
-        """
-        # the cells of the chunk
-        cells = 1
-        # by going through its axes
-        for width in chunk:
-            # and multiplying them out
-            cells *= width
-        # each cell is a complex pair of singles; ask the type rather than assume
-        return cells * self._datatype.bytes
-
-    def _remember(self, cache) -> "Pyramid":
-        """
-        Keep my statistics beside my levels
-        """
-        # nothing was measured, so there is nothing to keep
-        if self.statistics.count == 0:
-            # leave the cache alone
+            # and leave the numbers alone
             return self
-        # the group my levels live in
-        group = self._openGroup(cache=cache, make=True)
-        # go through the parts of the record
-        for part, value in self._parts().items():
-            # each one hangs on the group, which already says which dataset it describes
-            name = part
-            # a number already there was written by the run that built the levels
-            if group.hasAttribute(name=name):
-                # and a level is built once, so it still stands
-                continue
-            # otherwise, make the attribute
-            attribute = group.createAttribute(
-                name=name,
-                type=qed.h5.memtypes.double.htype,
-                space=qed.h5.libh5.DataSpace([]),
-            )
-            # and record the number
-            attribute.double(float(value))
-        # all done
-        return self
-
-    def _recall(self, cache) -> "Pyramid":
-        """
-        Take back the statistics an earlier run measured while it built my levels
-        """
-        # walk to my group, without making one
-        group = self._openGroup(cache=cache, make=False)
-        # a cache that has never held my levels holds no numbers either
-        if group is None:
-            # so there is nothing to take back
+        # a record written for another layout, or by another version of this code, does
+        # not describe my levels
+        if (
+            record.get("format") != self.format
+            or record.get("cell") != self._cell
+            or tuple(record.get("shape", ())) != self._shape
+            or tuple(record.get("tile", ())) != self._tile
+        ):
+            # so leave the numbers alone
             return self
+        # the numbers
+        statistics = record.get("statistics", {})
         # go through the parts of the record
         for part in self._parts():
-            # a group that does not carry this part carries none of them
-            if not group.hasAttribute(name=part):
+            # a record that does not carry this part carries none of them
+            if part not in statistics:
                 # so there is nothing to take back
                 return self
-            # otherwise, install it
-            setattr(self.statistics, part, group.getAttribute(name=part).double())
+        # otherwise, install them
+        for part in self._parts():
+            # one at a time
+            setattr(self.statistics, part, statistics[part])
         # all done
         return self
 
@@ -510,36 +539,38 @@ class Pyramid:
             for part in ("count", "min", "mean", "m2", "max")
         }
 
-    def _levelName(self, exponent: int) -> str:
+    def _tilesPath(self, exponent: int):
         """
-        Build the name a level goes by within its group
+        The file that holds the tiles of the level at {exponent}
         """
-        # the group already says which dataset this is, so the level says only how deep
-        return f"level{exponent}"
+        # the directory already says which dataset this is, so the level says only how deep
+        return self.home / f"level{exponent}.tiles"
 
-    def _openGroup(self, cache, make: bool):
+    def _occupancyPath(self, exponent: int):
         """
-        Walk to the group that holds my levels, making it when asked to
+        The record of which tiles of the level at {exponent} were written
         """
-        # start at the root of the cache
-        group = cache
-        # and walk one coordinate at a time, so the file has the shape of the selector
-        # rather than one flat name per dataset with the whole selector spelled into it
-        for step in self._path:
-            # a step that is already there is walked into
-            if group.has(name=step):
-                # by opening it
-                group = group.group(path=step)
-                # and moving on
-                continue
-            # a step that is missing ends the walk, unless i am building
-            if not make:
-                # in which case there is no group
-                return None
-            # otherwise, make it
-            group = group.create(path=step)
-        # hand back where the walk ended
-        return group
+        # beside the tiles
+        return self.home / f"level{exponent}.occupancy"
+
+    def _tileOf(self, extent: tuple) -> tuple:
+        """
+        The tile a level of the given {extent} is diced into
+
+        It is the chunk of the product, so a tile request reads exactly one tile; at the top
+        of the pyramid, where the level is smaller than a chunk, the tile shrinks with it
+        """
+        # clip the chunk to the extent on each axis
+        return tuple(min(width, axis) for width, axis in zip(self._tile, extent))
+
+    def _tileCount(self, extent: tuple, tile: tuple) -> int:
+        """
+        How many tiles a level of the given {extent} diced into {tile} has
+        """
+        # the count along each axis, edge tiles included
+        counts = ((axis + width - 1) // width for width, axis in zip(tile, extent))
+        # multiplied out
+        return math.prod(counts)
 
     def _extent(self, exponent: int) -> tuple:
         """
@@ -548,12 +579,10 @@ class Pyramid:
         # halve the base once per level
         return tuple(axis // 2**exponent for axis in self._shape)
 
-    def _tiles(self, extent: list):
+    def _tiles(self, extent: tuple, tile: tuple):
         """
-        Walk a level in tiles, which are its chunks
+        Walk a level of the given {extent} in tiles of the given {tile}
         """
-        # the tile, kept inside the extent on both axes
-        tile = [min(width, axis) for width, axis in zip(self._tile, extent)]
         # go through the rows
         for row in range(0, extent[0], tile[0]):
             # the rows this tile covers
@@ -571,15 +600,15 @@ class Pyramid:
     @property
     def root(self):
         """
-        The directory that holds my cache
+        The directory that holds every pyramid
         """
         # the workspace decides where derived data goes
         return self._workspace.cache(name="pyramids")
 
     @property
-    def path(self):
+    def home(self):
         """
-        The file that holds my levels
+        The directory that holds my levels
         """
         # the workspace may have nowhere to keep anything
         root = self.root
@@ -587,17 +616,21 @@ class Pyramid:
         if root is None:
             # so say so
             return None
-        # one cache per product version, holding the levels of all its datasets
-        return root / f"{self._stamp}.h5"
+        # one directory per product version, and within it one per dataset, so that the
+        # levels of one dataset are never in the way of another's
+        return root.join(self._stamp, *self._path)
+
+    @property
+    def sidecar(self):
+        """
+        The file that describes my levels and carries my statistics
+        """
+        # beside the levels
+        return self.home / "pyramid.json"
 
     # constants
-    # how hard to squeeze a level; the levels are written once and read many times, so a
-    # middling setting buys most of the space at a fraction of the time the highest costs
-    compression = 4
-    # how many chunks the library may hold for one level; a decimation reads a two by two
-    # block of the level below for every chunk it writes, so a handful is enough to keep
-    # any of them from being inflated twice
-    slots = 8
+    # the version of the layout; a sidecar written for another is not read
+    format = 1
 
 
 # end of file
