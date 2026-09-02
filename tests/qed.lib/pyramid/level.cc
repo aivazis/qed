@@ -181,8 +181,8 @@ main(int argc, char * argv[])
     assert(std::isnan((strided[{ 3, 4 }])));
 
     // a strided read away from the origin, with different strides on the two axes: the
-    // origin is in decimated coordinates, so the footprint starts at (3, 4)
-    auto offset = level.read<grid_t>({ 1, 1 }, { 2, 2 }, { 3, 4 });
+    // footprint starts at (3, 4) and steps by (3, 4)
+    auto offset = level.read<grid_t>({ 3, 4 }, { 2, 2 }, { 3, 4 });
     // (3, 4) lies in an unwritten tile
     assert(std::isnan((offset[{ 0, 0 }])));
     // (3, 8) is the top of the middle edge tile
@@ -195,7 +195,7 @@ main(int argc, char * argv[])
     // a read whose footprint runs past the extent gets fill for the overhang, not the
     // padding of the edge tile and not a crash: the footprint starts at (3, 6) and reaches
     // column 9 and row 7
-    auto overhang = level.read<grid_t>({ 1, 2 }, { 5, 4 }, { 3, 3 });
+    auto overhang = level.read<grid_t>({ 3, 6 }, { 5, 4 }, { 3, 3 });
     // (3, 6) is in an unwritten tile
     assert(std::isnan((overhang[{ 0, 0 }])));
     // (3, 9) is past the last column
