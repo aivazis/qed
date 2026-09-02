@@ -39,18 +39,29 @@ class Discovery:
             finding.suffix = dataset.pyre_name[len(reader.pyre_name) :]
             # and the selector that identifies it
             finding.selector = dict(dataset.selector)
+            # the rasters it is read alongside travel by name, relative to the reader, so
+            # their twins can be wired together the way the live datasets are
+            finding.companions = {
+                role: companion.pyre_name[len(reader.pyre_name) :]
+                for role, companion in getattr(dataset, "companions", dict)().items()
+            }
             # add it to the pile
             findings.append(finding)
         # the availability map travels as plain sequences
         available = {axis: tuple(values) for axis, values in reader.available.items()}
         # flat flavors deduce their shape from the file, so it travels too
         shape = getattr(reader, "shape", None)
+        # the identifier the product carries for itself is read off the open file, so it
+        # travels as well: it names whatever is derived from the product, and the passive
+        # reader must name it the same way
+        granule = getattr(reader, "granule", None)
         # assemble the record
         return cls(
             selections=dict(reader.selections),
             available=available,
             shape=tuple(shape) if shape else None,
             findings=findings,
+            granule=granule,
         )
 
     # interface - team side
@@ -95,6 +106,38 @@ class Discovery:
             )
             # add it to the reader's pile
             reader.datasets.append(dataset)
+        # the twins by their suffix, so companions can find each other
+        twins = {
+            finding.suffix: twin
+            for finding, twin in zip(
+                self.findings, reader.datasets[-len(self.findings) :]
+            )
+        }
+        # go through the findings again
+        for finding in self.findings:
+            # and wire each twin to the twins of its companions, under the role each plays
+            for role, suffix in finding.companions.items():
+                # a companion the survey did not report is a bug in the survey
+                if suffix not in twins:
+                    # make a channel
+                    channel = journal.firewall("qed.nexus.survey")
+                    # complain
+                    channel.line(
+                        f"while hydrating '{reader.pyre_name}{finding.suffix}'"
+                    )
+                    channel.line(
+                        f"its '{role}' companion '{reader.pyre_name}{suffix}' was not surveyed"
+                    )
+                    # flush
+                    channel.log()
+                    # and move on
+                    continue
+                # otherwise, wire it
+                setattr(twins[finding.suffix], role, twins[suffix])
+        # a reader that names its product from the file learns the name from the survey
+        if self.granule is not None and hasattr(type(reader), "granule"):
+            # so it can name what is derived from the product the way the crew does
+            reader.granule = self.granule
         # install the availability map
         reader.available = {
             axis: set(values) for axis, values in self.available.items()
@@ -113,9 +156,11 @@ class Discovery:
         return reader
 
     # metamethods
-    def __init__(self, selections, available, shape, findings, **kwds):
+    def __init__(self, selections, available, shape, findings, granule=None, **kwds):
         # chain up
         super().__init__(**kwds)
+        # the identifier the product carries for itself, if any
+        self.granule = granule
         # the selections as they stood after first contact, auto-picks included
         self.selections = selections
         # the availability map, as plain sequences so the record pickles cleanly

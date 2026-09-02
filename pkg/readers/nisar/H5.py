@@ -47,6 +47,11 @@ class H5(
         """
         The identifier the product carries for itself
         """
+        # a reader that was told, e.g. one hydrated from a survey, answers with what it
+        # was told
+        if self._granule is not None:
+            # since it never opens the file
+            return self._granule
         # a product that has not been opened cannot say
         if self.product is None:
             # so it does not
@@ -61,6 +66,16 @@ class H5(
         except AttributeError:
             # cannot be named this way
             return None
+
+    @granule.setter
+    def granule(self, value):
+        """
+        Adopt {value} as the identifier of my product, on the word of whoever opened it
+        """
+        # remember it
+        self._granule = value
+        # all done
+        return
 
     # interface
     def select(self, selector):
@@ -207,6 +222,7 @@ class H5(
 
     # private data
     product = None  # the opened data product, once first contact has been made
+    _granule = None  # the identifier of my product, when i was told rather than read it
     _opened = False  # whether first contact has been made
     _archive = None  # the archive that manages my data source, when there is one
     _fapl = None  # the file access property list i was constructed with
