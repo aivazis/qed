@@ -19,7 +19,8 @@ from .Tile import Tile as tile
 from .Survey import Survey as survey
 
 # the unit of work that makes a dataset worth looking at
-from .Prepare import Prepare as prepare
+from .Decimate import Decimate as decimate
+from .Build import Build as build
 
 # what a survey learns about one dataset
 from .Finding import Finding as finding
