@@ -20,83 +20,123 @@ striding composes: halving twice is striding by four
 
 # externals
 import os
+import shutil
 
 # support
 import journal
 import pyre
 import qed
 
-# the NISAR fixture this driver reads; part of the shared test data tree
+# the product this driver decimates
 product = pyre.primitives.path(__file__).parent / ".." / "data" / "nisar" / "gslc.h5"
-# if it has not been generated
+# a checkout without the fixture has nothing to check
 if not product.exists():
-    # there is nothing to check
+    # so bail quietly
     raise SystemExit(0)
 
-# quiet the configuration chatter
+# the reader complains about the missing web assets on open; this driver is not the app
 journal.warning("qed.cli").deactivate()
 
-# the h5 bindings
-libh5 = qed.h5.libh5
+# the scratch area for the levels this driver builds
+scratch = pyre.primitives.path(__file__).parent / "pyramid.scratch"
+# start clean
+if scratch.exists():
+    # by removing whatever a previous run left behind
+    shutil.rmtree(str(scratch))
+# and make it
+scratch.mkdir()
 
-# open the product without measuring it; this driver only moves cells around
+
+def occupancy(path, extent, tile, written):
+    """
+    Write the occupancy record of a level of {extent} diced into {tile}, naming the tiles
+    whose origins are in {written}
+    """
+    # the grid of tiles, edge tiles included
+    columns = (extent[1] + tile[1] - 1) // tile[1]
+    rows = (extent[0] + tile[0] - 1) // tile[0]
+    # nothing written
+    record = bytearray(rows * columns)
+    # go through the written tiles
+    for origin in written:
+        # and mark each one, in tile order
+        record[(origin[0] // tile[0]) * columns + origin[1] // tile[1]] = 1
+    # save it
+    with open(str(path), "wb") as stream:
+        # in one piece
+        stream.write(bytes(record))
+    # all done
+    return
+
+
+def level(dataset, name, extent, tile, written, fill):
+    """
+    Make a level of {extent} diced into {tile} for {dataset} under {name}, ready for writing;
+    {written} is the list of tile origins the caller will fill, and the level reads them
+    back after the draft is let go
+    """
+    # the storage classes for cells of this type
+    storage = getattr(qed.libqed.pyramid, dataset.datatype.cell)
+    # the files
+    tiles = str(scratch / f"{name}.tiles")
+    record = scratch / f"{name}.occupancy"
+    # make the tile file at its full padded size
+    storage.Draft.create(tiles=tiles, shape=extent, tile=tile)
+    # and the record
+    occupancy(path=record, extent=extent, tile=tile, written=written)
+    # take hold of the file for writing, and the way a reader would; both map the same
+    # file, so a tile written through the one is visible through the other
+    draft = storage.Draft(tiles=tiles, shape=extent, tile=tile)
+    reader = storage.Level(
+        tiles=tiles, occupancy=str(record), shape=extent, tile=tile, fill=fill
+    )
+    # hand them off
+    return draft, reader
+
+
+# open the product without measuring it; the numbers come out of the decimation
 reader = qed.readers.nisar.gslc(name="pyramid", uri=f"file:{product}")
 reader.open(measure=False)
-# take its first dataset as the base of the pyramid
+# get the base dataset
 base, *_ = reader.datasets
-# its layout
+# its geometry
 shape = tuple(base.shape)
 tile = tuple(base.tile)
-# and the in-memory type both levels share
 datatype = base.datatype.htype
-# a raster is read into a buffer of its own cells, so the kernels come from the dataset
-# rather than from a fixed instantiation that happens to suit one product
+# the kernels that read its cells
 kernels = base.kernels
+# a real product carries a nan for absence
+assert base.cell.blank != base.cell.blank
 
-# the level above the base is half the extent on each axis
-extent = [axis // 2 for axis in shape]
-# the file that holds it, beside this driver so the suite can clean up after itself
-scratch = str(pyre.primitives.path(__file__).parent / "pyramid.h5")
-# start from nothing, in case an earlier run left something behind
-if os.path.exists(scratch):
-    # by removing it
-    os.unlink(scratch)
-
-# make the file
-cache = libh5.File(scratch, "w")
-# the level keeps the chunking of the base, so a tile of it is still one chunk
-dcpl = libh5.properties.dcpl()
-dcpl.chunk = [min(width, axis) for width, axis in zip(tile, extent)]
-# cells nobody writes must read back as fill, and the product is the only authority on
-# what its absence looks like, so take the value from it rather than assume one
-dcpl.fillValue = base.data.dataset.fillValue
-# create the level
-level = cache.create(
-    path="level1", type=datatype, space=libh5.DataSpace(extent), dcpl=dcpl
-)
-
-# the fixture frames its data inside a much larger grid of fill, so a tile taken anywhere
-# would likely hold nothing and compare equal for the wrong reason; these destination
-# origins have source footprints that land on the data
-# they are also exactly the four that feed the level two tile checked below, so the
-# composition has a fully populated ancestry
+# the first level: half the extent on each axis
+extent = tuple(axis // 2 for axis in shape)
+# the four tiles this driver fills, a 2x2 block in the middle of the raster
 origins = [(16384, 5120), (16384, 5632), (16896, 5120), (16896, 5632)]
-# go through them
+# make it
+draft, first = level(
+    dataset=base,
+    name="level1",
+    extent=extent,
+    tile=tile,
+    written=origins,
+    fill=base.cell.blank,
+)
+# go through the tiles
 for origin in origins:
-    # build the tile of the level by decimating the base
+    # decimate the base into the level
     deposited = kernels.decimate(
         source=base.data.dataset,
-        destination=level,
+        destination=draft,
         datatype=datatype,
         origin=origin,
         shape=tile,
         stride=(2, 2),
     )
-    # read the level back at unit stride
+    # what the level holds there
     stored = kernels.sample(
-        source=level, datatype=datatype, origin=origin, shape=tile, stride=(1, 1)
+        source=first, datatype=datatype, origin=origin, shape=tile, stride=(1, 1)
     )
-    # and read the base the way a client would have, striding by two
+    # and what a strided read of the base holds
     strided = kernels.sample(
         source=base.data.dataset,
         datatype=datatype,
@@ -104,38 +144,40 @@ for origin in origins:
         shape=tile,
         stride=(2, 2),
     )
-    # the tile must hold real data, or the comparison proves nothing
+    # the tile is full of measurements
     assert stored[0] == tile[0] * tile[1]
-    # and the two readings must be indistinguishable
+    # the level is cell for cell the strided base
     assert stored == strided
-    # the decimation measured the very cells it moved, so its own record agrees with both
-    # without anybody reading them a second time
+    # and the decimation reported exactly what it deposited
     assert deposited == stored
 
-# now build the level above from the level just written, and check that decimation
-# composes: striding by two twice must land exactly where striding by four would
-second = cache.create(
-    path="level2",
-    type=datatype,
-    space=libh5.DataSpace([axis // 4 for axis in shape]),
-    dcpl=dcpl,
-)
-# take a tile of it whose ancestry runs through the tiles built above
+# the second level is built from the first, not from the base: a quarter of the extent
+above = tuple(axis // 4 for axis in shape)
+# the one tile of it that the block above covers
 origin = (8192, 2560)
-# build it from the level below
+# make it
+draft2, second = level(
+    dataset=base,
+    name="level2",
+    extent=above,
+    tile=tile,
+    written=[origin],
+    fill=base.cell.blank,
+)
+# decimate the first level into it
 kernels.decimate(
-    source=level,
-    destination=second,
+    source=first,
+    destination=draft2,
     datatype=datatype,
     origin=origin,
     shape=tile,
     stride=(2, 2),
 )
-# read it back at unit stride
+# what the second level holds
 stored = kernels.sample(
     source=second, datatype=datatype, origin=origin, shape=tile, stride=(1, 1)
 )
-# and read the base the way a client at that zoom would have, striding by four
+# is what striding the base by four holds: halving composes
 strided = kernels.sample(
     source=base.data.dataset,
     datatype=datatype,
@@ -143,23 +185,16 @@ strided = kernels.sample(
     shape=tile,
     stride=(4, 4),
 )
-# the tile must hold real data, or the comparison proves nothing
 assert stored[0] == tile[0] * tile[1]
-# and two halvings must be indistinguishable from one quartering
 assert stored == strided
 
-# a tile of pure fill is never written, so its chunk stays unallocated; what it reads back
-# as is what the level above will see, and it has to be fill. the library's own default is
-# zero, which is a perfectly good measurement, and a level built over that default would
-# hand the next one a raster with no fill in it at all -- the pyramid would densify one
-# level at a time, each holding four times the cells of the one below instead of a quarter
+# a tile of pure fill is not written; the corner of this product is empty
 empty = (0, 0)
-# decimating a region the product never wrote deposits nothing, and says so: the record it
-# reports counts no cells at all
+# so the decimation reports nothing deposited
 assert (
     kernels.decimate(
         source=base.data.dataset,
-        destination=level,
+        destination=draft,
         datatype=datatype,
         origin=empty,
         shape=tile,
@@ -167,192 +202,162 @@ assert (
     )[0]
     == 0
 )
-# and reading that region back finds nothing, rather than a field of zeros
+# and the level, whose record does not name that tile, reads fill there
 assert (
     kernels.sample(
-        source=level, datatype=datatype, origin=empty, shape=tile, stride=(1, 1)
+        source=first, datatype=datatype, origin=empty, shape=tile, stride=(1, 1)
     )[0]
     == 0
 )
 
 
-# the point of the whole exercise: a render served from a level must be the same picture
-# as one that strides the base. stand in for a pyramid with the level built above, which
-# covers the tiles this render reads
+# a render through the level must be the render off the base
 class Stub:
     """
     A pyramid holding the one level this driver built
     """
 
-    # interface
     def level(self, zoom):
         """
         Serve everything from the level, which owes one halving less than the request
         """
-        # the level is the base decimated once, so it owes whatever is left
-        return level, tuple(step - 1 for step in zoom)
+        return first, tuple(step - 1 for step in zoom)
 
 
-# a tile whose footprint lies inside the level tiles built above
+# a tile at zoom one, inside the block this driver decimated
 spec = {"zoom": (1, 1), "origin": (16384, 5120), "shape": (256, 256)}
-# the channel that renders it
+# the amplitude channel
 amplitude = base.channel(name="amplitude")
-# render it the way the reader always has, striding the product
+# render off the base
 straight = bytes(memoryview(base.render(channel=amplitude, **spec)))
-# hand the dataset its levels and render again
+# install the stub
 base.pyramid = Stub()
+# and render through the level
 served = bytes(memoryview(base.render(channel=amplitude, **spec)))
-# the pictures must be indistinguishable, or the pyramid would change what a user sees
-# depending on whether it happened to have been built
+# the two must agree
 assert straight == served
-# and the tile must hold something, or the comparison proves nothing
+# and show something
 assert len(set(straight)) > 1
-# put the dataset back the way it was
+# remove the stub
 base.pyramid = None
+# and let go of the scratch levels
+del draft, draft2, first, second
 
-# a render that reads a companion raster alongside its data -- a mask -- reads both with one
-# origin and one stride, so the two have to come from the same depth. this is where a
-# covariance term, whose cells are real and whose mask is a single byte per cell, exercises
-# both halves of that: the levels of the two rasters are built by different kernels, and the
-# render must pair them correctly or refuse the level altogether
+# the masked renders read a companion raster alongside the data, and both must come from
+# the same depth; check that with a covariance product, if the fixture is there
 covariances = (
     pyre.primitives.path(__file__).parent / ".." / "data" / "nisar" / "gcov.h5"
 )
-# when that fixture has been generated
+# if it is
 if covariances.exists():
     # open it
     gcov = qed.readers.nisar.gcov(name="pyramid.gcov", uri=f"file:{covariances}")
     gcov.open(measure=False)
-    # take a covariance term of the smaller frequency, which carries a mask alongside its
-    # data; it is the same arrangement as the larger one and there is less of it to decimate
+    # find the covariance term and its mask
     covariance = [
         entry
         for entry in gcov.datasets
         if dict(entry.selector) == {"band": "L", "frequency": "B", "cov": "HHHH"}
     ][0]
-    # and the mask it is read with
     mask = covariance.mask
-
-    # the two rasters hold different kinds of number, so each is decimated by the kernels
-    # of its own cell type; reading either into a buffer laid out for the other would
-    # deposit pairs, or halves, of what the file actually holds
+    # the covariance is real, the mask is a byte
     assert covariance.datatype.cell == "float32"
     assert mask.datatype.cell == "uint8"
-
-    # the tile to draw, one halving out
+    # the tile this driver checks, at zoom one
     where = {"zoom": (1, 1), "origin": (1024, 1024), "shape": (128, 128)}
-    # a file to keep the levels of both rasters in
-    derived = str(pyre.primitives.path(__file__).parent / "companions.h5")
-    # starting from nothing, in case an earlier run left something behind
-    if os.path.exists(derived):
-        # by removing it
-        os.unlink(derived)
-    # make it
-    store = libh5.File(derived, "w")
 
-    # build the first level of one raster over the region the render will read
     def decimate(dataset, name):
         """
         Halve {dataset} over the footprint of the tile above, and hand back the level
         """
-        # the level covers the whole raster, halved on each axis
-        extent = [axis // 2 for axis in tuple(dataset.shape)]
-        # lay it out in chunks the size of the tile being drawn
-        plan = libh5.properties.dcpl()
-        plan.chunk = list(where["shape"])
-        # spelling absence exactly the way the raster it comes from does
-        plan.fillValue = dataset.data.dataset.fillValue
-        # make it
-        target = store.create(
-            path=name,
-            type=dataset.datatype.htype,
-            space=libh5.DataSpace(extent),
-            dcpl=plan,
+        # the extent of the level and its tile
+        extent = tuple(axis // 2 for axis in tuple(dataset.shape))
+        chunk = where["shape"]
+        # a cell type that cannot say "nothing" fills with what the product declared
+        fill = dataset.cell.blank if dataset.cell.blank is not None else 0
+        # make the level
+        draft, reader = level(
+            dataset=dataset,
+            name=name,
+            extent=extent,
+            tile=chunk,
+            written=[where["origin"]],
+            fill=fill,
         )
-        # fill the one tile the render will ask for, with the kernels of its own cell type
+        # decimate the one tile
         record = dataset.kernels.decimate(
             source=dataset.data.dataset,
-            destination=target,
+            destination=draft,
             datatype=dataset.datatype.htype,
             origin=where["origin"],
-            shape=where["shape"],
+            shape=chunk,
             stride=(2, 2),
         )
-        # the region has to hold data, or none of the comparisons below prove anything
+        # which held something
         assert record[0] > 0
-        # hand off the level
-        return target
+        # hand back the level
+        return reader
 
-    # a pyramid holding the single level built for one raster
     class Stub:
         """
         A pyramid whose only level is the base decimated once
         """
 
-        # metamethods
         def __init__(self, level, **kwds):
             # chain up
             super().__init__(**kwds)
-            # remember the level i hold
+            # remember my level
             self.first = level
             # all done
             return
 
-        # interface
         def level(self, zoom):
             """
             Serve everything from my one level, which owes one halving less than the request
             """
-            # the level is the base decimated once, so it owes whatever is left
             return self.first, tuple(step - 1 for step in zoom)
 
         def at(self, exponent):
             """
             Answer the exact request, which i can do at exactly one depth
             """
-            # i hold the first level and nothing else
             return self.first if exponent == 1 else None
 
-    # render the masked channel the way the reader always has, striding the product
+    # the masked channel
     channel = covariance.channel(name="covarianceMasked")
+    # render off the base
     straight = bytes(memoryview(covariance.render(channel=channel, **where)))
-    # the picture has to have some structure in it, or comparing it proves nothing
+    # which shows something
     assert len(set(straight)) > 1
-
-    # now offer the data a level while the mask has none. the render must decline it: a
-    # level for one raster and the product for the other would pair every data cell with
-    # the mask value of a cell half the distance away
-    covariance.pyramid = Stub(level=decimate(dataset=covariance, name="data"))
+    # give the data a level but not the mask: the render must fall back to the base for
+    # both, since a level and a full resolution mask do not pair
+    covariance.pyramid = Stub(level=decimate(dataset=covariance, name="covariance"))
     guarded = bytes(memoryview(covariance.render(channel=channel, **where)))
-    # so the picture is unchanged
     assert straight == guarded
-
-    # give the mask its own level, at the same depth and built by its own kernels
+    # give the mask its level too: now both come from depth one
     mask.pyramid = Stub(level=decimate(dataset=mask, name="mask"))
     served = bytes(memoryview(covariance.render(channel=channel, **where)))
-    # now the render can take both from their levels, and the picture is still the one the
-    # product would have given: a level is cell for cell what striding the base produces
     assert straight == served
-
-    # a level is built by skipping the tiles that hold nothing, so what an unwritten chunk
-    # reads back as decides whether the level is the raster it came from. this product is
-    # the case that matters: it frames its data in nans while declaring the library's
-    # default fill of zero, and a level built on that declaration would answer a zoomed out
-    # request with a margin of perfectly good zeros where the product has nothing at all
+    # the product declares zero as its fill, while framing its data in nans
     assert covariance.data.dataset.fillValue == 0.0
     assert covariance.cell.blank != covariance.cell.blank
-    # a raster whose cells cannot hold a nan never has a tile skipped, so it keeps the
-    # value the product declared
+    # and a byte mask has no way to say "nothing"
     assert mask.cell.blank is None
 
-    # build a real level, the way a preparation does
+    # the pyramid proper: build the first level of the covariance in a scratch workspace
     scratchWorkspace = qed.workspaces.local(name="pyramid.companions.workspace")
-    scratchWorkspace.path = str(pyre.primitives.path(__file__).parent)
+    scratchWorkspace.path = str(scratch)
     levels = qed.readers.nisar.pyramid(
         reader=gcov, dataset=covariance, workspace=scratchWorkspace
     )
     levels.build(depth=1)
-    # the corner of a geocoded product is nothing but fill, so the base finds no cell there
+    # the level exists: its files are there, and so is the sidecar with the statistics
+    assert levels.reach() == 1
+    assert (levels.home / "level1.tiles").exists()
+    assert (levels.home / "level1.occupancy").exists()
+    assert levels.sidecar.exists()
+    assert levels.statistics.count > 0
+    # the corner of the product is empty: the base says so
     corner = {"origin": (0, 0), "shape": (64, 64), "stride": (1, 1)}
     kernels = covariance.kernels
     assert (
@@ -361,98 +366,76 @@ if covariances.exists():
         )[0]
         == 0
     )
-    # and neither must the level: every tile there was skipped, and a skipped tile has to
-    # read back as what was skipped
+    # and so does the level, whose record does not name that tile
     assert (
         kernels.sample(
             source=levels._levels[1], datatype=covariance.datatype.htype, **corner
         )[0]
         == 0
     )
-    # let the cache go and take it with us
+    # a second pyramid over the same dataset finds the level, and the numbers, on disk
+    again = qed.readers.nisar.pyramid(
+        reader=gcov, dataset=covariance, workspace=scratchWorkspace
+    )
+    again.attach()
+    assert again.reach() == 1
+    assert again.statistics.count == levels.statistics.count
+    assert again.statistics.mean == levels.statistics.mean
+    # let go
     levels.close()
-    os.unlink(str(levels.path))
-    os.rmdir(str(scratchWorkspace.cache(name="pyramids")))
-    os.rmdir(str(scratchWorkspace.path / ".qed"))
-
-    # put the datasets back the way they were and let the file go
+    again.close()
     covariance.pyramid = None
     mask.pyramid = None
-    store.close()
-    os.unlink(derived)
 
-# close the file before it goes away
-cache.close()
-# and clean up after the driver
-os.unlink(scratch)
-
-# a pyramid is told where it lives rather than going looking: the workspace the
-# application owns is the one authority on where derived data goes
+# a pyramid with no levels serves everything off the base, owing the whole zoom
 workspace = qed.workspaces.local(name="pyramid.workspace")
-# the pyramid of a dataset knows how deep it can go: the top is the level whose whole
-# raster fits in a single tile
 pyramid = qed.readers.nisar.pyramid(reader=reader, dataset=base, workspace=workspace)
-# this fixture is large enough to support several halvings
+# the extent supports several halvings
 assert pyramid.depth() > 1
-# with nothing built, every request falls back to the base at the full stride, which is
-# exactly what the reader did before any of this existed
+# a symmetric request
 source, residual = pyramid.level(zoom=(3, 3))
 assert source is base.data.dataset
 assert residual == (3, 3)
-# and a request at full resolution owes nothing
+# full resolution
 source, residual = pyramid.level(zoom=(0, 0))
 assert source is base.data.dataset
 assert residual == (0, 0)
-# the two axes are not required to agree, since the client can decouple them; a request
-# that zooms one axis further than the other is served by the level that over-decimates
-# neither, and each axis makes up its own difference by striding what it reads
+# an asymmetric one
 source, residual = pyramid.level(zoom=(3, 1))
 assert source is base.data.dataset
 assert residual == (3, 1)
 
-# a cache is written by one process and read by others -- a crew member calls the same
-# reader something else, and a later run may call it a third thing -- so the names inside
-# it must come from the product rather than from whatever this process named its reader
+# the cache is named after the product, not the reader: a second reader of the same file
+# under another name lands on the same directory
 other = qed.readers.nisar.gslc(name="pyramid.other", uri=f"file:{product}")
 other.open(measure=False)
 twin, *_ = other.datasets
-# the two readers disagree about what to call themselves
 assert twin.pyre_name != base.pyre_name
-# but their pyramids agree on where everything goes
 assert (
-    qed.readers.nisar.pyramid(reader=other, dataset=twin, workspace=workspace).path
-    == pyramid.path
+    qed.readers.nisar.pyramid(reader=other, dataset=twin, workspace=workspace).home
+    == pyramid.home
 )
-
-# the workspace keeps derived data beside the configuration the user launched from,
-# rather than out of sight under a home directory
+# the default workspace is the current directory
 assert str(workspace.path) == "."
-# gathered under one folder
 assert str(workspace.cache(name="pyramids")) == "./.qed/pyramids"
-# which is where the pyramid puts its levels
-assert str(pyramid.path).startswith("./.qed/pyramids/")
-# and the driver leaves nothing behind
+assert str(pyramid.home).startswith("./.qed/pyramids/")
+# nothing was built there, so the directories are empty
 os.rmdir("./.qed/pyramids")
 os.rmdir("./.qed")
 
-# the workspace directory belongs to the user; a workspace pointed at one that does not
-# exist says so rather than making it, since making it silently would turn a typo in the
-# configuration into a tree of empty directories
+# a workspace that cannot make its cache says so, and makes nothing
 stray = qed.workspaces.local(name="pyramid.stray")
 stray.path = "no/such/place"
-# the complaint is the point, so let it out where a human would see it, but not here
 journal.error("qed.workspace").fatal = False
 journal.error("qed.workspace").deactivate()
-# there is nowhere to keep anything
 assert stray.cache(name="pyramids") is None
-# and nothing was made on the way to finding that out
 assert not os.path.exists("no")
 
-# the application owns the workspace, so everything that derives anything can be pointed
-# at the same one
+# the app owns a workspace
 app = qed.shells.qed(name="pyramid.app")
-# it resolves to the local flavor by default
 assert isinstance(app.workspace, qed.workspaces.local)
 
+# clean up the scratch area
+shutil.rmtree(str(scratch))
 
 # end of file
