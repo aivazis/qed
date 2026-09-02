@@ -23,10 +23,27 @@ class Preparation:
     # constants
     # the states the work can be in
     working = "working"
+    seeded = "seeded"
     ready = "ready"
     failed = "failed"
 
     # interface
+    def seed(self):
+        """
+        Mark the work as far enough along to render by: the first tiles of the pyramid,
+        the ones spread over the extent the way the probe samples it, have reported, so
+        the statistics are an estimate rather than a guess, and the levels keep building
+        while the view shows the product at full resolution
+        """
+        # a preparation that is over has nothing to seed
+        if self.status != self.working:
+            # so leave it alone
+            return self
+        # otherwise, mark it
+        self.status = self.seeded
+        # all done
+        return self
+
     def succeed(self):
         """
         Mark the work as done
