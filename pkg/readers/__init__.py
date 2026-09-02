@@ -16,6 +16,6 @@ from . import asar
 from .Metadata import Metadata as metadata
 
 # the statistics prober the dataset flavors seed themselves with
-from .probes import probe
+from .probes import probe, windows
 
 # end of file

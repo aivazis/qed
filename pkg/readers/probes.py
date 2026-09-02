@@ -9,10 +9,10 @@ import journal
 
 
 # estimate the statistics of a dataset by probing it in several places
-def probe(dataset, windows: int = 4) -> tuple:
+def probe(dataset, stops: int = 4) -> tuple:
     """
-    Estimate the display range of {dataset} from a grid of {windows}x{windows} sample
-    windows spread across its full extent
+    Estimate the display range of {dataset} from a grid of {stops}x{stops} sample windows
+    spread across its full extent
 
     A single window in the middle of the raster is a poor estimator: a geocoded product
     frames its data inside a much larger grid of fill, so the middle is often empty, and a
@@ -29,25 +29,15 @@ def probe(dataset, windows: int = 4) -> tuple:
     library to decompress as many as four chunks to deliver the cells of one
     """
     # unpack the extent of the raster
+    # the windows, spread over the extent
+    origins = windows(dataset=dataset, stops=stops)
+    # their extent
+    span = tuple(
+        min(width, axis)
+        for width, axis in zip(tuple(dataset.tile), tuple(dataset.shape))
+    )
+    # the extent of the dataset, for the diagnostics
     shape = tuple(dataset.shape)
-    # the window is the dataset's preferred tile, kept inside the raster on both axes
-    span = tuple(min(width, axis) for width, axis in zip(tuple(dataset.tile), shape))
-    # the last origin that still fits a whole window on each axis
-    last = tuple(axis - width for axis, width in zip(shape, span))
-    # the number of stops per axis, never more than the axis can hold distinctly
-    stops = tuple(min(windows, axis // width + 1) for axis, width in zip(last, span))
-    # plan the origins: evenly spaced from the first row to the last that fits, each one
-    # snapped back to a multiple of the window so it sits inside a single chunk
-    origins = [
-        (
-            (last[0] * i // max(stops[0] - 1, 1)) // span[0] * span[0],
-            (last[1] * j // max(stops[1] - 1, 1)) // span[1] * span[1],
-        )
-        for i in range(stops[0])
-        for j in range(stops[1])
-    ]
-
-    # the running merge of everything the windows found
     cells, low, high, total = 0, None, None, 0.0
     # go through the planned windows
     for origin in origins:
@@ -86,6 +76,39 @@ def probe(dataset, windows: int = 4) -> tuple:
 
     # otherwise, report what the windows found
     return low, total / cells, high
+
+
+def windows(dataset, stops: int = 4) -> list:
+    """
+    The origins of a grid of {stops}x{stops} sample windows spread across the full
+    extent of {dataset}, each the size of its tile and snapped to a multiple of it
+
+    This is the sampling pattern the probe uses, published on its own so that whoever
+    reads these tiles anyway, e.g. a pyramid build, can read them first and seed the
+    statistics with the same estimate the probe would have made
+    """
+    shape = tuple(dataset.shape)
+    # the window is the dataset's preferred tile, kept inside the raster on both axes
+    span = tuple(min(width, axis) for width, axis in zip(tuple(dataset.tile), shape))
+    # the last origin that still fits a whole window on each axis
+    last = tuple(axis - width for axis, width in zip(shape, span))
+    # the number of stops per axis, never more than the axis can hold distinctly
+    stops = tuple(min(stops, axis // width + 1) for axis, width in zip(last, span))
+    # plan the origins: evenly spaced from the first row to the last that fits, each one
+    # snapped back to a multiple of the window so it sits inside a single chunk
+    # the origins
+    origins = [
+        (
+            (last[0] * i // max(stops[0] - 1, 1)) // span[0] * span[0],
+            (last[1] * j // max(stops[1] - 1, 1)) // span[1] * span[1],
+        )
+        for i in range(stops[0])
+        for j in range(stops[1])
+    ]
+
+    # the running merge of everything the windows found
+    # all done
+    return origins
 
 
 # end of file
