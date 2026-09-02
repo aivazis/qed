@@ -110,7 +110,7 @@ class Pyramid:
         # otherwise, take hold of what is there that i do not hold already
         self._survey()
         # and of what an earlier run measured while it built it
-        self._recall()
+        self.recall()
         # all done
         return self
 
@@ -164,11 +164,13 @@ class Pyramid:
             # the tile the level is diced into
             tile = self._tileOf(extent=extent)
             # make the file at its full padded size and take hold of it for writing
-            draft = self._create(exponent=exponent, extent=extent, tile=tile)
+            self.create(exponent=exponent)
+            draft = self.draft(exponent=exponent)
             # the tiles of the level, in tile order; nothing is written yet
-            occupancy = bytearray(self._tileCount(extent=extent, tile=tile))
+            _, _, grid = self.layout(exponent=exponent)
+            occupancy = bytearray(math.prod(grid))
             # the width of the grid of tiles, for placing an entry in the record
-            columns = (extent[1] + tile[1] - 1) // tile[1]
+            columns = grid[1]
             # walk it in tiles, which are chunks, so no chunk is written twice
             for origin, shape in self._tiles(extent=extent, tile=tile):
                 # and fill each one by decimating the level below; a tile of pure fill is
@@ -195,7 +197,7 @@ class Pyramid:
             # let go of the writable mapping; the level is complete
             del draft
             # commit the occupancy record, which is what makes the level exist
-            self._commit(exponent=exponent, occupancy=occupancy)
+            self.commit(exponent=exponent, occupancy=occupancy)
             # and take hold of the level the way a reader would
             self._levels[exponent] = self._open(
                 exponent=exponent, extent=extent, tile=tile
@@ -210,7 +212,7 @@ class Pyramid:
             # arrive without the very numbers it was the cheapest way to compute
             if exponent == 1:
                 # so write them down
-                self._remember()
+                self.remember()
         # all done
         return self
 
@@ -261,7 +263,11 @@ class Pyramid:
         self._shape = tuple(dataset.shape)
         self._tile = tuple(dataset.tile)
         self._datatype = dataset.datatype.htype
-        self._base = dataset.data.dataset
+        # the payload, when there is one: a metadata-only twin on the team side has none,
+        # and never serves a zoom; it lays out levels, hands out the work, and keeps the
+        # records
+        data = getattr(dataset, "data", None)
+        self._base = data.dataset if data is not None else None
         # the kernels that read cells of this type. a raster whose samples are encoded
         # rather than stored has none, and it must not get levels: decimation is a read and
         # a write, and a read into a buffer laid out for the wrong cell type deposits
@@ -288,11 +294,11 @@ class Pyramid:
             # so the cell type decides
             self._fill = blank
         # a raster whose cells have no way to say "nothing" never has a tile skipped, since
-        # every value it can hold is a measurement; whatever the product declared stands,
-        # and nothing ever reads it back, so a product that declared nothing gets a zero
+        # every value it can hold is a measurement, so its fill is never read back and any
+        # value will do
         else:
-            # so the declaration stands
-            self._fill = self._base.fillValue if self._base.fillValue is not None else 0
+            # so zero stands
+            self._fill = 0
         # the identity of the product this dataset came from, so a cache built against one
         # version of a file is never read against another
         self._stamp = self._identify(reader=reader, uri=dataset.uri)
@@ -359,10 +365,6 @@ class Pyramid:
     def _survey(self) -> dict:
         """
         Take hold of the levels my directory holds that i do not hold already
-
-        A level exists when its occupancy record does: the record is the last thing a build
-        writes, so a tile file without one is a build in progress or the remains of one that
-        died, and neither is a level
         """
         # go through the levels the extent could support
         for exponent in range(1, self.depth() + 1):
@@ -371,7 +373,7 @@ class Pyramid:
                 # so skip it
                 continue
             # a level without its record does not exist
-            if not self._occupancyPath(exponent=exponent).exists():
+            if not self.holds(exponent=exponent):
                 # so neither does anything above it, since each level is built from the
                 # one below; but keep looking, in case a stale record is all that is left
                 continue
@@ -413,19 +415,62 @@ class Pyramid:
             fill=self._fill,
         )
 
-    def _create(self, exponent: int, extent: tuple, tile: tuple):
+    def create(self, exponent: int) -> "Pyramid":
         """
-        Make the file that holds the level at {exponent}, and take hold of it for writing
-        """
-        # the file
-        path = str(self._tilesPath(exponent=exponent))
-        # make it at its full padded size; it is sparse, so this costs nothing until tiles
-        # land in it, and a file left behind by a build that died starts over
-        self._storage.Draft.create(tiles=path, shape=extent, tile=tile)
-        # and map it
-        return self._storage.Draft(tiles=path, shape=extent, tile=tile)
+        Make the file that holds the level at {exponent}, at its full padded size
 
-    def _commit(self, exponent: int, occupancy: bytearray) -> None:
+        The file is sparse, so this costs nothing until tiles land in it, and a file left
+        behind by a build that died starts over. This is the one thing a level needs before
+        workers can write tiles into it, so whoever hands out the work does it first
+        """
+        # make my directory, if this is the first time
+        self.home.mkdir(parents=True, exist_ok=True)
+        # the layout of the level
+        extent, tile, _ = self.layout(exponent=exponent)
+        # make the file
+        self._storage.Draft.create(
+            tiles=str(self._tilesPath(exponent=exponent)), shape=extent, tile=tile
+        )
+        # all done
+        return self
+
+    def draft(self, exponent: int):
+        """
+        Take hold of the level at {exponent} for writing; the file must exist already
+        """
+        # the layout of the level
+        extent, tile, _ = self.layout(exponent=exponent)
+        # map the file
+        return self._storage.Draft(
+            tiles=str(self._tilesPath(exponent=exponent)), shape=extent, tile=tile
+        )
+
+    def holds(self, exponent: int) -> bool:
+        """
+        Report whether the level at {exponent} exists, without taking hold of it
+
+        A level exists when its occupancy record does: the record is the last thing a build
+        writes, so a tile file without one is a build in progress or the remains of one
+        that died, and neither is a level
+        """
+        # ask the filesystem
+        return self._occupancyPath(exponent=exponent).exists()
+
+    def layout(self, exponent: int) -> tuple:
+        """
+        Report the extent of the level at {exponent}, the tile it is diced into, and the
+        shape of its grid of tiles, edge tiles included
+        """
+        # the extent, halved once per level
+        extent = self._extent(exponent=exponent)
+        # the tile, clipped to it
+        tile = self._tileOf(extent=extent)
+        # and the grid of tiles
+        grid = tuple((axis + width - 1) // width for axis, width in zip(extent, tile))
+        # all done
+        return extent, tile, grid
+
+    def commit(self, exponent: int, occupancy: bytearray) -> None:
         """
         Write the occupancy record of the level at {exponent}, which is what makes it exist
 
@@ -444,7 +489,7 @@ class Pyramid:
         # all done
         return
 
-    def _remember(self) -> "Pyramid":
+    def remember(self) -> "Pyramid":
         """
         Keep my statistics, and the layout they describe, beside my levels
         """
@@ -473,7 +518,7 @@ class Pyramid:
         # all done
         return self
 
-    def _recall(self) -> "Pyramid":
+    def recall(self) -> "Pyramid":
         """
         Take back the statistics an earlier run measured while it built my levels
         """
@@ -565,18 +610,9 @@ class Pyramid:
         # clip the chunk to the extent on each axis
         return tuple(min(width, axis) for width, axis in zip(self._tile, extent))
 
-    def _tileCount(self, extent: tuple, tile: tuple) -> int:
-        """
-        How many tiles a level of the given {extent} diced into {tile} has
-        """
-        # the count along each axis, edge tiles included
-        counts = ((axis + width - 1) // width for width, axis in zip(tile, extent))
-        # multiplied out
-        return math.prod(counts)
-
     def _extent(self, exponent: int) -> tuple:
         """
-        Report the extent of a level
+        Report the extent of the level at {exponent}
         """
         # halve the base once per level
         return tuple(axis // 2**exponent for axis in self._shape)
