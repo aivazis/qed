@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// the bindings support, for {py::module}
+#include "external.h"
+
 
 // set up the namespace
 namespace qed::py::nisar {

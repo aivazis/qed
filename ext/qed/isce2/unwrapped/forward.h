@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// the bindings support, for {py::module}
+#include "external.h"
+
 
 // the {native} namespace
 namespace qed::py::isce2::unwrapped {
