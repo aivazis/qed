@@ -5,8 +5,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_isce2_externals_h)
-#define qed_isce2_externals_h
+#pragma once
 
 
 // journal
@@ -35,10 +34,12 @@ namespace qed::isce2 {
     using hl_t = pyre::viz::iterators::colormaps::hl_t<hueSourceT, luminositySourceT>;
     // hsb
     template <typename hueSourceT, typename saturationSourceT, typename brightnessSourceT>
-    using hsb_t = pyre::viz::iterators::colormaps::hsb_t<hueSourceT, saturationSourceT, brightnessSourceT>;
+    using hsb_t =
+        pyre::viz::iterators::colormaps::hsb_t<hueSourceT, saturationSourceT, brightnessSourceT>;
     // hsl
     template <typename hueSourceT, typename saturationSourceT, typename luminositySourceT>
-    using hsl_t = pyre::viz::iterators::colormaps::hsl_t<hueSourceT, saturationSourceT, luminositySourceT>;
+    using hsl_t =
+        pyre::viz::iterators::colormaps::hsl_t<hueSourceT, saturationSourceT, luminositySourceT>;
 
     // filters
     // map [0,1] to an interval
@@ -68,8 +69,5 @@ namespace qed::isce2 {
     template <typename sourceT>
     using real_t = pyre::viz::iterators::filters::real_t<sourceT>;
 }
-
-
-#endif
 
 // end of file

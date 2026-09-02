@@ -5,10 +5,6 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_native_forward_h)
-#define qed_native_forward_h
-
-
-#endif
+#pragma once
 
 // end of file

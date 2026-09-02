@@ -4,8 +4,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_isce2_interferogram_channels_real_h)
-#define qed_isce2_interferogram_channels_real_h
+#pragma once
 
 // external dependencies and the local type aliases
 #include "../externals.h"
@@ -32,10 +31,6 @@ namespace qed::isce2::interferogram::channels {
 
 
 // pull in the implementations
-#define qed_isce2_interferogram_channels_real_icc
 #include "real.icc"
-#undef qed_isce2_interferogram_channels_real_icc
-
-#endif
 
 // end of file

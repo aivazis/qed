@@ -4,8 +4,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_real_value_h)
-#define qed_nisar_real_value_h
+#pragma once
 
 // external dependencies and the local type aliases
 #include "../externals.h"
@@ -36,10 +35,6 @@ namespace qed::nisar::real {
 
 
 // pull in the implementations
-#define qed_nisar_real_value_icc
 #include "value.icc"
-#undef qed_nisar_real_value_icc
-
-#endif
 
 // end of file

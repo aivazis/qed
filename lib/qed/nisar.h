@@ -5,14 +5,10 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_h)
-#define qed_nisar_h
+#pragma once
 
 // publish
 // the api is in "nisar.api.h"
 #include "nisar/public.h"
-
-
-#endif
 
 // end of file

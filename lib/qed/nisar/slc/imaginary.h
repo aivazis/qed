@@ -4,8 +4,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_slc_imaginary_h)
-#define qed_nisar_slc_imaginary_h
+#pragma once
 
 // external dependencies and the local type aliases
 #include "../externals.h"
@@ -34,10 +33,6 @@ namespace qed::nisar::slc {
 
 
 // pull in the implementations
-#define qed_nisar_slc_imaginary_icc
 #include "imaginary.icc"
-#undef qed_nisar_slc_imaginary_icc
-
-#endif
 
 // end of file

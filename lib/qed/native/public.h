@@ -5,8 +5,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_native_public_h)
-#define qed_native_public_h
+#pragma once
 
 // external packages
 #include "externals.h"
@@ -32,8 +31,5 @@
 #include "profile.h"
 // statistics
 #include "stats.h"
-
-
-#endif
 
 // end of file

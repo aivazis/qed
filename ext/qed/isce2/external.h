@@ -4,16 +4,12 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_py_isce2_external_h)
-#define qed_py_isce2_external_h
+#pragma once
 
 
 // pull the {isce2} support from {qed}
 #include <qed/isce2.h>
 // inherit
 #include "../external.h"
-
-
-#endif
 
 // end of file

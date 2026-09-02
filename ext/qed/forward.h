@@ -4,8 +4,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_py_forward_h)
-#define qed_py_forward_h
+#pragma once
 
 
 // useful type aliases
@@ -46,8 +45,5 @@ namespace qed::py {
         void nisar(py::module &);
     }
 }
-
-
-#endif
 
 // end of file

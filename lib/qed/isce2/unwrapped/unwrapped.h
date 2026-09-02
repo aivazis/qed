@@ -5,8 +5,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_isce2_unwrapped_unwrapped_h)
-#define qed_isce2_unwrapped_unwrapped_h
+#pragma once
 
 // stats and profile
 #include "profile.h"
@@ -15,8 +14,5 @@
 #include "amplitude.h"
 #include "complex.h"
 #include "phase.h"
-
-
-#endif
 
 // end of file

@@ -5,14 +5,10 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_native_h)
-#define qed_native_h
+#pragma once
 
 // publish
 // the api is in "native.api.h"
 #include "native/public.h"
-
-
-#endif
 
 // end of file

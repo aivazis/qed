@@ -4,8 +4,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_py_nisar_external_h)
-#define qed_py_nisar_external_h
+#pragma once
 
 
 // pull the {nisar} support from {qed}
@@ -13,8 +12,5 @@
 
 // inherit
 #include "../external.h"
-
-
-#endif
 
 // end of file
