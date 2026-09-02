@@ -16,7 +16,9 @@ def selectors(default={}, **kwds):
     # build the trait descriptor and return it
     return qed.properties.dict(
         schema=qed.properties.tuple(schema=qed.properties.str(), default=()),
-        default=default, **kwds)
+        default=default,
+        **kwds
+    )
 
 
 # end of file

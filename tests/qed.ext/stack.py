@@ -9,7 +9,6 @@
 Check that the nisar stack tile-generator bindings are available
 """
 
-
 # support
 import qed
 

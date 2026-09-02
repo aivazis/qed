@@ -6,8 +6,10 @@
 
 # support
 import qed
+
 # my superclass
 from .Specification import Specification
+
 # my parts
 from .Channel import Channel
 from .Datatype import Datatype
@@ -18,7 +20,6 @@ class Dataset(Specification, family="qed.datasets"):
     """
     A dataset provides access to the actual data
     """
-
 
     # public data
     cell = Datatype()

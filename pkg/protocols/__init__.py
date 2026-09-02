@@ -7,7 +7,6 @@
 # custom properties
 from .properties import selectors
 
-
 # export the local wrappers over the flow protocols
 from .Producer import Producer as producer
 from .Specification import Specification as specification
@@ -32,6 +31,5 @@ from .Controller import Controller as controller
 
 # ux state
 from . import ux
-
 
 # end of file

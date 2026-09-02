@@ -18,10 +18,8 @@ class Node(graphene.relay.Node):
     class Meta:
         name = "Node"
 
-
     # the basic fields
     id = graphene.ID()
-
 
     #  {graphene} hooks
     @classmethod
@@ -31,13 +29,15 @@ class Node(graphene.relay.Node):
         """
         # anything not recognized explicitly is a problem
         import journal
+
         # that's almost certainly a bug
         channel = journal.firewall("qed.gql.schema")
         # so, complain
-        channel.log(f"while attempting to resolve {entity}: unknown type '{entity.typename}'")
+        channel.log(
+            f"while attempting to resolve {entity}: unknown type '{entity.typename}'"
+        )
         # and, just in case firewalls are not fatal, send a generic node back
         return Node
-
 
     @staticmethod
     def to_global_id(gtype, eid):
@@ -46,7 +46,6 @@ class Node(graphene.relay.Node):
         """
         # just splice them together
         return f"{gtype}:{eid}"
-
 
     @staticmethod
     def get_node_from_global_id(info, gid, only_type=None):
@@ -59,6 +58,7 @@ class Node(graphene.relay.Node):
         if only_type and gtype != only_type:
             # get the journal
             import journal
+
             # treat this as a bug, for now
             channel = journal.firewall("qed.gql.node")
             # and complain
@@ -70,6 +70,7 @@ class Node(graphene.relay.Node):
 
         # anything else is a bug
         import journal
+
         # make a channel
         channel = journal.firewall("qed.gql.node")
         # and complain

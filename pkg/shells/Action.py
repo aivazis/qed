@@ -9,7 +9,7 @@ import pyre
 
 
 # protocol declaration
-class Action(pyre.action, family='qed.cli'):
+class Action(pyre.action, family="qed.cli"):
     """
     Protocol declaration for qed commands
     """
