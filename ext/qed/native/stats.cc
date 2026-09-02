@@ -27,8 +27,9 @@ qed::py::native::stats(py::module & m)
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
             // dispatch on the buffer's cell type and collect the statistics of the matching grid
-            return onGrid<2, char, int8_t, int16_t, int32_t, int64_t, float, double,
-                          std::complex<float>, std::complex<double>>(
+            return onGrid<
+                2, char, int8_t, int16_t, int32_t, int64_t, float, double, std::complex<float>,
+                std::complex<double>>(
                 source, [&](const auto & grid) { return qed::native::stats(grid, o, t); });
         },
         // the signature
@@ -48,8 +49,9 @@ qed::py::native::stats(py::module & m)
             auto t = asShape<2>(shape);
             auto s = asIndex<2>(stride);
             // dispatch on the buffer's cell type and sample the matching grid
-            return onGrid<2, char, int8_t, int16_t, int32_t, int64_t, float, double,
-                          std::complex<float>, std::complex<double>>(
+            return onGrid<
+                2, char, int8_t, int16_t, int32_t, int64_t, float, double, std::complex<float>,
+                std::complex<double>>(
                 source, [&](const auto & grid) { return qed::native::sample(grid, o, t, s); });
         },
         // the signature

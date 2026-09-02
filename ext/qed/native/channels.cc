@@ -31,9 +31,8 @@ qed::py::native::channels(py::module & m)
         // the name
         "value",
         // the handler
-        [](const py::buffer & source, const py::iterable & origin,
-           const py::iterable & shape, const py::iterable & stride, double min,
-           double max) -> bmp_t {
+        [](const py::buffer & source, const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
@@ -54,9 +53,8 @@ qed::py::native::channels(py::module & m)
         // the name
         "abs",
         // the handler
-        [](const py::buffer & source, const py::iterable & origin,
-           const py::iterable & shape, const py::iterable & stride, double min,
-           double max) -> bmp_t {
+        [](const py::buffer & source, const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
@@ -108,9 +106,9 @@ qed::py::native::channels(py::module & m)
         // the name
         "complex",
         // the handler
-        [](const py::buffer & source, const py::iterable & origin,
-           const py::iterable & shape, const py::iterable & stride, double min,
-           double max, double minPhase, double maxPhase, double saturation) -> bmp_t {
+        [](const py::buffer & source, const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max, double minPhase, double maxPhase,
+           double saturation) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
@@ -133,9 +131,8 @@ qed::py::native::channels(py::module & m)
         // the name
         "amplitude",
         // the handler
-        [](const py::buffer & source, const py::iterable & origin,
-           const py::iterable & shape, const py::iterable & stride, double min,
-           double max) -> bmp_t {
+        [](const py::buffer & source, const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
@@ -156,9 +153,9 @@ qed::py::native::channels(py::module & m)
         // the name
         "phase",
         // the handler
-        [](const py::buffer & source, const py::iterable & origin,
-           const py::iterable & shape, const py::iterable & stride, double low,
-           double high, double saturation, double brightness) -> bmp_t {
+        [](const py::buffer & source, const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double low, double high, double saturation,
+           double brightness) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
@@ -166,7 +163,8 @@ qed::py::native::channels(py::module & m)
             // dispatch on the buffer's cell type and run the kernel over the matching grid
             return onGrid<2, std::complex<float>, std::complex<double>>(
                 source, [&](const auto & grid) {
-                    return qed::native::channels::phase(grid, o, t, s, low, high, saturation, brightness);
+                    return qed::native::channels::phase(
+                        grid, o, t, s, low, high, saturation, brightness);
                 });
         },
         // the signature
@@ -180,9 +178,8 @@ qed::py::native::channels(py::module & m)
         // the name
         "real",
         // the handler
-        [](const py::buffer & source, const py::iterable & origin,
-           const py::iterable & shape, const py::iterable & stride, double min,
-           double max) -> bmp_t {
+        [](const py::buffer & source, const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
@@ -203,9 +200,8 @@ qed::py::native::channels(py::module & m)
         // the name
         "imaginary",
         // the handler
-        [](const py::buffer & source, const py::iterable & origin,
-           const py::iterable & shape, const py::iterable & stride, double min,
-           double max) -> bmp_t {
+        [](const py::buffer & source, const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double min, double max) -> bmp_t {
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);

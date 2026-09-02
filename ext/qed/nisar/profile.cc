@@ -61,8 +61,9 @@ qed::py::nisar::profile(py::module & m)
         [](const dataset_t & source, const datatype_t & datatype,
            const qed::native::points_t & points, bool closed) -> py::object {
             // read the path and hand it back
-            return py::cast(qed::nisar::profile<heapgrid_t<std::complex<float>>>(
-                source, datatype, points, closed));
+            return py::cast(
+                qed::nisar::profile<heapgrid_t<std::complex<float>>>(
+                    source, datatype, points, closed));
         },
         // the signature
         "source"_a, "datatype"_a, "points"_a, "closed"_a = false,
@@ -77,8 +78,9 @@ qed::py::nisar::profile(py::module & m)
         [](const dataset_t & source, const datatype_t & datatype, const py::buffer & lut,
            const qed::native::points_t & points, bool closed) -> py::object {
             // read and decode the path and hand it back
-            return py::cast(qed::nisar::profileBFPQ<heapgrid_t<std::complex<float>>>(
-                source, datatype, asBFPQ(lut), points, closed));
+            return py::cast(
+                qed::nisar::profileBFPQ<heapgrid_t<std::complex<float>>>(
+                    source, datatype, asBFPQ(lut), points, closed));
         },
         // the signature
         "source"_a, "datatype"_a, "bfpq"_a, "points"_a, "closed"_a = false,

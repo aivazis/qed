@@ -27,8 +27,9 @@ qed::py::isce2::unwrapped::stats(py::module & m)
             auto o = asIndex<3>(origin);
             auto t = asShape<3>(shape);
             // dispatch on the buffer's cell type and collect the statistics of the matching grid
-            return onGrid<3, float, double>(
-                source, [&](const auto & grid) { return qed::isce2::unwrapped::stats(grid, o, t); });
+            return onGrid<3, float, double>(source, [&](const auto & grid) {
+                return qed::isce2::unwrapped::stats(grid, o, t);
+            });
         },
         // the signature
         "source"_a, "origin"_a, "shape"_a,

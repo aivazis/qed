@@ -25,11 +25,11 @@ qed::py::native::profile(py::module & m)
            bool closed) -> py::object {
             // dispatch on the buffer's cell type and collect values along the path; the result's
             // cell type varies, so hand it back as a python object rather than one fixed type
-            return onGrid<2, char, int8_t, int16_t, int32_t, int64_t, float, double,
-                          std::complex<float>, std::complex<double>>(
-                source, [&](const auto & grid) -> py::object {
-                    return py::cast(qed::native::profile(grid, points, closed));
-                });
+            return onGrid<
+                2, char, int8_t, int16_t, int32_t, int64_t, float, double, std::complex<float>,
+                std::complex<double>>(source, [&](const auto & grid) -> py::object {
+                return py::cast(qed::native::profile(grid, points, closed));
+            });
         },
         // the signature
         "source"_a, "points"_a, "closed"_a = false,
