@@ -17,6 +17,8 @@ template <class sourceT, class pipelineT>
 class qed::nisar::Absence {
     // types
 public:
+    // me
+    using self_type = Absence<sourceT, pipelineT>;
     // the raster i watch, and the pipeline whose colors i pass through
     using source_type = sourceT;
     using pipeline_type = pipelineT;

@@ -26,6 +26,8 @@ template <class sourceT>
 class qed::nisar::masks::GCOVMask {
     // types
 public:
+    // me
+    using self_type = GCOVMask<sourceT>;
     // my template parameter
     using source_type = sourceT;
     // its reference type

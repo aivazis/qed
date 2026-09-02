@@ -128,10 +128,10 @@ qed::pyramid::Level<cellT>::_verify(const uri_type & tiles, const uri_type & occ
         // make a channel
         auto channel = pyre::journal::error_t("qed.pyramid.level");
         // complain
-        channel << "while attaching the level at '" << tiles << "':" << pyre::journal::newline
-                << "the file holds " << _grid.storage().cells() << " cells, but the layout of "
-                << packing.tiles() << " tiles of " << packing.tileShape() << " needs " << cells
-                << pyre::journal::endl(__HERE__);
+        channel << pyre::journal::at() << "while attaching the level at '" << tiles
+                << "':" << pyre::journal::newline << "the file holds " << _grid.storage().cells()
+                << " cells, but the layout of " << packing.tiles() << " tiles of "
+                << packing.tileShape() << " needs " << cells << pyre::journal::endl;
         // and bail
         return;
     }
@@ -142,10 +142,10 @@ qed::pyramid::Level<cellT>::_verify(const uri_type & tiles, const uri_type & occ
         // make a channel
         auto channel = pyre::journal::error_t("qed.pyramid.level");
         // complain
-        channel << "while attaching the level at '" << tiles << "':" << pyre::journal::newline
-                << "the occupancy record at '" << occupancy << "' holds " << _occupancy.cells()
-                << " entries, but the level has " << entries << " tiles"
-                << pyre::journal::endl(__HERE__);
+        channel << pyre::journal::at() << "while attaching the level at '" << tiles
+                << "':" << pyre::journal::newline << "the occupancy record at '" << occupancy
+                << "' holds " << _occupancy.cells() << " entries, but the level has " << entries
+                << " tiles" << pyre::journal::endl;
         // and bail
         return;
     }

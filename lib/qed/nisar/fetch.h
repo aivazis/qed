@@ -15,10 +15,10 @@
 // moving tiles between rasters of either kind
 //
 // every kernel here does the same first thing: gather a strided tile of its source into a
-// dense grid, and only then look at the cells. the source used to be an hdf5 dataset and
-// nothing else; now it may also be a level of a pyramid, a flat file of tiles the kernel
-// reads through a mapping. these overloads are the one place that knows the difference, so
-// the kernels can name their source by a template parameter and never ask what it is
+// dense grid, and only then look at the cells. the source is an hdf5 dataset, or a level of
+// a pyramid, a flat file of tiles the kernel reads through a mapping. these overloads are
+// the one place that knows the difference, so the kernels can name their source by a
+// template parameter and never ask what it is
 namespace qed::nisar {
     // gather the tile at {origin}+{shape} of an hdf5 dataset, taking every {stride}-th cell
     // along each axis, into a fresh {gridT}; the {datatype} is the memory type the library

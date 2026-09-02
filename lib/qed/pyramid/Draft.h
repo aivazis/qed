@@ -24,6 +24,8 @@ template <class cellT>
 class qed::pyramid::Draft {
     // types
 public:
+    // me
+    using self_type = Draft<cellT>;
     // my cell
     using cell_type = cellT;
     // the layout of my file

@@ -26,6 +26,8 @@ template <class cellT>
 class qed::pyramid::Level {
     // types
 public:
+    // me
+    using self_type = Level<cellT>;
     // my cell
     using cell_type = cellT;
     // the layout of my file

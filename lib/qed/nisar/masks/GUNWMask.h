@@ -26,6 +26,8 @@ template <class sourceT>
 class qed::nisar::masks::GUNWMask {
     // types
 public:
+    // me
+    using self_type = GUNWMask<sourceT>;
     // my template parameter
     using source_type = sourceT;
     // its reference type

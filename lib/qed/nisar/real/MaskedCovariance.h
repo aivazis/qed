@@ -25,6 +25,8 @@ template <class sourceT, class maskT>
 class qed::nisar::real::MaskedCovariance {
     // types
 public:
+    // me
+    using self_type = MaskedCovariance<sourceT, maskT>;
     // my template parameters
     using source_type = sourceT;
     using mask_type = maskT;

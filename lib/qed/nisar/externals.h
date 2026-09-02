@@ -70,7 +70,7 @@ namespace qed::nisar {
     // support for zooming
     template <typename sourceT>
     using decimate_t = pyre::viz::iterators::filters::decimate_t<sourceT>;
-    // extract the imaginary paty of a complex source
+    // extract the imaginary part of a complex source
     template <typename sourceT>
     using imaginary_t = pyre::viz::iterators::filters::imaginary_t<sourceT>;
     // map a range of values to the unit interval

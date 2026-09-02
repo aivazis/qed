@@ -26,10 +26,10 @@ qed::pyramid::Draft<cellT>::Draft(
         // make a channel
         auto channel = pyre::journal::error_t("qed.pyramid.draft");
         // complain
-        channel << "while attaching the draft at '" << tiles << "':" << pyre::journal::newline
-                << "the file holds " << _grid.storage().cells() << " cells, but the layout of "
-                << packing.tiles() << " tiles of " << packing.tileShape() << " needs " << cells
-                << pyre::journal::endl(__HERE__);
+        channel << pyre::journal::at() << "while attaching the draft at '" << tiles
+                << "':" << pyre::journal::newline << "the file holds " << _grid.storage().cells()
+                << " cells, but the layout of " << packing.tiles() << " tiles of "
+                << packing.tileShape() << " needs " << cells << pyre::journal::endl;
         // and bail
         return;
     }
