@@ -1,0 +1,115 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+// my declaration
+#include "Draft.h"
+
+// metamethods
+template <class cellT>
+qed::pyramid::Draft<cellT>::Draft(
+    const uri_type & tiles, const shape_type & shape, const shape_type & tile) :
+    // dice the extent into tiles and lay the layout over the file, mapped for writing
+    _grid { packing_type { shape, tile }, storage_type::open(tiles, true) }
+{
+    // the layout
+    const auto & packing = _grid.packing();
+    // the cells the file must hold: every tile in full, padding included
+    auto cells = static_cast<std::size_t>(packing.cells());
+    // if the file holds fewer
+    if (_grid.storage().cells() < cells) {
+        // make a channel
+        auto channel = pyre::journal::error_t("qed.pyramid.draft");
+        // complain
+        channel << "while attaching the draft at '" << tiles << "':" << pyre::journal::newline
+                << "the file holds " << _grid.storage().cells() << " cells, but the layout of "
+                << packing.tiles() << " tiles of " << packing.tileShape() << " needs " << cells
+                << pyre::journal::endl(__HERE__);
+        // and bail
+        return;
+    }
+    // all done
+    return;
+}
+
+// interface
+template <class cellT>
+auto
+qed::pyramid::Draft<cellT>::create(
+    const uri_type & tiles, const shape_type & shape, const shape_type & tile) -> void
+{
+    // dice the extent, to find out how many cells the file must hold
+    auto packing = packing_type { shape, tile };
+    // make the file that big; the storage places one byte at the end and nothing else, so
+    // the file is sparse and the mapping it hands back is let go right here
+    storage_type::create(tiles, packing.cells());
+    // all done
+    return;
+}
+
+template <class cellT>
+auto
+qed::pyramid::Draft<cellT>::shape() const -> shape_type
+{
+    // the layout knows
+    return _grid.packing().shape();
+}
+
+template <class cellT>
+auto
+qed::pyramid::Draft<cellT>::tile() const -> shape_type
+{
+    // the layout knows
+    return _grid.packing().tileShape();
+}
+
+template <class cellT>
+auto
+qed::pyramid::Draft<cellT>::tiles() const -> shape_type
+{
+    // the layout knows
+    return _grid.packing().tiles();
+}
+
+template <class cellT>
+template <class gridT>
+auto
+qed::pyramid::Draft<cellT>::write(const typename gridT::index_type & origin, const gridT & data)
+    -> void
+{
+    // my extent
+    auto extent = shape();
+    // the extent of the deposit
+    auto span = data.packing().shape();
+    // go through its rows
+    for (auto row = 0l; row < static_cast<long>(span[0]); ++row) {
+        // the row it lands on; one past my extent is the padding of an edge tile
+        auto r = origin[0] + row;
+        // which is not mine to write
+        if (r < 0 || r >= extent[0]) {
+            // so skip the row
+            continue;
+        }
+        // go through its columns
+        for (auto col = 0l; col < static_cast<long>(span[1]); ++col) {
+            // the column it lands on
+            auto c = origin[1] + col;
+            // likewise
+            if (c < 0 || c >= extent[1]) {
+                // skip the cell
+                continue;
+            }
+            // deposit the value
+            _grid[{ r, c }] = data[{ row, col }];
+        }
+    }
+    // all done
+    return;
+}
+
+// end of file

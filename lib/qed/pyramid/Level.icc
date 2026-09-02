@@ -1,0 +1,157 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+// my declaration
+#include "Level.h"
+
+// metamethods
+template <class cellT>
+qed::pyramid::Level<cellT>::Level(
+    const uri_type & tiles, const uri_type & occupancy, const shape_type & shape,
+    const shape_type & tile, cell_type fill) :
+    // dice the extent into tiles and lay the layout over the mapped file
+    _grid { packing_type { shape, tile }, storage_type::open(tiles) },
+    // map the record of what was written
+    _occupancy { occupancy_type::open(occupancy) },
+    // and remember what stands for what was not
+    _fill { fill }
+{
+    // make sure the files are the size the layout says they are, so no read ever reaches
+    // past the end of a mapping
+    _verify(tiles, occupancy);
+}
+
+// interface
+template <class cellT>
+auto
+qed::pyramid::Level<cellT>::shape() const -> shape_type
+{
+    // the layout knows
+    return _grid.packing().shape();
+}
+
+template <class cellT>
+auto
+qed::pyramid::Level<cellT>::tile() const -> shape_type
+{
+    // the layout knows
+    return _grid.packing().tileShape();
+}
+
+template <class cellT>
+auto
+qed::pyramid::Level<cellT>::tiles() const -> shape_type
+{
+    // the layout knows
+    return _grid.packing().tiles();
+}
+
+template <class cellT>
+auto
+qed::pyramid::Level<cellT>::fill() const -> cell_type
+{
+    // easy enough
+    return _fill;
+}
+
+template <class cellT>
+auto
+qed::pyramid::Level<cellT>::occupied(const index_type & tile) const -> bool
+{
+    // the record has one byte per tile, in tile order; anything nonzero means written
+    return _occupancy.data()[_grid.packing().tileOrdinal(tile)] != 0;
+}
+
+template <class cellT>
+auto
+qed::pyramid::Level<cellT>::holds(const index_type & cell) const -> bool
+{
+    // my extent
+    auto extent = shape();
+    // go through the axes
+    for (std::size_t axis = 0; axis < index_type::rank(); ++axis) {
+        // a cell outside my extent, in either direction, is padding or nonsense
+        if (cell[axis] < 0 || cell[axis] >= extent[axis]) {
+            // and reads as fill
+            return false;
+        }
+    }
+    // otherwise, the cell is mine, and it holds something if its tile was written
+    return occupied(_grid.packing().tileOf(cell));
+}
+
+template <class cellT>
+template <class gridT>
+auto
+qed::pyramid::Level<cellT>::read(
+    const typename gridT::index_type & origin, const typename gridT::shape_type & shape,
+    const typename gridT::index_type & stride) const -> gridT
+{
+    // the pieces of the destination
+    using packing_t = typename gridT::packing_type;
+    using storage_t = typename gridT::storage_type;
+    // make a dense grid of the requested shape
+    auto data = gridT { packing_t { shape }, storage_t { shape.cells() } };
+    // go through its rows
+    for (auto row = 0l; row < static_cast<long>(shape[0]); ++row) {
+        // and its columns
+        for (auto col = 0l; col < static_cast<long>(shape[1]); ++col) {
+            // the cell of mine that stands at this place: the origin is in decimated
+            // coordinates, so both it and the offset within the tile are scaled by the stride
+            auto source =
+                index_type { (origin[0] + row) * stride[0], (origin[1] + col) * stride[1] };
+            // deposit its value, or the fill when there is nothing there
+            data[{ row, col }] = holds(source) ? _grid[source] : _fill;
+        }
+    }
+    // hand off the tile
+    return data;
+}
+
+// implementation details
+template <class cellT>
+auto
+qed::pyramid::Level<cellT>::_verify(const uri_type & tiles, const uri_type & occupancy) const
+    -> void
+{
+    // the layout
+    const auto & packing = _grid.packing();
+    // the cells the tile file must hold: every tile in full, padding included
+    auto cells = static_cast<std::size_t>(packing.cells());
+    // if the file holds fewer
+    if (_grid.storage().cells() < cells) {
+        // make a channel
+        auto channel = pyre::journal::error_t("qed.pyramid.level");
+        // complain
+        channel << "while attaching the level at '" << tiles << "':" << pyre::journal::newline
+                << "the file holds " << _grid.storage().cells() << " cells, but the layout of "
+                << packing.tiles() << " tiles of " << packing.tileShape() << " needs " << cells
+                << pyre::journal::endl(__HERE__);
+        // and bail
+        return;
+    }
+    // the bytes the occupancy record must hold: one per tile
+    auto entries = static_cast<std::size_t>(packing.tiles().cells());
+    // if the record holds fewer
+    if (_occupancy.cells() < entries) {
+        // make a channel
+        auto channel = pyre::journal::error_t("qed.pyramid.level");
+        // complain
+        channel << "while attaching the level at '" << tiles << "':" << pyre::journal::newline
+                << "the occupancy record at '" << occupancy << "' holds " << _occupancy.cells()
+                << " entries, but the level has " << entries << " tiles"
+                << pyre::journal::endl(__HERE__);
+        // and bail
+        return;
+    }
+    // all done
+    return;
+}
+
+// end of file
