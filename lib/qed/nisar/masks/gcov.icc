@@ -14,11 +14,11 @@
 
 
 // the GCOV mask tile generator
-template <typename sourceT>
+template <typename sourceT, typename rasterT>
 auto
 qed::nisar::masks::gcov(
     // the source
-    const dataset_t & dataset,
+    const rasterT & dataset,
     // the layout
     const datatype_t & datatype,
     // the origin of the tile
@@ -41,7 +41,7 @@ qed::nisar::masks::gcov(
         zoomedOrigin[axis] *= stride[axis];
     }
     // read the data
-    auto mask = pyre::h5::read<sourceT>(dataset, datatype, zoomedOrigin, tile, stride);
+    auto mask = fetch<sourceT>(dataset, datatype, zoomedOrigin, tile, stride);
 
     // make a bitmap
     auto bmp = bmp_t(tile[0], tile[1]);

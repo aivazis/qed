@@ -17,6 +17,7 @@
 #include "api.h"
 
 // the decorator that paints the cells where a raster has nothing to say
+#include "fetch.h"
 #include "Absence.h"
 
 // implementation

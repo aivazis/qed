@@ -6,6 +6,8 @@
 // code guard
 #pragma once
 
+// the gather that knows both kinds of raster
+#include "../fetch.h"
 // my declaration
 #include "coherenceMasked.h"
 
@@ -17,13 +19,13 @@
 
 
 // the coherence tile generator
-template <typename sourceT>
+template <typename sourceT, typename rasterT, typename maskRasterT>
 auto
 qed::nisar::real::coherenceMasked(
     // the source
-    const dataset_t & dataset,
+    const rasterT & dataset,
     // the mask
-    const dataset_t & maskDataset,
+    const maskRasterT & maskDataset,
     // the layout
     const datatype_t & datatype,
     // the origin of the tile
@@ -56,10 +58,10 @@ qed::nisar::real::coherenceMasked(
         zoomedOrigin[axis] *= stride[axis];
     }
     // read the data
-    auto source = pyre::h5::read<source_t>(dataset, datatype, zoomedOrigin, tile, stride);
+    auto source = fetch<source_t>(dataset, datatype, zoomedOrigin, tile, stride);
     // and the mask, read into our storage width whatever the on-disk type
-    auto mask = pyre::h5::read<mask_t>(
-        maskDataset, pyre::h5::datatype<std::uint32_t>(), zoomedOrigin, tile, stride);
+    auto mask =
+        fetch<mask_t>(maskDataset, pyre::h5::datatype<std::uint32_t>(), zoomedOrigin, tile, stride);
 
     // build the workflow
     auto workflow = MaskedCoherence(source, mask, min, max);

@@ -12,13 +12,13 @@
 
 
 // the coherence tile generator
-template <typename sourceT>
+template <typename sourceT, typename rasterT, typename maskRasterT>
 auto
 qed::nisar::real::coherence(
     // the source
-    const dataset_t & dataset,
+    const rasterT & dataset,
     // the mask (unused)
-    const dataset_t &,
+    const maskRasterT &,
     // the layout
     const datatype_t & datatype,
     // the origin of the tile
@@ -56,7 +56,7 @@ qed::nisar::real::coherence(
         zoomedOrigin[axis] *= stride[axis];
     }
     // read the data
-    auto source = pyre::h5::read<source_t>(dataset, datatype, zoomedOrigin, tile, stride);
+    auto source = fetch<source_t>(dataset, datatype, zoomedOrigin, tile, stride);
     // set up the workflow
     // the normalizer
     auto normalizer = norm_t { source.cbegin(), { min, max } };

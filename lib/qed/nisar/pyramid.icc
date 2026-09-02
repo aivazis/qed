@@ -6,18 +6,20 @@
 // code guard
 #pragma once
 
+// the gather and the deposit that know both kinds of raster
+#include "fetch.h"
 // my declaration
 #include "pyramid.h"
 
 
 // build a tile of a pyramid level by decimating the level below it
-template <typename sourceT>
+template <typename sourceT, typename rasterT, typename draftT>
 auto
 qed::nisar::decimate(
     // the level being read
-    const dataset_t & source,
+    const rasterT & source,
     // the level being written
-    const dataset_t & destination,
+    draftT & destination,
     // the data layout, shared by both
     const datatype_t & datatype,
     // the origin of the tile, in the coordinates of the destination
@@ -36,9 +38,9 @@ qed::nisar::decimate(
         from[axis] *= stride[axis];
     }
 
-    // read the strided tile; the hyperslab machinery applies the decimation, so what comes
-    // back is dense in memory and already the shape of the destination tile
-    auto data = pyre::h5::read<sourceT>(source, datatype, from, tile, stride);
+    // gather the strided tile; whichever kind of raster the source is, what comes back is
+    // dense in memory and already the shape of the destination tile
+    auto data = fetch<sourceT>(source, datatype, from, tile, stride);
 
     // measure what the tile holds. every cell of it is in hand already, so the statistics
     // of the level, and through it of the whole raster, cost nothing beyond the arithmetic
@@ -55,21 +57,8 @@ qed::nisar::decimate(
         return measured;
     }
 
-    // express the destination region the way the writer wants it
-    auto cast = [](auto extent) -> std::size_t {
-        return static_cast<std::size_t>(extent);
-    };
-    // the rank of the request
-    constexpr auto rank = sourceT::shape_type::rank();
-    // the placement of the tile within the destination, and its extent
-    pyre::h5::shape_t at(rank), span(rank);
-    std::transform(origin.begin(), origin.end(), at.begin(), cast);
-    std::transform(tile.begin(), tile.end(), span.begin(), cast);
-
-    // deposit it; the buffer is dense and matches the region exactly, so this is a
-    // straight copy into the destination chunks
-    pyre::h5::write(destination, data, datatype, at, span);
-
+    // deposit it where the destination keeps this tile
+    deposit(destination, datatype, origin, data);
     // report what the tile held
     return measured;
 }

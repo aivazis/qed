@@ -42,10 +42,12 @@ namespace qed::nisar {
 
     // a mergeable sample of a strided tile of a complex HDF5 source; {origin} and {tile} are
     // in decimated coordinates, exactly as the render kernels see them
-    template <typename sourceT>
+    // {sourceT} is the grid the tile is gathered into; {rasterT} is where it is gathered
+    // from, an hdf5 dataset or a level of a pyramid
+    template <typename sourceT, typename rasterT>
     auto sample(
         // the source
-        const dataset_t & source,
+        const rasterT & source,
         // the data layout
         const datatype_t & datatype,
         // the origin of the tile

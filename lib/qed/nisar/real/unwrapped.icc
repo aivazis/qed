@@ -12,13 +12,13 @@
 
 
 // the unwrapped phase tile generator
-template <typename sourceT>
+template <typename sourceT, typename rasterT, typename maskRasterT>
 auto
 qed::nisar::real::unwrapped(
     // the source
-    const dataset_t & dataset,
+    const rasterT & dataset,
     // the mask (unused)
-    const dataset_t &,
+    const maskRasterT &,
     // the layout
     const datatype_t & datatype,
     // the origin of the tile
@@ -58,7 +58,7 @@ qed::nisar::real::unwrapped(
         zoomedOrigin[axis] *= stride[axis];
     }
     // read the data
-    auto source = pyre::h5::read<sourceT>(dataset, datatype, zoomedOrigin, tile, stride);
+    auto source = fetch<sourceT>(dataset, datatype, zoomedOrigin, tile, stride);
 
     // make a bitmap
     bmp_t bmp(tile[0], tile[1]);
