@@ -31,9 +31,8 @@ qed::py::isce2::unwrapped::channels(py::module & m)
         // the name
         "amplitude",
         // the handler
-        [](const py::buffer & source, const py::iterable & origin,
-           const py::iterable & shape, const py::iterable & stride, double mean,
-           double scale, double exponent) -> bmp_t {
+        [](const py::buffer & source, const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double mean, double scale, double exponent) -> bmp_t {
             // rebuild the tile geometry as rank-3 grid coordinates
             auto o = asIndex<3>(origin);
             auto t = asShape<3>(shape);
@@ -54,9 +53,9 @@ qed::py::isce2::unwrapped::channels(py::module & m)
         // the name
         "complex",
         // the handler
-        [](const py::buffer & source, const py::iterable & origin,
-           const py::iterable & shape, const py::iterable & stride, double mean,
-           double scale, double exponent, double minPhase, double maxPhase) -> bmp_t {
+        [](const py::buffer & source, const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double mean, double scale, double exponent, double minPhase,
+           double maxPhase) -> bmp_t {
             // rebuild the tile geometry as rank-3 grid coordinates
             auto o = asIndex<3>(origin);
             auto t = asShape<3>(shape);
@@ -78,9 +77,8 @@ qed::py::isce2::unwrapped::channels(py::module & m)
         // the name
         "phase",
         // the handler
-        [](const py::buffer & source, const py::iterable & origin,
-           const py::iterable & shape, const py::iterable & stride, double low,
-           double high, double brightness) -> bmp_t {
+        [](const py::buffer & source, const py::iterable & origin, const py::iterable & shape,
+           const py::iterable & stride, double low, double high, double brightness) -> bmp_t {
             // rebuild the tile geometry as rank-3 grid coordinates
             auto o = asIndex<3>(origin);
             auto t = asShape<3>(shape);

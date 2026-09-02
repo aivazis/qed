@@ -107,7 +107,8 @@ main(int argc, char * argv[])
         assert(got.red == want.red && got.green == want.green && got.blue == want.blue);
     }
 
-    // guard the fix: the fill code 255 must resolve to its assigned color, not out-of-bounds garbage
+    // guard the fix: the fill code 255 must resolve to its assigned color, not out-of-bounds
+    // garbage
     const auto fill = renderer.palette(255);
     // the shipping fill color is a dark red-brown; check each channel with a float tolerance
     assert(std::abs(fill.red - 0.150f) < 1e-6f);

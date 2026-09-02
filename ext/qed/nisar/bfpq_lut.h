@@ -34,7 +34,7 @@ namespace qed::py {
         // pair the layout and storage into the lookup table grid
         return qed::nisar::bfpq_lut_t(layout, storage);
     }
-} // namespace qed::py
+}    // namespace qed::py
 
 
 // end of file

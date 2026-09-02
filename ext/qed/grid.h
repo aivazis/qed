@@ -38,7 +38,7 @@ namespace qed::py {
     // type matched
     template <int dim, typename... cellTs, typename F>
     auto onGrid(const py::buffer & source, F && f);
-} // namespace qed::py
+}    // namespace qed::py
 
 
 // the inline implementations

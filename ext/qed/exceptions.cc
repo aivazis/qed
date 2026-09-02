@@ -12,8 +12,8 @@
 
 // add bindings to the inventory
 void
-qed::py::
-exceptions(py::module & m) {
+qed::py::exceptions(py::module & m)
+{
     // all done
     return;
 }

@@ -79,10 +79,11 @@ qed::py::onGrid(const py::buffer & source, F && f)
     // a slot for it
     std::optional<result_t> result;
     // try each candidate; the first whose struct code matches the buffer wins
-    bool matched = (((info.format == py::format_descriptor<cellTs>::format())
-                         ? (result.emplace(f(asGrid<cellTs, dim>(info))), true)
-                         : false)
-                    || ...);
+    bool matched =
+        (((info.format == py::format_descriptor<cellTs>::format()) ?
+              (result.emplace(f(asGrid<cellTs, dim>(info))), true) :
+              false)
+         || ...);
     // an unmatched cell type is a caller mistake
     if (!matched) {
         // say which one
