@@ -94,6 +94,27 @@ This is a property of the storage, not of the scheduler, and it is unavailable w
 process owns one file.
 
 
+## Who does what
+
+The server lays the levels out and the crew fills them. When a dataset is selected the
+server makes its directory and pre-sizes every level, then hands the first level to the
+team of the product as runs of tiles along each row. A worker maps the level being built,
+reads the product for level one or the level beneath for every other, decimates its tiles,
+and returns one record per tile saying what it held. The server keeps the occupancy record
+from those, merges the records of level one into the statistics of the whole raster, and
+when the last run of a level has reported it commits the record, writes the sidecar after
+level one, and hands out the next level. A worker can only read a level whose record
+exists, so the levels are barriers; level one is three quarters of the work, so the
+barriers cost little.
+
+The first runs handed out are the tiles that cover the windows the probe samples, one tile
+each, so the first records to come back are the same estimate the probe would have made.
+When they have all reported the preparation is seeded, and the view stops waiting: tiles at
+full resolution render off the product while the levels keep building, and a render picks
+up each level as it appears. On the reference geocoded product the wait between selecting
+a dataset and its first tile is about a second, and the whole pyramid, mask included, is
+committed a second and a half later.
+
 ## Sparsity, and why it needs a record
 
 A tile that holds nothing but fill should cost nothing. In the HDF5 storage this was free:
@@ -174,8 +195,10 @@ at a time, which is what makes a disk budget tractable.
 
 ## Open questions
 
-- Whether the occupancy record is written by the workers or by the server. The server is
-  simpler and matches where the statistics already flow; the workers avoid a round trip.
+- Whether a level should be handed out before the one beneath it is complete. A tile of
+  level *n* needs only a 2×2 block of level *n−1*, but a worker can only read a level whose
+  record exists, so pipelining would need the server to ship partial occupancy with each
+  task. Worth measuring before adding.
 - Whether tiles are ordered row-major or by a locality-preserving curve. Row-major matches
   `chunked_t` and needs no new code; a Morton order would serve diagonal panning better, and
   the question should be settled by measuring how the viewport actually moves.
