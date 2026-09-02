@@ -34,32 +34,6 @@ qed::nisar::fetch(
     return source.template read<gridT>(origin, shape, stride);
 }
 
-// place a dense tile in an hdf5 dataset
-template <class gridT>
-auto
-qed::nisar::deposit(
-    const dataset_t & destination, const datatype_t & datatype,
-    const typename gridT::index_type & origin, const gridT & data) -> void
-{
-    // express the destination region the way the writer wants it
-    auto cast = [](auto extent) -> std::size_t {
-        return static_cast<std::size_t>(extent);
-    };
-    // the rank of the request
-    constexpr auto rank = gridT::shape_type::rank();
-    // the placement of the tile within the destination, and its extent
-    pyre::h5::shape_t at(rank), span(rank);
-    std::transform(origin.begin(), origin.end(), at.begin(), cast);
-    // the extent is the shape of the data
-    auto shape = data.packing().shape();
-    std::transform(shape.begin(), shape.end(), span.begin(), cast);
-    // deposit it; the buffer is dense and matches the region exactly, so this is a straight
-    // copy into the destination chunks
-    pyre::h5::write(destination, data, datatype, at, span);
-    // all done
-    return;
-}
-
 // place a dense tile in a draft of a pyramid level
 template <class gridT, class cellT>
 auto

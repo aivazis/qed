@@ -37,13 +37,8 @@ namespace qed::nisar {
         const typename gridT::index_type & origin, const typename gridT::shape_type & shape,
         const typename gridT::index_type & stride) -> gridT;
 
-    // place the dense {data} in an hdf5 dataset with its first cell at {origin}
-    template <class gridT>
-    inline auto deposit(
-        const dataset_t & destination, const datatype_t & datatype,
-        const typename gridT::index_type & origin, const gridT & data) -> void;
-
-    // place it in a draft of a pyramid level; the draft has its own idea of the cell type
+    // place the dense {data} in a draft of a pyramid level with its first cell at {origin}; the
+    // draft has its own idea of the cell type, so the {datatype} has no bearing on it
     template <class gridT, class cellT>
     inline auto deposit(
         draft_t<cellT> & destination, const datatype_t &, const typename gridT::index_type & origin,
