@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// my declaration
+#include "profile.h"
+
 
 // collect statistics on a tile
 template <typename sourceT>

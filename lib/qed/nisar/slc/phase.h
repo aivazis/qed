@@ -7,6 +7,11 @@
 #if !defined(qed_nisar_slc_phase_h)
 #define qed_nisar_slc_phase_h
 
+// external dependencies and the local type aliases
+#include "../externals.h"
+// the namespace and its forward declarations
+#include "../forward.h"
+
 
 // the phase tile generator
 namespace qed::nisar::slc {

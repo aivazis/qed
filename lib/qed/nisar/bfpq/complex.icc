@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// my declaration
+#include "complex.h"
+
 
 // the complex tile generator
 template <typename sourceT>

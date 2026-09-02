@@ -4,9 +4,10 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_slc_real_icc)
-#error this file contains implementation details for qed::nisar::slc::real
-#else
+#pragma once
+
+// my declaration
+#include "real.h"
 
 
 // the real part tile generator
@@ -44,7 +45,5 @@ qed::nisar::slc::real(
     return native::channels::real(source, { 0, 0 }, tile, { 1, 1 }, min, max);
 }
 
-
-#endif
 
 // end of file

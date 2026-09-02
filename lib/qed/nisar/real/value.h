@@ -7,6 +7,13 @@
 #if !defined(qed_nisar_real_value_h)
 #define qed_nisar_real_value_h
 
+// external dependencies and the local type aliases
+#include "../externals.h"
+// the namespace and its forward declarations
+#include "../forward.h"
+// the local forward declarations
+#include "forward.h"
+
 
 // the value part tile generator
 namespace qed::nisar::real {

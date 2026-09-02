@@ -6,12 +6,16 @@
 // code guard
 #pragma once
 
+// external dependencies and the local type aliases
+#include "../externals.h"
+// the namespace and its forward declarations
+#include "../forward.h"
+// the local forward declarations
+#include "forward.h"
+
 
 // the GCOV mask tile generator
 namespace qed::nisar::masks {
-    // renderers
-    template <class sourceT>
-    class GCOVMask;
 
     // the tile generator for the mask of a GCOV product
     template <typename sourceT>

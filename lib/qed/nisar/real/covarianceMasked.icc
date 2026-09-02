@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// my declaration
+#include "covarianceMasked.h"
+
 
 // the declaration
 #include "covariance.h"

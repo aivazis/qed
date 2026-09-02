@@ -6,12 +6,16 @@
 // code guard
 #pragma once
 
+// external dependencies and the local type aliases
+#include "../externals.h"
+// the namespace and its forward declarations
+#include "../forward.h"
+// the local forward declarations
+#include "forward.h"
+
 
 // the GUNW mask tile generator
 namespace qed::nisar::masks {
-    // renderers
-    template <class sourceT>
-    class GUNWMask;
 
     // the tile generator for the mask of a GUNW product
     template <typename sourceT>

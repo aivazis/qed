@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// my declaration
+#include "phase.h"
+
 
 // the phase tile generator
 template <typename sourceT>

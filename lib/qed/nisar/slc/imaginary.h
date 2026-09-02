@@ -7,6 +7,11 @@
 #if !defined(qed_nisar_slc_imaginary_h)
 #define qed_nisar_slc_imaginary_h
 
+// external dependencies and the local type aliases
+#include "../externals.h"
+// the namespace and its forward declarations
+#include "../forward.h"
+
 
 // the imaginary part tile generator
 namespace qed::nisar::slc {
