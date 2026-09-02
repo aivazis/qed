@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// my declaration
+#include "amplitude.h"
+
 
 // the amplitude tile generators
 template <typename sourceT>

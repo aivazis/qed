@@ -7,6 +7,11 @@
 #if !defined(qed_nisar_slc_amplitude_h)
 #define qed_nisar_slc_amplitude_h
 
+// external dependencies and the local type aliases
+#include "../externals.h"
+// the namespace and its forward declarations
+#include "../forward.h"
+
 
 // amplitude tile generator
 namespace qed::nisar::slc {

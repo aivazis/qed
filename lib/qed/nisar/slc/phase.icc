@@ -4,9 +4,10 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_slc_phase_icc)
-#error this file contains implementation details for qed::nisar::slc::phase
-#else
+#pragma once
+
+// my declaration
+#include "phase.h"
 
 
 // the phase tile generator
@@ -47,7 +48,5 @@ qed::nisar::slc::phase(
         source, { 0, 0 }, tile, { 1, 1 }, low, high, saturation, brightness);
 }
 
-
-#endif
 
 // end of file

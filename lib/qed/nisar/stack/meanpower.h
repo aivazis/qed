@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// the namespace and its forward declarations
+#include "../forward.h"
+
 // the hdf5 handles, the bitmap type, and the native pipeline i delegate to
 #include "../externals.h"
 

@@ -4,9 +4,10 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_slc_complex_icc)
-#error this file contains implementation details for qed::nisar::slc::complex
-#else
+#pragma once
+
+// my declaration
+#include "complex.h"
 
 
 // the complex tile generator
@@ -45,7 +46,5 @@ qed::nisar::slc::complex(
         source, { 0, 0 }, tile, { 1, 1 }, min, max, phaseMin, phaseMax, saturation);
 }
 
-
-#endif
 
 // end of file

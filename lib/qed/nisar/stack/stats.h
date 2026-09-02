@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// the namespace and its forward declarations
+#include "../forward.h"
+
 // the hdf5 handles and the {native::stats_t} return type
 #include "../externals.h"
 

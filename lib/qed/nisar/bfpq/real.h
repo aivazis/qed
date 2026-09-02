@@ -6,6 +6,11 @@
 // code guard
 #pragma once
 
+// external dependencies and the local type aliases
+#include "../externals.h"
+// the namespace and its forward declarations
+#include "../forward.h"
+
 
 // the real part tile generator
 namespace qed::nisar::bfpq {

@@ -7,6 +7,9 @@
 // code guard
 #pragma once
 
+// external dependencies and the local type aliases
+#include "externals.h"
+
 namespace qed::nisar {
     // a pipeline decorator that paints the cells where a raster has nothing to say
     template <class sourceT, class pipelineT>

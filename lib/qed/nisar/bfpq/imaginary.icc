@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// my declaration
+#include "imaginary.h"
+
 
 // the imaginary part tile generator
 template <typename sourceT>

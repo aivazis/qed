@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// my declaration
+#include "real.h"
+
 
 // the real part tile generator
 template <typename sourceT>

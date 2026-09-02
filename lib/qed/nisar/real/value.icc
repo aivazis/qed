@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// my declaration
+#include "value.h"
+
 // the value part tile generator
 template <typename sourceT>
 auto

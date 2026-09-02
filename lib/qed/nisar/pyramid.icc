@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// my declaration
+#include "pyramid.h"
+
 
 // build a tile of a pyramid level by decimating the level below it
 template <typename sourceT>
