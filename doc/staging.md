@@ -8,11 +8,13 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # staging: first contact to first tile
 
 > **Status, 2026-09-02.** The lifecycle described here is current, but the account of what
-> happens between selecting a dataset and seeing it is not: it predates the chunk pyramid, so
-> it describes a zoomed-out render that strides the base rather than reading a decimated level.
-> Preparation now builds a pyramid for the dataset a view binds, and that pass is what produces
-> the statistics as well. `pyramid.md` describes how those levels are stored and why the
-> storage is changing.
+> happens between selecting a dataset and seeing it is not. Selecting a dataset now starts a
+> pyramid build: the server lays the levels out and hands runs of tiles to the crew, the
+> first of them the tiles that cover the probe's sample windows. The view is released when
+> those have reported, about a second after selection, and renders at full resolution off the
+> product while the levels keep building; the client withholds the channel selector until
+> then. A zoomed-out render reads a decimated level as soon as it exists. The statistics of
+> the raster come out of the same build. `pyramid.md` describes the storage and the build.
 
 > Status: **approved in outline; phase 1 pinned 2026-08-29** — the trigger design (T1)
 > and the deferral sequencing are settled; the remaining open questions are at the end.

@@ -9,13 +9,15 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 
 > **Status, 2026-09-02.** This was written before the chunk pyramid existed, and it describes a
 > world in which whole-dataset statistics come from a dedicated thumbnail pass over a strided
-> base. They now fall out of building the first pyramid level, which reads every allocated cell
-> anyway, so they are available during staging and before any view is bound. The mechanisms
-> below are still the ones in the code; what has changed is when they run and what pays for
-> them. The constraints stated here have not been reviewed since, and at least one of them —
-> that a sweep may only widen bounds rather than move picks — is a conclusion rather than
-> something the code requires. Read this alongside `pyramid.md`, and treat the timeline in it
-> as pending revision.
+> base. That pass is gone. The statistics of a raster now accumulate on the server from the
+> records the crew returns while it builds the first pyramid level: an estimate from the tiles
+> that cover the probe's own sample windows, within a second of selecting the dataset, and the
+> whole raster once level one is complete. Each record widens the controller bounds as it
+> arrives. The survey still probes every dataset at first contact, and the picks still come
+> from that probe. The mechanisms of bounds and picks described below are the ones in the
+> code; what has changed is where the numbers come from and when. The constraint that a sweep
+> may only widen bounds rather than move picks remains a conclusion rather than something the
+> code requires, and has not been reviewed. Read this alongside `pyramid.md`.
 
 > Status: **reference**. This document records what has been measured and built around dataset
 > statistics — the numbers that drive the visualization controllers — and the invariants any
