@@ -8,8 +8,10 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # how qed starts up
 
 > **Status, 2026-09-02.** Accurate as far as the server and its readers are concerned. It stops
-> short of what now happens on first contact with a dataset, which is the pyramid build
-> described in `pyramid.md`; the narrative here should be extended to reach that point.
+> short of what happens when a dataset is selected: the server pre-sizes the levels of its
+> pyramid, the crew fills them, and the viewer is released as soon as the tiles covering the
+> probe's sample windows have reported, about a second later. `pyramid.md` describes that
+> build; the narrative here should be extended to reach it.
 
 > Status: this document describes the startup sequence as it is intended to work once the
 > staging redesign is complete. It is written ahead of the code and will be kept current as
