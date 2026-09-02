@@ -89,10 +89,6 @@ class Tile(Chore):
         of them with one origin and one stride, so a mask that arrived without its levels
         would hold the data at full resolution however deep its own pyramid went
         """
-        # a dataset that already has them needs nothing
-        if getattr(dataset, "pyramid", None) is not None:
-            # so leave it alone
-            return dataset
         # a dataset whose flavor knows nothing of levels, or a task built before the
         # server had a workspace, renders the way it always did
         if self.workspace is None or not hasattr(dataset, "resolve"):
@@ -103,6 +99,18 @@ class Tile(Chore):
             # and give each of them their levels first, so they are in hand by the time the
             # data resolves a zoom and asks whether they can match it
             self._attachPyramid(reader=reader, dataset=companion)
+        # the pyramid a render attached earlier, if any
+        pyramid = getattr(dataset, "pyramid", None)
+        # if there is one
+        if pyramid is not None:
+            # a pyramid that is still being built may have grown since; looking costs a
+            # few checks for the records of the missing levels, and nothing at all once
+            # every level is there
+            if pyramid.reach() < pyramid.depth():
+                # so pick up whatever appeared
+                pyramid.attach()
+            # either way, it is in hand
+            return dataset
         # carefully, since a cache that cannot be opened must not cost us the tile
         try:
             # point a workspace at where the server keeps what it derives

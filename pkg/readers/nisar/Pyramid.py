@@ -636,6 +636,14 @@ class Pyramid:
 
     # public data
     @property
+    def workspace(self):
+        """
+        The workspace my levels live in
+        """
+        # the one i was handed
+        return self._workspace
+
+    @property
     def root(self):
         """
         The directory that holds every pyramid
