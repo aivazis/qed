@@ -102,10 +102,9 @@ qed::pyramid::Level<cellT>::read(
     for (auto row = 0l; row < static_cast<long>(shape[0]); ++row) {
         // and its columns
         for (auto col = 0l; col < static_cast<long>(shape[1]); ++col) {
-            // the cell of mine that stands at this place: the origin is in decimated
-            // coordinates, so both it and the offset within the tile are scaled by the stride
-            auto source =
-                index_type { (origin[0] + row) * stride[0], (origin[1] + col) * stride[1] };
+            // the cell of mine that stands at this place: {stride} steps away from the
+            // origin for every step within the tile
+            auto source = index_type { origin[0] + row * stride[0], origin[1] + col * stride[1] };
             // deposit its value, or the fill when there is nothing there
             data[{ row, col }] = holds(source) ? _grid[source] : _fill;
         }

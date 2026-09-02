@@ -73,9 +73,9 @@ public:
     inline auto occupied(const index_type & tile) const -> bool;
     // whether the cell at {cell} lies within my extent and in a tile that was written
     inline auto holds(const index_type & cell) const -> bool;
-    // gather the tile at {origin}+{shape} into a fresh {gridT}, taking every {stride}-th
-    // cell along each axis; the origin is in decimated coordinates, so the footprint in my
-    // cells starts at the origin scaled by the stride, exactly as the render kernels ask
+    // gather into a fresh {gridT} the cells at {origin} and every {stride}-th cell after it
+    // along each axis, {shape} of them per axis; the origin is in my own coordinates, the
+    // way an hdf5 read takes it, and the caller scales it when it comes from a zoomed view
     template <class gridT>
     inline auto read(
         const typename gridT::index_type & origin, const typename gridT::shape_type & shape,

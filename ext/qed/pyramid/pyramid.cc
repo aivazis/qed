@@ -140,9 +140,9 @@ namespace qed::py::pyramid {
             // the signature
             "origin"_a, "shape"_a, "stride"_a,
             // the docstring
-            "gather the tile at {origin}+{shape}, taking every {stride}-th cell along each "
-            "axis, into an array; the origin is in decimated coordinates, so the footprint "
-            "starts at the origin scaled by the stride");
+            "gather into an array the cells at {origin} and every {stride}-th cell after it "
+            "along each axis, {shape} of them per axis; the origin is in the level's own "
+            "coordinates");
 
         // the draft
         auto draft = py::class_<draft_type>(
