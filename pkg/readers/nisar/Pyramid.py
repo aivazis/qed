@@ -218,16 +218,17 @@ class Pyramid:
         """
         Report how many levels my extent supports
 
-        Halving stops when the smaller axis would drop below one cell, which is all the
-        pyramid has to promise: a client asking for a deeper zoom is served by the deepest
-        level there is, striding it for the rest
+        Halving stops at the level that fits within a single tile: a client asking for a
+        deeper zoom is served by striding that one tile, which is already the cheap case,
+        so nothing above it would buy anything. A raster that fits in a tile to begin with
+        gets no levels at all
         """
         # start at the base
         depth = 0
         # and the full extent
         extent = list(self._shape)
-        # halve until an axis collapses
-        while min(axis // 2 for axis in extent) >= 1:
+        # halve until the extent fits in a tile on both axes
+        while any(axis > width for axis, width in zip(extent, self._tile)):
             # one more level
             depth += 1
             # and the extent shrinks
@@ -543,15 +544,16 @@ class Pyramid:
         """
         The file that holds the tiles of the level at {exponent}
         """
-        # the directory already says which dataset this is, so the level says only how deep
-        return self.home / f"level{exponent}.tiles"
+        # the directory already says which dataset this is, so the level says only how deep;
+        # two digits, so the levels list in order
+        return self.home / f"level-{exponent:02d}.tiles"
 
     def _occupancyPath(self, exponent: int):
         """
         The record of which tiles of the level at {exponent} were written
         """
         # beside the tiles
-        return self.home / f"level{exponent}.occupancy"
+        return self.home / f"level-{exponent:02d}.occupancy"
 
     def _tileOf(self, extent: tuple) -> tuple:
         """
