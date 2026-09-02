@@ -62,11 +62,19 @@ sizes itself that way, and the h5 tiling test asserts a cell count of `(4*30) * 
 The layout on disk mirrors the HDF5 hierarchy it replaces. The group path of a dataset within
 its product becomes a directory path, and each level is a file within it:
 
-    {workspace}/pyramids/{stamp}/{dataset path}/{level}.tiles
-    {workspace}/pyramids/{stamp}/{dataset path}/{level}.occupancy
+    {workspace}/pyramids/{stamp}/{dataset path}/level-{nn}.tiles
+    {workspace}/pyramids/{stamp}/{dataset path}/level-{nn}.occupancy
+    {workspace}/pyramids/{stamp}/{dataset path}/pyramid.json
 
 The stamp continues to identify the product version, so a cache built against one version is
-never read against another.
+never read against another. The level number is zero padded so the levels list in order. The
+sidecar records the layout the levels were built for, their format version, the cell type,
+the shape and the tile, and the statistics measured while level one was built; a sidecar
+written for another layout is ignored.
+
+The levels stop at the one that fits within a single tile. A deeper zoom is served by
+striding that one tile, which is already the cheap case, so nothing above it would buy
+anything; a raster that fits in a tile to begin with gets no levels at all.
 
 
 ## Writing without contention

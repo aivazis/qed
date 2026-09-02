@@ -353,8 +353,8 @@ if covariances.exists():
     levels.build(depth=1)
     # the level exists: its files are there, and so is the sidecar with the statistics
     assert levels.reach() == 1
-    assert (levels.home / "level1.tiles").exists()
-    assert (levels.home / "level1.occupancy").exists()
+    assert (levels.home / "level-01.tiles").exists()
+    assert (levels.home / "level-01.occupancy").exists()
     assert levels.sidecar.exists()
     assert levels.statistics.count > 0
     # the corner of the product is empty: the base says so
