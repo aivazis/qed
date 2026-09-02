@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// the bindings support, for {py::module}
+#include "external.h"
+
 
 // useful type aliases
 namespace qed::py {
@@ -40,6 +43,9 @@ namespace qed::py {
         void isce2(py::module &);
     }
     // nisar support
+    namespace pyramid {
+        void pyramid(py::module &);
+    }
     namespace nisar {
         // the initializer
         void nisar(py::module &);

@@ -20,6 +20,8 @@
 #include <pyre/h5.h>
 #include <pyre/grid.h>
 #include <pyre/viz.h>
+// the pyramid storage
+#include <qed/pyramid.h>
 
 
 // pybind support
@@ -55,6 +57,12 @@ namespace qed::py {
     using dataset_t = pyre::h5::dataset_t;
     using dataspace_t = pyre::h5::dataspace_t;
     using datatype_t = pyre::h5::datatype_t;
+
+    // the levels of a pyramid, as a reader sees them and as a builder writes them
+    template <class cellT>
+    using level_t = qed::pyramid::level_t<cellT>;
+    template <class cellT>
+    using draft_t = qed::pyramid::draft_t<cellT>;
 }
 
 // type aliases for pyre types
