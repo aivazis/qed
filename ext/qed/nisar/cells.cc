@@ -1,41 +1,29 @@
-// -*- C++ -*-
+// -*- c++ -*-
 // -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 // (c) 1998-2026 all rights reserved
 
-
-// external
+// externals
 #include "external.h"
 // namespace setup
 #include "forward.h"
 
 
-// the helpers that bind the kernels of one cell type
+// the kernels of one cell type, bound once per kind of raster they can read
 namespace qed::py::nisar {
-    // bind the kernels that read a raster whose cells are {cellT}
-    template <typename cellT>
-    inline void bindCell(py::module & m, const char * name, const char * doc)
+    // bind the decimation over a source of type {rasterT} and a destination of type {draftT}
+    template <class cellT, class rasterT, class draftT>
+    inline void bindDecimate(py::module & cell)
     {
-        // the grid the kernels read into. it holds exactly the cells the file holds: a
-        // buffer laid out for one type and filled from a dataset of another is read back
-        // as pairs, or halves, of whatever the file actually stored
+        // the grid the tile passes through; it holds exactly the cells the raster holds
         using grid_t = heapgrid_t<cellT>;
-
-        // gather the kernels of this cell type under their own name, so a caller picks the
-        // one that matches its raster rather than getting whichever was bound first
-        auto cell = m.def_submodule(
-            // the name of the cell type, spelled the way {qed.datatypes} spells it
-            name,
-            // its docstring
-            doc);
-
         // build a tile of a pyramid level from the level below it
         cell.def(
             // the name
             "decimate",
             // the handler
-            [](const dataset_t & source, const dataset_t & destination, const datatype_t & datatype,
+            [](const rasterT & source, draftT & destination, const datatype_t & datatype,
                const py::iterable & origin, const py::iterable & shape,
                const py::iterable & stride) -> sample_t {
                 // read the strided tile and deposit it in the destination
@@ -48,13 +36,22 @@ namespace qed::py::nisar {
             // the docstring
             "fill the {destination} tile at {origin}+{shape} by decimating {source} by "
             "{stride}, and report a mergeable statistical record of what it held");
+        // all done
+        return;
+    }
 
+    // bind the sample over a source of type {rasterT}
+    template <class cellT, class rasterT>
+    inline void bindSample(py::module & cell)
+    {
+        // the grid the kernel reads into
+        using grid_t = heapgrid_t<cellT>;
         // collect a mergeable sample of a strided tile
         cell.def(
             // the name
             "sample",
             // the handler
-            [](const dataset_t & source, const datatype_t & datatype, const py::iterable & origin,
+            [](const rasterT & source, const datatype_t & datatype, const py::iterable & origin,
                const py::iterable & shape, const py::iterable & stride) -> sample_t {
                 // read the decimated tile and sample it
                 return qed::nisar::sample<grid_t>(
@@ -65,8 +62,36 @@ namespace qed::py::nisar {
             // the docstring
             "collect a mergeable statistical sample of the strided tile at "
             "{origin}+{shape}");
+        // all done
+        return;
+    }
 
-        // compute the display range of a tile
+    // bind the kernels over cells of type {cellT} in their own submodule
+    template <class cellT>
+    inline void bindCell(py::module & m, const char * name, const char * doc)
+    {
+        // the grid the kernels read into. it holds exactly the cells the file holds: a
+        // buffer laid out for one type and filled from a dataset of another is read back
+        // as pairs, or halves, of whatever the file actually stored
+        using grid_t = heapgrid_t<cellT>;
+        // gather the kernels of this cell type under their own name, so a caller picks the
+        // one that matches its raster rather than getting whichever was bound first
+        auto cell = m.def_submodule(
+            // the name of the cell type, spelled the way {qed.datatypes} spells it
+            name,
+            // its docstring
+            doc);
+        // the decimation: the first level reads the product, every level after it reads the
+        // level below, and the destination is the draft of a pyramid level
+        bindDecimate<cellT, dataset_t, draft_t<cellT>>(cell);
+        bindDecimate<cellT, level_t<cellT>, draft_t<cellT>>(cell);
+        // an hdf5 destination stays on offer while the pyramid builder still writes one
+        bindDecimate<cellT, dataset_t, const dataset_t>(cell);
+        // the sample reads the product or a level, whichever serves the zoom
+        bindSample<cellT, dataset_t>(cell);
+        bindSample<cellT, level_t<cellT>>(cell);
+        // compute the display range of a tile; this reads the product at open time, before
+        // any level exists
         cell.def(
             // the name
             "stats",
@@ -81,7 +106,6 @@ namespace qed::py::nisar {
             "source"_a, "datatype"_a, "origin"_a, "shape"_a,
             // the docstring
             "compute the statistics of the tile at {origin}+{shape}");
-
         // all done
         return;
     }
@@ -98,7 +122,6 @@ qed::py::nisar::cells(py::module & m)
         "cells",
         // its docstring
         "the raster kernels, one set per cell type");
-
     // the integers, signed and unsigned; masks and classification rasters live here
     bindCell<std::int8_t>(cells, "int8", "rasters of signed single byte integers");
     bindCell<std::uint8_t>(cells, "uint8", "rasters of unsigned single byte integers");
@@ -113,10 +136,8 @@ qed::py::nisar::cells(py::module & m)
     // covariance terms
     bindCell<std::complex<float>>(cells, "complex64", "rasters of single precision complex");
     bindCell<std::complex<double>>(cells, "complex128", "rasters of double precision complex");
-
     // all done
     return;
 }
-
 
 // end of file
