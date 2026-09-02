@@ -20,6 +20,8 @@ namespace qed::native::channels {
     class Coherence {
         // types
     public:
+        // me
+        using self_type = Coherence<sourceT>;
         // i wrap a homogeneous collection of these
         using source_type = sourceT;
         // and i report my reduction as a real in [0,1]
