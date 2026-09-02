@@ -12,6 +12,7 @@ def test():
     """
     # get the package
     import qed
+
     # verify the bindings are accessible
     assert qed.libqed
     # all done

@@ -14,7 +14,6 @@ class Config(qed.shells.command, family="qed.cli.config"):
     Display configuration information about this package
     """
 
-
     # version info
     @qed.export(tip="the version information")
     def version(self, **kwds):
@@ -25,7 +24,6 @@ class Config(qed.shells.command, family="qed.cli.config"):
         print(f"{qed.meta.version}")
         # all done
         return 0
-
 
     # configuration
     @qed.export(tip="the top level installation directory")
@@ -38,7 +36,6 @@ class Config(qed.shells.command, family="qed.cli.config"):
         # all done
         return 0
 
-
     @qed.export(tip="the directory with the executable scripts")
     def path(self, **kwds):
         """
@@ -48,7 +45,6 @@ class Config(qed.shells.command, family="qed.cli.config"):
         print(f"{qed.prefix}/bin")
         # all done
         return 0
-
 
     @qed.export(tip="the directory with the python packages")
     def pythonpath(self, **kwds):
@@ -60,7 +56,6 @@ class Config(qed.shells.command, family="qed.cli.config"):
         # all done
         return 0
 
-
     @qed.export(tip="the location of the {qed} headers")
     def incpath(self, **kwds):
         """
@@ -70,7 +65,6 @@ class Config(qed.shells.command, family="qed.cli.config"):
         print(f"{qed.prefix}/include")
         # all done
         return 0
-
 
     @qed.export(tip="the location of the {qed} libraries")
     def libpath(self, **kwds):

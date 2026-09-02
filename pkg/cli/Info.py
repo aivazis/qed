@@ -6,16 +6,16 @@
 
 # externals
 import journal
+
 # support
 import qed
 
 
 # declaration
-class Info(qed.shells.command, family='qed.cli.info'):
+class Info(qed.shells.command, family="qed.cli.info"):
     """
     Display helpful information about various aspects of the application
     """
-
 
     @qed.export(tip="display host information")
     def host(self, plexus, **kwds):
@@ -38,7 +38,6 @@ class Info(qed.shells.command, family='qed.cli.info'):
 
         # all done
         return
-
 
     @qed.export(tip="display platform information")
     def platform(self, plexus, **kwds):
@@ -66,7 +65,6 @@ class Info(qed.shells.command, family='qed.cli.info'):
 
         # all done
         return
-
 
     @qed.export(tip="display user information")
     def user(self, plexus, **kwds):

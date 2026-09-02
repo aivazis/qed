@@ -55,7 +55,6 @@ from .ext import libqed, libqed_cuda
 # protocols
 from . import protocols
 
-
 # support for data archives
 from . import archives
 

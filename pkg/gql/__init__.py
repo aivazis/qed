@@ -9,15 +9,15 @@ import graphene
 
 # query
 from .Query import Query
+
 # mutation
 from .Mutation import Mutation
-
 
 # build the schema
 schema = graphene.Schema(
     # supported operations
-    query = Query,
-    mutation = Mutation,
+    query=Query,
+    mutation=Mutation,
 )
 
 

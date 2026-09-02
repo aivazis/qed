@@ -203,7 +203,9 @@ class Server(http, family="qed.nexus.servers.http"):
     # private data
     fleet = None  # the manager of the tile rendering teams, built at activation
     _changeFrame = None  # the constant change notification frame, built on first use
-    _app = None  # the application, held so the heartbeat can describe what it is carrying
+    _app = (
+        None  # the application, held so the heartbeat can describe what it is carrying
+    )
     _beat = 0  # how many times the heartbeat has been raised
 
 

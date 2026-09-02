@@ -30,6 +30,7 @@ class Controller(graphene.Interface):
         # avoid a circular import
         from .RangeController import RangeController
         from .ValueController import ValueController
+
         # the resolver table
         registry = {
             "range": RangeController,

@@ -13,7 +13,6 @@ without ever touching the user's picks, the dirty flag, or pinned configurations
 # support
 import qed
 
-
 # a log range controller, tuned to a modest sample: values around 1
 log = qed.controllers.logRange(name="widen_log")
 # tune it

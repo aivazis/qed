@@ -19,14 +19,18 @@ import qed
 # a 4x4 ramp
 ramp = np.arange(16, dtype=np.float32).reshape(4, 4)
 # sample every other cell in each direction: the values 0, 2, 8, 10
-record = qed.libqed.native.sample(source=ramp, origin=(0, 0), shape=(2, 2), stride=(2, 2))
+record = qed.libqed.native.sample(
+    source=ramp, origin=(0, 0), shape=(2, 2), stride=(2, 2)
+)
 # four samples, from 0 to 10, with mean 5 and second moment 68
 assert record == (4.0, 0.0, 5.0, 68.0, 10.0)
 
 # an all-nan tile
 fog = np.full((4, 4), np.nan, dtype=np.float32)
 # contributes an empty record
-record = qed.libqed.native.sample(source=fog, origin=(0, 0), shape=(2, 2), stride=(2, 2))
+record = qed.libqed.native.sample(
+    source=fog, origin=(0, 0), shape=(2, 2), stride=(2, 2)
+)
 # with nothing in it
 assert record == (0.0, 0.0, 0.0, 0.0, 0.0)
 
@@ -44,7 +48,9 @@ assert abs(mean - 3.75) < 1e-6
 assert abs(m2 - 68.75) < 1e-6
 
 # a decimated origin is scaled by the stride: origin (1,1) at stride (2,2) starts at cell (2,2)
-record = qed.libqed.native.sample(source=ramp, origin=(1, 1), shape=(1, 1), stride=(2, 2))
+record = qed.libqed.native.sample(
+    source=ramp, origin=(1, 1), shape=(1, 1), stride=(2, 2)
+)
 # so the single sample is the value at (2,2)
 assert record == (1.0, 10.0, 10.0, 0.0, 10.0)
 
