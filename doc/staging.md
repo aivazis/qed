@@ -7,6 +7,13 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 
 # staging: first contact to first tile
 
+> **Status, 2026-09-02.** The lifecycle described here is current, but the account of what
+> happens between selecting a dataset and seeing it is not: it predates the chunk pyramid, so
+> it describes a zoomed-out render that strides the base rather than reading a decimated level.
+> Preparation now builds a pyramid for the dataset a view binds, and that pass is what produces
+> the statistics as well. `pyramid.md` describes how those levels are stored and why the
+> storage is changing.
+
 > Status: **approved in outline; phase 1 pinned 2026-08-29** — the trigger design (T1)
 > and the deferral sequencing are settled; the remaining open questions are at the end.
 > This document records the verified timeline of what

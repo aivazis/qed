@@ -7,6 +7,10 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 
 # how qed starts up
 
+> **Status, 2026-09-02.** Accurate as far as the server and its readers are concerned. It stops
+> short of what now happens on first contact with a dataset, which is the pyramid build
+> described in `pyramid.md`; the narrative here should be extended to reach that point.
+
 > Status: this document describes the startup sequence as it is intended to work once the
 > staging redesign is complete. It is written ahead of the code and will be kept current as
 > each phase lands. The reasoning behind the design, along with the record of the system it

@@ -7,6 +7,16 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 
 # dataset statistics: what we know, and the constraints on the code
 
+> **Status, 2026-09-02.** This was written before the chunk pyramid existed, and it describes a
+> world in which whole-dataset statistics come from a dedicated thumbnail pass over a strided
+> base. They now fall out of building the first pyramid level, which reads every allocated cell
+> anyway, so they are available during staging and before any view is bound. The mechanisms
+> below are still the ones in the code; what has changed is when they run and what pays for
+> them. The constraints stated here have not been reviewed since, and at least one of them —
+> that a sweep may only widen bounds rather than move picks — is a conclusion rather than
+> something the code requires. Read this alongside `pyramid.md`, and treat the timeline in it
+> as pending revision.
+
 > Status: **reference**. This document records what has been measured and built around dataset
 > statistics — the numbers that drive the visualization controllers — and the invariants any
 > further work must respect. The construction-time sample has since been retired as a
