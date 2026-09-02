@@ -85,8 +85,6 @@ namespace qed::py::nisar {
         // level below, and the destination is the draft of a pyramid level
         bindDecimate<cellT, dataset_t, draft_t<cellT>>(cell);
         bindDecimate<cellT, level_t<cellT>, draft_t<cellT>>(cell);
-        // an hdf5 destination stays on offer while the pyramid builder still writes one
-        bindDecimate<cellT, dataset_t, const dataset_t>(cell);
         // the sample reads the product or a level, whichever serves the zoom
         bindSample<cellT, dataset_t>(cell);
         bindSample<cellT, level_t<cellT>>(cell);
