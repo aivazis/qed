@@ -8,6 +8,11 @@
 #if !defined(qed_native_api_h)
 #define qed_native_api_h
 
+// external dependencies and the local type aliases
+#include "externals.h"
+// the namespace and its forward declarations
+#include "forward.h"
+
 
 #endif
 

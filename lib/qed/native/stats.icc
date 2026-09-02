@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// my declaration
+#include "stats.h"
+
 
 // the magnitude of one cell
 template <typename cellT>

@@ -6,6 +6,9 @@
 // code guard
 #pragma once
 
+// the namespace and its forward declarations
+#include "../forward.h"
+
 // the pipeline node aliases and the containers my declarations lean on
 #include "../externals.h"
 
