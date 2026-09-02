@@ -4,8 +4,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_py_external_h)
-#define qed_py_external_h
+#pragma once
 
 
 // STL
@@ -97,8 +96,5 @@ namespace qed::py {
 // the helpers that rebuild a typed grid over a python buffer and dispatch on its cell type; these
 // depend on the grid aliases above, so they come last
 #include "grid.h"
-
-
-#endif
 
 // end of file

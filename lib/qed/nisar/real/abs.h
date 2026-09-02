@@ -4,8 +4,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_real_abs_h)
-#define qed_nisar_real_abs_h
+#pragma once
 
 // external dependencies and the local type aliases
 #include "../externals.h"
@@ -36,10 +35,6 @@ namespace qed::nisar::real {
 
 
 // pull in the implementations
-#define qed_nisar_real_abs_icc
 #include "abs.icc"
-#undef qed_nisar_real_abs_icc
-
-#endif
 
 // end of file

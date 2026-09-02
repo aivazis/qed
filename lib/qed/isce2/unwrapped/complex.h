@@ -4,8 +4,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_isce2_unwrapped_channels_complex_h)
-#define qed_isce2_unwrapped_channels_complex_h
+#pragma once
 
 // external dependencies and the local type aliases
 #include "../externals.h"
@@ -32,10 +31,6 @@ namespace qed::isce2::unwrapped::channels {
 
 
 // pull in the implementations
-#define qed_isce2_unwrapped_channels_complex_icc
 #include "complex.icc"
-#undef qed_isce2_unwrapped_channels_complex_icc
-
-#endif
 
 // end of file

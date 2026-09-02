@@ -4,14 +4,10 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_py_isce2_unwrapped_external_h)
-#define qed_py_isce2_unwrapped_external_h
+#pragma once
 
 
 // inherit
 #include "../external.h"
-
-
-#endif
 
 // end of file

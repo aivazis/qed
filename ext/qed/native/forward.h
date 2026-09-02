@@ -4,8 +4,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_py_forward_h)
-#define qed_py_forward_h
+#pragma once
 
 
 // the {native} namespace
@@ -20,8 +19,5 @@ namespace qed::py::native {
     // statistics
     void stats(py::module &);
 }
-
-
-#endif
 
 // end of file

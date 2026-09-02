@@ -4,8 +4,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_slc_phase_h)
-#define qed_nisar_slc_phase_h
+#pragma once
 
 // external dependencies and the local type aliases
 #include "../externals.h"
@@ -36,10 +35,6 @@ namespace qed::nisar::slc {
 
 
 // pull in the implementations
-#define qed_nisar_slc_phase_icc
 #include "phase.icc"
-#undef qed_nisar_slc_phase_icc
-
-#endif
 
 // end of file

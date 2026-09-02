@@ -5,8 +5,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_nisar_slc_slc_h)
-#define qed_nisar_slc_slc_h
+#pragma once
 
 // channels
 #include "amplitude.h"
@@ -14,7 +13,5 @@
 #include "imaginary.h"
 #include "phase.h"
 #include "real.h"
-
-#endif
 
 // end of file

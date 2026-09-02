@@ -5,8 +5,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_isce2_public_h)
-#define qed_isce2_public_h
+#pragma once
 
 // external packages
 #include "externals.h"
@@ -19,8 +18,5 @@
 // implementation
 #include "interferogram/interferogram.h"
 #include "unwrapped/unwrapped.h"
-
-
-#endif
 
 // end of file

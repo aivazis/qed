@@ -5,8 +5,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_native_externals_h)
-#define qed_native_externals_h
+#pragma once
 
 
 // STL
@@ -72,8 +71,5 @@ namespace qed::native {
     template <typename sourceT>
     using real_t = pyre::viz::iterators::filters::real_t<sourceT>;
 }
-
-
-#endif
 
 // end of file

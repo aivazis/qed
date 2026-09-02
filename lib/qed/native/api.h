@@ -5,15 +5,11 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_native_api_h)
-#define qed_native_api_h
+#pragma once
 
 // external dependencies and the local type aliases
 #include "externals.h"
 // the namespace and its forward declarations
 #include "forward.h"
-
-
-#endif
 
 // end of file

@@ -4,8 +4,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_py_isce2_forward_h)
-#define qed_py_isce2_forward_h
+#pragma once
 
 
 // the {isce2} namespace
@@ -21,8 +20,5 @@ namespace qed::py::isce2 {
         void unwrapped(py::module &);
     }
 }
-
-
-#endif
 
 // end of file

@@ -5,8 +5,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_version_h)
-#define qed_version_h
+#pragma once
 
 
 // support
@@ -37,8 +36,5 @@ namespace qed::version {
     // clang-format on
 
 }    // namespace qed::version
-
-
-#endif
 
 // end of file

@@ -4,8 +4,7 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_py_nisar_forward_h)
-#define qed_py_nisar_forward_h
+#pragma once
 
 
 // set up the namespace
@@ -28,8 +27,5 @@ namespace qed::py::nisar {
     // the kernels that read a raster of a given cell type
     void cells(py::module &);
 }
-
-
-#endif
 
 // end of file
