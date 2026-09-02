@@ -96,10 +96,10 @@ assert np.array_equal(whole, expected, equal_nan=True)
 strided = level.read(origin=(0, 0), shape=(4, 5), stride=(2, 2))
 assert np.array_equal(strided, expected[::2, ::2], equal_nan=True)
 # a strided read away from the origin, with different strides on the two axes
-offset = level.read(origin=(1, 1), shape=(2, 2), stride=(3, 4))
+offset = level.read(origin=(3, 4), shape=(2, 2), stride=(3, 4))
 assert np.array_equal(offset, expected[3::3, 4::4][:2, :2], equal_nan=True)
 # a read whose footprint runs past the extent gets fill for the overhang
-overhang = level.read(origin=(1, 2), shape=(5, 4), stride=(3, 3))
+overhang = level.read(origin=(3, 6), shape=(5, 4), stride=(3, 3))
 assert overhang.shape == (5, 4)
 assert np.array_equal(overhang[:2, :1], expected[3::3, 6::3][:2, :1], equal_nan=True)
 assert np.all(np.isnan(overhang[2:, :]))
