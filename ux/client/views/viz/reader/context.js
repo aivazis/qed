@@ -48,6 +48,9 @@ export const Provider = props => {
     const stackExtent = reader.stackExtent
     // the per-member participation mask, but only meaningful when i am the active reader
     const members = active ? view.members : null
+    // whether the dataset in the view is still being made worth looking at; only the active
+    // reader can be waiting on anything
+    const preparing = active ? view.preparing : false
 
     // assemble the context value
     const context = {
@@ -67,6 +70,8 @@ export const Provider = props => {
         stackExtent,
         // my per-member participation mask, if i am the active reader
         members,
+        // whether my dataset is still being prepared
+        preparing,
     }
 
     // provide for my children
@@ -94,6 +99,8 @@ export const Context = React.createContext(
         channel: null,
         // the possible solutions
         candidates: null,
+        // whether the dataset is still being prepared
+        preparing: false,
     }
 )
 
@@ -135,6 +142,8 @@ export const contextReaderGetViewFragment = graphql`
             name
             values
         }
+        # whether the dataset is still being made worth looking at
+        preparing
     }
 `
 

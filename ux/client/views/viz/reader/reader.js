@@ -19,6 +19,7 @@ import { useReader } from './useReader'
 import { useIsActive } from './useIsActive'
 import { useDataset } from './useDataset'
 import { useSelectReader } from './useSelectReader'
+import { usePreparing } from './usePreparing'
 // components
 import { Axis } from './axis'
 import { Channels } from './channels'
@@ -47,6 +48,8 @@ const Panel = ({ qed }) => {
     const dataset = useDataset()
     // get the view update
     const select = useSelectReader()
+    // whether my dataset is still being prepared
+    const preparing = usePreparing()
 
     // unpack the reader
     const { name, uri, selectors } = reader
@@ -102,7 +105,9 @@ const Panel = ({ qed }) => {
                     return <Axis key={axis} axis={axis}>{values}</Axis>
                 })}
                 <Stack />
-                {channels.length > 0 && <Channels>{channels}</Channels>}
+                {/* the channels appear when the dataset is worth looking at; offering them while
+                    the viewport is still waiting would promise something the view cannot show */}
+                {channels.length > 0 && !preparing && <Channels>{channels}</Channels>}
             </Meta.Table>
         </Tray>
     )
