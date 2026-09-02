@@ -7,6 +7,11 @@
 #if !defined(qed_isce2_unwrapped_channels_amplitude_h)
 #define qed_isce2_unwrapped_channels_amplitude_h
 
+// external dependencies and the local type aliases
+#include "../externals.h"
+// the namespace and its forward declarations
+#include "../forward.h"
+
 
 // the amplitude tile generator
 namespace qed::isce2::unwrapped::channels {

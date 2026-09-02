@@ -4,9 +4,10 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_isce2_interferogram_channels_real_icc)
-#error this file contains implementation details for qed::isce2::interferogram::channels::real
-#else
+#pragma once
+
+// my declaration
+#include "real.h"
 
 
 // the tile generator
@@ -73,7 +74,5 @@ qed::isce2::interferogram::channels::real(
     return bmp;
 }
 
-
-#endif
 
 // end of file
