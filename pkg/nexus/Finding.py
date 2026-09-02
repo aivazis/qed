@@ -28,6 +28,7 @@ class Finding:
         stats,
         suffix=None,
         selector=None,
+        companions=None,
         **kwds,
     ):
         # chain up
@@ -48,6 +49,9 @@ class Finding:
         self.suffix = suffix
         # the selector that identifies me to my reader
         self.selector = selector
+        # the rasters i am read alongside, by role, as name suffixes relative to my owner's,
+        # so my twin can be wired to theirs
+        self.companions = companions or {}
         # all done
         return
 
