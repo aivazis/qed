@@ -7,6 +7,9 @@
 // code guard
 #pragma once
 
+// my declaration
+#include "api.h"
+
 
 // the shape guess generator
 auto
