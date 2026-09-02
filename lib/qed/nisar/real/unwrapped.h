@@ -17,12 +17,15 @@
 // the unwrapped phase tile generator
 namespace qed::nisar::real {
     // the tile generator for datasets that are unwrapped phases
-    template <typename sourceT>
+    // {sourceT} is the grid the tile is gathered into; {rasterT} is where it is gathered from,
+    // an hdf5 dataset or a level of a pyramid, and a masked render names the raster its mask
+    // comes from the same way
+    template <typename sourceT, typename rasterT, typename maskRasterT>
     inline auto unwrapped(
         // the source
-        const dataset_t & source,
+        const rasterT & source,
         // the mask
-        const dataset_t & mask,
+        const maskRasterT & mask,
         // the data layout
         const datatype_t & datatype,
         // the origin of the tile

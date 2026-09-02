@@ -17,6 +17,7 @@
 #include <pyre/viz.h>
 // my native sibling
 #include "../native.h"
+#include "../pyramid.h"
 
 
 // type aliases
@@ -25,6 +26,12 @@ namespace qed::nisar {
     using dataset_t = pyre::h5::dataset_t;
     using dataspace_t = pyre::h5::dataspace_t;
     using datatype_t = pyre::h5::datatype_t;
+
+    // the levels of a pyramid, as a reader sees them and as a builder writes them
+    template <class cellT>
+    using level_t = qed::pyramid::level_t<cellT>;
+    template <class cellT>
+    using draft_t = qed::pyramid::draft_t<cellT>;
 
     // encodings
     using bmp_t = pyre::viz::iterators::codecs::bmp_t;

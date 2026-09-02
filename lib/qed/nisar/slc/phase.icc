@@ -6,16 +6,18 @@
 // code guard
 #pragma once
 
+// the gather that knows both kinds of raster
+#include "../fetch.h"
 // my declaration
 #include "phase.h"
 
 
 // the phase tile generator
-template <typename sourceT>
+template <typename sourceT, typename rasterT>
 auto
 qed::nisar::slc::phase(
     // the source
-    const dataset_t & dataset,
+    const rasterT & dataset,
     // the layout
     const datatype_t & datatype,
     // the origin of the tile
@@ -42,7 +44,7 @@ qed::nisar::slc::phase(
     }
 
     // read the data
-    auto source = pyre::h5::read<sourceT>(dataset, datatype, from, tile, stride);
+    auto source = fetch<sourceT>(dataset, datatype, from, tile, stride);
     // render and return
     return native::channels::phase(
         source, { 0, 0 }, tile, { 1, 1 }, low, high, saturation, brightness);

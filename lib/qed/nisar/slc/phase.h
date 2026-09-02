@@ -15,10 +15,13 @@
 // the phase tile generator
 namespace qed::nisar::slc {
     // the tile generator for the phase of a complex HDF5 source
-    template <typename sourceT>
+    // {sourceT} is the grid the tile is gathered into; {rasterT} is where it is gathered from,
+    // an hdf5 dataset or a level of a pyramid, and a masked render names the raster its mask
+    // comes from the same way
+    template <typename sourceT, typename rasterT>
     inline auto phase(
         // the source
-        const dataset_t & dataset,
+        const rasterT & dataset,
         // the data layout
         const datatype_t & datatype,
         // the origin of the tile

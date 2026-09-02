@@ -28,12 +28,16 @@ namespace qed::nisar {
     // a byproduct rather than a second pass. a tile of pure fill contributes an empty
     // record and is not written at all, so the destination chunk stays unallocated and a
     // sparse product does not become a dense one
-    template <typename sourceT>
+    //
+    // {sourceT} is the grid the tile passes through; {rasterT} is the level being read, an
+    // hdf5 dataset or a level of a pyramid; {draftT} is the level being written, an hdf5
+    // dataset or the draft of a pyramid level
+    template <typename sourceT, typename rasterT, typename draftT>
     auto decimate(
         // the level being read
-        const dataset_t & source,
+        const rasterT & source,
         // the level being written
-        const dataset_t & destination,
+        draftT & destination,
         // the data layout, shared by both
         const datatype_t & datatype,
         // the origin of the tile, in the coordinates of the destination

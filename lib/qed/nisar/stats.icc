@@ -6,6 +6,8 @@
 // code guard
 #pragma once
 
+// the gather that knows both kinds of raster
+#include "fetch.h"
 // my declaration
 #include "stats.h"
 
@@ -77,11 +79,11 @@ qed::nisar::statsBFPQ(
 
 
 // collect a mergeable sample of a strided tile
-template <typename sourceT>
+template <typename sourceT, typename rasterT>
 auto
 qed::nisar::sample(
     // the source
-    const dataset_t & dataset,
+    const rasterT & dataset,
     // the layout
     const datatype_t & datatype,
     // the origin of the tile
@@ -99,7 +101,7 @@ qed::nisar::sample(
         from[axis] *= stride[axis];
     }
     // read the decimated tile; the hyperslab machinery applies the stride
-    auto source = pyre::h5::read<sourceT>(dataset, datatype, from, tile, stride);
+    auto source = fetch<sourceT>(dataset, datatype, from, tile, stride);
     // the data is now dense in memory, so sample it at unit stride
     return native::sample(source, { 0, 0 }, tile, { 1, 1 });
 }

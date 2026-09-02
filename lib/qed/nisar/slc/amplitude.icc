@@ -6,16 +6,18 @@
 // code guard
 #pragma once
 
+// the gather that knows both kinds of raster
+#include "../fetch.h"
 // my declaration
 #include "amplitude.h"
 
 
 // the amplitude tile generators
-template <typename sourceT>
+template <typename sourceT, typename rasterT>
 auto
 qed::nisar::slc::amplitude(
     // the source
-    const dataset_t & dataset,
+    const rasterT & dataset,
     // the layout
     const datatype_t & datatype,
     // the origin of the tile
@@ -40,7 +42,7 @@ qed::nisar::slc::amplitude(
     }
 
     // read the data
-    auto source = pyre::h5::read<sourceT>(dataset, datatype, from, tile, stride);
+    auto source = fetch<sourceT>(dataset, datatype, from, tile, stride);
     // and render
     return native::channels::amplitude(source, { 0, 0 }, tile, { 1, 1 }, min, max);
 }

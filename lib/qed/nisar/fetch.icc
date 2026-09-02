@@ -1,0 +1,76 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+// my declaration
+#include "fetch.h"
+
+// gather a strided tile of an hdf5 dataset
+template <class gridT>
+auto
+qed::nisar::fetch(
+    const dataset_t & source, const datatype_t & datatype,
+    const typename gridT::index_type & origin, const typename gridT::shape_type & shape,
+    const typename gridT::index_type & stride) -> gridT
+{
+    // the hyperslab machinery applies the decimation, so what comes back is dense in
+    // memory and already the shape of the tile
+    return pyre::h5::read<gridT>(source, datatype, origin, shape, stride);
+}
+
+// gather a strided tile of a pyramid level
+template <class gridT, class cellT>
+auto
+qed::nisar::fetch(
+    const level_t<cellT> & source, const datatype_t &, const typename gridT::index_type & origin,
+    const typename gridT::shape_type & shape, const typename gridT::index_type & stride) -> gridT
+{
+    // the level walks its mapping and answers with fill wherever nothing was written
+    return source.template read<gridT>(origin, shape, stride);
+}
+
+// place a dense tile in an hdf5 dataset
+template <class gridT>
+auto
+qed::nisar::deposit(
+    const dataset_t & destination, const datatype_t & datatype,
+    const typename gridT::index_type & origin, const gridT & data) -> void
+{
+    // express the destination region the way the writer wants it
+    auto cast = [](auto extent) -> std::size_t {
+        return static_cast<std::size_t>(extent);
+    };
+    // the rank of the request
+    constexpr auto rank = gridT::shape_type::rank();
+    // the placement of the tile within the destination, and its extent
+    pyre::h5::shape_t at(rank), span(rank);
+    std::transform(origin.begin(), origin.end(), at.begin(), cast);
+    // the extent is the shape of the data
+    auto shape = data.packing().shape();
+    std::transform(shape.begin(), shape.end(), span.begin(), cast);
+    // deposit it; the buffer is dense and matches the region exactly, so this is a straight
+    // copy into the destination chunks
+    pyre::h5::write(destination, data, datatype, at, span);
+    // all done
+    return;
+}
+
+// place a dense tile in a draft of a pyramid level
+template <class gridT, class cellT>
+auto
+qed::nisar::deposit(
+    draft_t<cellT> & destination, const datatype_t &, const typename gridT::index_type & origin,
+    const gridT & data) -> void
+{
+    // the draft copies the cells into its mapping and drops whatever falls past its edge
+    destination.write(origin, data);
+    // all done
+    return;
+}
+
+// end of file
