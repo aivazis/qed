@@ -4,9 +4,10 @@
 // (c) 1998-2026 all rights reserved
 
 // code guard
-#if !defined(qed_isce2_unwrapped_channels_phase_icc)
-#error this file contains implementation details for qed::isce2::unwrapped::channels::phase
-#else
+#pragma once
+
+// my declaration
+#include "phase.h"
 
 
 // the tile generators
@@ -68,7 +69,5 @@ qed::isce2::unwrapped::channels::phase(
     return bmp;
 }
 
-
-#endif
 
 // end of file

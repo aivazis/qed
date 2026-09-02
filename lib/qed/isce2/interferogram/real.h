@@ -7,6 +7,11 @@
 #if !defined(qed_isce2_interferogram_channels_real_h)
 #define qed_isce2_interferogram_channels_real_h
 
+// external dependencies and the local type aliases
+#include "../externals.h"
+// the namespace and its forward declarations
+#include "../forward.h"
+
 
 // the real part tile generator
 namespace qed::isce2::interferogram::channels {
