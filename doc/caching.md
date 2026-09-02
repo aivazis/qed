@@ -101,6 +101,15 @@ The whole-dataset statistics keep the same company. They fall out of the pass th
 first level, and they are stored beside it, so a pyramid found on disk arrives with the
 numbers it was the cheapest way to compute.
 
+The pyramid is right about what to remember and wrong about where it puts it. Its levels live
+in one HDF5 file per product, which only one process may write; a second writer is refused by
+the library rather than made to wait. That, and not the granularity of the work, is what
+holds first contact to a single worker. Each level is becoming a flat file of chunk-shaped
+tiles in packing order, memory mapped for reading and written by many workers at disjoint
+offsets. `pyramid.md` describes the format, the occupancy record that keeps sparse levels
+honest about the fill value, and what pyre still lacks. Where that bears on this document it
+is noted below.
+
 ## The unit of work
 
 The viewer works with a tile shape identical to the chunk shape at every zoom level. That
@@ -174,17 +183,25 @@ Decided, not yet implemented:
 - The server should raise its own descriptor limit at startup rather than inherit whatever
   the launching shell happened to have.
 
+Answered by the pyramid on disk, described in `pyramid.md`:
+
+- Whether the cache should hold decompressed chunks rather than rendered tiles. It should not
+  hold them itself. A level stored as a flat file of chunk-shaped tiles is memory mapped, and
+  the operating system's page cache is then the chunk cache: it costs one descriptor per level
+  rather than one per remembered item, the descriptor may be closed as soon as the mapping
+  exists, and no byte budget has to be invented for it. The argument above was right that
+  chunks are the thing worth remembering, and wrong that the server should be the one
+  remembering them.
+- Whether the byte budget survives once entries are chunks. The question lapses with the
+  answer above: the budget continues to govern rendered tiles, which are what the cache still
+  holds, and mapped levels are governed by eviction of levels rather than by a byte count.
+
 Open, and wanting a decision:
 
-- Whether the cache should hold decompressed chunks rather than rendered tiles. The argument
-  above says it should. The cost is a redesign of what the crews exchange and of how a tile is
-  assembled from the pieces that cover it.
 - Whether a payload should travel as a descriptor at all. Passing bytes over the crew channel
   removes descriptors from the transport as well as the cache, at the price of a copy that is
   negligible for a small tile and less so for a large one.
 - Which mixing function routes chunks to workers, and how affinity degrades under load.
-- Whether the byte budget survives at all once entries are chunks rather than pictures, since
-  a decompressed chunk is larger than the bitmap made from it.
 
 
 <!-- end of file -->
