@@ -4,8 +4,17 @@
 # (c) 1998-2026 all rights reserved
 
 
+# externals
+import socket
+
+# support
+import journal
+
 # the marker the marshaler raises when its peer dies mid-conversation
 from pyre.ipc.exceptions import EndOfStream
+
+# the failure a task reports when it could not be carried out but the member is fine
+from pyre.nexus.exceptions import RecoverableError
 
 # the stock crew member; re-exported by {pyre.nexus} since the persistent-team graduation
 from pyre.nexus.Crew import Crew as crew
@@ -62,8 +71,34 @@ class Crew(crew, family="qed.nexus.crews.tile"):
         memberstatus, taskstatus, result = super().harvest(channel=channel)
         # a spooled result is just a size so far; its payload descriptor follows the report
         if isinstance(result, Spool):
-            # receive it
-            _, descriptors = channel.recvDescriptors(limit=1)
+            # carefully, since the descriptor lands in this process's table, and the kernel
+            # refuses it when the table is full
+            try:
+                # receive it
+                _, descriptors = channel.recvDescriptors(limit=1)
+            # if the table is full
+            except OSError as error:
+                # the kernel dropped the descriptor but left the byte that carried it in the
+                # socket, where the next report would be read from the wrong place; take
+                # that byte out of the way
+                self._drain(channel=channel)
+                # make a channel
+                warning = journal.warning("qed.nexus.crew")
+                # complain, since this is how a process that has run out of descriptors
+                # stops serving tiles: the render happened, and its payload cannot land
+                warning.line(
+                    f"crew {self.pid}: could not receive the payload of a render"
+                )
+                warning.line(f"got: {error}")
+                warning.line(f"the process is probably out of file descriptors")
+                # flush
+                warning.log()
+                # the member is fine; the task is not, and whoever asked for it is told
+                return (
+                    memberstatus,
+                    self.taskcodes.failed,
+                    RecoverableError(description=f"payload not received: {error}"),
+                )
             # a missing descriptor means the member died between the report and its trailer,
             # which is a death like any other
             if not descriptors:
@@ -73,6 +108,23 @@ class Crew(crew, family="qed.nexus.crews.tile"):
             result.adopt(descriptor=descriptors[0])
         # hand off the report
         return memberstatus, taskstatus, result
+
+    # implementation details
+    def _drain(self, channel) -> None:
+        """
+        Take the byte that carried a payload descriptor out of {channel}, after the kernel
+        refused to deliver the descriptor itself
+        """
+        # carefully, since there may be nothing there after all
+        try:
+            # take the byte, without waiting for one
+            channel.recv(1, socket.MSG_DONTWAIT)
+        # nothing to take
+        except OSError:
+            # is fine
+            pass
+        # all done
+        return
 
     # metamethods
     def __init__(self, **kwds):
