@@ -114,7 +114,7 @@ class Pyramid:
         # all done
         return self
 
-    def build(self, depth: int = 0) -> "Pyramid":
+    def build(self, depth: int | None = None) -> "Pyramid":
         """
         Make the levels up to {depth}, or as many as the extent supports
 
@@ -141,8 +141,8 @@ class Pyramid:
             return self
         # make my directory, if this is the first time
         home.mkdir(parents=True, exist_ok=True)
-        # figure out how deep to go
-        depth = depth if depth > 0 else self.depth()
+        # figure out how deep to go: as deep as asked, or as deep as the extent supports
+        depth = depth if depth is not None else self.depth()
         # take hold of whatever an earlier run left behind, so it is not built twice
         self.attach()
         # make a channel
