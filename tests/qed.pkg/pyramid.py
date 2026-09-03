@@ -19,6 +19,7 @@ striding composes: halving twice is striding by four
 """
 
 # externals
+import json
 import os
 import shutil
 
@@ -381,9 +382,29 @@ if covariances.exists():
     assert again.reach() == 1
     assert again.statistics.count == levels.statistics.count
     assert again.statistics.mean == levels.statistics.mean
+    # a sidecar for another layout disowns the levels beside it: a third pyramid finds
+    # nothing, and would start over
+    sidecar = json.load(open(str(levels.sidecar), "r"))
+    stale = dict(sidecar, format=sidecar["format"] + 1)
+    json.dump(stale, open(str(levels.sidecar), "w"))
+    third = qed.readers.nisar.pyramid(
+        reader=gcov, dataset=covariance, workspace=scratchWorkspace
+    )
+    third.attach()
+    assert third.reach() == 0
+    assert not third.holds(exponent=1)
+    assert third.statistics.count == 0
+    # and without a sidecar at all the levels are not consulted either
+    os.remove(str(levels.sidecar))
+    assert not third.holds(exponent=1)
+    # the layout this code reads brings them back
+    json.dump(sidecar, open(str(levels.sidecar), "w"))
+    third.attach()
+    assert third.reach() == 1
     # let go
     levels.close()
     again.close()
+    third.close()
     covariance.pyramid = None
     mask.pyramid = None
 
