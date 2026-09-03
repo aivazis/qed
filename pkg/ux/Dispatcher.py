@@ -5,6 +5,7 @@
 
 
 # externals
+import collections
 import csv
 import functools
 import io
@@ -68,6 +69,8 @@ class Dispatcher:
     def __init__(self, plexus, docroot, pfs, **kwds):
         # chain up
         super().__init__(**kwds)
+        # the tile requests by zoom, since the server started
+        self.zooms = collections.Counter()
         # save the location of my document root so i can serve static assets
         self.docroot = docroot.discover()
         # attach it to the app's private filesystem
@@ -198,6 +201,9 @@ class Dispatcher:
         channelName = match.group("data_channel")
         zoomSpec = match.group("data_zoom")
         zoom = tuple(map(int, zoomSpec.split("x")))
+        # count the request against its zoom; the pyramid exists on the belief that people
+        # look at products zoomed out, and this is where that belief gets measured
+        self.zooms[zoom] += 1
         spec = match.group("data_tile")
         origin = tuple(map(int, match.group("data_origin").split("x")))
         shape = tuple(map(int, match.group("data_shape").split("x")))
@@ -802,6 +808,20 @@ class Dispatcher:
             return "safari"
         # anything else, including our probe's fallback
         return "other"
+
+    def usage(self) -> str:
+        """
+        Report how many tile requests arrived at each zoom, in one line
+        """
+        # nothing asked for yet
+        if not self.zooms:
+            # is nothing to report
+            return "no tiles yet"
+        # otherwise, one entry per zoom, shallowest first
+        return " ".join(
+            f"{vertical}x{horizontal}:{count}"
+            for (vertical, horizontal), count in sorted(self.zooms.items())
+        )
 
     def backlog(self) -> tuple:
         """

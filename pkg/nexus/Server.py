@@ -156,10 +156,12 @@ class Server(http, family="qed.nexus.servers.http"):
             # the cache is what turns rendered tiles into held descriptors, so it reports
             # beside them
             cache = fleet.cache.census() if fleet is not None else "no cache"
+            # the zooms the tiles were asked at, which is what the pyramid is for
+            zooms = ux.usage() if ux is not None else "no tiles yet"
             # hand back the whole picture
             return (
                 f"fds={self._descriptors()} waiting={waiting} oldest={oldest:.1f}s "
-                f"| cache: {cache} | {teams}"
+                f"| cache: {cache} | zooms: {zooms} | {teams}"
             )
         # if anything at all goes wrong
         except Exception as error:
