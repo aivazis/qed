@@ -548,8 +548,31 @@ class Dispatcher:
             # and deliver whatever came out
             return deferred.resolve(response=response)
 
-        # on success, the tile arrives parked in a spool; map its payload
-        view = result.view()
+        # on success, the tile arrives parked in a spool; map its payload, carefully, since
+        # the mapping needs a descriptor of its own and this process may have none left
+        try:
+            # map it
+            view = result.view()
+        # if the process is out of descriptors
+        except OSError as error:
+            # tell me
+            chnl = journal.warning("qed.nexus.tiles")
+            # what happened
+            chnl.line(
+                f"could not map the payload of a '{channelName}' tile of '{datasetName}'"
+            )
+            chnl.line(f"with shape {shape} at {origin}")
+            chnl.line(f"got: {error}")
+            chnl.line(f"the process is probably out of file descriptors")
+            # and flush
+            chnl.log()
+            # record the outcome
+            if record is not None:
+                record(code=503, via="starved")
+            # and let the client know; it can always ask again, and the render is cached
+            return deferred.resolve(
+                response=server.responses.ServiceUnavailable(server=server)
+            )
         # and wrap it up as a document
         response = self._dataDocument(
             server=server,

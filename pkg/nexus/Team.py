@@ -5,6 +5,7 @@
 
 
 # support
+import journal
 import pyre
 
 # the standing team of persistent workers; not re-exported by {pyre.nexus} as a class, so
@@ -50,8 +51,28 @@ class Team(Staff, family="qed.nexus.teams.tile"):
         """
         # chain up to deliver the result to every subscriber; each maps its own view. a
         # discovery record needs nothing further here: the callback of a survey carries
-        # both outcomes, so the requester hydrates and settles the lifecycle itself
-        super().collect(task=task, result=result)
+        # both outcomes, so the requester hydrates and settles the lifecycle itself. this
+        # runs inside the harvest of the member that did the work, so a subscriber that
+        # fails must not take the member with it: an exception that escapes here unwinds
+        # through the event loop's dispatch, which has already taken the member's handler
+        # off its registry and never puts it back, and a member nobody listens to while it
+        # is counted as busy is a team that never hands out work again
+        try:
+            # deliver
+            super().collect(task=task, result=result)
+        # a subscriber that runs out of descriptors, e.g. mapping the payload, is the known
+        # way this fails
+        except OSError as error:
+            # make a channel
+            channel = journal.warning("qed.nexus.crew")
+            # complain
+            channel.line(f"a subscriber to {task} failed while taking delivery")
+            channel.line(f"got: {error}")
+            channel.line(
+                f"the member is fine; the remaining subscribers were not served"
+            )
+            # flush
+            channel.log()
         # if the result is spooled
         if isinstance(result, Spool):
             # if the worker took a statistical sample and a sink is attached
