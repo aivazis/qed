@@ -449,11 +449,17 @@ class Pyramid:
         """
         Report whether the level at {exponent} exists, without taking hold of it
 
-        A level exists when its occupancy record does: the record is the last thing a build
-        writes, so a tile file without one is a build in progress or the remains of one
-        that died, and neither is a level
+        A level exists when its occupancy record does and the sidecar describes the layout
+        this code reads: the record is the last thing a build writes, so a tile file without
+        one is a build in progress or the remains of one that died, and levels written for
+        another layout, or by a version of this code that stored them differently, would be
+        misread rather than read. Neither is a level, and a build starts them over
         """
-        # ask the filesystem
+        # a sidecar for another layout disowns every level
+        if not self._current():
+            # so there is nothing here
+            return False
+        # otherwise, ask the filesystem
         return self._occupancyPath(exponent=exponent).exists()
 
     def layout(self, exponent: int) -> tuple:
@@ -492,11 +498,11 @@ class Pyramid:
     def remember(self) -> "Pyramid":
         """
         Keep my statistics, and the layout they describe, beside my levels
+
+        The sidecar is what makes the levels readable: without one that describes the
+        layout this code reads, the levels beside it are not consulted. So it is written
+        even when the raster held nothing to measure
         """
-        # nothing was measured, so there is nothing to keep
-        if self.statistics.count == 0:
-            # leave the sidecar alone
-            return self
         # the record: the layout, so a reader can tell a cache built for another layout
         # from its own, and the numbers
         record = {
@@ -527,38 +533,10 @@ class Pyramid:
             # so there is nothing to take back
             return self
         # the sidecar
-        path = self.sidecar
-        # a directory without one holds no numbers
-        if not path.exists():
+        record = self._sidecar()
+        # a directory without one, or with one for another layout, holds no numbers of mine
+        if record is None:
             # so there is nothing to take back
-            return self
-        # carefully, since the file is text and anyone may have touched it
-        try:
-            # read it
-            with open(str(path), "r") as sidecar:
-                # as a record
-                record = json.load(sidecar)
-        # a file that is not a record is ignored
-        except (OSError, ValueError) as error:
-            # make a channel
-            channel = journal.warning("qed.readers.pyramid")
-            # complain
-            channel.line(f"could not read the sidecar of '{self._name}'")
-            channel.line(f"at '{path}'")
-            channel.line(f"got: {error}")
-            # flush
-            channel.log()
-            # and leave the numbers alone
-            return self
-        # a record written for another layout, or by another version of this code, does
-        # not describe my levels
-        if (
-            record.get("format") != self.format
-            or record.get("cell") != self._cell
-            or tuple(record.get("shape", ())) != self._shape
-            or tuple(record.get("tile", ())) != self._tile
-        ):
-            # so leave the numbers alone
             return self
         # the numbers
         statistics = record.get("statistics", {})
@@ -574,6 +552,54 @@ class Pyramid:
             setattr(self.statistics, part, statistics[part])
         # all done
         return self
+
+    def _sidecar(self):
+        """
+        Read my sidecar, if there is one and it describes the layout this code reads
+        """
+        # the file
+        path = self.sidecar
+        # a directory without one has never completed a first level
+        if not path.exists():
+            # so there is no record
+            return None
+        # carefully, since the file is text and anyone may have touched it
+        try:
+            # read it
+            with open(str(path), "r") as sidecar:
+                # as a record
+                record = json.load(sidecar)
+        # a file that is not a record is no record
+        except (OSError, ValueError) as error:
+            # make a channel
+            channel = journal.warning("qed.readers.pyramid")
+            # complain
+            channel.line(f"could not read the sidecar of '{self._name}'")
+            channel.line(f"at '{path}'")
+            channel.line(f"got: {error}")
+            # flush
+            channel.log()
+            # and report that there is none
+            return None
+        # a record written for another layout, or by another version of this code, does
+        # not describe my levels
+        if (
+            record.get("format") != self.format
+            or record.get("cell") != self._cell
+            or tuple(record.get("shape", ())) != self._shape
+            or tuple(record.get("tile", ())) != self._tile
+        ):
+            # so it is no record of mine
+            return None
+        # hand it back
+        return record
+
+    def _current(self) -> bool:
+        """
+        Report whether the sidecar beside my levels describes the layout this code reads
+        """
+        # it does when there is a record to be had
+        return self._sidecar() is not None
 
     def _parts(self) -> dict:
         """
