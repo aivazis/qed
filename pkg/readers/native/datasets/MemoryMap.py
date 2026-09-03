@@ -5,9 +5,10 @@
 
 
 # externals
-import journal
+import math
 
 # support
+import journal
 import qed
 
 
@@ -239,11 +240,44 @@ class MemoryMap(
             return
 
         # grab the path to the dataset
-        path = str(uri.address)
+        path = qed.primitives.path(uri.address)
+        # the bytes my shape needs; a mapping is laid over the file without looking, and a
+        # read past the end of a file that is shorter than its declared shape is a crash
+        # rather than an error, so the file is measured first
+        required = math.prod(self.shape) * self.cell.bytes
+        # carefully, since the file may not be there
+        try:
+            # measure it
+            actual = path.stat().st_size
+        # if it is not
+        except OSError as error:
+            # make a channel
+            channel = journal.error("qed.readers.native")
+            # complain
+            channel.line(f"while looking for '{path}'")
+            channel.line(f"got: {error}")
+            # flush
+            channel.log()
+            # and bail
+            return
+        # if it is too small
+        if actual < required:
+            # make a channel
+            channel = journal.error("qed.readers.native")
+            # complain
+            channel.line(f"'{path}' is too small for the declared shape")
+            channel.line(
+                f"shape {tuple(self.shape)} of {self.cell.cell} cells requires"
+            )
+            channel.line(f"{required} bytes, but the file holds only {actual}")
+            # flush
+            channel.log()
+            # and bail
+            return
         # lay an erased grid of my cell type over the memory-mapped file and return it; it presents
         # the buffer protocol, which is what the tile generators consume
         return qed.libpyre.grid.map(
-            uri=path, shape=self.shape, cell=self.cell.cell, create=False
+            uri=str(path), shape=self.shape, cell=self.cell.cell, create=False
         )
 
     def _collectStatistics(self):
