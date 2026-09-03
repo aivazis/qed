@@ -7,6 +7,9 @@
 
 // support
 import { defineConfig, devices } from "@playwright/test"
+import fs from "fs"
+import os from "os"
+import path from "path"
 
 
 // the port the server under test listens on; a dedicated test port, overridable so parallel
@@ -33,6 +36,23 @@ const soloPort = Number(process.env.QED_PORT_SOLO ?? 8139)
 const soloBaseURL = process.env.QED_URL_SOLO ?? `http://localhost:${soloPort}`
 const soloDataDir = process.env.QED_DATA_NISAR_SOLO ?? "../data/nisar/solo"
 
+// the servers derive data as they go: a selected dataset gets a pyramid, and the server keeps it
+// in its workspace, which defaults to the directory it runs in. that would leave caches behind in
+// the fixture directories, so every server is pointed at its own workspace under a scratch area
+// made here and removed by the teardown below; the teardown finds it through the environment,
+// since it runs after this module has loaded
+const scratch = process.env.QED_SCRATCH ?? fs.mkdtempSync(path.join(os.tmpdir(), "qed-playwright-"))
+process.env.QED_SCRATCH = scratch
+// one workspace per server, made here since a server refuses a workspace that is not there
+const workspace = (name: string) => {
+    // the directory
+    const home = path.join(scratch, name)
+    // make it
+    fs.mkdirSync(home, { recursive: true })
+    // and hand it back
+    return home
+}
+
 
 // the qed.ux suite drives the built client in a headless browser to enforce the semantic-markup
 // convention (doc/semantic-markup.md). playwright owns discovery, parallelism, and -- via the
@@ -51,6 +71,8 @@ export default defineConfig({
     workers: 1,
     // one line per spec; silence-on-pass in spirit
     reporter: [["list"]],
+    // remove the scratch area the servers worked out of, once they are down
+    globalTeardown: "./teardown.ts",
 
     use: {
         // every {page.goto} and {request} call is relative to the server under test
@@ -134,7 +156,7 @@ export default defineConfig({
     // we override its port on the command line so the two never collide
     webServer: [
         {
-            command: `qed --qed.app.nexus.services.web.address=ip4:0.0.0.0:${port}`,
+            command: `qed --qed.app.nexus.services.web.address=ip4:0.0.0.0:${port} --qed.app.workspace.path=${workspace("native")}`,
             cwd: dataDir,
             url: baseURL,
             reuseExistingServer: !process.env.CI,
@@ -143,7 +165,7 @@ export default defineConfig({
             stderr: "pipe",
         },
         {
-            command: `qed --qed.app.nexus.services.web.address=ip4:0.0.0.0:${nisarPort}`,
+            command: `qed --qed.app.nexus.services.web.address=ip4:0.0.0.0:${nisarPort} --qed.app.workspace.path=${workspace("nisar")}`,
             cwd: nisarDataDir,
             url: nisarBaseURL,
             reuseExistingServer: !process.env.CI,
@@ -152,7 +174,7 @@ export default defineConfig({
             stderr: "pipe",
         },
         {
-            command: `qed --qed.app.nexus.services.web.address=ip4:0.0.0.0:${soloPort}`,
+            command: `qed --qed.app.nexus.services.web.address=ip4:0.0.0.0:${soloPort} --qed.app.workspace.path=${workspace("solo")}`,
             cwd: soloDataDir,
             url: soloBaseURL,
             reuseExistingServer: !process.env.CI,
