@@ -37,6 +37,9 @@ class Server(http, family="qed.nexus.servers.http"):
     period = pyre.properties.dimensional(default=1 * second)
     period.doc = "how often the heartbeat reports that the event loop is still turning"
 
+    descriptors = pyre.properties.int(default=None)
+    descriptors.doc = "the descriptor ceiling to ask for at startup; left unset, as many as the system allows"
+
     # protocol obligations
     @pyre.export(tip="register this service with the nexus")
     def activate(self, app, dispatcher):
@@ -48,6 +51,10 @@ class Server(http, family="qed.nexus.servers.http"):
         # hold on to the application; it is the only thing in reach of everything the
         # heartbeat wants to report on
         self._app = app
+        # ask for as many descriptors as the system allows, before anything that holds them
+        # is built: every cached tile, every crew channel, and every client connection is
+        # one, and a shell's default ceiling is a few hundred
+        self._widen()
         # start the heartbeat. it is the one instrument that tells a server whose loop has
         # died apart from one whose loop is turning while the work sits still: if the beats
         # stop, the loop is gone; if they keep coming while requests go unanswered, the loop
@@ -84,6 +91,44 @@ class Server(http, family="qed.nexus.servers.http"):
         return
 
     # implementation details
+    def _widen(self) -> int:
+        """
+        Raise the ceiling on the descriptors this process may hold, as far as the system
+        allows, and report where it landed
+
+        Whatever ceiling this process starts with is inherited by every crew member it forks,
+        so this happens once, before the fleet is built
+        """
+        # where things stand
+        soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+        # the ceilings worth asking for, highest first: the one the user named, the hard
+        # limit when it is a number, and the usual system caps when it is not
+        wanted = [self.descriptors] if self.descriptors is not None else []
+        wanted += [hard] if hard != resource.RLIM_INFINITY else []
+        wanted += [65536, 10240, 4096, 1024]
+        # go through them
+        for ceiling in wanted:
+            # a ceiling no higher than the current one is not worth asking for
+            if ceiling <= soft:
+                # so stop looking
+                break
+            # carefully, since the system may refuse
+            try:
+                # ask
+                resource.setrlimit(resource.RLIMIT_NOFILE, (ceiling, hard))
+            # if it does
+            except (ValueError, OSError):
+                # try the next one
+                continue
+            # make a channel
+            channel = journal.info("qed.nexus.server")
+            # and say what happened, since a low ceiling is how tiles stop arriving
+            channel.log(f"descriptor ceiling raised from {soft} to {ceiling}")
+            # all done
+            return ceiling
+        # nothing was raised, so the current ceiling stands
+        return soft
+
     def _heartbeat(self, timestamp, **kwds):
         """
         Report that the event loop is still turning, and what it is carrying
