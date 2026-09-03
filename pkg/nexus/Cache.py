@@ -6,6 +6,7 @@
 
 # externals
 import collections
+import resource
 
 # support
 import qed
@@ -28,20 +29,22 @@ class Cache(qed.component, family="qed.nexus.caches.tile"):
     capacity = qed.properties.int(default=128 * 1024 * 1024)
     capacity.doc = "the total payload size to hold, in bytes; zero disables the cache"
 
+    slots = qed.properties.int(default=None)
+    slots.doc = "the most entries to hold; left unset, a quarter of the process's descriptor ceiling"
+
     # interface
     def census(self) -> str:
         """
         Describe what i am holding, in one line
 
         Each entry is a payload parked in a file that stays open for as long as i keep it, so
-        my size is measured in descriptors as well as bytes -- and only the bytes are budgeted.
-        A run of small tiles can therefore exhaust a process's descriptors long before it comes
-        anywhere near the capacity that is supposed to bound me, which is worth being able to
-        see rather than deduce
+        my size is measured in descriptors as well as bytes, and both are budgeted: a run of
+        small tiles would otherwise exhaust a process's descriptors long before it came
+        anywhere near the capacity in bytes, which is worth being able to see rather than deduce
         """
-        # report the population, what it weighs against its budget, and how it is doing
+        # report the population against both budgets, and how i am doing
         return (
-            f"{len(self.entries)} entries, "
+            f"{len(self.entries)} of {self.limit} entries, "
             f"{self.held / (1024 * 1024):.1f}MB of {self.capacity / (1024 * 1024):.0f}MB, "
             f"{self.hits} hits {self.misses} misses"
         )
@@ -91,8 +94,10 @@ class Cache(qed.component, family="qed.nexus.caches.tile"):
         self.entries[task] = spool
         # and adjust the books
         self.held += spool.size
-        # while the budget is exceeded
-        while self.held > self.capacity and self.entries:
+        # while either budget is exceeded, the bytes or the descriptors
+        while (
+            self.held > self.capacity or len(self.entries) > self.limit
+        ) and self.entries:
             # evict the least recently used entry
             victim, evicted = self.entries.popitem(last=False)
             # adjust the books
@@ -140,6 +145,11 @@ class Cache(qed.component, family="qed.nexus.caches.tile"):
         self.entries = collections.OrderedDict()
         # the total payload size on hand
         self.held = 0
+        # the most entries i may hold: what i was told, or a quarter of the descriptors this
+        # process may have, since every entry holds one and the rest of the process needs
+        # the others; measured now, after the server has asked for its ceiling
+        ceiling, _ = resource.getrlimit(resource.RLIMIT_NOFILE)
+        self.limit = self.slots if self.slots is not None else max(ceiling // 4, 16)
         # the service statistics
         self.hits = 0
         self.misses = 0
