@@ -24,6 +24,10 @@ from .controllers.ViewRangeReset import ViewRangeReset
 from .controllers.ViewValueReset import ViewValueReset
 from .controllers.ViewRangeUpdate import ViewRangeUpdate
 from .controllers.ViewValueUpdate import ViewValueUpdate
+from .controllers.ViewRangeResize import ViewRangeResize
+from .controllers.ViewValueResize import ViewValueResize
+from .controllers.ViewRangeAutoSet import ViewRangeAutoSet
+from .controllers.ViewValueAutoSet import ViewValueAutoSet
 
 
 # the mutation anchor
@@ -87,6 +91,14 @@ class Mutation(graphene.ObjectType):
     # updates to viz controllers
     viewRangeUpdate = ViewRangeUpdate.Field()
     viewValueUpdate = ViewValueUpdate.Field()
+
+    # hand edits of the display bounds of viz controllers
+    viewRangeResize = ViewRangeResize.Field()
+    viewValueResize = ViewValueResize.Field()
+
+    # pinning and releasing viz controllers
+    viewRangeAutoSet = ViewRangeAutoSet.Field()
+    viewValueAutoSet = ViewValueAutoSet.Field()
 
     # resetting of viz controller state
     viewRangeReset = ViewRangeReset.Field()

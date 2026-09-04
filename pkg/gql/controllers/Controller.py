@@ -18,6 +18,7 @@ class Controller(graphene.Interface):
     id = graphene.ID()
     dirty = graphene.Boolean()
     slot = graphene.String()
+    auto = graphene.Boolean()
     min = graphene.Float()
     max = graphene.Float()
 
