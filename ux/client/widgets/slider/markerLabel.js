@@ -15,19 +15,27 @@ import { theme } from "~/palette"
 // local
 // hooks
 import { useConfig } from './useConfig'
+import { useEditor } from './useEditor'
 
 
-// render a single label at the marker position
-export const MarkerLabel = ({ value }) => {
+// render the label of a marker; when the slider is {editable}, a double click on the label
+// opens an editor over it that lets the user type the pick, with {check} accepting a candidate
+// and {commit} sending an accepted one
+export const MarkerLabel = ({ value, name = null, check = null, commit = null }) => {
     // unpack the geometry
-    const { enabled, markers, markerLabelPosition, markerPrecision } = useConfig()
+    const { enabled, markers, markerLabelPosition, markerPrecision, editable } = useConfig()
+    // i can be edited when the client asked for it and told me how
+    const active = editable && enabled && name !== null && check !== null && commit !== null
+    // set up the editor
+    const { node, editing, open, editor } = useEditor({
+        name: `${name} value`, end: "value", value: value ?? 0, check, commit, fontSize,
+    })
 
     // if the client does not want the value label
     if (!markers) {
         // bail
         return null
     }
-
     // if there is no value to show, there is nothing to label
     if (value == null) {
         // so render nothing
@@ -36,23 +44,44 @@ export const MarkerLabel = ({ value }) => {
 
     // pick an implementation based on my state
     const Label = enabled ? Enabled : Disabled
+    // set up my behaviors
+    const behaviors = {}
+    // when i can be edited
+    if (active) {
+        // on double click, open the editor over me
+        behaviors["onDoubleClick"] = open
+        // tag me so drivers can find the affordance
+        behaviors["data-pyre-widget"] = "slider"
+        behaviors["data-pyre-widget-part"] = "pick"
+        behaviors["data-pyre-pick"] = name
+    }
 
-    // render
+    // render; while the editor is up, the label goes invisible so it does not show through
     return (
-        <Label {...markerLabelPosition(value)} >
-            {value.toFixed(markerPrecision)}
-        </Label>
+        <>
+            <Label ref={node} {...markerLabelPosition(value)} {...behaviors}
+                visibility={editing ? "hidden" : "visible"}
+            >
+                {value.toFixed(markerPrecision)}
+            </Label>
+            {editor}
+        </>
     )
 }
+
+
+// the font size of a marker label, in intrinsic units
+const fontSize = 28
 
 
 // styling
 // the base
 const Base = styled.text`
     font-family: inconsolata;
-    font-size: 28px;
+    font-size: ${fontSize}px;
     text-anchor: middle;
     cursor: default;
+    user-select: none;
 `
 
 
@@ -62,7 +91,17 @@ const Disabled = styled(Base)`
 
 
 const Enabled = styled(Base)`
-    fill: ${props => theme.page.normal};
+    & {
+        fill: ${props => theme.page.normal};
+    }
+
+    &[data-pyre-widget-part="pick"] {
+        cursor: text;
+    }
+
+    &[data-pyre-widget-part="pick"]:hover {
+        fill: ${props => theme.page.highlight};
+    }
 `
 
 

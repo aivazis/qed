@@ -16,6 +16,10 @@ import type { Page } from "@playwright/test"
 // committed extent pins the controller, and the lock button on the header releases it. the server
 // refuses an extent that encroaches on the picks; the field shows the refusal and closes on escape
 
+// the marker label of {slot} that edits the pick named {name}
+const pickLabel = (page: Page, slot: string, name: string) =>
+    page.locator(`[data-qed-control="${slot}"] [data-pyre-widget-part="pick"][data-pyre-pick="${name}"]`)
+
 // the end label of {slot} that edits the {end} of its extent
 const endLabel = (page: Page, slot: string, end: "min" | "max") =>
     page.locator(`[data-qed-control="${slot}"] [data-pyre-widget-part="bound"][data-pyre-bound="${end}"]`)
@@ -103,6 +107,59 @@ test.describe.serial("a controller's display bounds are editable by hand", () =>
 
         // restore
         await page.evaluate(slot => window.qed.range.reset(slot), slot)
+    })
+
+    test("typing a pick into a marker label reaches the server without pinning the controller", async ({ page, context }) => {
+        const driver = page
+        const observer = await context.newPage()
+        for (const client of [driver, observer]) {
+            await client.goto("/controls", { waitUntil: "load" })
+            await client.waitForFunction(() => Boolean(window.qed))
+        }
+
+        // the range controller of the active channel
+        const range = (await driver.evaluate(() => window.qed.controllers()))
+            .find(controller => controller.kind === "range")
+        test.skip(!range, "the active channel exposes no range controller")
+        const { slot, min, max, auto } = range!
+        const quarter = (max - min) / 4
+        // park the picks at known places
+        await driver.evaluate(
+            ([slot, picks]) => window.qed.range.update(slot, picks),
+            [slot, { min, low: min + quarter, high: max - quarter, max }] as const,
+        )
+
+        // a double click on the low marker label opens the editor over it
+        await pickLabel(driver, slot, `${slot} low`).dblclick()
+        const field = driver.getByRole("textbox", { name: `${slot} low value` })
+        await field.waitFor()
+        // seeded with the pick
+        expect(Number(await field.inputValue())).toBeCloseTo(min + quarter, 3)
+        // a pick below the lower limit is flagged before it is sent
+        await field.fill(String(min - quarter))
+        await expect(field).toHaveAttribute("aria-invalid", "true")
+        // a pick inside the limits is not
+        const low = min + quarter / 2
+        await field.fill(String(low))
+        await expect(field).toHaveAttribute("aria-invalid", "false")
+        // commit
+        await field.press("Enter")
+        await expect(field).toHaveCount(0)
+        // the driver's thumb moves
+        await expect.poll(async () =>
+            Number(await driver.getByRole("slider", { name: `${slot} low` }).getAttribute("aria-valuenow"))
+        ).toBeCloseTo(low, 3)
+        // and so does the observer's, which proves the pick reached the server
+        await expect.poll(async () =>
+            Number(await observer.getByRole("slider", { name: `${slot} low` }).getAttribute("aria-valuenow")),
+            { timeout: 15_000 },
+        ).toBeCloseTo(low, 3)
+        // a typed pick is not a hand edit of the bounds, so the flag is untouched
+        expect((await driver.evaluate(() => window.qed.controllers())).find(c => c.slot === slot)!.auto).toBe(auto)
+
+        // restore
+        await driver.evaluate(slot => window.qed.range.reset(slot), slot)
+        await observer.close()
     })
 })
 

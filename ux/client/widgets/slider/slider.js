@@ -10,6 +10,8 @@ import React from 'react'
 // locals
 // context
 import { Provider } from './context'
+// hooks
+import { useConfig } from './useConfig'
 // components
 import { Axis } from './axis'
 import { Labels } from './labels'
@@ -33,6 +35,12 @@ export const Slider = ({ value, setValue, ...config }) => {
 
 // lay out the control
 const Controller = ({ value, setValue }) => {
+    // the client names the thumb; the limits bound a typed pick
+    const { label = null, min, max } = useConfig()
+    // a typed pick may go anywhere between the limits
+    const check = candidate => candidate >= min && candidate <= max
+    // and goes straight to the client
+    const commit = candidate => setValue(candidate)
     // render; the axis, ticks, and tick labels are a decorative scale that duplicates the
     // accessible thumb (role=slider, aria-valuenow), so they are hidden from assistive tech --
     // they stay clickable for mouse users. the {Marker} thumb stays in the accessible tree.
@@ -45,7 +53,7 @@ const Controller = ({ value, setValue }) => {
                 <Labels value={value} setValue={setValue} />
             </g>
             <Marker value={value} />
-            <MarkerLabel value={value} />
+            <MarkerLabel value={value} name={label} check={check} commit={commit} />
         </Simplemat>
     )
 }
