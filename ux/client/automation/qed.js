@@ -22,6 +22,10 @@ import { useUpdateRangeControllerMutation as updateRangeControllerMutation } fro
 import { useResetRangeControllerMutation as resetRangeControllerMutation } from '~/views/viz/controls/viz/useResetRangeController'
 import { useUpdateValueControllerMutation as updateValueControllerMutation } from '~/views/viz/controls/viz/useUpdateValueController'
 import { useResetValueControllerMutation as resetValueControllerMutation } from '~/views/viz/controls/viz/useResetValueController'
+import { useResizeRangeControllerMutation as resizeRangeControllerMutation } from '~/views/viz/controls/viz/useResizeRangeController'
+import { useResizeValueControllerMutation as resizeValueControllerMutation } from '~/views/viz/controls/viz/useResizeValueController'
+import { useAutoRangeControllerMutation as autoRangeControllerMutation } from '~/views/viz/controls/viz/useAutoRangeController'
+import { useAutoValueControllerMutation as autoValueControllerMutation } from '~/views/viz/controls/viz/useAutoValueController'
 import { useAnchorAddMutation as anchorAddMutation } from '~/views/viz/measure/useAnchorAdd'
 import { useAnchorPlaceMutation as anchorPlaceMutation } from '~/views/viz/measure/useAnchorPlace'
 import { useAnchorSplitMutation as anchorSplitMutation } from '~/views/viz/measure/useAnchorSplit'
@@ -105,7 +109,7 @@ const readersQuery = graphql`
 const controllersQuery = graphql`
     query qedControllersQuery {
         qed {
-            views { channel { controllers { __typename slot min max } } }
+            views { channel { controllers { __typename slot auto min max } } }
         }
     }
 `
@@ -172,12 +176,13 @@ export const makeQED = () => ({
     },
 
     // the colour-stretch controllers on {viewport}'s channel: each one's kind (range|value), slot,
-    // and bounds, so a driver picks one by kind and feeds it to {range}/{value}
+    // whether it follows the data statistics ({auto}) or is pinned, and bounds, so a driver picks
+    // one by kind and feeds it to {range}/{value}
     controllers: async (viewport = getActiveViewport()) => {
         const { qed } = await read(controllersQuery)
         return (qed.views[viewport]?.channel?.controllers ?? []).map(controller => ({
             kind: controller.__typename.replace(/Controller$/, "").toLowerCase(),
-            slot: controller.slot, min: controller.min, max: controller.max,
+            slot: controller.slot, auto: controller.auto, min: controller.min, max: controller.max,
         }))
     },
 
@@ -305,6 +310,16 @@ export const makeQED = () => ({
         reset: async (controller, channel, viewport = getActiveViewport()) =>
             command(resetRangeControllerMutation,
                 { viewport, channel: channel ?? await channelOf(viewport), controller }),
+        // set the display bounds {min,max} by hand; they must leave {low,high} in place, so the
+        // pixels never change, and the edit pins the controller against statistics
+        resize: async (controller, { min, max }, channel, viewport = getActiveViewport()) =>
+            command(resizeRangeControllerMutation,
+                { viewport, channel: channel ?? await channelOf(viewport), controller, min, max }),
+        // pin the controller ({auto} false) or release it to follow the data statistics ({auto}
+        // true); a released controller stretches its bounds to the statistics accumulated so far
+        setAuto: async (controller, auto, channel, viewport = getActiveViewport()) =>
+            command(autoRangeControllerMutation,
+                { viewport, channel: channel ?? await channelOf(viewport), controller, auto }),
     },
 
     // the colour-stretch value controller of a {channel}; the bounds are {min,value,max}
@@ -315,6 +330,16 @@ export const makeQED = () => ({
         reset: async (controller, channel, viewport = getActiveViewport()) =>
             command(resetValueControllerMutation,
                 { viewport, channel: channel ?? await channelOf(viewport), controller }),
+        // set the display bounds {min,max} by hand; they must leave {value} in place, so the
+        // pixels never change, and the edit pins the controller against statistics
+        resize: async (controller, { min, max }, channel, viewport = getActiveViewport()) =>
+            command(resizeValueControllerMutation,
+                { viewport, channel: channel ?? await channelOf(viewport), controller, min, max }),
+        // pin the controller ({auto} false) or release it to follow the data statistics ({auto}
+        // true); a released controller stretches its bounds to the statistics accumulated so far
+        setAuto: async (controller, auto, channel, viewport = getActiveViewport()) =>
+            command(autoValueControllerMutation,
+                { viewport, channel: channel ?? await channelOf(viewport), controller, auto }),
     },
 })
 

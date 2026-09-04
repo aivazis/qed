@@ -48,7 +48,7 @@ window.qed = {
   },
   viewports() → [state, …],                      // every viewport, for split layouts
   readers()   → [{ name, selectors:{axis:[…]} }],// the reader catalog
-  controllers(viewport?) → [{ kind, slot, min, max }], // colour-stretch controllers; kind = range|value
+  controllers(viewport?) → [{ kind, slot, auto, min, max }], // colour-stretch controllers; kind = range|value; auto = follows the data
 
   // --- commands: act without synthesizing clicks ---
   selectReader(reader, viewport?),
@@ -64,8 +64,16 @@ window.qed = {
     toggleClosedPath(viewport?),
     toggleSelection(handle, viewport?), toggleSelectionMulti(handle, viewport?), extendSelection(handle, viewport?),
   },
-  range: { update(controller, {min,low,high,max}, channel?, viewport?), reset(controller, channel?, viewport?) },
-  value: { update(controller, {min,value,max}, channel?, viewport?), reset(controller, channel?, viewport?) },
+  range: {
+    update(controller, {min,low,high,max}, channel?, viewport?), reset(controller, channel?, viewport?),
+    resize(controller, {min,max}, channel?, viewport?),  // hand-set bounds; must enclose low/high; pins the controller
+    setAuto(controller, auto, channel?, viewport?),  // pin (false) or release (true); releasing widens to the accumulated statistics
+  },
+  value: {
+    update(controller, {min,value,max}, channel?, viewport?), reset(controller, channel?, viewport?),
+    resize(controller, {min,max}, channel?, viewport?),  // hand-set bounds; must enclose value; pins the controller
+    setAuto(controller, auto, channel?, viewport?),  // pin (false) or release (true); releasing widens to the accumulated statistics
+  },
   sync: {
     toggle(aspect, viewport?), toggleAll(aspect, viewport?), reset(viewport?),  // sync flags
     updateOffset(row, col, viewport?),            // the relative sync offset, in source pixels
