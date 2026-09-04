@@ -248,6 +248,28 @@ class Viewport(
         # and hand off the pair
         return view, controller
 
+    def vizResizeController(self, **kwds):
+        """
+        Set the display bounds of a controller of my active visualization pipeline
+        """
+        # get my active view
+        view = self._view
+        # resize the controller
+        controller = view.vizResizeController(**kwds)
+        # and hand off the pair
+        return view, controller
+
+    def vizSetControllerAuto(self, **kwds):
+        """
+        Set the {auto} flag of a controller of my active visualization pipeline
+        """
+        # get my active view
+        view = self._view
+        # adjust the controller
+        controller = view.vizSetControllerAuto(**kwds)
+        # and hand off the pair
+        return view, controller
+
     def lookAt(self, row, col):
         """
         Set the source pixel that sits at the center of the viewport
