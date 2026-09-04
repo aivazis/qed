@@ -73,6 +73,7 @@ mutation useResetRangeControllerMutation($input: ViewRangeResetInput!) {
         controller {
             id
             dirty
+            auto
             min
             low
             high

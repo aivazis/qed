@@ -29,6 +29,10 @@ export const Provider = ({ config, children }) => {
     const { min, max, major = [], minor = [] } = config
     // the label display precision
     const { tickPrecision = 1, markerPrecision = 1 } = config
+    // the optional hand-editable extent: accessible {names} for the two end labels, the
+    // {envelope} of the picks that the extent may never encroach on, and the {resize} callback
+    // that receives an accepted {min, max}
+    const { extent = null } = config
 
     // my unit cell, in intrinsic coordinates
     const cell = 10
@@ -207,6 +211,8 @@ export const Provider = ({ config, children }) => {
         min, max, major, minor,
         // the display precision of labels
         tickPrecision, markerPrecision,
+        // the hand-editable extent, if any
+        extent,
 
         // my unit cell
         cell,
@@ -268,6 +274,8 @@ export const Context = React.createContext(
         min: null, max: null, major: null, minor: null,
         // the display precision of labels
         tickPrecision: null, markerPrecision: null,
+        // the hand-editable extent
+        extent: null,
 
         // my unit cell
         cell: null,

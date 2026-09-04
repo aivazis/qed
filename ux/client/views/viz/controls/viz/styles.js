@@ -189,8 +189,11 @@ const save = {
 
 
 // publish
+// the pin/release toggle looks like the reset button
+const auto = reset
+
 export default {
-    reset, save,
+    reset, save, auto,
 }
 
 

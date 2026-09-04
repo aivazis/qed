@@ -93,6 +93,7 @@ mutation useUpdateRangeControllerMutation($input: ViewRangeUpdateInput!) {
         controller {
             id
             dirty
+            auto
             min
             low
             high
