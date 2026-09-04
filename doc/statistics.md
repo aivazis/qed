@@ -163,9 +163,12 @@ These are the rules the current code enforces, and that any change must preserve
    controllers and excluded from the identity harvest, so widening them never invalidates
    cached work and never rolls a session. `widen` only ever expands, never touches picks,
    and preserves the `dirty` flag — `dirty` is harvested, so flipping it would also perturb
-   identity.
+   identity. The `auto` flag is `cosmetic` too: pinning a controller or releasing it changes
+   what statistics may do later, not the pixels, so it leaves identities alone as well.
 3. **Pinned controllers never move.** `auto: no` gates both `autotune` and `widen`; the test
-   fixtures pin their pipelines for determinism and rely on this absolutely.
+   fixtures pin their pipelines for determinism and rely on this absolutely. A hand edit of
+   the bounds pins the controller, and the lock on its header pins or releases it; releasing
+   widens to the statistics accumulated so far, since no further report may ever arrive.
 4. **The autotuners are shape-sensitive, and now guarded.** `LinearRange._autotune` and
    `LogRange._autotune` unpack a bare `(low, mean, high)`; the channel wrappers index into
    the sample, and the isce2 unwrapped flavor expects a *list of two* triples for its

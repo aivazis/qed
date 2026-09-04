@@ -71,5 +71,18 @@ assert one != tweaked
 restored = build()
 assert one == restored
 
+# the display bounds are presentation only, so moving them is the same work
+minimum = pipeline.amplitude.min
+pipeline.amplitude.min = minimum - 1.0
+reframed = build()
+pipeline.amplitude.min = minimum
+assert one == reframed
+# and so is pinning the controller, or releasing it
+auto = pipeline.amplitude.auto
+pipeline.amplitude.auto = not auto
+flipped = build()
+pipeline.amplitude.auto = auto
+assert one == flipped
+
 
 # end of file
