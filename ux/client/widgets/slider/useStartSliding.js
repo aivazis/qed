@@ -20,7 +20,9 @@ export const useStartSliding = () => {
 
     // make a handler
     const start = (id, evt) => {
-        // that sets the flag
+        // that keeps the browser from turning the drag into a native text selection
+        evt.preventDefault()
+        // sets the flag
         setSliding(id)
         // and records the raw mouse coordinates
         cursor.current = { x: evt.clientX, y: evt.clientY }
