@@ -30,6 +30,7 @@ class ValueController(graphene.ObjectType):
     dirty = graphene.Boolean()
     # payload
     slot = graphene.String()
+    auto = graphene.Boolean()
     min = graphene.Float()
     max = graphene.Float()
     value = graphene.Float()
@@ -61,6 +62,16 @@ class ValueController(graphene.ObjectType):
         controller = context["controller"]
         # easy enough
         return controller.dirty
+
+    @staticmethod
+    def resolve_auto(context, *_):
+        """
+        Check whether the controller follows the data statistics or is pinned
+        """
+        # extract the controller
+        controller = context["controller"]
+        # easy enough
+        return controller.auto
 
     @staticmethod
     def resolve_min(context, *_):
