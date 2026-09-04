@@ -163,8 +163,9 @@ class Controller(qed.component, implements=qed.protocols.controller):
     # constants
     tag = "controller"
     # traits that shape the presentation but not the rendered pixels; they are excluded from
-    # tile identities, so adjusting them does not invalidate cached work
-    cosmetic = ("min", "max")
+    # tile identities, so adjusting them does not invalidate cached work: the display bounds,
+    # and the flag that says whether statistics may move them
+    cosmetic = ("auto", "min", "max")
 
 
 # end of file
