@@ -175,7 +175,12 @@ These are the rules the current code enforces, and that any change must preserve
    line-interleaved bands. `autotune(stats=None)` is a no-op — in `Controller.autotune` for
    every leaf controller, and in the three isce2 unwrapped channels that index before
    delegating — so a dataset nobody has measured keeps its configured values instead of
-   raising. Any new shape-sensitive autotuner must carry the same guard.
+   raising. Any new shape-sensitive autotuner must carry the same guard. A sample with no
+   spread — a raster that is all zeros, or all one value — is real data, not fill, and the
+   autotuners cope with it quietly: a log range keeps its configured values, since there is
+   nothing positive to take a log of, and a linear range pretends the data spans a unit
+   interval around its value, since a range with no width cannot render. The probe warns
+   once, on `qed.readers.statistics`, that the range is a guess. This is issue #81.
 5. **`GDALBand.render` takes its range from the controller.** It used to read `self.stats`
    on every tile, which silently ignored the client's settings; it now reads `low` and
    `high` off the channel's `range` controller, which is what the worker installs the
