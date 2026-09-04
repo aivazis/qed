@@ -71,6 +71,51 @@ test.describe.serial("the window.qed contract", () => {
         await page.evaluate(slot => window.qed.range.reset(slot), slot)
     })
 
+    test("a range controller adopts hand-set bounds that enclose its picks and refuses ones that do not", async ({ page }) => {
+        // the amplitude channel (the setup default) carries a range controller
+        const range = (await page.evaluate(() => window.qed.controllers())).find(c => c.kind === "range")
+        test.skip(!range, "the active channel exposes no range controller")
+        const { slot, min, max } = range!
+        // park the picks well inside the extent
+        const quarter = (max - min) / 4
+        const picks = { min, low: min + quarter, high: max - quarter, max }
+        await page.evaluate(([slot, picks]) => window.qed.range.update(slot, picks), [slot, picks] as const)
+        // a wider extent is adopted
+        const wider = { min: min - quarter, max: max + quarter }
+        const adopted = await page.evaluate(
+            ([slot, bounds]) => window.qed.range.resize(slot, bounds),
+            [slot, wider] as const,
+        ) as { viewRangeResize: { controller: { min: number, max: number } } }
+        expect(adopted.viewRangeResize.controller.min).toBeCloseTo(wider.min, 3)
+        expect(adopted.viewRangeResize.controller.max).toBeCloseTo(wider.max, 3)
+        // an extent that encroaches on the low pick is refused by the server
+        const encroaching = { min: picks.low + quarter / 2, max }
+        await expect(page.evaluate(
+            ([slot, bounds]) => window.qed.range.resize(slot, bounds),
+            [slot, encroaching] as const,
+        )).rejects.toThrow()
+        // and the bounds stay where the adopted edit put them
+        const after = (await page.evaluate(() => window.qed.controllers())).find(c => c.slot === slot)!
+        expect(after.min).toBeCloseTo(wider.min, 3)
+        expect(after.max).toBeCloseTo(wider.max, 3)
+        // the hand edit pinned the controller
+        expect(after.auto).toBe(false)
+        // releasing it flips the flag in the payload
+        const released = await page.evaluate(
+            ([slot]) => window.qed.range.setAuto(slot, true),
+            [slot] as const,
+        ) as { viewRangeAutoSet: { controller: { auto: boolean, low: number, high: number } } }
+        expect(released.viewRangeAutoSet.controller.auto).toBe(true)
+        // and in the model, with the picks untouched
+        const model = (await page.evaluate(() => window.qed.controllers())).find(c => c.slot === slot)!
+        expect(model.auto).toBe(true)
+        // pinning it again flips it back
+        await page.evaluate(([slot]) => window.qed.range.setAuto(slot, false), [slot] as const)
+        expect((await page.evaluate(() => window.qed.controllers())).find(c => c.slot === slot)!.auto).toBe(false)
+        // restore
+        await page.evaluate(slot => window.qed.range.reset(slot), slot)
+    })
+
     test("a value controller round-trips its marker through the server", async ({ page }) => {
         // the phase channel carries value controllers (brightness/saturation)
         await page.evaluate(() => window.qed.setChannel("phase"))
