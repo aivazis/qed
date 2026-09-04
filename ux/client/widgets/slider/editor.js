@@ -13,8 +13,8 @@ import ReactDOM from 'react-dom'
 import { theme } from "~/palette"
 
 
-// a text field that takes the place of an end label while its value is being edited by hand; it
-// is portalled to the document body and pinned over {rect}, the label's rectangle on the screen,
+// a text field that takes the place of a label while its value is being edited by hand; it is
+// rendered through a portal to the document body and pinned over {rect}, the label's rectangle,
 // so it sits on top of the label regardless of how the slider is transformed. it owns its
 // contents and talks to nobody until the user commits with {Enter} or by leaving the field;
 // {Escape} gives up, and the arrow keys step the bound, committing at once since each step is a

@@ -16,6 +16,8 @@ import { theme } from "~/palette"
 // hooks
 import { useConfig } from './useConfig'
 import { useEditor } from './useEditor'
+// components
+import { Hitbox } from './hitbox'
 
 
 // render the label of a marker; when the slider is {editable}, a double click on the label
@@ -56,16 +58,33 @@ export const MarkerLabel = ({ value, name = null, check = null, commit = null })
         behaviors["data-pyre-pick"] = name
     }
 
-    // render; while the editor is up, the label goes invisible so it does not show through
+    // what i show
+    const text = value.toFixed(markerPrecision)
+    // and where
+    const position = markerLabelPosition(value)
+
+    // an editable label gets a hit box behind it, so a double click anywhere on it opens the
+    // editor; the behaviors go on the group so both the box and the text respond
+    if (active) {
+        // render; while the editor is up, the label goes invisible so it does not show through
+        return (
+            <>
+                <g {...behaviors}>
+                    <Hitbox x={position.x} y={position.y} text={text} fontSize={fontSize} />
+                    <Label ref={node} {...position} visibility={editing ? "hidden" : "visible"}>
+                        {text}
+                    </Label>
+                </g>
+                {editor}
+            </>
+        )
+    }
+
+    // render
     return (
-        <>
-            <Label ref={node} {...markerLabelPosition(value)} {...behaviors}
-                visibility={editing ? "hidden" : "visible"}
-            >
-                {value.toFixed(markerPrecision)}
-            </Label>
-            {editor}
-        </>
+        <Label ref={node} {...position}>
+            {text}
+        </Label>
     )
 }
 
@@ -95,11 +114,11 @@ const Enabled = styled(Base)`
         fill: ${props => theme.page.normal};
     }
 
-    &[data-pyre-widget-part="pick"] {
+    [data-pyre-widget-part="pick"] > & {
         cursor: text;
     }
 
-    &[data-pyre-widget-part="pick"]:hover {
+    [data-pyre-widget-part="pick"]:hover > & {
         fill: ${props => theme.page.highlight};
     }
 `

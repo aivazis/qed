@@ -16,6 +16,8 @@ import { theme } from "~/palette"
 // hooks
 import { useConfig } from './useConfig'
 import { useEditor } from './useEditor'
+// components
+import { Hitbox } from './hitbox'
 
 
 // render a single label
@@ -84,16 +86,33 @@ export const Label = ({ tick, value = null, setValue = null }) => {
         behaviors["data-pyre-bound"] = end
     }
 
-    // render; while the editor is up, the label goes invisible so it does not show through
+    // what i show
+    const text = tick.toFixed(tickPrecision)
+    // and where
+    const position = labelPosition(tick)
+
+    // an editable end gets a hit box behind it, so a double click anywhere on it opens the
+    // editor; the behaviors go on the group so both the box and the text respond
+    if (end !== null && enabled) {
+        // render; while the editor is up, the label goes invisible so it does not show through
+        return (
+            <>
+                <g {...behaviors}>
+                    <Hitbox x={position.x} y={position.y} text={text} fontSize={fontSize} />
+                    <Label ref={node} {...position} visibility={editing ? "hidden" : "visible"}>
+                        {text}
+                    </Label>
+                </g>
+                {editor}
+            </>
+        )
+    }
+
+    // render
     return (
-        <>
-            <Label ref={node} {...labelPosition(tick)} {...behaviors}
-                visibility={editing ? "hidden" : "visible"}
-            >
-                {tick.toFixed(tickPrecision)}
-            </Label>
-            {editor}
-        </>
+        <Label ref={node} {...position} {...behaviors}>
+            {text}
+        </Label>
     )
 }
 
@@ -124,7 +143,7 @@ const Enabled = styled(Base)`
         cursor: pointer;
     }
 
-    &[data-pyre-widget-part="bound"] {
+    [data-pyre-widget-part="bound"] > & {
         cursor: text;
     }
 
