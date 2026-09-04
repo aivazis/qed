@@ -33,6 +33,8 @@ export const Provider = ({ config, children }) => {
     // {envelope} of the picks that the extent may never encroach on, and the {resize} callback
     // that receives an accepted {min, max}
     const { extent = null } = config
+    // whether the marker labels edit the picks on a double click
+    const { editable = false } = config
 
     // my unit cell, in intrinsic coordinates
     const cell = 10
@@ -213,6 +215,8 @@ export const Provider = ({ config, children }) => {
         tickPrecision, markerPrecision,
         // the hand-editable extent, if any
         extent,
+        // whether the picks are hand-editable
+        editable,
 
         // my unit cell
         cell,
@@ -276,6 +280,8 @@ export const Context = React.createContext(
         tickPrecision: null, markerPrecision: null,
         // the hand-editable extent
         extent: null,
+        // whether the picks are hand-editable
+        editable: null,
 
         // my unit cell
         cell: null,

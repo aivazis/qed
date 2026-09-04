@@ -44,6 +44,9 @@ export const ValueController = ({ channel, configuration }) => {
     // true while the user is dragging THIS control; server updates are throttled, so the store
     // trails the pointer and we must not let an in-flight echo of our own edit yank the marker back
     const interacting = React.useRef(false)
+    // true while a pointer button is down anywhere; only then is an update a drag, as opposed to
+    // a pick typed into the slider, which is a single deliberate commit
+    const pressed = React.useRef(false)
 
     // adopt server-side values that arrive while we are not dragging: a reset, or -- the point of
     // live sync -- a change another client made that the server pushed to us over the event stream
@@ -66,10 +69,13 @@ export const ValueController = ({ channel, configuration }) => {
     // a drag ends when the pointer is released anywhere; clear the flag so the next server value
     // is reconciled. listen in the capture phase so a child that stops propagation cannot hide it
     React.useEffect(() => {
-        const release = () => { interacting.current = false }
+        const press = () => { pressed.current = true }
+        const release = () => { pressed.current = false; interacting.current = false }
+        window.addEventListener("pointerdown", press, true)
         window.addEventListener("pointerup", release, true)
         window.addEventListener("pointercancel", release, true)
         return () => {
+            window.removeEventListener("pointerdown", press, true)
             window.removeEventListener("pointerup", release, true)
             window.removeEventListener("pointercancel", release, true)
         }
@@ -89,8 +95,9 @@ export const ValueController = ({ channel, configuration }) => {
     // and passes it as an argument a function that expects the current value and returns
     // the updated value
     const set = value => {
-        // we are driving this control; suppress server reconciliation until the drag ends
-        interacting.current = true
+        // if a pointer is driving this control, suppress server reconciliation until the drag
+        // ends; a typed pick has no drag to protect, so the server's echo is welcome right away
+        interacting.current = pressed.current
         // store it
         setMarker(value)
         // attempt to update the server side store
@@ -141,6 +148,8 @@ export const ValueController = ({ channel, configuration }) => {
             envelope: [marker, marker],
             resize: setExtentByHand,
         },
+        // the marker labels edit the picks on a double click
+        editable: true,
         direction: "row", labels: "bottom", arrows: "top", markers: true,
         height: 100, width: 250,
     }

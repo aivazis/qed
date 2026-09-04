@@ -15,21 +15,33 @@ import { theme } from "~/palette"
 // local
 // hooks
 import { useConfig } from './useConfig'
-import { useMine } from './useMine'
-// components
-import { Editor } from './editor'
+import { useEditor } from './useEditor'
 
 
 // render a single label
 export const Label = ({ tick, value = null, setValue = null }) => {
     // unpack the geometry
     const { enabled, arrows, labels, labelPosition, tickPrecision, min, max, extent } = useConfig()
-    // and the scale, to size the editor's font like mine
-    const { ils } = useMine()
-    // a handle on my text node, to measure where i am on the screen
-    const node = React.useRef(null)
-    // the rectangle the editor is pinned over while my value is being edited; {null} otherwise
-    const [editing, setEditing] = React.useState(null)
+
+    // an end label of a slider with a hand-editable extent doubles as its editor
+    const end = extent === null ? null : (tick === min ? "min" : (tick === max ? "max" : null))
+    // unpack the extent configuration, if any
+    const { names = [], envelope = [null, null], resize = null } = extent ?? {}
+    // and the span of the picks
+    const [lowest, highest] = envelope
+    // the low end may move anywhere below the lowest pick, as long as the extent stays sane;
+    // similarly for the high end
+    const check = end === "min"
+        ? candidate => candidate < max && candidate <= lowest
+        : candidate => candidate > min && candidate >= highest
+    // committing one end keeps the other where it is
+    const commit = end === "min"
+        ? candidate => resize({ min: candidate, max })
+        : candidate => resize({ min, max: candidate })
+    // set up the editor
+    const { node, editing, open, editor } = useEditor({
+        name: names[end === "min" ? 0 : 1], end, value: tick, check, commit, fontSize,
+    })
 
     // check whether my value is the currently chosen one
     const selected = tick === value
@@ -39,8 +51,6 @@ export const Label = ({ tick, value = null, setValue = null }) => {
         return null
     }
 
-    // an end label of a slider with a hand-editable extent doubles as its editor
-    const end = extent === null ? null : (tick === min ? "min" : (tick === max ? "max" : null))
     // pick an implementation based on my state
     const Label = enabled ? (selected ? Selected : Enabled) : Disabled
 
@@ -66,63 +76,19 @@ export const Label = ({ tick, value = null, setValue = null }) => {
     }
     // when i am an editable end
     if (end !== null && enabled) {
-        // on double click, measure myself and open the editor over me
-        behaviors["onDoubleClick"] = evt => {
-            // suppress the placemat listener
-            evt.stopPropagation()
-            // and quash any side effects, e.g. text selection
-            evt.preventDefault()
-            // measure
-            const rect = node.current.getBoundingClientRect()
-            // and open the editor
-            setEditing({
-                left: rect.left, top: rect.top, width: rect.width, height: rect.height,
-            })
-            // all done
-            return
-        }
+        // on double click, open the editor over me
+        behaviors["onDoubleClick"] = open
         // tag me so drivers can find the affordance
         behaviors["data-pyre-widget"] = "slider"
         behaviors["data-pyre-widget-part"] = "bound"
         behaviors["data-pyre-bound"] = end
     }
 
-    // the editor, if open
-    let editor = null
-    // when it is
-    if (editing !== null) {
-        // unpack the extent configuration
-        const { names, envelope, resize } = extent
-        // and the span of the picks
-        const [lowest, highest] = envelope
-        // a keyboard step is one unit in the digit below the leading digit of the span, so
-        // that stepping produces round numbers at the scale of the slider
-        const span = max - min
-        const step = span > 0 ? Math.pow(10, Math.floor(Math.log10(span)) - 1) : 1
-        // the low end may move anywhere below the lowest pick, as long as the extent stays sane;
-        // similarly for the high end
-        const check = end === "min"
-            ? candidate => candidate < max && candidate <= lowest
-            : candidate => candidate > min && candidate >= highest
-        // committing one end keeps the other where it is
-        const commit = end === "min"
-            ? candidate => resize({ min: candidate, max })
-            : candidate => resize({ min, max: candidate })
-        // the editor closes by clearing the rectangle
-        const close = () => setEditing(null)
-        // build it, with a font as big as mine on the screen
-        editor = (
-            <Editor name={names[end === "min" ? 0 : 1]} end={end} value={tick} step={step}
-                check={check} commit={commit} rect={editing} fontSize={fontSize * ils} close={close}
-            />
-        )
-    }
-
     // render; while the editor is up, the label goes invisible so it does not show through
     return (
         <>
             <Label ref={node} {...labelPosition(tick)} {...behaviors}
-                visibility={editing === null ? "visible" : "hidden"}
+                visibility={editing ? "hidden" : "visible"}
             >
                 {tick.toFixed(tickPrecision)}
             </Label>

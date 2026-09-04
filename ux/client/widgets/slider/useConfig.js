@@ -19,7 +19,7 @@ export const useConfig = () => {
     const {
         enabled, label, names, direction,
         arrows, labels, markers,
-        min, max, major, minor, tickPrecision, markerPrecision, extent,
+        min, max, major, minor, tickPrecision, markerPrecision, extent, editable,
         intervalPosition,
         labelPosition, majorPosition, minorPosition, marker, markerPosition, markerLabelPosition,
     } = React.useContext(Context)
@@ -28,7 +28,7 @@ export const useConfig = () => {
     return {
         enabled, label, names, direction,
         arrows, labels, markers,
-        min, max, major, minor, tickPrecision, markerPrecision, extent,
+        min, max, major, minor, tickPrecision, markerPrecision, extent, editable,
         intervalPosition, labelPosition, majorPosition, minorPosition,
         marker, markerPosition, markerLabelPosition,
     }
