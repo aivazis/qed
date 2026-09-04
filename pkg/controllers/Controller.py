@@ -48,6 +48,66 @@ class Controller(qed.component, implements=qed.protocols.controller):
         # otherwise, let my flavor decide; it reports whether anything actually moved
         return self._widen(stats=stats)
 
+    def resize(self, *, min: float, max: float) -> bool:
+        """
+        Set my display bounds to [{min}, {max}] by hand; the new extent must leave my picks in
+        place, so the rendered pixels never change, and the edit pins me so that statistics
+        can no longer move my bounds
+        """
+        # an extent that would encroach on my picks is refused
+        if not self.accommodates(min=min, max=max):
+            # untouched
+            return False
+        # adopt the bounds
+        self.min = min
+        self.max = max
+        # a hand-set extent is pinned: neither autotune nor widen may move it from now on
+        self.auto = False
+        # report the move
+        return True
+
+    def pin(self) -> None:
+        """
+        Opt out of automatic adjustments: neither autotune nor widen may move my bounds
+        """
+        # easy enough
+        self.auto = False
+        # all done
+        return
+
+    def unpin(self, stats: tuple | None = None) -> bool:
+        """
+        Opt back into automatic adjustments and, if {stats} are on offer, stretch my bounds to
+        accommodate them right away, since no further statistics may ever arrive
+        """
+        # release the pin
+        self.auto = True
+        # without statistics, there is nothing to catch up on
+        if stats is None:
+            # so report that the bounds stayed put
+            return False
+        # otherwise, stretch, and report whether anything moved
+        return self.widen(stats=stats)
+
+    def accommodates(self, *, min: float, max: float) -> bool:
+        """
+        Check whether the extent [{min}, {max}] is well formed and leaves my picks inside it
+        """
+        # a degenerate or inverted extent is meaningless
+        if min >= max:
+            # so refuse it
+            return False
+        # get the span of my picks
+        envelope = self._envelope()
+        # a controller without picks accommodates any well formed extent
+        if envelope is None:
+            # so accept it
+            return True
+        # unpack
+        lowest, highest = envelope
+        # the extent must enclose the picks
+        return min <= lowest and highest <= max
+
     # metamethods
     def __init__(self, **kwds):
         # chain up
@@ -92,6 +152,13 @@ class Controller(qed.component, implements=qed.protocols.controller):
         """
         # by default, there is nothing to expand
         return False
+
+    def _envelope(self) -> tuple | None:
+        """
+        Report the span of my picks as a (lowest, highest) pair, or None if i have no picks
+        """
+        # by default, i have no picks for an extent to accommodate
+        return None
 
     # constants
     tag = "controller"

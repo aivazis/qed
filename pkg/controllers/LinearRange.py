@@ -98,6 +98,13 @@ class LinearRange(Controller, family="qed.controllers.linearrange"):
         # report the move
         return True
 
+    def _envelope(self) -> tuple:
+        """
+        Report the span of my picks
+        """
+        # my range is my span
+        return (self.low, self.high)
+
     # constants
     tag = "range"
 

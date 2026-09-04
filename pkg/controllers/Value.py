@@ -40,6 +40,14 @@ class Value(Controller, family="qed.controllers.value"):
         # and let the caller know
         return True
 
+    # helpers
+    def _envelope(self) -> tuple:
+        """
+        Report the span of my picks
+        """
+        # my single pick is both ends of my span
+        return (self.value, self.value)
+
     # constants
     tag = "value"
 
