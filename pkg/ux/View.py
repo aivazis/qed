@@ -474,13 +474,87 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         pipeline = self._pipelines[channel]
         # get the controller
         controller = getattr(pipeline, name)
+        # the extent rides along with the picks; collect it here
+        extent = {}
         # go through the configuration
-        for name, value in configuration.items():
-            # and adjust the controller state
-            setattr(controller, name, value)
+        for trait, value in configuration.items():
+            # setting the extent aside
+            if trait in controller.cosmetic:
+                # for after the picks have landed
+                extent[trait] = value
+                # on to the next one
+                continue
+            # and adjusting the picks
+            setattr(controller, trait, value)
+        # if the payload carries an extent
+        if extent:
+            # it must leave the picks in place, since only they shape the rendered pixels
+            if controller.accommodates(**extent):
+                # adopt it; the picks own this payload, so the extent is not a hand edit
+                # and does not pin the controller
+                for trait, value in extent.items():
+                    # one bound at a time
+                    setattr(controller, trait, value)
+            # otherwise
+            else:
+                # make a channel
+                warning = journal.warning("qed.ux.controllers")
+                # complain
+                warning.line(f"while updating '{controller.pyre_name}'")
+                warning.indent()
+                warning.line(f"ignoring the extent {extent}")
+                warning.line(f"it does not accommodate the picks")
+                warning.outdent()
+                # flush
+                warning.log()
         # grab a new session token
         self.session = uuid.uuid1()
         # all done
+        return controller
+
+    def vizResizeController(self, name, channel, min, max):
+        """
+        Set the display bounds of one of my controllers to [{min}, {max}] by hand
+        """
+        # form the name of the pipeline and look it up
+        pipeline = self._pipelines[channel]
+        # get the controller
+        controller = getattr(pipeline, name)
+        # ask it to adopt the extent, which pins it
+        if not controller.resize(min=min, max=max):
+            # if it refused, make a channel
+            error = journal.error("qed.ux.controllers")
+            # complain
+            error.line(f"while resizing '{controller.pyre_name}'")
+            error.indent()
+            error.line(f"the extent [{min}, {max}] does not accommodate the picks")
+            error.line(f"or is not well formed")
+            error.outdent()
+            # flush; the error is fatal and reaches the client as a failed mutation
+            error.log()
+            # bail, in case the channel has been muted
+            return controller
+        # the rendered pixels are unchanged, so the session token stays put
+        return controller
+
+    def vizSetControllerAuto(self, name, channel, auto, stats=None):
+        """
+        Set the {auto} flag of one of my controllers; a released controller catches up with
+        {stats}, the accumulated statistics of my dataset, if any
+        """
+        # form the name of the pipeline and look it up
+        pipeline = self._pipelines[channel]
+        # get the controller
+        controller = getattr(pipeline, name)
+        # if the flag is being cleared
+        if not auto:
+            # pin the controller
+            controller.pin()
+        # otherwise
+        else:
+            # release it and let it catch up with the data
+            controller.unpin(stats=stats)
+        # the picks are untouched either way, so the session token stays put
         return controller
 
     def zoomSetLevel(self, horizontal, vertical):

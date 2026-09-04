@@ -818,6 +818,29 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # and delegate
         return port.vizUpdateController(**kwds)
 
+    def vizResizeController(self, viewport, **kwds):
+        """
+        Set the display bounds of a viz pipeline controller by hand
+        """
+        # get the {viewport} configuration
+        port = self._viewports[viewport]
+        # and delegate
+        return port.vizResizeController(**kwds)
+
+    def vizSetControllerAuto(self, viewport, auto, **kwds):
+        """
+        Set the {auto} flag of a viz pipeline controller; a released controller catches up
+        with whatever statistics have accumulated for its dataset
+        """
+        # get the {viewport} configuration
+        port = self._viewports[viewport]
+        # look up the accumulated statistics of the dataset on display
+        sample = self.statistics(name=port.view().dataset.pyre_name)
+        # reduce them to the triple the controllers understand, if there are any
+        stats = None if sample is None else (sample.min, sample.mean, sample.max)
+        # and delegate
+        return port.vizSetControllerAuto(auto=auto, stats=stats, **kwds)
+
     def lookAt(self, viewport, row, col):
         """
         Set the source pixel at the center of {viewport}
