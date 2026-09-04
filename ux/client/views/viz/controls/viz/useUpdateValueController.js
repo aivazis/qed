@@ -93,6 +93,7 @@ mutation useUpdateValueControllerMutation($input: ViewValueUpdateInput!) {
         controller {
             id
             dirty
+            auto
             min
             value
             max

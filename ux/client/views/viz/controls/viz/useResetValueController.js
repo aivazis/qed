@@ -73,6 +73,7 @@ mutation useResetValueControllerMutation($input: ViewValueResetInput!) {
         controller {
             id
             dirty
+            auto
             min
             value
             max

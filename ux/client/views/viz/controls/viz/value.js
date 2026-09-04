@@ -20,7 +20,10 @@ import { theme } from "~/palette"
 import { useViewports } from '~/views/viz'
 import { useResetValueController } from './useResetValueController'
 import { useUpdateValueController } from './useUpdateValueController'
+import { useResizeValueController } from './useResizeValueController'
+import { useAutoValueController } from './useAutoValueController'
 // components
+import { Auto } from './auto'
 import { Reset } from './reset'
 import { Save } from './save'
 
@@ -29,7 +32,7 @@ import { Save } from './save'
 export const ValueController = ({ channel, configuration }) => {
     // unpack the controller configuration
     const {
-        slot, dirty, min, value, max,
+        slot, dirty, auto, min, value, max,
     } = useFragment(valueVizGetControllerStateFragment, configuration)
     // get the active viewport
     const { activeViewport } = useViewports()
@@ -76,6 +79,10 @@ export const ValueController = ({ channel, configuration }) => {
     const { reset: defaults } = useResetValueController({ viewport: activeViewport, channel })
     // build the update handler
     const { update } = useUpdateValueController({ viewport: activeViewport, channel })
+    // build the resize handler, for hand edits of the display bounds
+    const { resize } = useResizeValueController({ viewport: activeViewport, channel })
+    // and the pin/release handler
+    const { setAuto } = useAutoValueController({ viewport: activeViewport, channel })
 
     // the handler that sets the controller state
     // this is built in the style of {react} state updates: the controller invokes this
@@ -102,6 +109,21 @@ export const ValueController = ({ channel, configuration }) => {
     const save = () => {
         console.log(`viz.value: saving`)
     }
+    // the handler that sets the display bounds by hand; the server refuses an extent that
+    // encroaches on the picks, so the field simply snaps back to the bounds on record
+    const setExtentByHand = bounds => {
+        // send it
+        resize({ controller: slot, extent: bounds })
+        // all done
+        return
+    }
+    // the handler that pins the controller or releases it to follow the data
+    const setAutoFlag = flag => {
+        // send it
+        setAuto({ controller: slot, auto: flag })
+        // all done
+        return
+    }
 
     // set up the tick marks
     const major = [min, (min + max) / 2, max]
@@ -112,6 +134,13 @@ export const ValueController = ({ channel, configuration }) => {
         // name the single thumb after the server controller {slot}, so it is uniquely addressable
         label: slot,
         min, max, major,
+        // the end labels edit the extent on a double click; the bounds may never encroach on
+        // the picks, and an accepted extent goes to the server
+        extent: {
+            names: [`${slot} min`, `${slot} max`],
+            envelope: [marker, marker],
+            resize: setExtentByHand,
+        },
         direction: "row", labels: "bottom", arrows: "top", markers: true,
         height: 100, width: 250,
     }
@@ -122,6 +151,7 @@ export const ValueController = ({ channel, configuration }) => {
             <Header>
                 <Title>{slot}</Title>
                 <Spacer />
+                <Auto slot={slot} auto={auto} setAuto={setAutoFlag} />
                 <Save save={save} enabled={false} />
                 <Reset reset={reset} enabled={dirty} />
             </Header>
@@ -169,6 +199,7 @@ const valueVizGetControllerStateFragment = graphql`
     fragment valueVizGetControllerStateFragment on Controller {
         slot
         dirty
+        auto
         min
         max
         ... on ValueController {

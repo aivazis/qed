@@ -23,6 +23,8 @@ export default {
         // stroke
         stroke: ink,
         strokeWidth: 1,
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
         // fill
         fill: "none",
     },
