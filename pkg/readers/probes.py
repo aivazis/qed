@@ -74,7 +74,23 @@ def probe(dataset, stops: int = 4) -> tuple:
         # linear channel cannot render without one
         return 0.0, 0.5, 1.0
 
-    # otherwise, report what the windows found
+    # a raster whose every sampled cell holds the same value, e.g. one that is all zeros,
+    # has data but no spread; the controllers cope, but the user should know the range is a
+    # guess, just as for a raster that holds nothing at all
+    if low == high:
+        # make a channel
+        channel = journal.warning("qed.readers.statistics")
+        # complain
+        channel.line(f"found no spread in '{dataset.pyre_name}'")
+        channel.line(
+            f"sampled {len(origins)} windows of {span} across an extent of {shape}"
+        )
+        channel.line(f"and every cell that held data held {low}")
+        channel.line(f"the display range is a guess until a tile finds something else")
+        # flush
+        channel.log()
+
+    # report what the windows found
     return low, total / cells, high
 
 
