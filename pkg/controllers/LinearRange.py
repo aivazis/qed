@@ -53,6 +53,15 @@ class LinearRange(Controller, family="qed.controllers.linearrange"):
         low, mean, high = stats
         # compute the spread
         spread = high - low
+        # a sample with no spread, e.g. one taken from a raster that is all zeros, would
+        # collapse the picks onto each other and the bounds onto the picks, and a range with
+        # no width cannot render; pretend the data spans a unit interval around its value
+        if spread <= 0:
+            # a unit wide
+            spread = 1.0
+            # centered on the value
+            low = mean - spread / 2
+            high = mean + spread / 2
 
         # set the initial guess for the low value
         self.low = low

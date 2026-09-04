@@ -55,9 +55,15 @@ class LogRange(Controller, family="qed.controllers.logrange"):
 
         # unpack the stats
         low, mean, high = stats
-        # if low is too small
-        if low / high < 1e-3:
-            # adjust it
+        # a sample with nothing positive in it, e.g. one taken from a raster that is all
+        # zeros, has nothing to teach a log scale; the configured values stay in place, and
+        # the accumulated statistics will widen the bounds if a tile ever finds something
+        if high <= 0:
+            # so leave things alone
+            return
+        # protect the low end from zeros and excessive dynamic range
+        if low <= 0 or low / high < 1e-3:
+            # by clipping it
             low = high / 1e3
 
         # we want to be conservative, as this logic is only supposed to make sure that
