@@ -13,6 +13,7 @@ export { Activity } from './activity'
 
 // activities
 export { About } from './about'
+export { Console } from './console'
 export { Controls } from './controls'
 export { Data } from './data'
 export { Explore } from './explore'
