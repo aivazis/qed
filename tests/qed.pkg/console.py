@@ -14,6 +14,7 @@ its own way when the hub speaks up
 # externals
 import json
 import os
+import socket
 
 # support
 import pyre
@@ -149,9 +150,11 @@ debug.log("three")
 assert mirror.calls == [("alert", ["one"]), ("alert", ["two"]), ("memo", ["three"])]
 # the history has them
 assert [record.page for record in device.history] == [["one"], ["two"], ["three"]]
-# stamped by me
-assert all(record.pid == os.getpid() for record in device.history)
-assert [record.seq for record in device.history] == [1, 2, 3]
+# stamped by me: the origin is in the notes
+assert all(record.notes["pid"] == str(os.getpid()) for record in device.history)
+assert all(record.notes["host"] == socket.gethostname() for record in device.history)
+assert all(float(record.notes["time"]) > 0 for record in device.history)
+assert [record.notes["seq"] for record in device.history] == ["1", "2", "3"]
 # the channels were noted
 assert device.channels == {("info", name), ("warning", name), ("debug", name)}
 # they are waiting to go out
@@ -167,44 +170,46 @@ assert len(server.hub.published) == 1
 frame, topic, coalesce = server.hub.published[0]
 assert topic == "journal"
 assert coalesce is False
-# carrying the three records
+# carrying the three records, as page and notes
 records = unpack(frame)
 assert [record["page"] for record in records] == [["one"], ["two"], ["three"]]
-assert [record["seq"] for record in records] == [1, 2, 3]
-assert records[0]["sink"] == "alert"
-assert records[2]["sink"] == "memo"
+assert [record["notes"]["seq"] for record in records] == ["1", "2", "3"]
+assert records[0]["notes"]["severity"] == "info"
+assert records[2]["notes"]["severity"] == "debug"
 assert records[0]["notes"]["channel"] == name
+assert set(records[0]) == {"journal", "page", "notes"}
 # the queue is empty and the alarm is spent
 assert device.pending == []
 assert not device.armed
 
-# a record from a crew member, replayed the way the nexus does it
-foreign = journal.record(
-    sink="alert",
-    page=["from a worker"],
-    notes={"channel": name, "severity": "info", "application": "qed"},
-    seq=5,
-    pid=99,
-    time=12.5,
-)
-journal.replay(record=foreign)
-# it is in the history, with the origin lifted into the envelope
+# a record from a crew member, replayed the way the nexus does it, with the origin its
+# courier stamped
+stamped = {
+    "channel": name,
+    "severity": "info",
+    "application": "qed",
+    "pid": "99",
+    "seq": "5",
+    "time": "12.5",
+    "host": "afar",
+}
+journal.replay(record=journal.record(page=["from a worker"], notes=stamped))
+# it is in the history, with the notes exactly as the worker's courier shipped them
 record = device.history[-1]
 assert record.page == ["from a worker"]
-assert record.pid == 99
-assert record.seq == 5
-assert record.time == 12.5
-# and the notes as the worker flushed them, without the copies
-assert record.notes == {"channel": name, "severity": "info", "application": "qed"}
+assert record.notes == stamped
 # my own sequence did not move
 assert device.seq == 3
 
-# a user note that happens to be named like an origin field is left alone
-journal.info(name).log("mine", pid="not a number", seq="x", time="now")
+# an entry that says where it came from but not when is filled in, not overwritten
+journal.info(name).log("mine", pid="77", seq="9")
 record = device.history[-1]
-assert record.pid == os.getpid()
-assert record.seq == 4
-assert record.notes["pid"] == "not a number"
+assert record.notes["pid"] == "77"
+assert record.notes["seq"] == "9"
+assert float(record.notes["time"]) > 0
+assert record.notes["host"] == socket.gethostname()
+# and my own sequence still did not move
+assert device.seq == 3
 
 # the history is bounded
 journal.info(name).log("five")
@@ -212,6 +217,7 @@ journal.info(name).log("six")
 assert len(device.history) == 4
 assert device.history[0].page == ["from a worker"]
 assert device.history[-1].page == ["six"]
+assert device.history[-1].notes["seq"] == "5"
 # and a newcomer is opened with all of it
 assert [record["page"] for record in unpack(device.opening())] == [
     ["from a worker"],
