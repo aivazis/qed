@@ -40,6 +40,16 @@ class Server(http, family="qed.nexus.servers.http"):
     descriptors = pyre.properties.int(default=None)
     descriptors.doc = "the descriptor ceiling to ask for at startup; left unset, as many as the system allows"
 
+    history = pyre.properties.int(default=2048)
+    history.doc = (
+        "how many journal records to keep for clients that open the console late"
+    )
+
+    latency = pyre.properties.dimensional(default=0.1 * second)
+    latency.doc = (
+        "how long journal records accumulate before going out to clients as a batch"
+    )
+
     # protocol obligations
     @pyre.export(tip="register this service with the nexus")
     def activate(self, app, dispatcher):
@@ -55,6 +65,10 @@ class Server(http, family="qed.nexus.servers.http"):
         # is built: every cached tile, every crew channel, and every client connection is
         # one, and a shell's default ceiling is a few hundred
         self._widen()
+        # from here on, everything said to the journal also reaches the browser: install the
+        # device that records and publishes entries, with the terminal as its mirror, before
+        # the fleet is built, so the crews inherit it and their replayed entries land on it
+        self._listen()
         # start the heartbeat. it is the one instrument that tells a server whose loop has
         # died apart from one whose loop is turning while the work sits still: if the beats
         # stop, the loop is gone; if they keep coming while requests go unanswered, the loop
@@ -91,6 +105,25 @@ class Server(http, family="qed.nexus.servers.http"):
         return
 
     # implementation details
+    def _listen(self):
+        """
+        Install the journal device that keeps a history and publishes entries to live clients
+        """
+        # the device that reaches the browser; imported here to keep the ux package out of
+        # this module's dependencies until it is needed
+        from ..ux.Journal import Journal
+
+        # the device the journal has been writing to, typically the terminal
+        terminal = journal.chronicler.device
+        # build mine, with the terminal as its mirror
+        self.journal = Journal(
+            server=self, mirror=terminal, capacity=self.history, latency=self.latency
+        )
+        # and make it the default device
+        journal.chronicler.device = self.journal
+        # all done
+        return
+
     def _widen(self) -> int:
         """
         Raise the ceiling on the descriptors this process may hold, as far as the system
@@ -243,12 +276,17 @@ class Server(http, family="qed.nexus.servers.http"):
             # since the {stop} url exits by raising {SystemExit} without visiting the orderly
             # shutdown path
             self.fleet.disband()
+        # if my journal device was installed
+        if self.journal is not None:
+            # give the journal back to the terminal
+            journal.chronicler.device = self.journal.mirror
         # chain up
         return super().shutdown()
 
     # implementation details
     # private data
     fleet = None  # the manager of the tile rendering teams, built at activation
+    journal = None  # the device that records and publishes journal entries, installed at activation
     _changeFrame = None  # the constant change notification frame, built on first use
     _app = (
         None  # the application, held so the heartbeat can describe what it is carrying
