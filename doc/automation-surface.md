@@ -78,8 +78,18 @@ window.qed = {
     toggle(aspect, viewport?), toggleAll(aspect, viewport?), reset(viewport?),  // sync flags
     updateOffset(row, col, viewport?),            // the relative sync offset, in source pixels
   },
+  journal: {
+    entries() → [{ seq, pid, time, sink, page:[…], notes:{channel, severity, …} }],  // the console's buffer
+    live() → bool,                                  // whether the journal stream is open
+    clear(),                                        // empty the buffer, and nothing else
+  },
 }
 ```
+
+The `journal` namespace reads the buffer the console panel renders, not the server: the buffer
+fills only while the console is mounted, since that is what keeps the `/journal` stream open, and
+it is opened with the server's history. A driver that wants to hear the server navigates to
+`/console` first; see `doc/console.md`.
 
 The visible window (the rendered viewport's origin and shape in source pixels) is **not** in
 `state()`; it is published by the markup as `data-qed-view-origin` / `data-qed-view-shape` on the
