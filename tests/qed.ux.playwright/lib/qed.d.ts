@@ -8,13 +8,10 @@
 // ambient typing for the {window.qed} automation facade (doc/automation-surface.md), so specs and
 // agents that drive the app through it get completion. coordinates are row-major source pixels
 
-// a journal record, as the server publishes it: the envelope, the page, and the notes
+// a journal record, as the server publishes it: the page and the notes, which carry the
+// channel, the severity, the location, and the origin (pid, seq, time, host)
 type QEDJournalRecord = {
     journal: number
-    seq: number
-    pid: number
-    time: number
-    sink: "alert" | "memo" | "help"
     page: string[]
     notes: Record<string, string>
     key: number

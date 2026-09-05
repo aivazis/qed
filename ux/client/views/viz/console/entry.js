@@ -17,7 +17,9 @@ import styles from './styles'
 
 
 // the notes that are shown in their own slots rather than listed
-const shown = new Set(["channel", "severity", "application", "filename", "line", "function"])
+const shown = new Set([
+    "channel", "severity", "application", "filename", "line", "function", "pid", "seq", "time", "host",
+])
 
 // render the time of a record
 const clock = time => {
@@ -36,7 +38,7 @@ export const Entry = ({ record }) => {
     // flip
     const toggle = () => setExpanded(!expanded)
     // unpack
-    const { page, notes, pid, time } = record
+    const { page, notes } = record
     // the severity and the channel
     const severity = notes.severity ?? "info"
     const channel = notes.channel ?? ""
@@ -65,8 +67,9 @@ export const Entry = ({ record }) => {
                 <Details>
                     {rest.map((line, index) => <Text key={index}>{line}</Text>)}
                     <Meta>
-                        <Field>{clock(time)}</Field>
-                        <Field>pid {pid}</Field>
+                        {notes.time && <Field>{clock(Number(notes.time))}</Field>}
+                        {notes.pid && <Field>pid {notes.pid}</Field>}
+                        {notes.host && <Field>{notes.host}</Field>}
                         {notes.filename && (
                             <Field title={notes.filename}>
                                 {notes.filename.split("/").pop()}:{notes.line} in {notes.function}
