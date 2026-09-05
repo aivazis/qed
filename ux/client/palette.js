@@ -31,14 +31,14 @@ const wheel = {
         orange: "hsl(31deg, 80%, 58%)",
     },
 
-    // journal colors, by severity
+    // journal colors, by severity: the x11 colors of the journal's dark terminal palette
     journal: {
-        debug: "hsl(0deg, 0%, 40%)",
-        firewall: "hsl(300deg, 70%, 55%)",
-        info: "hsl(203deg, 60%, 55%)",
-        warning: "hsl(31deg, 80%, 58%)",
-        error: "hsl(0deg, 90%, 50%)",
-        help: "hsl(63deg, 40%, 50%)",
+        debug: "#6495ed", // cornflower blue
+        firewall: "#ff00ff", // fuchsia
+        info: "#228b22", // forest green
+        warning: "#ffa500", // orange
+        error: "#ff0000", // red
+        help: "#00ffff", // cyan
     }
 }
 

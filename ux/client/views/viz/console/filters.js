@@ -10,7 +10,7 @@ import styled from 'styled-components'
 
 // project
 // colors
-import { theme } from '~/palette'
+import { theme, wheel } from '~/palette'
 
 // locals
 import styles from './styles'
@@ -70,16 +70,15 @@ const Severities = styled.div`
     gap: 0.25rem;
 `
 
-// a severity toggle
+// a severity toggle: plain text, grayed out when off, lit with its color when on
 const Severity = styled.button`
     font-family: inconsolata;
     font-size: 100%;
     cursor: pointer;
-    padding: 0.05rem 0.4rem;
-    border: 1px solid ${props => props.$color};
-    border-radius: 0.2rem;
-    color: ${props => props.$on ? theme.page.background : props.$color};
-    background-color: ${props => props.$on ? props.$color : "transparent"};
+    padding: 0.05rem 0.4rem 0.05rem 0;
+    border: none;
+    color: ${props => props.$on ? props.$color : wheel.gray.gabro};
+    background-color: transparent;
 `
 
 // the channel prefix
