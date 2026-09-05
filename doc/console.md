@@ -10,8 +10,8 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 > Status: **built through the channel toggles** (2026-09-05, branch `journal`): the server
 > device, the `journal` route with history on subscription, the console activity with
 > its filters, expansion, copy and clear, the channel listing and switch, and the facade;
-> worker entries arrive through the `pyre` fan-in with no `qed` change. Not built:
-> virtualized rendering, and channel control that reaches running workers. The `qed`
+> worker entries arrive through the `pyre` fan-in with no `qed` change, and a channel
+> switch reaches running workers through the fleet. Not built: virtualized rendering. The `qed`
 > half of journal delivery: a device in the server that forwards every entry to connected
 > clients, and an activity panel that shows them. The generic half, a device that ships
 > entries over ipc and the collection of worker entries in `pyre.nexus`, is designed in
@@ -97,11 +97,11 @@ discoverable than the configuration file. Two GraphQL operations:
   convention in `doc/graphql-conventions.md`, which sets the flag on the server's own
   channel of that severity and name.
 
-In the first version the mutation reaches only the server's channels. A worker forked
-before the change keeps the state it inherited, and one forked after gets the new state
-for free. Reaching running workers is the control phase of the `pyre` design, and the
-mutation grows to forward the change when that exists; the client is written against
-the mutation, not the mechanism.
+The mutation applies the change to the server's own journal and hands the fleet a control
+record, which every team sends to its running crew members over their journal channels;
+a member forked afterwards inherits the state. A member inside a long task applies the
+change when the task ends, since its loop is single threaded. The client is written
+against the mutation, not the mechanism.
 
 ## What the client does
 
