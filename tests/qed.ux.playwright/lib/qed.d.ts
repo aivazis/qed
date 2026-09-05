@@ -8,6 +8,18 @@
 // ambient typing for the {window.qed} automation facade (doc/automation-surface.md), so specs and
 // agents that drive the app through it get completion. coordinates are row-major source pixels
 
+// a journal record, as the server publishes it: the envelope, the page, and the notes
+type QEDJournalRecord = {
+    journal: number
+    seq: number
+    pid: number
+    time: number
+    sink: "alert" | "memo" | "help"
+    page: string[]
+    notes: Record<string, string>
+    key: number
+}
+
 type QEDViewModel = {
     viewport: number
     reader: string | null
@@ -61,6 +73,14 @@ interface QED {
     value: {
         update(controller: string, bounds: { min: number, value: number, max: number }, channel?: string, viewport?: number): Promise<unknown>
         reset(controller: string, channel?: string, viewport?: number): Promise<unknown>
+    }
+    journal: {
+        // the records in the console's buffer; it fills only while the console is mounted
+        entries(): QEDJournalRecord[]
+        // whether the journal stream is open
+        live(): boolean
+        // empty the buffer
+        clear(): void
     }
 }
 
