@@ -145,8 +145,19 @@ class Journal(journal.device):
         record = self.stamp(entry=entry)
         # remember it
         self.history.append(record)
-        # and the channel that produced it
-        self.channels.add((record.severity, record.channel))
+        # the channel that produced it
+        channel = (record.severity, record.channel)
+        # if it is speaking for the first time
+        if channel not in self.channels:
+            # add it to the census
+            self.channels.add(channel)
+            # a client lists the channels it knows about, so tell every client its state has
+            # changed, the way a mutation would; the server may not have the means
+            notify = getattr(self.server, "notifyChange", None)
+            # if it does
+            if notify is not None:
+                # do so
+                notify()
         # an entry flushed while a batch is going out is recorded but not queued, so a hub
         # that speaks up while draining a slow client cannot loop back into itself
         if self.publishing:
