@@ -44,6 +44,8 @@ export const query = graphql`
             ...vizGetViewsFragment
             # for the sync control
             ...bodyGetSyncTableFragment
+            # for the channel listing in the journal console
+            ...channelsGetJournalFragment
         }
     }
 `

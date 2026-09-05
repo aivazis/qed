@@ -24,7 +24,7 @@ import styles from './styles'
 
 // the tray with the channels the server knows about, and a switch for each
 export const Channels = () => {
-    // render; the listing suspends while it loads
+    // render; the listing suspends the first time, while the store fills
     return (
         <Tray title="channels" initially={false} state="enabled" scale={0.5}
             data-qed-panel="journal-channels">
