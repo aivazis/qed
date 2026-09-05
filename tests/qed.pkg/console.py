@@ -107,6 +107,15 @@ class Server:
         self.dispatcher = pyre.ipc.newPSL()
         # and a hub
         self.hub = Hub(chatty=chatty)
+        # the change notifications sent
+        self.notifications = 0
+        # all done
+        return
+
+    # interface
+    def notifyChange(self):
+        # count
+        self.notifications += 1
         # all done
         return
 
@@ -157,6 +166,8 @@ assert all(float(record.notes["time"]) > 0 for record in device.history)
 assert [record.notes["seq"] for record in device.history] == ["1", "2", "3"]
 # the channels were noted
 assert device.channels == {("info", name), ("warning", name), ("debug", name)}
+# and every first-time speaker was news to the clients
+assert server.notifications == 3
 # they are waiting to go out
 assert len(device.pending) == 3
 assert device.armed
@@ -181,6 +192,9 @@ assert set(records[0]) == {"journal", "page", "notes"}
 # the queue is empty and the alarm is spent
 assert device.pending == []
 assert not device.armed
+# a channel that speaks again is not news
+journal.info(name).log("one more")
+assert server.notifications == 3
 
 # a record from a crew member, replayed the way the nexus does it, with the origin its
 # courier stamped
@@ -198,8 +212,8 @@ journal.replay(record=journal.record(page=["from a worker"], notes=stamped))
 record = device.history[-1]
 assert record.page == ["from a worker"]
 assert record.notes == stamped
-# my own sequence did not move
-assert device.seq == 3
+# my own sequence did not move past the four entries of my own
+assert device.seq == 4
 
 # an entry that says where it came from but not when is filled in, not overwritten
 journal.info(name).log("mine", pid="77", seq="9")
@@ -209,7 +223,7 @@ assert record.notes["seq"] == "9"
 assert float(record.notes["time"]) > 0
 assert record.notes["host"] == socket.gethostname()
 # and my own sequence still did not move
-assert device.seq == 3
+assert device.seq == 4
 
 # the history is bounded
 journal.info(name).log("five")
@@ -217,7 +231,7 @@ journal.info(name).log("six")
 assert len(device.history) == 4
 assert device.history[0].page == ["from a worker"]
 assert device.history[-1].page == ["six"]
-assert device.history[-1].notes["seq"] == "5"
+assert device.history[-1].notes["seq"] == "6"
 # and a newcomer is opened with all of it
 assert [record["page"] for record in unpack(device.opening())] == [
     ["from a worker"],
