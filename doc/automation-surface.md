@@ -82,6 +82,8 @@ window.qed = {
     entries() → [{ seq, pid, time, sink, page:[…], notes:{channel, severity, …} }],  // the console's buffer
     live() → bool,                                  // whether the journal stream is open
     clear(),                                        // empty the buffer, and nothing else
+    channels() → [{ id, severity, name, active, fatal }],  // the channels the server knows about
+    setActive(severity, name, active),              // turn a channel on or off
   },
 }
 ```
