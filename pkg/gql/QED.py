@@ -18,6 +18,7 @@ from .Node import Node
 from .archives.Archive import Archive
 from .archives.ArchiveType import ArchiveType
 from .readers.Reader import Reader
+from .journal.JournalChannel import JournalChannel
 from . import views
 
 
@@ -39,6 +40,7 @@ class QED(graphene.ObjectType):
     views = graphene.List(views.view)
     archives = graphene.List(Archive)
     readers = graphene.List(Reader)
+    journal = graphene.List(JournalChannel)
 
     # resolvers
     @staticmethod
@@ -68,6 +70,39 @@ class QED(graphene.ObjectType):
         """
         # hand off the views to the resolver
         yield from (viewport.view() for viewport in store.viewports)
+        # all done
+        return
+
+    # journal channels
+    @staticmethod
+    def resolve_journal(store, info, **kwds):
+        """
+        Generate the journal channels the server knows about, as (severity, name) pairs
+
+        The live channel index is not enumerable, so the list is the union of the channels the
+        application placed under user control and the channels that have spoken since the
+        server started, which the device that publishes to clients keeps a census of
+        """
+        # the pile
+        channels = set()
+        # the application, if the request came through a server
+        server = info.context.get("server")
+        # the device that publishes to clients, if the server installed one
+        device = getattr(server, "journal", None)
+        # if it is there
+        if device is not None:
+            # its census
+            channels |= device.channels
+        # the application
+        plexus = info.context.get("plexus")
+        # if it is there
+        if plexus is not None:
+            # the channels it declared
+            channels |= {
+                (severity, name) for severity, name in plexus.pyre_journalChannels()
+            }
+        # hand them over, in a stable order
+        yield from sorted(channels)
         # all done
         return
 

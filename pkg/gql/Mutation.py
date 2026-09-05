@@ -19,6 +19,9 @@ from .readers.ConnectReader import ConnectReader
 from .readers.DisconnectReader import DisconnectReader
 from .readers.Stage import Stage
 
+# the journal
+from .journal import journalChannelSet
+
 # visualization pipeline controls
 from .controllers.ViewRangeReset import ViewRangeReset
 from .controllers.ViewValueReset import ViewValueReset
@@ -35,6 +38,9 @@ class Mutation(graphene.ObjectType):
     """
     The resting place for mutations
     """
+
+    # the journal
+    journalChannelSet = journalChannelSet.Field()
 
     # view management
     viewReaderSelect = views.viewReaderSelect.Field()
