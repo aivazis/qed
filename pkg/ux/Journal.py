@@ -7,6 +7,9 @@
 # externals
 import collections
 import json
+import os
+import socket
+import time
 
 # support
 import journal
@@ -31,8 +34,6 @@ class Journal(journal.device):
     topic = "journal"
     # the frame name, so a client can tell a batch of records from anything else
     event = "journal"
-    # the origin fields a replayed record carries in its notes
-    origin = ("pid", "seq", "time")
 
     # interface
     def alert(self, entry):
@@ -71,45 +72,35 @@ class Journal(journal.device):
         # frame it as one batch
         return self._frame(records=self.history)
 
-    def stamp(self, entry, sink):
+    def stamp(self, entry):
         """
-        Build the record for {entry} bound for {sink}
+        Build the record for {entry}
 
-        An entry the nexus replayed from a crew member carries its origin in its notes; it is
-        lifted back into the envelope, so a client sees one record shape whatever the origin
+        Every record a client receives carries its origin in its notes: the process, the
+        sequence number, the time, and the host. An entry the nexus replayed from a crew
+        member already has them, stamped by the worker's courier; an entry of this process
+        does not, so it is stamped here, with a sequence of this process's own
         """
-        # build the record with my own sequence number
-        record = journal.record.stamp(entry=entry, sink=sink, seq=self.seq + 1)
-        # the notes
-        notes = record.notes
-        # if the entry came from somewhere else
-        if all(field in notes for field in self.origin):
-            # attempt to
-            try:
-                # lift the origin out of the notes
-                pid = int(notes[self.origin[0]])
-                seq = int(notes[self.origin[1]])
-                stamp = float(notes[self.origin[2]])
-            # if the fields are not what a replay writes, they are somebody's own notes
-            except ValueError:
-                # leave them alone
-                pass
-            # otherwise
-            else:
-                # the envelope is the origin's
-                record.pid = pid
-                record.seq = seq
-                record.time = stamp
-                # and the notes are what the origin flushed
-                for field in self.origin:
-                    # so drop the copies
-                    del notes[field]
-                # all done
-                return record
-        # the entry is mine; consume the sequence number
-        self.seq += 1
-        # all done
-        return record
+        # the notes as flushed
+        notes = dict(entry.notes)
+        # the origin, as far as it is already there
+        origin = {}
+        # if the entry does not say which process produced it, it is mine
+        if "pid" not in notes:
+            # advance my sequence
+            self.seq += 1
+            # and supply the process and the sequence number
+            origin["pid"] = self.pid
+            origin["seq"] = self.seq
+        # the rest is filled in only where missing
+        if "time" not in notes:
+            # the time of the flush
+            origin["time"] = time.time()
+        if "host" not in notes:
+            # the host
+            origin["host"] = self.host
+        # build the record
+        return journal.record.stamp(entry=entry, **origin)
 
     # metamethods
     def __init__(
@@ -123,6 +114,9 @@ class Journal(journal.device):
         self.mirror = mirror
         # how long to accumulate records before publishing a batch
         self.latency = latency
+        # the process and the host, looked up once
+        self.pid = os.getpid()
+        self.host = socket.gethostname()
         # the sequence number of the last record of my own
         self.seq = 0
         # the records a newcomer is sent
@@ -148,7 +142,7 @@ class Journal(journal.device):
             # it gets the entry unchanged, through the same sink
             getattr(self.mirror, sink)(entry=entry)
         # build the record
-        record = self.stamp(entry=entry, sink=sink)
+        record = self.stamp(entry=entry)
         # remember it
         self.history.append(record)
         # and the channel that produced it
