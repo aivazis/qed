@@ -19,9 +19,7 @@ class Polygon(Filter, family="qed.archives.filters.polygon"):
     """
 
     # user-configurable state
-    vertices = qed.properties.list(
-        schema=qed.properties.tuple(schema=qed.properties.float())
-    )
+    vertices = qed.properties.list(schema=qed.properties.tuple(schema=qed.properties.float()))
     vertices.doc = "the collection of (lon, lat) vertices that make up the polygon"
 
     # implementation details

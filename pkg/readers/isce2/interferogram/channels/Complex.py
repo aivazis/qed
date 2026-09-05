@@ -82,9 +82,7 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
         lowPhase = self.phase.low
         highPhase = self.phase.high
         # add my configuration and chain up
-        return super().tile(
-            min=low, max=high, minPhase=lowPhase, maxPhase=highPhase, **kwds
-        )
+        return super().tile(min=low, max=high, minPhase=lowPhase, maxPhase=highPhase, **kwds)
 
     # constants
     tag = "complex"

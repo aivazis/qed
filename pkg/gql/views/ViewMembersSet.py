@@ -37,9 +37,7 @@ class ViewMembersSet(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to set the mask
-        view = store.setMembers(
-            viewport=input.viewport, source=input.reader, members=input.members
-        )
+        view = store.setMembers(viewport=input.viewport, source=input.reader, members=input.members)
         # form the mutation resolution context
         context = {"view": view}
         # and resolve the mutation

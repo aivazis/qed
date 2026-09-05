@@ -82,9 +82,7 @@ class Discovery:
         # go through the findings
         for finding in self.findings:
             # resolve the dataset factory
-            factory = qed.protocols.dataset.pyre_resolveSpecification(
-                spec=finding.factory
-            )
+            factory = qed.protocols.dataset.pyre_resolveSpecification(spec=finding.factory)
             # and materialize a metadata-only twin: it opens no file, and the seed carries
             # what the surveying worker measured, so its channels autotune exactly as they
             # would have on the live path
@@ -109,9 +107,7 @@ class Discovery:
         # the twins by their suffix, so companions can find each other
         twins = {
             finding.suffix: twin
-            for finding, twin in zip(
-                self.findings, reader.datasets[-len(self.findings) :]
-            )
+            for finding, twin in zip(self.findings, reader.datasets[-len(self.findings) :])
         }
         # go through the findings again
         for finding in self.findings:
@@ -122,9 +118,7 @@ class Discovery:
                     # make a channel
                     channel = journal.firewall("qed.nexus.survey")
                     # complain
-                    channel.line(
-                        f"while hydrating '{reader.pyre_name}{finding.suffix}'"
-                    )
+                    channel.line(f"while hydrating '{reader.pyre_name}{finding.suffix}'")
                     channel.line(
                         f"its '{role}' companion '{reader.pyre_name}{suffix}' was not surveyed"
                     )
@@ -139,9 +133,7 @@ class Discovery:
             # so it can name what is derived from the product the way the crew does
             reader.granule = self.granule
         # install the availability map
-        reader.available = {
-            axis: set(values) for axis, values in self.available.items()
-        }
+        reader.available = {axis: set(values) for axis, values in self.available.items()}
         # adopt the selections as the survey left them: the worker rebuilt the reader from
         # its recipe, so they are the user's configuration plus the open-time auto-picks
         reader.selections = dict(self.selections)

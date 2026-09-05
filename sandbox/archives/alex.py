@@ -4,7 +4,6 @@
 import journal
 import earthaccess
 
-
 # a polygon
 crete = [
     (23.3547, 34.7211),
@@ -80,9 +79,7 @@ def search(**kwds):
         # report
         channel.line(f"size: {granule.size()}")
         channel.line(f"links: {granule.data_links(access='direct')}")
-        channel.line(
-            f"s3 credentials endpoint: {granule.get_s3_credentials_endpoint()}"
-        )
+        channel.line(f"s3 credentials endpoint: {granule.get_s3_credentials_endpoint()}")
         channel.line(f"umm: keys={tuple(granule['umm'].keys())}")
         # channel.line(f"umm:")
         channel.indent()
@@ -90,9 +87,9 @@ def search(**kwds):
 
         # get all the urls related to this granule
         for url in granule["umm"]["RelatedUrls"]:
-            interesting = url["Type"].lower().startswith(
-                "get data via direct access"
-            ) and url["Format"].lower().startswith("binary")
+            interesting = url["Type"].lower().startswith("get data via direct access") and url[
+                "Format"
+            ].lower().startswith("binary")
             if interesting:
                 channel.line(f"url: {url['URL']}")
         # channel.line(f"related urls: {granule['umm']['RelatedUrls']}")
@@ -101,9 +98,7 @@ def search(**kwds):
         channel.indent()
         # channel.line(f"archive: {granule['umm']['DataGranule']['ArchiveAndDistributionInformation']}")
         # channel.line(f"day/night: {granule['umm']['DataGranule']['DayNightFlag']}")
-        channel.line(
-            f"production date: {granule['umm']['DataGranule']['ProductionDateTime']}"
-        )
+        channel.line(f"production date: {granule['umm']['DataGranule']['ProductionDateTime']}")
         # channel.line(f"identifiers: {granule['umm']['DataGranule']['Identifiers']}")
         channel.outdent()
         channel.outdent()
@@ -114,9 +109,7 @@ def search(**kwds):
         channel.line(f"native id: {granule['meta']['native-id']}")
         channel.line(f"concept id: {granule['meta']['concept-id']}")
         channel.line(f"concept type: {granule['meta']['concept-type']}")
-        channel.line(
-            f"collection concept id: {granule['meta']['collection-concept-id']}"
-        )
+        channel.line(f"collection concept id: {granule['meta']['collection-concept-id']}")
         channel.outdent()
         # outdent
         channel.outdent()

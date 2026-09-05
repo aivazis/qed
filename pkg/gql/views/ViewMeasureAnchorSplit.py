@@ -37,9 +37,7 @@ class ViewMeasureAnchorSplit(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # delegate to the store
-        measures = store.measureAnchorSplit(
-            viewport=input.viewport, anchor=input.anchor
-        )
+        measures = store.measureAnchorSplit(viewport=input.viewport, anchor=input.anchor)
         # form the mutation resolution context
         context = {"measures": measures}
         # and resolve the mutation

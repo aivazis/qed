@@ -78,9 +78,7 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
                     channel = journal.warning("qed.nisar.rslc")
                     # and complain
                     channel.line(f"while exploring '{self.pyre_name}'")
-                    channel.line(
-                        f"no '{frequency}' frequency in the '{band}'-band swaths"
-                    )
+                    channel.line(f"no '{frequency}' frequency in the '{band}'-band swaths")
                     # flush
                     channel.log()
                     # and move on
@@ -99,9 +97,7 @@ class RSLC(H5, family="qed.readers.nisar.rslc"):
                         channel = journal.warning("qed.nisar.rslc")
                         # and complain
                         channel.line(f"while exploring '{self.pyre_name}'")
-                        channel.line(
-                            f"no '{polarization}' polarization in the '{frequency}' swath"
-                        )
+                        channel.line(f"no '{polarization}' polarization in the '{frequency}' swath")
                         # flush
                         channel.log()
                         # and move on

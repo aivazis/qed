@@ -19,12 +19,8 @@ class Line(Filter, family="qed.archives.filters.line"):
     """
 
     # user-configurable state
-    vertices = qed.properties.list(
-        schema=qed.properties.tuple(schema=qed.properties.float())
-    )
-    vertices.doc = (
-        "the collection of (lon, lat) vertices that make up the line segments"
-    )
+    vertices = qed.properties.list(schema=qed.properties.tuple(schema=qed.properties.float()))
+    vertices.doc = "the collection of (lon, lat) vertices that make up the line segments"
 
     # implementation details
     # visitor support

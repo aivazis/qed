@@ -30,9 +30,7 @@ dataset, *_ = reader.datasets
 pipeline = dataset.channel(name="amplitude")
 
 # assemble a stand-in for the view state behind a tile request
-view = types.SimpleNamespace(
-    reader=reader, dataset=dataset, pipeline=lambda channel: pipeline
-)
+view = types.SimpleNamespace(reader=reader, dataset=dataset, pipeline=lambda channel: pipeline)
 
 
 # a task builder with fixed geometry

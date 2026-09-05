@@ -75,9 +75,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                     channel = journal.warning("qed.nisar.rifg")
                     # and complain
                     channel.line(f"while exploring '{self.pyre_name}'")
-                    channel.line(
-                        f"no '{frequency}' frequency in the '{band}'-band swaths"
-                    )
+                    channel.line(f"no '{frequency}' frequency in the '{band}'-band swaths")
                     # flush
                     channel.log()
                     # and move on
@@ -96,9 +94,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                         channel = journal.warning("qed.nisar.rifg")
                         # and complain
                         channel.line(f"while exploring '{self.pyre_name}'")
-                        channel.line(
-                            f"no '{polarization}' polarization in the '{frequency}' swath"
-                        )
+                        channel.line(f"no '{polarization}' polarization in the '{frequency}' swath")
                         # flush
                         channel.log()
                         # and move on
@@ -128,9 +124,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                     # otherwise
                     else:
                         # generate a name for the dataset
-                        name = (
-                            f"{self.pyre_name}.{band}.{frequency}.{polarization}.mask"
-                        )
+                        name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.mask"
                         # build its selector
                         selector = {
                             "band": band,
@@ -212,7 +206,9 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                     # otherwise
                     else:
                         # generate a name for the dataset
-                        name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.coherenceMagnitude"
+                        name = (
+                            f"{self.pyre_name}.{band}.{frequency}.{polarization}.coherenceMagnitude"
+                        )
                         # build its selector
                         selector = {
                             "band": band,
@@ -227,9 +223,7 @@ class RIFG(H5, family="qed.readers.nisar.rifg"):
                             "selector": selector,
                         }
                         # instantiate it
-                        dataset = Coherence(
-                            name=name, data=coherence, mask=companion, **config
-                        )
+                        dataset = Coherence(name=name, data=coherence, mask=companion, **config)
                         # add the dataset to my pile
                         self.datasets.append(dataset)
 

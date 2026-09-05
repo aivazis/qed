@@ -47,9 +47,7 @@ class JournalChannelSet(graphene.Mutation):
             # complain
             raise ValueError(f"unknown journal severity '{input.severity}'")
         # the instruction
-        control = journal.control(
-            severity=input.severity, name=input.name, active=input.active
-        )
+        control = journal.control(severity=input.severity, name=input.name, active=input.active)
         # apply it here
         control.apply()
         # the server that took the request, if any

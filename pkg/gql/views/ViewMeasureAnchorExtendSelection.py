@@ -37,9 +37,7 @@ class ViewMeasureAnchorExtendSelection(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # delegate to the store
-        measures = store.measureAnchorExtendSelection(
-            viewport=input.viewport, index=input.index
-        )
+        measures = store.measureAnchorExtendSelection(viewport=input.viewport, index=input.index)
         # form the mutation resolution context
         context = {"measures": measures}
         # and resolve the mutation

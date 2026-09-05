@@ -92,9 +92,7 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                     channel = journal.warning("qed.nisar.gcov")
                     # and complain
                     channel.line(f"while exploring '{self.pyre_name}'")
-                    channel.line(
-                        f"no '{frequency}' frequency in the '{band}'-band grids"
-                    )
+                    channel.line(f"no '{frequency}' frequency in the '{band}'-band grids")
                     # flush
                     channel.log()
                     # and move on
@@ -185,9 +183,7 @@ class GCOV(H5, family="qed.readers.nisar.gcov"):
                     # the diagonal terms
                     else:
                         # are real
-                        data = Covariance(
-                            name=name, data=dataset, mask=companion, **config
-                        )
+                        data = Covariance(name=name, data=dataset, mask=companion, **config)
                     # add the dataset to my pile
                     registered.append(data)
         # all done

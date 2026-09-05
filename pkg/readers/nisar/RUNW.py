@@ -75,9 +75,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                     channel = journal.warning("qed.nisar.runw")
                     # and complain
                     channel.line(f"while exploring '{self.pyre_name}'")
-                    channel.line(
-                        f"no '{frequency}' frequency in the '{band}'-band swaths"
-                    )
+                    channel.line(f"no '{frequency}' frequency in the '{band}'-band swaths")
                     # flush
                     channel.log()
                     # and move on
@@ -110,9 +108,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                     # otherwise
                     else:
                         # generate a name for the dataset
-                        name = (
-                            f"{self.pyre_name}.{band}.{frequency}.{polarization}.mask"
-                        )
+                        name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.mask"
                         # build its selector
                         selector = {
                             "band": band,
@@ -187,9 +183,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                             "selector": selector,
                         }
                         # instantiate it
-                        dataset = UNW(
-                            name=name, data=unwrappedPhase, mask=companion, **config
-                        )
+                        dataset = UNW(name=name, data=unwrappedPhase, mask=companion, **config)
                         # add the dataset to my pile
                         self.datasets.append(dataset)
 
@@ -229,9 +223,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                             "selector": selector,
                         }
                         # instantiate it
-                        dataset = UNW(
-                            name=name, data=ionosphere, mask=companion, **config
-                        )
+                        dataset = UNW(name=name, data=ionosphere, mask=companion, **config)
                         # add the dataset to my pile
                         self.datasets.append(dataset)
 
@@ -256,7 +248,9 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                     # otherwise
                     else:
                         # generate a name for the dataset
-                        name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.coherenceMagnitude"
+                        name = (
+                            f"{self.pyre_name}.{band}.{frequency}.{polarization}.coherenceMagnitude"
+                        )
                         # build its selector
                         selector = {
                             "band": band,
@@ -271,9 +265,7 @@ class RUNW(H5, family="qed.readers.nisar.runw"):
                             "selector": selector,
                         }
                         # instantiate it
-                        coherence = Coherence(
-                            name=name, data=coherence, mask=companion, **config
-                        )
+                        coherence = Coherence(name=name, data=coherence, mask=companion, **config)
                         # add the dataset to my pile
                         self.datasets.append(coherence)
 

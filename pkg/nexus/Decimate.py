@@ -74,8 +74,7 @@ class Decimate(Chore):
                 origin = (row * tile[0], col * tile[1])
                 # and how far it reaches, clipped to the extent at the edges
                 shape = tuple(
-                    min(width, axis - start)
-                    for width, axis, start in zip(tile, extent, origin)
+                    min(width, axis - start) for width, axis, start in zip(tile, extent, origin)
                 )
                 # decimate the level below into it; a tile of pure fill is skipped, so
                 # the level stays as sparse as the product it came from
@@ -116,9 +115,7 @@ class Decimate(Chore):
         self.tiles = tuple(tuple(tile) for tile in tiles)
         # my identity: the reader, the dataset, the level, and the tiles; the credentials
         # are left out, since they do not change what the work is
-        spec = {
-            name: value for name, value in self.config.items() if name != "credentials"
-        }
+        spec = {name: value for name, value in self.config.items() if name != "credentials"}
         self.identity = self._freeze(
             value=(
                 self.reader,
@@ -145,9 +142,7 @@ class Decimate(Chore):
             workspace = qed.workspaces.local(name=f"{self.reader}.crew.workspace")
             workspace.path = self.workspace
             # make one
-            pyramid = qed.readers.nisar.pyramid(
-                reader=reader, dataset=dataset, workspace=workspace
-            )
+            pyramid = qed.readers.nisar.pyramid(reader=reader, dataset=dataset, workspace=workspace)
             # and hand it to the dataset, so the renders find it
             dataset.pyramid = pyramid
         # attaching is idempotent: it picks up the levels that have appeared since

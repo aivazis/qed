@@ -32,19 +32,14 @@ def probe(dataset, stops: int = 4) -> tuple:
     # the windows, spread over the extent
     origins = windows(dataset=dataset, stops=stops)
     # their extent
-    span = tuple(
-        min(width, axis)
-        for width, axis in zip(tuple(dataset.tile), tuple(dataset.shape))
-    )
+    span = tuple(min(width, axis) for width, axis in zip(tuple(dataset.tile), tuple(dataset.shape)))
     # the extent of the dataset, for the diagnostics
     shape = tuple(dataset.shape)
     cells, low, high, total = 0, None, None, 0.0
     # go through the planned windows
     for origin in origins:
         # sample this one at full resolution; the record is mergeable
-        count, minimum, mean, _, maximum = dataset.sample(
-            zoom=(0, 0), origin=origin, shape=span
-        )
+        count, minimum, mean, _, maximum = dataset.sample(zoom=(0, 0), origin=origin, shape=span)
         # a window of nothing but fill contributes nothing
         if count == 0:
             # so skip it
@@ -63,9 +58,7 @@ def probe(dataset, stops: int = 4) -> tuple:
         # say so plainly: the numbers below are a guess, not a measurement, and a display
         # built on them will be wrong as soon as real data appears
         channel.line(f"found no data in '{dataset.pyre_name}'")
-        channel.line(
-            f"sampled {len(origins)} windows of {span} across an extent of {shape}"
-        )
+        channel.line(f"sampled {len(origins)} windows of {span} across an extent of {shape}")
         channel.line(f"and every one of them held nothing but fill")
         channel.line(f"the display range is a guess until a tile finds something")
         # flush
@@ -82,9 +75,7 @@ def probe(dataset, stops: int = 4) -> tuple:
         channel = journal.warning("qed.readers.statistics")
         # complain
         channel.line(f"found no spread in '{dataset.pyre_name}'")
-        channel.line(
-            f"sampled {len(origins)} windows of {span} across an extent of {shape}"
-        )
+        channel.line(f"sampled {len(origins)} windows of {span} across an extent of {shape}")
         channel.line(f"and every cell that held data held {low}")
         channel.line(f"the display range is a guess until a tile finds something else")
         # flush

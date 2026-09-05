@@ -41,14 +41,10 @@ def prepare(reader):
     pipeline = dataset.channel(name="amplitude")
     # render the reference tile
     reference = bytes(
-        memoryview(
-            dataset.render(channel=pipeline, zoom=(0, 0), origin=(0, 0), shape=(64, 64))
-        )
+        memoryview(dataset.render(channel=pipeline, zoom=(0, 0), origin=(0, 0), shape=(64, 64)))
     )
     # assemble a stand-in for the view state
-    view = types.SimpleNamespace(
-        reader=reader, dataset=dataset, pipeline=lambda channel: pipeline
-    )
+    view = types.SimpleNamespace(reader=reader, dataset=dataset, pipeline=lambda channel: pipeline)
     # describe the tile as a task
     task = qed.nexus.tile(
         view=view, channel="d16.amplitude", zoom=(0, 0), origin=(0, 0), shape=(64, 64)

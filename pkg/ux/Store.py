@@ -148,9 +148,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
                 # harvest the recipe the same way a survey does
                 recipe = qed.nexus.survey(reader=source)
                 # resolve the factory
-                factory = qed.protocols.reader.pyre_resolveSpecification(
-                    spec=recipe.factory
-                )
+                factory = qed.protocols.reader.pyre_resolveSpecification(spec=recipe.factory)
                 # build a live instance with file handles of its own; the derived name
                 # keeps it clear of the passive source it stands in for
                 live = factory(name=f"{name}.local", **recipe.config)
@@ -1103,9 +1101,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
                 statistics=statistics,
                 onProgress=functools.partial(self._progressed, name=raster.pyre_name),
                 onSeeded=(
-                    functools.partial(self._seeded, name=name)
-                    if raster is dataset
-                    else None
+                    functools.partial(self._seeded, name=name) if raster is dataset else None
                 ),
                 onDone=functools.partial(self._built, name=name),
                 onFailed=functools.partial(self._buildFailed, name=name),
@@ -1250,9 +1246,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         plexus.pyre_setTrait(
             alias="archives",
             value=[],
-            locator=pyre.tracking.simple(
-                "while handing the data archives to the store"
-            ),
+            locator=pyre.tracking.simple("while handing the data archives to the store"),
         )
         # all done
         return archives
@@ -1324,11 +1318,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # a string carries comma separated specs, possibly wrapped in grouping delimiters
         elif isinstance(raw, str):
             # split it the way the framework does
-            entries = [
-                entry.strip()
-                for entry in raw.strip("[]{}()").split(",")
-                if entry.strip()
-            ]
+            entries = [entry.strip() for entry in raw.strip("[]{}()").split(",") if entry.strip()]
         # a sequence is already a pile
         elif isinstance(raw, (list, tuple)):
             # take it as is

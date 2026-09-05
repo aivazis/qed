@@ -11,9 +11,7 @@ import journal
 
 
 # a reader of flat binary files
-class Flat(
-    qed.flow.factory, family="qed.readers.native.flat", implements=qed.protocols.reader
-):
+class Flat(qed.flow.factory, family="qed.readers.native.flat", implements=qed.protocols.reader):
     """
     A reader of flat binary files
     """
@@ -94,9 +92,7 @@ class Flat(
         # and start it
         stats.start()
         # there is only one dataset in the file and it is structurally trivial; build it
-        dataset = qed.readers.native.datasets.mmap(
-            name=f"{self.pyre_name}.data", **config
-        )
+        dataset = qed.readers.native.datasets.mmap(name=f"{self.pyre_name}.data", **config)
         # stop the timer
         stats.stop()
 
@@ -181,15 +177,11 @@ class Flat(
             channel.line(f"as lines x samples")
             channel.indent()
             # generate some options
-            for lines, samples in qed.libqed.factor(
-                product=filesize // cell.bytes, aspect=10
-            ):
+            for lines, samples in qed.libqed.factor(product=filesize // cell.bytes, aspect=10):
                 # and show them
                 channel.line(f"{lines} x {samples}")
             channel.outdent()
-            channel.line(
-                f"please use '--lines' or '--samples' to provide the dataset shape"
-            )
+            channel.line(f"please use '--lines' or '--samples' to provide the dataset shape")
             # flush
             channel.log()
         # all done

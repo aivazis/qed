@@ -85,9 +85,7 @@ for twin, live in zip(reader.datasets, reference.datasets):
         # find the live counterpart
         peer = live.channels[tag]
         # walk the controllers of both in step
-        for (controller, _), (mirror, _) in zip(
-            pipeline.controllers(), peer.controllers()
-        ):
+        for (controller, _), (mirror, _) in zip(pipeline.controllers(), peer.controllers()):
             # nothing pins these, so both tuned themselves from the same statistics
             assert controller.auto == mirror.auto
             # and arrived at the same display bounds

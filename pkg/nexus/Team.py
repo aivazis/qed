@@ -68,9 +68,7 @@ class Team(Staff, family="qed.nexus.teams.tile"):
             # complain
             channel.line(f"a subscriber to {task} failed while taking delivery")
             channel.line(f"got: {error}")
-            channel.line(
-                f"the member is fine; the remaining subscribers were not served"
-            )
+            channel.line(f"the member is fine; the remaining subscribers were not served")
             # flush
             channel.log()
         # if the result is spooled
@@ -149,9 +147,7 @@ class Team(Staff, family="qed.nexus.teams.tile"):
         # the loop
         dispatcher = self.dispatcher
         # the write registrations, by channel
-        pending = (
-            getattr(dispatcher, "_write", None) if dispatcher is not None else None
-        )
+        pending = getattr(dispatcher, "_write", None) if dispatcher is not None else None
         # a loop that cannot be asked reports nothing
         if pending is None:
             # so say so

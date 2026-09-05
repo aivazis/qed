@@ -35,9 +35,7 @@ class Sync(qed.component, family="qed.ux.sync.sync", implements=qed.protocols.ux
 
     offsets = qed.properties.tuple(schema=qed.properties.int())
     offsets.default = (0, 0)
-    offsets.doc = (
-        "relative offset to apply to this viewport when synchronized scrolling"
-    )
+    offsets.doc = "relative offset to apply to this viewport when synchronized scrolling"
 
     # support
     def clone(self, name=None):

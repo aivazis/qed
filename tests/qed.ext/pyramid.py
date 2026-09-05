@@ -107,12 +107,8 @@ assert np.all(np.isnan(overhang[:, 1:]))
 
 # the sample kernel over the level must agree with the native one over the cells
 reference = np.ascontiguousarray(expected[::2, ::2])
-record = kernels.sample(
-    source=level, datatype=datatype, origin=(0, 0), shape=(4, 5), stride=(2, 2)
-)
-native = qed.libqed.native.sample(
-    source=reference, origin=(0, 0), shape=(4, 5), stride=(1, 1)
-)
+record = kernels.sample(source=level, datatype=datatype, origin=(0, 0), shape=(4, 5), stride=(2, 2))
+native = qed.libqed.native.sample(source=reference, origin=(0, 0), shape=(4, 5), stride=(1, 1))
 assert record == native
 # and so must a render
 bmp = qed.libqed.nisar.real.value(
@@ -148,9 +144,7 @@ record = kernels.decimate(
     stride=(2, 2),
 )
 # the record describes the cells that were moved
-native = qed.libqed.native.sample(
-    source=reference, origin=(0, 0), shape=aboveShape, stride=(1, 1)
-)
+native = qed.libqed.native.sample(source=reference, origin=(0, 0), shape=aboveShape, stride=(1, 1))
 assert record == native
 # the tile held something, so it was written
 with open(aboveOccupancy, "wb") as record:

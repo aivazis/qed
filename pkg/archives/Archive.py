@@ -10,9 +10,7 @@ import journal
 
 
 # a local data archive
-class Archive(
-    qed.component, family="qed.archives.base", implements=qed.protocols.archive
-):
+class Archive(qed.component, family="qed.archives.base", implements=qed.protocols.archive):
     """
     The base data archive
     """

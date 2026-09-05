@@ -10,9 +10,7 @@ import qed
 
 
 # a workspace rooted in a directory on local disk
-class Local(
-    qed.component, family="qed.workspaces.local", implements=qed.protocols.workspace
-):
+class Local(qed.component, family="qed.workspaces.local", implements=qed.protocols.workspace):
     """
     The local directory qed works out of, and the keeper of everything it derives
 
@@ -49,9 +47,7 @@ class Local(
             # complain
             channel.line(f"the workspace at '{self.path}' is not a directory")
             channel.line(f"so there is nowhere to keep the '{name}' cache")
-            channel.line(
-                f"make it, or point '{self.pyre_family()}.path' somewhere else"
-            )
+            channel.line(f"make it, or point '{self.pyre_family()}.path' somewhere else")
             # flush
             channel.log()
             # and report that there is nowhere to keep anything

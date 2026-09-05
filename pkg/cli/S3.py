@@ -148,9 +148,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
             channel.line("please specify a file to upload")
             channel.line("usage:")
             channel.indent()
-            channel.line(
-                "qed s3 --profile=<name> --bucket=<bucket> --key=<key> <filename>"
-            )
+            channel.line("qed s3 --profile=<name> --bucket=<bucket> --key=<key> <filename>")
             channel.outdent()
             # flush
             channel.log()
@@ -272,9 +270,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
             # and the address
             address = "/".join(filter(None, (bucket, key)))
             # build the uri
-            uri = qed.primitives.uri(
-                scheme="s3", authority=authority, address=f"/{address}"
-            )
+            uri = qed.primitives.uri(scheme="s3", authority=authority, address=f"/{address}")
         # show me
         channel.log(f"opening {uri}")
         # make a reader
@@ -298,9 +294,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         return
 
     # specific datasets
-    @qed.export(
-        tip="create an empty file with the given file space management page size"
-    )
+    @qed.export(tip="create an empty file with the given file space management page size")
     def empty(self, **kwds):
         """
         Create an empty file with the given file space management page size
@@ -310,9 +304,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         # all done
         return 0
 
-    @qed.export(
-        tip="create an empty RSLC file with the given file space management page size"
-    )
+    @qed.export(tip="create an empty RSLC file with the given file space management page size")
     def rslc(self, **kwds):
         """
         Create an empty NISAR RSLC file with the given file space management page size
@@ -367,9 +359,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
                 # place value in the grid
                 grid[i, j] = complex(i, j) / hh.shape[0]
         # dress it up as a tile
-        tile = hh.tile(
-            data=grid, type=hh.memtype, shape=hh.shape, origin=[0] * len(hh.shape)
-        )
+        tile = hh.tile(data=grid, type=hh.memtype, shape=hh.shape, origin=[0] * len(hh.shape))
         # stage it
         hh._staged.append(tile)
 
@@ -397,9 +387,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
             # convert it into K, and make it a little bigger
             cache = self.cache * 1024 * page
             # set the paging characteristics
-            fapl.pageBufferSize = libh5.properties.PageBuffer(
-                bytes=cache, metadata=50, raw=50
-            )
+            fapl.pageBufferSize = libh5.properties.PageBuffer(bytes=cache, metadata=50, raw=50)
         # make a reader
         reader = qed.h5.reader(uri=uri, fapl=fapl)
 
@@ -408,9 +396,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
         # show me
         channel.line(f"opened '{uri}'")
         channel.indent()
-        channel.line(
-            f"page buffer: {reader._file._pyre_id.fapl.pageBufferSize.bytes} bytes"
-        )
+        channel.line(f"page buffer: {reader._file._pyre_id.fapl.pageBufferSize.bytes} bytes")
         channel.outdent()
         # flush
         channel.log()

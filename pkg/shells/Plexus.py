@@ -237,9 +237,7 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
                     alias="service",
                     value="import:qed.nexus.server",
                     priority=self.pyre_executive.priority.package(),
-                    locator=pyre.tracking.simple(
-                        "while mounting the qed application folders"
-                    ),
+                    locator=pyre.tracking.simple("while mounting the qed application folders"),
                 )
 
         # all done
@@ -292,9 +290,7 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
             # find out where this setting came from
             priority, locator = self._traitProvenance(alias=name)
             # and deposit onto {cell} at the shorthand's own standing
-            self.pyre_setTrait(
-                alias="cell", value=name, priority=priority, locator=locator
-            )
+            self.pyre_setTrait(alias="cell", value=name, priority=priority, locator=locator)
         # return with no configuration errors
         return []
 
@@ -346,9 +342,7 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
             return
         # otherwise, interpret all command line arguments arguments as files to read
         # consume the command line so we bypass the panel dispatch in {main}
-        argv = tuple(
-            command.command for command in self.pyre_configurator.consumeCommands()
-        )
+        argv = tuple(command.command for command in self.pyre_configurator.consumeCommands())
         # i need a reader
         reader = self.reader
         # if i don't have one
@@ -461,9 +455,7 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     # private data
     _ds = 0
     _ux = None  # the UX manager
-    _cliSources = (
-        None  # readers built from bare command line uris, drained by the store
-    )
+    _cliSources = None  # readers built from bare command line uris, drained by the store
 
 
 # end of file

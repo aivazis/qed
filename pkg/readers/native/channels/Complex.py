@@ -93,12 +93,7 @@ class Complex(Channel, family="qed.channels.native.complex"):
         saturation = self.saturation.value
         # add my configuration and chain up
         return super().tile(
-            min=low,
-            max=high,
-            minPhase=lowPhase,
-            maxPhase=highPhase,
-            saturation=saturation,
-            **kwds
+            min=low, max=high, minPhase=lowPhase, maxPhase=highPhase, saturation=saturation, **kwds
         )
 
     # constants

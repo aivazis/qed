@@ -103,9 +103,7 @@ class Journal(journal.device):
         return journal.record.stamp(entry=entry, **origin)
 
     # metamethods
-    def __init__(
-        self, server, mirror=None, capacity=2048, latency=None, name="journal", **kwds
-    ):
+    def __init__(self, server, mirror=None, capacity=2048, latency=None, name="journal", **kwds):
         # chain up
         super().__init__(name=name, **kwds)
         # the server whose hub, dispatcher, and stream framing i use

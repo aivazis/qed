@@ -77,9 +77,7 @@ assert dict(reader.selections) == dict(reference.selections)
 
 # the seed statistics crossed the wire unchanged, so the twins carry exactly what the
 # surveying worker measured; tuning the channels from that seed is what {hydration} checks
-assert [data.stats for data in reader.datasets] == [
-    data.stats for data in reference.datasets
-]
+assert [data.stats for data in reader.datasets] == [data.stats for data in reference.datasets]
 
 # the twins are named the way the live datasets are, so the configuration this directory
 # holds for the {d16} pipelines reaches them; the fixture pins every controller, which is

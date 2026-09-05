@@ -9,9 +9,7 @@ import qed
 
 
 # the LOA reader
-class L0A(
-    qed.flow.factory, family="qed.readers.nisar.l0a", implements=qed.protocols.reader
-):
+class L0A(qed.flow.factory, family="qed.readers.nisar.l0a", implements=qed.protocols.reader):
     """
     The reader of LOA files
     """

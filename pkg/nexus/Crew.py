@@ -86,9 +86,7 @@ class Crew(crew, family="qed.nexus.crews.tile"):
                 warning = journal.warning("qed.nexus.crew")
                 # complain, since this is how a process that has run out of descriptors
                 # stops serving tiles: the render happened, and its payload cannot land
-                warning.line(
-                    f"crew {self.pid}: could not receive the payload of a render"
-                )
+                warning.line(f"crew {self.pid}: could not receive the payload of a render")
                 warning.line(f"got: {error}")
                 warning.line(f"the process is probably out of file descriptors")
                 # flush

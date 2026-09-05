@@ -98,9 +98,7 @@ class QED(graphene.ObjectType):
         # if it is there
         if plexus is not None:
             # the channels it declared
-            channels |= {
-                (severity, name) for severity, name in plexus.pyre_journalChannels()
-            }
+            channels |= {(severity, name) for severity, name in plexus.pyre_journalChannels()}
         # hand them over, in a stable order
         yield from sorted(channels)
         # all done

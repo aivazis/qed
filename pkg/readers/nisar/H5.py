@@ -12,9 +12,7 @@ import qed
 
 
 # the basic reader for products in HDF5 format
-class H5(
-    qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protocols.reader
-):
+class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protocols.reader):
     """
     The base class for readers of HDF5 files
     """
@@ -146,9 +144,7 @@ class H5(
             # form the cache size
             size = 4 * 1024 * pages
             # adjust the {fapl}
-            fapl.pageBufferSize = qed.h5.libh5.properties.PageBuffer(
-                bytes=size, metadata=5, raw=50
-            )
+            fapl.pageBufferSize = qed.h5.libh5.properties.PageBuffer(bytes=size, metadata=5, raw=50)
         # if i'm managed, get access credentials from the archive; otherwise settle for
         # whatever the caller supplied, e.g. a worker rebuilding me from a recipe
         archive = self._archive
@@ -156,9 +152,7 @@ class H5(
         # retain them, so my recipe can carry them to a worker that cannot reach the archive
         self.credentials = credentials
         # open my file
-        self.product = qed.h5.reader(
-            uri=self.uri, credentials=credentials, fapl=fapl
-        ).read()
+        self.product = qed.h5.reader(uri=self.uri, credentials=credentials, fapl=fapl).read()
 
         # load the datasets
         self._loadDatasets()

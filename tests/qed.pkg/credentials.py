@@ -52,9 +52,7 @@ assert plain.credentials == {}
 # describe a tile of the managed reader
 dataset = managed.find(selector={"band": "L", "frequency": "A", "polarization": "HH"})
 pipeline = dataset.channel(name="amplitude")
-view = types.SimpleNamespace(
-    reader=managed, dataset=dataset, pipeline=lambda channel: pipeline
-)
+view = types.SimpleNamespace(reader=managed, dataset=dataset, pipeline=lambda channel: pipeline)
 task = qed.nexus.tile(
     view=view, channel="cred.amplitude", zoom=(4, 4), origin=(0, 0), shape=(32, 32)
 )
@@ -65,9 +63,7 @@ assert "sekrit" not in repr(task.identity)
 
 # render the reference inline
 reference = bytes(
-    memoryview(
-        dataset.render(channel=pipeline, zoom=(4, 4), origin=(0, 0), shape=(32, 32))
-    )
+    memoryview(dataset.render(channel=pipeline, zoom=(4, 4), origin=(0, 0), shape=(32, 32)))
 )
 
 # push the task through the wire and execute it the way a worker does; the rebuilt reader

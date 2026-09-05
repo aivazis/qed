@@ -208,9 +208,7 @@ class Build:
             # make a channel
             channel = journal.firewall("qed.nexus.build")
             # complain
-            channel.line(
-                f"while building level {self.exponent} of '{self.dataset.pyre_name}'"
-            )
+            channel.line(f"while building level {self.exponent} of '{self.dataset.pyre_name}'")
             channel.line(f"got records for level {exponent}")
             # flush
             channel.log()
@@ -272,9 +270,7 @@ class Build:
         # the dataset's own windows, in its own coordinates
         origins = qed.readers.windows(dataset=self.dataset, stops=self.windows)
         # each one lands in the tile of the first level that holds its decimation
-        return {
-            (origin[0] // 2 // tile[0], origin[1] // 2 // tile[1]) for origin in origins
-        }
+        return {(origin[0] // 2 // tile[0], origin[1] // 2 // tile[1]) for origin in origins}
 
     def _seeded(self) -> None:
         """
@@ -320,9 +316,7 @@ class Build:
         # make a channel
         channel = journal.warning("qed.nexus.build")
         # complain
-        channel.line(
-            f"could not build level {self.exponent} of '{self.dataset.pyre_name}'"
-        )
+        channel.line(f"could not build level {self.exponent} of '{self.dataset.pyre_name}'")
         channel.line(f"got: {error}")
         # flush
         channel.log()

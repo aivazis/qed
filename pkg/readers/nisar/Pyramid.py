@@ -66,9 +66,7 @@ class Pyramid:
                 # the tile does not move: it is in decimated coordinates, and the render
                 # scales it by whatever stride it is given, so the same origin lands on the
                 # same cells whichever level supplies them
-                return self._levels[candidate], tuple(
-                    level - candidate for level in zoom
-                )
+                return self._levels[candidate], tuple(level - candidate for level in zoom)
         # nothing was built, so the base owes the whole decimation
         return self._base, tuple(zoom)
 
@@ -191,17 +189,13 @@ class Pyramid:
                 # a tile that held anything was written
                 if record[0]:
                     # so name it in the record, at its place in tile order
-                    occupancy[
-                        (origin[0] // tile[0]) * columns + origin[1] // tile[1]
-                    ] = 1
+                    occupancy[(origin[0] // tile[0]) * columns + origin[1] // tile[1]] = 1
             # let go of the writable mapping; the level is complete
             del draft
             # commit the occupancy record, which is what makes the level exist
             self.commit(exponent=exponent, occupancy=occupancy)
             # and take hold of the level the way a reader would
-            self._levels[exponent] = self._open(
-                exponent=exponent, extent=extent, tile=tile
-            )
+            self._levels[exponent] = self._open(exponent=exponent, extent=extent, tile=tile)
             # show me
             channel.log(
                 f"{self._name}: level {exponent} of extent {extent}, "
@@ -276,9 +270,7 @@ class Pyramid:
         # the storage classes for cells of this type, the level a reader maps and the draft
         # a builder writes, gathered under the same cell name as the kernels
         self._cell = dataset.datatype.cell
-        self._storage = (
-            getattr(qed.libqed.pyramid, self._cell, None) if self._cell else None
-        )
+        self._storage = getattr(qed.libqed.pyramid, self._cell, None) if self._cell else None
         # what an unwritten chunk of a level must read back as. the decimation leaves a tile
         # unwritten exactly when it found no valid cell in it, and the only cell its kernels
         # call invalid is a nan -- so for a raster that can hold one, the fill is a nan and
@@ -383,9 +375,7 @@ class Pyramid:
             # carefully, since the files may not be what the record promises
             try:
                 # take hold of it
-                self._levels[exponent] = self._open(
-                    exponent=exponent, extent=extent, tile=tile
-                )
+                self._levels[exponent] = self._open(exponent=exponent, extent=extent, tile=tile)
             # a file of the wrong size, or one that has gone missing, is refused
             except journal.ApplicationError as error:
                 # make a channel
@@ -607,8 +597,7 @@ class Pyramid:
         """
         # the accumulator carries a population, its extrema, and the running moments
         return {
-            part: getattr(self.statistics, part)
-            for part in ("count", "min", "mean", "m2", "max")
+            part: getattr(self.statistics, part) for part in ("count", "min", "mean", "m2", "max")
         }
 
     def _tilesPath(self, exponent: int):
