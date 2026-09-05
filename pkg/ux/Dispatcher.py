@@ -135,9 +135,7 @@ class Dispatcher:
         # get its first dataset
         data, *_ = reader.datasets
         # if the requested view oversteps the raster, the native pipeline would crash
-        if not self._dataInBounds(
-            dataset=data, zoom=(zoom, zoom), origin=(0, 0), shape=view
-        ):
+        if not self._dataInBounds(dataset=data, zoom=(zoom, zoom), origin=(0, 0), shape=view):
             # the client derives the preview geometry from the product metadata, so an
             # overstep is a bug in whoever built the request
             firewall = journal.firewall("qed.ux.dispatch")
@@ -153,9 +151,7 @@ class Dispatcher:
         # get the first registered channel
         channel, *_ = data.channels.values()
         # render the tile
-        tile = data.render(
-            channel=channel, zoom=(zoom, zoom), origin=(0, 0), shape=view
-        )
+        tile = data.render(channel=channel, zoom=(zoom, zoom), origin=(0, 0), shape=view)
         # and send it to the client
         return server.documents.BMP(server=server, bmp=memoryview(tile))
 
@@ -275,9 +271,7 @@ class Dispatcher:
             firewall = journal.firewall("qed.ux.dispatch")
             # complain
             firewall.line(f"tile out of bounds")
-            firewall.line(
-                f"while fetching a tile of '{channelName}' from '{datasetName}'"
-            )
+            firewall.line(f"while fetching a tile of '{channelName}' from '{datasetName}'")
             firewall.line(f"with shape {shape} at {origin}, zoom {zoom}")
             firewall.line(f"of a dataset with shape {dataset.shape}")
             # flush
@@ -558,9 +552,7 @@ class Dispatcher:
             # tell me
             chnl = journal.warning("qed.nexus.tiles")
             # what happened
-            chnl.line(
-                f"could not map the payload of a '{channelName}' tile of '{datasetName}'"
-            )
+            chnl.line(f"could not map the payload of a '{channelName}' tile of '{datasetName}'")
             chnl.line(f"with shape {shape} at {origin}")
             chnl.line(f"got: {error}")
             chnl.line(f"the process is probably out of file descriptors")
@@ -570,9 +562,7 @@ class Dispatcher:
             if record is not None:
                 record(code=503, via="starved")
             # and let the client know; it can always ask again, and the render is cached
-            return deferred.resolve(
-                response=server.responses.ServiceUnavailable(server=server)
-            )
+            return deferred.resolve(response=server.responses.ServiceUnavailable(server=server))
         # and wrap it up as a document
         response = self._dataDocument(
             server=server,

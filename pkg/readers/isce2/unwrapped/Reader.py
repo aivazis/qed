@@ -181,9 +181,7 @@ class Reader(
                     # and show them
                     channel.line(f"{lines} x {samples}")
                 channel.outdent()
-                channel.line(
-                    f"please use '--lines' or '--samples' to provide the dataset shape"
-                )
+                channel.line(f"please use '--lines' or '--samples' to provide the dataset shape")
                 # flush
                 channel.log()
 

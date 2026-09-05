@@ -15,9 +15,7 @@ from .channels import channels as channelRegistry
 
 
 # raw dataset, i.e. a dataset in binary file with no metadata
-class Dataset(
-    qed.flow.product, family="qed.datasets.isce2.int", implements=qed.protocols.dataset
-):
+class Dataset(qed.flow.product, family="qed.datasets.isce2.int", implements=qed.protocols.dataset):
     """
     An interferogram
     """
@@ -215,9 +213,7 @@ class Dataset(
             channel.line(f"while looking for {uri}")
             channel.line(f"unsupported scheme '{uri.scheme}' in the dataset URI")
             channel.line(f"the isce2.int reader supports local datasets only")
-            channel.line(
-                f"please specify 'file:' as the dataset scheme, or drop it altogether"
-            )
+            channel.line(f"please specify 'file:' as the dataset scheme, or drop it altogether")
             # flush
             channel.log()
             # and bail
@@ -227,9 +223,7 @@ class Dataset(
         path = str(uri.address)
         # lay an erased grid of my cell type over the memory-mapped file and return it; it presents
         # the buffer protocol, which is what the tile generators consume
-        return qed.libpyre.grid.map(
-            uri=path, shape=self.shape, cell=self.cell.cell, create=False
-        )
+        return qed.libpyre.grid.map(uri=path, shape=self.shape, cell=self.cell.cell, create=False)
 
     def _collectStatistics(self):
         """
@@ -246,9 +240,7 @@ class Dataset(
         center = tuple((s - t) // 2 for s, t in zip(shape, tile))
 
         # compute the stats
-        stats = qed.libqed.isce2.interferogram.stats(
-            source=data, origin=center, shape=tile
-        )
+        stats = qed.libqed.isce2.interferogram.stats(source=data, origin=center, shape=tile)
         # and return them
         return stats
 

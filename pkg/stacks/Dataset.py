@@ -12,9 +12,7 @@ from qed.readers.nisar.products import channels
 
 
 # the aggregate dataset of a stack
-class Dataset(
-    qed.flow.product, family="qed.datasets.stack", implements=qed.protocols.dataset
-):
+class Dataset(qed.flow.product, family="qed.datasets.stack", implements=qed.protocols.dataset):
     """
     A dataset that renders aggregate views over the members of a stack
     """

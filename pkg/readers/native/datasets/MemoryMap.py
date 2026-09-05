@@ -90,9 +90,7 @@ class MemoryMap(
         Sample my data along the path defined by {points}
         """
         # ask my data manager to build a profile
-        profile = qed.libqed.native.profile(
-            source=self.data, points=points, closed=closed
-        )
+        profile = qed.libqed.native.profile(source=self.data, points=points, closed=closed)
         # and return it
         return profile
 
@@ -111,9 +109,7 @@ class MemoryMap(
         # the render pipeline decimates by striding
         stride = tuple(2**level for level in zoom)
         # sample the strided footprint and return the mergeable record
-        return qed.libqed.native.sample(
-            source=self.data, origin=origin, shape=shape, stride=stride
-        )
+        return qed.libqed.native.sample(source=self.data, origin=origin, shape=shape, stride=stride)
 
     def summary(self):
         """
@@ -231,9 +227,7 @@ class MemoryMap(
             channel.line(f"while looking for {uri}")
             channel.line(f"unsupported scheme '{uri.scheme}' in the dataset URI")
             channel.line(f"the native reader supports local datasets only")
-            channel.line(
-                f"please specify 'file:' as the dataset scheme, or drop it altogether"
-            )
+            channel.line(f"please specify 'file:' as the dataset scheme, or drop it altogether")
             # flush
             channel.log()
             # and bail
@@ -266,9 +260,7 @@ class MemoryMap(
             channel = journal.error("qed.readers.native")
             # complain
             channel.line(f"'{path}' is too small for the declared shape")
-            channel.line(
-                f"shape {tuple(self.shape)} of {self.cell.cell} cells requires"
-            )
+            channel.line(f"shape {tuple(self.shape)} of {self.cell.cell} cells requires")
             channel.line(f"{required} bytes, but the file holds only {actual}")
             # flush
             channel.log()

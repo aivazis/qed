@@ -12,9 +12,7 @@ import qed
 
 
 # a stack of readers, presented to the rest of {qed} as an aggregate reader
-class Stack(
-    qed.flow.factory, family="qed.readers.stack", implements=qed.protocols.reader
-):
+class Stack(qed.flow.factory, family="qed.readers.stack", implements=qed.protocols.reader):
     """
     A stack of readers whose datasets are rendered through aggregate channels
     """
@@ -201,9 +199,7 @@ class Stack(
             # form the full name
             name = f"{self.pyre_name}.{suffix}"
             # build the aggregate dataset over the gathered members
-            dataset = qed.stacks.dataset(
-                name=name, members=members, selector=dict(selector)
-            )
+            dataset = qed.stacks.dataset(name=name, members=members, selector=dict(selector))
             # and add it to my pile
             self.datasets.append(dataset)
         # all done

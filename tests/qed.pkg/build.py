@@ -122,9 +122,7 @@ def watch(name):
 # go through the rasters
 for name, raster in (("covariance", covariance), ("mask", mask)):
     # the pyramid the server lays out
-    pyramid = qed.readers.nisar.pyramid(
-        reader=gcov, dataset=raster, workspace=workspace
-    )
+    pyramid = qed.readers.nisar.pyramid(reader=gcov, dataset=raster, workspace=workspace)
     # and the build
     builds[name] = qed.nexus.build(
         reader=gcov,
@@ -165,9 +163,7 @@ for name, build in builds.items():
         assert pyramid.holds(exponent=exponent), (name, exponent)
         # its record names as many tiles as the level has
         _, _, grid = pyramid.layout(exponent=exponent)
-        record = open(
-            str(pyramid.home / f"level-{exponent:02d}.occupancy"), "rb"
-        ).read()
+        record = open(str(pyramid.home / f"level-{exponent:02d}.occupancy"), "rb").read()
         assert len(record) == grid[0] * grid[1], (name, exponent)
     # and the sidecar is beside them
     assert pyramid.sidecar.exists(), name
@@ -194,9 +190,7 @@ theirs = builds["covariance"].statistics
 assert theirs.count == reference.statistics.count
 assert theirs.min == reference.statistics.min
 assert theirs.max == reference.statistics.max
-assert abs(theirs.mean - reference.statistics.mean) < 1e-9 * abs(
-    reference.statistics.mean
-)
+assert abs(theirs.mean - reference.statistics.mean) < 1e-9 * abs(reference.statistics.mean)
 assert abs(theirs.m2 - reference.statistics.m2) < 1e-9 * abs(reference.statistics.m2)
 
 # a reader attaching to the crew's levels serves the same cells as one attaching to the
@@ -213,9 +207,7 @@ for exponent in range(1, reference.reach() + 1):
     # the samples agree
     assert kernels.sample(
         source=theirs.at(exponent=exponent), datatype=datatype, **window
-    ) == kernels.sample(
-        source=reference.at(exponent=exponent), datatype=datatype, **window
-    )
+    ) == kernels.sample(source=reference.at(exponent=exponent), datatype=datatype, **window)
 # and the first level holds data there
 assert kernels.sample(source=theirs.at(exponent=1), datatype=datatype, **window)[0] > 0
 

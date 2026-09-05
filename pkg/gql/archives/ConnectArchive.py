@@ -66,9 +66,7 @@ class ConnectArchive(graphene.Mutation):
         elif uri.scheme == "s3":
             # initialize the credentials
             tokens = {
-                token["name"]: token["value"]
-                for token in credentials.tokens
-                if token["value"]
+                token["name"]: token["value"] for token in credentials.tokens if token["value"]
             }
             # build the archive and mount it
             archive = qed.archives.s3(name=name, uri=uri, **tokens)

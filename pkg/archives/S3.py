@@ -117,9 +117,7 @@ class S3(Archive, family="qed.archives.s3"):
             # make an explorer
             explorer = qed.filesystem.treeExplorer()
             # show me
-            channel.report(
-                report=explorer.explore(node=self.fs, label=self.fs.location().address)
-            )
+            channel.report(report=explorer.explore(node=self.fs, label=self.fs.location().address))
             # flush
             channel.log()
 

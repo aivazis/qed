@@ -49,9 +49,7 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         Compute the channel representation of a {pixel}
         """
         # don't kow what to do
-        raise NotImplementedError(
-            f"class {type(self).__name__} must implement 'project'"
-        )
+        raise NotImplementedError(f"class {type(self).__name__} must implement 'project'")
 
     def tile(self, source, zoom, origin, shape, datatype, **kwds):
         """

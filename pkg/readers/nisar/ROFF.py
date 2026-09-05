@@ -73,9 +73,7 @@ class ROFF(H5):
                     channel = journal.warning("qed.nisar.roff")
                     # and complain
                     channel.line(f"while exploring '{self.pyre_name}'")
-                    channel.line(
-                        f"no '{frequency}' frequency in the '{band}'-band swaths"
-                    )
+                    channel.line(f"no '{frequency}' frequency in the '{band}'-band swaths")
                     # flush
                     channel.log()
                     # and move on

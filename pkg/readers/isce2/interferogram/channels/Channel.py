@@ -59,9 +59,7 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         stride = tuple(2**level for level in zoom)
 
         # ask it to make a tile and return it
-        return pipeline(
-            source=source.data, origin=origin, shape=shape, stride=stride, **kwds
-        )
+        return pipeline(source=source.data, origin=origin, shape=shape, stride=stride, **kwds)
 
     def update(self, **kwds):
         """

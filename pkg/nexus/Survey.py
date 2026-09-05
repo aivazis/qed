@@ -61,9 +61,7 @@ class Survey(Chore):
         # rather than opening the file a second time
         # access credentials are not part of what is discovered: a rotated token must not
         # make an in-flight survey look like different work
-        spec = {
-            name: value for name, value in self.config.items() if name != "credentials"
-        }
+        spec = {name: value for name, value in self.config.items() if name != "credentials"}
         self.identity = self._freeze(value=(self.reader, self.factory, spec))
         # all done
         return

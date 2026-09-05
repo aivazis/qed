@@ -70,9 +70,7 @@ class Tile(Chore):
             try:
                 # revisit the footprint this render saw and attach the mergeable record to
                 # the report, so the team side can accumulate whole-dataset statistics
-                spool.stats = sample(
-                    zoom=self.zoom, origin=self.origin, shape=self.shape
-                )
+                spool.stats = sample(zoom=self.zoom, origin=self.origin, shape=self.shape)
             # let the sample die quietly on any failure
             except Exception:
                 # the tile is still good; it just doesn't contribute statistics
@@ -117,9 +115,7 @@ class Tile(Chore):
             workspace = qed.workspaces.local(name=f"{self.reader}.crew.workspace")
             workspace.path = self.workspace
             # take hold of the pyramid and find out which levels it holds
-            pyramid = qed.readers.nisar.pyramid(
-                reader=reader, dataset=dataset, workspace=workspace
-            )
+            pyramid = qed.readers.nisar.pyramid(reader=reader, dataset=dataset, workspace=workspace)
             # take hold of whatever levels are there; a pyramid that finds none answers
             # every request with the base, which is what this dataset did anyway
             pyramid.attach()
@@ -184,9 +180,7 @@ class Tile(Chore):
         # equal tasks can share a single execution
         # access credentials are not part of what is rendered: a rotated token must not
         # invalidate cached work
-        spec = {
-            name: value for name, value in self.config.items() if name != "credentials"
-        }
+        spec = {name: value for name, value in self.config.items() if name != "credentials"}
         self.identity = self._freeze(
             value=(
                 self.reader,

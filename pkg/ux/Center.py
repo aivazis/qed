@@ -11,9 +11,7 @@ import uuid
 
 
 # the look-at control
-class Center(
-    qed.component, family="qed.ux.center.center", implements=qed.protocols.ux.center
-):
+class Center(qed.component, family="qed.ux.center.center", implements=qed.protocols.ux.center):
     """
     The source pixel that sits at the center of the viewport
     """

@@ -143,9 +143,7 @@ class Debug(qed.shells.command, family="qed.cli.debug"):
                 channel = journal.error("merlin.debug.vfs")
                 # complain
                 channel.line(f"could not find '{part}' in '{folder.uri}'")
-                channel.line(
-                    f"while scanning for '{prefix}' in the virtual file system"
-                )
+                channel.line(f"while scanning for '{prefix}' in the virtual file system")
                 # flush
                 channel.log()
                 # and bail if errors aren't fatal

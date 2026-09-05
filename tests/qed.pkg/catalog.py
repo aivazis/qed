@@ -69,9 +69,7 @@ assert [source.pyre_name for source in registry.sources()] == [
 
 # now let the middle one finish its survey and re-register, carrying the datasets the survey
 # found; this is what the store does when a crew reports back
-registry.addSource(
-    source=Source(name="second", datasets=[Dataset(name="second.discovered")])
-)
+registry.addSource(source=Source(name="second", datasets=[Dataset(name="second.discovered")]))
 # the catalog must not have moved
 assert [source.pyre_name for source in registry.sources()] == [
     "first",

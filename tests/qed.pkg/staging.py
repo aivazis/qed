@@ -93,9 +93,7 @@ assert readers[0]["status"] == "ready"
 assert len(store.source(name="solo").datasets) > 0
 
 # staging again, confined to the named source, is a harmless no-op
-result = qed.gql.schema.execute(
-    stage, context=context, variables={"payload": {"reader": "solo"}}
-)
+result = qed.gql.schema.execute(stage, context=context, variables={"payload": {"reader": "solo"}})
 # it succeeds
 assert result.errors is None
 # and still reports readiness

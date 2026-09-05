@@ -82,9 +82,7 @@ def storeLookAt():
     # a stand-in viewport that delegates to a view carrying a center
     def makePort(tag):
         # the view this port wraps
-        view = types.SimpleNamespace(
-            center=types.SimpleNamespace(row=0, col=0, tag=tag)
-        )
+        view = types.SimpleNamespace(center=types.SimpleNamespace(row=0, col=0, tag=tag))
 
         # its look-at delegate records the call and moves the center
         def portLookAt(row, col):

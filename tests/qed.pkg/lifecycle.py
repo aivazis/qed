@@ -158,18 +158,14 @@ assert twin.data is None
 assert store.realize(dataset=twin).data is not None
 
 # a second source, this time one whose survey fails
-store.connectSource(
-    source=qed.readers.nisar.gslc(name="doomed", uri="file:/nope/missing.h5")
-)
+store.connectSource(source=qed.readers.nisar.gslc(name="doomed", uri="file:/nope/missing.h5"))
 # stage it alone
 store.stage(name="doomed")
 # it went to the crew
 assert len(fleet.requests) == 2
 # deliver the failure the way a team reports a casualty
 reader, callback = fleet.requests[1]
-callback(
-    result=None, error=qed.nexus.exceptions.RecoverableError(description="no file")
-)
+callback(result=None, error=qed.nexus.exceptions.RecoverableError(description="no file"))
 
 # the source is marked as failed
 assert store.lifecycle(name="doomed").status == "failed"

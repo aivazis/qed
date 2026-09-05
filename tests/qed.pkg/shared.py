@@ -30,15 +30,11 @@ dataset, *_ = reader.datasets
 pipeline = dataset.channel(name="amplitude")
 # render the reference tile inline
 reference = bytes(
-    memoryview(
-        dataset.render(channel=pipeline, zoom=(0, 0), origin=(0, 0), shape=(64, 64))
-    )
+    memoryview(dataset.render(channel=pipeline, zoom=(0, 0), origin=(0, 0), shape=(64, 64)))
 )
 
 # assemble a stand-in for the view state behind a tile request
-view = types.SimpleNamespace(
-    reader=reader, dataset=dataset, pipeline=lambda channel: pipeline
-)
+view = types.SimpleNamespace(reader=reader, dataset=dataset, pipeline=lambda channel: pipeline)
 
 
 # a task builder with fixed geometry, so the two requests compare equal

@@ -15,9 +15,7 @@ from .channels import channels as channelRegistry
 
 
 # raw dataset, i.e. a dataset in binary file with no metadata
-class Dataset(
-    qed.flow.product, family="qed.datasets.isce2.unw", implements=qed.protocols.dataset
-):
+class Dataset(qed.flow.product, family="qed.datasets.isce2.unw", implements=qed.protocols.dataset):
     """
     A line interleaved unwrapped interferogram
     """
@@ -84,9 +82,7 @@ class Dataset(
         Sample my data along the path defined by {points}
         """
         # ask my data manager to build a profile
-        profile = qed.libqed.isce2.unwrapped.profile(
-            source=self.data, points=points, closed=closed
-        )
+        profile = qed.libqed.isce2.unwrapped.profile(source=self.data, points=points, closed=closed)
         # and return it
         return profile
 
@@ -215,9 +211,7 @@ class Dataset(
             channel.line(f"while looking for {uri}")
             channel.line(f"unsupported scheme '{uri.scheme}' in the dataset URI")
             channel.line(f"the isce2.unw reader supports local datasets only")
-            channel.line(
-                f"please specify 'file:' as the dataset scheme, or drop it altogether"
-            )
+            channel.line(f"please specify 'file:' as the dataset scheme, or drop it altogether")
             # flush
             channel.log()
             # and bail
@@ -227,9 +221,7 @@ class Dataset(
         path = str(uri.address)
         # lay an erased grid of my cell type over the memory-mapped file and return it; it presents
         # the buffer protocol, which is what the tile generators consume
-        return qed.libpyre.grid.map(
-            uri=path, shape=self.layout, cell=self.cell.cell, create=False
-        )
+        return qed.libpyre.grid.map(uri=path, shape=self.layout, cell=self.cell.cell, create=False)
 
     def _collectStatistics(self):
         """
@@ -254,9 +246,7 @@ class Dataset(
             # spanning that one band
             shape = (tile[0], 1, tile[1])
             # compute the stats
-            channelStats = qed.libqed.isce2.unwrapped.stats(
-                source=data, origin=origin, shape=shape
-            )
+            channelStats = qed.libqed.isce2.unwrapped.stats(source=data, origin=origin, shape=shape)
             # and add them to the pile
             stats.append(channelStats)
 

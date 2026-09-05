@@ -33,9 +33,7 @@ class Node(graphene.relay.Node):
         # that's almost certainly a bug
         channel = journal.firewall("qed.gql.schema")
         # so, complain
-        channel.log(
-            f"while attempting to resolve {entity}: unknown type '{entity.typename}'"
-        )
+        channel.log(f"while attempting to resolve {entity}: unknown type '{entity.typename}'")
         # and, just in case firewalls are not fatal, send a generic node back
         return Node
 

@@ -53,11 +53,7 @@ assert (
 # a lone scalar deposits a partial shape, with a zero in the unspecified rank, for the
 # size-based inference of the flat readers to complete
 assert (
-    scenario(
-        "import qed\n"
-        "app = qed.shells.qed(name='t', lines=100)\n"
-        "print(app.shape)\n"
-    )
+    scenario("import qed\n" "app = qed.shells.qed(name='t', lines=100)\n" "print(app.shape)\n")
     == "(100, 0)"
 )
 
@@ -84,9 +80,7 @@ assert (
 # a web shell serves tiles with the concurrent flavor by default
 assert (
     scenario(
-        "import qed\n"
-        "app = qed.shells.qed(name='t', shell='web')\n"
-        "print(app.shell.service)\n"
+        "import qed\n" "app = qed.shells.qed(name='t', shell='web')\n" "print(app.shell.service)\n"
     )
     == "import:qed.nexus.server"
 )

@@ -33,9 +33,7 @@ class Query(graphene.ObjectType):
     # the session manager
     qed = graphene.Field(QED)
     # directory contents
-    contents = graphene.List(
-        Item, required=True, archive=graphene.String(), path=graphene.String()
-    )
+    contents = graphene.List(Item, required=True, archive=graphene.String(), path=graphene.String())
     # dataset auto discovery
     discover = graphene.Field(
         ProductMetadata,

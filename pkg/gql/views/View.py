@@ -66,11 +66,7 @@ class View(graphene.ObjectType):
         # a view is renderable once its source, its dataset, and the channel that shapes
         # the render have all been bound; the client used to infer this from three
         # nullable joins, which made readiness its business rather than the server's
-        return (
-            view.reader is not None
-            and view.dataset is not None
-            and view.channel is not None
-        )
+        return view.reader is not None and view.dataset is not None and view.channel is not None
 
     @staticmethod
     def resolve_preparing(view, info, **kwds):

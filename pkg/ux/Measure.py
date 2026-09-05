@@ -11,9 +11,7 @@ import uuid
 
 
 # the sync control
-class Measure(
-    qed.component, family="qed.ux.measure.measure", implements=qed.protocols.ux.measure
-):
+class Measure(qed.component, family="qed.ux.measure.measure", implements=qed.protocols.ux.measure):
     """
     The measure layer options for a dataset
     """

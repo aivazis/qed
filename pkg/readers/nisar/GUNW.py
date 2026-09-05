@@ -84,9 +84,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
                     channel = journal.warning("qed.nisar.gunw")
                     # and complain
                     channel.line(f"while exploring '{self.pyre_name}'")
-                    channel.line(
-                        f"no frequency '{frequency}' in the band '{band}' grids"
-                    )
+                    channel.line(f"no frequency '{frequency}' in the band '{band}' grids")
                     # flush
                     channel.log()
                     # and move on
@@ -127,9 +125,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
             channel = journal.warning("qed.nisar.gunw")
             # and complain
             channel.line(f"while exploring '{self.pyre_name}'")
-            channel.line(
-                f"no polarization '{polarization}' in the '{frequency}' interferogram"
-            )
+            channel.line(f"no polarization '{polarization}' in the '{frequency}' interferogram")
             # flush
             channel.log()
             # and bail
@@ -320,9 +316,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
             channel = journal.warning("qed.nisar.gunw")
             # and complain
             channel.line(f"while exploring '{self.pyre_name}'")
-            channel.line(
-                f"no polarization '{polarization}' in the '{frequency}' interferogram"
-            )
+            channel.line(f"no polarization '{polarization}' in the '{frequency}' interferogram")
             # flush
             channel.log()
             # and bail
@@ -437,9 +431,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw"):
         # otherwise
         else:
             # generate a name for the dataset
-            name = (
-                f"{self.pyre_name}.{band}.{frequency}.{polarization}.wrappedCoherence"
-            )
+            name = f"{self.pyre_name}.{band}.{frequency}.{polarization}.wrappedCoherence"
             # build its selector
             selector = {
                 "band": band,

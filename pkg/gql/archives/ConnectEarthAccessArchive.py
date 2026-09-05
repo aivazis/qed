@@ -114,9 +114,7 @@ class ConnectEarthAccessArchive(graphene.Mutation):
             # build the name of the filter
             filterName = f"{name}.window"
             # make a time interval filter
-            filter = qed.archives.window(
-                name=filterName, begin=when["begin"], end=when["end"]
-            )
+            filter = qed.archives.window(name=filterName, begin=when["begin"], end=when["end"])
             # add it to the pile
             selectedFilters.append(filter)
         #  next, the geographical searches
@@ -148,9 +146,7 @@ class ConnectEarthAccessArchive(graphene.Mutation):
             # if it's a polygon
             elif geo == "polygon":
                 # parse the vertices
-                vertices = qed.archives.polygon.parseVertices(
-                    payload=polygon["vertices"]
-                )
+                vertices = qed.archives.polygon.parseVertices(payload=polygon["vertices"])
                 # and build the filter
                 filter = qed.archives.polygon(name=filterName, vertices=vertices)
             # otherwise
@@ -159,9 +155,7 @@ class ConnectEarthAccessArchive(graphene.Mutation):
                 bug = journal.firewall("qed.gql.connectArhive.earth")
                 # report
                 bug.line(f"unknown geo filter '{geo}'")
-                bug.line(
-                    f"while attempting to connect '{name}', an earth access archive"
-                )
+                bug.line(f"while attempting to connect '{name}', an earth access archive")
                 bug.log()
                 # and bail, just in case firewalls aren't fatal
                 return

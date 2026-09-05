@@ -36,9 +36,7 @@ def census(tile, shape):
     raw = bytes(memoryview(tile))
     body = raw[len(raw) - shape[0] * shape[1] * 3 :]
     # gather them, remembering that a bitmap stores its channels in reverse
-    tally = Counter(
-        (body[at + 2], body[at + 1], body[at]) for at in range(0, len(body), 3)
-    )
+    tally = Counter((body[at + 2], body[at + 1], body[at]) for at in range(0, len(body), 3))
     # hand back the pile
     return tally
 
@@ -83,9 +81,7 @@ assert (
 # the channels that build their own pipeline paint the difference
 for tag in ("covariance", "covarianceMasked"):
     # render the corner, which is nothing but absence
-    tile = covariance.render(
-        channel=covariance.channel(name=tag), zoom=(0, 0), **corner
-    )
+    tile = covariance.render(channel=covariance.channel(name=tag), zoom=(0, 0), **corner)
     # take stock of what came out
     tally = census(tile=tile, shape=corner["shape"])
     # every cell of it is a nan the product never declared, so the whole tile is one color

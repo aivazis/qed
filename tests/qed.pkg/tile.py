@@ -35,15 +35,11 @@ low = pipeline.amplitude.low
 pipeline.amplitude.low = low + 0.05
 # render the reference tile with the adjusted pipeline
 reference = bytes(
-    memoryview(
-        dataset.render(channel=pipeline, zoom=(0, 0), origin=(0, 0), shape=(64, 64))
-    )
+    memoryview(dataset.render(channel=pipeline, zoom=(0, 0), origin=(0, 0), shape=(64, 64)))
 )
 
 # assemble a stand-in for the view state behind a tile request
-view = types.SimpleNamespace(
-    reader=reader, dataset=dataset, pipeline=lambda channel: pipeline
-)
+view = types.SimpleNamespace(reader=reader, dataset=dataset, pipeline=lambda channel: pipeline)
 # describe the tile as a task
 task = qed.nexus.tile(
     view=view, channel="d16.amplitude", zoom=(0, 0), origin=(0, 0), shape=(64, 64)
@@ -67,9 +63,7 @@ assert tile == reference
 pipeline.amplitude.low = low
 # render the unadjusted tile
 unadjusted = bytes(
-    memoryview(
-        dataset.render(channel=pipeline, zoom=(0, 0), origin=(0, 0), shape=(64, 64))
-    )
+    memoryview(dataset.render(channel=pipeline, zoom=(0, 0), origin=(0, 0), shape=(64, 64)))
 )
 # and check that the adjustment was actually visible, so the comparison above has teeth
 assert tile != unadjusted

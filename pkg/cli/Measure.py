@@ -42,9 +42,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     # sweep geometry
     shapes = qed.properties.tuple(schema=qed.properties.int())
     shapes.default = (8, 12)
-    shapes.doc = (
-        "the half open range of tile shape exponents; (8,12) sweeps 256 through 2048"
-    )
+    shapes.doc = "the half open range of tile shape exponents; (8,12) sweeps 256 through 2048"
 
     zooms = qed.properties.tuple(schema=qed.properties.int())
     zooms.default = (0, 3)
@@ -154,9 +152,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if first is None:
             # complain
             error = journal.error("qed.measure.swarm")
-            error.log(
-                "no dataset to measure; check the configuration and the restrictions"
-            )
+            error.log("no dataset to measure; check the configuration and the restrictions")
             # and bail
             return 1
         # unpack the target
@@ -171,9 +167,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if not origins:
             # complain
             error = journal.error("qed.measure.swarm")
-            error.log(
-                f"'{dataset.pyre_name}' cannot fit a {span}x{span} tile at zoom {zoom}"
-            )
+            error.log(f"'{dataset.pyre_name}' cannot fit a {span}x{span} tile at zoom {zoom}")
             # and bail
             return 1
         # if the raster ran out of room before the workload filled up
@@ -194,9 +188,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             if not self._ready():
                 # if it never came up, complain
                 error = journal.error("qed.measure.swarm")
-                error.log(
-                    f"the server on port {self.port} never came up; see '{log.name}'"
-                )
+                error.log(f"the server on port {self.port} never came up; see '{log.name}'")
                 # and bail
                 return 1
             # the tile path resolves its reader through server side view state, so drive the
@@ -220,9 +212,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 # collect the level
                 results.append((workers, elapsed, rate, latencies, failures))
                 # show me
-                channel.line(
-                    f"{workers:4} clients: {rate:6.1f} tiles/s, batch {elapsed:.0f} ms"
-                )
+                channel.line(f"{workers:4} clients: {rate:6.1f} tiles/s, batch {elapsed:.0f} ms")
         # no matter how the sweep went
         finally:
             # bring the server down
@@ -262,9 +252,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if first is None:
             # complain
             error = journal.error("qed.measure.crew")
-            error.log(
-                "no dataset to measure; check the configuration and the restrictions"
-            )
+            error.log("no dataset to measure; check the configuration and the restrictions")
             # and bail
             return 1
         # unpack the target
@@ -305,9 +293,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 if not self._ready():
                     # if it never came up, complain
                     error = journal.error("qed.measure.crew")
-                    error.log(
-                        f"the server on port {self.port} never came up; see '{log.name}'"
-                    )
+                    error.log(f"the server on port {self.port} never came up; see '{log.name}'")
                     # and bail
                     return 1
                 # the tile path resolves its reader through server side view state, so
@@ -424,9 +410,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 # mark it
                 seen.add(reader.pyre_name)
                 # read the open time costs its constructor accumulated
-                discovery = qed.timers.wall(
-                    f"qed.profiler.discovery.{reader.pyre_name}"
-                ).ms()
+                discovery = qed.timers.wall(f"qed.profiler.discovery.{reader.pyre_name}").ms()
                 stats = qed.timers.wall(f"qed.profiler.stats.{reader.pyre_name}").ms()
                 # and report them; they are the per-dataset part of the fixed cost
                 channel.line(
@@ -437,9 +421,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # go through the measurement points
             for span, zoom in self._points(dataset=dataset):
                 # show me
-                channel.line(
-                    f"  {dataset.pyre_name}.{name}: {span}x{span} @ zoom {zoom}"
-                )
+                channel.line(f"  {dataset.pyre_name}.{name}: {span}x{span} @ zoom {zoom}")
                 # repeat the point
                 for trial in range(self.trials):
                     # read the clocks
@@ -517,9 +499,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                     f"--output={self.output}",
                 ]
                 # show me
-                channel.line(
-                    f"fresh: {dataset.pyre_name}.{name}: {span}x{span} @ zoom {zoom}"
-                )
+                channel.line(f"fresh: {dataset.pyre_name}.{name}: {span}x{span} @ zoom {zoom}")
                 # launch and wait
                 got = subprocess.run(cmd)
                 # if the point failed
@@ -527,8 +507,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                     # a missing point silently skews the fit, so make it loud
                     warning = journal.warning("qed.measure.tile")
                     warning.log(
-                        f"point failed: {dataset.pyre_name}.{name} "
-                        f"{span}x{span} @ zoom {zoom}"
+                        f"point failed: {dataset.pyre_name}.{name} " f"{span}x{span} @ zoom {zoom}"
                     )
         # flush the progress report
         channel.log()
@@ -701,9 +680,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # a positive slope has a meaningful throughput reading
             if b > 0:
                 # so include it
-                channel.line(
-                    f"    b: {b * 1e6:.1f} ns per unit ({1 / (b * 1000):.1f} M/s)"
-                )
+                channel.line(f"    b: {b * 1e6:.1f} ns per unit ({1 / (b * 1000):.1f} M/s)")
             # a vanishing or negative slope means the fixed cost dominates at these sizes
             else:
                 # report it raw
@@ -835,9 +812,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # selection alone, so pin each axis to the coordinate that identifies my target
         for axis, value in dict(dataset.selector).items():
             # read back what the view currently holds for this axis
-            reply = self._graphql(
-                query="{ qed { views { selections { name value } } } }"
-            )
+            reply = self._graphql(query="{ qed { views { selections { name value } } } }")
             # unpack the selections of viewport 0
             current = {
                 entry["name"]: entry["value"]
@@ -965,9 +940,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # attempt to
         try:
             # ask it to shut down
-            with urllib.request.urlopen(
-                f"http://127.0.0.1:{self.port}/stop", timeout=5
-            ):
+            with urllib.request.urlopen(f"http://127.0.0.1:{self.port}/stop", timeout=5):
                 # nothing else to do with the response
                 pass
         # the server may drop the connection while dying; that's a successful stop

@@ -57,8 +57,7 @@ class Chore(pyre.nexus.task):
             ):
                 # each member contributes its factory and its own recipe
                 config[name] = tuple(
-                    (item.pyre_family(), self._harvestReader(reader=item))
-                    for item in value
+                    (item.pyre_family(), self._harvestReader(reader=item)) for item in value
                 )
                 # on to the next trait
                 continue
@@ -116,9 +115,7 @@ class Chore(pyre.nexus.task):
         # go through the facilities, e.g. the controllers of a channel pipeline
         for trait in component.pyre_facilities():
             # and capture each part recursively
-            config[trait.name] = self._harvestComponent(
-                component=getattr(component, trait.name)
-            )
+            config[trait.name] = self._harvestComponent(component=getattr(component, trait.name))
         # hand off the pile
         return config
 
@@ -139,10 +136,7 @@ class Chore(pyre.nexus.task):
         # tables travel entry by entry
         if isinstance(value, dict):
             # reduce the entries
-            entries = {
-                key: self._scrub(value=item, strict=strict)
-                for key, item in value.items()
-            }
+            entries = {key: self._scrub(value=item, strict=strict) for key, item in value.items()}
             # a table with an opaque entry is itself opaque
             return self._opaque if self._opaque in entries.values() else entries
         # in strict mode, nothing else makes the cut
@@ -159,9 +153,7 @@ class Chore(pyre.nexus.task):
         # tables freeze entry by entry, in a canonical order
         if isinstance(value, dict):
             # as sorted tuples of frozen pairs
-            return tuple(
-                (key, self._freeze(value=item)) for key, item in sorted(value.items())
-            )
+            return tuple((key, self._freeze(value=item)) for key, item in sorted(value.items()))
         # sequences freeze member by member
         if isinstance(value, (tuple, list)):
             # in a tuple
@@ -197,10 +189,7 @@ class Chore(pyre.nexus.task):
                 isinstance(value, tuple)
                 and value
                 and all(isinstance(item, tuple) and len(item) == 2 for item in value)
-                and all(
-                    isinstance(item[0], str) and isinstance(item[1], dict)
-                    for item in value
-                )
+                and all(isinstance(item[0], str) and isinstance(item[1], dict) for item in value)
             ):
                 # resurrect each member with its own file handles
                 config[name] = [
@@ -231,9 +220,7 @@ class Chore(pyre.nexus.task):
                 # hand it off
                 return dataset
         # not finding one means the reconstruction diverged from the team side view
-        raise self.RecoverableError(
-            description=f"no dataset matches the selector {self.selector}"
-        )
+        raise self.RecoverableError(description=f"no dataset matches the selector {self.selector}")
 
     def _configure(self, component, config):
         """

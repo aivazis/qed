@@ -38,17 +38,15 @@ class Server(http, family="qed.nexus.servers.http"):
     period.doc = "how often the heartbeat reports that the event loop is still turning"
 
     descriptors = pyre.properties.int(default=None)
-    descriptors.doc = "the descriptor ceiling to ask for at startup; left unset, as many as the system allows"
+    descriptors.doc = (
+        "the descriptor ceiling to ask for at startup; left unset, as many as the system allows"
+    )
 
     history = pyre.properties.int(default=2048)
-    history.doc = (
-        "how many journal records to keep for clients that open the console late"
-    )
+    history.doc = "how many journal records to keep for clients that open the console late"
 
     latency = pyre.properties.dimensional(default=0.1 * second)
-    latency.doc = (
-        "how long journal records accumulate before going out to clients as a batch"
-    )
+    latency.doc = "how long journal records accumulate before going out to clients as a batch"
 
     # protocol obligations
     @pyre.export(tip="register this service with the nexus")
@@ -225,9 +223,7 @@ class Server(http, family="qed.nexus.servers.http"):
             fleet = getattr(ux.store, "fleet", None) if ux is not None else None
             # describe each team that has been formed
             teams = (
-                " | ".join(
-                    f"{name}: {team.census()}" for name, team in fleet.teams.items()
-                )
+                " | ".join(f"{name}: {team.census()}" for name, team in fleet.teams.items())
                 if fleet is not None and fleet.teams
                 else "no teams yet"
             )
@@ -288,9 +284,7 @@ class Server(http, family="qed.nexus.servers.http"):
     fleet = None  # the manager of the tile rendering teams, built at activation
     journal = None  # the device that records and publishes journal entries, installed at activation
     _changeFrame = None  # the constant change notification frame, built on first use
-    _app = (
-        None  # the application, held so the heartbeat can describe what it is carrying
-    )
+    _app = None  # the application, held so the heartbeat can describe what it is carrying
     _beat = 0  # how many times the heartbeat has been raised
 
 

@@ -92,9 +92,7 @@ assert amplitude.auto is False
 # a hand-set extent that encroaches on the picks
 try:
     # is refused
-    ux.store.vizResizeController(
-        viewport=0, channel=channel, name="amplitude", min=0.0, max=1.0
-    )
+    ux.store.vizResizeController(viewport=0, channel=channel, name="amplitude", min=0.0, max=1.0)
 # loudly
 except journal.ApplicationError:
     # as expected
@@ -115,9 +113,7 @@ assert view.session == session
 # a value controller behaves the same way; an extent that leaves the pick outside
 try:
     # is refused
-    ux.store.vizResizeController(
-        viewport=0, channel=channel, name="saturation", min=0.5, max=0.6
-    )
+    ux.store.vizResizeController(viewport=0, channel=channel, name="saturation", min=0.5, max=0.6)
 # loudly
 except journal.ApplicationError:
     # as expected
@@ -147,9 +143,7 @@ assert controller is saturation
 assert saturation.auto is True
 assert (saturation.min, saturation.value, saturation.max) == (0.4, 0.4, 1.0)
 # pinning it again is just as quiet
-ux.store.vizSetControllerAuto(
-    viewport=0, channel=channel, name="saturation", auto=False
-)
+ux.store.vizSetControllerAuto(viewport=0, channel=channel, name="saturation", auto=False)
 assert saturation.auto is False
 
 # seed the accumulated statistics of the dataset on display, the way rendered tiles would

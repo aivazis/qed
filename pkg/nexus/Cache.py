@@ -30,7 +30,9 @@ class Cache(qed.component, family="qed.nexus.caches.tile"):
     capacity.doc = "the total payload size to hold, in bytes; zero disables the cache"
 
     slots = qed.properties.int(default=None)
-    slots.doc = "the most entries to hold; left unset, a quarter of the process's descriptor ceiling"
+    slots.doc = (
+        "the most entries to hold; left unset, a quarter of the process's descriptor ceiling"
+    )
 
     # interface
     def census(self) -> str:
@@ -95,9 +97,7 @@ class Cache(qed.component, family="qed.nexus.caches.tile"):
         # and adjust the books
         self.held += spool.size
         # while either budget is exceeded, the bytes or the descriptors
-        while (
-            self.held > self.capacity or len(self.entries) > self.limit
-        ) and self.entries:
+        while (self.held > self.capacity or len(self.entries) > self.limit) and self.entries:
             # evict the least recently used entry
             victim, evicted = self.entries.popitem(last=False)
             # adjust the books

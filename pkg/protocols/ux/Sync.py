@@ -28,9 +28,7 @@ class Sync(qed.protocol, family="qed.ux.sync"):
     path.doc = "the path sync flag"
 
     offsets = qed.properties.tuple(schema=qed.properties.int())
-    offsets.doc = (
-        "relative offset to apply to this viewport when synchronized scrolling"
-    )
+    offsets.doc = "relative offset to apply to this viewport when synchronized scrolling"
 
     # framework hooks
     @classmethod

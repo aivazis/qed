@@ -17,9 +17,7 @@ from . import datasets
 
 
 # a reader that employs gdal to read supported file formats
-class GDAL(
-    qed.flow.factory, family="qed.readers.native.gdal", implements=qed.protocols.reader
-):
+class GDAL(qed.flow.factory, family="qed.readers.native.gdal", implements=qed.protocols.reader):
     """
     A reader that uses GDAL
     """
@@ -74,9 +72,7 @@ class GDAL(
             # add to the selector
             bands.append(str(rid))
             # make a dataset
-            band = datasets.gdal(
-                name=f"s{self.pyre_name}.band_{rid:02}", rid=rid, dataset=dataset
-            )
+            band = datasets.gdal(name=f"s{self.pyre_name}.band_{rid:02}", rid=rid, dataset=dataset)
             # add it to my pile
             self.datasets.append(band)
         # remember the data product

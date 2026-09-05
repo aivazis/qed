@@ -46,9 +46,7 @@ ns.insert(name="good.uri", value=str(fixture), priority=pri.user(), locator=loc)
 ns.insert(name="good.cell", value="c16", priority=pri.user(), locator=loc)
 ns.insert(name="good.shape", value="65,65", priority=pri.user(), locator=loc)
 # point the broken one at a file that does not exist
-ns.insert(
-    name="broken.uri", value="/nope/missing.slc", priority=pri.user(), locator=loc
-)
+ns.insert(name="broken.uri", value="/nope/missing.slc", priority=pri.user(), locator=loc)
 # and declare a shape one sample too large for the short one, which would otherwise let
 # the render machinery read past the end of the map
 ns.insert(name="short.uri", value=str(fixture), priority=pri.user(), locator=loc)

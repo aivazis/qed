@@ -88,9 +88,7 @@ def level(dataset, name, extent, tile, written, fill):
     # take hold of the file for writing, and the way a reader would; both map the same
     # file, so a tile written through the one is visible through the other
     draft = storage.Draft(tiles=tiles, shape=extent, tile=tile)
-    reader = storage.Level(
-        tiles=tiles, occupancy=str(record), shape=extent, tile=tile, fill=fill
-    )
+    reader = storage.Level(tiles=tiles, occupancy=str(record), shape=extent, tile=tile, fill=fill)
     # hand them off
     return draft, reader
 
@@ -175,9 +173,7 @@ kernels.decimate(
     stride=(2, 2),
 )
 # what the second level holds
-stored = kernels.sample(
-    source=second, datatype=datatype, origin=origin, shape=tile, stride=(1, 1)
-)
+stored = kernels.sample(source=second, datatype=datatype, origin=origin, shape=tile, stride=(1, 1))
 # is what striding the base by four holds: halving composes
 strided = kernels.sample(
     source=base.data.dataset,
@@ -205,10 +201,7 @@ assert (
 )
 # and the level, whose record does not name that tile, reads fill there
 assert (
-    kernels.sample(
-        source=first, datatype=datatype, origin=empty, shape=tile, stride=(1, 1)
-    )[0]
-    == 0
+    kernels.sample(source=first, datatype=datatype, origin=empty, shape=tile, stride=(1, 1))[0] == 0
 )
 
 
@@ -246,9 +239,7 @@ del draft, draft2, first, second
 
 # the masked renders read a companion raster alongside the data, and both must come from
 # the same depth; check that with a covariance product, if the fixture is there
-covariances = (
-    pyre.primitives.path(__file__).parent / ".." / "data" / "nisar" / "gcov.h5"
-)
+covariances = pyre.primitives.path(__file__).parent / ".." / "data" / "nisar" / "gcov.h5"
 # if it is
 if covariances.exists():
     # open it
@@ -348,9 +339,7 @@ if covariances.exists():
     # the pyramid proper: build the first level of the covariance in a scratch workspace
     scratchWorkspace = qed.workspaces.local(name="pyramid.companions.workspace")
     scratchWorkspace.path = str(scratch)
-    levels = qed.readers.nisar.pyramid(
-        reader=gcov, dataset=covariance, workspace=scratchWorkspace
-    )
+    levels = qed.readers.nisar.pyramid(reader=gcov, dataset=covariance, workspace=scratchWorkspace)
     levels.build(depth=1)
     # the level exists: its files are there, and so is the sidecar with the statistics
     assert levels.reach() == 1
@@ -369,15 +358,11 @@ if covariances.exists():
     )
     # and so does the level, whose record does not name that tile
     assert (
-        kernels.sample(
-            source=levels._levels[1], datatype=covariance.datatype.htype, **corner
-        )[0]
+        kernels.sample(source=levels._levels[1], datatype=covariance.datatype.htype, **corner)[0]
         == 0
     )
     # a second pyramid over the same dataset finds the level, and the numbers, on disk
-    again = qed.readers.nisar.pyramid(
-        reader=gcov, dataset=covariance, workspace=scratchWorkspace
-    )
+    again = qed.readers.nisar.pyramid(reader=gcov, dataset=covariance, workspace=scratchWorkspace)
     again.attach()
     assert again.reach() == 1
     assert again.statistics.count == levels.statistics.count
@@ -387,9 +372,7 @@ if covariances.exists():
     sidecar = json.load(open(str(levels.sidecar), "r"))
     stale = dict(sidecar, format=sidecar["format"] + 1)
     json.dump(stale, open(str(levels.sidecar), "w"))
-    third = qed.readers.nisar.pyramid(
-        reader=gcov, dataset=covariance, workspace=scratchWorkspace
-    )
+    third = qed.readers.nisar.pyramid(reader=gcov, dataset=covariance, workspace=scratchWorkspace)
     third.attach()
     assert third.reach() == 0
     assert not third.holds(exponent=1)
@@ -433,8 +416,7 @@ other.open(measure=False)
 twin, *_ = other.datasets
 assert twin.pyre_name != base.pyre_name
 assert (
-    qed.readers.nisar.pyramid(reader=other, dataset=twin, workspace=workspace).home
-    == pyramid.home
+    qed.readers.nisar.pyramid(reader=other, dataset=twin, workspace=workspace).home == pyramid.home
 )
 # the default workspace is the current directory
 assert str(workspace.path) == "."

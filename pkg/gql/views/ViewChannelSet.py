@@ -37,9 +37,7 @@ class ViewChannelSet(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to set the channel
-        views = store.channelSet(
-            viewport=input.viewport, source=input.reader, tag=input.value
-        )
+        views = store.channelSet(viewport=input.viewport, source=input.reader, tag=input.value)
         # form the mutation resolution context
         context = {"views": views}
         # and resolve the mutation

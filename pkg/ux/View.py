@@ -57,9 +57,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
 
     members = qed.properties.list(schema=qed.properties.bool())
     members.default = None
-    members.doc = (
-        "the per-member participation mask, or None until seeded from a stack reader"
-    )
+    members.doc = "the per-member participation mask, or None until seeded from a stack reader"
 
     # interface
     def pipeline(self, channel):
@@ -118,15 +116,9 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         pipeline = self.pipeline(channel=channel)
         # an aggregate dataset renders over only the members my mask leaves active; a
         # single-member dataset is a plain reader dataset that knows nothing of masks
-        extra = (
-            {"mask": self.members}
-            if isinstance(self.dataset, qed.stacks.dataset)
-            else {}
-        )
+        extra = {"mask": self.members} if isinstance(self.dataset, qed.stacks.dataset) else {}
         # and ask my dataset to render the tile
-        return self.dataset.render(
-            channel=pipeline, zoom=zoom, origin=origin, shape=shape, **extra
-        )
+        return self.dataset.render(channel=pipeline, zoom=zoom, origin=origin, shape=shape, **extra)
 
     def toggleSelection(self, key, value):
         """
@@ -719,9 +711,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
                 firewall.line(f"with {reader}")
                 firewall.line(f"given the following selections:")
                 firewall.indent()
-                firewall.report(
-                    report=(f"{key}: {value}" for key, value in selections.items())
-                )
+                firewall.report(report=(f"{key}: {value}" for key, value in selections.items()))
                 firewall.outdent()
                 # flush
                 firewall.log()
@@ -934,9 +924,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # chain up
         super().__init__(**kwds)
         # build my visualization pipeline registry
-        self._pipelines = {
-            pipeline.pyre_name: pipeline for pipeline in self.pipelines()
-        }
+        self._pipelines = {pipeline.pyre_name: pipeline for pipeline in self.pipelines()}
         # resolve my state
         self.resolve()
         # all done

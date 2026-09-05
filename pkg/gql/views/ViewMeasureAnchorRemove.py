@@ -37,9 +37,7 @@ class ViewMeasureAnchorRemove(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # delegate to the store
-        measures = store.measureAnchorRemove(
-            viewport=input.viewport, anchor=input.anchor
-        )
+        measures = store.measureAnchorRemove(viewport=input.viewport, anchor=input.anchor)
         # form the mutation resolution context
         context = {"measures": measures}
         # and resolve the mutation
