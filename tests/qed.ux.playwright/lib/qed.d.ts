@@ -81,6 +81,10 @@ interface QED {
         live(): boolean
         // empty the buffer
         clear(): void
+        // the channels the server knows about, with their live state
+        channels(): Promise<{ id: string, severity: string, name: string, active: boolean, fatal: boolean }[]>
+        // turn the {severity} channel named {name} on or off
+        setActive(severity: string, name: string, active: boolean): Promise<unknown>
     }
 }
 
