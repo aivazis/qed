@@ -44,6 +44,8 @@ import { collapseMutation } from '~/views/viz/viz/useCollapseView'
 import { splitViewUpdater, collapseViewUpdater } from '~/views/viz/viz/viewListUpdaters'
 import { useSyncToggleViewportMutation as syncToggleViewportMutation } from '~/views/viz/controls/sync/useSyncToggleViewport'
 import { useSyncUpdateOffsetMutation as syncUpdateOffsetMutation } from '~/views/viz/controls/sync/useSyncUpdateOffset'
+// the journal console's buffer, so the facade reads what the panel renders
+import { journal as console } from '~/views/viz/console/store'
 // the active viewport, kept in sync with the ui by the {ViewportBridge}
 import { getActiveViewport, activate } from './activeViewport'
 
@@ -320,6 +322,17 @@ export const makeQED = () => ({
         setAuto: async (controller, auto, channel, viewport = getActiveViewport()) =>
             command(autoRangeControllerMutation,
                 { viewport, channel: channel ?? await channelOf(viewport), controller, auto }),
+    },
+
+    // the journal console; the records are those in the console's buffer, which fills only
+    // while the console is mounted, since that is what keeps the stream open
+    journal: {
+        // the records currently in the buffer
+        entries: () => console.entries(),
+        // whether the stream is open
+        live: () => console.live(),
+        // empty the buffer, and nothing else
+        clear: () => console.clear(),
     },
 
     // the colour-stretch value controller of a {channel}; the bounds are {min,value,max}
