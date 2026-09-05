@@ -20,9 +20,29 @@ try:
     # pull the extension module
     from . import qed as libqed
 # if this fails
-except ImportError:
+except ImportError as error:
     # indicate the bindings are not accessible
     libqed = None
+    # remember why, for whoever has to explain a failure downstream: a server without its
+    # extension declines to come up, and a product without it cannot read its cells, and both
+    # quote this
+    libqed_error = str(error)
+    # leave a note for the curious; not a warning, since a command line panel that never
+    # renders, e.g. the one that generates the schema while the extension is still being built,
+    # must be able to carry on quietly
+    import journal
+
+    # make a channel
+    channel = journal.debug("qed.ext")
+    # complain
+    channel.line("the qed extension could not be imported")
+    channel.line(f"{error}")
+    # flush
+    channel.log()
+# if it succeeds
+else:
+    # there is no failure to explain
+    libqed_error = None
 
 # check whether
 try:
