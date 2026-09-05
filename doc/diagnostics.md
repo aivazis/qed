@@ -12,6 +12,11 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 > is small and independent; the second is a feature in its own right. Everything recorded
 > here as a fact was read out of the source; the open questions are marked as such.
 > Companion: `doc/staging.md` for the lifecycle these diagnostics describe.
+>
+> **Update, 2026-09-04.** Part two has a design: the delivery primitive and the
+> collection of worker entries are in `pyre/doc/design/courier.md`, and the server device
+> and the client panel are in `doc/console.md`. The crew options weighed below are settled
+> there in favor of a dedicated journal channel per worker. Part one stands as written.
 
 ## Why this came up
 
