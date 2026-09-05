@@ -112,18 +112,18 @@ const Name = styled.span`
     white-space: nowrap;
 `
 
-// the switch
+// the switch: plain text, dim when off, lit with the app color when on, like a selector value
 const Switch = styled.button`
     flex: 0 0 auto;
     width: 2.5em;
     font-family: inconsolata;
     font-size: 100%;
     cursor: pointer;
-    padding: 0 0.3rem;
-    border: 1px solid ${theme.page.relief};
-    border-radius: 0.2rem;
-    color: ${props => props.$on ? theme.page.background : theme.page.dim};
-    background-color: ${props => props.$on ? theme.page.highlight : "transparent"};
+    padding: 0;
+    border: none;
+    text-align: right;
+    color: ${props => props.$on ? theme.page.name : theme.page.dim};
+    background-color: transparent;
 `
 
 
