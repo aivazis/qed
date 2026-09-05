@@ -20,6 +20,7 @@ import { journal } from './store'
 // hooks
 import { useJournal } from './useJournal'
 // components
+import { Channels } from './channels'
 import { Entry } from './entry'
 import { Filters } from './filters'
 // styles
@@ -103,6 +104,8 @@ export const Console = () => {
                     clear
                 </Action>
             </Header>
+            {/* the channels the server knows about, and their switches */}
+            <Channels />
             {/* the filters */}
             <Filters severities={severities} toggle={toggle} prefix={prefix} setPrefix={setPrefix} />
             {/* the records */}
