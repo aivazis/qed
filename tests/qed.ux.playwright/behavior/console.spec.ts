@@ -65,6 +65,26 @@ test.describe.serial("the journal console", () => {
         await expect(entries.filter({ hasText: "qed.ux.graphql" }).last()).toBeVisible()
         await prefix.fill("")
 
+        // the channels tray lists the graphql channel, since it has spoken, with its switch on
+        await panel.locator('[data-qed-panel="journal-channels"] [data-qed-control="tray"]').click()
+        const graphqlSwitch = panel.locator('[data-qed-control="channel-active"][data-qed-value="warning:qed.ux.graphql"]')
+        await expect(graphqlSwitch).toHaveAttribute("aria-pressed", "true", { timeout: 10_000 })
+        // the facade reads the same listing
+        const channels = await page.evaluate(() => window.qed.journal.channels())
+        expect(channels.some(channel => channel.severity === "warning" && channel.name === "qed.ux.graphql" && channel.active)).toBe(true)
+        // a channel nobody has heard of can be turned on through the facade
+        await page.evaluate(() => window.qed.journal.setActive("debug", "qed.test.console", true))
+        expect(
+            (await page.evaluate(() => window.qed.journal.channels()))
+                .find(channel => channel.id === "debug:qed.test.console")?.active,
+        ).toBe(true)
+        // and off again
+        await page.evaluate(() => window.qed.journal.setActive("debug", "qed.test.console", false))
+        expect(
+            (await page.evaluate(() => window.qed.journal.channels()))
+                .find(channel => channel.id === "debug:qed.test.console")?.active,
+        ).toBe(false)
+
         // clearing empties the buffer, and nothing else
         await panel.locator('[data-qed-control="clear"]').click()
         await expect(entries).toHaveCount(0)
