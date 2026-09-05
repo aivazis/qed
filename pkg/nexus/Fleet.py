@@ -145,6 +145,17 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         # all done
         return self
 
+    def instruct(self, control):
+        """
+        Apply the journal {control} to every team, and so to every running crew member
+        """
+        # go through my teams
+        for team in self.teams.values():
+            # and pass the word to each one
+            team.instruct(control=control)
+        # all done
+        return self
+
     def disband(self):
         """
         Disband all my teams

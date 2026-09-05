@@ -22,8 +22,8 @@ class JournalChannelSet(graphene.Mutation):
     """
     Set whether a journal channel speaks
 
-    The change applies to the server's own journal; a crew member forked afterwards inherits
-    it, while one forked before keeps the state it was born with
+    The change applies to the server's own journal, and the fleet passes it to every running
+    crew member; a member forked afterwards inherits it
     """
 
     # inputs
@@ -46,13 +46,23 @@ class JournalChannelSet(graphene.Mutation):
         if input.severity not in journal.severities:
             # complain
             raise ValueError(f"unknown journal severity '{input.severity}'")
-        # open the live channel
-        live = JournalChannel.live(channel=channel)
-        # and set its state
-        live.active = input.active
+        # the instruction
+        control = journal.control(
+            severity=input.severity, name=input.name, active=input.active
+        )
+        # apply it here
+        control.apply()
+        # the server that took the request, if any
+        server = info.context.get("server")
+        # its fleet of crews, if it has one
+        fleet = getattr(server, "fleet", None)
+        # if it does
+        if fleet is not None:
+            # every running crew member gets the instruction too
+            fleet.instruct(control=control)
         # the device that publishes to clients keeps a census of channels; if the server has
         # one, make sure this channel is on the list from now on
-        device = getattr(info.context.get("server"), "journal", None)
+        device = getattr(server, "journal", None)
         # if it is there
         if device is not None:
             # add the channel
