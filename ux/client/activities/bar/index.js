@@ -9,7 +9,7 @@ import React from 'react'
 
 // locals
 // the activities
-import { About, Controls, Data, Explore, Help, Kill } from '~/activities'
+import { About, Console, Controls, Data, Explore, Help, Kill } from '~/activities'
 // widgets
 import { Toolbar, Spacer } from '~/widgets'
 // styles
@@ -31,6 +31,7 @@ export const Bar = ({ style }) => {
             <Explore size={size} style={paint} />
             <Data size={size} style={paint} />
             <Controls size={size} style={paint} />
+            <Console size={size} style={paint} />
             <Help size={size} style={paint} />
 
             <Spacer />

@@ -7,6 +7,7 @@
 // export the container
 export { Viz } from './viz'
 // and the activity specific panels so the main page can use them as outlets
+export { Console } from './console'
 export { Controls } from './controls'
 export { Readers } from './readers'
 

@@ -7,6 +7,7 @@
 // publish
 export { Camera } from './camera'
 export { Chevron } from './chevron'
+export { Console } from './console'
 export { Data } from './data'
 export { Download } from './download'
 export { Eye } from './eye'

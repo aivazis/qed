@@ -37,7 +37,7 @@ import {
     // data archives
     Explorer, Archives,
     // datasets
-    Viz, Controls, Readers,
+    Viz, Console, Controls, Readers,
     // embedded documentation
     Guide,
     // the main page
@@ -72,6 +72,7 @@ const QEDApp = ({ base }) => {
                 {/* datasets */}
                 <Route element={<Viz qed={qed} />} >
                     <Route path="controls" element={<Controls qed={qed} />} />
+                    <Route path="console" element={<Console qed={qed} />} />
                     <Route index element={<Readers qed={qed} />} />
                 </Route>
 

@@ -31,9 +31,14 @@ const wheel = {
         orange: "hsl(31deg, 80%, 58%)",
     },
 
-    // journal colors
+    // journal colors, by severity
     journal: {
+        debug: "hsl(0deg, 0%, 40%)",
+        firewall: "hsl(300deg, 70%, 55%)",
+        info: "hsl(203deg, 60%, 55%)",
+        warning: "hsl(31deg, 80%, 58%)",
         error: "hsl(0deg, 90%, 50%)",
+        help: "hsl(63deg, 40%, 50%)",
     }
 }
 

@@ -10,7 +10,7 @@ export { Main, useTopic, useActivityPanel } from './main'
 // data archives
 export { Explorer, Archives } from './explorer'
 // datasets
-export { Viz, Controls, Readers } from './viz'
+export { Viz, Console, Controls, Readers } from './viz'
 // embedded documentation
 export { Guide, TOC } from './doc'
 
