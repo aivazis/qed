@@ -19,8 +19,12 @@ import qed
 
 # a stand-in for the journal device the server installs: only its census matters here
 device = types.SimpleNamespace(channels={("info", "qed.test.channels.spoken")})
-# and for the server that holds it
-server = types.SimpleNamespace(journal=device)
+# the instructions the fleet was asked to pass on
+instructions = []
+# a stand-in for the fleet that records them
+fleet = types.SimpleNamespace(instruct=lambda control: instructions.append(control))
+# and for the server that holds both
+server = types.SimpleNamespace(journal=device, fleet=fleet)
 # the session resolver hands back the store, and nothing here reads it, so a stand-in will do
 store = types.SimpleNamespace()
 # the execution context; no application, so the declared channels contribute nothing
@@ -97,6 +101,13 @@ assert channel == {
 }
 # the live channel agrees
 assert journal.debug(name).active
+# and the fleet was told, so running crew members follow
+assert len(instructions) == 1
+assert (instructions[0].severity, instructions[0].name, instructions[0].active) == (
+    "debug",
+    name,
+    True,
+)
 # and the channel joined the census, so the listing shows it from now on
 channels = query(listing)["qed"]["journal"]
 assert [(channel["severity"], channel["name"]) for channel in channels] == [
