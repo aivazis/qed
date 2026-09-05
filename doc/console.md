@@ -11,7 +11,9 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 > device, the `journal` route with history on subscription, the console activity with
 > its filters, expansion, copy and clear, the channel listing and switch, and the facade;
 > worker entries arrive through the `pyre` fan-in with no `qed` change, and a channel
-> switch reaches running workers through the fleet. Not built: virtualized rendering. The `qed`
+> switch reaches running workers through the fleet. The buffer is bounded on both ends; if
+> the console ever needs more history than it holds, the answer is pagination over the
+> server's history, not a larger buffer drawn cleverly. The `qed`
 > half of journal delivery: a device in the server that forwards every entry to connected
 > clients, and an activity panel that shows them. The generic half, a device that ships
 > entries over ipc and the collection of worker entries in `pyre.nexus`, is designed in
@@ -144,9 +146,9 @@ provider mounted beside `LiveSync` in `ux/client/qed.js`, and the hook reads fro
 In order of importance:
 
 - **A list of entries**, newest at the bottom, that stays responsive at the buffer's
-  full length. Rendering only the visible rows is the way to keep it so; the first
-  version may render the whole buffer if it is small, but the buffer size is a trait and
-  virtualization is the expected end state.
+  full length. The buffer is a few thousand records and every row is drawn; that is
+  cheap at this size, and the size is deliberate. If the console ever needs to reach
+  further back, it pages through the server's history rather than growing its buffer.
 - **A row per entry** showing the severity, the channel, the first line of the page,
   and the pid when the entry came from a worker. Severity colors come from the palette,
   which already has a journal slot (`ux/client/palette.js:34-37`).
@@ -234,8 +236,7 @@ that path ever changes.
    subscription. Verifiable with `curl` before any client work.
 3. The activity, the panel with the list, expansion and filters, and the facade.
 4. The channel query and mutation, and the toggles tray.
-5. Virtualized rendering, once the buffer size makes it matter.
-6. Worker channel control, when the `pyre` control phase exists.
+5. Worker channel control, when the `pyre` control phase exists.
 
 ## Open questions
 
