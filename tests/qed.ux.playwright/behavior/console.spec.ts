@@ -115,6 +115,20 @@ test.describe.serial("the journal console", () => {
         await expect.poll(() => entries.count(), { timeout: 10_000 }).toBeGreaterThan(before)
         await expect(entries.filter({ hasText: "qed.ux.graphql" }).last()).toBeVisible()
 
+        // the observer opens its channels tray
+        await observer.locator('[data-qed-panel="journal-channels"] [data-qed-control="tray"]').click()
+        const tray = observer.locator('[data-qed-panel="journal-channels"]')
+        await tray.locator('[data-qed-control="channel-active"]').first().waitFor({ timeout: 10_000 })
+        // the driver switches a channel nobody has heard of on; the switch appears on the observer,
+        // pressed, with no reload, since every client refetches its state after a mutation
+        await driver.waitForFunction(() => Boolean(window.qed))
+        await driver.evaluate(() => window.qed.journal.setActive("debug", "qed.test.console.remote", true))
+        const remote = tray.locator('[data-qed-control="channel-active"][data-qed-value="debug:qed.test.console.remote"]')
+        await expect(remote).toHaveAttribute("aria-pressed", "true", { timeout: 10_000 })
+        // and off again
+        await driver.evaluate(() => window.qed.journal.setActive("debug", "qed.test.console.remote", false))
+        await expect(remote).toHaveAttribute("aria-pressed", "false", { timeout: 10_000 })
+
         // tidy up the extra client
         await observer.close()
     })
