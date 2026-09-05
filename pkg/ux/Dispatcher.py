@@ -730,6 +730,17 @@ class Dispatcher:
         # hand back a streaming response; the server subscribes this connection to its hub
         return server.eventStream(server=server)
 
+    def journal(self, server, **kwds):
+        """
+        Open a server-sent event stream that carries journal records, opening with the history
+        """
+        # the device that records entries, if the server installed one
+        device = getattr(server, "journal", None)
+        # the history it holds, framed for a newcomer
+        opening = device.opening() if device is not None else None
+        # hand back a streaming response on the journal topic
+        return server.eventStream(server=server, topic="journal", opening=opening)
+
     def stop(self, plexus, server, **kwds):
         """
         The client is asking me to die
@@ -1005,6 +1016,8 @@ class Dispatcher:
                 r"/(?P<schema>schema)",
                 # the live server-sent event stream
                 r"/(?P<events>events)",
+                # the journal stream
+                r"/(?P<journal>journal)",
                 # the kill command
                 r"/(?P<stop>stop)",
                 # document requests

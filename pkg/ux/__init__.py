@@ -14,6 +14,9 @@ from .View import View as view
 from .Sample import Sample as sample
 from .Preparation import Preparation as preparation
 
+# the journal device that reaches the browser
+from .Journal import Journal as journal
+
 # configurable state
 from .Source import Source as source
 
