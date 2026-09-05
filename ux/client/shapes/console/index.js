@@ -10,49 +10,20 @@ import React from 'react'
 import styles from './styles'
 
 
-// a terminal: a frame with a prompt and a cursor
-const frame = `
-M 120 220
-C 120 187 147 160 180 160
-L 820 160
-C 853 160 880 187 880 220
-L 880 780
-C 880 813 853 840 820 840
-L 180 840
-C 147 840 120 813 120 780
-Z
-M 190 230
-L 810 230
-L 810 770
-L 190 770
-Z`
-
-const prompt = `
-M 270 360
-L 330 300
-L 500 470
-L 330 640
-L 270 580
-L 380 470
-Z
-M 520 620
-L 730 620
-L 730 690
-L 520 690
-Z`
-
-
-// render the shape
+// render the shape: a terminal, drawn as a frame with a prompt and a cursor
 export const Console = ({ style }) => {
     // mix my paint
-    const ico = { ...styles.icon, ...style?.icon }
-    const dec = { ...styles.decoration, ...style?.decoration }
+    const paint = styles.console(style)
 
     // paint me
     return (
         <>
-            <path d={frame} style={ico} fillRule="evenodd" />
-            <path d={prompt} style={dec} />
+            {/* the frame */}
+            <rect x="100" y="180" width="800" height="640" rx="60" ry="60" style={paint.icon} />
+            {/* the prompt */}
+            <path d="M 260 340 L 440 500 L 260 660" style={paint.decoration} />
+            {/* the cursor */}
+            <line x1="520" y1="660" x2="740" y2="660" style={paint.decoration} />
         </>
     )
 }

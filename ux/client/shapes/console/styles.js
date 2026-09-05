@@ -13,18 +13,20 @@ import style from '~/shapes/styles'
 
 // the shape color
 const ink = theme.page.bright
-const paint = theme.page.normal
 
-// publish
-export default {
+// paint mixer
+const console = (client) => ({
     // the frame
     icon: {
         // inherit
         ...style.icon,
         // stroke
         stroke: ink,
+        strokeWidth: "1px",
         // fill
-        fill: paint,
+        fill: "none",
+        // plus whatever the {client} said
+        ...client?.icon,
     },
 
     // the prompt and the cursor
@@ -33,9 +35,20 @@ export default {
         ...style.decoration,
         // stroke
         stroke: ink,
+        strokeWidth: "1px",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
         // fill
-        fill: ink,
+        fill: "none",
+        // plus whatever the {client} said
+        ...client?.decoration,
     },
+})
+
+
+// publish
+export default {
+    console,
 }
 
 
