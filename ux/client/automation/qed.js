@@ -46,6 +46,9 @@ import { useSyncToggleViewportMutation as syncToggleViewportMutation } from '~/v
 import { useSyncUpdateOffsetMutation as syncUpdateOffsetMutation } from '~/views/viz/controls/sync/useSyncUpdateOffset'
 // the journal console's buffer, so the facade reads what the panel renders
 import { journal as console } from '~/views/viz/console/store'
+// the channel listing and switch the console uses
+import { channelsQuery } from '~/views/viz/console/useChannels'
+import { journalChannelSetMutation } from '~/views/viz/console/useSetChannel'
 // the active viewport, kept in sync with the ui by the {ViewportBridge}
 import { getActiveViewport, activate } from './activeViewport'
 
@@ -333,6 +336,11 @@ export const makeQED = () => ({
         live: () => console.live(),
         // empty the buffer, and nothing else
         clear: () => console.clear(),
+        // the channels the server knows about, with their live state
+        channels: async () => (await read(channelsQuery)).qed.journal,
+        // turn the {severity} channel named {name} on or off
+        setActive: (severity, name, active) =>
+            command(journalChannelSetMutation, { severity, name, active }),
     },
 
     // the colour-stretch value controller of a {channel}; the bounds are {min,value,max}

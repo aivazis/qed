@@ -7,13 +7,17 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 
 # console: the journal in the client
 
-> Status: **design, not yet built**. The `qed` half of journal delivery: a device in the
-> server that forwards every entry to connected clients, and an activity panel that
-> shows them. The generic half, a device that ships entries over ipc and the collection
-> of worker entries in `pyre.nexus`, is designed in `pyre/doc/design/courier.md` and
-> lands first. This supersedes part two of `doc/diagnostics.md`, whose options for the
-> crew are settled here. Facts about the current code were read from the source on
-> 2026-09-04; open questions are marked.
+> Status: **built through the channel toggles** (2026-09-05, branch `journal`): the server
+> device, the `journal` route with history on subscription, the console activity with
+> its filters, expansion, copy and clear, the channel listing and switch, and the facade;
+> worker entries arrive through the `pyre` fan-in with no `qed` change. Not built:
+> virtualized rendering, and channel control that reaches running workers. The `qed`
+> half of journal delivery: a device in the server that forwards every entry to connected
+> clients, and an activity panel that shows them. The generic half, a device that ships
+> entries over ipc and the collection of worker entries in `pyre.nexus`, is designed in
+> `pyre/doc/design/courier.md`. This supersedes part two of `doc/diagnostics.md`, whose
+> options for the crew are settled here. Facts about the code that preceded this work
+> were read from the source on 2026-09-04; open questions are marked.
 
 ## What the server does
 
@@ -190,9 +194,10 @@ Client side, in `tests/qed.ux.playwright`, modeled on `behavior/live-sync.spec.t
 - filters and the channel toggle, through `data-qed-control` and `aria-pressed`.
 
 Causing a warning deterministically needs a server action that is guaranteed to log
-one. Connecting a reader to a file that does not exist does so today on
-`qed.ux.staging`; a facade command that asks the server to emit a test entry would be
-more honest about its purpose, and is an open question below.
+one. A GraphQL query that names a field the schema does not have makes the handler log
+a warning on `qed.ux.graphql` for every error it reports back, which is what the tests
+use; a facade command that asks the server to emit a test entry remains an option if
+that path ever changes.
 
 ## Change map
 
