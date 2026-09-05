@@ -79,7 +79,7 @@ window.qed = {
     updateOffset(row, col, viewport?),            // the relative sync offset, in source pixels
   },
   journal: {
-    entries() → [{ seq, pid, time, sink, page:[…], notes:{channel, severity, …} }],  // the console's buffer
+    entries() → [{ page:[…], notes:{channel, severity, pid, seq, time, host, …} }],  // the console's buffer
     live() → bool,                                  // whether the journal stream is open
     clear(),                                        // empty the buffer, and nothing else
     channels() → [{ id, severity, name, active, fatal }],  // the channels the server knows about

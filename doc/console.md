@@ -49,11 +49,14 @@ client cannot loop back into the hub.
 
 ### Records, not entries
 
-The device builds the record itself for the server's own entries, with the server's pid
-and its own sequence counter; for a replayed worker entry the nexus has already written
-`pid`, `seq` and `time` into the notes, and the device lifts them into the envelope
-rather than stamping its own. A client thus receives one record shape whatever the
-origin, and can group and order by process.
+Every record a client receives carries its origin in its notes, next to the channel, the
+severity and the location the journal put there: `pid`, `seq`, `time` and `host`. A
+worker's entry arrives with them already stamped by the worker's courier; the server's
+own entries have none, so the device stamps them, with a sequence counter of its own.
+That is the one rule `qed` adds on top of `pyre`, which stays agnostic about what a
+consumer requires: a record published to a client always says which process produced
+it, when, and where. A client can therefore group and order by process without caring
+where an entry came from.
 
 ### Publication
 
