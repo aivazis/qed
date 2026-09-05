@@ -1,0 +1,12 @@
+# -*- toml -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2026 all rights reserved
+
+
+# formatting: wrap at column 100, the width pyre uses, so the two agree
+[tool.black]
+line-length = 100
+
+
+# end of file
