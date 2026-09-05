@@ -54,6 +54,20 @@ class Server(http, family="qed.nexus.servers.http"):
         """
         Register with the nexus and wire my fleet into the shared event loop
         """
+        # the extension, whose absence the package only warns about
+        from .. import ext
+
+        # a server that cannot render must not come up and serve a catalog it will fail on
+        if ext.libqed is None:
+            # make a channel
+            channel = journal.error("qed.nexus.server")
+            # complain, quoting the loader
+            channel.line("the qed extension is not available, so no dataset can be rendered")
+            channel.line(f"{ext.libqed_error}")
+            # flush; the channel is fatal unless the user has said otherwise
+            channel.log()
+            # in which case, decline to activate
+            return
         # chain up to grab a port and build the event hub
         super().activate(app=app, dispatcher=dispatcher)
         # hold on to the application; it is the only thing in reach of everything the

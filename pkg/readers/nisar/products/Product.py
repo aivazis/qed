@@ -66,6 +66,14 @@ class Product(
         if cell is None:
             # there is no kernel either; whoever needs one must decode first
             return None
+        # the kernels live in the extension; its absence must be named rather than tripped
+        # over, since an attribute error raised here would be reported as the absence of
+        # this very property
+        if qed.libqed is None:
+            # complain, quoting the loader
+            raise qed.exceptions.ExtensionError(
+                reason=f"{qed.ext.libqed_error}; the cells of '{self.pyre_name}' cannot be read"
+            )
         # otherwise, hand back the set that matches
         return getattr(qed.libqed.nisar.cells, cell, None)
 
