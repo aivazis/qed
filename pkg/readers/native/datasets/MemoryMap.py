@@ -184,14 +184,16 @@ class MemoryMap(
         )
 
     # metamethods
-    def __init__(self, hydrated=False, seed=None, **kwds):
+    def __init__(self, hydrated=False, seed=None, data=None, **kwds):
         # chain up
         super().__init__(**kwds)
         # my statistics are whatever i was handed: a survey seed when i am a twin, and
         # nothing at all when i am live, until somebody asks me to measure
         self.stats = seed
-        # a live dataset lays a grid over its file; a twin holds no payload at all
-        self.data = None if hydrated else self._open()
+        # a live dataset lays a grid over its file, unless its reader hands it one, the way a
+        # band of a multi-band product arrives as a sub-grid of the mapping of the whole
+        # product; a twin holds no payload at all
+        self.data = data if data is not None else (None if hydrated else self._open())
 
         # build my default pipelines
         for pipeline in self.pipelines(context=self.pyre_name):

@@ -79,25 +79,14 @@ class Flat(qed.flow.factory, family="qed.readers.native.flat", implements=qed.pr
             # the complaint has been lodged
             return self
 
-        # unpack my state into a dataset configuration
-        config = {
-            "uri": self.uri,
-            "shape": shape,
-            "cell": cell,
-            "tile": self.cell.tile,
-        }
-
-        # make a timer that measures the amount of time it takes to collect statistics
+        # make a timer that measures the amount of time it takes to build the datasets
         stats = qed.timers.wall(f"qed.profiler.stats.{self.pyre_name}")
         # and start it
         stats.start()
-        # there is only one dataset in the file and it is structurally trivial; build it
-        dataset = qed.readers.native.datasets.mmap(name=f"{self.pyre_name}.data", **config)
+        # build my datasets
+        self._loadDatasets(cell=cell, shape=shape)
         # stop the timer
         stats.stop()
-
-        # add the dataset to the pile
-        self.datasets.append(dataset)
 
         # unless my caller is a worker that will be handed the client's controller state,
         # let each dataset sample itself, so its channels start out tuned to its data
@@ -120,6 +109,25 @@ class Flat(qed.flow.factory, family="qed.readers.native.flat", implements=qed.pr
         return
 
     # implementation details
+    def _loadDatasets(self, cell, shape):
+        """
+        Build my datasets over {shape} cells of type {cell}; a flat file holds exactly one, and it
+        is structurally trivial
+        """
+        # unpack my state into a dataset configuration
+        config = {
+            "uri": self.uri,
+            "shape": shape,
+            "cell": cell,
+            "tile": cell.tile,
+        }
+        # build the dataset
+        dataset = qed.readers.native.datasets.mmap(name=f"{self.pyre_name}.data", **config)
+        # and add it to the pile
+        self.datasets.append(dataset)
+        # all done
+        return
+
     def _resolveShape(self):
         """
         Complete my shape, interrogating the file for whatever is missing
