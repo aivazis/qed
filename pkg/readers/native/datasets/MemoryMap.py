@@ -172,8 +172,8 @@ class MemoryMap(
         return qed.nexus.finding(
             # the factory that materializes my twin
             factory=self.pyre_family(),
-            # my layout
-            cell=self.cell.pyre_family(),
+            # my layout; the cell travels as a specification so its byte order comes along
+            cell=self.cell.spec,
             shape=tuple(self.shape),
             origin=tuple(self.origin),
             tile=tuple(self.tile),
@@ -267,9 +267,11 @@ class MemoryMap(
             # and bail
             return
         # lay an erased grid of my cell type over the memory-mapped file and return it; it presents
-        # the buffer protocol, which is what the tile generators consume
+        # the buffer protocol, which is what the tile generators consume; the cell name carries the
+        # byte order of the file, so a product written on a machine of the other endianness reads
+        # in place, and the buffer description says so for the generators to notice
         return qed.libpyre.grid.map(
-            uri=str(path), shape=self.shape, cell=self.cell.cell, create=False
+            uri=str(path), shape=self.shape, cell=self.cell.ordered, create=False
         )
 
     def _collectStatistics(self):
