@@ -182,21 +182,116 @@ def test():
     else:
         # is a failure
         assert False, "a product with an embedded header was accepted"
-    # and so is a product with more than one band
-    pyre.envi.writer().write(header=describe(order=0, bands=3), uri="envi_bands.hdr")
-    with open("envi_bands.dat", "wb") as product:
-        product.write(bytes(3 * 4 * LINES * SAMPLES))
-    try:
-        # refused
-        contact(name="envi.bands", uri="envi_bands.dat")
-    # fatally
-    except journal.ApplicationError:
-        # as expected
-        pass
-    # anything else
-    else:
-        # is a failure
-        assert False, "a multi-band product was accepted"
+    # multi-band products come apart into one dataset per band
+    bands()
+
+    # all done
+    return
+
+
+def bands():
+    """
+    A multi-band product yields one dataset per band, selectable by name, in every interleave and
+    in either byte order, each reading exactly like the band written out on its own
+    """
+    # the host's order
+    host = sys.byteorder
+    # the bands
+    names = ["red", "green", "blue"]
+    # every cell holds a value that names its band and its position
+    cube = [
+        [float(1000 * b + i * SAMPLES + j) for i in range(LINES) for j in range(SAMPLES)]
+        for b in range(len(names))
+    ]
+    # the reference: each band on its own, in the host's order, through the flat reader
+    references = []
+    for b, plane in enumerate(cube):
+        with open(f"envi_band{b}.dat", "wb") as product:
+            product.write(struct.pack(f"={LINES * SAMPLES}f", *plane))
+        reader = qed.readers.native.flat(
+            name=f"envi.band{b}", uri=f"envi_band{b}.dat", shape=(LINES, SAMPLES), cell="float32"
+        )
+        reader.open()
+        (dataset,) = reader.datasets
+        references.append(dataset)
+
+    # the interleaves, each with a byte order; the pixel interleaved product is in the order
+    # the host lacks, so the swap is exercised on a strided plane as well
+    layouts = [("bsq", 0 if host == "little" else 1), ("bil", 0 if host == "little" else 1)]
+    layouts.append(("bip", 1 if host == "little" else 0))
+    # go through them
+    for interleave, order in layouts:
+        # the struct code of the order
+        code = "<" if order == 0 else ">"
+        # arrange the cells the way the interleave does
+        cells = []
+        if interleave == "bsq":
+            for b in range(3):
+                cells.extend(cube[b])
+        elif interleave == "bil":
+            for i in range(LINES):
+                for b in range(3):
+                    cells.extend(cube[b][i * SAMPLES : (i + 1) * SAMPLES])
+        else:
+            for i in range(LINES):
+                for j in range(SAMPLES):
+                    for b in range(3):
+                        cells.append(cube[b][i * SAMPLES + j])
+        # write the product
+        with open(f"envi_{interleave}.dat", "wb") as product:
+            product.write(struct.pack(f"{code}{len(cells)}f", *cells))
+        # and its header
+        pyre.envi.writer().write(
+            header=describe(order=order, bands=3, interleave=interleave, bandNames=names),
+            uri=f"envi_{interleave}.hdr",
+        )
+        # open it
+        reader = contact(name=f"envi.{interleave}", uri=f"envi_{interleave}.dat")
+        # one dataset per band, named by ordinal
+        assert [dataset.pyre_name for dataset in reader.datasets] == [
+            f"envi.{interleave}.{b + 1}" for b in range(3)
+        ]
+        # the selector names the bands
+        assert reader.selectors == {"band": tuple(names)}
+        assert reader.available == {"band": set(names)}
+        # each dataset knows its band and its plane
+        for b, dataset in enumerate(reader.datasets):
+            assert dataset.selector == {"band": names[b]}
+            assert dataset.shape == (LINES, SAMPLES)
+            assert dataset.cell.cell == "float32"
+            # its cells read as the band's values
+            assert dataset.data[3, 5] == cube[b][3 * SAMPLES + 5]
+            assert dataset.data[LINES - 1, SAMPLES - 1] == cube[b][-1]
+            # and it renders, samples, and profiles exactly like the band on its own
+            expected = references[b]
+            for zoom, origin, shape in [((0, 0), (0, 0), (32, 32)), ((1, 1), (2, 3), (8, 8))]:
+                tile = bytes(
+                    memoryview(
+                        expected.render(
+                            channel=expected.channel(name="value"),
+                            zoom=zoom,
+                            origin=origin,
+                            shape=shape,
+                        )
+                    )
+                )
+                actual = bytes(
+                    memoryview(
+                        dataset.render(
+                            channel=dataset.channel(name="value"),
+                            zoom=zoom,
+                            origin=origin,
+                            shape=shape,
+                        )
+                    )
+                )
+                assert actual == tile
+            assert dataset.stats == expected.stats
+            assert dataset.sample(zoom=(1, 0), origin=(3, 4), shape=(10, 10)) == expected.sample(
+                zoom=(1, 0), origin=(3, 4), shape=(10, 10)
+            )
+            points = [(1, 2), (10, 20), (30, 60)]
+            assert dataset.profile(points=points) == expected.profile(points=points)
 
     # all done
     return
