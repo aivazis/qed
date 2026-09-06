@@ -32,7 +32,8 @@ namespace qed::native {
     using values_t = std::vector<value_t<valueT>>;
 
 
-    // profile for a complex grid source
+    // profile for a grid source; the values come back as the native scalar behind the cell, so
+    // a source whose cells swap on access yields plain numbers
     template <typename sourceT>
     auto profile(
         // the source
@@ -40,7 +41,7 @@ namespace qed::native {
         // the points
         const points_t &,
         // the closed flag
-        bool closed = false) -> values_t<typename sourceT::value_type>;
+        bool closed = false) -> values_t<pyre::memory::native_t<typename sourceT::value_type>>;
 }
 
 
