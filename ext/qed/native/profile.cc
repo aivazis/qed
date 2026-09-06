@@ -24,8 +24,10 @@ qed::py::native::profile(py::module & m)
         [](const py::buffer & source, const qed::native::points_t & points,
            bool closed) -> py::object {
             // dispatch on the buffer's cell type and collect values along the path; the result's
-            // cell type varies, so hand it back as a python object rather than one fixed type
-            return onGrid<
+            // cell type varies, so hand it back as a python object rather than one fixed type; a
+            // foreign order buffer is read through cells that swap on access, since the path
+            // visits arbitrary cells and the kernel stores native values
+            return onCells<
                 2, char, int8_t, int16_t, int32_t, int64_t, float, double, std::complex<float>,
                 std::complex<double>>(source, [&](const auto & grid) -> py::object {
                 return py::cast(qed::native::profile(grid, points, closed));

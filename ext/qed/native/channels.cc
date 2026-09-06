@@ -37,9 +37,12 @@ qed::py::native::channels(py::module & m)
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
             auto s = asIndex<2>(stride);
-            // dispatch on the buffer's cell type and run the kernel over the matching grid
-            return onGrid<2, char, int16_t, int32_t, int64_t, float, double>(
-                source, [&](const auto & grid) {
+            // dispatch on the buffer's cell type and run the kernel over the tile; a foreign order
+            // buffer arrives as a native copy of the tile, so the geometry the kernel sees is the
+            // dispatcher's, not the caller's
+            return onTile<2, char, int16_t, int32_t, int64_t, float, double>(
+                source, o, t, s,
+                [&](const auto & grid, const auto & o, const auto & t, const auto & s) {
                     return qed::native::channels::value(grid, o, t, s, min, max);
                 });
         },
@@ -59,9 +62,12 @@ qed::py::native::channels(py::module & m)
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
             auto s = asIndex<2>(stride);
-            // dispatch on the buffer's cell type and run the kernel over the matching grid
-            return onGrid<2, char, int16_t, int32_t, int64_t, float, double>(
-                source, [&](const auto & grid) {
+            // dispatch on the buffer's cell type and run the kernel over the tile; a foreign order
+            // buffer arrives as a native copy of the tile, so the geometry the kernel sees is the
+            // dispatcher's, not the caller's
+            return onTile<2, char, int16_t, int32_t, int64_t, float, double>(
+                source, o, t, s,
+                [&](const auto & grid, const auto & o, const auto & t, const auto & s) {
                     return qed::native::channels::magnitude(grid, o, t, s, min, max);
                 });
         },
@@ -113,9 +119,12 @@ qed::py::native::channels(py::module & m)
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
             auto s = asIndex<2>(stride);
-            // dispatch on the buffer's cell type and run the kernel over the matching grid
-            return onGrid<2, std::complex<float>, std::complex<double>>(
-                source, [&](const auto & grid) {
+            // dispatch on the buffer's cell type and run the kernel over the tile; a foreign order
+            // buffer arrives as a native copy of the tile, so the geometry the kernel sees is the
+            // dispatcher's, not the caller's
+            return onTile<2, std::complex<float>, std::complex<double>>(
+                source, o, t, s,
+                [&](const auto & grid, const auto & o, const auto & t, const auto & s) {
                     return qed::native::channels::complex(
                         grid, o, t, s, min, max, minPhase, maxPhase, saturation);
                 });
@@ -137,9 +146,12 @@ qed::py::native::channels(py::module & m)
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
             auto s = asIndex<2>(stride);
-            // dispatch on the buffer's cell type and run the kernel over the matching grid
-            return onGrid<2, std::complex<float>, std::complex<double>>(
-                source, [&](const auto & grid) {
+            // dispatch on the buffer's cell type and run the kernel over the tile; a foreign order
+            // buffer arrives as a native copy of the tile, so the geometry the kernel sees is the
+            // dispatcher's, not the caller's
+            return onTile<2, std::complex<float>, std::complex<double>>(
+                source, o, t, s,
+                [&](const auto & grid, const auto & o, const auto & t, const auto & s) {
                     return qed::native::channels::amplitude(grid, o, t, s, min, max);
                 });
         },
@@ -160,9 +172,12 @@ qed::py::native::channels(py::module & m)
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
             auto s = asIndex<2>(stride);
-            // dispatch on the buffer's cell type and run the kernel over the matching grid
-            return onGrid<2, std::complex<float>, std::complex<double>>(
-                source, [&](const auto & grid) {
+            // dispatch on the buffer's cell type and run the kernel over the tile; a foreign order
+            // buffer arrives as a native copy of the tile, so the geometry the kernel sees is the
+            // dispatcher's, not the caller's
+            return onTile<2, std::complex<float>, std::complex<double>>(
+                source, o, t, s,
+                [&](const auto & grid, const auto & o, const auto & t, const auto & s) {
                     return qed::native::channels::phase(
                         grid, o, t, s, low, high, saturation, brightness);
                 });
@@ -184,9 +199,12 @@ qed::py::native::channels(py::module & m)
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
             auto s = asIndex<2>(stride);
-            // dispatch on the buffer's cell type and run the kernel over the matching grid
-            return onGrid<2, std::complex<float>, std::complex<double>>(
-                source, [&](const auto & grid) {
+            // dispatch on the buffer's cell type and run the kernel over the tile; a foreign order
+            // buffer arrives as a native copy of the tile, so the geometry the kernel sees is the
+            // dispatcher's, not the caller's
+            return onTile<2, std::complex<float>, std::complex<double>>(
+                source, o, t, s,
+                [&](const auto & grid, const auto & o, const auto & t, const auto & s) {
                     return qed::native::channels::real(grid, o, t, s, min, max);
                 });
         },
@@ -206,9 +224,12 @@ qed::py::native::channels(py::module & m)
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
             auto s = asIndex<2>(stride);
-            // dispatch on the buffer's cell type and run the kernel over the matching grid
-            return onGrid<2, std::complex<float>, std::complex<double>>(
-                source, [&](const auto & grid) {
+            // dispatch on the buffer's cell type and run the kernel over the tile; a foreign order
+            // buffer arrives as a native copy of the tile, so the geometry the kernel sees is the
+            // dispatcher's, not the caller's
+            return onTile<2, std::complex<float>, std::complex<double>>(
+                source, o, t, s,
+                [&](const auto & grid, const auto & o, const auto & t, const auto & s) {
                     return qed::native::channels::imaginary(grid, o, t, s, min, max);
                 });
         },
