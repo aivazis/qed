@@ -10,7 +10,7 @@ qed.pkg.tests.stem := qed.pkg
 qed.pkg.tests.prerequisites := qed.pkg qed.ext
 
 # the ENVI driver writes its own products and headers
-tests.qed.pkg.envi.clean := envi_le.dat envi_le.hdr envi_be.dat envi_be.dat.hdr envi_offset.dat envi_offset.hdr envi_bands.dat envi_bands.hdr
+tests.qed.pkg.envi.clean := envi_le.dat envi_le.hdr envi_be.dat envi_be.dat.hdr envi_offset.dat envi_offset.hdr envi_band0.dat envi_band1.dat envi_band2.dat envi_bsq.dat envi_bsq.hdr envi_bil.dat envi_bil.hdr envi_bip.dat envi_bip.hdr
 
 
 # end of file
