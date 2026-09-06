@@ -18,15 +18,16 @@ qed::native::profile(
     // the points
     const points_t & path,
     // the closed path indicator
-    bool closed) -> values_t<typename sourceT::value_type>
+    bool closed) -> values_t<pyre::memory::native_t<typename sourceT::value_type>>
 {
     // type aliases
     using index_t = typename sourceT::index_type;
     using shape_t = typename sourceT::shape_type;
-    using value_t = typename sourceT::value_type;
+    // the native scalar behind the cell, which is what the answer carries
+    using native_t = pyre::memory::native_t<typename sourceT::value_type>;
 
     // make a container for the answer
-    values_t<typename sourceT::value_type> values;
+    values_t<native_t> values;
 
     // if there are no points in the path
     if (path.size() == 0) {
@@ -69,8 +70,8 @@ qed::native::profile(
                 auto shift = index_t(dx, dy);
                 // assemble the index
                 auto idx = index_t(tail + shift);
-                // get the value
-                auto value = source[idx];
+                // get the value, as a native scalar
+                native_t value = source[idx];
                 // and record an entry in the result
                 values.emplace_back(idx[0], idx[1], value);
             }
@@ -81,8 +82,8 @@ qed::native::profile(
     auto & last = closed ? path.front() : path.back();
     // convert it into an index
     auto idx = index_t(std::get<0>(last), std::get<1>(last));
-    // sample the data
-    auto data = source[idx];
+    // sample the data, as a native scalar
+    native_t data = source[idx];
     // and build the last entry
     values.emplace_back(idx[0], idx[1], data);
 
