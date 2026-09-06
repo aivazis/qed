@@ -24,7 +24,8 @@
 // cell type, so one wrapper stands in for the old per-cell-type overload pile
 namespace qed::py {
     // interpret a python buffer as a read-only grid of rank {dim} and cell type {cellT}, its
-    // extents read from the buffer's own shape, laid over the block the buffer exports
+    // extents and strides read from the buffer's own description, laid over the block the
+    // buffer exports; a strided buffer, such as one band of a multi-band product, is honored
     template <typename cellT, int dim>
     auto asGrid(const py::buffer_info & info) -> viewgrid_t<cellT, dim>;
 

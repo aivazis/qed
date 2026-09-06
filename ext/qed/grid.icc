@@ -17,15 +17,39 @@ template <typename cellT, int dim>
 auto
 qed::py::asGrid(const py::buffer_info & info) -> viewgrid_t<cellT, dim>
 {
-    // the extents, copied out of the buffer description axis by axis
-    typename viewgrid_t<cellT, dim>::shape_type shape;
+    // the layout
+    using packing_t = pyre::grid::canonical_t<dim>;
+    // the extents and the strides, in cells, copied out of the buffer description axis by
+    // axis; a sub-grid of a larger block, such as one band of a multi-band product, arrives
+    // with strides that step over the cells of its neighbors, so the layout must honor them
+    typename packing_t::shape_type shape;
+    typename packing_t::strides_type strides;
+    // the span of the block the layout reaches, in cells: one past the largest offset
+    typename packing_t::difference_type span = 1;
+    // whether the grid has any cells at all
+    bool empty = false;
+    // go through the axes
     for (int axis = 0; axis < dim; ++axis) {
+        // the extent
         shape[axis] = info.shape[axis];
+        // the stride, which the protocol reports in bytes
+        strides[axis] = info.strides[axis] / static_cast<py::ssize_t>(info.itemsize);
+        // an axis without cells empties the grid
+        empty = empty || shape[axis] == 0;
+        // fold the reach of this axis into the span
+        span += (shape[axis] - 1) * strides[axis];
     }
-    // the canonical packing over that shape
-    auto packing = pyre::grid::canonical_t<dim>(shape);
-    // a read-only view over the buffer's block, sized to the packing
-    auto storage = view_t<cellT>(static_cast<const cellT *>(info.ptr), packing.cells());
+    // an empty grid reaches nothing
+    if (empty) {
+        // so its block has no cells
+        span = 0;
+    }
+    // the layout: the buffer's shape and strides, with the origin at zero, visited in row major
+    // order, and no shift since the origin is at the beginning of the block
+    auto packing =
+        packing_t(shape, packing_t::index_type::zero(), packing_t::order_type::c(), strides, 0);
+    // a read-only view over the buffer's block, sized to the span the layout reaches
+    auto storage = view_t<cellT>(static_cast<const cellT *>(info.ptr), span);
     // paired into a grid
     return viewgrid_t<cellT, dim>(packing, storage);
 }
