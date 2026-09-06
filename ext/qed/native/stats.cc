@@ -26,11 +26,16 @@ qed::py::native::stats(py::module & m)
             // rebuild the tile geometry as rank-2 grid coordinates
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
-            // dispatch on the buffer's cell type and collect the statistics of the matching grid
-            return onGrid<
+            // dispatch on the buffer's cell type and collect the statistics of the tile; the
+            // kernel takes no stride, so the tile is dense, and a foreign order buffer arrives
+            // as a native copy of it
+            return onTile<
                 2, char, int8_t, int16_t, int32_t, int64_t, float, double, std::complex<float>,
                 std::complex<double>>(
-                source, [&](const auto & grid) { return qed::native::stats(grid, o, t); });
+                source, o, t, pyre::grid::index_t<2>::one(),
+                [&](const auto & grid, const auto & o, const auto & t, const auto &) {
+                    return qed::native::stats(grid, o, t);
+                });
         },
         // the signature
         "source"_a, "origin"_a, "shape"_a,
@@ -48,11 +53,15 @@ qed::py::native::stats(py::module & m)
             auto o = asIndex<2>(origin);
             auto t = asShape<2>(shape);
             auto s = asIndex<2>(stride);
-            // dispatch on the buffer's cell type and sample the matching grid
-            return onGrid<
+            // dispatch on the buffer's cell type and sample the tile; a foreign order buffer
+            // arrives as a native copy of the decimated footprint
+            return onTile<
                 2, char, int8_t, int16_t, int32_t, int64_t, float, double, std::complex<float>,
                 std::complex<double>>(
-                source, [&](const auto & grid) { return qed::native::sample(grid, o, t, s); });
+                source, o, t, s,
+                [&](const auto & grid, const auto & o, const auto & t, const auto & s) {
+                    return qed::native::sample(grid, o, t, s);
+                });
         },
         // the signature
         "source"_a, "origin"_a, "shape"_a, "stride"_a,

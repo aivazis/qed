@@ -94,4 +94,153 @@ qed::py::onGrid(const py::buffer & source, F && f)
 }
 
 
+// split a buffer's struct code into the scalar code and the foreign order flag
+auto
+qed::py::splitFormat(const std::string & format) -> std::pair<std::string, bool>
+{
+    // the struct module's byte order markers
+    static const std::string markers = "@=<>!";
+    // if the code does not lead with one
+    if (format.empty() || markers.find(format[0]) == std::string::npos) {
+        // the scalar is in the host's order
+        return { format, false };
+    }
+    // otherwise, pull the marker off
+    auto marker = format[0];
+    // the host's order
+    const bool little = std::endian::native == std::endian::little;
+    // the marker names the order the host lacks when it says little on a big endian host, or
+    // big, which network order also is, on a little endian one
+    const bool foreign = (marker == '<' && !little) || ((marker == '>' || marker == '!') && little);
+    // hand back the scalar code and the verdict
+    return { format.substr(1), foreign };
+}
+
+
+// run {f} over a tile of the buffer, swapping its bytes into the host's order on the way if
+// the buffer is in the other order
+template <int dim, typename... cellTs, typename F>
+auto
+qed::py::onTile(
+    const py::buffer & source, const pyre::grid::index_t<dim> & origin,
+    const pyre::grid::shape_t<dim> & tile, const pyre::grid::index_t<dim> & stride, F && f)
+{
+    // read the buffer description, read-only
+    auto info = source.request();
+    // its rank has to be the one the caller expects
+    if (info.ndim != dim) {
+        // otherwise the caller and the data disagree
+        throw py::value_error("grid rank does not match the expected dimensionality");
+    }
+    // separate the scalar code from the byte order
+    auto [code, foreign] = splitFormat(info.format);
+    // the result type is the same whatever cell we dispatch to; take it from the first candidate
+    using first_t = typename std::tuple_element<0, std::tuple<cellTs...>>::type;
+    using result_t = decltype(f(std::declval<viewgrid_t<first_t, dim>>(), origin, tile, stride));
+    // a slot for it
+    std::optional<result_t> result;
+    // try each candidate; the first whose struct code matches the buffer wins, and the byte
+    // order decides whether the tile is viewed in place or copied through the swap
+    bool matched =
+        (((code == py::format_descriptor<cellTs>::format()) ?
+              (result.emplace(
+                   foreign ? swapTile<cellTs, dim>(info, origin, tile, stride, f) :
+                             f(asGrid<cellTs, dim>(info), origin, tile, stride)),
+               true) :
+              false)
+         || ...);
+    // an unmatched cell type is a caller mistake
+    if (!matched) {
+        // say which one
+        throw py::value_error("unsupported grid cell type '" + info.format + "'");
+    }
+    // hand back what {f} produced, moved out since the result may be move-only
+    return std::move(*result);
+}
+
+
+// copy the footprint of a tile through the swap and run {f} over the native copy
+template <typename cellT, int dim, typename F>
+auto
+qed::py::swapTile(
+    const py::buffer_info & info, const pyre::grid::index_t<dim> & origin,
+    const pyre::grid::shape_t<dim> & tile, const pyre::grid::index_t<dim> & stride, F && f)
+{
+    // the cells as they sit in the buffer: in the order the host lacks
+    using foreign_t = pyre::memory::foreign_t<cellT>;
+    // a view over the buffer that reads them as native values
+    auto source = asGrid<foreign_t, dim>(info);
+    // the extent of the source along each axis
+    const auto & extent = source.packing().shape();
+    // the layout of the tile
+    auto packing = pyre::grid::canonical_t<dim>(tile);
+    // the block that receives the native copy, one cell per tile cell
+    std::vector<cellT> block(packing.cells());
+    // go through the tile
+    for (auto it = packing.begin(); it != packing.end(); ++it) {
+        // the tile cell
+        auto idx = *it;
+        // and the source cell it decimates to, the way the kernels project it
+        auto src = idx;
+        // axis by axis
+        for (int axis = 0; axis < dim; ++axis) {
+            // the origin is in decimated coordinates and the stride spaces the samples
+            src[axis] = (origin[axis] + idx[axis]) * stride[axis];
+            // a footprint that leaves the source would read past the end of the block, which
+            // the in-place leg cannot survive either, so refuse it here where it can be caught
+            if (src[axis] < 0 || src[axis] >= extent[axis]) {
+                // by complaining
+                throw py::value_error("tile footprint lies outside the source");
+            }
+        }
+        // read the source cell, which swaps into the host's order on the way out, and store it
+        block[packing.offset(idx)] = source[src];
+    }
+    // a native view over the copy, with the tile's own layout
+    auto grid = viewgrid_t<cellT, dim>(packing, view_t<cellT>(block.data(), packing.cells()));
+    // the kernel sees a tile that starts at the origin with unit stride
+    return f(grid, pyre::grid::index_t<dim>::zero(), tile, pyre::grid::index_t<dim>::one());
+}
+
+
+// dispatch on a python buffer's cell format, viewing a foreign order buffer through cells that
+// swap on access
+template <int dim, typename... cellTs, typename F>
+auto
+qed::py::onCells(const py::buffer & source, F && f)
+{
+    // read the buffer description, read-only
+    auto info = source.request();
+    // its rank has to be the one the caller expects
+    if (info.ndim != dim) {
+        // otherwise the caller and the data disagree
+        throw py::value_error("grid rank does not match the expected dimensionality");
+    }
+    // separate the scalar code from the byte order
+    auto [code, foreign] = splitFormat(info.format);
+    // the result type is the same whatever cell we dispatch to; take it from the first candidate
+    using first_t = typename std::tuple_element<0, std::tuple<cellTs...>>::type;
+    using result_t = decltype(f(std::declval<viewgrid_t<first_t, dim>>()));
+    // a slot for it
+    std::optional<result_t> result;
+    // try each candidate; the first whose struct code matches the buffer wins, and the byte
+    // order decides whether the cells are read as they are or through the swap
+    bool matched =
+        (((code == py::format_descriptor<cellTs>::format()) ?
+              (result.emplace(
+                   foreign ? f(asGrid<pyre::memory::foreign_t<cellTs>, dim>(info)) :
+                             f(asGrid<cellTs, dim>(info))),
+               true) :
+              false)
+         || ...);
+    // an unmatched cell type is a caller mistake
+    if (!matched) {
+        // say which one
+        throw py::value_error("unsupported grid cell type '" + info.format + "'");
+    }
+    // hand back what {f} produced, moved out since the result may be move-only
+    return std::move(*result);
+}
+
+
 // end of file
