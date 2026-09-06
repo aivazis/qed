@@ -4,6 +4,9 @@
 # (c) 1998-2026 all rights reserved
 
 
+# externals
+import math
+
 # support
 import pyre
 import qed
@@ -20,7 +23,8 @@ class ENVI(Flat, family="qed.readers.native.envi"):
 
     The header supplies what the flat reader would otherwise have to be told: the cell type, the
     byte order of the product, and its shape. A value the user pins explicitly wins over the one
-    in the header.
+    in the header. A product with more than one band yields one dataset per band, selectable by
+    name, each a plane of the mapping of the whole product wherever the interleave put it.
     """
 
     # public data
@@ -29,27 +33,92 @@ class ENVI(Flat, family="qed.readers.native.envi"):
     header.doc = "the location of the ENVI header; left unset, it is looked for next to the product"
 
     # implementation details
+    def _loadDatasets(self, cell, shape):
+        """
+        Build my datasets: one for the product when it holds a single band, and one per band
+        otherwise, each a sub-grid of the mapping of the whole product
+        """
+        # get the header
+        hdr = self._header
+        # the number of bands, with the ENVI default when the header does not say
+        bands = hdr.bands if hdr is not None and hdr.bands is not None else 1
+        # a single band is a flat file
+        if bands == 1:
+            # so the flat reader knows what to do
+            return super()._loadDatasets(cell=cell, shape=shape)
+        # the layout of the whole product, in interleave order
+        layout = hdr.shape
+        # the path to the product
+        path = qed.primitives.path(self.uri.address)
+        # the file must hold the whole product; a short file would let the render machinery read
+        # past the end of the mapping
+        required = math.prod(layout) * cell.bytes
+        # measure it
+        actual = path.stat().st_size
+        # if it is too small
+        if actual < required:
+            # make a channel
+            channel = journal.error("qed.readers.native.envi")
+            # complain
+            channel.line(f"'{path}' is too small for the declared layout")
+            channel.line(f"{bands} bands of {tuple(shape)} {cell.cell} cells require")
+            channel.line(f"{required} bytes, but the file holds only {actual}")
+            # flush
+            channel.log()
+            # and bail
+            return
+        # lay a grid over the whole product, in the byte order of the file
+        cube = qed.libpyre.grid.map(uri=str(path), shape=layout, cell=cell.ordered, create=False)
+        # the band axis sits where the interleave put it
+        axis = self.axes[hdr.interleave or "bsq"]
+        # the bands are known by the names in the header when it names them all, and by their
+        # ordinals otherwise
+        names = hdr.bandNames
+        # check
+        if not names or len(names) != bands:
+            # fall back to ordinals
+            names = [str(band + 1) for band in range(bands)]
+        # publish the selector
+        self.selectors = {"band": tuple(names)}
+        # go through the bands
+        for band, name in enumerate(names):
+            # the index that picks the plane of this band out of the cube
+            index = [slice(None)] * len(layout)
+            # by pinning the band axis
+            index[axis] = band
+            # the plane: a sub-grid that shares the mapping of the whole product
+            plane = cube[tuple(index)]
+            # build the dataset over it
+            dataset = qed.readers.native.datasets.mmap(
+                # named by the ordinal of the band, which is stable whatever the header calls it
+                name=f"{self.pyre_name}.{band + 1}",
+                # the product
+                uri=self.uri,
+                # the layout of the plane
+                shape=shape,
+                cell=cell,
+                tile=cell.tile,
+                # its identity
+                selector={"band": name},
+                # and its payload
+                data=plane,
+            )
+            # and add it to the pile
+            self.datasets.append(dataset)
+        # every band is present
+        self.available = {"band": set(names)}
+        # all done
+        return
+
     def _resolveShape(self):
         """
         Complete my cell and shape from the ENVI header, then fall back on the file for whatever
         is still missing
         """
-        # get the header
-        hdr = self._describe()
+        # get the header, and keep it for the dataset construction
+        hdr = self._header = self._describe()
         # if there is one
         if hdr is not None:
-            # a product with more than one band needs a band axis the flat dataset does not have
-            if hdr.bands is not None and hdr.bands != 1:
-                # make a channel
-                channel = journal.error("qed.readers.native.envi")
-                # complain
-                channel.line(f"could not load a dataset from '{self.uri.address}'")
-                channel.line(f"the header declares {hdr.bands} bands")
-                channel.line(f"multi-band products are not supported yet")
-                # flush
-                channel.log()
-                # and bail
-                return
             # a product with an embedded header needs a mapping with an offset, which the flat
             # dataset does not have
             if hdr.offset:
@@ -169,6 +238,13 @@ class ENVI(Flat, family="qed.readers.native.envi"):
         channel.log()
         # and bail
         return None
+
+    # constants
+    # the position of the band axis in the layout of a product, by interleave
+    axes = {"bsq": 0, "bil": 1, "bip": 2}
+
+    # private data
+    _header = None  # the ENVI header, once read
 
 
 # end of file
