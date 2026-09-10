@@ -271,6 +271,46 @@ The story, then. An earthaccess archive is a **query**, and its tree is the quer
 The archive tree operations, the `expanded` trait, the GraphQL surface, and the client stay in
 qed.
 
+### 3.8 What comes from qef
+
+`~/dv/qef` holds the complete NISAR granule definition, and the user has cleared cannibalizing
+it until qef and qed learn to interoperate, which is on the pile. What the earth archive takes:
+
+- **The granule id grammar**, `pkg/qef/missions/nisar/daac/`: a `tokens/` package where every
+  field of a granule id is a pyre trait that also knows its lexer (`Numeric` with a width and a
+  range, `Discrete` with its allowed values, `ERT` for `YYYYMMDDTHHMMSS` timestamps), and
+  descriptor components (`Single` for RSLC, GSLC, GCOV, SME2; `Pair` for RIFG, RUNW, ROFF,
+  GUNW, GOFF; plus RRSD, RRST, HST_DRT, Daphne) whose `sequencer` lists the tokens in id order.
+  The `Descriptor` metaclass composes the regex from the lexers, and `Registrar.parse` picks the
+  descriptor from the product field, so `daac.descriptor(granule=gid)` yields an object with
+  `cycle`, `track`, `direction`, `frame`, the bandwidths, the polarizations, `begin`, `end`,
+  fidelity, coverage, and a `gid` that round-trips. The live ids of 3.6 have exactly the shape of
+  the sample ids in qef's own `tests/qef.pkg/missions/nisar/daac/descriptor.py`
+  (`P05023` is environment, phase, major, minor, patch; `4005` is the two bandwidths). Parsing
+  them in this process needs qef's extension built, which the environment lacks, so the
+  round trip was not exercised here; qef's test suite is the evidence.
+- **What the grammar buys.** The stack identity, track plus direction plus frame, and the date
+  come from the id alone, so the earth filesystem never has to trust CMR's
+  `AdditionalAttributes`, and the same grouping applies to a local or s3 folder of granules,
+  which the browser can then fold into stacks too. For pair products the stack is the same
+  triple and the date level uses the reference acquisition, which is what `Pair.mark` already
+  says.
+- **`daac.Filter`**: builds a regex from partial token values, track or frame or direction or
+  begin, with every unspecified token's lexer filling the gaps. CMR's `granule_name` filter takes
+  wildcards, and the same partial specification renders as one, so a stack folder can be a
+  query as well as a group, which is the escape hatch when a filtered page is still too large.
+- **The canonical layout**, `missions/nisar/archives/Canonical.py`: the ops bucket
+  `s3://nisar-ops-rs-fwd/products/` is laid out as `{stage}_{band}_{product}/{yyyy}/{mm}/{dd}/
+  {gid}/{gid}.h5`, and `scrape` walks it a level at a time with the pyre filesystem, the same
+  way qed's s3 archive browses. That layout is a second, date-first hierarchy over the same
+  granules, worth knowing when the grouping question is settled.
+
+Cannibalized form: lift `daac/` (tokens, descriptors, `Registrar`, `Filter`) into qed as
+`pkg/readers/nisar/daac/`, with the descriptor and filter tests, and have the earth filesystem
+name its nodes by gid and keep the descriptor in each node's `Info`. When the interop lands,
+the copy becomes an import and nothing else moves. qef's own archive protocol is a different
+concept, `locate` and `download` by descriptor rather than `contents`, and stays where it is.
+
 ## 4. Sequence
 
 1. **Server model and schema.** The `expanded` trait, the tree operations on the archives, the
@@ -327,6 +367,8 @@ redesign that starts from server state is cheaper than one that has to build it.
    the start? The earthaccess numbers in 3.6 say a filtered query is sub-second, which argues
    for the loop.
 5. **The earthaccess grouping.** Stack first, then date, or the reverse. The refusal of
-   unfiltered listings is decided, see 3.6.
+   unfiltered listings is decided, see 3.6. With the grammar of 3.8 in hand the grouping
+   applies to local and s3 folders of granules as well, so the choice is really about the
+   browser, not the earth archive.
 
 <!-- end of file -->
