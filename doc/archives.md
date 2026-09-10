@@ -286,9 +286,9 @@ it until qef and qed learn to interoperate, which is on the pile. What the earth
   `cycle`, `track`, `direction`, `frame`, the bandwidths, the polarizations, `begin`, `end`,
   fidelity, coverage, and a `gid` that round-trips. The live ids of 3.6 have exactly the shape of
   the sample ids in qef's own `tests/qef.pkg/missions/nisar/daac/descriptor.py`
-  (`P05023` is environment, phase, major, minor, patch; `4005` is the two bandwidths). Parsing
-  them in this process needs qef's extension built, which the environment lacks, so the
-  round trip was not exercised here; qef's test suite is the evidence.
+  (`P05023` is environment, phase, major, minor, patch; `4005` is the two bandwidths), and the
+  grammar round-trips live GCOV, GUNW, and RRSD ids from CMR: the GUNW pair parses with its
+  reference and secondary cycles, and the RRSD with no frame, as their descriptors say.
 - **What the grammar buys.** The stack identity, track plus direction plus frame, and the date
   come from the id alone, so the earth filesystem never has to trust CMR's
   `AdditionalAttributes`, and the same grouping applies to a local or s3 folder of granules,
