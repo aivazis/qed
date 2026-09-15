@@ -171,12 +171,12 @@ catalog read per folder, or they load marked stale and the first refresh fills t
   separate session file, and `pfg` is not supported for persistence.
 - Augmenting in place needs a round-trip yaml editor. PyYAML cannot do it: it drops comments,
   flow style, and blank lines (verified with 6.0.3, and its issue #90 has been open since 2017).
-  Two packages can: `ruamel.yaml` (0.19.1, already in the environment, `YAML()` instance API
-  since the module-level functions are deprecated) and `yamlrocks` (0.6.1, July 2026, Rust
-  core, byte-for-byte round trip, python 3.12 and up; the environment is 3.14). Support is
-  conditional: whichever is importable is used, preferring `yamlrocks` for speed; with neither,
-  the archives load from the file as they do today and nothing is written back. Reading stays
-  on the PyYAML loader pyre already uses.
+  `ruamel.yaml` can (0.19.1, already in the environment, `YAML()` instance API since the
+  module-level functions are deprecated). `yamlrocks` (0.6.1, Rust core, byte-for-byte round
+  trip) would also do, but it has no conda-forge package, so it is not a backend (decided
+  2026-09-15). Support is conditional: with `ruamel.yaml` importable the file is edited in
+  place; without it, the archives load from the file as they do today and nothing is written
+  back. Reading stays on the PyYAML loader pyre already uses.
 - The document is edited by key path, never regenerated: an archive that came from the file
   keeps its section and its comments and gains an `expanded` key; a new archive gets a new
   section and an entry in the `archives` list; a disconnected one loses both. Credentials are
@@ -264,8 +264,8 @@ The story, then. An earthaccess archive is a **query**, and its tree is the quer
   3.1.1, beside `local`, `s3`, `zip`, and `hdf5`; qed's archive just mounts it.
 - **A round-trip yaml editor.** A codec-level `encode` that pyre's config layer lacks
   (`Codec.encode` is a stub): open a yaml document, set or delete a value by key path, write it
-  back with everything else untouched, over whichever of `yamlrocks` or `ruamel.yaml` is
-  importable, and report itself absent when neither is. qed's "augment the user's file" is a
+  back with everything else untouched, over `ruamel.yaml`, and report itself absent when the
+  package is not importable. The backend is a seam, so another package can be slotted in later. qed's "augment the user's file" is a
   client of it.
 
 The archive tree operations, the `expanded` trait, the GraphQL surface, and the client stay in
@@ -319,7 +319,7 @@ concept, `locate` and `download` by descriptor rather than `contents`, and stays
 2. **Client.** The fragment, controlled trays, `Directory`/`Contents` from the fragment, the
    refresh badge, dead hooks removed, `contents` retired.
 3. **pyre.** Filesystem snapshot and rehydration; the earthaccess filesystem; the round-trip
-   yaml editor with its two backends. Each with its own tests, in pyre.
+   yaml editor over `ruamel.yaml`. Each with its own tests, in pyre.
 4. **Persistence in qed.** Archives written back into `qed.yaml` through the pyre editor,
    gated on a backend being present; the boot-time read of snapshots; `viewPersist` given a
    body. The earthaccess filters become traits here too, since the persisted section is what
