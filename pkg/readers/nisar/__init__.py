@@ -7,6 +7,9 @@
 # support
 import qed
 
+# the granule naming conventions
+from . import daac
+
 # publish the readers
 from .Pyramid import Pyramid as pyramid
 
