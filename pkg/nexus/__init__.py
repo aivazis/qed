@@ -22,6 +22,12 @@ from .Survey import Survey as survey
 from .Decimate import Decimate as decimate
 from .Build import Build as build
 
+# the unit of work that lists a folder of a data archive
+from .Listing import Listing as listing
+
+# the record a listing ships back
+from .Manifest import Manifest as manifest
+
 # what a survey learns about one dataset
 from .Finding import Finding as finding
 
@@ -39,6 +45,9 @@ from .Fork import Fork as fork
 
 # the pool of persistent tile rendering processes
 from .Team import Team as team
+
+# the pool of persistent archive listing processes
+from .Scouts import Scouts as scouts
 
 # the cache of rendered tiles
 from .Cache import Cache as cache

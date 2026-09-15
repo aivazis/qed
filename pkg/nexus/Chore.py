@@ -82,10 +82,11 @@ class Chore(pyre.nexus.task):
             # carries its byte order
             config[name] = value.spec if hasattr(value, "spec") else value.pyre_family()
         # archive-backed readers retain access credentials, which are not traits; a worker
-        # cannot reach the archive, but it can present the credentials
+        # cannot reach the archive, but it can present the credentials. an archive itself
+        # generates credentials on demand and mounts on the worker from its traits alone
         credentials = getattr(reader, "credentials", None)
-        # if there are any
-        if credentials:
+        # if there are any on record
+        if isinstance(credentials, dict) and credentials:
             # add them to the recipe
             config["credentials"] = dict(credentials)
         # hand off the recipe

@@ -38,8 +38,8 @@ class Crew(crew, family="qed.nexus.crews.tile"):
         """
         Carry out {task}, granting it access to my reader registry
         """
-        # execute the task with my open readers on hand
-        return task(readers=self.readers, **kwds)
+        # execute the task with my open readers and mounted archives on hand
+        return task(readers=self.readers, archives=self.archives, **kwds)
 
     def report(self, channel, crewstatus, taskstatus, result, **kwds):
         """
@@ -130,6 +130,8 @@ class Crew(crew, family="qed.nexus.crews.tile"):
         super().__init__(**kwds)
         # the worker side registry of open readers, keyed by the team side reader name
         self.readers = {}
+        # the worker side registry of mounted archives, keyed by the team side archive name
+        self.archives = {}
         # all done
         return
 
