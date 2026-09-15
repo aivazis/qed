@@ -84,13 +84,16 @@ class Query(graphene.ObjectType):
         # attempt to
         try:
             # ask it for its contents
-            return manager.contents(uri=qed.primitives.uri.parse(path))
+            entries = manager.contents(uri=qed.primitives.uri.parse(path))
         # if anything goes wrong
         except journal.ApplicationError:
-            # swallow
-            pass
-        # all done
-        return []
+            # report an empty folder
+            return []
+        # describe each entry
+        return [
+            manager.item(name=name, uri=str(uri), isFolder=isFolder)
+            for name, uri, isFolder in entries
+        ]
 
     # product metadata
     @staticmethod
