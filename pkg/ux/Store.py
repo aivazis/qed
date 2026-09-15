@@ -315,8 +315,81 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         Disconnect an archive
         """
-        # delegate to my archive store
-        return self._dataArchives.removeArchive(uri=uri)
+        # remove it from my archive store
+        archive = self._dataArchives.removeArchive(uri=uri)
+        # if it was there and a fleet is attached
+        if archive is not None and self.fleet is not None:
+            # send its scouts home
+            self.fleet.recall(archive=archive.pyre_name)
+        # hand it back
+        return archive
+
+    def expandFolder(self, archive, uri):
+        """
+        Put the folder at {uri} of {archive} on display and list it
+        """
+        # look up the archive
+        archive = self._locateArchive(uri=archive)
+        # an unknown archive has already been reported
+        if archive is None:
+            # so there is nothing to do
+            return None
+        # normalize the folder
+        uri = str(uri)
+        # a listing already under way covers this request
+        if archive.isPending(uri=uri):
+            # so leave it alone
+            return archive
+        # otherwise, put the folder on display
+        archive.expand(uri=uri)
+        # and list it
+        self._browse(archive=archive, uri=uri)
+        # the tree moved, so let the clients know
+        self._announce()
+        # all done
+        return archive
+
+    def collapseFolder(self, archive, uri):
+        """
+        Take the folder at {uri} of {archive} off display
+        """
+        # look up the archive
+        archive = self._locateArchive(uri=archive)
+        # an unknown archive has already been reported
+        if archive is None:
+            # so there is nothing to do
+            return None
+        # take the folder off display
+        archive.collapse(uri=uri)
+        # the tree moved, so let the clients know
+        self._announce()
+        # all done
+        return archive
+
+    def refreshArchive(self, uri):
+        """
+        List every folder of the archive at {uri} that is on display again
+        """
+        # look up the archive
+        archive = self._locateArchive(uri=uri)
+        # an unknown archive has already been reported
+        if archive is None:
+            # so there is nothing to do
+            return None
+        # go through the folders on display, on a copy since listings may land inline
+        for folder in list(archive.expanded):
+            # a listing already under way is fresh enough
+            if archive.isPending(uri=folder):
+                # so leave it alone
+                continue
+            # mark the rest as under way
+            archive.expand(uri=folder)
+            # and list them
+            self._browse(archive=archive, uri=folder)
+        # the tree moved, so let the clients know
+        self._announce()
+        # all done
+        return archive
 
     # readers
     @property
@@ -1234,6 +1307,86 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             # let them know; the notification is coalesced, so a burst of standings
             # moving collapses into a single refetch per client
             self.notifier()
+        # all done
+        return self
+
+    def _locateArchive(self, uri):
+        """
+        Look up the archive at {uri}, reporting a miss
+        """
+        # look it up
+        archive = self.archive(uri=uri)
+        # if it is not there
+        if archive is None:
+            # make a channel
+            channel = journal.warning("qed.ux.archives")
+            # complain
+            channel.log(f"no archive at '{uri}'")
+        # hand back whatever was found
+        return archive
+
+    def _browse(self, archive, uri):
+        """
+        List the folder at {uri} of {archive}, preferring the crew: with a fleet attached the
+        listing runs on a worker and this call returns at once; without one it runs here
+        """
+        # if a fleet is attached
+        if self.fleet is not None:
+            # describe the folder as a task that can travel to a worker
+            task = qed.nexus.listing(archive=archive, uri=uri)
+            # and hand it to the scouts; the callback receives the manifest, or the reason
+            # the listing failed
+            self.fleet.browse(
+                task=task,
+                callback=functools.partial(self._listed, archive=str(archive.uri), uri=uri),
+            )
+            # all done
+            return self
+        # otherwise, carefully, since a folder that vanished should not take the archive down
+        try:
+            # take the listing here, blocking whichever thread runs this
+            manifest = qed.nexus.manifest.compose(
+                archive=archive, uri=qed.primitives.uri.parse(uri)
+            )
+        # if the archive could not answer
+        except (pyre.framework.exceptions.FrameworkError, journal.ApplicationError) as error:
+            # deliver the failure
+            self._listed(archive=str(archive.uri), uri=uri, error=error)
+        # otherwise
+        else:
+            # deliver the manifest
+            self._listed(archive=str(archive.uri), uri=uri, result=manifest)
+        # all done
+        return self
+
+    def _listed(self, archive, uri, result=None, error=None):
+        """
+        Take delivery of the outcome of listing the folder at {uri} of {archive}
+        """
+        # look up the archive; it may have been disconnected while the listing ran
+        archive = self.archive(uri=archive)
+        # if it is gone
+        if archive is None:
+            # its report has nowhere to land
+            return self
+        # if the listing failed
+        if error is not None:
+            # make a channel
+            channel = journal.warning("qed.ux.archives")
+            # complain
+            channel.line(f"could not list '{uri}'")
+            channel.line(f"of the archive at '{archive.uri}'")
+            channel.line(f"got: {error}")
+            # flush
+            channel.log()
+            # record the failure, retaining the reason for the client to display
+            archive.fail(uri=uri, error=error)
+        # otherwise
+        else:
+            # keep the listing
+            archive.record(manifest=result)
+        # either way, the tree moved, so let the clients know
+        self._announce()
         # all done
         return self
 
