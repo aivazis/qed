@@ -13,6 +13,7 @@ from pyre import (
     protocol,
     component,
     foundry,
+    actor,
     # decorators
     export,
     provides,
