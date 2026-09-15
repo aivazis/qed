@@ -117,8 +117,38 @@ class EarthAccess(Archive, family="qed.archives.earth"):
             return []
         # get my filesystem, mounting it on first contact
         fs = self.fs if self.fs is not None else self.mount()
-        # bring its page current
-        fs.discover()
+        # project the request onto the tree
+        rel = self.project(uri=uri)
+        # and break it into its crumbs
+        crumbs = tuple(rel.names)
+        # the root is the filesystem itself
+        if not crumbs:
+            # so there is nothing to look up
+            folder = fs
+        # a folder below it
+        else:
+            # cannot be on a page that has never been fetched
+            if fs.info(node=fs).sync is None:
+                # so fetch it
+                fs.discover()
+            # attempt to
+            try:
+                # find the folder on the page
+                folder = fs[rel]
+            # if the page does not have it
+            except fs.NotFoundError:
+                # make a channel
+                channel = journal.warning("qed.archives.earth.contents")
+                # explain
+                channel.line(f"'{self.pyre_name}': no folder at '{uri}'")
+                channel.line("the page may have changed since the folder was listed")
+                # flush
+                channel.log()
+                # and report an empty folder
+                return []
+        # bring the folder current: at the root, this runs the query; below it, the page in
+        # hand answers
+        folder.discover(levels=1)
         # make a channel
         channel = journal.debug("qed.archives.earth.contents")
         # show me
@@ -126,38 +156,44 @@ class EarthAccess(Archive, family="qed.archives.earth"):
         channel.indent()
         channel.line(f"query: {fs.query}")
         channel.line(f"hits: {fs.hits}")
-        # make a pile for the items
-        items = []
-        # go through the granules on the page
-        for name, node in sorted(fs.contents.items()):
-            # locate the payload
-            location = self.locate(info=node.info)
-            # a granule without one cannot be read
+        channel.line(f"folder: {folder.uri}")
+        # make a pile for the folders
+        folders = []
+        # and one for the granules
+        granules = []
+        # go through the folder contents, in order
+        for name, node in sorted(folder.contents.items()):
+            # the location of the entry
+            location = self.location(node=node)
+            # a granule without a payload cannot be read
             if location is None:
                 # so skip it
                 continue
             # show me
-            channel.line(f"granule:")
+            channel.line(f"entry:")
             channel.indent()
             channel.line(f"name: {name}")
-            channel.line(f"size: {node.info.size}")
             channel.line(f"location: {location}")
             channel.outdent()
-            # and add the granule to the pile
-            items.append((name, location, False))
+            # form the item
+            item = (name, location, node.isFolder)
+            # and add it to the right pile
+            (folders if node.isFolder else granules).append(item)
         # outdent
         channel.outdent()
         # flush
         channel.log()
-        # all done
-        return items
+        # folders first
+        return folders + granules
 
     def mount(self, engine=None):
         """
         Mount the filesystem over my query, using {engine} to run it
         """
         # build the filesystem
-        fs = qed.filesystem.earthaccess(query=self.query(), count=self.count, engine=engine)
+        fs = qed.filesystem.earthaccess(
+            query=self.query(), count=self.count, layout=self.layout, engine=engine
+        )
         # attach it
         self.fs = fs
         # and hand it back
@@ -214,12 +250,19 @@ class EarthAccess(Archive, family="qed.archives.earth"):
         # all done
         return query
 
-    def locate(self, info):
+    def location(self, node):
         """
-        Pick the location of the payload of a granule out of its metadata {info}
+        Build the uri of {node}: a folder is a location within my document space, and a granule
+        is the location of its payload
         """
-        # go through the direct access links
-        for link in info.links:
+        # a folder is addressed within me
+        if node.isFolder:
+            # by its path on the tree, relative to the root of the filesystem
+            rel = node.uri.relativeTo(qed.primitives.path("/"))
+            # appended to my own address
+            return str(self.uri.clone(address=str(self.base() / rel)))
+        # a granule is addressed by its payload; go through the direct access links
+        for link in node.info.links:
             # looking for the product
             if link.startswith("s3://") and link.endswith(".h5"):
                 # convert it into a uri the readers understand; the address keeps the slash
@@ -231,6 +274,48 @@ class EarthAccess(Archive, family="qed.archives.earth"):
                 return str(uri)
         # a granule without a product is unreadable
         return None
+
+    def project(self, uri):
+        """
+        Project {uri}, a location within my document space, onto the tree
+        """
+        # the location is the address of the uri, relative to my own
+        return qed.primitives.path(uri.address).relativeTo(self.base())
+
+    def base(self):
+        """
+        The path that anchors my document space
+        """
+        # get my address
+        address = self.uri.address
+        # an archive without one anchors at the root
+        return qed.primitives.path(address) if address else qed.primitives.path("/")
+
+    # the layout of the tree
+    @staticmethod
+    def layout(granule):
+        """
+        Place {granule} on the tree: under its stack, then its acquisition date
+        """
+        # the catalog name of the granule is its id
+        gid = granule["meta"]["native-id"]
+        # parse it
+        descriptor = qed.readers.nisar.daac.descriptor(granule=gid)
+        # a granule the grammar cannot place hangs off the root
+        if not descriptor:
+            # under its own name
+            return (gid,)
+        # the stack is the track, the pass direction, and the frame
+        track = descriptor.track
+        direction = descriptor.direction
+        # which products at level 0 do not have
+        frame = getattr(descriptor, "frame", None)
+        # form the stack name the way the catalog spells it
+        stack = f"{track:03}_{direction}" if frame is None else f"{track:03}_{direction}_{frame:03}"
+        # the date is that of the acquisition, the reference one for pairs
+        date = f"{descriptor.mark:%Y-%m-%d}"
+        # place the granule
+        return stack, date, gid
 
     # hooks
     @classmethod
