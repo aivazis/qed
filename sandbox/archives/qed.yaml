@@ -4,21 +4,12 @@
 # (c) 1998-2026 all rights reserved
 
 
-# the archive
+# the archive: a query of the NISAR L0B collection over crete
 example:
     uri: earth:example
-    filters:
-        - collection#l0b
-        - polygon#crete
-
-# the NISAR L0B collection
-l0b:
+    collection: NISAR_L0B_RRSD_BETA_V1
     conceptId: C3622228339-ASF
-    shortName: NISAR_L0B_RRSD_BETA_V1
-
-# a polygon around crete
-crete:
-    vertices:
+    polygon:
         - (23.3547, 34.7211)
         - (26.4923, 34.7211)
         - (26.4923, 35.7146)
