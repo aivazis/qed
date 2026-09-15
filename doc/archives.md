@@ -101,6 +101,13 @@ read the archive's node tree and never touch the filesystem or the network.
   the point.
 - The store keeps the catalog it has and adds `expandFolder`, `collapseFolder`,
   `refreshArchive`, each returning the archive so the mutation payload can carry it.
+- **Built 2026-09-15.** A listing is a `qed.nexus.listing` task: a chore that carries the
+  archive's family and recipe and the folder uri, mounts the archive on the worker from the
+  recipe, keeps it in the crew member's archive registry, and returns a `qed.nexus.manifest`.
+  Each archive gets its own team of scouts, `qed.nexus.scouts`, a team flavor of one member,
+  keyed by archive name and disbanded on disconnect; `Fleet.browse` routes to them. Without a
+  fleet the listing runs in the server process. A failed listing leaves the folder on display
+  with its reason recorded, the way a failed survey does.
 
 ### 3.1.1 The archive is a pyre filesystem
 
@@ -130,6 +137,19 @@ wrinkle is boot: a persisted expansion has to be re-discovered before the app qu
 and boot is pinned to do nothing. Either the expanded folders are discovered at boot, one
 catalog read per folder, or they load marked stale and the first refresh fills them.
 
+**Built 2026-09-15.** The tree lives in two places, by process. Where an archive is mounted,
+on a crew member, or in the server when no fleet is attached, it is a pyre filesystem and
+`contents` walks it; the earth archive mounts `pyre.filesystem.earthaccess` with a layout that
+hangs granules under their stack and acquisition date, both read off the granule id by the
+grammar of 3.8. Where the tree is kept, in the store, an archive holds its `expanded` list and
+a table of manifests, one per folder on display: the `(name, uri, isFolder)` entries the
+listing returned, the moment it was taken, and the catalog count for query backed archives. A
+worker ships a manifest back the way a survey ships a discovery record, so the store mounts
+nothing, and `Archive.items` is read off the manifests. Each folder on display also records
+whether its listing is under way and, when it failed, why. Persistence needs only the spec and
+the `expanded` list, as above; a persisted expansion boots pending and its first listing fills
+it.
+
 ### 3.2 GraphQL
 
 - `Archive` gains `items: [Item]`, a **flat** list of every item in every expanded folder, with
@@ -141,6 +161,9 @@ catalog read per folder, or they load marked stale and the first refresh fills t
   uri})`, `refreshArchive(input: {uri})`, each returning `{ archive { ...items } }`.
 - The `contents` query is retired once the client no longer issues it. `useFetchDirectoryContents`
   (the `useLazyLoadQuery` variant) is dead and broken already and goes with it.
+- **Built 2026-09-15.** `Item` carries `parent`, `expanded`, `pending`, and `error`; `Archive`
+  carries `items`, its root's `expanded`, `pending`, and `error`, and `hits`. The three
+  mutations are registered. `contents` still answers, with its items described the same way.
 
 ### 3.3 Client
 
@@ -317,10 +340,11 @@ concept, `locate` and `download` by descriptor rather than `contents`, and stays
    the pyre branch `archives`, so that every archive flavor is a name plus a mounted filesystem
    before the tree interface is written. Decided 2026-09-15 to go first; the snapshot and the
    yaml editor stay in step 3.
-2. **Server model and schema.** The `expanded` trait, the tree operations on the archives
-   implemented once over the filesystem API, the store methods, the crew task that discovers
-   on a worker, `Archive.items`, the three mutations, the package tests. The `contents` query
-   stays through this step so the client keeps working.
+2. **Server model and schema.** Done 2026-09-15: the `expanded` trait and the manifest table
+   on the base archive, the earth archive as a query over the pyre filesystem with the
+   NISAR grammar lifted from qef, the listing task and the scouts, the store methods, the
+   three mutations, the package tests. The `contents` query stays through this step so the
+   client keeps working.
 3. **Client.** The fragment, controlled trays, `Directory`/`Contents` from the fragment, the
    refresh badge, dead hooks removed, `contents` retired.
 4. **pyre.** Filesystem snapshot and rehydration; the round-trip yaml editor over
