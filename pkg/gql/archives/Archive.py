@@ -12,6 +12,7 @@ from ..Node import Node
 
 # my parts
 from .Credential import Credential
+from .Item import Item
 
 
 # my node type
@@ -31,6 +32,11 @@ class Archive(graphene.ObjectType):
     uri = graphene.String()
     credentials = graphene.List(Credential)
     readers = graphene.List(graphene.String)
+    items = graphene.List(Item)
+    expanded = graphene.Boolean()
+    pending = graphene.Boolean()
+    error = graphene.String()
+    hits = graphene.Int()
 
     # the resolvers
     @staticmethod
@@ -78,6 +84,48 @@ class Archive(graphene.ObjectType):
         """
         # extract the supported readers
         return archive.readers
+
+    @staticmethod
+    def resolve_items(archive, *_):
+        """
+        Get the entries of every folder of the {archive} that is on display
+        """
+        # the archive knows
+        return archive.items()
+
+    @staticmethod
+    def resolve_expanded(archive, *_):
+        """
+        Check whether the root of the {archive} is on display
+        """
+        # the root is the archive itself
+        return archive.isExpanded(uri=archive.uri)
+
+    @staticmethod
+    def resolve_pending(archive, *_):
+        """
+        Check whether the listing of the root of the {archive} is under way
+        """
+        # the root is the archive itself
+        return archive.isPending(uri=archive.uri)
+
+    @staticmethod
+    def resolve_error(archive, *_):
+        """
+        Get the reason the listing of the root of the {archive} failed, if it did
+        """
+        # the root is the archive itself
+        return archive.failure(uri=archive.uri)
+
+    @staticmethod
+    def resolve_hits(archive, *_):
+        """
+        Get the number of entries the {archive} holds in all, when it can tell
+        """
+        # get the listing of the root
+        manifest = archive.listing(uri=archive.uri)
+        # an archive that has not been listed does not know
+        return None if manifest is None else manifest.hits
 
 
 # end of file
