@@ -313,20 +313,25 @@ concept, `locate` and `download` by descriptor rather than `contents`, and stays
 
 ## 4. Sequence
 
-1. **Server model and schema.** The `expanded` trait, the tree operations on the archives, the
-   store methods, `Archive.items`, the three mutations, the package tests. The `contents` query
+1. **pyre: the earthaccess filesystem.** `pyre.filesystem.earthaccess`, with its tests, on
+   the pyre branch `archives`, so that every archive flavor is a name plus a mounted filesystem
+   before the tree interface is written. Decided 2026-09-15 to go first; the snapshot and the
+   yaml editor stay in step 3.
+2. **Server model and schema.** The `expanded` trait, the tree operations on the archives
+   implemented once over the filesystem API, the store methods, the crew task that discovers
+   on a worker, `Archive.items`, the three mutations, the package tests. The `contents` query
    stays through this step so the client keeps working.
-2. **Client.** The fragment, controlled trays, `Directory`/`Contents` from the fragment, the
+3. **Client.** The fragment, controlled trays, `Directory`/`Contents` from the fragment, the
    refresh badge, dead hooks removed, `contents` retired.
-3. **pyre.** Filesystem snapshot and rehydration; the earthaccess filesystem; the round-trip
-   yaml editor over `ruamel.yaml`. Each with its own tests, in pyre.
-4. **Persistence in qed.** Archives written back into `qed.yaml` through the pyre editor,
+4. **pyre.** Filesystem snapshot and rehydration; the round-trip yaml editor over
+   `ruamel.yaml`. Each with its own tests, in pyre.
+5. **Persistence in qed.** Archives written back into `qed.yaml` through the pyre editor,
    gated on a backend being present; the boot-time read of snapshots; `viewPersist` given a
    body. The earthaccess filters become traits here too, since the persisted section is what
    they shape.
-5. **Facade and playwright.**
+6. **Facade and playwright.**
 
-Steps 1 and 2 are the migration the request asks for and are independent of the UX redesign of
+Steps 2 and 3 are the migration the request asks for and are independent of the UX redesign of
 `/explore` that is on the books; the server model does not care how the tree is drawn, and a
 redesign that starts from server state is cheaper than one that has to build it.
 
@@ -357,18 +362,17 @@ redesign that starts from server state is cheaper than one that has to build it.
    in place. What remains is the smaller question of *which* file when several configuration
    sources contribute archives (a `~/.config/pyre/qed.yaml` and a local one): the proposal is
    to write to the file the archive came from, and new archives to the local one.
-2. **What is shared.** The tree is shared, so expanding a folder on one client expands it on
-   all. Is that the intent, or should expansion be per client with only the listings shared?
-   Per-client expansion means the server keeps a set per client, and there is no client identity
-   today. The recommendation is shared, like the views.
+2. ~~What is shared.~~ Resolved 2026-09-15: the tree is shared, like the views. Expanding a
+   folder on one client expands it on all, and the `expanded` trait is what persists.
 3. **Views in the same record.** The persistence step could carry the viewports and readers as
    well, and `viewPersist` suggests that was the plan. In scope now, or a separate step?
-4. **Discovery placement.** On the loop for the first cut, per section 5, or on a worker from
-   the start? The earthaccess numbers in 3.6 say a filtered query is sub-second, which argues
-   for the loop.
-5. **The earthaccess grouping.** Stack first, then date, or the reverse. The refusal of
+4. ~~Discovery placement.~~ Resolved 2026-09-15: on a worker from the start. Expand and
+   refresh dispatch a survey-style task to the crew, the way `open` does, and the mutation
+   returns the archive with the folder marked in flight; the change frame after the worker
+   reports carries the listing to every client. Section 5's first-cut-on-the-loop is withdrawn.
+5. ~~The earthaccess grouping.~~ Resolved 2026-09-15: stack first, then date. The refusal of
    unfiltered listings is decided, see 3.6. With the grammar of 3.8 in hand the grouping
-   applies to local and s3 folders of granules as well, so the choice is really about the
-   browser, not the earth archive.
+   applies to local and s3 folders of granules as well, so it is a property of the browser,
+   not of the earth archive.
 
 <!-- end of file -->
