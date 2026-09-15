@@ -124,22 +124,6 @@ class S3(Archive, family="qed.archives.s3"):
         # all done
         return
 
-    # visitor support
-    def identify(self, visitor, **kwds):
-        """
-        Let {visitor} know i'm an S3 archive
-        """
-        # attempt to
-        try:
-            # ask {visitor} for it's base handler
-            handler = visitor.onS3
-        # if it doesn't understand
-        except AttributeError:
-            # chain up
-            return super().identify(visitor=visitor, **kwds)
-        # if all went well, invoke the hook
-        return handler(archive=self, **kwds)
-
     # hooks
     @classmethod
     def isSupported(cls):

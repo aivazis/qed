@@ -13,7 +13,6 @@ from .Specification import Specification as specification
 
 # data archives
 from .Archive import Archive as archive
-from .ArchiveFilter import ArchiveFilter as archiveFilter
 
 # the places qed keeps what it derives
 from .Workspace import Workspace as workspace

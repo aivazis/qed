@@ -40,30 +40,6 @@ class Archive(qed.component, family="qed.archives.base", implements=qed.protocol
         # nothing, by default
         return {}
 
-    # implementation details
-    # visitor support
-    def identify(self, visitor, **kwds):
-        """
-        Let {visitor} know i'm a base archive
-        """
-        # attempt to
-        try:
-            # ask {visitor} for it's base handler
-            handler = visitor.onArchive
-        # if it doesn't understand
-        except AttributeError:
-            # get my class
-            me = type(self)
-            # and my poorly formed visitor's
-            them = type(visitor)
-            # complain that it is not a real visitor
-            raise NotImplementedError(
-                f"class '{them.__module__}.{them.__name__}' "
-                f"is not a well formed visitor of '{me.__module__}.{me.__name__}"
-            )
-        # if all went well, invoke the hook
-        return handler(archive=self, **kwds)
-
     # constants
     tag = "<base>"
     label = "<base>"
