@@ -77,22 +77,6 @@ class Local(Archive, family="qed.archives.local"):
         # all done
         return
 
-    # visitor support
-    def identify(self, visitor, **kwds):
-        """
-        Let {visitor} know i'm a local archive
-        """
-        # attempt to
-        try:
-            # ask {visitor} for it's base handler
-            handler = visitor.onLocal
-        # if it doesn't understand
-        except AttributeError:
-            # chain up
-            return super().identify(visitor=visitor, **kwds)
-        # if all went well, invoke the hook
-        return handler(archive=self, **kwds)
-
     # hooks
     @classmethod
     def isSupported(cls):
