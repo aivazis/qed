@@ -1,3 +1,4 @@
+# -*- Python -*-
 # -*- coding: utf-8 -*-
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
@@ -39,34 +40,8 @@ class ConnectEarthAccessArchive(graphene.Mutation):
         # unpack the payload
         name = input.name
         uri = input.uri
-        count = input.count
-        granule = input.granule
-        collection = input.collection
-        filters = input.filters
-        when = input.when
-        geo = input.geo
-        bbox = input.bbox
-        point = input.point
-        circle = input.circle
-        line = input.line
-        polygon = input.polygon
         # make a channel
         channel = journal.info("qed.archives.connect")
-        # show me
-        channel.line(f"{name=}")
-        channel.indent()
-        channel.line(f"{uri=}")
-        channel.line(f"{filters=}")
-        channel.line(f"{when=}")
-        channel.line(f"{geo=}")
-        channel.line(f"{point=}")
-        channel.line(f"{circle=}")
-        channel.line(f"{line=}")
-        channel.line(f"{polygon=}")
-        channel.outdent()
-        # flush
-        channel.log()
-
         # grab the store
         store = info.context["store"]
         # if the {uri} is already connected
@@ -81,98 +56,27 @@ class ConnectEarthAccessArchive(graphene.Mutation):
         uri = qed.primitives.uri.parse(uri, scheme="file")
         # show me
         channel.log(f"connecting to archive {uri}")
-
-        # make room for the search filters
-        selectedFilters = []
-
-        # if the users wants to limit the size of the search
-        if count:
-            # build the name of the filter
-            filterName = f"{name}.count"
-            # make a data size limiter
-            filter = qed.archives.count(name=filterName, count=count)
-            # and add it the pile
-            selectedFilters.append(filter)
-        # if there is a restriction on the data collection
-        if collection.shortName or collection.conceptId:
-            # build the name of the filter
-            filterName = f"{name}.collection"
-            # make a data size limiter
-            filter = qed.archives.collection(name=filterName, **collection)
-            # and add it the pile
-            selectedFilters.append(filter)
-        # if there is a restriction on the data granule
-        if granule.pattern:
-            # build the name of the filter
-            filterName = f"{name}.granule"
-            # make a data size limiter
-            filter = qed.archives.granule(name=filterName, **granule)
-            # and add it the pile
-            selectedFilters.append(filter)
-        # if there is a time interval restriction
-        if "when" in filters:
-            # build the name of the filter
-            filterName = f"{name}.window"
-            # make a time interval filter
-            filter = qed.archives.window(name=filterName, begin=when["begin"], end=when["end"])
-            # add it to the pile
-            selectedFilters.append(filter)
-        #  next, the geographical searches
-        if "geo" in filters:
-            # build the name of the filter
-            filterName = f"{name}.where.{geo}"
-            # if the selection is a bounding box
-            if geo == "bbox":
-                # make a geo bounding box
-                filter = qed.archives.bbox(
-                    name=filterName,
-                    ne=(bbox["ne"]["longitude"], bbox["ne"]["latitude"]),
-                    sw=(bbox["sw"]["longitude"], bbox["sw"]["latitude"]),
-                )
-            # if the selection is a point
-            elif geo == "point":
-                # make a geo point
-                filter = qed.archives.point(name=filterName, **point)
-            # if it's a circle
-            elif geo == "circle":
-                # make a geo circle
-                filter = qed.archives.circle(name=filterName, **circle)
-            # if it's a line
-            elif geo == "line":
-                # parse the vertices
-                vertices = qed.archives.line.parseVertices(payload=line["vertices"])
-                # and build the filter
-                filter = qed.archives.line(name=filterName, vertices=vertices)
-            # if it's a polygon
-            elif geo == "polygon":
-                # parse the vertices
-                vertices = qed.archives.polygon.parseVertices(payload=polygon["vertices"])
-                # and build the filter
-                filter = qed.archives.polygon(name=filterName, vertices=vertices)
-            # otherwise
-            else:
-                # we have a bug
-                bug = journal.firewall("qed.gql.connectArhive.earth")
-                # report
-                bug.line(f"unknown geo filter '{geo}'")
-                bug.line(f"while attempting to connect '{name}', an earth access archive")
-                bug.log()
-                # and bail, just in case firewalls aren't fatal
-                return
-            # if all went well, add the filter to the pile
-            selectedFilters.append(filter)
-
-        # build a collection of datasets on earth access
-        archive = qed.archives.earth(name=name, uri=uri, filters=selectedFilters)
-        # add the new archive to the pile
+        # assemble the query out of the payload
+        query = ConnectEarthAccessArchive.harvest(input=input)
+        # a payload that does not form a query has already been reported
+        if query is None:
+            # so bail
+            return None
+        # build the archive
+        archive = qed.archives.earth(name=name, uri=uri, **query)
+        # add it to the pile
         store.connectArchive(archive=archive)
         # report
         channel.line(f"connected to '{uri}', an earth access archive")
-        channel.line("filters:")
+        channel.line("query:")
         channel.indent()
-        for filter in archive.filters:
-            channel.line(f"{filter}")
+        # with the query parameters
+        for parameter, value in archive.query().items():
+            # one per line
+            channel.line(f"{parameter}: {value}")
+        # outdent
         channel.outdent()
+        # and flush
         channel.log()
         # make a resolution context
         context = {
@@ -180,6 +84,108 @@ class ConnectEarthAccessArchive(graphene.Mutation):
         }
         # and resolve the mutation
         return context
+
+    # implementation details
+    @staticmethod
+    def harvest(input):
+        """
+        Extract the archive traits from the mutation {input}
+        """
+        # make a pile
+        query = {}
+        # the cap on the search results
+        if input.count:
+            # goes in as an integer
+            query["count"] = int(input.count)
+        # the collection
+        collection = input.collection
+        # if it is specified
+        if collection is not None:
+            # its short name
+            if collection.shortName:
+                # goes in
+                query["collection"] = collection.shortName
+            # and its concept id
+            if collection.conceptId:
+                # goes in
+                query["conceptId"] = collection.conceptId
+        # the granule name pattern
+        granule = input.granule
+        # if it is specified
+        if granule is not None and granule.pattern:
+            # goes in
+            query["pattern"] = granule.pattern
+        # the set of active filters
+        filters = input.filters or []
+        # the time window
+        when = input.when
+        # if it is active
+        if "when" in filters and when is not None:
+            # its ends go in, open where blank
+            query["begin"] = when.begin or None
+            query["end"] = when.end or None
+        # the geographical restriction
+        if "geo" in filters:
+            # get its kind
+            geo = input.geo
+            # a bounding box
+            if geo == "bbox":
+                # get its corners
+                sw = input.bbox.sw
+                ne = input.bbox.ne
+                # goes in as (west, south, east, north)
+                query["bbox"] = (
+                    float(sw.longitude),
+                    float(sw.latitude),
+                    float(ne.longitude),
+                    float(ne.latitude),
+                )
+            # a point
+            elif geo == "point":
+                # get it
+                point = input.point
+                # goes in as (longitude, latitude)
+                query["point"] = (float(point.longitude), float(point.latitude))
+            # a circle
+            elif geo == "circle":
+                # get it
+                circle = input.circle
+                # goes in as (longitude, latitude, radius)
+                query["circle"] = (
+                    float(circle.longitude),
+                    float(circle.latitude),
+                    float(circle.radius),
+                )
+            # a line
+            elif geo == "line":
+                # its vertices go in
+                query["line"] = ConnectEarthAccessArchive.vertices(payload=input.line.vertices)
+            # a polygon
+            elif geo == "polygon":
+                # its vertices go in
+                query["polygon"] = ConnectEarthAccessArchive.vertices(
+                    payload=input.polygon.vertices
+                )
+            # anything else
+            else:
+                # is a bug
+                bug = journal.firewall("qed.gql.connectArchive.earth")
+                # report
+                bug.line(f"unknown geo filter '{geo}'")
+                bug.line(f"while attempting to connect '{input.name}', an earth access archive")
+                bug.log()
+                # and bail, just in case firewalls aren't fatal
+                return None
+        # all done
+        return query
+
+    @staticmethod
+    def vertices(payload):
+        """
+        Convert {payload}, a list of vertices, into (longitude, latitude) pairs
+        """
+        # one pair per vertex
+        return [(float(vertex.longitude), float(vertex.latitude)) for vertex in payload]
 
 
 # end of file
