@@ -10,6 +10,7 @@ import journal
 
 # the teams i manage
 from .Team import Team
+from .Scouts import Scouts
 
 # the cache of rendered tiles they share
 from .Cache import Cache
@@ -117,6 +118,58 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         # and hand it off
         return team
 
+    def browse(self, task, callback):
+        """
+        Send the listing {task} to the scouts of its archive and arrange for {callback} to
+        receive the manifest
+        """
+        # locate the scouts, forming them on first contact
+        team = self.scouts(archive=task.archive)
+        # and hand them the work
+        team.assign(task=task, callback=callback)
+        # all done
+        return self
+
+    def scouts(self, archive):
+        """
+        Retrieve the scouts dedicated to {archive}, forming them on first contact
+        """
+        # look them up
+        team = self.explorers.get(archive)
+        # if they exist
+        if team is not None:
+            # hand them off
+            return team
+        # form the team; its name places its configuration under my namespace, so users can
+        # adjust its size, e.g. '{fleet}.{archive}.size'
+        team = Scouts(name=f"{self.pyre_name}.{archive}")
+        # the team's crew traffic rides the shared event loop
+        team.dispatcher = self.dispatcher
+        # manifests are neither cached nor sampled
+        team.cache = None
+        team.stats = None
+        # register the team
+        self.explorers[archive] = team
+        # show me
+        channel = journal.debug("qed.nexus.fleet")
+        # what happened
+        channel.log(f"formed a team of {team.size} scouts for '{archive}'")
+        # and hand it off
+        return team
+
+    def recall(self, archive):
+        """
+        Disband the scouts dedicated to {archive}, e.g. because it was disconnected
+        """
+        # look up the team, removing it from my registry
+        team = self.explorers.pop(archive, None)
+        # if there is one
+        if team is not None:
+            # send its crews home
+            team.disband()
+        # all done
+        return self
+
     def revoke(self, task, callback):
         """
         Withdraw {callback} from the outcome of {task}, e.g. because its requester hung up
@@ -149,8 +202,8 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         """
         Apply the journal {control} to every team, and so to every running crew member
         """
-        # go through my teams
-        for team in self.teams.values():
+        # go through my teams and my scouts
+        for team in (*self.teams.values(), *self.explorers.values()):
             # and pass the word to each one
             team.instruct(control=control)
         # all done
@@ -166,6 +219,12 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
             team.disband()
         # empty the registry
         self.teams.clear()
+        # go through my scouts
+        for team in self.explorers.values():
+            # and send each one's crews home
+            team.disband()
+        # empty their registry
+        self.explorers.clear()
         # and release every cached render
         self.cache.clear()
         # all done
@@ -177,6 +236,8 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         super().__init__(**kwds)
         # the table of teams, keyed by the name of their data source
         self.teams = {}
+        # the scouts, keyed by archive name
+        self.explorers = {}
         # the cache of rendered tiles, shared by all of them; its name places its
         # configuration under my namespace, e.g. '{fleet}.cache.capacity'
         self.cache = Cache(name=f"{self.pyre_name}.cache")
