@@ -20,6 +20,10 @@ class Archive(qed.component, family="qed.archives.base", implements=qed.protocol
     uri.default = qed.primitives.uri(scheme="file", address=qed.primitives.path.cwd())
     uri.doc = "the location of the archive"
 
+    expanded = qed.properties.list(schema=qed.properties.str())
+    expanded.default = []
+    expanded.doc = "the folders on display, by uri"
+
     # constants
     readers = ()
 
@@ -39,6 +43,167 @@ class Archive(qed.component, family="qed.archives.base", implements=qed.protocol
         """
         # nothing, by default
         return {}
+
+    # the tree: the folders on display and their listings
+    def expand(self, uri):
+        """
+        Put the folder at {uri} on display and mark its listing as under way
+        """
+        # normalize
+        uri = str(uri)
+        # if the folder is not on display yet
+        if uri not in self.expanded:
+            # add it
+            self.expanded = [*self.expanded, uri]
+        # a fresh attempt carries no error
+        self._errors.pop(uri, None)
+        # the listing is under way
+        self._pending.add(uri)
+        # all done
+        return self
+
+    def collapse(self, uri):
+        """
+        Take the folder at {uri} off display, along with every folder beneath it
+        """
+        # normalize
+        uri = str(uri)
+        # the folders beneath it are the folder entries of its listing
+        manifest = self._manifests.get(uri)
+        # if there is one
+        if manifest is not None:
+            # go through the entries
+            for _, child, isFolder in manifest.entries:
+                # the folders
+                if isFolder:
+                    # get collapsed first
+                    self.collapse(uri=child)
+        # forget the listing
+        self._manifests.pop(uri, None)
+        # any attempt under way
+        self._pending.discard(uri)
+        # and any failure
+        self._errors.pop(uri, None)
+        # take the folder off display
+        self.expanded = [folder for folder in self.expanded if folder != uri]
+        # all done
+        return self
+
+    def record(self, manifest):
+        """
+        Take delivery of the {manifest} of one of my folders
+        """
+        # get the folder
+        uri = manifest.uri
+        # the listing is no longer under way
+        self._pending.discard(uri)
+        # a folder taken off display while its listing ran has nowhere to put it
+        if uri not in self.expanded:
+            # so drop it
+            return self
+        # otherwise, keep it
+        self._manifests[uri] = manifest
+        # and clear any earlier failure
+        self._errors.pop(uri, None)
+        # all done
+        return self
+
+    def fail(self, uri, error):
+        """
+        Record that the listing of the folder at {uri} failed, retaining {error} as the reason
+        """
+        # normalize
+        uri = str(uri)
+        # the listing is no longer under way
+        self._pending.discard(uri)
+        # keep the reason, since the client displays it
+        self._errors[uri] = str(error)
+        # all done
+        return self
+
+    def listing(self, uri):
+        """
+        Retrieve the manifest of the folder at {uri}, if it has one
+        """
+        # look it up
+        return self._manifests.get(str(uri))
+
+    def isExpanded(self, uri):
+        """
+        Check whether the folder at {uri} is on display
+        """
+        # easy enough
+        return str(uri) in self.expanded
+
+    def isPending(self, uri):
+        """
+        Check whether the listing of the folder at {uri} is under way
+        """
+        # easy enough
+        return str(uri) in self._pending
+
+    def failure(self, uri):
+        """
+        Retrieve the reason the listing of the folder at {uri} failed, if it did
+        """
+        # look it up
+        return self._errors.get(str(uri))
+
+    def items(self):
+        """
+        Generate the entries of every folder on display, each with the folder that holds it
+        """
+        # go through the folders on display, in the order they were expanded
+        for folder in self.expanded:
+            # get the listing
+            manifest = self._manifests.get(folder)
+            # a folder whose listing has not landed contributes nothing yet
+            if manifest is None:
+                # so move on
+                continue
+            # go through the entries
+            for name, uri, isFolder in manifest.entries:
+                # and describe each one
+                yield self.item(
+                    name=name,
+                    uri=uri,
+                    isFolder=isFolder,
+                    parent=folder,
+                    expanded=isFolder and uri in self.expanded,
+                    pending=uri in self._pending,
+                    error=self._errors.get(uri),
+                )
+        # all done
+        return
+
+    @staticmethod
+    def item(name, uri, isFolder, parent=None, expanded=False, pending=False, error=None):
+        """
+        Describe an archive entry the way the query layer resolves it
+        """
+        # pack the description
+        return {
+            "name": name,
+            "uri": uri,
+            "isFolder": isFolder,
+            "parent": parent,
+            "expanded": expanded,
+            "pending": pending,
+            "error": error,
+        }
+
+    # metamethods
+    def __init__(self, **kwds):
+        # chain up
+        super().__init__(**kwds)
+        # the listings of the folders on display, keyed by uri
+        self._manifests = {}
+        # the folders whose listing is under way
+        self._pending = set()
+        # the folders whose listing failed, with the reason
+        self._errors = {}
+        # all done
+        return
 
     # constants
     tag = "<base>"
