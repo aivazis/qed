@@ -23,9 +23,11 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
 
     datasets = qed.properties.list(schema=qed.protocols.dataset.output())
     datasets.doc = "the list of data sets provided by the reader"
+    datasets.persistent = False
 
     selectors = qed.protocols.selectors()
     selectors.doc = "a map of selector names to their allowed values"
+    selectors.persistent = False
 
     selections = qed.properties.kv()
     selections.doc = "a key value store of preferred values for selectors"

@@ -20,9 +20,11 @@ class L0A(qed.flow.factory, family="qed.readers.nisar.l0a", implements=qed.proto
 
     datasets = qed.properties.list(schema=qed.protocols.dataset.output())
     datasets.doc = "the list of data sets provided by the reader"
+    datasets.persistent = False
 
     selectors = qed.protocols.selectors()
     selectors.doc = "a map of selector names to their allowed values"
+    selectors.persistent = False
 
     # interface
     @qed.export

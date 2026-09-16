@@ -31,6 +31,7 @@ class Reader(Producer, family="qed.readers"):
     selectors.doc = "a map of selector names to their allowed values"
 
     datasets = qed.properties.list(schema=Dataset())
+    datasets.persistent = False
     datasets.doc = "the list of data sets provided by the reader"
 
     # requirements

@@ -25,6 +25,7 @@ class RRSD(H5, family="qed.readers.nisar.rrsd"):
     # my selectors
     selectors = qed.protocols.selectors()
     selectors.doc = "a map of selector names to their allowed values"
+    selectors.persistent = False
     # the full set of allowed values
     selectors.default = {
         "band": ["L"],

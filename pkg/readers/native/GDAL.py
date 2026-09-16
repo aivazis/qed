@@ -27,6 +27,7 @@ class GDAL(qed.flow.factory, family="qed.readers.native.gdal", implements=qed.pr
     uri.doc = "the uri of the data source"
 
     selectors = qed.protocols.selectors()
+    selectors.persistent = False
     selectors.default = {
         "band": [],
     }
@@ -37,6 +38,7 @@ class GDAL(qed.flow.factory, family="qed.readers.native.gdal", implements=qed.pr
 
     datasets = qed.properties.list(schema=qed.protocols.dataset.output())
     datasets.doc = "the list of data sets provided by the reader"
+    datasets.persistent = False
 
     # interface
     @qed.export
