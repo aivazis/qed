@@ -15,6 +15,8 @@ import { X as Icon } from '~/shapes'
 import { Badge } from '~/widgets'
 
 // local
+// the store updater the archive mutations share
+import { disconnectArchiveUpdater } from './archiveListUpdaters'
 // styles
 import { disconnect as paintDisconnect } from './styles'
 
@@ -22,7 +24,7 @@ import { disconnect as paintDisconnect } from './styles'
 // control to disconnect a data archive
 export const Disconnect = ({ uri }) => {
     // build the mutation request
-    const [request, isInFlight] = useMutation(disconnectMutation)
+    const [request, isInFlight] = useMutation(disconnectArchiveMutation)
     // build the handler that disconnects an archive
     const disconnect = evt => {
         // stop this event from propagating
@@ -44,30 +46,7 @@ export const Disconnect = ({ uri }) => {
                 }
             },
             // update the store
-            updater: store => {
-                // get the root field of the query result
-                const payload = store.getRootField("disconnectArchive")
-                // ask for the target archive
-                const archive = payload.getLinkedRecord("archive")
-                // if we didn't get back a valid archive
-                if (archive === null) {
-                    // something went wrong at the server; there isn't much more to do
-                    return
-                }
-                // get the session manager
-                const qed = store.get("QED")
-                // get its connected archives
-                const archives = qed.getLinkedRecords("archives")
-                // remove our target from the pile
-                const filtered = archives.filter(
-                    // by filtering out entries that match its id
-                    entry => entry.getDataID() !== archive.getDataID()
-                )
-                // attach the modified pile to the session manager
-                qed.setLinkedRecords(filtered, "archives")
-                // all done
-                return
-            },
+            updater: disconnectArchiveUpdater,
             // when done
             onCompleted: data => {
                 // not much to do, for now
@@ -93,7 +72,7 @@ export const Disconnect = ({ uri }) => {
 
 
 // the mutation that disconnects an archive
-const disconnectMutation = graphql`
+export const disconnectArchiveMutation = graphql`
     mutation disconnectArchiveMutation($input: DisconnectArchiveInput!) {
         disconnectArchive(input: $input) {
             archive {
