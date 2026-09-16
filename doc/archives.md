@@ -352,8 +352,14 @@ concept, `locate` and `download` by descriptor rather than `contents`, and stays
    hooks are gone on both sides. Live sync refetches once more when a change frame lands while
    a refetch is in flight, since relay would otherwise answer the second frame with the first
    frame's response; listings are fast enough to expose that.
-4. **pyre.** Filesystem snapshot and rehydration; the round-trip yaml editor over
-   `ruamel.yaml`. Each with its own tests, in pyre.
+4. **pyre.** Done 2026-09-16: the round-trip yaml editor, `pyre.config.yaml.editor`, built
+   by `pyre.config.newYamlEditor`, over `ruamel.yaml`; it reads a document, answers `get`,
+   `set`, `delete`, `append`, and `remove` by key path, renders, and saves atomically. What it
+   does not touch comes out byte for byte as it went in; a comment block that trails an
+   entry moves with the tail of its container, and a new top level section is set apart by
+   the blank lines that preceded the old tail. The snapshot was dropped (decided 2026-09-16):
+   with the tree kept as manifests, nothing on the store side is a filesystem to snapshot,
+   and a persisted expansion boots pending, filled by its first listing.
 5. **Persistence in qed.** Archives written back into `qed.yaml` through the pyre editor,
    gated on a backend being present; the boot-time read of snapshots; `viewPersist` given a
    body. The earthaccess filters become traits here too, since the persisted section is what
