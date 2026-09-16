@@ -22,7 +22,8 @@ import { Indicator } from './indicator'
 // a tray with a header and some items
 export const Tray = ({
     style,
-    title, state, initially = false, scale = 1.0, busy = false, controls = null,
+    title, state, initially = false, expanded, onToggle,
+    scale = 1.0, busy = false, controls = null,
     children, ...rest
 }) => {
     // scale up a bit on large displays
@@ -30,10 +31,15 @@ export const Tray = ({
     // convert to pixels
     const size = rem * parseFloat(getComputedStyle(document.documentElement).fontSize)
 
-    // storage for my state
-    const [expanded, setExpanded] = React.useState(initially)
+    // a tray whose {expanded} prop is set is controlled: its owner keeps the state and
+    // hears about every toggle; otherwise the state is mine
+    const controlled = expanded !== undefined
+    // storage for the state of an uncontrolled tray
+    const [local, setLocal] = React.useState(initially)
+    // pick the state
+    const open = controlled ? expanded : local
     // handler for flipping my state
-    const toggle = () => setExpanded(!expanded)
+    const toggle = () => controlled ? onToggle?.(!open) : setLocal(!open)
 
     // pick my parts based on my state
     const { Header, Title } = components(state)
@@ -53,16 +59,16 @@ export const Tray = ({
                 style={paint}
                 onClick={toggle}
                 role="button"
-                aria-expanded={expanded}
+                aria-expanded={open}
                 aria-label={typeof title === "string" ? title : undefined}
                 data-qed-control="tray">
-                <Indicator expanded={expanded} size={0.6 * size} />
+                <Indicator expanded={open} size={0.6 * size} />
                 <Title>{title}</Title>
                 <Spacer />
                 {busy && <Busy />}
                 {controls}
             </Header>
-            {expanded && <Items style={paint}>{children}</Items>}
+            {open && <Items style={paint}>{children}</Items>}
         </Section>
     )
 }
