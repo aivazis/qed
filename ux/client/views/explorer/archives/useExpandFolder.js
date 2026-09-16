@@ -11,7 +11,7 @@ import { graphql, useMutation } from 'react-relay/hooks'
 // expand the folder at {uri} of the archive at {archive}
 export const useExpandFolder = () => {
     // build the mutation request
-    const [request, isInFlight] = useMutation(mutation)
+    const [request, isInFlight] = useMutation(useExpandFolderMutation)
     // build the handler
     const handler = ({ archive, uri }) => {
         // send the mutation to the server; the payload carries the archive tree, which relay
@@ -30,8 +30,8 @@ export const useExpandFolder = () => {
 }
 
 
-// the mutation
-const mutation = graphql`
+// the mutation, exported so the automation facade commits the same document
+export const useExpandFolderMutation = graphql`
     mutation useExpandFolderMutation($input: ExpandFolderInput!) {
         expandFolder(input: $input) {
             archive {

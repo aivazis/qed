@@ -44,6 +44,13 @@ import { collapseMutation } from '~/views/viz/viz/useCollapseView'
 import { splitViewUpdater, collapseViewUpdater } from '~/views/viz/viz/viewListUpdaters'
 import { useSyncToggleViewportMutation as syncToggleViewportMutation } from '~/views/viz/controls/sync/useSyncToggleViewport'
 import { useSyncUpdateOffsetMutation as syncUpdateOffsetMutation } from '~/views/viz/controls/sync/useSyncUpdateOffset'
+// the archive tree: the explorer's documents and the store updater the archive list needs
+import { localArchiveMutation } from '~/views/explorer/archive/local'
+import { disconnectArchiveMutation } from '~/views/explorer/archives/disconnect'
+import { useExpandFolderMutation as expandFolderMutation } from '~/views/explorer/archives/useExpandFolder'
+import { useCollapseFolderMutation as collapseFolderMutation } from '~/views/explorer/archives/useCollapseFolder'
+import { useRefreshArchiveMutation as refreshArchiveMutation } from '~/views/explorer/archives/useRefreshArchive'
+import { connectArchiveUpdater, disconnectArchiveUpdater } from '~/views/explorer/archives/archiveListUpdaters'
 // the journal console's buffer, so the facade reads what the panel renders
 import { journal as console } from '~/views/viz/console/store'
 // the channel listing and switch the console uses
@@ -119,6 +126,19 @@ const controllersQuery = graphql`
     }
 `
 
+// the connected archives and their trees: every folder on display with its entries, each entry
+// with the folder that holds it and, for folders, where its own listing stands
+const archivesQuery = graphql`
+    query qedArchivesQuery {
+        qed {
+            archives {
+                name uri expanded pending error hits
+                items { name uri isFolder parent expanded pending error }
+            }
+        }
+    }
+`
+
 // the sync reset has no ui control, so the facade carries its own document; the returned {sync}
 // auto-merges by its node id
 const syncResetMutation = graphql`
@@ -179,6 +199,34 @@ export const makeQED = () => ({
             selectors: Object.fromEntries((reader.selectors ?? []).map(axis => [axis.name, axis.values])),
         }))
     },
+
+    // the connected archives, each with the tree the server keeps of it
+    archives: async () => (await read(archivesQuery)).qed.archives.map(archive => ({
+        name: archive.name,
+        uri: archive.uri,
+        expanded: archive.expanded,
+        pending: archive.pending,
+        error: archive.error,
+        hits: archive.hits,
+        items: archive.items.map(item => ({ ...item })),
+    })),
+
+    // connect a local archive called {name} rooted at {uri}, e.g. "file:/data"
+    connectArchive: (name, uri) =>
+        command(localArchiveMutation, { name, uri }, connectArchiveUpdater("connectArchive")),
+
+    // disconnect the archive at {uri}
+    disconnectArchive: uri => command(disconnectArchiveMutation, { uri }, disconnectArchiveUpdater),
+
+    // put the folder at {uri} of the archive at {archive} on display and list it; the root of an
+    // archive is the folder at the archive's own uri
+    expandFolder: (archive, uri = archive) => command(expandFolderMutation, { archive, uri }),
+
+    // take the folder at {uri} of the archive at {archive} off display
+    collapseFolder: (archive, uri = archive) => command(collapseFolderMutation, { archive, uri }),
+
+    // list every folder on display of the archive at {uri} again
+    refreshArchive: uri => command(refreshArchiveMutation, { uri }),
 
     // the colour-stretch controllers on {viewport}'s channel: each one's kind (range|value), slot,
     // whether it follows the data statistics ({auto}) or is pinned, and bounds, so a driver picks
