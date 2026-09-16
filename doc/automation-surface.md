@@ -78,6 +78,14 @@ window.qed = {
     toggle(aspect, viewport?), toggleAll(aspect, viewport?), reset(viewport?),  // sync flags
     updateOffset(row, col, viewport?),            // the relative sync offset, in source pixels
   },
+  // --- data archives: session-level, the tree the server keeps of each connected archive ---
+  archives() → [{ name, uri, expanded, pending, error, hits,
+                  items:[{ name, uri, isFolder, parent, expanded, pending, error }] }],
+  connectArchive(name, uri),                      // a local archive rooted at uri, e.g. "file:/data"
+  disconnectArchive(uri),
+  expandFolder(archive, uri?),                    // put a folder on display and list it; the root is the archive's own uri
+  collapseFolder(archive, uri?),                  // take a folder, and everything beneath it, off display
+  refreshArchive(uri),                            // list every folder on display again
   journal: {
     entries() → [{ page:[…], notes:{channel, severity, pid, seq, time, host, …} }],  // the console's buffer
     live() → bool,                                  // whether the journal stream is open
@@ -188,10 +196,10 @@ client-only controls (detail toggle, tray, nav) that carry no mutation.
 
 ## Deferred
 
-- **Data archives.** `connectArchive` (local/s3/earthaccess variants), `connectReader`, and the
-  disconnects are an admin/data-source flow, not a viewport-state one, and the disconnects are
-  destructive against the shared fixture server. They want a dedicated connect→read→disconnect
-  round-trip on an isolated fixture; not added to the facade yet.
+- **Readers and the other archive flavors.** `connectReader` and its disconnect, and the s3 and
+  earthaccess connect forms, are not on the facade yet. The local archive is, along with the
+  tree operations, since each spec owns a scratch directory of its own (`api/archives.spec`,
+  `behavior/archives.spec`) and the disconnect hazard against the shared fixture is gone.
 - **Annotations as first-class state.** Rec 4's markers are the measure path; if a separate
   annotation layer grows (`addAnnotation/removeAnnotation/annotations`), it joins `measure` here.
 - **Pixel/tile rendering.** The suite asserts DOM extent and the model, not that tiles render correct

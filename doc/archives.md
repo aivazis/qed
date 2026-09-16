@@ -372,7 +372,12 @@ concept, `locate` and `download` by descriptor rather than `contents`, and stays
    persist the readers, and `viewPersist` writes everything. At boot the folders on display
    come back pending and first contact lists them. Decided 2026-09-16: the origin file is the
    target, views ride along including controller ranges, and the recipe lives in pyre.
-6. **Facade and playwright.**
+6. **Facade and playwright.** Done 2026-09-16: `window.qed` gained `archives()`,
+   `connectArchive`, `disconnectArchive`, `expandFolder`, `collapseFolder`, and
+   `refreshArchive`, committing the explorer's own documents; `api/archives.spec` round-trips a
+   scratch directory through the model, `behavior/archives.spec` checks the trays follow the
+   server. A local archive addressed through a symbolic link now lists, since the request is
+   resolved the way the root was.
 
 Steps 2 and 3 are the migration the request asks for and are independent of the UX redesign of
 `/explore` that is on the books; the server model does not care how the tree is drawn, and a
