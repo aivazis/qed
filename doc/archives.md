@@ -360,10 +360,18 @@ concept, `locate` and `download` by descriptor rather than `contents`, and stays
    the blank lines that preceded the old tail. The snapshot was dropped (decided 2026-09-16):
    with the tree kept as manifests, nothing on the store side is a filesystem to snapshot,
    and a persisted expansion boots pending, filled by its first listing.
-5. **Persistence in qed.** Archives written back into `qed.yaml` through the pyre editor,
-   gated on a backend being present; the boot-time read of snapshots; `viewPersist` given a
-   body. The earthaccess filters become traits here too, since the persisted section is what
-   they shape.
+5. **Persistence in qed.** Done 2026-09-16: `pkg/ux/Keeper.py` writes the store's state back
+   into the configuration files. It builds a `pyre.config` recipe of the archives, the
+   readers with the reference channels of their datasets, and the views under session names
+   `view.N` with their parts, keeps only what the session assigned, so settings that came from
+   a file are left as the user spelled them, macros included, and edits each component's
+   section in the file it came from, found through the provenance the yaml codec now records,
+   or in the workspace's `qed.yaml` for what the session made. The plexus lists `archives`,
+   `datasets`, and `views` go to the workspace file, and the sections of views the list no
+   longer names are dropped. Archive mutations persist the archives, the reader mutations
+   persist the readers, and `viewPersist` writes everything. At boot the folders on display
+   come back pending and first contact lists them. Decided 2026-09-16: the origin file is the
+   target, views ride along including controller ranges, and the recipe lives in pyre.
 6. **Facade and playwright.**
 
 Steps 2 and 3 are the migration the request asks for and are independent of the UX redesign of
