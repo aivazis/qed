@@ -1074,6 +1074,12 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         if self.fleet is None or not getattr(source, "surveyable", False):
             # and leave the view as it has always been: rendered straight off the product
             return view
+        # a dataset whose flavor knows nothing of levels, e.g. a memory mapped raster, has
+        # nothing to prepare either; it renders straight off the product, the way the tile
+        # task treats it
+        if not hasattr(dataset, "resolve"):
+            # so leave the view alone
+            return view
         # open a record and mark the work as under way
         record = Preparation()
         # remember it before dispatching, so a second request finds it
