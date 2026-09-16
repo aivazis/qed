@@ -76,6 +76,24 @@ export const disconnect = {
     ...collapse,
 }
 
+// the button that refreshes an archive
+export const refresh = {
+    // inherit
+    ...collapse,
+}
+
+// the reason a folder could not be listed
+export const failure = {
+    paddingTop: '0.25em',
+    paddingRight: '1.0em',
+    paddingBottom: '0.25em',
+    paddingLeft: '1.0em',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+    color: theme.page.danger,
+}
+
 
 // the paint
 // for the {archive} mixer

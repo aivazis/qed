@@ -10,35 +10,32 @@ import React from 'react'
 // locals
 // hooks
 import { useArchive } from './useArchive'
-import { useDirectoryContentsLoader } from './useFetchDirectoryContents'
+import { useGetActiveView } from '../explorer/useGetActiveView'
 // components
-import { Contents } from './contents'
+import { File } from './file'
+import { Folder } from './folder'
 
-// the panel with the directory contents
+
+// the panel with the contents of the folder at {uri}, read off the archive tree
 export const Directory = ({ uri }) => {
     // get the archive
     const archive = useArchive()
-    // preload the query
-    const [qref, getContents] = useDirectoryContentsLoader()
-    // schedule the contents fetch
-    React.useEffect(() => {
-        // variables
-        const variables = { archive: archive.uri, path: uri, }
-        // options
-        const options = { fetchPolicy: "store-and-network" }
-        // fetch
-        getContents(variables, options)
-        // all done
-        return
-    }, [])
-    // if the data is not available yet
-    if (qref === null) {
-        // bail
-        return
-    }
-    // otherwise, render the directory contents
+    // get the active view information
+    const { reader: activeReader } = useGetActiveView()
+    // the entries of this folder are the items it holds
+    const entries = archive.items.filter(item => item.parent === uri)
+    // build a function that determines the state of my folders
+    const state = (uri) => activeReader?.uri.startsWith(uri + "/") ? "selected" : "active"
+    // render
     return (
-        <Contents qref={qref} />
+        <>
+            {entries.map(item => (
+                item.isFolder ?
+                    <Folder key={item.id} item={item} state={state(item.uri)} />
+                    :
+                    <File key={item.id} uri={item.uri} name={item.name} />
+            ))}
+        </>
     )
 }
 

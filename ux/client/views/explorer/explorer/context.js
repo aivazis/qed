@@ -28,6 +28,20 @@ export const Provider = ({ qed, children }) => {
                     value
                 }
                 readers
+                expanded
+                pending
+                error
+                hits
+                items {
+                    id
+                    name
+                    uri
+                    isFolder
+                    parent
+                    expanded
+                    pending
+                    error
+                }
             }
         }`,
         qed
