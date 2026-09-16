@@ -28,6 +28,7 @@ class Flat(qed.flow.factory, family="qed.readers.native.flat", implements=qed.pr
     shape.doc = "the size of the dataset in (lines, samples)"
 
     selectors = qed.protocols.selectors()
+    selectors.persistent = False
     selectors.default = {}
     selectors.doc = "a map of selector names to their allowed values"
 
@@ -36,6 +37,7 @@ class Flat(qed.flow.factory, family="qed.readers.native.flat", implements=qed.pr
 
     datasets = qed.properties.list(schema=qed.protocols.dataset.output())
     datasets.doc = "the list of data sets provided by the reader"
+    datasets.persistent = False
 
     # constants
     # my dataset can describe itself in a discovery record and materialize as a

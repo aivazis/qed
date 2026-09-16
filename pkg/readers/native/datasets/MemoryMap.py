@@ -34,6 +34,7 @@ class MemoryMap(
     cell.doc = "the type of the dataset payload"
 
     channels = qed.properties.dict(schema=qed.protocols.channel())
+    channels.persistent = False
     channels.default = {}
     channels.doc = "the table of channels supported by this dataset"
 

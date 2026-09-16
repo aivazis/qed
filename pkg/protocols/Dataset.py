@@ -27,6 +27,7 @@ class Dataset(Specification, family="qed.datasets"):
 
     channels = qed.properties.dict(schema=Channel())
     channels.doc = "the table of channels supported by this dataset"
+    channels.persistent = False
 
     origin = qed.properties.tuple(schema=qed.properties.int())
     origin.doc = "the smallest possible index"
