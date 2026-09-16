@@ -24,6 +24,11 @@ app = qed.shells.qed(name="qed.app")
 ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.local(root="."), pfs=app.pfs)
 # get the store
 store = ux.store
+# the store writes the archives back to the workspace file on every change; point the
+# workspace at a scratch directory so the fixtures of this directory stay untouched
+scratch = os.path.join(os.path.dirname(os.path.abspath(__file__)), "browse_fleet_ws")
+os.makedirs(scratch, exist_ok=True)
+app.workspace.path = scratch
 # build a fleet
 fleet = qed.nexus.fleet(name="qed.test.fleet")
 # give it an event loop
