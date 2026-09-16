@@ -345,8 +345,13 @@ concept, `locate` and `download` by descriptor rather than `contents`, and stays
    NISAR grammar lifted from qef, the listing task and the scouts, the store methods, the
    three mutations, the package tests. The `contents` query stays through this step so the
    client keeps working.
-3. **Client.** The fragment, controlled trays, `Directory`/`Contents` from the fragment, the
-   refresh badge, dead hooks removed, `contents` retired.
+3. **Client.** Done 2026-09-15: the archive fragment selects the tree, `Tray` has a controlled
+   mode beside its local one, `Directory` and `Folder` render from the fragment, folder trays
+   and the archive header fire the expand and collapse mutations, a refresh badge sits beside
+   disconnect, a failed listing shows its reason under the folder, the contents query and its
+   hooks are gone on both sides. Live sync refetches once more when a change frame lands while
+   a refetch is in flight, since relay would otherwise answer the second frame with the first
+   frame's response; listings are fast enough to expose that.
 4. **pyre.** Filesystem snapshot and rehydration; the round-trip yaml editor over
    `ruamel.yaml`. Each with its own tests, in pyre.
 5. **Persistence in qed.** Archives written back into `qed.yaml` through the pyre editor,
