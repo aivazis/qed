@@ -195,6 +195,20 @@ const connectMutation = graphql`
                     value
                 }
                 readers
+                expanded
+                pending
+                error
+                hits
+                items {
+                    id
+                    name
+                    uri
+                    isFolder
+                    parent
+                    expanded
+                    pending
+                    error
+                }
             }
         }
     }

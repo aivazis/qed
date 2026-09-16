@@ -16,11 +16,14 @@ import { Meta, Tray } from '~/widgets'
 import { Provider } from './context'
 // hooks
 import { useArchive } from './useArchive'
+import { useExpandFolder } from './useExpandFolder'
+import { useCollapseFolder } from './useCollapseFolder'
 import { useGetActiveView } from '../explorer/useGetActiveView'
 // components
-import { Busy } from './busy'
 import { Directory } from './directory'
 import { Disconnect } from './disconnect'
+import { Failure } from './failure'
+import { Refresh } from './refresh'
 // styles
 import { archive as paintArchive } from './styles'
 
@@ -37,25 +40,41 @@ const Panel = () => {
     const archive = useArchive()
     // unpack the active view
     const { archive: activeArchive } = useGetActiveView()
+    // get the tree operations
+    const expand = useExpandFolder()
+    const collapse = useCollapseFolder()
     // unpack the archive information
-    const { id, name, uri } = archive
+    const { id, name, uri, expanded, pending, error, hits } = archive
     // deduce my state
     const state = (activeArchive?.id === id) ? "selected" : "enabled"
+    // toggling the tray asks the server to put the root on display, or take it off
+    const toggle = open => (open ? expand : collapse)({ archive: uri, uri })
     // build my controls
-    const Controls = <Disconnect uri={uri} />
+    const Controls = (
+        <>
+            <Refresh uri={uri} />
+            <Disconnect uri={uri} />
+        </>
+    )
     // mix my paint
     const paint = paintArchive(state)
     // render
     return (
-        <Tray title={name} initially={true} state={state} scale={0.5} controls={Controls}>
+        <Tray title={name} expanded={expanded} onToggle={toggle} busy={pending}
+            state={state} scale={0.5} controls={Controls}
+        >
             <Meta.Table style={paint.meta}>
                 <Meta.Entry attribute="uri" style={paint.meta}>
                     {uri}
                 </Meta.Entry>
+                {hits != null &&
+                    <Meta.Entry attribute="hits" style={paint.meta}>
+                        {hits}
+                    </Meta.Entry>
+                }
             </Meta.Table>
-            <React.Suspense fallback={<Busy />}>
-                <Directory uri={uri} />
-            </React.Suspense>
+            {error && <Failure reason={error} />}
+            <Directory uri={uri} />
         </Tray>
     )
 }
