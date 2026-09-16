@@ -28,7 +28,7 @@ class GraphQL:
         Resolve the {query} and generate a response for the client
         """
         # assemble the raw payload
-        raw = b"\n".join(request.payload)
+        raw = b"".join(request.payload)
         # if there's nothing there
         if not raw:
             # respond with an empty document; should never happen
