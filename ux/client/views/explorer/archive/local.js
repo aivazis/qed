@@ -11,6 +11,8 @@ import { graphql, useMutation } from 'react-relay/hooks'
 // local
 // hooks
 import { useSetActiveView } from '../explorer/useSetActiveView'
+// the store updater the archive mutations share
+import { connectArchiveUpdater } from '../archives/archiveListUpdaters'
 // components
 import { Busy } from './busy'
 import { Panel } from './panel'
@@ -34,7 +36,7 @@ export const Local = ({ view, setType, hide }) => {
     // get the view mutator
     const decorate = useSetActiveView()
     // build the mutation request
-    const [request, isInFlight] = useMutation(connectMutation)
+    const [request, isInFlight] = useMutation(localArchiveMutation)
     // set up the state update
     const update = (field, value) => {
         // clear any errors
@@ -85,25 +87,7 @@ export const Local = ({ view, setType, hide }) => {
                 }
             },
             // updater
-            updater: store => {
-                // get the root field of the query result
-                const payload = store.getRootField("connectArchive")
-                // if it's trivial
-                if (!payload) {
-                    // raise an issue
-                    throw new Error("could not connect to the data archive")
-                }
-                // ask for the new archive
-                const archive = payload.getLinkedRecord("archive")
-                // get the session manager
-                const qed = store.get("QED")
-                // get its connected archives
-                const archives = qed.getLinkedRecords("archives")
-                // add the new one to the pile
-                qed.setLinkedRecords([...archives, archive], "archives")
-                // all done
-                return
-            },
+            updater: connectArchiveUpdater("connectArchive"),
             // when done
             onCompleted: data => {
                 // clear the error
@@ -165,7 +149,7 @@ export const Local = ({ view, setType, hide }) => {
 
 
 // the mutation that connects a local archive
-const connectMutation = graphql`
+export const localArchiveMutation = graphql`
     mutation localArchiveMutation($input: ConnectArchiveInput!) {
         connectArchive(input: $input) {
             archive {
