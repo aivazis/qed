@@ -41,8 +41,9 @@ class Local(Archive, family="qed.archives.local"):
         root = self.fs
         # and the filter state
         all = self.all
-        # get the target address
-        path = qed.primitives.path(uri.address)
+        # get the target address, resolved the way the root was when the filesystem was
+        # mounted, so a request spelled through a symbolic link still lands within it
+        path = qed.primitives.path(uri.address).resolve()
         # project the {address} onto my {root}
         rel = path.relativeTo(root.uri)
         # starting at the top, descend as many levels as necessary
