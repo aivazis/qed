@@ -13,7 +13,6 @@ import qed
 import journal
 
 # types
-from .archives.Item import Item
 from .datasets.ProductMetadata import ProductMetadata
 from .QED import QED
 from .datasets.Sample import Sample
@@ -32,8 +31,6 @@ class Query(graphene.ObjectType):
     version = graphene.Field(Version, required=True)
     # the session manager
     qed = graphene.Field(QED)
-    # directory contents
-    contents = graphene.List(Item, required=True, archive=graphene.String(), path=graphene.String())
     # dataset auto discovery
     discover = graphene.Field(
         ProductMetadata,
@@ -62,44 +59,11 @@ class Query(graphene.ObjectType):
         # and pass it on
         return store
 
-    # directory contents
-    @staticmethod
-    def resolve_contents(root, info, archive, path, **kwds):
-        """
-        Generate a list with the contents of a directory
-        """
-        # this resolver must exist; its job is to build an object that gets handed to the
-        # {Item} resolvers; here we prep such an object using the query execution
-        # context in {info.context} and the variable bindings in {kwds}
-        #
-        #     root: should be {None}; this is the root
-        #     info: has {.context} with whatever was built by the executioner
-        #     kwds: contains the variable bindings for this query resolution
-        #
-
-        # grab the store
-        store = info.context["store"]
-        # identify the archive
-        manager = store.archive(uri=archive)
-        # attempt to
-        try:
-            # ask it for its contents
-            entries = manager.contents(uri=qed.primitives.uri.parse(path))
-        # if anything goes wrong
-        except journal.ApplicationError:
-            # report an empty folder
-            return []
-        # describe each entry
-        return [
-            manager.item(name=name, uri=str(uri), isFolder=isFolder)
-            for name, uri, isFolder in entries
-        ]
-
     # product metadata
     @staticmethod
     def resolve_discover(root, info, archive, uri, module, **kwds):
         """
-        Generate a list with the contents of a directory
+        Retrieve the metadata of the product at {uri}
         """
         # assemble the metadata resolution context
         context = {
