@@ -28,7 +28,37 @@ type QEDViewModel = {
     sync: { scroll: boolean, channel: boolean, zoom: boolean, path: boolean } | null
 }
 
+// an entry of an archive folder: a folder or a file, with the folder that holds it and, for
+// folders, where its own listing stands
+type QEDArchiveItem = {
+    name: string
+    uri: string
+    isFolder: boolean
+    parent: string
+    expanded: boolean
+    pending: boolean
+    error: string | null
+}
+
+// a connected archive with the tree the server keeps of it
+type QEDArchive = {
+    name: string
+    uri: string
+    expanded: boolean
+    pending: boolean
+    error: string | null
+    hits: number | null
+    items: QEDArchiveItem[]
+}
+
 interface QED {
+    // the archive tree
+    archives(): Promise<QEDArchive[]>
+    connectArchive(name: string, uri: string): Promise<unknown>
+    disconnectArchive(uri: string): Promise<unknown>
+    expandFolder(archive: string, uri?: string): Promise<unknown>
+    collapseFolder(archive: string, uri?: string): Promise<unknown>
+    refreshArchive(uri: string): Promise<unknown>
     // queries
     state(viewport?: number): Promise<QEDViewModel | null>
     viewports(): Promise<QEDViewModel[]>
