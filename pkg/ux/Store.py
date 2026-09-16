@@ -16,6 +16,7 @@ from .Harvester import Harvester
 
 # my parts
 from .Archives import Archives
+from .Keeper import Keeper
 from .Preparation import Preparation
 from .Sample import Sample
 from .Sources import Sources
@@ -86,6 +87,23 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         for source in blocking:
             # each one in turn, blocking whichever thread runs this
             self._openSource(source=source)
+        # the folders that were on display when the session was persisted are listed again,
+        # so the tree comes back; nothing else touches them at boot
+        if name is None:
+            # go through the archives
+            for archive in self.archives:
+                # and the folders on display
+                for folder in list(archive.expanded):
+                    # a folder that has a listing, or one under way, is fine
+                    if archive.listing(uri=folder) is not None or archive.isPending(uri=folder):
+                        # so leave it alone
+                        continue
+                    # the rest are about to move
+                    touched = True
+                    # mark them as under way
+                    archive.expand(uri=folder)
+                    # and list them
+                    self._browse(archive=archive, uri=folder)
         # if any standing moved
         if touched:
             # let the clients know; a request that found every source already under way
@@ -308,8 +326,12 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         Connect a new archive
         """
-        # delegate to my archive store
-        return self._dataArchives.addArchive(archive=archive)
+        # add it to my archive store
+        archive = self._dataArchives.addArchive(archive=archive)
+        # write the archives back
+        self.persist(sources=False, views=False)
+        # and hand it back
+        return archive
 
     def disconnectArchive(self, uri):
         """
@@ -321,6 +343,8 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         if archive is not None and self.fleet is not None:
             # send its scouts home
             self.fleet.recall(archive=archive.pyre_name)
+        # write the archives back
+        self.persist(sources=False, views=False)
         # hand it back
         return archive
 
@@ -346,6 +370,8 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         self._browse(archive=archive, uri=uri)
         # the tree moved, so let the clients know
         self._announce()
+        # and write the archives back
+        self.persist(sources=False, views=False)
         # all done
         return archive
 
@@ -363,8 +389,33 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         archive.collapse(uri=uri)
         # the tree moved, so let the clients know
         self._announce()
+        # and write the archives back
+        self.persist(sources=False, views=False)
         # all done
         return archive
+
+    def persist(self, archives=True, sources=True, views=True):
+        """
+        Write my state back into the user's configuration files, so the next session starts
+        where this one leaves off; the flags say which parts of the state to write
+        """
+        # make a keeper
+        keeper = Keeper(plexus=self._plexus, store=self)
+        # carefully, since persistence must never take the session down
+        try:
+            # and ask it to write
+            return keeper.persist(archives=archives, sources=sources, views=views)
+        # if a file cannot be edited
+        except pyre.config.exceptions.CodecError as error:
+            # make a channel
+            channel = journal.warning("qed.ux.persistence")
+            # complain
+            channel.line("could not persist the session")
+            channel.line(f"got: {error}")
+            # flush
+            channel.log()
+        # nothing was written
+        return []
 
     def refreshArchive(self, uri):
         """
@@ -982,6 +1033,8 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         super().__init__(plexus=plexus, spec="store", **kwds)
         # save the root of the document
         self._docroot = docroot
+        # and the plexus, which knows the workspace and names the configuration lists
+        self._plexus = plexus
 
         # build my registries
         # map: name -> data archive

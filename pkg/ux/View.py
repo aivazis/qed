@@ -32,9 +32,11 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
 
     dataset = qed.protocols.dataset()
     dataset.doc = "my dataset"
+    dataset.persistent = False
 
     channel = qed.protocols.channel()
     channel.doc = "my channel"
+    channel.persistent = False
 
     selections = qed.properties.kv()
     selections.default = {}
@@ -54,10 +56,12 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
 
     session = qed.properties.str()
     session.doc = "the session token"
+    session.persistent = False
 
     members = qed.properties.list(schema=qed.properties.bool())
     members.default = None
     members.doc = "the per-member participation mask, or None until seeded from a stack reader"
+    members.persistent = False
 
     # interface
     def pipeline(self, channel):
