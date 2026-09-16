@@ -130,8 +130,9 @@ class RRSD(H5, family="qed.readers.nisar.rrsd"):
                             # and move on
                             continue
 
-                        # load the BFPQ lookup table into memory
-                        lut = bfpq.read().data
+                        # load the BFPQ lookup table into memory, whole: a dense grid over
+                        # the table's full extent, which the decoders take as a buffer
+                        lut = bfpq.tile()
 
                         # generate a name for the dataset
                         name = f"{self.pyre_name}.{band}.{frequency}.{pol}"
