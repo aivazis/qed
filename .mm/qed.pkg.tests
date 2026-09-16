@@ -17,5 +17,6 @@ tests.qed.pkg.envi.clean := envi_le.dat envi_le.hdr envi_be.dat envi_be.dat.hdr 
 # the persistence drivers share a scratch workspace: the reboot reads what the first wrote
 tests.qed.pkg.persist.clean := persist_ws
 tests.qed.pkg.browse.clean := browse_ws
+tests.qed.pkg.archive_symlink.clean := archive_symlink_ws archive_symlink_link
 tests.qed.pkg.browse_fleet.clean := browse_fleet_ws
 tests.qed.pkg.persist_reboot.pre := tests.qed.pkg.persist
