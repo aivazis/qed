@@ -83,6 +83,8 @@ class ConnectReader(graphene.Mutation):
             raise
         # add the new source to the store
         store.connectSource(source=source)
+        # and write the readers back
+        store.persist(archives=False, views=False)
         # connecting is the user asking for this product, so first contact starts now; it
         # happens on the product's crew, and this call returns while the survey runs, with
         # the outcome arriving over the event stream as {ready} or {failed}

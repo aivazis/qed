@@ -26,7 +26,7 @@ class ViewPersist(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to persist itself
-        store.pyre_dump()
+        store.persist()
         # and resolve the mutation with the store id
         return store.pyre_name
 
