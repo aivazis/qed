@@ -42,7 +42,7 @@ $(qed.data.native.r8): $(project.home)/tests/data/native/r8
 	@cd ${dir $@} && ./r8
 
 
-# the NISAR fixtures: a GSLC and a GCOV the {qed.ux.playwright} suite reads. synthetic generation
+# the NISAR fixtures: a GSLC and a GCOV the {qed.ux.playwright.*} suites read. synthetic generation
 # is DEFERRED (a future generator -- likely python over {pyre.h5.api.Writer} with an articulated
 # NISAR product schema -- will synthesize tiny valid products); until then real products stand in.
 qed.data.nisar.gslc := $(project.home)/tests/data/nisar/gslc.h5

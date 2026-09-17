@@ -1,0 +1,45 @@
+# -*- makefile -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2026 all rights reserved
+
+
+# the playwright-driven test suite for the qed ux client, on webkit: it drives the built client
+# in a headless browser and enforces the semantic-markup convention (doc/semantic-markup.md).
+# there is one suite per browser engine, all over the same sources in {tests/qed.ux.playwright};
+# the specs count on servers no one else has used, so each engine gets its own run, with its own
+# staging area, servers, and ports, and the suites may run side by side
+qed.ux.playwright.webkit.stem := qed.ux.playwright
+# it delegates discovery, parallelism, and the server-under-test to playwright
+qed.ux.playwright.webkit.runner := playwright
+# the framework and its browsers come from the environment-level {playwright} toolchain, installed
+# once per environment with {mm playwright.install}; mm verifies it is present before the suite runs
+# and points the runner at it (NODE_PATH + the browser path), so the suite owns no node_modules of
+# its own. the suite stays CommonJS (.ts, no "type":"module"), since NODE_PATH only feeds playwright's
+# CJS loader; an ESM switch would need a different resolution scheme
+qed.ux.playwright.webkit.toolchain := playwright
+# it needs the built client (the server serves it) and the test fixtures the servers read: the
+# native raster ({qed.data.native.c16}) and the two NISAR products ({qed.data.nisar.*}). each file
+# target produces its fixture only when missing -- skip-if-present, so present data is never rebuilt
+qed.ux.playwright.webkit.prerequisites := qed.pkg qed.ext qed.ux \
+    $(qed.data.native.c16) $(qed.data.nisar.gslc) $(qed.data.nisar.gcov)
+
+# name the engine this suite drives, and give its three servers ports of their own so that the
+# suites of the other engines can run at the same time. then
+# tell the runner where the test data lives so playwright.config can point each webServer's {qed} at
+# it; the suite runs staged, away from the source tree, so it needs the absolute paths. the solo
+# server reads the shared gslc fixture through its own single-source configuration directory, so it
+# rides the same prerequisite
+qed.ux.playwright.webkit.env := \
+    QED_ENGINE=webkit \
+    QED_PORT=8147 QED_PORT_NISAR=8148 QED_PORT_SOLO=8149 \
+    QED_DATA_NATIVE=$(dir $(qed.data.native.c16)) \
+    QED_DATA_NISAR=$(dir $(qed.data.nisar.gslc)) \
+    QED_DATA_NISAR_SOLO=$(dir $(qed.data.nisar.gslc))solo
+
+# a hand-run of playwright from the suite directory drops its report tree in the source tree;
+# mm-driven runs are staged, so theirs is removed with the staging area
+qed.ux.playwright.webkit.clean := test-results
+
+
+# end of file
