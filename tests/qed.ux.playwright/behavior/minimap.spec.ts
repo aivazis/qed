@@ -83,9 +83,11 @@ test.describe.serial("the minimap tracks the current zoom", () => {
         expect(baseline).toBeGreaterThan(800)
 
         // zoom out two octaves and back to 0, IN PLACE, through the coupled zoom slider
-        await zoomTrack.getByText("-2", { exact: true }).click()
+        // aim at each tick's group: webkit misplaces positioned svg text, so a click on the
+        // text itself misses
+        await zoomTrack.locator('[data-pyre-widget-part="tick"][data-pyre-tick="-2"]').click()
         await waitForZoom(page, -2)
-        await zoomTrack.getByText("0", { exact: true }).click()
+        await zoomTrack.locator('[data-pyre-widget-part="tick"][data-pyre-tick="0"]').click()
         await waitForZoom(page, 0)
 
         // the same click must scroll to the same place; a stale zoom factor would divide it by ~4
