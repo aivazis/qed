@@ -53,7 +53,9 @@ const setHorizontalZoom = async (page: Page, level: number) => {
     const track = page.locator('[data-pyre-widget="slider"][data-pyre-widget-part="track"]')
         .filter({ has: page.locator('[aria-orientation="horizontal"]') })
         .filter({ hasText: "-6" })
-    await track.getByText(String(level), { exact: true }).click()
+    // aim at the tick's group: webkit misplaces positioned svg text, so a click on the
+    // text itself misses
+    await track.locator(`[data-pyre-widget-part="tick"][data-pyre-tick="${level}"]`).click()
     await waitForZoom(page, level)
     // let the minimap observe the resulting scroll
     await page.waitForTimeout(150)
