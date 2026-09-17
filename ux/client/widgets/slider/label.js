@@ -75,6 +75,14 @@ export const Label = ({ tick, value = null, setValue = null }) => {
             // all done
             return
         }
+        // an ordinary label
+        if (end === null) {
+            // is tagged so drivers can find the affordance; they aim at the group, since some
+            // browser automation misplaces positioned svg text
+            behaviors["data-pyre-widget"] = "slider"
+            behaviors["data-pyre-widget-part"] = "tick"
+            behaviors["data-pyre-tick"] = tick
+        }
     }
     // when i am an editable end
     if (end !== null && enabled) {
@@ -91,28 +99,30 @@ export const Label = ({ tick, value = null, setValue = null }) => {
     // and where
     const position = labelPosition(tick)
 
-    // an editable end gets a hit box behind it, so a double click anywhere on it opens the
-    // editor; the behaviors go on the group so both the box and the text respond
-    if (end !== null && enabled) {
-        // render; while the editor is up, the label goes invisible so it does not show through
+    // a label that does not respond to the pointer
+    if (Object.keys(behaviors).length === 0) {
+        // is just its text
         return (
-            <>
-                <g {...behaviors}>
-                    <Hitbox x={position.x} y={position.y} text={text} fontSize={fontSize} />
-                    <Label ref={node} {...position} visibility={editing ? "hidden" : "visible"}>
-                        {text}
-                    </Label>
-                </g>
-                {editor}
-            </>
+            <Label ref={node} {...position}>
+                {text}
+            </Label>
         )
     }
 
-    // render
+    // every other label gets a hit box behind it, so a click anywhere on it sets the value, and
+    // a double click anywhere on an editable end opens the editor; the behaviors go on the group
+    // so both the box and the text respond. while the editor is up, the label goes invisible so
+    // it does not show through
     return (
-        <Label ref={node} {...position} {...behaviors}>
-            {text}
-        </Label>
+        <>
+            <g {...behaviors}>
+                <Hitbox x={position.x} y={position.y} text={text} fontSize={fontSize} />
+                <Label ref={node} {...position} visibility={editing ? "hidden" : "visible"}>
+                    {text}
+                </Label>
+            </g>
+            {editor}
+        </>
     )
 }
 
