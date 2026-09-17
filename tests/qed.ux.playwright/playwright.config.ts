@@ -54,6 +54,29 @@ const workspace = (name: string) => {
 }
 
 
+// the browser engines the suite knows how to run on, and the device that stands in for each
+const devicesByEngine: Record<string, string> = {
+    chromium: "Desktop Chrome",
+    webkit: "Desktop Safari",
+    firefox: "Desktop Firefox",
+}
+// the engine of this run. a run drives exactly one: the specs count on servers that no one else
+// has used -- the console looks for the startup record, the archive specs connect a name that must
+// not have been seen before -- so engines cannot take turns against the same servers. mm runs one
+// suite per engine, each with its own servers and ports, and sets {QED_ENGINE} accordingly
+const engine = process.env.QED_ENGINE ?? "chromium"
+// if the choice is not in the table
+if (!(engine in devicesByEngine)) {
+    // the run cannot mean what its author intended, so refuse it
+    throw new Error(
+        `unknown browser engine '${engine}'; ` +
+        `choose among: ${Object.keys(devicesByEngine).join(", ")}`
+    )
+}
+// the device every project drives
+const device = devices[devicesByEngine[engine]]
+
+
 // the qed.ux suite drives the built client in a headless browser to enforce the semantic-markup
 // convention (doc/semantic-markup.md). playwright owns discovery, parallelism, and -- via the
 // {webServer} block -- the isolated qed server the specs run against.
@@ -93,14 +116,14 @@ export default defineConfig({
     projects: [
         // a one-shot setup that selects a channel so a Mosaic (and the zoom slider) renders for
         // the read-only specs; without it the viewport is an empty shell and the gate is vacuous
-        { name: "setup", testMatch: /.*\.setup\.ts/, use: { ...devices["Desktop Chrome"] } },
+        { name: "setup", testMatch: /.*\.setup\.ts/, use: { ...device } },
         // the gate: every identity and aria spec must pass -- the rollout is complete, so the
         // coverage check (no untagged interactive controls) is now part of the gate, not a backlog
         {
             name: "gate",
             testMatch: [/identity\/.*\.spec\.ts/, /aria\/.*\.spec\.ts/],
             dependencies: ["setup"],
-            use: { ...devices["Desktop Chrome"] },
+            use: { ...device },
         },
         // behavior specs that operate controls and mutate shared server state (e.g. the zoom
         // level). they run AFTER the read-only gate and serially, and restore the state they
@@ -110,7 +133,7 @@ export default defineConfig({
             testMatch: /behavior\/.*\.spec\.ts/,
             dependencies: ["gate"],
             fullyParallel: false,
-            use: { ...devices["Desktop Chrome"] },
+            use: { ...device },
         },
         // the NISAR suite runs against its own server (the {nisarBaseURL}); it selects a reader and a
         // selector value, then asserts the band/frequency/polarization radiogroups. it operates the
@@ -119,7 +142,7 @@ export default defineConfig({
             name: "nisar",
             testMatch: /nisar\/.*\.spec\.ts/,
             fullyParallel: false,
-            use: { ...devices["Desktop Chrome"], baseURL: nisarBaseURL },
+            use: { ...device, baseURL: nisarBaseURL },
         },
         // the solo suite runs against the single-source server; it guards the boot-time selection
         // adoption -- views built before first contact must inherit the reader's auto-picked axes.
@@ -128,7 +151,7 @@ export default defineConfig({
             name: "solo",
             testMatch: /solo\/.*\.spec\.ts/,
             fullyParallel: false,
-            use: { ...devices["Desktop Chrome"], baseURL: soloBaseURL },
+            use: { ...device, baseURL: soloBaseURL },
         },
         // the api-contract project: it drives {window.qed} but asserts the MODEL (state/viewports/
         // controllers) instead of the DOM, so a failure localizes to the server/store layer rather
@@ -138,7 +161,7 @@ export default defineConfig({
             testMatch: /api\/.*\.spec\.ts/,
             dependencies: ["gate"],
             fullyParallel: false,
-            use: { ...devices["Desktop Chrome"] },
+            use: { ...device },
         },
         // a live driveability audit (not a gate): it mutates the native store and reaches the nisar
         // server, so it runs LAST and serially, after every other project, restoring what it touches
@@ -147,7 +170,7 @@ export default defineConfig({
             testMatch: /audit\/.*\.spec\.ts/,
             dependencies: ["behavior", "nisar"],
             fullyParallel: false,
-            use: { ...devices["Desktop Chrome"] },
+            use: { ...device },
         },
     ],
 
