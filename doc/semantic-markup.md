@@ -147,11 +147,14 @@ values, but are **not yet keyboard-operable** (no arrow-key resize / value chang
 is a behavior change wiring into `doFlex` / `setValue`, not markup, and is deferred. The
 `aria/coverage` test reports these as interactive controls so the gap stays visible.
 
-## The gate — `mm qed.ux.playwright`
+## The gate — `mm qed.ux.playwright.{chromium,webkit,firefox}`
 
-The convention is enforced by the `qed.ux.playwright` suite (`.mm/qed.ux.playwright`), an mm
-*runner* suite that delegates to Playwright: `mm qed.ux.playwright` builds the client, then runs
-`npx playwright test`, which drives the built client in a headless browser.
+The convention is enforced by the specs in `tests/qed.ux.playwright`, which mm runs as three
+*runner* suites that delegate to Playwright, one per browser engine: `qed.ux.playwright.chromium`,
+`qed.ux.playwright.webkit`, and `qed.ux.playwright.firefox` (`.mm/qed.ux.playwright.*`). Each
+builds the client, then runs `playwright test` from its own staging area, which drives the built
+client in a headless browser. The suites share the sources and differ only in their environment:
+`QED_ENGINE` names the engine, and `playwright.config.ts` gives every project the matching device.
 
 The suite owns its server. `playwright.config.ts` launches an isolated `qed` instance (the
 installed command) from the shared, generated test-data tree (`tests/data/native/` — a 3929×6049
@@ -159,6 +162,18 @@ complex `native.flat` raster produced by the `qed.data` generators, never commit
 dedicated test port (8137, overridable; the port is passed through to `qed` on the command line so
 parallel suites don't collide). Because the server is private to the run, the suite may be
 stateful — it no longer has to be read-only against a shared server.
+
+The engines do not take turns against the same servers, because some specs count on a server no
+one else has used: the console spec looks for the record the server logs when it comes up, and the
+archive specs connect an archive under a fixed name, which a server binds to the first location it
+sees for the rest of its life. So each engine suite brings up its own servers, on its own ports
+(chromium 8137–8139, webkit 8147–8149, firefox 8157–8159), and mm may run the three side by side.
+By hand, `QED_ENGINE=webkit playwright test` from the suite directory drives one engine; without
+the variable, the engine is chromium.
+
+Under webkit, Playwright places a positioned SVG `<text>` at the origin of its coordinate system,
+so a click aimed at such an element lands elsewhere. Specs click the tagged group that holds the
+text instead (`-part="tick"`, `"bound"`, `"pick"`), which is placed correctly on every engine.
 
 Playwright projects (`tests/qed.ux.playwright/`):
 
@@ -183,10 +198,11 @@ Playwright projects (`tests/qed.ux.playwright/`):
     the gate, restoring what it touches), not here — see `behavior/actions.spec.ts` and
     `behavior/coordinates.spec.ts`.
 
-`mm qed.ux.playwright` runs only the `gate` project, so a clean tree is green; failures print one
-line per problem. The framework lives in a dedicated `node_modules` kept out of the client bundle
-(`tests/qed.ux.playwright/config/package.json`); browser binaries are located by `PLAYWRIGHT_BROWSERS_PATH`
-(set once in your shell profile). mm installs both on first run.
+Each suite runs every project, in the order their dependencies set; failures print one line per
+problem. The framework and the browser binaries come from mm's environment-level `playwright`
+toolchain, installed once per environment with `mm playwright.install`; mm verifies that it is
+present before a suite runs, and points the runner at it through `NODE_PATH` and
+`PLAYWRIGHT_BROWSERS_PATH`, so the suites own no `node_modules`.
 
 The GraphQL setup runs from inside the page (browser `fetch`), exactly as the client does — pyre's
 minimal HTTP server is happy with the browser's requests but not with Playwright's node-side
