@@ -9,9 +9,11 @@ import React from 'react'
 import styled from 'styled-components'
 
 
-// an invisible rectangle behind a label that catches the pointer over the label's whole box;
-// browsers differ on how they hit test text, and some only count the glyphs themselves, so a
-// click between two characters would otherwise fall through to whatever lies underneath. the
+// an invisible rectangle behind a label that catches the pointer over the label's whole box and
+// some slack around it, so the label is an easier target than its text alone. it also gives the
+// group that holds the pair an extent that browser automation can aim at: when driving webkit,
+// playwright places a positioned svg text at the origin of its coordinate system, so a click
+// aimed at the text lands elsewhere, while a group or a rectangle is placed correctly. the
 // label is centered on ({x}, {y}) with its baseline at {y}, {text} is what it shows, and
 // {fontSize} is its size in intrinsic units
 export const Hitbox = ({ x, y, text, fontSize }) => {
@@ -31,7 +33,16 @@ const Box = styled.rect`
     fill: none;
     stroke: none;
     pointer-events: all;
-    cursor: text;
+
+    /* a click on a label sets the value */
+    & {
+        cursor: pointer;
+    }
+
+    /* except on an editable end, where a double click edits it */
+    [data-pyre-widget-part="bound"] > & {
+        cursor: text;
+    }
 `
 
 
