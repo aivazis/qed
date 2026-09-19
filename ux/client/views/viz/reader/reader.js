@@ -26,6 +26,7 @@ import { Channels } from './channels'
 import { Stack } from './stack'
 import { Standing } from './standing'
 import { Disconnect } from './disconnect'
+import { Retry } from './retry'
 // styles
 import styles from './styles'
 
@@ -52,7 +53,14 @@ const Panel = ({ qed }) => {
     const preparing = usePreparing()
 
     // unpack the reader
-    const { name, uri, selectors } = reader
+    const { name, uri, status, selectors } = reader
+    // my selectors and channels describe a product that has been opened; until then, they
+    // would be offering choices that lead nowhere
+    const ready = status === "ready"
+    // a product that could not be opened flags its tray, so the trouble shows when collapsed
+    const failed = status === "failed"
+    // and one that is still being opened shows that work is under way
+    const opening = !ready && !failed
     // if i have a valid dataset selection, grab its channels
     const channels = dataset?.channels ?? []
 
@@ -82,8 +90,14 @@ const Panel = ({ qed }) => {
         // click to select
         onClick: selectReader,
     }
-    // build my controls
-    const Controls = <Disconnect qed={qed} name={name} />
+    // build my controls: a product that could not be opened offers another attempt, next to
+    // the control that lets go of the reader
+    const Controls = (
+        <>
+            {failed && <Retry name={name} />}
+            <Disconnect qed={qed} name={name} />
+        </>
+    )
 
     // mix my paint
     const paint = styles.reader(state)
@@ -91,23 +105,23 @@ const Panel = ({ qed }) => {
     // per reader (two readers can share an axis, e.g. {frequency}), forwarded onto the {Tray} section
     return (
         <Tray title={name} initially={true} state={state} scale={0.5} controls={Controls}
-            data-qed-reader={name}>
+            alert={failed} busy={opening} data-qed-reader={name}>
             <Meta.Table style={paint.meta} {...behaviors}>
                 <Meta.Entry attribute="uri" style={paint.meta}>
                     {uri}
                 </Meta.Entry>
                 {/* what the source is doing, while it is not yet viewable */}
-                <Standing />
-                {selectors.map(selector => {
+                <Standing style={paint.meta} />
+                {ready && selectors.map(selector => {
                     // unpack
                     const { name: axis, values } = selector
                     // build an axis and return it
                     return <Axis key={axis} axis={axis}>{values}</Axis>
                 })}
-                <Stack />
+                {ready && <Stack />}
                 {/* the channels appear when the dataset is worth looking at; offering them while
                     the viewport is still waiting would promise something the view cannot show */}
-                {channels.length > 0 && !preparing && <Channels>{channels}</Channels>}
+                {ready && channels.length > 0 && !preparing && <Channels>{channels}</Channels>}
             </Meta.Table>
         </Tray>
     )
