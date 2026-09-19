@@ -23,7 +23,7 @@ import { Indicator } from './indicator'
 export const Tray = ({
     style,
     title, state, initially = false, expanded, onToggle,
-    scale = 1.0, busy = false, controls = null,
+    scale = 1.0, busy = false, alert = false, controls = null,
     children, ...rest
 }) => {
     // scale up a bit on large displays
@@ -43,6 +43,9 @@ export const Tray = ({
 
     // pick my parts based on my state
     const { Header, Title } = components(state)
+    // a tray whose contents are in trouble says so in its title, so the trouble is visible
+    // even while the tray is collapsed
+    const titlePaint = alert ? { color: theme.page.danger } : undefined
 
     // mix my paint
     const paint = {
@@ -63,7 +66,7 @@ export const Tray = ({
                 aria-label={typeof title === "string" ? title : undefined}
                 data-qed-control="tray">
                 <Indicator expanded={open} size={0.6 * size} />
-                <Title>{title}</Title>
+                <Title style={titlePaint}>{title}</Title>
                 <Spacer />
                 {busy && <Busy />}
                 {controls}
