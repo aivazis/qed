@@ -139,13 +139,14 @@ export const SelectedTitle = styled(Title)`
     color: ${() => theme.page.name};
 `
 
-// the busy indicator
+// the busy indicator: a ring in the color of the app, with one faded quadrant, since a
+// uniform ring looks the same at every angle and its rotation would go unnoticed
 export const Busy = styled.div`
     width: 1.0em;
     height: 1.0em;
-    border: 3px solid ${() => theme.page.normal};
+    border: 3px solid ${() => theme.page.name};
     border-radius: 50%;
-    border-top: 3px solid ${() => theme.page.normal};
+    border-top: 3px solid ${() => theme.page.viewportBorder};
     animation: busy 1s linear infinite;
 `
 
