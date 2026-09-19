@@ -44,8 +44,8 @@ export const Retry = ({ name }) => {
     const behaviors = {
         onClick: retry,
     }
-    // the glyph draws its ring well inside its box, while the x of the control next to me runs
-    // nearly corner to corner; size my box so that the two marks come out the same
+    // the glyph draws its ring well inside its box, so it takes a generous one to read at a
+    // glance; this matches the refresh control of the archive trays
     const size = 20
     // render
     return (
