@@ -8,6 +8,10 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// widgets
+import { Spinner } from '~/widgets'
+
 
 // the panel shown while a dataset is being made worth looking at
 // selecting a dataset settles what to render; it does not settle how well. the pyramid that
@@ -18,7 +22,7 @@ export const Preparing = ({ behaviors }) => {
     // render
     return (
         <Panel data-qed-viewport-status="preparing" {...behaviors}>
-            <Ring />
+            <Spinner size="90px" />
             <Note>preparing the dataset...</Note>
         </Panel>
     )
@@ -33,16 +37,6 @@ const Panel = styled.section`
     align-items: center;
     justify-content: center;
     gap: 1.5rem;
-`
-
-// the spinner
-const Ring = styled.div`
-    width: 90px;
-    height: 90px;
-    border: 3px solid hsl(28deg, 90%, 55%);
-    border-radius: 50%;
-    border-top: 3px solid hsl(28deg, 90%, 55%, 0.25);
-    animation: busy 1s linear infinite;
 `
 
 // and what it is waiting for

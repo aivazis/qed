@@ -12,7 +12,7 @@ import styled from 'styled-components'
 // theme
 import { theme } from '~/palette'
 // widgets
-import { Meta } from '~/widgets'
+import { Meta, Spinner } from '~/widgets'
 
 // locals
 // hooks
@@ -56,7 +56,7 @@ export const Standing = ({ style }) => {
         <Meta.Entry attribute="status" style={style}>
             <Report data-qed-reader-status={status}>
                 <Verdict>
-                    <Ring />
+                    <Spinner size="0.8em" weight="2px" />
                     <Note>opening</Note>
                 </Verdict>
             </Report>
@@ -77,16 +77,6 @@ const Verdict = styled.div`
     display: flex;
     align-items: center;
     gap: 0.75em;
-`
-
-// the spinner, sized to sit on a line of text
-const Ring = styled.div`
-    width: 0.8em;
-    height: 0.8em;
-    border: 2px solid hsl(28deg, 90%, 55%);
-    border-radius: 50%;
-    border-top: 2px solid hsl(28deg, 90%, 55%, 0.5);
-    animation: busy 1s linear infinite;
 `
 
 // the label that names the work

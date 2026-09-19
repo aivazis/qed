@@ -8,13 +8,17 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// widgets
+import { Spinner } from '~/widgets'
+
 
 // the area
 export const Busy = () => {
     // render
     return (
         <Box>
-            <Indicator />
+            <Spinner size="150px" />
         </Box>
     )
 }
@@ -25,16 +29,6 @@ const Box = styled.section`
     margin: 5.0rem 0.0em auto 0.0em;
     justify-content: center;
     align-items: center;
-`
-
-// the busy indicator
-const Indicator = styled.div`
-    width: 150px;
-    height: 150px;
-    border: 3px solid hsl(28deg, 90%, 55%);
-    border-radius: 50%;
-    border-top: 3px solid hsl(28deg, 90%, 55%, 0.5);
-    animation: busy 1s linear infinite;
 `
 
 

@@ -10,7 +10,7 @@ import styled from 'styled-components'
 
 // project
 // widgets
-import { Spacer } from '~/widgets'
+import { Spacer, Spinner } from '~/widgets'
 // colors
 import { theme } from '~/palette'
 
@@ -68,7 +68,7 @@ export const Tray = ({
                 <Indicator expanded={open} size={0.6 * size} />
                 <Title style={titlePaint}>{title}</Title>
                 <Spacer />
-                {busy && <Busy />}
+                {busy && <Spinner />}
                 {controls}
             </Header>
             {open && <Items style={paint}>{children}</Items>}
@@ -137,17 +137,6 @@ export const Title = styled.span`
 
 export const SelectedTitle = styled(Title)`
     color: ${() => theme.page.name};
-`
-
-// the busy indicator: a ring in the color of the app, with one faded quadrant, since a
-// uniform ring looks the same at every angle and its rotation would go unnoticed
-export const Busy = styled.div`
-    width: 1.0em;
-    height: 1.0em;
-    border: 3px solid ${() => theme.page.name};
-    border-radius: 50%;
-    border-top: 3px solid ${() => theme.page.viewportBorder};
-    animation: busy 1s linear infinite;
 `
 
 // the items
