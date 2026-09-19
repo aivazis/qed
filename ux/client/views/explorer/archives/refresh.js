@@ -40,7 +40,7 @@ export const Refresh = ({ uri }) => {
     }
     // render
     return (
-        <Badge size={10} state="enabled" behaviors={behaviors} style={paintRefresh}
+        <Badge size={20} state="enabled" behaviors={behaviors} style={paintRefresh}
             aria-label="refresh this archive">
             <Icon />
         </Badge>
