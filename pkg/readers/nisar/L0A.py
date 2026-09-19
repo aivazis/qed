@@ -42,11 +42,11 @@ class L0A(qed.flow.factory, family="qed.readers.nisar.l0a", implements=qed.proto
     def __init__(self, **kwds):
         # chain up
         super().__init__(**kwds)
+        # first contact has not been made; this is the state of an instance, so it is set
+        # here rather than shared through the class
+        self._opened = False
         # all done
         return
-
-    # private data
-    _opened = False  # whether first contact has been made
 
 
 # end of file

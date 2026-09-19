@@ -131,8 +131,6 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
         if self._opened:
             # there is nothing further to do
             return self
-        # leave a mark
-        self._opened = True
         # get the access property list i was constructed with
         fapl = self._fapl
         # if the caller didn't provide one
@@ -169,6 +167,9 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
                 # and let each one measure itself
                 dataset.measure()
 
+        # first contact is complete, and only now is it safe to say so: everything that
+        # could fail is behind me, so a failed attempt leaves no trace and can be repeated
+        self._opened = True
         # all done
         return self
 
@@ -176,6 +177,9 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
     def __init__(self, archive=None, credentials=None, fapl=None, **kwds):
         # chain up; construction is passive, so nothing touches the file until {open}
         super().__init__(**kwds)
+        # first contact has not been made; this is the state of an instance, so it is set
+        # here rather than shared through the class
+        self._opened = False
         # squirrel away what first contact needs
         self._archive = archive
         self._fapl = fapl
@@ -219,7 +223,6 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
     # private data
     product = None  # the opened data product, once first contact has been made
     _granule = None  # the identifier of my product, when i was told rather than read it
-    _opened = False  # whether first contact has been made
     _archive = None  # the archive that manages my data source, when there is one
     _fapl = None  # the file access property list i was constructed with
 
