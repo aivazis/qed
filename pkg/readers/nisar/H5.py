@@ -77,6 +77,34 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
         # all done
         return
 
+    @property
+    def credentials(self):
+        """
+        The credentials that grant access to my product, as of right now
+        """
+        # get my archive
+        archive = self._archive
+        # if i am managed
+        if archive is not None:
+            # ask for a fresh grant every time: whoever is asking may be about to ship it to a
+            # worker that cannot reach the archive, and that may happen long before, or entirely
+            # without, my own first contact; a grant that was taken once and kept would also
+            # outlive the token it carries
+            return archive.credentials()
+        # otherwise, settle for whatever i was given, e.g. by the recipe that rebuilt me on a
+        # worker
+        return self._credentials
+
+    @credentials.setter
+    def credentials(self, value):
+        """
+        Adopt {value} as the credentials of a reader that has no archive to ask
+        """
+        # remember them
+        self._credentials = value or {}
+        # all done
+        return
+
     # interface
     def select(self, selector):
         """
@@ -145,12 +173,9 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
             size = 4 * 1024 * pages
             # adjust the {fapl}
             fapl.pageBufferSize = qed.h5.libh5.properties.PageBuffer(bytes=size, metadata=5, raw=50)
-        # if i'm managed, get access credentials from the archive; otherwise settle for
-        # whatever the caller supplied, e.g. a worker rebuilding me from a recipe
-        archive = self._archive
-        credentials = archive.credentials() if archive else (self.credentials or {})
-        # retain them, so my recipe can carry them to a worker that cannot reach the archive
-        self.credentials = credentials
+        # get my access credentials: fresh from my archive if i'm managed, otherwise whatever
+        # my caller supplied, e.g. a worker rebuilding me from a recipe
+        credentials = self.credentials
         # open my file
         self.product = qed.h5.reader(uri=self.uri, credentials=credentials, fapl=fapl).read()
 
@@ -183,9 +208,9 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
         # squirrel away what first contact needs
         self._archive = archive
         self._fapl = fapl
-        # retain whatever credentials the caller supplied; {open} may refresh them from
-        # the archive
-        self.credentials = credentials or {}
+        # retain whatever credentials the caller supplied; they matter only when there is no
+        # archive to ask
+        self._credentials = credentials or {}
         # initialize the availability map so the panel can render before first contact
         self.available = {}
         # all done
