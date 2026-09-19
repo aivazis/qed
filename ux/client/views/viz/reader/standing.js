@@ -8,21 +8,25 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// theme
+import { theme } from '~/palette'
+// widgets
+import { Meta } from '~/widgets'
+
 // locals
 // hooks
 import { useReader } from './useReader'
-import { useStageReader } from './useStageReader'
 
 
 // report where my reader stands on its way to being viewable
 // a source that is ready says nothing: its selectors and channels are the report. one that
 // is still being surveyed shows that work is under way, and one whose survey failed shows
-// why, along with the control that asks for another attempt
-export const Standing = () => {
+// why. either way, the report is an entry in the metadata table of the reader, like the uri
+// above it, so it sits on the same grid and reads at the same size
+export const Standing = ({ style }) => {
     // get my reader
-    const { name, status, error } = useReader()
-    // and the handler that asks for another attempt
-    const { stage, isInFlight } = useStageReader(name)
+    const { status, error } = useReader()
 
     // a source that has completed first contact has nothing to report here
     if (status === "ready") {
@@ -30,64 +34,55 @@ export const Standing = () => {
         return null
     }
 
-    // a source whose survey failed shows the reason and offers a retry
+    // a source whose survey failed shows the reason
     if (status === "failed") {
-        // make a handler that asks for another attempt
-        const retry = evt => {
-            // this control is not a reader selection, so keep the click to myself
-            evt.stopPropagation()
-            // and quash any default behavior
-            evt.preventDefault()
-            // ask the server to survey the product again
-            stage()
-            // all done
-            return
-        }
-        // render the reason and the control, in a row that spans the whole table: my
-        // siblings here are {Meta.Entry} rows, so anything that is not a row of its own is
-        // invalid markup wherever the browser decides to put it
+        // render the verdict, and the reason underneath, as the server reported it; the
+        // control that asks for another attempt lives in the header of my tray
         return (
-            <tr data-qed-reader-status="failed">
-                <td colSpan={3}>
-                    <Failure>
-                        <Reason>{error ?? "first contact failed"}</Reason>
-                        <Retry onClick={retry} disabled={isInFlight}
-                            aria-label={`retry first contact with '${name}'`}>
-                            retry
-                        </Retry>
-                    </Failure>
-                </td>
-            </tr>
+            <Meta.Entry attribute="status" style={style}>
+                <Report data-qed-reader-status="failed">
+                    <Verdict>
+                        <Failed>could not open</Failed>
+                    </Verdict>
+                    <Reason>{error ?? "first contact failed"}</Reason>
+                </Report>
+            </Meta.Entry>
         )
     }
 
     // everything else is work in progress: the source is either waiting for its survey to
     // be assigned or being surveyed right now
     return (
-        <tr data-qed-reader-status={status}>
-            <td colSpan={3}>
-                <Progress>
+        <Meta.Entry attribute="status" style={style}>
+            <Report data-qed-reader-status={status}>
+                <Verdict>
                     <Ring />
-                    <Note>opening...</Note>
-                </Progress>
-            </td>
-        </tr>
+                    <Note>opening</Note>
+                </Verdict>
+            </Report>
+        </Meta.Entry>
     )
 }
 
 
-// the row that reports work in progress
-const Progress = styled.div`
+// the report, a stack of lines in the value column
+const Report = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+`
+
+// the first line of the report: what happened
+const Verdict = styled.div`
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.25rem 0.0rem;
+    gap: 0.75em;
 `
 
 // the spinner, sized to sit on a line of text
 const Ring = styled.div`
-    width: 0.9rem;
-    height: 0.9rem;
+    width: 0.8em;
+    height: 0.8em;
     border: 2px solid hsl(28deg, 90%, 55%);
     border-radius: 50%;
     border-top: 2px solid hsl(28deg, 90%, 55%, 0.5);
@@ -96,42 +91,19 @@ const Ring = styled.div`
 
 // the label that names the work
 const Note = styled.span`
-    font-size: 60%;
     color: hsl(0deg, 0%, 60%);
 `
 
-// the block that reports a failure
-const Failure = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.25rem 0.0rem;
+// the statement that first contact failed
+const Failed = styled.span`
+    color: ${() => theme.page.danger};
 `
 
-// the reason first contact failed
+// the reason first contact failed, verbatim; it may be long, and it may have structure
 const Reason = styled.span`
-    font-size: 60%;
-    color: hsl(0deg, 60%, 60%);
+    color: hsl(0deg, 0%, 60%);
+    white-space: pre-wrap;
     overflow-wrap: anywhere;
 `
-
-// the control that asks for another attempt
-const Retry = styled.button`
-    font-family: inherit;
-    font-size: 60%;
-    color: hsl(28deg, 90%, 55%);
-    background: none;
-    border: 1px solid hsl(28deg, 90%, 55%);
-    border-radius: 0.25rem;
-    padding: 0.1rem 0.4rem;
-    cursor: pointer;
-
-    &:disabled {
-        color: hsl(0deg, 0%, 50%);
-        border-color: hsl(0deg, 0%, 50%);
-        cursor: default;
-    }
-`
-
 
 // end of file

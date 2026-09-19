@@ -94,6 +94,12 @@ export const disconnect = {
     ...styles.control,
 }
 
+// the button that asks for another attempt at first contact
+export const retry = {
+    // inherit
+    ...styles.control,
+}
+
 
 // publish
 export default {
