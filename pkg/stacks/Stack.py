@@ -100,8 +100,6 @@ class Stack(qed.flow.factory, family="qed.readers.stack", implements=qed.protoco
         if self._opened:
             # there is nothing further to do
             return self
-        # leave a mark
-        self._opened = True
         # get my members
         readers = self.readers
         # if i somehow have none
@@ -127,6 +125,9 @@ class Stack(qed.flow.factory, family="qed.readers.stack", implements=qed.protoco
             for dataset in self.datasets:
                 # and let each one measure itself
                 dataset.measure()
+        # first contact is complete, and only now is it safe to say so: everything that
+        # could fail is behind me, so a failed attempt leaves no trace and can be repeated
+        self._opened = True
         # all done
         return self
 
@@ -134,6 +135,9 @@ class Stack(qed.flow.factory, family="qed.readers.stack", implements=qed.protoco
     def __init__(self, **kwds):
         # chain up; construction is passive: my members don't touch their files until {open}
         super().__init__(**kwds)
+        # first contact has not been made; this is the state of an instance, so it is set
+        # here rather than shared through the class
+        self._opened = False
         # get my members
         readers = self.readers
         # remember how many members i have
@@ -231,9 +235,6 @@ class Stack(qed.flow.factory, family="qed.readers.stack", implements=qed.protoco
                 selections[axis] = option
         # all done
         return available
-
-    # private data
-    _opened = False  # whether first contact has been made
 
 
 # end of file

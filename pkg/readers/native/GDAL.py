@@ -51,8 +51,6 @@ class GDAL(qed.flow.factory, family="qed.readers.native.gdal", implements=qed.pr
         if self._opened:
             # there is nothing further to do
             return self
-        # leave a mark
-        self._opened = True
         # open the file
         dataset = self._open()
         # if something went wrong
@@ -95,6 +93,9 @@ class GDAL(qed.flow.factory, family="qed.readers.native.gdal", implements=qed.pr
                 # and let each one measure itself
                 dataset.measure()
 
+        # first contact is complete, and only now is it safe to say so: everything that
+        # could fail is behind me, so a failed attempt leaves no trace and can be repeated
+        self._opened = True
         # all done
         return self
 
@@ -102,6 +103,9 @@ class GDAL(qed.flow.factory, family="qed.readers.native.gdal", implements=qed.pr
     def __init__(self, name, archive=None, **kwds):
         # chain up; construction is passive, so nothing touches the file until {open}
         super().__init__(name=name, **kwds)
+        # first contact has not been made; this is the state of an instance, so it is set
+        # here rather than shared through the class
+        self._opened = False
         # initialize the availability map so the panel can render before first contact
         self.available = {}
         # all done
@@ -147,9 +151,6 @@ class GDAL(qed.flow.factory, family="qed.readers.native.gdal", implements=qed.pr
         channel.log()
         # and bail, just in case errors aren't fatal
         return
-
-    # private data
-    _opened = False  # whether first contact has been made
 
 
 # end of file
