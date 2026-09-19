@@ -40,9 +40,12 @@ class Survey(Chore):
             discovery = Discovery.compose(reader=reader)
         # any failure at all
         except Exception as error:
-            # is reported as a task failure that leaves the crew member healthy; the team
+            # name the kind of failure along with what it said; the text of some errors is
+            # meaningless without it, e.g. a missing key whose entire message is its name
+            reason = f"{type(error).__name__}: {error}"
+            # and report it as a task failure that leaves the crew member healthy; the team
             # side turns it into the {failed} lifecycle state, error retained
-            raise self.RecoverableError(description=str(error)) from None
+            raise self.RecoverableError(description=reason) from None
         # hand off the report
         return discovery
 
