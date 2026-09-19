@@ -8,36 +8,31 @@
 import React from 'react'
 import styled from 'styled-components'
 
+// project
+// widgets
+import { Spinner } from '~/widgets'
+
 
 // the area
 export const Busy = () => {
     // render
     return (
         <Box>
-            <Indicator />
+            <Spinner size="3.0em" />
         </Box>
     )
 }
 
-// the box
+// the box; it centers the spinner by laying it out, since the spinner's transform belongs
+// to its animation
 const Box = styled.section`
+    /* for my container */
     flex: 1 1 auto;
     min-width: 50px;
-`
-
-// the busy indicator
-const Indicator = styled.div`
-    display: block;
-    position: relative;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 3.0em;
-    height: 3.0em;
-    border: 3px solid hsl(28deg, 90%, 55%);
-    border-radius: 50%;
-    border-top: 3px solid hsl(28deg, 90%, 55%, 0.5);
-    animation: busy 1s linear infinite;
+    /* for my spinner */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `
 
 
