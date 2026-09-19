@@ -24,11 +24,15 @@ const entry = {
 const attribute = {
     textTransform: "uppercase",
     textAlign: "right",
+    // a value may run over many lines; its label belongs next to the first
+    verticalAlign: "top",
     padding: "0.0em 0.0em 0.0em 1.0em",
 }
 
 const separator = {
     width: "1.0em",
+    // stay with the label
+    verticalAlign: "top",
     padding: "0.0em 0.25em 0.0em 0.25em",
     textAlign: "center",
 }
