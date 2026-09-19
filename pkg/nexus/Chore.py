@@ -81,9 +81,11 @@ class Chore(pyre.nexus.task):
             # they know a richer specification that resolves back into them, the way a datatype
             # carries its byte order
             config[name] = value.spec if hasattr(value, "spec") else value.pyre_family()
-        # archive-backed readers retain access credentials, which are not traits; a worker
-        # cannot reach the archive, but it can present the credentials. an archive itself
-        # generates credentials on demand and mounts on the worker from its traits alone
+        # access credentials are not traits, and a worker cannot reach the archive that grants
+        # them, but it can present the ones it is handed; so ask the reader now, while there
+        # is an archive within reach. this must not depend on the reader having made first
+        # contact in this process: a surveyed reader never does. an archive itself generates
+        # credentials on demand and mounts on the worker from its traits alone
         credentials = getattr(reader, "credentials", None)
         # if there are any on record
         if isinstance(credentials, dict) and credentials:
