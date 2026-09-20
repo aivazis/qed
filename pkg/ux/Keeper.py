@@ -69,34 +69,32 @@ class Keeper:
             component = recipe.components[name]
             # keep only what the session assigned
             section = self._assigned(component=component, section=section)
-            # a section with nothing to say
+            # of those, find the ones that say nothing, and whose entries should go
+            vacuous = self._vacuous(component=component, section=section)
+            # a section with nothing to say and nothing to take back
             if not section:
                 # says nothing
                 continue
             # a component that is neither an entity nor a part of one, e.g. a datatype the
             # framework built under a generated name to bind a reader's cell, is rebuilt at
             # boot from the entity that references it, so its section is not worth keeping
-            if not any(
-                name == entity or name.startswith(f"{entity}.") for entity in entities
-            ):
+            if not any(name == entity or name.startswith(f"{entity}.") for entity in entities):
                 # so move on
                 continue
             # find the file the component came from, or fall back to the workspace file
             target = self._origin(component=component) or self.workspace
-            # and file the section
-            targets.setdefault(target, []).append((name, section))
+            # and file the section, along with the entries to remove
+            targets.setdefault(target, []).append((name, section, vacuous))
         # the views go to the workspace file
         for name, section in named.items():
             # whole
-            targets.setdefault(self.workspace, []).append((name, section))
+            targets.setdefault(self.workspace, []).append((name, section, ()))
         # the plexus lists go to the workspace file as well
         lists = {}
         # the archives
         if archives:
             # by specification
-            lists["archives"] = [
-                recipe.spec(archive.pyre_name) for archive in connected
-            ]
+            lists["archives"] = [recipe.spec(archive.pyre_name) for archive in connected]
         # the readers
         if sources:
             # by specification
@@ -119,9 +117,7 @@ class Keeper:
         # and the plexus
         self.plexus = plexus
         # the workspace file, resolved so it matches the origins the file server reports
-        self.workspace = (
-            pyre.primitives.path(plexus.workspace.path).resolve() / "qed.yaml"
-        )
+        self.workspace = pyre.primitives.path(plexus.workspace.path).resolve() / "qed.yaml"
         # the configuration files this session read, by the name pyre knows them by
         self.sources = self._sources()
         # all done
@@ -172,9 +168,7 @@ class Keeper:
                 section = {
                     trait: value
                     for trait, value in section.items()
-                    if not (
-                        isinstance(value, str) and value.endswith(f"#{live}.{trait}")
-                    )
+                    if not (isinstance(value, str) and value.endswith(f"#{live}.{trait}"))
                 }
                 # the view's channel is a per-view pipeline, so it is recorded by its tag,
                 # which is how the view binds it at boot
@@ -215,6 +209,35 @@ class Keeper:
                 kept[name] = value
         # hand off the pile
         return kept
+
+    def _vacuous(self, component, section):
+        """
+        Find the entries of {section} whose values say nothing that the absence of the entry
+        would not: an empty collection for a trait of {component} whose default is empty
+
+        A list that the session filled and then emptied was assigned, so it would be written,
+        as a pair of brackets that tell the next session what it would have assumed anyway.
+        The test is deliberately narrow: the values here are rendered for the file, and
+        comparing those against the typed defaults of arbitrary traits invites false matches
+        """
+        # the kinds of value that can be empty
+        collections = (list, tuple, set, dict)
+        # make a pile
+        vacuous = set()
+        # go through the section
+        for name, value in section.items():
+            # anything but an empty collection
+            if not isinstance(value, collections) or value:
+                # has something to say
+                continue
+            # get the default of the trait
+            default = component.pyre_trait(alias=name).default
+            # if that is an empty collection as well
+            if isinstance(default, collections) and not default:
+                # the entry adds nothing
+                vacuous.add(name)
+        # hand off the pile
+        return vacuous
 
     def _origin(self, component):
         """
@@ -300,12 +323,18 @@ class Keeper:
                 # and give up on every file
                 return written
             # go through the sections
-            for name, section in sections:
+            for name, section, vacuous in sections:
                 # find the entry that configures the component, or make a section for it
                 keys = editor.find(name) or (name,)
-                # and store each setting
+                # and go through the settings
                 for trait, value in section.items():
-                    # in place
+                    # one that says nothing
+                    if trait in vacuous:
+                        # has its entry removed, if it has one; its absence says the same
+                        editor.delete(*keys, trait)
+                        # and that's all
+                        continue
+                    # the rest are stored in place
                     editor.set(*keys, trait, value=value)
             # the lists
             if path == self.workspace:
@@ -340,11 +369,7 @@ class Keeper:
         """
         # the entry may be a top level key, the way pyre aliases plexus traits, or sit
         # within the plexus section
-        keys = (
-            editor.find(trait)
-            or editor.find(f"{self.plexus.pyre_name}.{trait}")
-            or (trait,)
-        )
+        keys = editor.find(trait) or editor.find(f"{self.plexus.pyre_name}.{trait}") or (trait,)
         # the views the list named before
         if trait == "views":
             # get the old list
