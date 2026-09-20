@@ -117,6 +117,25 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
         # hand it off
         return grant
 
+    def access(self):
+        """
+        Describe how to get at my product in terms that are safe to write down: what my archive
+        says about getting in, if i have one, overridden by my own {credentials}. This is what
+        gets saved with me, so that i can find my own way in a later session
+        """
+        # start with nothing
+        access = {}
+        # get my archive
+        archive = self._archive
+        # if i am managed
+        if archive is not None:
+            # start with what it says
+            access.update(archive.access())
+        # my own settings win
+        access.update(dict(self.credentials))
+        # hand it off
+        return access
+
     def select(self, selector):
         """
         Retrieve all datasets that match {selector}
