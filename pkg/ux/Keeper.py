@@ -108,6 +108,81 @@ class Keeper:
         # all done
         return written
 
+    def persistArchive(self, archive):
+        """
+        Write {archive} into the configuration files, at the request of the user: its section,
+        with whatever the session assigned to it, and its entry in the list that attaches it
+        at boot. Nothing else is written: the other archives of the session are their own
+        business
+        """
+        # an archive has no parts worth describing separately
+        return self._persistEntity(entity=archive, parts=(), roster=self.archiveRoster)
+
+    def persistReader(self, reader):
+        """
+        Write {reader} into the configuration files, at the request of the user: its section,
+        the sections of the reference channels of its datasets, which hold the controller
+        ranges the views mirror, and its entry in the list that attaches it at boot
+        """
+        # collect the channels of its datasets
+        channels = [channel for dataset in reader.datasets for channel in dataset.channels.values()]
+        # and write
+        return self._persistEntity(entity=reader, parts=channels, roster=self.readerRoster)
+
+    def forgetArchive(self, archive):
+        """
+        Remove {archive} from the configuration of the workspace, because the user disconnected
+        it: its entry in the list that attaches it at boot goes, and so does its section, when
+        that lives in the workspace file. A section in any other file stays: it is inert
+        without the entry, and other workspaces may still depend on it
+        """
+        # delegate
+        return self._forgetEntity(entity=archive, roster=self.archiveRoster)
+
+    def forgetReader(self, reader):
+        """
+        Remove {reader} from the configuration of the workspace, because the user disconnected
+        it; the rules are the ones for archives
+        """
+        # delegate
+        return self._forgetEntity(entity=reader, roster=self.readerRoster)
+
+    def forgetFolders(self, archive, folders):
+        """
+        Remove {folders} from the record of what {archive} has on display, because they are no
+        longer there. This corrects what was saved and records nothing new: the rest of the
+        record, and the rest of the session, are left alone
+        """
+        # describe the archive, to find out where it lives
+        recipe = pyre.config.newRecipe()
+        recipe.add(archive)
+        # its name
+        name = archive.pyre_name
+        # the file it came from, or the workspace file
+        target = self._origin(component=archive) or self.workspace
+
+        # the edit
+        def prune(editor):
+            # look for the section of the archive
+            section = editor.find(name)
+            # an archive that was never saved has no record to correct
+            if section is None or editor.get(*section, "expanded") is None:
+                # so there is nothing to do
+                return
+            # go through the folders
+            for folder in folders:
+                # and take each one out of the record
+                editor.remove(*section, "expanded", value=folder)
+            # a record with nothing left in it
+            if not editor.get(*section, "expanded"):
+                # says what its absence would
+                editor.delete(*section, "expanded")
+            # all done
+            return
+
+        # apply it to the file with the section
+        return self._write(targets={target: []}, lists={}, amend=prune, where=target)
+
     # metamethods
     def __init__(self, plexus, store, **kwds):
         # chain up
@@ -297,13 +372,16 @@ class Keeper:
         # hand off the pile
         return sources
 
-    def _write(self, targets, lists):
+    def _write(self, targets, lists, amend=None, where=None):
         """
         Edit the files in {targets} with their sections, and the workspace file with the
-        plexus {lists}
+        plexus {lists}; {amend}, when given, is an edit to apply to the file at {where}, the
+        workspace file by default
         """
         # the workspace file always gets the lists
         targets.setdefault(self.workspace, [])
+        # the file that gets the extra edit
+        where = self.workspace if where is None else where
         # the files written
         written = []
         # go through the targets
@@ -342,6 +420,10 @@ class Keeper:
                 for trait, specs in lists.items():
                     # and place each one
                     self._list(editor=editor, trait=trait, specs=specs)
+            # the extra edit
+            if amend is not None and path == where:
+                # goes to its file
+                amend(editor)
             # carefully, since the file may not be writable
             try:
                 # save
@@ -361,6 +443,175 @@ class Keeper:
             written.append(path)
         # all done
         return written
+
+    @property
+    def archiveRoster(self):
+        """
+        The list that attaches the archives: its name, what boot attached, what is connected
+        """
+        # pack it
+        return "archives", self.store.bootArchives, self.store.archives
+
+    @property
+    def readerRoster(self):
+        """
+        The list that attaches the readers: its name, what boot attached, what is connected
+        """
+        # pack it
+        return "datasets", self.store.bootSources, self.store.sources
+
+    def _persistEntity(self, entity, parts, roster):
+        """
+        Write {entity}, a component that one of the plexus lists attaches at boot, along with
+        its {parts}, and make sure the list described by {roster} names it
+        """
+        # describe the entity and its parts
+        recipe = pyre.config.newRecipe()
+        recipe.add(entity)
+        # go through the parts
+        for part in parts:
+            # and describe each one
+            recipe.add(part)
+        # the name of the entity, and the way the list spells it
+        name = entity.pyre_name
+        spec = recipe.spec(name)
+        # the sections to write, keyed by the file they go to
+        targets = {}
+        # go through what was described
+        for key, section in recipe.sections.items():
+            # the entity and its parts are named after it; anything else, e.g. a component
+            # the framework built under a generated name, is rebuilt at boot
+            if key != name and not key.startswith(f"{name}."):
+                # so it is not worth keeping
+                continue
+            # get the component
+            component = recipe.components[key]
+            # keep only what the session assigned
+            section = self._assigned(component=component, section=section)
+            # of those, find the ones that say nothing, and whose entries should go
+            vacuous = self._vacuous(component=component, section=section)
+            # a section with nothing to say
+            if not section:
+                # says nothing
+                continue
+            # find the file the component came from, or fall back to the workspace file
+            target = self._origin(component=component) or self.workspace
+            # and file the section, along with the entries to remove
+            targets.setdefault(target, []).append((key, section, vacuous))
+
+        # the list that attaches the entity lives in the workspace file
+        def attach(editor):
+            # get the list, making it if this is the first time anything is saved
+            keys, entries = self._roster(editor=editor, roster=roster)
+            # if the entity is not there yet
+            if name not in [self._named(entry) for entry in entries]:
+                # add it
+                entries.append(spec)
+            # and store the list
+            editor.set(*keys, value=entries)
+            # all done
+            return
+
+        # write everything
+        return self._write(targets=targets, lists={}, amend=attach)
+
+    def _forgetEntity(self, entity, roster):
+        """
+        Take {entity} out of the list described by {roster}, and remove its section when that
+        lives in the workspace file
+        """
+        # the name of the entity
+        name = entity.pyre_name
+        # what boot attached
+        _, boot, _ = roster
+
+        # the edit
+        def detach(editor):
+            # look for the list, without making one
+            keys = self._rosterKeys(editor=editor, roster=roster)
+            # if there is no list, and the entity was not attached at boot
+            if keys is None and name not in boot:
+                # the files know nothing about it, so there is nothing to forget
+                return
+            # otherwise get the list, making it if necessary: an entity that was attached
+            # by default stays away only if there is a list that leaves it out
+            keys, entries = self._roster(editor=editor, roster=roster)
+            # leave the entity out, and store the list
+            editor.set(*keys, value=[e for e in entries if self._named(e) != name])
+            # look for the section of the entity, wherever the scoping of this file put it
+            section = editor.find(name)
+            # if it is here
+            if section is not None:
+                # it goes
+                editor.delete(*section)
+            # go through the top level sections that are left
+            for key in list(editor.document.keys()):
+                # the name each one spells
+                spelled = self._named(key)
+                # the section of the entity, and the sections of its parts
+                if spelled == name or spelled.startswith(f"{name}."):
+                    # go as well
+                    editor.delete(key)
+            # all done
+            return
+
+        # apply it to the workspace file
+        return self._write(targets={}, lists={}, amend=detach)
+
+    def _rosterKeys(self, editor, roster):
+        """
+        Find the list described by {roster} in the document {editor} holds, if it has one
+        """
+        # the name of the list
+        trait, _, _ = roster
+        # the entry may be a top level key, the way pyre aliases plexus traits, or sit
+        # within the plexus section
+        return editor.find(trait) or editor.find(f"{self.plexus.pyre_name}.{trait}")
+
+    def _roster(self, editor, roster):
+        """
+        Get the list described by {roster} from the document {editor} holds, along with where
+        it lives; when the document has none, make the list that reproduces what happens
+        without one
+
+        A list in the workspace file replaces whatever would have been attached without it:
+        the entities named by another configuration file, or the ones the application attaches
+        by default, such as the archive over the current directory. So the first list to be
+        written names what was attached at boot and is still connected; that way, making the
+        list changes nothing the user did not ask to change
+        """
+        # unpack
+        trait, boot, connected = roster
+        # look for the list
+        keys = self._rosterKeys(editor=editor, roster=roster)
+        # if it is there
+        if keys is not None:
+            # hand off a copy of it
+            return keys, [str(entry) for entry in editor.get(*keys) or []]
+        # otherwise, describe what was attached at boot and is still around
+        recipe = pyre.config.newRecipe()
+        # make a pile
+        entries = []
+        # go through what is connected
+        for entity in connected:
+            # whatever the session made is not part of what boot would attach
+            if entity.pyre_name not in boot:
+                # so it stays out
+                continue
+            # describe the rest
+            recipe.add(entity)
+            # and add them to the pile, the way the list spells them
+            entries.append(recipe.spec(entity.pyre_name))
+        # the list goes at the top level, the way pyre aliases plexus traits
+        return (trait,), entries
+
+    @staticmethod
+    def _named(entry):
+        """
+        Extract the name of the component that {entry}, a specification from a list, builds
+        """
+        # the name follows the family
+        return str(entry).split("#")[-1]
 
     def _list(self, editor, trait, specs):
         """
