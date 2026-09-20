@@ -23,6 +23,7 @@ import { useGetActiveView } from '../explorer/useGetActiveView'
 import { Directory } from './directory'
 import { Disconnect } from './disconnect'
 import { Failure } from './failure'
+import { Persist } from './persist'
 import { Refresh } from './refresh'
 // styles
 import { archive as paintArchive } from './styles'
@@ -53,6 +54,7 @@ const Panel = () => {
     const Controls = (
         <>
             <Refresh uri={uri} />
+            <Persist uri={uri} />
             <Disconnect uri={uri} />
         </>
     )
