@@ -121,6 +121,69 @@ class Archive(qed.component, family="qed.archives.base", implements=qed.protocol
         # all done
         return self
 
+    def orphans(self, manifest):
+        """
+        Find the folders on display that belong beneath the folder that {manifest} lists, but
+        are neither among the folders it holds nor beneath one of them
+
+        The folders on display may be a record of what was there in an earlier session, and an
+        archive changes shape on its own schedule. A fresh listing of a folder is the authority
+        on what it holds, so it settles the fate of everything that claims to live beneath it.
+        A listing that could not be taken settles nothing: a folder that cannot be reached
+        today says nothing about whether its contents still exist
+        """
+        # everything beneath the folder starts with its location, as a folder
+        stem = manifest.uri.rstrip("/") + "/"
+        # the folders it holds
+        heirs = [uri.rstrip("/") for _, uri, isFolder in manifest.entries if isFolder]
+        # make a pile
+        orphans = []
+        # go through the folders on display
+        for folder in self.expanded:
+            # the ones that live elsewhere
+            if not folder.startswith(stem):
+                # are none of this listing's business
+                continue
+            # normalize
+            location = folder.rstrip("/")
+            # a folder that the listing holds, or one that lives beneath such a folder
+            if any(location == heir or location.startswith(heir + "/") for heir in heirs):
+                # is accounted for, at least as far as this listing can tell
+                continue
+            # the rest are gone
+            orphans.append(folder)
+        # hand them off
+        return orphans
+
+    def strays(self):
+        """
+        Find the folders on display that do not belong to me at all
+        """
+        # my root, and everything beneath it
+        root = str(self.uri).rstrip("/")
+        stem = root + "/"
+        # anything else does not belong
+        return [
+            folder
+            for folder in self.expanded
+            if folder.rstrip("/") != root and not folder.startswith(stem)
+        ]
+
+    def awaiting(self, manifest):
+        """
+        Find the folders that {manifest} holds that are on display but have no listing, and
+        none under way
+        """
+        # go through the folders of the listing
+        return [
+            uri
+            for _, uri, isFolder in manifest.entries
+            if isFolder
+            and uri in self.expanded
+            and uri not in self._manifests
+            and uri not in self._pending
+        ]
+
     def listing(self, uri):
         """
         Retrieve the manifest of the folder at {uri}, if it has one
