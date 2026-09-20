@@ -50,8 +50,10 @@ export const Badge = ({ size, state, behaviors, style, children, ...options }) =
 
     // size the shape
     const shrink = `scale(${size / 1000})`
-    // mix my paint
-    const paint = paintBadge({ state, client: style, polish })
+    // mix my paint; the highlight is for badges that respond, so one that was disabled while
+    // the cursor was still over it, e.g. by the very click that made it irrelevant, loses it
+    // right away rather than when the cursor leaves
+    const paint = paintBadge({ state, client: style, polish: polish && state === "enabled" })
     // and render; a {Badge} is a button by default (the client may override {role}, e.g. to none
     // when it nests the badge inside a link); the svg is decorative, named by the badge's label
     return (
