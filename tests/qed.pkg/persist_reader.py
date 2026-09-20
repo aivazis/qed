@@ -91,6 +91,8 @@ def doc():
 
 # boot attached the reader from the file, and nothing else
 assert store.bootSources == {"booted"}
+# which the files know about, so there is nothing to save
+assert store.isSaved(name="booted") is True
 
 # connect two more readers over the same raster, the way the session does
 raster = os.path.join(here, "c16.dat")
@@ -101,6 +103,9 @@ for name in ("first", "second"):
     store.connectSource(source=reader)
 # none of which wrote anything
 assert text() == original
+# so the files do not know about them
+assert store.isSaved(name="first") is False
+assert store.isSaved(name="second") is False
 
 # make first contact with the reader that came from the file; this resolves its shape and
 # binds its cell, which the session did, not the user
@@ -108,6 +113,9 @@ next(source for source in store.sources if source.pyre_name == "booted").open()
 
 # save the first one
 assert store.persistSource(name="first").pyre_name == "first"
+# now they know about it, and not about the other one
+assert store.isSaved(name="first") is True
+assert store.isSaved(name="second") is False
 saved = doc()
 # it has a section that says what it is
 assert saved.get("first", "uri") == f"file:{raster}"
@@ -178,6 +186,7 @@ assert text() == before
 
 # disconnect the one that was saved; its entry and its section go
 store.disconnectSource(name="first")
+assert store.isSaved(name="first") is False
 after = doc()
 assert after.get("first") is None
 assert list(after.get("datasets")) == ["qed.readers.native.flat#booted"]
