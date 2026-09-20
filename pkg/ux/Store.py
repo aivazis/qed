@@ -350,7 +350,13 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             # so there is nothing to do
             return None
         # write it
-        self._keep(lambda keeper: keeper.persistArchive(archive=archive))
+        written = self._keep(lambda keeper: keeper.persistArchive(archive=archive))
+        # if that worked
+        if written:
+            # the files now say what the archive says
+            archive.saved()
+            # which the clients show, so let them know
+            self._announce()
         # and hand it back
         return archive
 
@@ -1611,6 +1617,8 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # correct it; this takes out what is gone and records nothing new, since what the
         # session has on display is not part of the configuration until the user says so
         self._keep(lambda keeper: keeper.forgetFolders(archive=archive, folders=folders))
+        # and what the archive knows about the record
+        archive.forgotten(folders=folders)
         # all done
         return self
 
@@ -1628,6 +1636,10 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # something, the list that is written must reproduce them, since a list in the
         # workspace file replaces whatever would have been attached without it
         self.bootArchives = {archive.pyre_name for archive in archives.archives()}
+        # each of them says what the configuration says, since that is where it came from
+        for archive in archives.archives():
+            # so there is nothing to save until something changes
+            archive.saved()
         # the store is now the authority on the connected archives; empty the plexus pile,
         # recording the handoff as the provenance
         plexus.pyre_setTrait(
