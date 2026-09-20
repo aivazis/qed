@@ -83,12 +83,13 @@ class Keeper:
                 continue
             # find the file the component came from, or fall back to the workspace file
             target = self._origin(component=component) or self.workspace
-            # and file the section, along with the entries to remove
-            targets.setdefault(target, []).append((name, section, vacuous))
+            # and file the section, along with the entries to remove; it is written whether
+            # or not there is one already
+            targets.setdefault(target, []).append((name, section, vacuous, False))
         # the views go to the workspace file
         for name, section in named.items():
             # whole
-            targets.setdefault(self.workspace, []).append((name, section, ()))
+            targets.setdefault(self.workspace, []).append((name, section, (), False))
         # the plexus lists go to the workspace file as well
         lists = {}
         # the archives
@@ -120,14 +121,26 @@ class Keeper:
 
     def persistReader(self, reader):
         """
-        Write {reader} into the configuration files, at the request of the user: its section,
-        the sections of the reference channels of its datasets, which hold the controller
-        ranges the views mirror, and its entry in the list that attaches it at boot
+        Write {reader} into the configuration files, at the request of the user: that it is
+        part of the workspace, and nothing about how it was being looked at
+
+        That means its entry in the list that attaches it at boot and, if it does not have one
+        already, a section that says what it is: its product, what the session had to be told
+        in order to make it, and how to get at the product. A reader that came from a file has
+        a section, written the way the user wanted it, and that is left alone. The state of
+        its controllers is not part of what a reader is; the control panels save that
         """
-        # collect the channels of its datasets
-        channels = [channel for dataset in reader.datasets for channel in dataset.channels.values()]
-        # and write
-        return self._persistEntity(entity=reader, parts=channels, roster=self.readerRoster)
+        # how to get at the product: what its archive says about getting in, and its own
+        # settings; safe to write down, unlike the keys they lead to
+        access = reader.access() if hasattr(reader, "access") else {}
+        # write
+        return self._persistEntity(
+            entity=reader,
+            parts=(),
+            roster=self.readerRoster,
+            extras={"credentials": access} if access else {},
+            create=True,
+        )
 
     def forgetArchive(self, archive):
         """
@@ -285,6 +298,41 @@ class Keeper:
         # hand off the pile
         return kept
 
+    @staticmethod
+    def _spelled(section, owner):
+        """
+        Respell the values of {section} that refer to components the framework built under
+        names of its own choosing, e.g. the datatype that binds the cell of a reader
+
+        Such a name means nothing in a later session, and nobody would write it by hand. The
+        family of the component says everything there is to say, and resolves into a fresh
+        instance at boot. References to {owner} and its parts are names that were chosen, and
+        they stay
+        """
+        # make a pile
+        spelled = {}
+        # go through the settings
+        for trait, value in section.items():
+            # a reference to a component is a family and a name
+            if isinstance(value, str) and "#" in value:
+                # take it apart
+                family, _, name = value.partition("#")
+                # a family is a dotted name; anything else with a '#' in it, e.g. a uri with
+                # a fragment, is not a reference
+                if not all(part.isidentifier() for part in family.split(".")):
+                    # so it stays as it is
+                    spelled[trait] = value
+                    # and on to the next one
+                    continue
+                # a name that was not derived from the owner was generated
+                if name != owner and not name.startswith(f"{owner}."):
+                    # so the family is all that is worth keeping
+                    value = family
+            # record
+            spelled[trait] = value
+        # hand off the pile
+        return spelled
+
     def _vacuous(self, component, section):
         """
         Find the entries of {section} whose values say nothing that the absence of the entry
@@ -401,9 +449,15 @@ class Keeper:
                 # and give up on every file
                 return written
             # go through the sections
-            for name, section, vacuous in sections:
-                # find the entry that configures the component, or make a section for it
-                keys = editor.find(name) or (name,)
+            for name, section, vacuous, create in sections:
+                # look for the entry that configures the component
+                found = editor.find(name)
+                # if it is there, and this section is only for components that have none
+                if create and found is not None:
+                    # the user's spelling stands
+                    continue
+                # otherwise, use it, or make a section for the component
+                keys = found or (name,)
                 # and go through the settings
                 for trait, value in section.items():
                     # one that says nothing
@@ -460,10 +514,12 @@ class Keeper:
         # pack it
         return "datasets", self.store.bootSources, self.store.sources
 
-    def _persistEntity(self, entity, parts, roster):
+    def _persistEntity(self, entity, parts, roster, extras=None, create=False):
         """
         Write {entity}, a component that one of the plexus lists attaches at boot, along with
-        its {parts}, and make sure the list described by {roster} names it
+        its {parts}, and make sure the list described by {roster} names it; {extras} are
+        settings to add to the section of the entity that are not among its assigned traits.
+        With {create}, the section of the entity is written only when it does not have one
         """
         # describe the entity and its parts
         recipe = pyre.config.newRecipe()
@@ -488,6 +544,12 @@ class Keeper:
             component = recipe.components[key]
             # keep only what the session assigned
             section = self._assigned(component=component, section=section)
+            # spell the components it refers to the way a person would
+            section = self._spelled(section=section, owner=name)
+            # the entity itself gets the extras
+            if key == name and extras:
+                # which win over whatever is there
+                section.update(extras)
             # of those, find the ones that say nothing, and whose entries should go
             vacuous = self._vacuous(component=component, section=section)
             # a section with nothing to say
@@ -496,8 +558,9 @@ class Keeper:
                 continue
             # find the file the component came from, or fall back to the workspace file
             target = self._origin(component=component) or self.workspace
-            # and file the section, along with the entries to remove
-            targets.setdefault(target, []).append((key, section, vacuous))
+            # and file the section, along with the entries to remove, and whether an existing
+            # section is to be left alone
+            targets.setdefault(target, []).append((key, section, vacuous, create))
 
         # the list that attaches the entity lives in the workspace file
         def attach(editor):
