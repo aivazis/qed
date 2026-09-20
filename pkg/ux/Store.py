@@ -87,23 +87,11 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         for source in blocking:
             # each one in turn, blocking whichever thread runs this
             self._openSource(source=source)
-        # the folders that were on display when the session was persisted are listed again,
-        # so the tree comes back; nothing else touches them at boot
+        # the folders that were on display when the session was persisted come back as well;
+        # nothing else touches them at boot
         if name is None:
-            # go through the archives
-            for archive in self.archives:
-                # and the folders on display
-                for folder in list(archive.expanded):
-                    # a folder that has a listing, or one under way, is fine
-                    if archive.listing(uri=folder) is not None or archive.isPending(uri=folder):
-                        # so leave it alone
-                        continue
-                    # the rest are about to move
-                    touched = True
-                    # mark them as under way
-                    archive.expand(uri=folder)
-                    # and list them
-                    self._browse(archive=archive, uri=folder)
+            # bring the trees back, without an announcement of its own
+            touched = self.restoreArchives(announce=False) or touched
         # if any standing moved
         if touched:
             # let the clients know; a request that found every source already under way
@@ -417,6 +405,70 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # nothing was written
         return []
 
+    def restoreArchives(self, announce=True):
+        """
+        Bring back the trees of the connected archives: list the folders that are on display
+        but have no listing, e.g. the ones recorded as expanded by an earlier session. Report
+        whether anything moved
+
+        The record is treated as a claim, not a fact, since an archive may have changed shape
+        since it was written. So the restoration starts at the root of each archive and works
+        its way down: only the root is listed here, and as each listing lands, {_settle}
+        prunes the folders on display that it no longer holds and lists the ones it does
+        """
+        # nothing has moved yet
+        moved = False
+        # go through the archives
+        for archive in self.archives:
+            # folders on display that do not belong to this archive at all have no listing
+            # that could ever account for them
+            strays = archive.strays()
+            # so they go
+            for folder in strays:
+                # one at a time
+                archive.collapse(uri=folder)
+            # and the record is corrected
+            if strays:
+                # right away
+                self._pruned(archive=archive, folders=strays)
+                # the tree moved
+                moved = True
+            # get the root
+            root = str(archive.uri)
+            # an archive whose root is not on display shows nothing
+            if not archive.isExpanded(uri=root):
+                # so there is nothing to bring back
+                continue
+            # the folders that are on display, have no listing and none under way, and can be
+            # vouched for: the root, and the ones that a listing already in hand holds
+            waiting = [root] if archive.listing(uri=root) is None else []
+            # go through the folders on display, on a copy since listings may land inline
+            for folder in list(archive.expanded):
+                # get the listing of each one
+                manifest = archive.listing(uri=folder)
+                # and if it has one
+                if manifest is not None:
+                    # add the folders it holds that have nothing to show
+                    waiting += archive.awaiting(manifest=manifest)
+            # go through them
+            for folder in waiting:
+                # a listing under way, or one that landed while i was busy with the others
+                if archive.isPending(uri=folder) or archive.listing(uri=folder) is not None:
+                    # needs no help
+                    continue
+                # mark the listing as under way
+                archive.expand(uri=folder)
+                # and ask for it; the rest follows as the listings land
+                self._browse(archive=archive, uri=folder)
+                # the tree moved
+                moved = True
+        # if the tree moved and my caller is not going to say so
+        if moved and announce:
+            # let the clients know
+            self._announce()
+        # report
+        return moved
+
     def refreshArchive(self, uri):
         """
         List every folder of the archive at {uri} that is on display again
@@ -429,6 +481,12 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             return None
         # go through the folders on display, on a copy since listings may land inline
         for folder in list(archive.expanded):
+            # a listing that landed earlier in this pass may have taken this folder off
+            # display, because the folder that held it no longer does; asking for its listing
+            # would put it right back
+            if not archive.isExpanded(uri=folder):
+                # so skip it
+                continue
             # a listing already under way is fresh enough
             if archive.isPending(uri=folder):
                 # so leave it alone
@@ -1401,8 +1459,13 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             manifest = qed.nexus.manifest.compose(
                 archive=archive, uri=qed.primitives.uri.parse(uri)
             )
-        # if the archive could not answer
-        except (pyre.framework.exceptions.FrameworkError, journal.ApplicationError) as error:
+        # if the archive could not answer, or the system would not let it, e.g. a folder that
+        # cannot be read
+        except (
+            pyre.framework.exceptions.FrameworkError,
+            journal.ApplicationError,
+            OSError,
+        ) as error:
             # deliver the failure
             self._listed(archive=str(archive.uri), uri=uri, error=error)
         # otherwise
@@ -1422,6 +1485,13 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         if archive is None:
             # its report has nowhere to land
             return self
+        # a folder that was taken off display while its listing ran, e.g. one that was pruned
+        # because a listing of its parent no longer holds it, has nowhere to put the outcome
+        if not archive.isExpanded(uri=uri):
+            # so drop it, quietly: a failure to list a folder that is gone is not news
+            archive.collapse(uri=uri)
+            # and move on
+            return self
         # if the listing failed
         if error is not None:
             # make a channel
@@ -1438,8 +1508,61 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         else:
             # keep the listing
             archive.record(manifest=result)
+            # and let it settle the fate of the folders on display beneath it
+            self._settle(archive=archive, manifest=result)
         # either way, the tree moved, so let the clients know
         self._announce()
+        # all done
+        return self
+
+    def _settle(self, archive, manifest):
+        """
+        Reconcile the folders of {archive} that are on display with {manifest}, a fresh listing
+        of one of them: the ones it no longer holds are pruned, from the tree and from the
+        record, and the ones it holds that have no listing yet get listed
+        """
+        # a fresh listing is the authority on what its folder holds, so whatever claims to
+        # live beneath it and is not there is gone
+        orphans = archive.orphans(manifest=manifest)
+        # go through them
+        for folder in orphans:
+            # and take each one off display, along with whatever is beneath it
+            archive.collapse(uri=folder)
+        # if anything went
+        if orphans:
+            # correct the record
+            self._pruned(archive=archive, folders=orphans)
+        # the folders it does hold that are on display but have nothing to show
+        for folder in archive.awaiting(manifest=manifest):
+            # get marked as under way
+            archive.expand(uri=folder)
+            # and listed, which brings this method back for the next level down
+            self._browse(archive=archive, uri=folder)
+        # all done
+        return self
+
+    def _pruned(self, archive, folders):
+        """
+        Record that {folders} of {archive} were on display but are no longer there
+        """
+        # make a channel
+        channel = journal.info("qed.ux.archives")
+        # explain
+        channel.line(f"the archive at '{archive.uri}' has changed shape")
+        channel.line("these folders were on display but are no longer there:")
+        # indent
+        channel.indent()
+        # go through them
+        for folder in folders:
+            # and name each one
+            channel.line(f"{folder}")
+        # outdent
+        channel.outdent()
+        # flush
+        channel.log()
+        # the record of what is on display is no longer accurate, so write it again; what is
+        # being removed from it was never the user's to keep
+        self.persist(sources=False, views=False)
         # all done
         return self
 
