@@ -14,6 +14,7 @@ import { Header } from '~/widgets'
 // locals
 //hooks
 import { useArchives } from '../explorer/useArchives'
+import { useRestoreArchives } from './useRestoreArchives'
 // components
 import { Archive } from './archive'
 import { Connect } from '../archive'
@@ -25,6 +26,9 @@ import { header as headerPaint } from './styles'
 export const Archives = () => {
     // get the repositories
     const archives = useArchives()
+    // showing them is what makes them relevant, so ask the server to bring back the trees
+    // that are on display with nothing to show, e.g. the ones an earlier session left open
+    useRestoreArchives(archives)
     // render
     return (
         <>
