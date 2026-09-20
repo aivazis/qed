@@ -96,6 +96,44 @@ assert "credentials" not in dict(qed.nexus.survey(reader=bare).config)
 rebuilt = qed.readers.nisar.gslc(name="cred_rebuilt", uri=uri, credentials=dict(keys))
 assert rebuilt.grant(resolve=False) == keys
 
+# the grant is carried by hand, and it has to be: {credentials} is a {kv}, and pyre builds
+# {kv} out of {dict}, which is neither a property nor a facility. so the trait walk that
+# assembles every other part of a recipe never sees it, and a reader whose keys were left to
+# that walk would ship them as the string form of the table and rebuild with nothing
+assert "credentials" not in {trait.name for trait in remote.pyre_properties()}
+assert "credentials" not in {trait.name for trait in remote.pyre_facilities()}
+assert "credentials" in {trait.name for trait in remote.pyre_traits()}
+
+# so a recipe must survive being rebuilt into a live reader, not merely look right
+worker = qed.readers.nisar.gslc(name="cred_worker", **dict(qed.nexus.survey(reader=remote).config))
+# the keys arrive as a table the reader can read, rather than a string that happens to
+# render like one
+assert dict(worker.credentials) == dict(remote.grant(resolve=False))
+# and the reader presents them onward, which is what opens the product
+assert worker.grant(resolve=False) == dict(remote.grant(resolve=False))
+
+# every member of a stack gets its own grant, since each one opens its own product and the
+# stack itself opens nothing
+members = [
+    qed.readers.nisar.gslc(
+        name=f"cred_member{index}", uri=f"s3://bucket/p{index}.h5", archive=archive
+    )
+    for index in range(2)
+]
+stack = qed.stacks.stack(name="cred_stack", readers=members)
+recipe = dict(qed.nexus.survey(reader=stack).config)
+# the stack has nothing of its own to present
+assert "credentials" not in recipe
+# while each member recipe carries the grant its reader would have presented
+for family, member in recipe["readers"]:
+    assert member["credentials"] == dict(keys)
+# and each one rebuilds into a reader that can still present it
+for index, (family, member) in enumerate(recipe["readers"]):
+    crew = qed.protocols.reader.pyre_resolveSpecification(spec=family)(
+        name=f"cred_stack.crew.{index}", **member
+    )
+    assert crew.grant(resolve=False) == dict(keys)
+
 # the lookup of what is missing; stand in for the AWS chain, and note what it is asked
 asked = []
 
