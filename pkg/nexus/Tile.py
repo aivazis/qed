@@ -32,16 +32,21 @@ class Tile(Chore):
         """
         # carefully, since failures here should not poison the crew member
         try:
-            # locate my reader, building it on first contact; a render installs the
-            # client's controller state below, so measuring the datasets here would buy
-            # numbers that are overwritten before a single pixel is produced
+            # locate my reader, building it on first contact; sampling the datasets here
+            # would read the payload a second time to arrive at numbers the team side
+            # already has, so i carry them instead
             reader = self._locateReader(readers=readers, measure=False)
             # find the dataset i'm after
             dataset = self._locateDataset(reader=reader)
             # and make sure it knows about its decimated levels, if there are any; the
             # reader registry is persistent, so this happens once per worker per product
             self._attachPyramid(reader=reader, dataset=dataset)
-            # get its channel pipeline and mirror the controller state of the client view
+            # hand the dataset the measurement the team side made, so its channels tune
+            # themselves exactly as the client's did; this is what carries the state a
+            # channel derives from statistics but keeps outside its traits
+            self._seed(dataset=dataset)
+            # get its channel pipeline and mirror the controller state of the client view,
+            # which is dialed by hand and therefore wins over anything the tuning chose
             pipeline = self._configure(
                 component=dataset.channel(name=self.tag), config=self.controllers
             )
@@ -79,6 +84,22 @@ class Tile(Chore):
         return spool
 
     # implementation details - worker side
+    def _seed(self, dataset):
+        """
+        Install the statistics the team side measured on {dataset} and tune its channels
+        """
+        # a task built before there was a measurement, or one whose numbers could not be
+        # reduced to wire form, carries nothing
+        if self.stats is None:
+            # so the dataset keeps whatever it arrived with
+            return dataset
+        # otherwise, hand over the record; the dataset tunes its channels against it, which
+        # is where a channel picks up the scalars it derives from a measurement and keeps
+        # outside its traits, e.g. the reference amplitude of the unwrapped power law
+        dataset.measure(seed=self.stats)
+        # hand it back
+        return dataset
+
     def _attachPyramid(self, reader, dataset):
         """
         Give {dataset} the decimated levels of its product, when they exist
@@ -165,6 +186,21 @@ class Tile(Chore):
         pipeline = view.pipeline(channel=channel)
         # and harvest its configuration
         self.controllers = self._harvestComponent(component=pipeline)
+        # the measurement the team side made, so a worker tunes against the same numbers
+        # instead of sampling the payload again; a dataset whose statistics cannot be
+        # reduced to wire form travels without them and the worker renders untuned
+        self.stats = self._scrub(value=view.dataset.stats, strict=True)
+        # which is worth saying out loud, since the tile it renders will be wrong
+        if self.stats is self._opaque:
+            # make a channel
+            chnl = journal.warning("qed.nexus.recipe")
+            # complain
+            chnl.line(f"the statistics of '{self.dataset}' cannot travel to a worker")
+            chnl.line("so its channels will render untuned")
+            # flush
+            chnl.log()
+            # and send nothing rather than something the worker cannot read
+            self.stats = None
         # where the decimated levels of this product live, if any have been built; a
         # worker cannot be left to decide that for itself, or it would look somewhere the
         # server never wrote. deliberately not part of my identity: a level is cell for
@@ -192,6 +228,10 @@ class Tile(Chore):
                 self.origin,
                 self.shape,
                 self.controllers,
+                # the measurement belongs here too: it reaches the pixels through whatever
+                # a channel derives from it, so two tiles tuned against different numbers
+                # are different tiles however identical their controllers look
+                self.stats,
                 self.stacked,
                 self.mask,
             )
