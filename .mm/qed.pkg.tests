@@ -12,11 +12,20 @@ qed.pkg.tests.prerequisites := qed.pkg qed.ext
 # the ENVI driver writes its own products and headers
 tests.qed.pkg.envi.clean := envi_le.dat envi_le.hdr envi_be.dat envi_be.dat.hdr envi_offset.dat envi_offset.hdr envi_band0.dat envi_band1.dat envi_band2.dat envi_bsq.dat envi_bsq.hdr envi_bil.dat envi_bil.hdr envi_bip.dat envi_bip.hdr
 
-
-# end of file
 # the persistence drivers share a scratch workspace: the reboot reads what the first wrote
 tests.qed.pkg.persist.clean := persist_ws
 tests.qed.pkg.browse.clean := browse_ws
 tests.qed.pkg.archive_symlink.clean := archive_symlink_ws archive_symlink_link
 tests.qed.pkg.browse_fleet.clean := browse_fleet_ws
+# the drivers below take their workspace down on the way out, so these declarations are
+# what recovers the directory when one of them dies partway and leaves its scratch behind
+tests.qed.pkg.archive_restore.clean := archive_restore_ws
+tests.qed.pkg.persist_archive.clean := persist_archive_ws
+tests.qed.pkg.persist_empty.clean := persist_empty_ws
+tests.qed.pkg.persist_reader.clean := persist_reader_ws
+# the seed driver writes the unwrapped product it measures
+tests.qed.pkg.measured.clean := measured.unw
 tests.qed.pkg.persist_reboot.pre := tests.qed.pkg.persist
+
+
+# end of file
