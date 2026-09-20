@@ -67,6 +67,24 @@ class S3(Archive, family="qed.archives.s3"):
         # and present them in this order
         return folders + files
 
+    def access(self):
+        """
+        Describe how to get at my contents: the authentication profile and the region, when i
+        was told, neither of which is a secret
+        """
+        # prime by chaining up
+        access = super().access()
+        # if i know the profile
+        if self.profile:
+            # say so
+            access["profile"] = self.profile
+        # if i know the region
+        if self.region:
+            # say so
+            access["region"] = self.region
+        # hand them off
+        return access
+
     def credentials(self):
         """
         Generate the credentials necessary to access my contents
