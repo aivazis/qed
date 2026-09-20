@@ -10,6 +10,9 @@ import collections
 # support
 import qed
 
+# the lookup of access credentials
+from .. import access
+
 
 # the basic reader for products in HDF5 format
 class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protocols.reader):
@@ -35,6 +38,9 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
     pages = qed.properties.int()
     pages.default = 1024**2
     pages.doc = "the number of 4K pages in the aggregation cache"
+
+    credentials = qed.properties.kv()
+    credentials.doc = "how to get access to my product, e.g. the AWS {profile} and {region}"
 
     # constants
     # my datasets can describe themselves in a discovery record and materialize as
@@ -77,35 +83,40 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
         # all done
         return
 
-    @property
-    def credentials(self):
+    # interface
+    def grant(self, resolve=True):
         """
-        The credentials that grant access to my product, as of right now
+        Assemble what gets presented to the infrastructure in order to open my product
+
+        The grant starts out empty. If an archive manages me, what it hands out goes in first,
+        fresh every time, since whoever is asking may be about to ship it to a worker that
+        cannot reach the archive, and a grant that was taken once and kept would outlive the
+        token it carries. My own {credentials} go in last and win, so that i can be wired by
+        hand, and so that i can outlive the archive i came from. With {resolve}, whatever is
+        still missing is looked up, e.g. keys for a bucket through the standard AWS chain,
+        under the profile the grant names; describing work for somebody else to do leaves that
+        lookup to them, since they are the ones who are going to open the product
+
+        My {credentials} are what the user wrote, and they are all that is ever saved. The
+        grant lives in memory only
         """
+        # start with nothing
+        grant = {}
         # get my archive
         archive = self._archive
         # if i am managed
         if archive is not None:
-            # ask for a fresh grant every time: whoever is asking may be about to ship it to a
-            # worker that cannot reach the archive, and that may happen long before, or entirely
-            # without, my own first contact; a grant that was taken once and kept would also
-            # outlive the token it carries
-            return archive.credentials()
-        # otherwise, settle for whatever i was given, e.g. by the recipe that rebuilt me on a
-        # worker
-        return self._credentials
+            # start with what it hands out
+            grant.update(archive.credentials())
+        # my own settings win
+        grant.update(dict(self.credentials))
+        # if my caller is the one who opens the product
+        if resolve:
+            # fill in what is still missing
+            grant = access.resolve(uri=self.uri, grant=grant)
+        # hand it off
+        return grant
 
-    @credentials.setter
-    def credentials(self, value):
-        """
-        Adopt {value} as the credentials of a reader that has no archive to ask
-        """
-        # remember them
-        self._credentials = value or {}
-        # all done
-        return
-
-    # interface
     def select(self, selector):
         """
         Retrieve all datasets that match {selector}
@@ -173,9 +184,8 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
             size = 4 * 1024 * pages
             # adjust the {fapl}
             fapl.pageBufferSize = qed.h5.libh5.properties.PageBuffer(bytes=size, metadata=5, raw=50)
-        # get my access credentials: fresh from my archive if i'm managed, otherwise whatever
-        # my caller supplied, e.g. a worker rebuilding me from a recipe
-        credentials = self.credentials
+        # assemble what it takes to get at my product, looking up whatever is missing
+        credentials = self.grant()
         # open my file
         self.product = qed.h5.reader(uri=self.uri, credentials=credentials, fapl=fapl).read()
 
@@ -199,7 +209,7 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
         return self
 
     # metamethods
-    def __init__(self, archive=None, credentials=None, fapl=None, **kwds):
+    def __init__(self, archive=None, fapl=None, **kwds):
         # chain up; construction is passive, so nothing touches the file until {open}
         super().__init__(**kwds)
         # first contact has not been made; this is the state of an instance, so it is set
@@ -208,9 +218,6 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
         # squirrel away what first contact needs
         self._archive = archive
         self._fapl = fapl
-        # retain whatever credentials the caller supplied; they matter only when there is no
-        # archive to ask
-        self._credentials = credentials or {}
         # initialize the availability map so the panel can render before first contact
         self.available = {}
         # all done
