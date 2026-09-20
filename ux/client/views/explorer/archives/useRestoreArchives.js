@@ -85,6 +85,7 @@ export const useRestoreArchivesMutation = graphql`
                 pending
                 error
                 hits
+                dirty
                 items {
                     id
                     name

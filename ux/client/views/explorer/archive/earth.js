@@ -233,6 +233,7 @@ const connectMutation = graphql`
                 pending
                 error
                 hits
+                dirty
                 items {
                     id
                     name

@@ -32,6 +32,7 @@ export const Provider = ({ qed, children }) => {
                 pending
                 error
                 hits
+                dirty
                 items {
                     id
                     name
