@@ -82,6 +82,12 @@ export const refresh = {
     ...collapse,
 }
 
+// the button that saves an archive
+export const persist = {
+    // inherit
+    ...collapse,
+}
+
 // the reason a folder could not be listed
 export const failure = {
     paddingTop: '0.25em',
