@@ -44,6 +44,17 @@ class Archive(qed.component, family="qed.archives.base", implements=qed.protocol
         # nothing, by default
         return {}
 
+    def access(self):
+        """
+        Describe how to get at my contents, as opposed to what it takes: settings that are safe
+        to write down, e.g. the name of an authentication profile, and never the keys it leads to
+
+        A reader that is saved takes a copy of these, so that it can find its own way to its
+        product in a later session, whether or not i am still around
+        """
+        # nothing, by default
+        return {}
+
     # the tree: the folders on display and their listings
     def expand(self, uri):
         """
