@@ -37,6 +37,7 @@ class Archive(graphene.ObjectType):
     pending = graphene.Boolean()
     error = graphene.String()
     hits = graphene.Int()
+    dirty = graphene.Boolean()
 
     # the resolvers
     @staticmethod
@@ -116,6 +117,14 @@ class Archive(graphene.ObjectType):
         """
         # the root is the archive itself
         return archive.failure(uri=archive.uri)
+
+    @staticmethod
+    def resolve_dirty(archive, *_):
+        """
+        Check whether saving the {archive} would change what the configuration files say
+        """
+        # the archive keeps track
+        return archive.dirty
 
     @staticmethod
     def resolve_hits(archive, *_):
