@@ -4,6 +4,9 @@
 # (c) 1998-2026 all rights reserved
 
 
+# externals
+import journal
+
 # support
 import pyre
 import qed
@@ -98,8 +101,51 @@ class Chore(pyre.nexus.task):
         else:
             # there is nothing to say, and an empty table is not worth shipping
             config.pop("credentials", None)
+        # say what got left behind; {datasets} and {selectors} are named as deliberate, so
+        # the report distinguishes them from state that went missing
+        self._report(
+            component=reader, dropped=[], harvested=config, skipped=("datasets", "selectors")
+        )
+        # and account for the grant separately, since it is the one thing here that a trait
+        # walk cannot find: {credentials} is a {kv}, and no {kv} is a pyre property
+        self._reportGrant(reader=reader, grant=config.get("credentials"))
         # hand off the recipe
         return config
+
+    def _reportGrant(self, reader, grant):
+        """
+        Say what {reader} hands a worker in order to get at its product
+
+        The entries are named, never their values: what an archive generates is a live
+        session token, and a diagnostic is not a place to put one
+        """
+        # make a channel
+        channel = journal.debug("qed.nexus.recipe")
+        # nothing to assemble unless somebody is listening
+        if not channel.active:
+            # so leave
+            return
+        # a reader that needs nothing to get in
+        if not hasattr(reader, "grant"):
+            # has nothing to report
+            return
+        # name the reader
+        channel.line(f"'{reader.pyre_name}' grant")
+        channel.indent()
+        # a grant that came out empty is how a product in a bucket fails to open on a
+        # worker, so it is worth a line of its own rather than silence
+        if not grant:
+            # say so
+            channel.line("empty: the worker will have to find its own way in")
+        # otherwise
+        else:
+            # name what it carries, and nothing more
+            channel.line(f"carries: {', '.join(sorted(grant))}")
+        channel.outdent()
+        # flush
+        channel.log()
+        # all done
+        return
 
     def _harvestComponent(self, component):
         """
@@ -111,6 +157,8 @@ class Chore(pyre.nexus.task):
         # pixels, e.g. the display bounds of controllers; they are left out, so adjusting
         # them neither perturbs the tile identity nor invalidates cached work
         cosmetic = getattr(component, "cosmetic", ())
+        # the traits that will not be making the trip
+        left = []
         # go through the properties
         for trait in component.pyre_properties():
             # skip the presentation-only ones
@@ -124,12 +172,74 @@ class Chore(pyre.nexus.task):
             if value is not self._opaque:
                 # record it
                 config[trait.name] = value
+            # if it did not
+            else:
+                # remember it, so the report below can name it
+                left.append(trait.name)
         # go through the facilities, e.g. the controllers of a channel pipeline
         for trait in component.pyre_facilities():
             # and capture each part recursively
             config[trait.name] = self._harvestComponent(component=getattr(component, trait.name))
+        # say what got left behind; the flow bookkeeping is named as deliberate, so the
+        # report stays quiet unless something the author did not intend went missing
+        self._report(component=component, dropped=left, harvested=config, skipped=self.bookkeeping)
         # hand off the pile
         return config
+
+    def _report(self, component, dropped, harvested, skipped=()):
+        """
+        Name the state of {component} that the harvest could not carry to a worker
+
+        Three things go missing here. A value that cannot be reduced to primitives is
+        {dropped}. A trait that is neither a property nor a facility is never looked at:
+        that is every {dict} flavor, which is what {kv} is built from, so {credentials} and
+        {selections} are invisible to the walk and have to be carried by hand or not at
+        all. And {skipped} names what the harvest leaves behind on purpose, e.g. the flow
+        bookkeeping, which belongs to this process and nothing else
+
+        What is left over is a worker that will render against state the client never sent,
+        so it gets said out loud where somebody hunting a wrong tile can find it
+        """
+        # make a channel
+        channel = journal.debug("qed.nexus.recipe")
+        # nothing below is worth assembling unless somebody is listening
+        if not channel.active:
+            # so leave
+            return
+        # the deliberate omissions
+        skipped = set(skipped)
+        # every trait the component declares
+        declared = {trait.name for trait in component.pyre_traits() if trait.isConfigurable}
+        # and the ones the walk above actually visits
+        seen = {trait.name for trait in component.pyre_properties()}
+        seen |= {trait.name for trait in component.pyre_facilities()}
+        # the rest it never looks at, less whatever was carried by hand anyway, the way the
+        # reader grant lands in the recipe without ever being walked
+        invisible = sorted(declared - seen - set(harvested) - skipped)
+        # the values that could not be reduced, less the ones nobody meant to send
+        dropped = sorted(set(dropped) - skipped)
+        # if there is nothing to say
+        if not dropped and not invisible:
+            # keep quiet
+            return
+        # otherwise, name the component
+        channel.line(f"'{component.pyre_name}', an instance of '{component.pyre_family()}'")
+        channel.indent()
+        # the values that could not be reduced
+        if dropped:
+            # named
+            channel.line(f"not wire-friendly: {', '.join(dropped)}")
+        # the traits the walk cannot see
+        if invisible:
+            # named as well
+            channel.line(f"not visited: {', '.join(invisible)}")
+        # and what did make it, so the two lists can be read against each other
+        channel.line(f"carried: {', '.join(sorted(harvested))}")
+        channel.outdent()
+        # flush
+        channel.log()
+        # all done
+        return
 
     def _scrub(self, value, strict=False):
         """
@@ -172,6 +282,10 @@ class Chore(pyre.nexus.task):
             return tuple(self._freeze(value=item) for item in value)
         # everything else is already a hashable primitive
         return value
+
+    # the flow node traits every pipeline inherits: the graph this process wired, which a
+    # worker rebuilds for itself and must not be handed
+    bookkeeping = ("factories", "products")
 
     # the marker for values that cannot travel
     _opaque = object()
