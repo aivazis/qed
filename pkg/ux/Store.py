@@ -316,9 +316,8 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         """
         # add it to my archive store
         archive = self._dataArchives.addArchive(archive=archive)
-        # write the archives back
-        self.persist(sources=False, views=False)
-        # and hand it back
+        # and hand it back; nothing is written: the archive is part of the session, and it
+        # becomes part of the configuration when the user says so
         return archive
 
     def disconnectArchive(self, uri):
@@ -331,9 +330,28 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         if archive is not None and self.fleet is not None:
             # send its scouts home
             self.fleet.recall(archive=archive.pyre_name)
-        # write the archives back
-        self.persist(sources=False, views=False)
+        # if it was there
+        if archive is not None:
+            # the user has let go of it, so the configuration lets go of it as well;
+            # otherwise it would be back at the next boot
+            self._keep(lambda keeper: keeper.forgetArchive(archive=archive))
         # hand it back
+        return archive
+
+    def persistArchive(self, uri):
+        """
+        Write the archive at {uri} into the user's configuration files, along with what it
+        has on display, so that the next session finds it the way this one leaves it
+        """
+        # look up the archive
+        archive = self._locateArchive(uri=uri)
+        # an unknown archive has already been reported
+        if archive is None:
+            # so there is nothing to do
+            return None
+        # write it
+        self._keep(lambda keeper: keeper.persistArchive(archive=archive))
+        # and hand it back
         return archive
 
     def expandFolder(self, archive, uri):
@@ -358,9 +376,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         self._browse(archive=archive, uri=uri)
         # the tree moved, so let the clients know
         self._announce()
-        # and write the archives back
-        self.persist(sources=False, views=False)
-        # all done
+        # all done; what is on display is recorded when the user saves the archive
         return archive
 
     def collapseFolder(self, archive, uri):
@@ -377,9 +393,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         archive.collapse(uri=uri)
         # the tree moved, so let the clients know
         self._announce()
-        # and write the archives back
-        self.persist(sources=False, views=False)
-        # all done
+        # all done; what is on display is recorded when the user saves the archive
         return archive
 
     def persist(self, archives=True, sources=True, views=True):
@@ -387,12 +401,21 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         Write my state back into the user's configuration files, so the next session starts
         where this one leaves off; the flags say which parts of the state to write
         """
+        # ask a keeper to write
+        return self._keep(
+            lambda keeper: keeper.persist(archives=archives, sources=sources, views=views)
+        )
+
+    def _keep(self, chore):
+        """
+        Hand a keeper of the configuration files to {chore}, a callable that writes something
+        """
         # make a keeper
         keeper = Keeper(plexus=self._plexus, store=self)
         # carefully, since persistence must never take the session down
         try:
             # and ask it to write
-            return keeper.persist(archives=archives, sources=sources, views=views)
+            return chore(keeper)
         # if a file cannot be edited
         except pyre.config.exceptions.CodecError as error:
             # make a channel
@@ -537,7 +560,31 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         Disconnect a data source
         """
         # delegate to my source store
-        return self._dataSources.removeSource(name=name)
+        source = self._dataSources.removeSource(name=name)
+        # if it was there
+        if source is not None:
+            # the user has let go of it, so the configuration lets go of it as well;
+            # otherwise it would be back at the next boot
+            self._keep(lambda keeper: keeper.forgetReader(reader=source))
+        # hand it back
+        return source
+
+    def persistSource(self, name):
+        """
+        Write the data source called {name} into the user's configuration files, along with
+        the state of its controllers, so that the next session finds it the way this one
+        leaves it
+        """
+        # look it up
+        source = self._dataSources.source(name=name)
+        # if there is no such source
+        if source is None:
+            # there is nothing to write
+            return None
+        # write it
+        self._keep(lambda keeper: keeper.persistReader(reader=source))
+        # and hand it back
+        return source
 
     # datasets
     def dataset(self, name):
@@ -1560,9 +1607,10 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         channel.outdent()
         # flush
         channel.log()
-        # the record of what is on display is no longer accurate, so write it again; what is
-        # being removed from it was never the user's to keep
-        self.persist(sources=False, views=False)
+        # the record of what is on display, if the user saved one, is no longer accurate, so
+        # correct it; this takes out what is gone and records nothing new, since what the
+        # session has on display is not part of the configuration until the user says so
+        self._keep(lambda keeper: keeper.forgetFolders(archive=archive, folders=folders))
         # all done
         return self
 
@@ -1576,6 +1624,10 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         for archive in self._drain(plexus=plexus, alias="archives"):
             # and connect the survivors
             archives.addArchive(archive=archive)
+        # remember which ones were attached at boot, by name; when the user first saves
+        # something, the list that is written must reproduce them, since a list in the
+        # workspace file replaces whatever would have been attached without it
+        self.bootArchives = {archive.pyre_name for archive in archives.archives()}
         # the store is now the authority on the connected archives; empty the plexus pile,
         # recording the handoff as the provenance
         plexus.pyre_setTrait(
@@ -1597,6 +1649,9 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         for reader in self._drain(plexus=plexus, alias="datasets"):
             # and connect the survivors
             sources.addSource(source=reader)
+        # remember which ones were attached at boot, by name, for the same reason the
+        # archives are remembered: the first list to be written must reproduce them
+        self.bootSources = {source.pyre_name for source in sources.sources()}
         # readers built from bare command line uris arrive as live components on a side
         # pile, since the command line processor must not disturb the configured entries
         for reader in plexus._cliSources or []:
