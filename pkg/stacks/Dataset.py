@@ -151,12 +151,17 @@ class Dataset(qed.flow.product, family="qed.datasets.stack", implements=qed.prot
         return
 
     # interface
-    def measure(self):
+    def measure(self, seed=None):
         """
         Sample the aggregate and let my channels tune themselves against what i find
+
+        A {seed} is a measurement somebody else already made, adopted in place of sampling;
+        it is how a crew member arrives at the numbers the team side tuned against without
+        walking my members a second time
         """
-        # sample the per-pixel mean power over my members
-        self.stats = self._collectStatistics()
+        # a measurement that was handed to me is the one i adopt; anything else samples the
+        # per-pixel mean power over my members
+        self.stats = seed if seed is not None else self._collectStatistics()
         # go through my pipelines
         for pipeline in self.channels.values():
             # and let each one tune itself; a pipeline pinned by the user stays put
