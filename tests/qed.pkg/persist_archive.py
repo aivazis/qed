@@ -74,6 +74,8 @@ def doc():
 
 # boot attached the archive over the current directory, and nothing else
 assert store.bootArchives == {"local:workspace"}
+# it says what the configuration says, which is nothing, so there is nothing to save
+assert next(iter(store.archives)).dirty is False
 
 # connect two archives, and put a couple of folders on display
 first = store.connectArchive(archive=qed.archives.local(name="first", uri=one))
@@ -84,6 +86,9 @@ store.expandFolder(archive=two, uri=two)
 store.collapseFolder(archive=two, uri=two)
 # none of which wrote anything
 assert text() == original
+# an archive that the session made has never been saved, so it has something to save
+assert first.dirty is True
+assert second.dirty is True
 
 # save the first one
 assert store.persistArchive(uri=one) is first
@@ -101,6 +106,11 @@ assert list(saved.get("archives")) == [
 assert saved.get("second") is None
 assert "second" not in text()
 
+# the archive now says what the file says
+assert first.dirty is False
+# and the other one still has something to save
+assert second.dirty is True
+
 # saving it again changes nothing
 before = text()
 store.persistArchive(uri=one)
@@ -109,8 +119,17 @@ assert text() == before
 # take a folder off display; the file does not follow until the user says so
 store.collapseFolder(archive=one, uri=f"{one}/inner")
 assert text() == before
+# so there is something to save
+assert first.dirty is True
+# putting the folder back brings the archive in line with the file again, with nothing saved:
+# what matters is whether a save would change anything, not whether something happened
+store.expandFolder(archive=one, uri=f"{one}/inner")
+assert first.dirty is False
+# take it off again, and save this time
+store.collapseFolder(archive=one, uri=f"{one}/inner")
 store.persistArchive(uri=one)
 assert list(doc().get("first", "expanded")) == [one]
+assert first.dirty is False
 
 # disconnect the archive that was never saved; the files never knew about it
 before = text()

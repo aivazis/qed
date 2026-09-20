@@ -114,6 +114,9 @@ assert archive.listing(uri=at("idle")) is None
 # the configuration file was corrected as well
 doc = pyre.config.newYamlEditor(uri="qed.yaml")
 assert list(doc.get("restored", "expanded")) == [at(), at("kept"), at("kept", "deeper")]
+# so the archive says what the file says, and there is nothing for the user to save: the
+# folders that went were taken out of both
+assert archive.dirty is False
 
 # asking again changes nothing
 assert store.restoreArchives() is False

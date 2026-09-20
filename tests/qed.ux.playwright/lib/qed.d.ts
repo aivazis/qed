@@ -48,6 +48,7 @@ type QEDArchive = {
     pending: boolean
     error: string | null
     hits: number | null
+    dirty: boolean
     items: QEDArchiveItem[]
 }
 
