@@ -36,6 +36,7 @@ class Reader(graphene.ObjectType):
     api = graphene.String()
     status = graphene.String()
     error = graphene.String()
+    dirty = graphene.Boolean()
     selectors = graphene.List(SelectorAxis)
     available = graphene.List(SelectorAxis)
     datasets = graphene.List(Dataset)
@@ -86,6 +87,17 @@ class Reader(graphene.ObjectType):
         store = info.context["store"]
         # and hand off the standing the catalog keeps for this source
         return store.lifecycle(name=reader.pyre_name).status
+
+    @staticmethod
+    def resolve_dirty(reader, info, **kwds):
+        """
+        Check whether saving the {reader} would change what the configuration files say
+        """
+        # get the store
+        store = info.context["store"]
+        # saving a reader records that it is part of the workspace, so there is something to
+        # save exactly when the files do not know about it
+        return not store.isSaved(name=reader.pyre_name)
 
     @staticmethod
     def resolve_error(reader, info, **kwds):
