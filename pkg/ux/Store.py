@@ -572,6 +572,8 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             # the user has let go of it, so the configuration lets go of it as well;
             # otherwise it would be back at the next boot
             self._keep(lambda keeper: keeper.forgetReader(reader=source))
+            # and it is no longer among the ones the files know about
+            self.savedSources.discard(name)
         # hand it back
         return source
 
@@ -588,9 +590,22 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             # there is nothing to write
             return None
         # write it
-        self._keep(lambda keeper: keeper.persistReader(reader=source))
+        written = self._keep(lambda keeper: keeper.persistReader(reader=source))
+        # if that worked
+        if written:
+            # the files now know about it
+            self.savedSources.add(name)
+            # which the clients show, so let them know
+            self._announce()
         # and hand it back
         return source
+
+    def isSaved(self, name):
+        """
+        Check whether the configuration files know about the data source called {name}
+        """
+        # what a reader saves is that it is part of the workspace, so this is all there is to it
+        return name in self.savedSources
 
     # datasets
     def dataset(self, name):
@@ -1664,6 +1679,8 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # remember which ones were attached at boot, by name, for the same reason the
         # archives are remembered: the first list to be written must reproduce them
         self.bootSources = {source.pyre_name for source in sources.sources()}
+        # the configuration files know about each of them, since that is where they came from
+        self.savedSources = set(self.bootSources)
         # readers built from bare command line uris arrive as live components on a side
         # pile, since the command line processor must not disturb the configured entries
         for reader in plexus._cliSources or []:
