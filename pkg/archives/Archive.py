@@ -184,6 +184,41 @@ class Archive(qed.component, family="qed.archives.base", implements=qed.protocol
             and uri not in self._pending
         ]
 
+    @property
+    def dirty(self):
+        """
+        Check whether saving me would change what the configuration files say about me
+        """
+        # an archive that was never saved has everything to say
+        if self._saved is None:
+            # so it is
+            return True
+        # otherwise, the only thing about me that a session changes is what i have on display;
+        # the order in which the folders were opened is not worth a save
+        return set(self.expanded) != self._saved
+
+    def saved(self):
+        """
+        Record that the configuration files say what i say, as of right now: because they were
+        just read, or because they were just written
+        """
+        # remember what i have on display
+        self._saved = frozenset(self.expanded)
+        # all done
+        return self
+
+    def forgotten(self, folders):
+        """
+        Record that {folders} were taken out of what the configuration files say i have on
+        display, e.g. because they are no longer there
+        """
+        # if there is a record to correct
+        if self._saved is not None:
+            # take them out
+            self._saved = self._saved - set(folders)
+        # all done
+        return self
+
     def listing(self, uri):
         """
         Retrieve the manifest of the folder at {uri}, if it has one
@@ -263,6 +298,8 @@ class Archive(qed.component, family="qed.archives.base", implements=qed.protocol
         self._manifests = {}
         # the folders whose listing is under way
         self._pending = set()
+        # what the configuration files say i have on display; nothing, until somebody tells me
+        self._saved = None
         # the folders whose listing failed, with the reason
         self._errors = {}
         # all done
