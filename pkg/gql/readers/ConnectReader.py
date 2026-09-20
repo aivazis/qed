@@ -81,10 +81,9 @@ class ConnectReader(graphene.Mutation):
             # runs; returning a trivial reader used to look like success and poisoned the
             # client's catalog with a null
             raise
-        # add the new source to the store
+        # add the new source to the store; nothing is written: the reader is part of the
+        # session, and it becomes part of the configuration when the user says so
         store.connectSource(source=source)
-        # and write the readers back
-        store.persist(archives=False, views=False)
         # connecting is the user asking for this product, so first contact starts now; it
         # happens on the product's crew, and this call returns while the survey runs, with
         # the outcome arriving over the event stream as {ready} or {failed}
