@@ -12,6 +12,11 @@ time: saving a reader writes that reader and no other; the first list of dataset
 written reproduces what was attached at boot; and disconnecting a reader makes it stay away,
 whether it came from the file or was made by the session
 
+Saving a reader records that it is part of the workspace, and nothing about how it was being
+looked at: a reader the session made gets a section that says what it is, spelled the way a
+person would, with how to get at its product but never the keys; a reader that came from a
+file keeps its section exactly as the user wrote it
+
 The driver works out of a scratch workspace with its own configuration file, so the fixtures
 of this directory stay untouched
 """
@@ -19,6 +24,7 @@ of this directory stay untouched
 # externals
 import os
 import shutil
+import types
 
 # this directory
 here = os.path.dirname(os.path.abspath(__file__))
@@ -96,18 +102,43 @@ for name in ("first", "second"):
 # none of which wrote anything
 assert text() == original
 
+# make first contact with the reader that came from the file; this resolves its shape and
+# binds its cell, which the session did, not the user
+next(source for source in store.sources if source.pyre_name == "booted").open()
+
 # save the first one
 assert store.persistSource(name="first").pyre_name == "first"
 saved = doc()
-# it has a section
+# it has a section that says what it is
 assert saved.get("first", "uri") == f"file:{raster}"
+# with its shape, which the recipe renders as configuration text; it reads back as numbers
+assert [int(extent) for extent in saved.get("first", "shape")] == [65, 65]
+# and its cell by family, not under the name the framework generated for the instance
+assert saved.get("first", "cell") == "qed.datatypes.complex128"
+# which is enough to build it again
+again = qed.readers.native.flat(
+    name="first_again",
+    uri=saved.get("first", "uri"),
+    shape=[int(extent) for extent in saved.get("first", "shape")],
+    cell=saved.get("first", "cell"),
+)
+assert again.cell.pyre_family() == "qed.datatypes.complex128"
+# nothing about how it was being looked at made it into the file
+assert "amplitude" not in text()
 # and it joined the list the file already had, after the reader that was there
 assert list(saved.get("datasets")) == [
     "qed.readers.native.flat#booted",
     "qed.readers.native.flat#first",
 ]
-# the reader that came from the file keeps its section as the user wrote it, macro and all
+# the reader that came from the file keeps its section as the user wrote it, macro and all,
+# even though the session has resolved its shape since
 assert saved.get("booted", "uri") == "{qed.native}/c16.dat"
+assert saved.get("booted", "shape") == "65, 65"
+assert saved.get("booted", "cell") == "c16"
+# and saving it explicitly changes nothing, since all that is missing is nothing
+before = text()
+store.persistSource(name="booted")
+assert text() == before
 # and the other reader of the session is nowhere to be found
 assert saved.get("second") is None
 
@@ -116,7 +147,28 @@ before = text()
 store.persistSource(name="first")
 assert text() == before
 
+# a reader that came through an archive: the archive hands out keys, and says how to get in
+archive = types.SimpleNamespace(
+    credentials=lambda: {"region": "us-west-2", "access_key": "AKIATEST", "secret_key": "sekrit"},
+    access=lambda: {"profile": "st", "region": "us-west-2"},
+)
+# connect it; the product lives in a bucket, and nobody opens it here
+remote = qed.readers.nisar.gslc(name="remote", uri="s3://bucket/products/gslc.h5", archive=archive)
+store.connectSource(source=remote)
+# and save it
+store.persistSource(name="remote")
+saved = doc()
+# its section says how to get at the product, so that it can outlive its archive
+assert dict(saved.get("remote", "credentials")) == {"profile": "st", "region": "us-west-2"}
+# and the keys are nowhere in the file
+assert "AKIATEST" not in text()
+assert "sekrit" not in text()
+# let go of it, so the rest of the driver is about the local readers
+store.disconnectSource(name="remote")
+assert doc().get("remote") is None
+
 # a name that matches nothing writes nothing
+before = text()
 assert store.persistSource(name="nobody") is None
 assert text() == before
 
