@@ -145,21 +145,31 @@ class MemoryMap(
         # all done
         return
 
-    def measure(self):
+    def measure(self, seed=None):
         """
         Collect the statistics my channels tune themselves from, and tune them
 
         Construction deliberately leaves me unmeasured; whoever wants me tuned from my own
         data asks for it, so the contexts that do not need it -- a worker about to receive
         the client's controller state, a twin that carries a survey seed -- pay nothing
+
+        A {seed} is a measurement somebody else already made, adopted in place of sampling;
+        it is how a crew member arrives at the numbers the team side tuned against without
+        reading the payload a second time
         """
+        # a measurement that was handed to me
+        if seed is not None:
+            # is the one i adopt
+            self.stats = seed
         # a metadata-only twin has no payload to measure
-        if self.data is None:
+        elif self.data is None:
             # so it keeps the seed it was hydrated with
             return self.stats
-        # sample my data
-        self.stats = self._collectStatistics()
-        # and let my channels tune themselves against what i found
+        # anything else samples for itself
+        else:
+            # from my data
+            self.stats = self._collectStatistics()
+        # let my channels tune themselves against whatever i now hold
         self._tuneChannels()
         # hand off the record
         return self.stats
