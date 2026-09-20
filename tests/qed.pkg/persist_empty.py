@@ -82,23 +82,25 @@ def text():
         return stream.read()
 
 
-# the default workspace archive is attached by code, and the session lists it along with the
-# ones from the file; account for it, so the comparison is about the archive under test
-store.persist(sources=False, views=False)
+# save the archive under test before anything is on display; the file already lists it, so
+# this is the state the trip must come back to
+store.persistArchive(uri=root)
 baseline = text()
 # nothing in there about what is on display, since nothing is
 assert "expanded" not in baseline
 
-# put the root of the first archive on display
+# put the root of the first archive on display, and save it
 store.expandFolder(archive=root, uri=root)
+store.persistArchive(uri=root)
 # the file records it, within the section of the archive
 doc = pyre.config.newYamlEditor(uri="qed.yaml")
 assert list(doc.get("first", "expanded")) == [root]
 # and says nothing about the archive nobody touched
 assert doc.get("second", "expanded") is None
 
-# take it off display again
+# take it off display again, and save it
 store.collapseFolder(archive=root, uri=root)
+store.persistArchive(uri=root)
 # the record is gone, not emptied
 doc = pyre.config.newYamlEditor(uri="qed.yaml")
 assert doc.get("first", "expanded") is None
