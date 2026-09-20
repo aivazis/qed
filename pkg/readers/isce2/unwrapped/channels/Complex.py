@@ -15,7 +15,7 @@ from .Channel import Channel
 
 
 # a channel for displaying complex values
-class Complex(Channel, family="qed.channels.isce2.int.complex"):
+class Complex(Channel, family="qed.channels.isce2.unw.complex"):
     """
     Make a visualization pipeline to display complex values
     """
@@ -131,6 +131,16 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
         )
         # and return it
         return tile
+
+    # metamethods
+    def __init__(self, **kwds):
+        # chain up
+        super().__init__(**kwds)
+        # the reference amplitude my power law divides by; it comes from a measurement, so
+        # until one arrives it is the neutral value rather than a zero that would divide
+        self.mean = 1
+        # all done
+        return
 
     # constants
     tag = "complex"

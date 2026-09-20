@@ -12,7 +12,7 @@ from .Channel import Channel
 
 
 # a channel for displaying the amplitude of complex values
-class Amplitude(Channel, family="qed.channels.isce2.int.amplitude"):
+class Amplitude(Channel, family="qed.channels.isce2.unw.amplitude"):
     """
     Make a visualization pipeline to display the amplitude of complex values
     """
@@ -121,8 +121,9 @@ class Amplitude(Channel, family="qed.channels.isce2.int.amplitude"):
     def __init__(self, **kwds):
         # chain up
         super().__init__(**kwds)
-        # the mean amplitude; set during auto tuning
-        self.mean = 0
+        # the reference amplitude my power law divides by; it comes from a measurement, so
+        # until one arrives it is the neutral value rather than a zero that would divide
+        self.mean = 1
         # all done
         return
 
