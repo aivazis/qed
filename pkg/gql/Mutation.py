@@ -17,10 +17,12 @@ from .archives.ConnectEarthAccessArchive import ConnectEarthAccessArchive
 from .archives.DisconnectArchive import DisconnectArchive
 from .archives.ExpandFolder import ExpandFolder
 from .archives.CollapseFolder import CollapseFolder
+from .archives.PersistArchive import PersistArchive
 from .archives.RefreshArchive import RefreshArchive
 from .archives.RestoreArchives import RestoreArchives
 from .readers.ConnectReader import ConnectReader
 from .readers.DisconnectReader import DisconnectReader
+from .readers.PersistReader import PersistReader
 from .readers.Stage import Stage
 
 # the journal
@@ -92,11 +94,13 @@ class Mutation(graphene.ObjectType):
     disconnectArchive = DisconnectArchive.Field()
     expandFolder = ExpandFolder.Field()
     collapseFolder = CollapseFolder.Field()
+    persistArchive = PersistArchive.Field()
     refreshArchive = RefreshArchive.Field()
     restoreArchives = RestoreArchives.Field()
     # data reader connection management
     connectReader = ConnectReader.Field()
     disconnectReader = DisconnectReader.Field()
+    persistReader = PersistReader.Field()
     # first contact with connected data sources
     stage = Stage.Field()
 

@@ -25,8 +25,9 @@ class ViewPersist(graphene.Mutation):
         """
         # get the store
         store = info.context["store"]
-        # ask it to persist itself
-        store.persist()
+        # ask it to persist its readers and its views; the archives are saved one at a time,
+        # from their own trays, and saving the readers must not save them as a side effect
+        store.persist(archives=False)
         # and resolve the mutation with the store id
         return store.pyre_name
 
