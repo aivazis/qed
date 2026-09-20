@@ -18,6 +18,7 @@ from .archives.DisconnectArchive import DisconnectArchive
 from .archives.ExpandFolder import ExpandFolder
 from .archives.CollapseFolder import CollapseFolder
 from .archives.RefreshArchive import RefreshArchive
+from .archives.RestoreArchives import RestoreArchives
 from .readers.ConnectReader import ConnectReader
 from .readers.DisconnectReader import DisconnectReader
 from .readers.Stage import Stage
@@ -92,6 +93,7 @@ class Mutation(graphene.ObjectType):
     expandFolder = ExpandFolder.Field()
     collapseFolder = CollapseFolder.Field()
     refreshArchive = RefreshArchive.Field()
+    restoreArchives = RestoreArchives.Field()
     # data reader connection management
     connectReader = ConnectReader.Field()
     disconnectReader = DisconnectReader.Field()
