@@ -19,8 +19,9 @@ export const usePersistReader = name => {
             // there is nothing to do
             return
         }
-        // send the mutation to the server; saving changes nothing the client displays, so
-        // there is nothing to merge and no updater is necessary
+        // send the mutation to the server; the payload says whether the reader still has
+        // something to save, which relay merges into the reader record, so no updater is
+        // necessary
         request({
             // input
             variables: {
@@ -41,6 +42,7 @@ export const usePersistReaderMutation = graphql`
         persistReader(input: $input) {
             reader {
                 id
+                dirty
             }
         }
     }

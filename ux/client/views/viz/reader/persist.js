@@ -23,7 +23,7 @@ import { persist as paintPersist } from './styles'
 // control to write a reader into the configuration files
 // nothing about a reader is saved on its own: not that it is connected, and not the state of
 // its controllers. this is how the user says that the reader, as it stands, is worth keeping
-export const Persist = ({ name }) => {
+export const Persist = ({ name, dirty }) => {
     // get the handler that saves the reader
     const { persist } = usePersistReader(name)
     // build the handler that reacts to the click
@@ -33,7 +33,12 @@ export const Persist = ({ name }) => {
         evt.stopPropagation()
         // and quash any side effects
         evt.preventDefault()
-        // send the mutation to the server
+        // a reader that the configuration files know about has nothing to save
+        if (!dirty) {
+            // so there is nothing to do
+            return
+        }
+        // otherwise, send the mutation to the server
         persist()
         // all done
         return
@@ -44,10 +49,13 @@ export const Persist = ({ name }) => {
     }
     // the glyph fills its box, so it takes a small one to sit well next to its neighbors
     const size = 12
+    // i am available when saving would change something; the handler stays installed either
+    // way, so that a click on me never reaches the tray
+    const state = dirty ? "enabled" : "disabled"
     // render
     return (
-        <Badge size={size} state="enabled" behaviors={behaviors} style={paintPersist}
-            aria-label={`save '${name}'`}>
+        <Badge size={size} state={state} behaviors={behaviors} style={paintPersist}
+            aria-label={`save '${name}'`} aria-disabled={!dirty}>
             <Icon />
         </Badge>
     )

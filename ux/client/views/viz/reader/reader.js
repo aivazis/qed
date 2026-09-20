@@ -54,7 +54,7 @@ const Panel = ({ qed }) => {
     const preparing = usePreparing()
 
     // unpack the reader
-    const { name, uri, status, selectors } = reader
+    const { name, uri, status, dirty, selectors } = reader
     // my selectors and channels describe a product that has been opened; until then, they
     // would be offering choices that lead nowhere
     const ready = status === "ready"
@@ -97,7 +97,7 @@ const Panel = ({ qed }) => {
     const Controls = (
         <>
             {failed && <Retry name={name} />}
-            {ready && <Persist name={name} />}
+            {ready && <Persist name={name} dirty={dirty} />}
             <Disconnect qed={qed} name={name} />
         </>
     )
