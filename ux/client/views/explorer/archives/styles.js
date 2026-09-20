@@ -86,6 +86,27 @@ export const refresh = {
 export const persist = {
     // inherit
     ...collapse,
+    // the container
+    badge: {
+        ...collapse.badge,
+        // when there is nothing to save
+        disabled: {
+            ...collapse.badge.disabled,
+            // i don't respond
+            cursor: "default",
+        },
+    },
+    // the shape
+    shape: {
+        ...collapse.shape,
+        // when there is nothing to save
+        disabled: {
+            ...collapse.shape.disabled,
+            // fade well below the controls that do something; the glyph is filled as well as
+            // stroked, so it is the whole shape that fades, not just its outline
+            opacity: 0.25,
+        },
+    },
 }
 
 // the reason a folder could not be listed

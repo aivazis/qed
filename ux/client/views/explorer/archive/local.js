@@ -161,6 +161,7 @@ export const localArchiveMutation = graphql`
                 pending
                 error
                 hits
+                dirty
                 items {
                     id
                     name

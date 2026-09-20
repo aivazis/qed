@@ -40,6 +40,7 @@ export const useRefreshArchiveMutation = graphql`
                 pending
                 error
                 hits
+                dirty
                 items {
                     id
                     name

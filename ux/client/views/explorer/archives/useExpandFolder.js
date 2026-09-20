@@ -40,6 +40,7 @@ export const useExpandFolderMutation = graphql`
                 pending
                 error
                 hits
+                dirty
                 items {
                     id
                     name

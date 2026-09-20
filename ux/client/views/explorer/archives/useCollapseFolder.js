@@ -40,6 +40,7 @@ export const useCollapseFolderMutation = graphql`
                 pending
                 error
                 hits
+                dirty
                 items {
                     id
                     name

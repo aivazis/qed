@@ -45,7 +45,7 @@ const Panel = () => {
     const expand = useExpandFolder()
     const collapse = useCollapseFolder()
     // unpack the archive information
-    const { id, name, uri, expanded, pending, error, hits } = archive
+    const { id, name, uri, expanded, pending, error, hits, dirty } = archive
     // deduce my state
     const state = (activeArchive?.id === id) ? "selected" : "enabled"
     // toggling the tray asks the server to put the root on display, or take it off
@@ -54,7 +54,7 @@ const Panel = () => {
     const Controls = (
         <>
             <Refresh uri={uri} />
-            <Persist uri={uri} />
+            <Persist uri={uri} dirty={dirty} />
             <Disconnect uri={uri} />
         </>
     )

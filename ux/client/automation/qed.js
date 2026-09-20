@@ -132,7 +132,7 @@ const archivesQuery = graphql`
     query qedArchivesQuery {
         qed {
             archives {
-                name uri expanded pending error hits
+                name uri expanded pending error hits dirty
                 items { name uri isFolder parent expanded pending error }
             }
         }
