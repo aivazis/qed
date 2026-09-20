@@ -157,6 +157,8 @@ export const contextGetReaderFragment = graphql`
         # where this source stands on its way to being viewable, and why, if it failed
         status
         error
+        # whether saving it would change what the configuration files say
+        dirty
         selectors {
             name
             values

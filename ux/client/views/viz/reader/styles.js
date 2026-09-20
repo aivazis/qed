@@ -104,6 +104,27 @@ export const retry = {
 export const persist = {
     // inherit
     ...styles.control,
+    // the container
+    badge: {
+        ...styles.control.badge,
+        // when there is nothing to save
+        disabled: {
+            ...styles.control.badge.disabled,
+            // i don't respond
+            cursor: "default",
+        },
+    },
+    // the shape
+    shape: {
+        ...styles.control.shape,
+        // when there is nothing to save
+        disabled: {
+            ...styles.control.shape.disabled,
+            // fade well below the controls that do something; the glyph is filled as well as
+            // stroked, so it is the whole shape that fades, not just its outline
+            opacity: 0.25,
+        },
+    },
 }
 
 
