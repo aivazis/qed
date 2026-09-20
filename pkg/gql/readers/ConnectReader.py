@@ -54,7 +54,7 @@ class ConnectReader(graphene.Mutation):
         # if there is a shape spec
         if lines and samples:
             # add it to the pile
-            args["shape"] = (lines, samples)
+            args["shape"] = (int(lines), int(samples))
         # if there is a data type spec
         if cell:
             # add it to the pile
