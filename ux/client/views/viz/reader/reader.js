@@ -26,6 +26,7 @@ import { Channels } from './channels'
 import { Stack } from './stack'
 import { Standing } from './standing'
 import { Disconnect } from './disconnect'
+import { Persist } from './persist'
 import { Retry } from './retry'
 // styles
 import styles from './styles'
@@ -90,11 +91,13 @@ const Panel = ({ qed }) => {
         // click to select
         onClick: selectReader,
     }
-    // build my controls: a product that could not be opened offers another attempt, next to
-    // the control that lets go of the reader
+    // build my controls, in the order the archive trays use: what acts on the contents, what
+    // saves, and what lets go. a product that could not be opened offers another attempt; one
+    // that has been opened can be saved, since only then is there something worth keeping
     const Controls = (
         <>
             {failed && <Retry name={name} />}
+            {ready && <Persist name={name} />}
             <Disconnect qed={qed} name={name} />
         </>
     )

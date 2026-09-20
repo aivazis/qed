@@ -17,7 +17,6 @@ import { Header } from '~/widgets'
 // locals
 // components
 import { Reader } from '../reader'
-import { Save } from './save'
 // styles
 import styles from './styles'
 
@@ -43,9 +42,7 @@ export const Readers = ({ qed }) => {
     return (
         <>
             {/* the title of the panel */}
-            <Header title="datasets" style={styles.header} >
-                <Save />
-            </Header>
+            <Header title="datasets" style={styles.header} />
             {/* go through the readers and render them */}
             {readers.map(reader => (
                 <Reader key={reader.id} reader={reader} qed={qed} views={views} />

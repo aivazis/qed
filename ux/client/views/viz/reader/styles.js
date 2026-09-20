@@ -100,6 +100,12 @@ export const retry = {
     ...styles.control,
 }
 
+// the button that saves a reader
+export const persist = {
+    // inherit
+    ...styles.control,
+}
+
 
 // publish
 export default {
