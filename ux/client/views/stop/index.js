@@ -8,6 +8,7 @@
 import React from 'react'
 // components
 export { Dead } from './dead'
+export { Lost } from './lost'
 export { Stop } from './stop'
 
 // end of file

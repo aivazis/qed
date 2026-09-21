@@ -43,7 +43,7 @@ import {
     // the main page
     Main,
     // boilerplate
-    Loading, NYI, Stop, Dead,
+    Loading, NYI, Stop, Lost,
 } from '~/views'
 
 
@@ -120,7 +120,10 @@ const Root = () => {
             <Automation />
             {/* keep this client in sync with the server over the event stream */}
             <LiveSync />
-            <ErrorBoundary fallback={<Dead base={base} />}>
+            {/* what could not go on is replaced by a page that waits for the server; the two
+                mounts above are outside on purpose, so that the stream that watches for the
+                server survives whatever happens in here */}
+            <ErrorBoundary fallback={<Lost base={base} />}>
                 <Suspense fallback={< Loading />}>
                     <Router basename={base}>
                         <Provider>
