@@ -41,33 +41,31 @@ export const useSelectDataset = ({ name, uri }) => {
 
     // otherwise, build the selector
     const selector = () => {
-        // look through the views; perhaps i'm already in there
+        // look through the views; perhaps i'm already on display
         const already = views.findIndex(view => view.reader?.uri == uri)
         // if i'm there
         if (already > -1) {
-            // just activate that viewport
+            // just activate that viewport, rather than opening a second copy of me
             activateViewport(already)()
             // and done
             return
         }
-        // otherwise, check whether i should replace a blank view
-        const replace = views.findIndex(view => view.archive === null && view.reader == null)
-        // use this to figure where to place my view
-        const spot = replace == -1 ? views.length : replace
-        // put me in the pile of views
+        // otherwise i take over the viewport the user is looking at. clicking through an
+        // archive is browsing, and browsing must not build a pile of views nobody asked
+        // for; a viewport comes into being when somebody asks for one, with {split}. the
+        // target defaults to the active viewport, so there is nothing to choose here
         activateView({
-            // start with a clean slate
+            // start with a clean slate, so nothing of the previous occupant survives
             ...emptyView(),
-            // add the reader description
+            // add the reader description, which the viewport renders as the form that
+            // connects me
             reader: {
                 name,
                 uri,
                 archive: archive.uri,
                 readers: archive.readers,
             }
-        }, spot)
-        // and activate that viewport
-        activateViewport(spot)()
+        })
         // all done
         return
     }
