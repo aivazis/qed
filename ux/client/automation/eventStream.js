@@ -5,6 +5,7 @@
 
 
 // local
+import { instance } from './instance'
 import { reachability } from './reachability'
 
 
@@ -32,6 +33,21 @@ export const subscribe = (onChange) => {
         // all done
         return
     }
+    // every stream opens with a greeting that says which run of the server is on the other
+    // end. it has a name of its own, so it does not arrive as a message, and the refetch that
+    // {onopen} started is wasted only when it turns out to be a stranger
+    source.addEventListener("hello", e => {
+        // carefully, since the payload comes from the network
+        try {
+            // find out who it is; a stranger makes the page start over
+            instance.greet(JSON.parse(e.data).instance)
+        } catch (error) {
+            // a greeting that cannot be read tells us nothing, which is what we knew before
+            console.error("events: undecodable greeting", error)
+        }
+        // all done
+        return
+    })
     // the stream is down: the connection dropped, or the server is not answering. the browser
     // retries by itself every few seconds and will report success through {onopen}; until then
     // everything this client displays is as old as the last frame it received, and it says so
