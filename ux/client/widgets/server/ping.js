@@ -15,7 +15,7 @@ import { Version } from './version'
 
 
 // display the server state
-export const Ping = ({ style, ...props }) => {
+export const Ping = ({ style, standing, ...props }) => {
     // preload the query
     const [qref, getVersion] = useServerQueryLoader()
     // schedule the query loading
@@ -45,7 +45,7 @@ export const Ping = ({ style, ...props }) => {
     }
     // otherwise, build the component with the version info and return it
     return (
-        <Version qref={qref} style={style} />
+        <Version qref={qref} style={style} standing={standing} />
     )
 }
 

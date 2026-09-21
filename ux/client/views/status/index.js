@@ -7,17 +7,22 @@
 // externals
 import React from 'react'
 import { Colophon, Server, Spacer } from '~/widgets'
+import { useReachability } from '~/automation'
 // locals
 import styles from './styles'
 
 
 // the bar at the bottom of every page
-export const Status = () => (
+export const Status = () => {
+    // find out whether we are still in touch with the server
+    const standing = useReachability()
+    // render
+    return (
     // the container
     <footer style={styles.box}>
 
         {/* version info and status of the app server */}
-        <Server style={styles.server} />
+        <Server style={styles.server} standing={standing} />
 
         {/* render a separator */}
         <Spacer style={styles.spacer} />
@@ -28,7 +33,8 @@ export const Status = () => (
             style={styles.colophon} />
 
     </footer>
-)
+    )
+}
 
 
 // end of file
