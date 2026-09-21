@@ -8,6 +8,8 @@
 export { Automation } from './Automation'
 // the mount component that keeps this client in sync with the server over the event stream
 export { LiveSync } from './LiveSync'
+// which run of the server this client is talking to
+export { instance } from './instance'
 // whether this client is in touch with its server, and the hook that reads it
 export { reachability } from './reachability'
 export { useReachability } from './useReachability'
