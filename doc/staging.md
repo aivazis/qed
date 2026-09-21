@@ -333,6 +333,65 @@ house sentinel idiom), so the inline render fallback, `/profile`, `/preview`, th
 pixel peeks, and the measure CLI keep working without the fleet. Nothing on the serving
 path uses it.
 
+## What a failure says
+
+A source that cannot be opened flips to `failed` and keeps the reason, which the panel
+shows. What that reason contains is worth recording, because the two sides of it are
+deliberately different.
+
+### The server side
+
+The h5 library does not raise when an open fails. It writes its reasons onto an error stack
+of its own, which it prints and does not return, and hands back a file object holding an
+invalid handle. A caller that walks that handle gets an attribute error about a `NoneType`,
+raised four frames below the call that caused it, naming neither the product nor anything
+that could be done about it. That was the behavior until pyre#252.
+
+`pyre.h5.api` now decides between the two things that can have happened. A handle the
+library will not vouch for means the open is what failed, and the refusal names the file:
+
+    OpenError: could not open 's3://bucket/products/x.h5': the h5 library handed back an
+    empty handle
+
+A live handle with nothing at the requested path means the file is intact and the path is
+wrong, and the refusal names both:
+
+    PathError: '/data/x.h5' holds nothing at '/science/LSAR/GUNW'
+
+Both are `pyre.h5.api.exceptions.APIError`, so a client that catches the family catches
+these. A product in a bucket is named by the uri as it was written, not by the https
+endpoint the ros3 driver is handed, because the rewritten address points at a host that
+appears in no configuration the reader was built from.
+
+What these do not say is *why*. The library does not return its reasons, so an expired
+session token, a missing object, a file that is not h5, and a bucket out of reach all
+arrive here as the same sentence. The verbose report of `OpenError` lists the candidates;
+narrowing them is the business of the reader-level exception hierarchy that item 6(a) of
+the standing pile describes, which is not built.
+
+`Survey.execute` turns whatever the open raised into the staging reason, and `Lifecycle.fail`
+keeps its text. The journal entry that `Store._surveyed` writes alongside it keeps the uri
+in full, since a log has no other way to say which product it means.
+
+### The client side
+
+The reader tray shows the verdict and the reason as two rows of the metadata table:
+
+    URI    : s3://bucket/products/x.h5
+    STATUS : could not open
+             the h5 library handed back an empty handle
+
+The reason is the server's, with the part the panel has already supplied taken out of it.
+`Standing` compares the reason against the uri of its own reader; when the reason quotes it,
+everything through the quote is dropped and what follows is kept. A reason that does not
+mention the uri is shown as it came. The elision is keyed on the exact uri string being
+displayed rather than on a pattern, so it cannot fire on a message that happens to look
+similar, and it depends on the server naming the product the way the client does — which is
+why the uri a remote file records matters on both sides.
+
+Retry is offered unconditionally. Whether a failure is worth retrying — a token that can be
+refreshed, against a file that will never be there — is not decided; see the open questions.
+
 ## Implementation phases (each its own PR)
 
 - **Phase 1 — the deferral.** The trigger machinery wrapped around today's blocking open,
@@ -421,6 +480,18 @@ hatch; asynchronous connect.
    remaining members under cover of human selection time — noting that the workplan's
    join-equal semantics require per-member task identities, and that the phase-4
    statistics stripes would produce the same warmth as a side effect of useful work.
+
+6. **Is a failure worth retrying?** The `failed` state offers retry unconditionally, which
+   is right for a token that can be refreshed and pointless for a product that is not
+   there. Classifying a failure as transient, external, or permanent has to happen on the
+   worker, where the exception still has its type, and travel back as part of the reason;
+   the client would then offer retry only where it could help. This is a question about
+   errors across qed, and probably across pyre, rather than a staging detail, so it is
+   recorded here and not answered.
+7. **How much of a refusal belongs to the reader?** `pyre.h5` can say that an open failed
+   but not why, since the library does not return its reasons. A reader-level hierarchy —
+   missing file, wrong product, missing group, shape against file size, credentials — would
+   narrow that where the reader has the context to do it. Item 6(a) of the standing pile.
 
 (Resolved: the interim selection hotfix — `View.refresh()` adopting `reader.selections`
 for views built before first contact — merged as PR #94 on 2026-08-29. Under phase 1 the

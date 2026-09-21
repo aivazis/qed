@@ -78,6 +78,48 @@ whole four-dataset product is probed in about 15 ms per dataset. The center wind
 comparison, found nothing at all on **every one of the four datasets** and fell back to
 nominal values — the display range of that product was previously a fabrication.
 
+### The same probe over the network
+
+The numbers above are a memory-mapped local file, where the cost of a window is the cost of
+the bytes it touches. A product read through `ros3` prices reads by the request instead, and
+the same probe becomes the dominant cost of first contact.
+
+Measured 2026-09-20 against a NISAR GUNW in an S3 bucket, 1.74 GB, seven datasets of
+`512×512` chunks, from a workstation that sees the bucket at about 1.1 MB/s:
+
+| step | time |
+|---|---|
+| open the file and walk its structure | 31 s |
+| probe all seven datasets | ~300 s |
+| survey end to end, `stage` to `ready` | **331 s** |
+
+Per dataset the probe ran 31.5, 36.8, 38.1, 45.1, 57.3 and 71.0 seconds. A window that lands
+on an allocated chunk costs 2.6 to 10 seconds; one that lands on a chunk never written
+returns fill and costs nothing.
+
+The unit of cost is the file space page. These products are page-allocated, as a
+cloud-friendly product should be — `h5stat` reports `H5F_FSPACE_STRATEGY_PAGE` with a 4 MiB
+page — and a ranged read of exactly one page off this link takes 3.6 to 4.4 seconds, which
+is what a probe window costs. Sixteen windows per dataset across seven datasets is 112 page
+fetches, and that is the five minutes.
+
+Two things follow that are not obvious from the local measurements.
+
+The page buffer does not help. `qed.readers.nisar.H5` configures a 4 GiB page buffer, and
+turning it off changes nothing: three probes cost 143.7 s with it and 139.2 s without. The
+buffer is correctly sized and is genuinely in the read path; it has nothing to reuse,
+because the probe is 112 first touches and never revisits a page.
+
+The spread that makes the probe a good estimator is what makes it expensive here. A 4 MiB
+page holds about four `512×512` float chunks, and the windows are deliberately far apart, so
+each pays for a page and uses a quarter of it. The same sixteen windows placed next to one
+another on `wrappedInterferogram` cost 41.6 s and returned 4,194,304 cells with data, against
+48.1 s and 786,432 cells for the spread the probe actually uses — five times the sample, in
+less time. Sampling a page's worth of adjacent chunks at fewer stops would keep the coverage
+and cut the requests; `stops` is a default argument on `qed.readers.probe`, reachable from
+neither configuration nor the reader, so there is at present no way to dial it down for a
+remote product either.
+
 ## The whole-dataset pass, and whether crews help
 
 The pass that touches every chunk is the minimap thumbnail: it decimates the raster until
