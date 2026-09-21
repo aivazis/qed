@@ -717,19 +717,28 @@ class Dispatcher:
         """
         Open a server-sent event stream so the client receives live state-change notifications
         """
-        # hand back a streaming response; the server subscribes this connection to its hub
-        return server.eventStream(server=server)
+        # the greeting that says which run of the server this is, if the server has one
+        hello = getattr(server, "hello", None)
+        # frame it
+        opening = hello() if hello is not None else None
+        # hand back a streaming response that opens with it; the server subscribes this
+        # connection to its hub
+        return server.eventStream(server=server, opening=opening)
 
     def journal(self, server, **kwds):
         """
         Open a server-sent event stream that carries journal records, opening with the history
         """
+        # the greeting that says which run of the server this is, if the server has one
+        hello = getattr(server, "hello", None)
         # the device that records entries, if the server installed one
         device = getattr(server, "journal", None)
-        # the history it holds, framed for a newcomer
-        opening = device.opening() if device is not None else None
+        # the greeting goes first, so a client knows whose records follow before it sees any
+        greeting = hello() if hello is not None else b""
+        # then the history the device holds, framed for a newcomer
+        history = (device.opening() if device is not None else None) or b""
         # hand back a streaming response on the journal topic
-        return server.eventStream(server=server, topic="journal", opening=opening)
+        return server.eventStream(server=server, topic="journal", opening=greeting + history)
 
     def stop(self, plexus, server, **kwds):
         """
