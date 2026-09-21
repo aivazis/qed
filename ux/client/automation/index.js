@@ -10,6 +10,8 @@ export { Automation } from './Automation'
 export { LiveSync } from './LiveSync'
 // which run of the server this client is talking to
 export { instance } from './instance'
+// load the page again, against whoever is serving it now
+export { startOver } from './startOver'
 // whether this client is in touch with its server; the hook that reads it is in {~/hooks}
 export { reachability } from './reachability'
 
