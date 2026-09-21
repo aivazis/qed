@@ -7,8 +7,10 @@
 // externals
 import React from 'react'
 
-// local
-import { reachability } from './reachability'
+// project
+// the store the event stream reports to; imported by path, since the package that holds it
+// publishes the automation surface, which reaches most of the client
+import { reachability } from '~/automation/reachability'
 
 
 // subscribe to whether this client is in touch with its server
