@@ -80,6 +80,11 @@ class Journal(journal.device):
         sequence number, the time, and the host. An entry the nexus replayed from a crew
         member already has them, stamped by the worker's courier; an entry of this process
         does not, so it is stamped here, with a sequence of this process's own
+
+        Every record also gets a serial number, which counts arrivals at this device no matter
+        who produced them. A stream that reconnects is sent the history again, and a newcomer
+        can be sent a record as history and then again in the batch that was pending when it
+        connected; the serial is how a client tells what it already holds
         """
         # the notes as flushed
         notes = dict(entry.notes)
@@ -99,6 +104,10 @@ class Journal(journal.device):
         if "host" not in notes:
             # the host
             origin["host"] = self.host
+        # this is one more arrival
+        self.serial += 1
+        # and the record says so, whoever produced it
+        origin["serial"] = self.serial
         # build the record
         return journal.record.stamp(entry=entry, **origin)
 
@@ -117,6 +126,8 @@ class Journal(journal.device):
         self.host = socket.gethostname()
         # the sequence number of the last record of my own
         self.seq = 0
+        # the serial number of the last record to arrive, from anywhere
+        self.serial = 0
         # the records a newcomer is sent
         self.history = collections.deque(maxlen=capacity)
         # the records waiting to be published
