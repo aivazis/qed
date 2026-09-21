@@ -8,6 +8,7 @@
 import json
 import os
 import resource
+import uuid
 
 # support
 import pyre
@@ -70,6 +71,10 @@ class Server(http, family="qed.nexus.servers.http"):
             return
         # chain up to grab a port and build the event hub
         super().activate(app=app, dispatcher=dispatcher)
+        # mint the token that tells this run of the server apart from every other, including
+        # the next one on the same host and port; a client that finds a different token on
+        # the other end of a connection it thought it knew is talking to somebody else
+        self.instance = str(uuid.uuid4())
         # hold on to the application; it is the only thing in reach of everything the
         # heartbeat wants to report on
         self._app = app
@@ -257,6 +262,23 @@ class Server(http, family="qed.nexus.servers.http"):
             return f"workload unavailable: {error}"
 
     # interface
+    def hello(self):
+        """
+        Frame the greeting that opens every event stream, which says which run of the server
+        is on the other end
+        """
+        # the greeting never changes, so build it once
+        if self._helloFrame is None:
+            # use the {EventStream} framing so the wire format lives in one place
+            stream = self.eventStream(server=self)
+            # the payload is my token
+            payload = json.dumps({"instance": self.instance})
+            # under a name of its own, so that clients that treat every unnamed message as a
+            # change notification do not mistake the greeting for one
+            self._helloFrame = stream.event(payload, name="hello")
+        # hand it off
+        return self._helloFrame
+
     def notifyChange(self):
         """
         Push a change notification to every live client subscribed to my hub
@@ -297,7 +319,9 @@ class Server(http, family="qed.nexus.servers.http"):
     # private data
     fleet = None  # the manager of the tile rendering teams, built at activation
     journal = None  # the device that records and publishes journal entries, installed at activation
+    instance = None  # the token that identifies this run of the server, minted at activation
     _changeFrame = None  # the constant change notification frame, built on first use
+    _helloFrame = None  # the constant greeting frame, built on first use
     _app = None  # the application, held so the heartbeat can describe what it is carrying
     _beat = 0  # how many times the heartbeat has been raised
 
