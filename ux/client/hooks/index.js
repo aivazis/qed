@@ -6,6 +6,8 @@
 
 // publish
 export { useEvent } from './useEvent'
+// whether this client is in touch with its server
+export { useReachability } from './useReachability'
 export { useResizeObserver } from './useResizeObserver'
 
 

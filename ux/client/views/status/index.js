@@ -6,8 +6,8 @@
 
 // externals
 import React from 'react'
+import { useReachability } from '~/hooks'
 import { Colophon, Server, Spacer } from '~/widgets'
-import { useReachability } from '~/automation'
 // locals
 import styles from './styles'
 

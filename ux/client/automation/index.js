@@ -10,9 +10,8 @@ export { Automation } from './Automation'
 export { LiveSync } from './LiveSync'
 // which run of the server this client is talking to
 export { instance } from './instance'
-// whether this client is in touch with its server, and the hook that reads it
+// whether this client is in touch with its server; the hook that reads it is in {~/hooks}
 export { reachability } from './reachability'
-export { useReachability } from './useReachability'
 
 
 // end of file
