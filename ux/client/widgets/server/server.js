@@ -14,11 +14,11 @@ import { Ping } from './ping'
 
 
 // display the server state
-export const Server = ({ style, ...props }) => {
+export const Server = ({ style, standing, ...props }) => {
     // build the component with the version info and return it
     return (
         <React.Suspense fallback={<Note style={style} />}>
-            <Ping style={style} />
+            <Ping style={style} standing={standing} />
         </React.Suspense>
     )
 }

@@ -50,7 +50,12 @@ export default {
             good: {
                 color: wheel.pyre.green,
             },
-            // when there is an error retrieving the state of the server
+            // before the event stream has reported either way
+            unknown: {
+                color: theme.page.appversion,
+            },
+            // when there is an error retrieving the state of the server, or when the event
+            // stream has dropped and the browser has not got it back yet
             error: {
                 color: theme.journal.error,
             },
