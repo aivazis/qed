@@ -164,6 +164,8 @@ assert all(record.notes["pid"] == str(os.getpid()) for record in device.history)
 assert all(record.notes["host"] == socket.gethostname() for record in device.history)
 assert all(float(record.notes["time"]) > 0 for record in device.history)
 assert [record.notes["seq"] for record in device.history] == ["1", "2", "3"]
+# and each one was counted on arrival
+assert [record.notes["serial"] for record in device.history] == ["1", "2", "3"]
 # the channels were noted
 assert device.channels == {("info", name), ("warning", name), ("debug", name)}
 # and every first-time speaker was news to the clients
@@ -185,6 +187,8 @@ assert coalesce is False
 records = unpack(frame)
 assert [record["page"] for record in records] == [["one"], ["two"], ["three"]]
 assert [record["notes"]["seq"] for record in records] == ["1", "2", "3"]
+# and the serials a client uses to tell what it already holds
+assert [record["notes"]["serial"] for record in records] == ["1", "2", "3"]
 assert records[0]["notes"]["severity"] == "info"
 assert records[2]["notes"]["severity"] == "debug"
 assert records[0]["notes"]["channel"] == name
@@ -208,10 +212,11 @@ stamped = {
     "host": "afar",
 }
 journal.replay(record=journal.record(page=["from a worker"], notes=stamped))
-# it is in the history, with the notes exactly as the worker's courier shipped them
+# it is in the history, with the origin exactly as the worker's courier shipped it, and the
+# serial of the fifth arrival at this device, which no worker could have known
 record = device.history[-1]
 assert record.page == ["from a worker"]
-assert record.notes == stamped
+assert record.notes == {**stamped, "serial": "5"}
 # my own sequence did not move past the four entries of my own
 assert device.seq == 4
 
@@ -239,6 +244,9 @@ assert [record["page"] for record in unpack(device.opening())] == [
     ["five"],
     ["six"],
 ]
+# the serials count arrivals from anywhere without a gap, so a client that was sent some of
+# these already can tell which ones, even though the sequence numbers of the origins repeat
+assert [record["notes"]["serial"] for record in unpack(device.opening())] == ["5", "6", "7", "8"]
 # drain the queue
 server.dispatcher.watch()
 assert len(server.hub.published) == 2
