@@ -15,6 +15,10 @@
 // this is plain dom, with no react in it, so every stream can use it
 
 
+// local
+import { startOver } from './startOver'
+
+
 // the token of the server this page was loaded against; unknown until the first greeting
 let known = null
 
@@ -47,7 +51,7 @@ export const instance = {
         // a server that is gone: the records in the relay store, whose ids the new server is
         // free to reuse for other things, the local edits made on its behalf, and possibly the
         // code of the page itself. start over, against whoever is there now
-        window.location.reload()
+        startOver()
         // all done
         return
     },
