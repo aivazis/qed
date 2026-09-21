@@ -10,4 +10,9 @@ __pycache__/
 *.py[cod]
 
 
+# the workspace cache: where a server keeps what it derives, pyramids above all. it appears
+# wherever a server is run, including directories that are tracked, and nothing in it belongs
+# to the repository
+.qed/
+
 # end of file
