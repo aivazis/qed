@@ -1313,6 +1313,10 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         if dataset is None:
             # and hand the view back untouched
             return view
+        # a server told not to build levels renders every view straight off the product
+        if not self._plexus.pyramids:
+            # so leave the view as it is
+            return view
         # the name that keys its record
         name = dataset.pyre_name
         # a dataset somebody already asked about is already being seen to
