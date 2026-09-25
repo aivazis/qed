@@ -136,6 +136,18 @@ qed --shell=script measure fit
 qed --shell=script measure swarm --team=4 --clients=1,2,4,8
 ```
 
+Both sweeps aim at data. A geocoded product frames its data in fill, and a tile of nothing but fill
+is answered without reading anything, so unless `--corner` names a tile, the panel searches a grid
+of windows for the one nearest the center that holds data, and measures the tile of the client's
+grid that contains it at every zoom; the swarm takes the tiles nearest that anchor. For a product
+in a bucket, where the fetch is the thing being measured, three switches keep caches out of the
+numbers: `--sample=no` skips the statistics a reader samples at first contact, `--warm=no` gives
+each concurrency level of a swarm tiles nobody has fetched, and `--levels=no` stops the launched
+server from building the pyramid, so every tile is read from the product. The swarm also leaves
+out the tiles that cover the windows the server samples at first contact, since the crew member
+that sampled them would serve them from its caches. `etc/perf/measure-s3.py` runs the whole
+program against a product in S3 with these settings and packs the results.
+
 ## Measurement categories
 
 Each section records its own setup, raw numbers, the `a`/`b` fit, the wall/cpu character, and the
