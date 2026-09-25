@@ -33,6 +33,10 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     workspace = qed.protocols.workspace()
     workspace.doc = "the directory i work out of, and the keeper of what i derive"
 
+    pyramids = qed.properties.bool()
+    pyramids.default = True
+    pyramids.doc = "build the reduced resolution levels of the datasets clients look at"
+
     # the pile of known datasets
     datasets = qed.properties.list(schema=qed.protocols.reader())
     datasets.aliases = {"ds"}
