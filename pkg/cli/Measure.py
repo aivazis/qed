@@ -39,6 +39,10 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     channels.default = []
     channels.doc = "restrict the sweep to these channels; empty sweeps all"
 
+    rasters = qed.properties.strings()
+    rasters.default = []
+    rasters.doc = "restrict the sweep to the datasets with these names; empty sweeps all"
+
     # sweep geometry
     shapes = qed.properties.tuple(schema=qed.properties.int())
     shapes.default = (8, 12)
@@ -48,9 +52,10 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     zooms.default = (0, 3)
     zooms.doc = "the half open range of zoom levels; higher zoom pulls a larger source footprint"
 
-    origin = qed.properties.tuple(schema=qed.properties.int())
-    origin.default = (0, 0)
-    origin.doc = "the tile origin, in decimated coordinates"
+    # not {origin}: panel traits alias globally, and the plexus has an {origin} of its own
+    corner = qed.properties.tuple(schema=qed.properties.int())
+    corner.default = None
+    corner.doc = "the tile origin, in decimated coordinates; unset aims at data near the center"
 
     # measurement discipline
     trials = qed.properties.int()
@@ -69,6 +74,10 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     output.default = "measurements.csv"
     output.doc = "the file that accumulates the measurement records"
 
+    sample = qed.properties.bool()
+    sample.default = True
+    sample.doc = "sample the display range at first contact; off keeps it from warming the tiles"
+
     # swarm configuration
     clients = qed.properties.tuple(schema=qed.properties.int())
     clients.default = (1, 2, 4, 8)
@@ -85,6 +94,18 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     tiles = qed.properties.int()
     tiles.default = 64
     tiles.doc = "the number of distinct tiles in the swarm workload"
+
+    warm = qed.properties.bool()
+    warm.default = True
+    warm.doc = (
+        "warm the workers with a full pass first; off gives every level tiles nobody has fetched"
+    )
+
+    levels = qed.properties.bool()
+    levels.default = True
+    levels.doc = (
+        "let the launched server build reduced resolution levels; off reads the product itself"
+    )
 
     # crew configuration
     crews = qed.properties.tuple(schema=qed.properties.int())
@@ -160,25 +181,35 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # the workload geometry: the smallest configured tile at the lowest configured zoom
         span = 2 ** self.shapes[0]
         zoom = self.zooms[0]
+        # a warm swarm replays one workload at every level; a cold one needs a workload for
+        # each level, so that no level is served tiles an earlier one already fetched
+        batches = 1 if self.warm else len(self.clients)
         # lay out the workload as a grid of distinct tiles; identical in-flight requests
         # collapse in the team workplan, so distinct tiles are essential to load the workers
-        origins = list(self._grid(dataset=dataset, span=span, zoom=zoom))
-        # if the raster cannot hold even one tile
-        if not origins:
+        origins = list(
+            self._grid(dataset=dataset, span=span, zoom=zoom, count=self.tiles * batches)
+        )
+        # if the raster cannot hold even one tile per batch
+        if len(origins) < batches:
             # complain
             error = journal.error("qed.measure.swarm")
             error.log(f"'{dataset.pyre_name}' cannot fit a {span}x{span} tile at zoom {zoom}")
             # and bail
             return 1
         # if the raster ran out of room before the workload filled up
-        if len(origins) < self.tiles:
+        if len(origins) < self.tiles * batches:
             # say so, so a smaller workload is never mistaken for the requested one
-            channel.line(f"workload truncated to {len(origins)} of {self.tiles} tiles")
-        # assemble the tile request urls
-        urls = [
-            f"http://127.0.0.1:{self.port}"
-            f"/data/0/{dataset.pyre_name}/{name}/{zoom}x{zoom}/{r}x{c}+{span}x{span}"
-            for r, c in origins
+            channel.line(f"workload truncated to {len(origins)} of {self.tiles * batches} tiles")
+        # the share of each batch
+        share = len(origins) // batches
+        # assemble the tile request urls, one list per batch
+        workloads = [
+            [
+                f"http://127.0.0.1:{self.port}"
+                f"/data/0/{dataset.pyre_name}/{name}/{zoom}x{zoom}/{r}x{c}+{span}x{span}"
+                for r, c in origins[batch * share : (batch + 1) * share]
+            ]
+            for batch in range(batches)
         ]
         # launch the server
         process, log = self._launch(reader=reader)
@@ -194,14 +225,18 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # the tile path resolves its reader through server side view state, so drive the
             # selections the way the client would
             self._select(reader=reader, dataset=dataset, channel=name)
-            # warm up with one full pass so every concurrency level sees the same cache state
-            self._batch(urls=urls, workers=max(self.clients))
+            # a warm swarm
+            if self.warm:
+                # warms up with one full pass so every concurrency level sees the same caches
+                self._batch(urls=workloads[0], workers=max(self.clients))
             # the collected results, one entry per concurrency level
             results = []
             # sweep the concurrency levels
-            for workers in self.clients:
-                # fire the workload
-                elapsed, latencies, failures = self._batch(urls=urls, workers=workers)
+            for level, workers in enumerate(self.clients):
+                # fire the workload of this level
+                elapsed, latencies, failures = self._batch(
+                    urls=workloads[level % batches], workers=workers
+                )
                 # failed requests void the level; say so rather than reporting on the rest
                 if failures:
                     # complain
@@ -224,7 +259,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             name=name,
             zoom=zoom,
             span=span,
-            count=len(urls),
+            count=share,
             results=results,
         )
         # flush the report
@@ -431,7 +466,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                     dataset.render(
                         channel=pipeline,
                         zoom=(zoom, zoom),
-                        origin=tuple(self.origin),
+                        origin=self._origin(dataset=dataset, span=span, zoom=zoom),
                         shape=(span, span),
                     )
                     # read the clocks again
@@ -489,17 +524,25 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                     # the configuration may prefer the web shell; the child is a CLI run
                     "--shell=script",
                     f"--only={reader.pyre_name}",
+                    f"--rasters={dataset.pyre_name}",
                     f"--channels={name}",
                     f"--shapes={exponent},{exponent + 1}",
                     f"--zooms={zoom},{zoom + 1}",
-                    f"--origin={self.origin[0]},{self.origin[1]}",
                     "--trials=1",
                     "--cache=fresh",
                     "--cold=no",
+                    f"--sample={'yes' if self.sample else 'no'}",
                     f"--output={self.output}",
                 ]
+                # the tile is picked here, so the search for data never warms the child
+                row, col = self._origin(dataset=dataset, span=span, zoom=zoom)
+                # and handed to it explicitly
+                cmd.append(f"--corner={row},{col}")
                 # show me
-                channel.line(f"fresh: {dataset.pyre_name}.{name}: {span}x{span} @ zoom {zoom}")
+                channel.line(
+                    f"fresh: {dataset.pyre_name}.{name}: {span}x{span} @ zoom {zoom}, "
+                    f"origin {row}x{col}"
+                )
                 # launch and wait
                 got = subprocess.run(cmd)
                 # if the point failed
@@ -522,6 +565,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         only = set(self.only)
         # the channel restriction
         channels = set(self.channels)
+        # the dataset restriction
+        rasters = set(self.rasters)
         # the plexus hands its readers to the ux store at construction, so the store is the
         # authority on the connected data sources; without ux support there is nothing to do
         ux = plexus._ux
@@ -541,10 +586,15 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 # by skipping everybody else
                 continue
             # construction is passive; measuring needs the data, so make first contact,
-            # which also charges the discovery and stats timers this panel reports
-            reader.open()
+            # which also charges the discovery and stats timers this panel reports, and
+            # samples the datasets only if asked to
+            reader.open(measure=self.sample)
             # go through the reader's datasets
             for dataset in reader.datasets:
+                # honor the dataset restriction
+                if rasters and dataset.pyre_name not in rasters:
+                    # by skipping everybody else
+                    continue
                 # and each dataset's channels
                 for name in dataset.channels.keys():
                     # honor the channel restriction
@@ -570,16 +620,95 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             span = 2**exponent
             # go through the zoom levels
             for zoom in range(*self.zooms):
+                # find the tile this point renders
+                row, col = self._origin(dataset=dataset, span=span, zoom=zoom)
                 # a tile that hangs over the raster edge crashes the native pipeline
-                if (self.origin[0] + span) * 2**zoom > rows or (
-                    self.origin[1] + span
-                ) * 2**zoom > cols:
+                if (
+                    row < 0
+                    or col < 0
+                    or (row + span) * 2**zoom > rows
+                    or (col + span) * 2**zoom > cols
+                ):
                     # so skip points that don't fit
                     continue
                 # publish the point
                 yield span, zoom
         # all done
         return
+
+    def _origin(self, dataset, span, zoom):
+        """
+        Pick the origin of the {span} tile at {zoom}, in decimated coordinates: the one i was
+        given, or else the tile of the client's grid that holds the anchor of the raster
+        """
+        # an explicit origin wins
+        if self.corner is not None:
+            # as is
+            return tuple(self.corner)
+        # otherwise, find the extent of the raster at this zoom
+        extents = [axis >> zoom for axis in dataset.shape]
+        # and where its anchor lands
+        anchor = [cell >> zoom for cell in self._anchor(dataset=dataset)]
+        # the client lays its tiles on a grid of {span} from the corner, so pick the one that
+        # holds the anchor, stepping back when it would hang over the far edge
+        origin = tuple(
+            min(cell // span * span, extent - span) // span * span
+            for cell, extent in zip(anchor, extents)
+        )
+        # all done
+        return origin
+
+    def _anchor(self, dataset):
+        """
+        Find a cell of {dataset} that holds data, as near its center as the sample windows allow
+
+        A geocoded product frames its data in fill, and a tile of nothing but fill is
+        answered without reading anything, so a measurement has to be aimed at the data. The
+        search reads a window at a time, one chunk each, nearest the center first
+        """
+        # the anchors found so far, by dataset
+        if self._anchors is None:
+            # start the memo on first use
+            self._anchors = {}
+        # a dataset searched before
+        name = dataset.pyre_name
+        # has its anchor ready
+        if name in self._anchors:
+            # so hand it off
+            return self._anchors[name]
+        # unpack the extent
+        rows, cols = tuple(dataset.shape)
+        # the center, which is also the fallback
+        anchor = (rows // 2, cols // 2)
+        # a flavor that cannot sample is measured at its center
+        if hasattr(dataset, "sample"):
+            # the window is the preferred tile, kept inside the raster
+            span = tuple(min(width, axis) for width, axis in zip(tuple(dataset.tile), (rows, cols)))
+            # plan a fine grid of windows over the extent, nearest the center first
+            candidates = sorted(
+                qed.readers.windows(dataset=dataset, stops=16),
+                key=lambda o: (o[0] + span[0] / 2 - rows / 2) ** 2
+                + (o[1] + span[1] / 2 - cols / 2) ** 2,
+            )
+            # go through them
+            for origin in candidates:
+                # read one at full resolution
+                count, *_ = dataset.sample(zoom=(0, 0), origin=origin, shape=span)
+                # the first one that holds data
+                if count > 0:
+                    # anchors the measurement at its center
+                    anchor = (origin[0] + span[0] // 2, origin[1] + span[1] // 2)
+                    # and ends the search
+                    break
+            # if none did
+            else:
+                # the measurement will be of fill, so say so
+                warning = journal.warning("qed.measure")
+                warning.log(f"found no data in '{name}'; measuring at its center")
+        # remember it
+        self._anchors[name] = anchor
+        # and hand it off
+        return anchor
 
     def _sink(self):
         """
@@ -713,31 +842,59 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         return a, b, r2
 
     # implementation details: the swarm
-    def _grid(self, dataset, span, zoom):
+    def _grid(self, dataset, span, zoom, count):
         """
-        Lay out up to {tiles} distinct in-bounds tile origins, in decimated coordinates
+        Lay out up to {count} distinct in-bounds tile origins, in decimated coordinates,
+        nearest the anchor of the raster first
         """
         # unpack the raster shape
         rows, cols = dataset.shape
         # reduce it to the decimated extents at this zoom
         decRows = rows >> zoom
         decCols = cols >> zoom
-        # the running count
-        count = 0
-        # walk the raster in tile sized steps
-        for r in range(0, decRows - span + 1, span):
-            # in row major order
-            for c in range(0, decCols - span + 1, span):
-                # until the workload is full
-                if count >= self.tiles:
-                    # all done
-                    return
-                # publish the origin
-                yield r, c
-                # and count it
-                count += 1
+        # the anchor, in the same coordinates
+        center = tuple(cell / 2**zoom for cell in self._anchor(dataset=dataset))
+        # the server samples these windows at first contact, on one of its crew members, so a
+        # tile that covers any of them would be served out of that member's caches
+        probed = self._probed(dataset=dataset)
+        # every tile of the client's grid that fits inside the raster and stays clear of them
+        origins = [
+            (r, c)
+            for r in range(0, decRows - span + 1, span)
+            for c in range(0, decCols - span + 1, span)
+            if not any(
+                r << zoom < wr + wh
+                and wr < (r + span) << zoom
+                and c << zoom < wc + ww
+                and wc < (c + span) << zoom
+                for wr, wc, wh, ww in probed
+            )
+        ]
+        # a geocoded product frames its data in fill, whose tiles would fetch nothing, so take
+        # the tiles closest to the anchor; the square distance of the tile center decides
+        origins.sort(
+            key=lambda o: (o[0] + span / 2 - center[0]) ** 2 + (o[1] + span / 2 - center[1]) ** 2
+        )
+        # publish as many as were asked for
+        yield from origins[:count]
         # all done
         return
+
+    def _probed(self, dataset):
+        """
+        The windows of {dataset} the server samples at first contact, as (row, col, height,
+        width) at full resolution
+        """
+        # a flavor that cannot sample is not probed
+        if not hasattr(dataset, "sample"):
+            # so there is nothing to stay clear of
+            return []
+        # the window is the preferred tile, kept inside the raster, just as the probe has it
+        height, width = (min(w, a) for w, a in zip(tuple(dataset.tile), tuple(dataset.shape)))
+        # the probe plans its windows with its own default density, and so does this
+        windows = [(r, c, height, width) for r, c in qed.readers.windows(dataset=dataset)]
+        # all done
+        return windows
 
     def _launch(self, reader):
         """
@@ -761,6 +918,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             "--qed.app.nexus.services.web.fleet.cache.capacity=0",
             # with the requested team size for the target reader
             f"--qed.app.nexus.services.web.fleet.{reader.pyre_name}.size={self.team}",
+            # building the levels of the product, unless asked not to
+            f"--qed.app.pyramids={'yes' if self.levels else 'no'}",
         ]
         # launch
         process = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT)
@@ -922,8 +1081,9 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         start = time.perf_counter()
         # attempt to
         try:
-            # fetch the tile
-            with urllib.request.urlopen(url, timeout=60) as response:
+            # fetch the tile; a small team behind many clients over a remote product can keep
+            # a request waiting in line for minutes, which is a result rather than a failure
+            with urllib.request.urlopen(url, timeout=900) as response:
                 # and drain the payload
                 response.read()
         # a request that failed at any level
@@ -1025,6 +1185,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         return
 
     # private data
+    # the cells that hold data, by dataset, found on first use
+    _anchors = None
     # the column labels of the per-request records
     _tileHeaders = (
         "stage",
