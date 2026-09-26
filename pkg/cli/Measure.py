@@ -5,10 +5,11 @@
 
 
 # externals
-import concurrent.futures
+import collections
 import contextlib
 import csv
 import datetime
+import functools
 import journal
 import json
 import math
@@ -20,13 +21,22 @@ import socket
 import statistics
 import subprocess
 import tarfile
-import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 
 # support
 import qed
+
+# the clients of the swarm
+from .TileClient import TileClient
+
+# the channel the event loop watches the output of a measurement through
+from pyre.ipc.Pipe import Pipe
+
+# the unit of the deadlines
+from pyre.units.SI import second
 
 # the NISAR readers the programs that measure products in a bucket know about
 FLAVORS = ("rslc", "rifg", "runw", "roff", "gslc", "gunw", "gcov", "goff")
@@ -895,38 +905,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # flush
         channel.log()
 
-        # the granules whose measurement did not complete
-        failures = []
-        # measure them, a few at a time
-        with concurrent.futures.ThreadPoolExecutor(max_workers=self.workers) as pool:
-            # launch every measurement
-            futures = {
-                pool.submit(
-                    self._census,
-                    results=results,
-                    bucket=bucket,
-                    kind=kind,
-                    granule=granule,
-                    key=key,
-                ): (kind, granule)
-                for kind, granule, key, _ in jobs
-            }
-            # and collect them as they complete
-            for future in concurrent.futures.as_completed(futures):
-                # identify the granule
-                kind, granule = futures[future]
-                # get the exit status of its measurement
-                status = future.result()
-                # if it failed
-                if status != 0:
-                    # remember it for the summary
-                    failures.append(f"{kind} {granule}")
-                    # say so
-                    channel.log(f"{kind} {granule}: failed with status {status}")
-                    # and move on
-                    continue
-                # otherwise, say it is done
-                channel.log(f"{kind} {granule}: measured")
+        # measure the granules, a few at a time, on the pyre event loop
+        failures = self._survey(channel=channel, results=results, bucket=bucket, jobs=jobs)
 
         # gather the summaries into one table
         rows = self._gather(results=results, jobs=jobs)
@@ -1882,62 +1862,67 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
 
     def _batch(self, urls, workers):
         """
-        Fetch all {urls} with {workers} concurrent clients; return the batch wall time in
-        ms, the per-request latencies of the successes, and the failure count
+        Fetch all {urls} with {workers} concurrent clients on the pyre event loop; return the
+        batch wall time in ms, the per-request latencies of the successes, and the failure
+        count
         """
-        # the successful latencies
-        latencies = []
-        # and the failure count
-        failures = 0
+        # the event loop that drives the clients
+        selector = pyre.ipc.newSelector(name="qed.measure.swarm")
+        # the tiles, as request paths, in a queue the clients share
+        queue = collections.deque(urllib.parse.urlsplit(url).path for url in urls)
+        # the clients that have not run out of tiles yet
+        busy = set()
+
+        # when a client runs out of tiles
+        def done(client):
+            """
+            Note that {client} has run out of tiles, and stop the loop after the last one
+            """
+            # it is no longer busy
+            busy.discard(client)
+            # and once nobody is
+            if not busy:
+                # the batch is over
+                selector.stop()
+            # all done
+            return
+
+        # make the clients
+        clients = [
+            TileClient(
+                index=index,
+                host="127.0.0.1",
+                port=self.port,
+                selector=selector,
+                queue=queue,
+                patience=self._tilePatience,
+                onDone=done,
+            )
+            for index in range(workers)
+        ]
+        # they are all busy until they say otherwise
+        busy.update(clients)
         # the clock of the batch
         clock = qed.timers.wall("qed.measure.swarm.batch")
         # started afresh
         clock.reset()
         clock.start()
-        # make the client pool
-        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
-            # fetch everything
-            for latency in pool.map(self._pull, urls):
-                # a missing latency marks a failed request
-                if latency is None:
-                    # count it
-                    failures += 1
-                # otherwise
-                else:
-                    # collect it
-                    latencies.append(latency)
+        # set every client going
+        for client in clients:
+            # each takes its first tile
+            client.start()
+        # unless the queue was too short to keep anybody busy
+        if busy:
+            # drive them until the last one runs dry
+            selector.watch()
         # stop the clock
         clock.stop()
+        # collect the latencies of every client
+        latencies = [latency for client in clients for latency in client.latencies]
+        # and their failures
+        failures = sum(client.failures for client in clients)
         # all done
         return clock.ms(), latencies, failures
-
-    def _pull(self, url):
-        """
-        Fetch one tile and return its latency in ms, or None on failure
-        """
-        # the clock of this request; the requests run in the threads of the client pool, and
-        # the registry hands out one timer per name, so each thread gets a clock of its own
-        clock = qed.timers.wall(f"qed.measure.swarm.request.{threading.get_ident()}")
-        # started afresh
-        clock.reset()
-        clock.start()
-        # attempt to
-        try:
-            # fetch the tile; a small team behind many clients over a remote product can keep
-            # a request waiting in line for minutes, which is a result rather than a failure
-            with urllib.request.urlopen(url, timeout=900) as response:
-                # and drain the payload
-                response.read()
-        # a request that failed at any level
-        except (urllib.error.URLError, TimeoutError, ConnectionError):
-            # stops the clock
-            clock.stop()
-            # and yields no latency
-            return None
-        # stop the clock
-        clock.stop()
-        # and report the round trip
-        return clock.ms()
 
     def _stop(self, process, log):
         """
@@ -2485,10 +2470,129 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # otherwise, hand off the granule, with the size of its product
         return granule, key, head["ContentLength"]
 
+    def _survey(self, channel, results, bucket, jobs):
+        """
+        Measure the granules in {jobs}, my {workers} of them at a time, each in a fresh process
+        whose output the event loop collects into its log, and hand off the ones that did not
+        complete
+        """
+        # the journal channel that reports the progress, since the handlers of the event loop
+        # are handed the channel they watch under the same name
+        reporter = channel
+        # the event loop that watches the measurements
+        selector = pyre.ipc.newSelector(name="qed.measure.census")
+        # the granules still to measure
+        pending = collections.deque(jobs)
+        # the measurements under way
+        running = set()
+        # and the ones that did not complete
+        failures = []
+
+        # start as many measurements as there is room for
+        def launch():
+            """
+            Start the next measurements, until my {workers} are busy or nothing is pending
+            """
+            # while there is room and work
+            while pending and len(running) < self.workers:
+                # take the next granule
+                kind, granule, key, _ = pending.popleft()
+                # start measuring it
+                process, log = self._census(
+                    results=results, bucket=bucket, kind=kind, granule=granule, key=key
+                )
+                # it is under way
+                running.add(process)
+                # wrap its output, so the event loop can watch it
+                output = Pipe(infd=process.stdout.fileno(), outfd=process.stdout.fileno())
+                # collect what it says, and learn from the end of it that it is done
+                selector.whenReadReady(
+                    channel=output,
+                    call=functools.partial(
+                        collect, process=process, log=log, kind=kind, granule=granule
+                    ),
+                )
+                # and give up on it if it takes too long
+                selector.alarm(
+                    interval=self._patience * second,
+                    call=functools.partial(overdue, process=process, log=log),
+                )
+            # all done
+            return
+
+        # collect the output of a measurement
+        def collect(channel, process, log, kind, granule, **kwds):
+            """
+            Add what the measurement of {granule} says to its {log}, and settle it once it is
+            done
+            """
+            # read what it said
+            chunk = os.read(channel.inbound, 1 << 16)
+            # if it said something
+            if chunk:
+                # keep it
+                log.write(chunk)
+                # and keep listening
+                return True
+            # otherwise, it is done talking; let go of its output
+            process.stdout.close()
+            # collect its exit status
+            status = process.wait()
+            # close its log
+            log.close()
+            # it is no longer under way
+            running.discard(process)
+            # if it failed
+            if status != 0:
+                # remember it for the summary
+                failures.append(f"{kind} {granule}")
+                # and say so
+                message = f"{kind} {granule}: failed with status {status}"
+            # otherwise
+            else:
+                # say it is done
+                message = f"{kind} {granule}: measured"
+            # report it
+            reporter.log(message)
+            # start the next ones
+            launch()
+            # if nothing is under way, nothing is left
+            if not running:
+                # so the census is over
+                selector.stop()
+            # stop listening to this one
+            return False
+
+        # the deadline of a measurement
+        def overdue(timestamp, process, log):
+            """
+            The measurement behind {process} has taken too long
+
+            N.B.: this is an alarm handler; returning {None} keeps it from being rescheduled
+            """
+            # a measurement that is still running
+            if process.poll() is None:
+                # leaves a note in its log
+                log.write(f"census: gave up after {self._patience} seconds\n".encode("utf-8"))
+                # and is stopped; its output closes, which settles it
+                process.kill()
+            # the alarm is done
+            return None
+
+        # start the first ones
+        launch()
+        # if anything is under way
+        if running:
+            # watch until the last one is done
+            selector.watch()
+        # hand off the ones that did not complete
+        return failures
+
     def _census(self, results, bucket, kind, granule, key):
         """
-        Measure the page layout of the {granule} of {kind} at {key} in {bucket}, in a fresh
-        process, with everything it records in its own folder under {results}
+        Start measuring the page layout of the {granule} of {kind} at {key} in {bucket} in a
+        fresh process, from a folder of its own under {results}, and hand off the process and
+        the log that collects its output
         """
         # the folder of the granule
         directory = results / kind / granule
@@ -2498,37 +2602,25 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         self._configure(
             directory=directory, uri=f"s3://{bucket}/{key}", flavor=self._flavor(kind=kind)
         )
-        # capture everything the measurement says in its own log
-        with open(directory / "pages.log", mode="w") as log:
-            # launch it
-            process = subprocess.Popen(
-                [
-                    "qed",
-                    "--shell=script",
-                    "measure",
-                    "pages",
-                    "--only=product",
-                    f"--output={directory / 'layout.csv'}",
-                ],
-                cwd=directory,
-                stdin=subprocess.DEVNULL,
-                stdout=log,
-                stderr=subprocess.STDOUT,
-            )
-            # attempt to
-            try:
-                # wait for it, but not forever
-                return process.wait(timeout=self._patience)
-            # if it takes too long
-            except subprocess.TimeoutExpired:
-                # stop it
-                process.kill()
-                # and collect it
-                process.wait()
-                # leave a note in its log
-                log.write(f"census: gave up after {self._patience} seconds\n")
-        # and report the failure
-        return -1
+        # open the log that collects its output
+        log = open(directory / "pages.log", mode="wb")
+        # launch the measurement, with its output on a pipe the event loop watches
+        process = subprocess.Popen(
+            [
+                "qed",
+                "--shell=script",
+                "measure",
+                "pages",
+                "--only=product",
+                f"--output={directory / 'layout.csv'}",
+            ],
+            cwd=directory,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+        # hand off the process and its log
+        return process, log
 
     def _gather(self, results, jobs):
         """
@@ -2643,6 +2735,10 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         return
 
     # private data
+    # how long a tile of a swarm may take before it counts as a failure, in seconds; a small
+    # team behind many clients over a remote product can keep a request waiting in line for
+    # minutes, which is a result rather than a failure
+    _tilePatience = 900
     # how long the census waits for the measurement of one granule, in seconds
     _patience = 900
     # how long the pyramid measurement waits for a build, and how often it looks, in seconds
