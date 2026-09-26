@@ -40,7 +40,9 @@ qed::py::native::channels(py::module & m)
             // dispatch on the buffer's cell type and run the kernel over the tile; a foreign order
             // buffer arrives as a native copy of the tile, so the geometry the kernel sees is the
             // dispatcher's, not the caller's
-            return onTile<2, char, int16_t, int32_t, int64_t, float, double>(
+            return onTile<
+                2, char, int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t,
+                float, double>(
                 source, o, t, s,
                 [&](const auto & grid, const auto & o, const auto & t, const auto & s) {
                     return qed::native::channels::value(grid, o, t, s, min, max);
@@ -65,7 +67,9 @@ qed::py::native::channels(py::module & m)
             // dispatch on the buffer's cell type and run the kernel over the tile; a foreign order
             // buffer arrives as a native copy of the tile, so the geometry the kernel sees is the
             // dispatcher's, not the caller's
-            return onTile<2, char, int16_t, int32_t, int64_t, float, double>(
+            return onTile<
+                2, char, int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t,
+                float, double>(
                 source, o, t, s,
                 [&](const auto & grid, const auto & o, const auto & t, const auto & s) {
                     return qed::native::channels::magnitude(grid, o, t, s, min, max);
