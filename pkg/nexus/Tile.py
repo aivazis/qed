@@ -67,19 +67,15 @@ class Tile(Chore):
         # on success, park the encoded tile in a spool; its descriptor travels as ancillary
         # data on the crew channel, so the payload itself never crosses the wire
         spool = Spool.stash(data=memoryview(tile))
-        # datasets that know how to measure themselves contribute source statistics
-        sample = getattr(dataset, "sample", None)
-        # if this one does
-        if sample is not None:
-            # carefully, since the render is the deliverable and the sample is a bonus
-            try:
-                # revisit the footprint this render saw and attach the mergeable record to
-                # the report, so the team side can accumulate whole-dataset statistics
-                spool.stats = sample(zoom=self.zoom, origin=self.origin, shape=self.shape)
-            # let the sample die quietly on any failure
-            except Exception:
-                # the tile is still good; it just doesn't contribute statistics
-                pass
+        # carefully, since the render is the deliverable and the sample is a bonus
+        try:
+            # revisit the footprint this render saw and attach the mergeable record to the
+            # report, so the team side can accumulate whole-dataset statistics
+            spool.stats = dataset.sample(zoom=self.zoom, origin=self.origin, shape=self.shape)
+        # let the sample die quietly on any failure
+        except Exception:
+            # the tile is still good; it just doesn't contribute statistics
+            pass
         # hand off the report
         return spool
 
