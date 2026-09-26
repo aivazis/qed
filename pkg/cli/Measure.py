@@ -393,6 +393,248 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # all done
         return 0
 
+    @qed.export(tip="measure how the chunks of each dataset occupy the pages of its file")
+    def pages(self, plexus, **kwds):
+        """
+        Walk the chunk table of each dataset and report how its chunks sit on the pages of
+        the file: how many pages a chunk spans, how full those pages are, and how many bytes
+        a reader that fetches whole pages, e.g. {ros3}, moves for every byte it needs
+
+        Only metadata is read, so this is cheap even for a product in a bucket
+        """
+        # make a channel
+        channel = journal.info("qed.measure.pages")
+        # the host label that lets records from different machines share a file
+        host = self.pyre_host.nickname
+        # the per chunk records land next to the others
+        stem = os.path.splitext(self.output)[0]
+        # in their own file
+        path = f"{stem}-pages.csv"
+        # check whether this is first contact
+        fresh = not os.path.exists(path)
+        # open the file for appending, so runs accumulate
+        with open(path, mode="a", newline="") as stream:
+            # make a writer
+            writer = csv.writer(stream)
+            # on first contact
+            if fresh:
+                # write the header
+                writer.writerow(self._pageHeaders)
+            # go through the datasets the restrictions allow
+            for reader, dataset in self._rasters(plexus=plexus):
+                # the file layout is shared by all the datasets of a reader
+                layout = self._layout(reader=reader)
+                # a reader whose file is not HDF5 has no pages to speak of
+                if layout is None:
+                    # so say so
+                    channel.line(f"{dataset.pyre_name}: not an HDF5 product")
+                    # and move on
+                    continue
+                # measure this one
+                self._occupancy(
+                    channel=channel,
+                    writer=writer,
+                    host=host,
+                    dataset=dataset,
+                    layout=layout,
+                )
+        # flush the report
+        channel.log()
+        # all done
+        return 0
+
+    # implementation details: page occupancy
+    def _rasters(self, plexus):
+        """
+        Enumerate the (reader, dataset) pairs the restrictions allow, without regard to channels
+        """
+        # the reader restriction
+        only = set(self.only)
+        # the dataset restriction
+        rasters = set(self.rasters)
+        # the store is the authority on the connected data sources
+        ux = plexus._ux
+        # without one
+        if ux is None:
+            # there are no sources to measure
+            return
+        # go through the connected readers
+        for reader in ux.store.sources:
+            # stacks aggregate other products, which are measured on their own
+            if isinstance(reader, qed.stacks.stack):
+                # so skip them
+                continue
+            # honor the reader restriction
+            if only and reader.pyre_name not in only:
+                # by skipping everybody else
+                continue
+            # make first contact; the layout is metadata, so there is nothing to sample
+            reader.open(measure=False)
+            # go through the reader's datasets
+            for dataset in reader.datasets:
+                # honor the dataset restriction
+                if rasters and dataset.pyre_name not in rasters:
+                    # by skipping everybody else
+                    continue
+                # publish the pair
+                yield reader, dataset
+        # all done
+        return
+
+    def _layout(self, reader):
+        """
+        Read the page size and the file space strategy of the file behind {reader}, or report
+        that it is not an HDF5 product
+        """
+        # only the HDF5 readers have pages
+        if not isinstance(reader, qed.readers.nisar.h5):
+            # so everybody else has no layout
+            return None
+        # the file creation properties are only reachable through the file itself, so open it
+        # again, with the same credentials; this reads nothing but metadata
+        h5 = qed.h5.reader(uri=reader.uri, credentials=reader.grant())
+        # get the creation properties
+        fcpl = h5._file._pyre_id.fcpl
+        # and the free space strategy among them
+        strategy = fcpl.filespaceStrategy
+        # hand off what matters
+        return fcpl.pageSize, strategy.strategy.name
+
+    def _occupancy(self, channel, writer, host, dataset, layout):
+        """
+        Walk the chunk grid of {dataset}, record each chunk that was written, and report how
+        the chunks sit on the pages of the file
+        """
+        # unpack the layout
+        pageSize, strategy = layout
+        # get the low level dataset
+        h5 = dataset.data.dataset
+        # unpack the extent and the tile
+        rows, cols = tuple(dataset.shape)
+        tileRows, tileCols = tuple(dataset.tile)
+        # the size of a chunk before the filters had their way with it
+        raw = tileRows * tileCols * dataset.data.disktype.bytes
+        # the number of chunks the tiling describes
+        grid = -(-rows // tileRows) * -(-cols // tileCols)
+        # the chunks that were written, as (address, bytes)
+        chunks = []
+        # go through them
+        for chunk in h5.chunkTable():
+            # the pages it spans, when the file has pages
+            first = chunk.address // pageSize if pageSize else 0
+            last = (chunk.address + chunk.bytes - 1) // pageSize if pageSize else 0
+            # unpack its corner
+            row, col = chunk.origin
+            # record it
+            writer.writerow(
+                (
+                    host,
+                    dataset.pyre_name,
+                    row,
+                    col,
+                    chunk.address,
+                    chunk.bytes,
+                    raw,
+                    pageSize,
+                    first,
+                    last - first + 1,
+                )
+            )
+            # and remember it
+            chunks.append((chunk.address, chunk.bytes))
+        # sign on
+        channel.line(f"{dataset.pyre_name}:")
+        channel.line(f"  file: {strategy} strategy, pages of {pageSize / 2**20:g} MiB")
+        # if nothing was written
+        if not chunks:
+            # there is nothing else to say
+            channel.line(f"  none of its {grid} chunks were written")
+            # so bail
+            return
+        # the stored sizes, in order
+        sizes = sorted(size for _, size in chunks)
+        # their total
+        stored = sum(sizes)
+        # report the chunk table
+        channel.line(
+            f"  chunks: {len(chunks)} of {grid} written ({len(chunks) / grid:.0%}), "
+            f"{stored / 2**20:.1f} MiB stored"
+        )
+        # and the sizes, against the raw chunk
+        channel.line(
+            f"  chunk size: raw {raw / 2**20:.2f} MiB; stored median "
+            f"{sizes[len(sizes) // 2] / 2**20:.2f} MiB, from {sizes[0] / 2**10:.1f} KiB "
+            f"to {sizes[-1] / 2**20:.2f} MiB; compression {raw * len(sizes) / stored:.2f}x"
+        )
+        # a file without pages is read in byte ranges, so the rest does not apply
+        if not pageSize:
+            # say so
+            channel.line("  the file is not paged; a reader fetches each chunk as one range")
+            # and bail
+            return
+        # the bytes of this dataset on each page, and the chunks that touch it
+        fill = {}
+        tenants = {}
+        # the number of pages each chunk spans
+        spans = []
+        # go through the chunks
+        for address, size in chunks:
+            # the pages it lands on
+            first = address // pageSize
+            last = (address + size - 1) // pageSize
+            # remember the span
+            spans.append(last - first + 1)
+            # and apportion its bytes among them
+            for page in range(first, last + 1):
+                # the part of the chunk that falls on this page
+                start = max(address, page * pageSize)
+                end = min(address + size, (page + 1) * pageSize)
+                # adds to its fill
+                fill[page] = fill.get(page, 0) + end - start
+                # and the chunk is one of its tenants
+                tenants[page] = tenants.get(page, 0) + 1
+        # tally the spans
+        histogram = {}
+        # by number of pages
+        for span in spans:
+            # lumping everything past three together
+            key = span if span < 3 else 3
+            # count it
+            histogram[key] = histogram.get(key, 0) + 1
+        # report them
+        channel.line(
+            "  pages per chunk: "
+            + ", ".join(
+                f"{'3+' if key == 3 else key}: {count} ({count / len(spans):.0%})"
+                for key, count in sorted(histogram.items())
+            )
+        )
+        # the bytes a reader that fetches whole pages moves to read each chunk on its own
+        alone = sum(spans) * pageSize
+        # and the bytes it moves to read them all, with every page fetched once
+        together = len(fill) * pageSize
+        # report the amplification of both
+        channel.line(
+            f"  read amplification: {alone / stored:.2f}x reading one chunk at a time, "
+            f"{together / stored:.2f}x reading every chunk with each page fetched once"
+        )
+        # the occupancy of the pages that hold any of this dataset
+        occupancy = sorted(size / pageSize for size in fill.values())
+        # report it
+        channel.line(
+            f"  pages: {len(fill)} hold part of it; the dataset fills a median of "
+            f"{occupancy[len(occupancy) // 2]:.0%} of each, and "
+            f"{sum(1 for share in occupancy if share >= 0.9) / len(occupancy):.0%} of them "
+            f"at least 90%"
+        )
+        # and how crowded they are
+        channel.line(
+            f"  tenants: a median of {sorted(tenants.values())[len(tenants) // 2]} chunks per "
+            f"page, at most {max(tenants.values())}"
+        )
+        # all done
+        return
+
     # implementation details: the whole dataset pass
     def _thumbnail(self, dataset):
         """
@@ -678,33 +920,31 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             return self._anchors[name]
         # unpack the extent
         rows, cols = tuple(dataset.shape)
-        # the center, which is also the fallback
+        # the center, where the measurement goes if no window finds data
         anchor = (rows // 2, cols // 2)
-        # a flavor that cannot sample is measured at its center
-        if hasattr(dataset, "sample"):
-            # the window is the preferred tile, kept inside the raster
-            span = tuple(min(width, axis) for width, axis in zip(tuple(dataset.tile), (rows, cols)))
-            # plan a fine grid of windows over the extent, nearest the center first
-            candidates = sorted(
-                qed.readers.windows(dataset=dataset, stops=16),
-                key=lambda o: (o[0] + span[0] / 2 - rows / 2) ** 2
-                + (o[1] + span[1] / 2 - cols / 2) ** 2,
-            )
-            # go through them
-            for origin in candidates:
-                # read one at full resolution
-                count, *_ = dataset.sample(zoom=(0, 0), origin=origin, shape=span)
-                # the first one that holds data
-                if count > 0:
-                    # anchors the measurement at its center
-                    anchor = (origin[0] + span[0] // 2, origin[1] + span[1] // 2)
-                    # and ends the search
-                    break
-            # if none did
-            else:
-                # the measurement will be of fill, so say so
-                warning = journal.warning("qed.measure")
-                warning.log(f"found no data in '{name}'; measuring at its center")
+        # the window is the preferred tile, kept inside the raster
+        span = tuple(min(width, axis) for width, axis in zip(tuple(dataset.tile), (rows, cols)))
+        # plan a fine grid of windows over the extent, nearest the center first
+        candidates = sorted(
+            qed.readers.windows(dataset=dataset, stops=16),
+            key=lambda o: (o[0] + span[0] / 2 - rows / 2) ** 2
+            + (o[1] + span[1] / 2 - cols / 2) ** 2,
+        )
+        # go through them
+        for origin in candidates:
+            # read one at full resolution
+            count, *_ = dataset.sample(zoom=(0, 0), origin=origin, shape=span)
+            # the first one that holds data
+            if count > 0:
+                # anchors the measurement at its center
+                anchor = (origin[0] + span[0] // 2, origin[1] + span[1] // 2)
+                # and ends the search
+                break
+        # if none did
+        else:
+            # the measurement will be of fill, so say so
+            warning = journal.warning("qed.measure")
+            warning.log(f"found no data in '{name}'; measuring at its center")
         # remember it
         self._anchors[name] = anchor
         # and hand it off
@@ -882,13 +1122,10 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
 
     def _probed(self, dataset):
         """
-        The windows of {dataset} the server samples at first contact, as (row, col, height,
-        width) at full resolution
+        The windows of {dataset} the probe samples when the server makes first contact, as
+        (row, col, height, width) at full resolution; a flavor that tunes itself some other way
+        loses nothing but a few candidate tiles by staying clear of them too
         """
-        # a flavor that cannot sample is not probed
-        if not hasattr(dataset, "sample"):
-            # so there is nothing to stay clear of
-            return []
         # the window is the preferred tile, kept inside the raster, just as the probe has it
         height, width = (min(w, a) for w, a in zip(tuple(dataset.tile), tuple(dataset.shape)))
         # the probe plans its windows with its own default density, and so does this
@@ -1219,6 +1456,19 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "median_ms",
         "p95_ms",
         "failures",
+    )
+    # the column labels of the chunk layout records
+    _pageHeaders = (
+        "host",
+        "dataset",
+        "row",
+        "col",
+        "address",
+        "bytes",
+        "raw",
+        "page_size",
+        "first_page",
+        "pages",
     )
 
 
