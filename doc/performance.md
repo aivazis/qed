@@ -148,6 +148,13 @@ out the tiles that cover the windows the server samples at first contact, since 
 that sampled them would serve them from its caches. `etc/perf/measure-s3.py` runs the whole
 program against a product in S3 with these settings and packs the results.
 
+`measure pages` reads the chunk table of each dataset and the page size of its file, and reports
+how the chunks sit on the pages: how many were written, how well they compress, how many pages
+each one spans, how full those pages are, and the read amplification of a driver that fetches
+whole pages, e.g. `ros3`, both for a chunk read on its own and for the whole dataset read with
+every page fetched once. It reads only metadata, and records one line per chunk next to the other
+measurement records.
+
 ## Measurement categories
 
 Each section records its own setup, raw numbers, the `a`/`b` fit, the wall/cpu character, and the
@@ -167,17 +174,23 @@ line to fit. `wall ≈ cpu` throughout (gap 0%), confirming the fetch is compute
 Warm memmap fetch is, as predicted, free; the cold/faulted-in case is not yet measured (requires
 eviction discipline the harness does not yet have).
 
-**HDF5, local disk, warm** (7.6 GB NISAR GSLC, complex64, 4 GB page buffer, file resident in the
-page cache after the first pass): at zoom 0 the slopes match memmap exactly — amplitude ~3.4,
-phase ~16.4 ns/px — the fetch disappears into the pipeline. Zooming out changes that: at zoom 1
-amplitude jumps to ~24 ns/px and phase to ~36; at zoom 2, ~30 and ~43. The fetch is no longer
-free even fully warm: the strided hyperslab must run the libhdf5 machinery over 4× and 16× the
-source cells, and it multiplies the zoomed-out render cost by up to ~9× over memmap. Read per
-*source cell* the marginal cost falls with zoom (~5.2 ns/cell at zoom 1, ~1.6 at zoom 2),
-pointing at chunk-granularity costs amortizing — the decimate-during-fetch question of category 2
-is live for this modality. Still `wall ≈ cpu` throughout: warm HDF5 is bound on decompression and
-library work, not waiting. The cold first-touch and the S3/`ros3` cases — where the wall−cpu gap
-should finally open — remain unmeasured.
+**HDF5, local disk** (7.6 GB NISAR GSLC, 76752² complex64 in compressed 512² chunks, file
+resident in the page cache, every point in a fresh process, 512² tiles aimed at data). The first
+round of these sweeps placed its tiles at the corner of the raster, which in this geocoded product
+is fill: chunks that were never written, which the library answers with the fill value without
+reading or decompressing anything. Those numbers measured fill and were discarded. On data:
+
+| zoom | amplitude | phase |
+|------|-----------|-------|
+| 0 | 6.3 ms, 24 ns/px | 13.8 ms, 53 ns/px |
+| 1 | 27 ms, 104 ns/px | 36 ms, 137 ns/px |
+| 2 | 92 ms, 351 ns/px | 100 ms, 381 ns/px |
+
+The fetch costs ~22–26 ns per *source cell* at every zoom, so it dominates even at zoom 0 (~21
+ns/px against ~3 for the amplitude pipeline), and a zoomed-out tile grows 4× per level: one pass
+continued the series to 0.29 s, 1.05 s, 3.8 s, and 9.5 s at zooms 3 through 6. `wall ≈ cpu`
+throughout: the work is decompressing every chunk under the tile, not waiting. The pyramid takes
+the zoomed-out cases off the product entirely.
 
 Four modalities, swept against storage layout, on the *vary-zoom* axis (per-source-element):
 
