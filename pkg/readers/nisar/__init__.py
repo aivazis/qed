@@ -12,6 +12,7 @@ from . import daac
 
 # publish the readers
 from .Pyramid import Pyramid as pyramid
+from .H5 import H5 as h5
 
 from .L0A import L0A as l0a
 
