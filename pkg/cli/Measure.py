@@ -20,6 +20,7 @@ import socket
 import statistics
 import subprocess
 import tarfile
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -1280,11 +1281,16 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             for span, zoom in self._points(dataset=dataset):
                 # show me
                 channel.line(f"  {dataset.pyre_name}.{name}: {span}x{span} @ zoom {zoom}")
+                # the clocks of the trials
+                wallclock = qed.timers.wall("qed.measure.tile.wall")
+                cpuclock = qed.timers.cpu("qed.measure.tile.cpu")
                 # repeat the point
                 for trial in range(self.trials):
-                    # read the clocks
-                    wall = time.perf_counter()
-                    cpu = time.process_time()
+                    # start both clocks afresh
+                    wallclock.reset()
+                    cpuclock.reset()
+                    wallclock.start()
+                    cpuclock.start()
                     # render the tile through the full pipeline, encoder included
                     dataset.render(
                         channel=pipeline,
@@ -1292,9 +1298,12 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                         origin=self._origin(dataset=dataset, span=span, zoom=zoom),
                         shape=(span, span),
                     )
-                    # read the clocks again
-                    wall = (time.perf_counter() - wall) * 1000
-                    cpu = (time.process_time() - cpu) * 1000
+                    # stop the clocks
+                    wallclock.stop()
+                    cpuclock.stop()
+                    # and read them
+                    wall = wallclock.ms()
+                    cpu = cpuclock.ms()
                     # the two denominators: output pixels drawn, source cells touched
                     pixels = span * span
                     cells = pixels * 4**zoom
@@ -1880,8 +1889,11 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         latencies = []
         # and the failure count
         failures = 0
-        # read the clock
-        start = time.perf_counter()
+        # the clock of the batch
+        clock = qed.timers.wall("qed.measure.swarm.batch")
+        # started afresh
+        clock.reset()
+        clock.start()
         # make the client pool
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
             # fetch everything
@@ -1894,17 +1906,21 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 else:
                     # collect it
                     latencies.append(latency)
-        # read the clock again
-        elapsed = (time.perf_counter() - start) * 1000
+        # stop the clock
+        clock.stop()
         # all done
-        return elapsed, latencies, failures
+        return clock.ms(), latencies, failures
 
     def _pull(self, url):
         """
         Fetch one tile and return its latency in ms, or None on failure
         """
-        # read the clock
-        start = time.perf_counter()
+        # the clock of this request; the requests run in the threads of the client pool, and
+        # the registry hands out one timer per name, so each thread gets a clock of its own
+        clock = qed.timers.wall(f"qed.measure.swarm.request.{threading.get_ident()}")
+        # started afresh
+        clock.reset()
+        clock.start()
         # attempt to
         try:
             # fetch the tile; a small team behind many clients over a remote product can keep
@@ -1914,10 +1930,14 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 response.read()
         # a request that failed at any level
         except (urllib.error.URLError, TimeoutError, ConnectionError):
-            # yields no latency
+            # stops the clock
+            clock.stop()
+            # and yields no latency
             return None
-        # report the round trip
-        return (time.perf_counter() - start) * 1000
+        # stop the clock
+        clock.stop()
+        # and report the round trip
+        return clock.ms()
 
     def _stop(self, process, log):
         """
@@ -2314,17 +2334,20 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # make first contact before the clock starts, so the time is the build's alone
             self._stage()
             # selecting the dataset is what starts the build, so the clock starts here
-            start = time.perf_counter()
+            clock = qed.timers.wall(f"qed.measure.pyramid.team{team}")
+            # afresh
+            clock.reset()
+            clock.start()
             # drive the selections the way the client would
             self._select(reader=reader, dataset=dataset, channel=name)
             # watch the preparation, but not forever
-            while time.perf_counter() - start < self._buildPatience:
+            while clock.sec() < self._buildPatience:
                 # ask the server how it is going
                 reply = self._graphql(query="{ qed { views { preparation } } }")
                 # the state of the view i drove
                 status = reply["data"]["qed"]["views"][0]["preparation"] or "none"
                 # the time so far
-                elapsed = time.perf_counter() - start
+                elapsed = clock.sec()
                 # a seeded build, or one that got past it, has been seeded
                 if seeded is None and status in ("seeded", "ready"):
                     # so note when
@@ -2345,6 +2368,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             else:
                 # say so
                 status = f"{status}, gave up after {self._buildPatience} s"
+            # the build is over, one way or another
+            clock.stop()
         # no matter how the build went
         finally:
             # bring the server down
