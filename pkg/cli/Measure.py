@@ -7,11 +7,17 @@
 # externals
 import concurrent.futures
 import csv
+import datetime
 import journal
 import json
 import math
 import os
+import pyre
+import selectors
+import shutil
+import socket
 import subprocess
+import tarfile
 import time
 import urllib.error
 import urllib.request
@@ -115,6 +121,30 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     resolution = qed.properties.int()
     resolution.default = 2048
     resolution.doc = "the target long axis of the decimated whole-dataset pass"
+
+    # the s3 program; not {product}, since the program registers its granule under that name,
+    # and panel traits alias globally
+    granule = qed.properties.str()
+    granule.default = None
+    granule.doc = "the s3 uri of the NISAR granule the s3 program measures"
+
+    flavor = qed.properties.str()
+    flavor.default = "gslc"
+    flavor.validators = qed.constraints.isMember(
+        "rslc", "rifg", "runw", "roff", "gslc", "gunw", "gcov", "goff"
+    )
+    flavor.doc = "the NISAR reader that understands the granule of the s3 program"
+
+    depth = qed.properties.int()
+    depth.default = 6
+    depth.doc = "the deepest zoom level of the s3 zoom ladder; 6 is the deepest the client asks for"
+
+    results = qed.properties.path()
+    results.default = None
+    results.doc = (
+        "the directory that collects the results of the s3 program; unset names one after the "
+        "host and the time"
+    )
 
     # interface
     @qed.export(tip="sweep tile generation and record the cost of each request")
@@ -442,6 +472,204 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         channel.log()
         # all done
         return 0
+
+    @qed.export(tip="measure tile generation from a NISAR granule in an S3 bucket")
+    def s3(self, plexus, **kwds):
+        """
+        Measure tile generation from the NISAR {granule} in an S3 bucket: the page layout of
+        the file, the cost of a tile at every zoom level the client requests, the cost of each
+        tile size, the fit of the cost model, and the throughput of a server as a function of
+        its team size, with everything collected in a fresh {results} directory that is packed
+        into a tarball at the end
+
+        Each measurement runs in a fresh process, so no cache carries over from one to the
+        next. The run takes a while, so start it under nohup or inside tmux
+        """
+        # make a channel for the problems that stop the program before it starts
+        error = journal.error("qed.measure.s3")
+        # a granule is required
+        if self.granule is None:
+            # so complain
+            error.log("no granule to measure; point {granule} at its s3 uri")
+            # and bail
+            return 1
+        # and it has to be in a bucket
+        if not self.granule.startswith("s3://"):
+            # or else this is the wrong program
+            error.log(f"'{self.granule}' is not an s3 uri")
+            # so bail
+            return 1
+        # the measurements run in child processes of the installed qed
+        if shutil.which("qed") is None:
+            # so it must be on the path
+            error.log("there is no 'qed' on the path to run the measurements")
+            # or there is nothing to measure with
+            return 1
+        # the swarms launch servers on my port
+        if not self._s3port():
+            # which somebody else holds
+            error.log(f"port {self.port} is taken; pick another with {{port}}")
+            # so bail
+            return 1
+        # the reader, read here so its validator runs before anything is spent
+        flavor = self.flavor
+        # the directory that collects the results
+        results = self._s3results()
+        # a directory that exists already would mix records from different runs
+        if results.exists():
+            # so refuse it
+            error.log(f"'{results}' already exists")
+            # and bail
+            return 1
+        # make it
+        results.mkdir(parents=True)
+
+        # make a channel for the progress of the program
+        channel = journal.info("qed.measure.s3")
+        # which reaches the console and the run log alike
+        channel.device = journal.tee(paths=[str(results / "run.log")])
+        # the number of cores, which caps the team sizes
+        cores = os.cpu_count()
+        # the team sizes the machine can staff
+        teams = [size for size in self.crews if size <= cores]
+        # say what is about to happen
+        channel.line(f"on {self.pyre_host.nickname}, {cores} cores")
+        channel.line(f"granule {self.granule} as nisar.{flavor}")
+        channel.line(f"results in {results}")
+        # flush
+        channel.log()
+
+        # record the installation, so the numbers can be tied to the code that produced them
+        self._s3about(channel=channel, results=results)
+        # write the configuration every measurement reads
+        self._s3configure(results=results)
+        # find out what the granule holds, which also checks that it can be reached at all
+        datasets = self._s3survey()
+        # keep the description of the granule
+        with open(results / "product.txt", mode="w") as stream:
+            # one dataset per line
+            for name, shape, tile, channels in datasets:
+                # with its shape, its tile, and its channels
+                stream.write(
+                    f"{name} {shape[0]}x{shape[1]} {tile[0]}x{tile[1]} {','.join(channels)}\n"
+                )
+                # and show it
+                channel.line(
+                    f"{name} {shape[0]}x{shape[1]} {tile[0]}x{tile[1]} {','.join(channels)}"
+                )
+        # flush
+        channel.log()
+        # choose what to measure
+        target = self._s3pick(datasets=datasets)
+        # if the granule lacks what was asked for
+        if target is None:
+            # the reason has been reported; pack what there is, so the record is complete
+            self._s3pack(channel=channel, results=results)
+            # and bail
+            return 1
+        # unpack the choice
+        dataset, name = target
+        # say what will be measured
+        channel.log(f"measuring {dataset}, channel {name}")
+
+        # the restrictions every measurement shares
+        restrictions = ["--only=product", f"--rasters={dataset}", f"--channels={name}"]
+        # the measurements that did not complete
+        failures = []
+
+        # the layout of the chunks on the pages of the file, which says how many bytes the
+        # driver fetches for every byte a tile needs; it reads nothing but metadata
+        self._s3run(
+            channel=channel,
+            results=results,
+            label="page occupancy",
+            args=["pages", "--only=product", f"--output={results / 'layout.csv'}"],
+            failures=failures,
+        )
+        # the zoom levels: a 512 tile, the one the client asks for, at every decimation the
+        # client requests, each point in a fresh process so nothing is served from a cache
+        for trial in range(1, self.trials + 1):
+            # measure
+            self._s3run(
+                channel=channel,
+                results=results,
+                label=f"zoom ladder, pass {trial} of {self.trials}",
+                args=[
+                    "tile",
+                    *restrictions,
+                    "--shapes=9,10",
+                    f"--zooms=0,{self.depth + 1}",
+                    "--cold=yes",
+                    "--sample=no",
+                    f"--output={results / 'tiles.csv'}",
+                ],
+                failures=failures,
+            )
+        # the tile sizes: 256 through 2048 at full resolution, which separates the fixed cost
+        # of a request from the cost of each pixel
+        for trial in range(1, self.trials + 1):
+            # measure
+            self._s3run(
+                channel=channel,
+                results=results,
+                label=f"shape ladder, pass {trial} of {self.trials}",
+                args=[
+                    "tile",
+                    *restrictions,
+                    "--shapes=8,12",
+                    "--zooms=0,1",
+                    "--cold=yes",
+                    "--sample=no",
+                    f"--output={results / 'tiles.csv'}",
+                ],
+                failures=failures,
+            )
+        # fit the cost model to everything the ladders recorded
+        self._s3run(
+            channel=channel,
+            results=results,
+            label="fit",
+            args=["fit", f"--output={results / 'tiles.csv'}"],
+            failures=failures,
+        )
+        # the team sizes: a server per size, full resolution tiles of 512, every concurrency
+        # level served tiles nobody has fetched, and no pyramid, so every tile is read from the
+        # bucket
+        for team in teams:
+            # measure
+            self._s3run(
+                channel=channel,
+                results=results,
+                label=f"swarm with a team of {team}",
+                args=[
+                    "swarm",
+                    *restrictions,
+                    "--shapes=9,10",
+                    "--zooms=0,1",
+                    f"--team={team}",
+                    f"--clients={','.join(map(str, self.clients))}",
+                    f"--tiles={self.tiles}",
+                    "--warm=no",
+                    "--levels=no",
+                    "--sample=no",
+                    f"--port={self.port}",
+                    f"--output={results / f'swarm-team{team}.csv'}",
+                ],
+                failures=failures,
+            )
+
+        # say it is over
+        channel.line("done")
+        # and list whatever did not complete, so a partial result is never mistaken for a whole
+        for label in failures:
+            # one per line
+            channel.line(f"incomplete: {label}")
+        # flush
+        channel.log()
+        # pack the results
+        self._s3pack(channel=channel, results=results)
+        # report failures through the exit status too
+        return 1 if failures else 0
 
     # implementation details: page occupancy
     def _rasters(self, plexus):
@@ -1421,7 +1649,278 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # all done
         return
 
+    # implementation details: the s3 program
+    def _s3port(self):
+        """
+        Check that my {port} is free for the servers the swarms launch
+        """
+        # make a socket
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+            # attempt to
+            try:
+                # claim the port
+                probe.bind(("127.0.0.1", self.port))
+            # if somebody else has it
+            except OSError:
+                # it is not free
+                return False
+        # otherwise, it is
+        return True
+
+    def _s3results(self):
+        """
+        The directory that collects the results: my {results}, or one named after the host and
+        the time
+        """
+        # if one was named
+        if self.results is not None:
+            # use it
+            return self.results.resolve()
+        # otherwise, stamp one with the host and the time
+        stamp = f"qed-measure-{self.pyre_host.nickname}-{datetime.datetime.now():%Y%m%d-%H%M%S}"
+        # in the current directory
+        return qed.primitives.path(stamp).resolve()
+
+    def _s3about(self, channel, results):
+        """
+        Record the versions and revisions of qed and the pyre underneath it in {results}
+        """
+        # what qed says about its libraries and bindings, from the installation the
+        # measurements run
+        about = subprocess.run(
+            ["qed", "--shell=script", "about", "version"],
+            cwd=results,
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+        )
+        # and the pyre this process runs on, which is the one the measurements load as well
+        version = ".".join(map(str, pyre.meta.version[:3]))
+        # assemble the record
+        record = about.stdout + about.stderr + f"pyre: {version} rev {pyre.meta.revision}\n"
+        # keep it
+        with open(results / "about.txt", mode="w") as stream:
+            # all of it
+            stream.write(record)
+        # show it
+        for line in record.splitlines():
+            # one line at a time
+            channel.line(line)
+        # flush
+        channel.log()
+        # all done
+        return
+
+    def _s3configure(self, results):
+        """
+        Write the configuration every measurement reads into {results}: the granule and its
+        reader, and nothing else, since the credentials come from the standard AWS chain
+        """
+        # the settings
+        settings = (
+            "# -*- yaml -*-\n"
+            "\n"
+            "# the granule under measurement\n"
+            "product:\n"
+            f"    uri: {self.granule}\n"
+            "\n"
+            "# register it\n"
+            "datasets:\n"
+            f"    - nisar.{self.flavor}#product\n"
+        )
+        # write them
+        with open(results / "qed.yaml", mode="w") as stream:
+            # all at once
+            stream.write(settings)
+        # all done
+        return
+
+    def _s3survey(self):
+        """
+        Open my {granule} and list its datasets as (name, shape, tile, channels)
+        """
+        # build the reader the way the configuration does; {flavor} is one of the readers
+        # its validator allows
+        reader = getattr(qed.readers.nisar, self.flavor)(name="product", uri=self.granule)
+        # make first contact, without the statistics
+        reader.open(measure=False)
+        # describe each dataset
+        found = [
+            (
+                dataset.pyre_name,
+                tuple(dataset.shape),
+                tuple(dataset.tile),
+                tuple(dataset.channels.keys()),
+            )
+            for dataset in reader.datasets
+        ]
+        # let go of the granule, so its handles close before the measurements start
+        del reader
+        # hand off the description
+        return found
+
+    def _s3pick(self, datasets):
+        """
+        Choose the dataset and channel to measure: the first of my {rasters} and {channels}, or
+        else the largest dataset, preferring one with an amplitude channel, and its amplitude or
+        its first channel
+        """
+        # make a channel for what the granule lacks
+        error = journal.error("qed.measure.s3")
+        # if a dataset was named
+        if self.rasters:
+            # the name, with or without the name of the granule in front
+            wanted = self.rasters[0]
+            # find it
+            chosen = [entry for entry in datasets if entry[0] in (wanted, f"product.{wanted}")]
+            # a dataset the granule does not have is a mistake
+            if not chosen:
+                # so say so
+                error.log(f"the granule has no dataset '{wanted}'")
+                # and give up
+                return None
+            # otherwise, it is the one
+            name, _, _, channels = chosen[0]
+        # otherwise
+        else:
+            # rank the datasets: amplitude first, then size
+            name, _, _, channels = max(
+                datasets, key=lambda entry: ("amplitude" in entry[3], entry[1][0] * entry[1][1])
+            )
+        # if a channel was named
+        if self.channels:
+            # it is the one
+            pipeline = self.channels[0]
+            # but a channel the dataset does not have is a mistake
+            if pipeline not in channels:
+                # so say so
+                error.log(f"'{name}' has no channel '{pipeline}'; it has {channels}")
+                # and give up
+                return None
+        # otherwise
+        else:
+            # amplitude if there is one, else the first
+            pipeline = "amplitude" if "amplitude" in channels else channels[0]
+        # hand off the choice
+        return name, pipeline
+
+    def _s3run(self, channel, results, label, args, failures):
+        """
+        Run one measurement in a fresh process from {results}, passing its output to {channel}
+        and noting a failure in {failures} instead of abandoning the measurements to come
+        """
+        # say what is starting
+        channel.log(label)
+        # launch the panel from the results directory, so the child reads its configuration
+        process = subprocess.Popen(
+            ["qed", "--shell=script", "measure", *args],
+            cwd=results,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+        # pass its output along as it arrives
+        self._s3relay(channel=channel, process=process)
+        # wait for it to finish
+        status = process.wait()
+        # if it failed
+        if status != 0:
+            # say so
+            channel.log(f"{label} failed with status {status}")
+            # and remember it for the summary
+            failures.append(label)
+        # all done
+        return
+
+    def _s3relay(self, channel, process):
+        """
+        Pass the output of the child {process} to {channel} as it arrives, one entry for each
+        entry the child makes, so the console and the run log see it as it happens
+        """
+        # watch the output of the child
+        watcher = selectors.DefaultSelector()
+        # for something to read
+        watcher.register(process.stdout, selectors.EVENT_READ)
+        # the lines of the entry being assembled
+        entry = []
+        # and whatever trails the last complete line
+        pending = b""
+        # until the child closes its output
+        while True:
+            # wait a little for more
+            ready = watcher.select(timeout=self._s3quiet)
+            # if the child has been quiet for that long
+            if not ready:
+                # what it said so far is a whole entry
+                self._s3flush(channel=channel, entry=entry)
+                # and wait some more
+                continue
+            # read what is there
+            chunk = os.read(process.stdout.fileno(), 1 << 16)
+            # if there is nothing, the child is done
+            if not chunk:
+                # so stop listening
+                break
+            # split off the complete lines, keeping the tail for the next read
+            *lines, pending = (pending + chunk).split(b"\n")
+            # go through the complete ones
+            for line in lines:
+                # decode it
+                text = line.decode(errors="replace")
+                # a line that is not indented opens a new entry of the child
+                if text and not text[0].isspace():
+                    # so whatever came before it is a whole entry
+                    self._s3flush(channel=channel, entry=entry)
+                # add the line to the entry being assembled
+                entry.append(text)
+        # a last line without a newline still belongs to the output
+        if pending:
+            # so keep it
+            entry.append(pending.decode(errors="replace"))
+        # and flush whatever is left
+        self._s3flush(channel=channel, entry=entry)
+        # stop watching
+        watcher.close()
+        # all done
+        return
+
+    def _s3flush(self, channel, entry):
+        """
+        Emit the lines of {entry} as one entry of {channel}, and empty it
+        """
+        # if there is nothing to say
+        if not entry:
+            # say nothing
+            return
+        # go through the lines
+        for line in entry:
+            # add each one
+            channel.line(line)
+        # make the entry
+        channel.log()
+        # and start over
+        entry.clear()
+        # all done
+        return
+
+    def _s3pack(self, channel, results):
+        """
+        Pack the {results} directory into a tarball next to it
+        """
+        # the tarball
+        tarball = results.parent / f"{results.name}.tar.gz"
+        # make it
+        with tarfile.open(tarball, mode="w:gz") as archive:
+            # with the whole directory, under its own name
+            archive.add(str(results), arcname=results.name)
+        # say where it is
+        channel.log(f"results packed in {tarball}")
+        # all done
+        return
+
     # private data
+    # how long the output of a measurement can pause before what it said counts as an entry
+    _s3quiet = 0.2
     # the cells that hold data, by dataset, found on first use
     _anchors = None
     # the column labels of the per-request records
