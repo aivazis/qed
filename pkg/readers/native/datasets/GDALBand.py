@@ -110,8 +110,8 @@ class GDALBand(
         # my statistics here would silently ignore them
         low = channel.range.low
         high = channel.range.high
-        # zoom
-        zoomedTile = tile[:: scale[1], :: scale[0]]
+        # zoom: the rows of the tile stride by the vertical scale, its columns by the horizontal
+        zoomedTile = tile[:: scale[0], :: scale[1]]
         # render a tile and return it
         return channel.gdal(source=zoomedTile, shape=shape, low=low, high=high)
 
