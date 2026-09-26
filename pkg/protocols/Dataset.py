@@ -41,5 +41,15 @@ class Dataset(Specification, family="qed.datasets"):
     tile = qed.properties.tuple(schema=qed.properties.int())
     tile.doc = "the preferred shape of dataset subsets"
 
+    # obligations
+    @qed.provides
+    def sample(self, zoom, origin, shape):
+        """
+        Collect a mergeable statistical sample of the tile at {origin}+{shape}, visiting exactly
+        the cells the render at {zoom} sees, as the record {(count, min, mean, m2, max)} of their
+        magnitudes; cells that hold no value are left out, and a tile of nothing but those
+        yields the empty record, which merges into an accumulator without moving it
+        """
+
 
 # end of file
