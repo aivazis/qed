@@ -23,6 +23,20 @@ namespace qed::isce2::unwrapped {
         typename sourceT::index_type origin,
         // the tile shape
         typename sourceT::shape_type tile) -> native::stats_t;
+
+    // collect a mergeable sample of the magnitudes of one band of a strided tile
+    template <typename sourceT>
+    auto sample(
+        // the source
+        const sourceT & source,
+        // the band to sample
+        long band,
+        // the origin of the tile in decimated coordinates, as (line, band, sample)
+        typename sourceT::index_type origin,
+        // the tile shape, as (lines, bands, samples)
+        typename sourceT::shape_type tile,
+        // the spacing of the samples in the source
+        typename sourceT::index_type stride) -> native::sample_t;
 }
 
 

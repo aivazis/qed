@@ -61,4 +61,63 @@ qed::isce2::unwrapped::stats(
 }
 
 
+// collect a mergeable sample of the magnitudes of one band of a strided tile
+template <typename sourceT>
+auto
+qed::isce2::unwrapped::sample(
+    // the source
+    const sourceT & source,
+    // the band to sample
+    long band,
+    // the origin of the tile in decimated coordinates
+    typename sourceT::index_type origin,
+    // the tile shape
+    typename sourceT::shape_type tile,
+    // the spacing of the samples in the source
+    typename sourceT::index_type stride) -> native::sample_t
+{
+    // my counters: the number of samples and the running mean and second moment
+    double count = 0.0, mean = 0.0, m2 = 0.0;
+    // the running extrema
+    double min = std::numeric_limits<double>::max();
+    double max = std::numeric_limits<double>::lowest();
+
+    // go through the lines of the tile
+    for (auto i = 0l; i < static_cast<long>(tile[0]); ++i) {
+        // and its samples
+        for (auto j = 0l; j < static_cast<long>(tile[2]); ++j) {
+            // project the tile cell onto the source, the way the render kernels do: the origin
+            // is in decimated coordinates, the stride spaces the samples, and the band is fixed
+            auto idx = typename sourceT::index_type { (origin[0] + i) * stride[0], band,
+                                                      (origin[2] + j) * stride[2] };
+            // compute the magnitude
+            double r = std::abs(static_cast<double>(source[idx]));
+            // if this is a nan
+            if (std::isnan(r)) {
+                // don't let it pollute the sample
+                continue;
+            }
+            // count the contribution
+            count += 1.0;
+            // fold it into the running mean and second moment, a la Welford
+            double delta = r - mean;
+            mean += delta / count;
+            m2 += delta * (r - mean);
+            // and update the extrema
+            min = std::min(min, r);
+            max = std::max(max, r);
+        }
+    }
+
+    // an empty sample, e.g. a tile of nothing but nans
+    if (count == 0.0) {
+        // contributes nothing; the accumulator skips it
+        return { 0.0, 0.0, 0.0, 0.0, 0.0 };
+    }
+
+    // all done
+    return { count, min, mean, m2, max };
+}
+
+
 // end of file
