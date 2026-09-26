@@ -15,6 +15,9 @@ nominal values. Probing a spread of windows across the extent costs about the sa
 finds the data wherever it sits
 """
 
+# externals
+import types
+
 # support
 import journal
 import pyre
@@ -67,11 +70,16 @@ assert amplitude.high is not None
 # a probe that finds nothing anywhere says so, and still yields a usable range: a linear
 # channel cannot render without one, so the nominal values are a deliberate fallback rather
 # than a measurement dressed up as one
-empty = qed.readers.native.datasets.mmap(
-    name="empty", hydrated=True, uri=f"file:{product}", cell="float32", shape=(4, 4)
+empty = types.SimpleNamespace(
+    # a name, for the complaint
+    pyre_name="empty",
+    # a small extent
+    shape=(4, 4),
+    # in a single tile
+    tile=(4, 4),
+    # whose every window holds nothing but fill
+    sample=lambda zoom, origin, shape: (0, 0.0, 0.0, 0.0, 0.0),
 )
-# a hydrated twin holds no payload, so its sampler reports nothing for every window
-empty.sample = lambda zoom, origin, shape: (0, 0.0, 0.0, 0.0, 0.0)
 # the complaint is the point, so let it out where a human would see it, but not here
 journal.warning("qed.readers.statistics").deactivate()
 # probe it
