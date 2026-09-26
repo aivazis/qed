@@ -25,6 +25,7 @@ tests.qed.pkg.persist_empty.clean := persist_empty_ws
 tests.qed.pkg.persist_reader.clean := persist_reader_ws
 # the seed driver writes the unwrapped product it measures
 tests.qed.pkg.measured.clean := measured.unw
+tests.qed.pkg.sample_isce2.clean := sample.unw sample.int
 tests.qed.pkg.persist_reboot.pre := tests.qed.pkg.persist
 
 
