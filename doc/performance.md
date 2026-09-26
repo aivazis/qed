@@ -166,6 +166,19 @@ chunks that follow each other on a page are also neighbors on the raster. It rea
 records one line per chunk in `{output}-pages.csv` and one summary line per dataset in
 `{output}-occupancy.csv`.
 
+`measure census` runs `measure pages` on a sample of the NISAR products in a bucket: `--quota`
+granules of each of the `--kinds` of product, spread evenly over the dates on offer under
+`--bucket`, each in a fresh process, `--workers` at a time. Every granule gets a folder of its own,
+and `census.csv` collects the summary of every dataset with its kind, granule, size, and processing
+version; the run log reports the medians of each kind. Only metadata is read, so a census next to
+the data is cheap.
+
+`measure pyramid` builds the pyramid of a dataset from scratch with a server of each of the
+`--crews` sizes, and records the seconds from the selection of the dataset until the view is
+seeded and until every level is built, with the space the levels take on disk. Each build works out
+of a folder of its own, so none finds the levels of another, and the levels are removed once
+measured. `measure s3` ends with it, so a product in a bucket gets the cost of reading all of it.
+
 ## Measurement categories
 
 Each section records its own setup, raw numbers, the `a`/`b` fit, the wall/cpu character, and the
