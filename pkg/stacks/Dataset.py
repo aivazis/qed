@@ -81,6 +81,27 @@ class Dataset(qed.flow.product, family="qed.datasets.stack", implements=qed.prot
             **kwds,
         )
 
+    @qed.export
+    def sample(self, zoom: tuple, origin: tuple, shape: tuple) -> tuple:
+        """
+        Collect a mergeable statistical sample of the tile at {origin}+{shape} over all my
+        members, visiting exactly the decimated footprint the render at this {zoom} sees
+        """
+        # the records of my members fold together exactly, whatever their order
+        accumulator = qed.ux.sample()
+        # go through my members
+        for member in self.members:
+            # and fold in the sample of each one
+            accumulator.merge(record=member.sample(zoom=zoom, origin=origin, shape=shape))
+        # hand off the combined record
+        return (
+            accumulator.count,
+            accumulator.min,
+            accumulator.mean,
+            accumulator.m2,
+            accumulator.max,
+        )
+
     def pipelines(self, context):
         """
         Build my aggregate visualization pipelines using the given naming {context}
