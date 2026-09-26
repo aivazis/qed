@@ -87,6 +87,7 @@ class BFPQSLC(Product, family="qed.datasets.nisar.products.bfpqslc"):
         # all done
         return
 
+    @qed.export
     def sample(self, zoom: tuple, origin: tuple, shape: tuple) -> tuple:
         """
         Collect a mergeable statistical sample of the tile at {origin}+{shape}, decoding the

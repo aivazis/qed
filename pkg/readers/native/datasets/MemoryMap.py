@@ -102,6 +102,7 @@ class MemoryMap(
         # render a tile and return it
         return channel.tile(source=self, zoom=zoom, origin=origin, shape=shape)
 
+    @qed.export
     def sample(self, zoom: tuple, origin: tuple, shape: tuple) -> tuple:
         """
         Collect a mergeable statistical sample of the tile at {origin}+{shape}, visiting

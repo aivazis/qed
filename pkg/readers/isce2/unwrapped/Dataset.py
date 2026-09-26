@@ -94,6 +94,19 @@ class Dataset(qed.flow.product, family="qed.datasets.isce2.unw", implements=qed.
         # render a tile and return it
         return channel.tile(source=self, zoom=zoom, origin=origin, shape=shape)
 
+    @qed.export
+    def sample(self, zoom: tuple, origin: tuple, shape: tuple) -> tuple:
+        """
+        Collect a mergeable statistical sample of the tile at {origin}+{shape}, visiting
+        exactly the decimated footprint the render at this {zoom} sees
+        """
+        # the render decimates by striding
+        stride = tuple(2**level for level in zoom)
+        # my magnitude is the amplitude, which is the first band of my line interleaved layout
+        return qed.libqed.isce2.unwrapped.sample(
+            source=self.data, band=0, origin=origin, shape=shape, stride=stride
+        )
+
     def summary(self):
         """
         Build a sequence of the important channels that form my summary view

@@ -115,6 +115,21 @@ class GDALBand(
         # render a tile and return it
         return channel.gdal(source=zoomedTile, shape=shape, low=low, high=high)
 
+    @qed.export
+    def sample(self, zoom: tuple, origin: tuple, shape: tuple) -> tuple:
+        """
+        Collect a mergeable statistical sample of the tile at {origin}+{shape}, visiting
+        exactly the decimated footprint the render at this {zoom} sees
+        """
+        # interpret the zoom level as a scale
+        scale = tuple(1 << level for level in zoom)
+        # read the footprint the render reads: every cell under the tile, at full resolution
+        tile = self.data.ReadAsArray(
+            scale[1] * origin[1], scale[0] * origin[0], scale[1] * shape[1], scale[0] * shape[0]
+        )
+        # sample the strided footprint and return the mergeable record
+        return qed.libqed.native.sample(source=tile, origin=(0, 0), shape=shape, stride=scale)
+
     def summary(self):
         """
         Build a sequence of the important channels that form my summary view
