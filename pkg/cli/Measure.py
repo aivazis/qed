@@ -17,6 +17,7 @@ import pyre
 import selectors
 import shutil
 import socket
+import statistics
 import subprocess
 import tarfile
 import time
@@ -25,6 +26,9 @@ import urllib.request
 
 # support
 import qed
+
+# the NISAR readers the programs that measure products in a bucket know about
+FLAVORS = ("rslc", "rifg", "runw", "roff", "gslc", "gunw", "gcov", "goff")
 
 
 # declaration
@@ -131,9 +135,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
 
     flavor = qed.properties.str()
     flavor.default = "gslc"
-    flavor.validators = qed.constraints.isMember(
-        "rslc", "rifg", "runw", "roff", "gslc", "gunw", "gcov", "goff"
-    )
+    flavor.validators = qed.constraints.isMember(*FLAVORS)
     flavor.doc = "the NISAR reader that understands the granule of the s3 program"
 
     depth = qed.properties.int()
@@ -143,9 +145,38 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     results = qed.properties.path()
     results.default = None
     results.doc = (
-        "the directory that collects the results of the s3 program; unset names one after the "
-        "host and the time"
+        "the directory that collects the results of the s3 program or the census; unset names "
+        "one after the kind of run, the host, and the time"
     )
+
+    # the census of the layout of the NISAR products in a bucket
+    bucket = qed.properties.str()
+    bucket.default = "s3://nisar-ops-rs-fwd/products/"
+    bucket.doc = (
+        "the prefix under which the census finds the NISAR products, laid out by kind, date, "
+        "and granule"
+    )
+
+    kinds = qed.properties.strings()
+    kinds.default = [
+        "L1_L_RSLC",
+        "L1_L_RIFG",
+        "L1_L_RUNW",
+        "L1_L_ROFF",
+        "L2_L_GSLC",
+        "L2_L_GUNW",
+        "L2_L_GCOV",
+        "L2_L_GOFF",
+    ]
+    kinds.doc = "the kinds of product the census measures, named the way the bucket names them"
+
+    quota = qed.properties.int()
+    quota.default = 24
+    quota.doc = "the number of granules of each kind the census measures, spread over the dates"
+
+    workers = qed.properties.int()
+    workers.default = 8
+    workers.doc = "the number of granules the census measures at the same time"
 
     # interface
     @qed.export(tip="sweep tile generation and record the cost of each request")
@@ -424,6 +455,88 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # all done
         return 0
 
+    @qed.export(tip="measure the construction of the pyramid of a dataset against team size")
+    def pyramid(self, plexus, **kwds):
+        """
+        Build the pyramid of the first dataset the restrictions allow with a server of each of
+        my {crews} sizes, from scratch every time, and record how long it takes until the view
+        is worth looking at and until every level is built
+
+        Each server works out of a folder of its own next to the measurement records, so no
+        build finds the levels of an earlier one; once their size is on record the levels are
+        removed, since a sweep would otherwise keep several copies of a pyramid that can be as
+        large as the product, and the folder keeps the log of the server
+        """
+        # make a channel
+        channel = journal.info("qed.measure.pyramid")
+        # pick the first target the restrictions allow
+        first = next(self._targets(plexus=plexus), None)
+        # if there is none
+        if first is None:
+            # complain
+            error = journal.error("qed.measure.pyramid")
+            error.log("no dataset to measure; check the configuration and the restrictions")
+            # and bail
+            return 1
+        # unpack the target
+        reader, dataset, name, _ = first
+        # the records land next to the others
+        stem = os.path.splitext(self.output)[0]
+        # the host label that lets records from different machines share a file
+        host = self.pyre_host.nickname
+        # the configuration the servers read is the one in effect here
+        configuration = os.path.join(os.getcwd(), "qed.yaml")
+        # go through the team sizes
+        for team in self.crews:
+            # the folder of this build
+            directory = qed.primitives.path(f"{stem}-pyramid-team{team}").resolve()
+            # a folder that exists already may hold the levels of an earlier build
+            if directory.exists():
+                # which would make this one a measurement of nothing, so refuse it
+                error = journal.error("qed.measure.pyramid")
+                error.log(f"'{directory}' already exists; its levels would be reused")
+                # and bail
+                return 1
+            # make it
+            directory.mkdir(parents=True)
+            # give it the configuration, if there is one
+            if os.path.exists(configuration):
+                # by copying it over
+                shutil.copy(configuration, str(directory / "qed.yaml"))
+            # build the pyramid and time it
+            seeded, ready, status = self._build(
+                reader=reader, dataset=dataset, name=name, team=team, directory=directory
+            )
+            # the bytes the levels occupy on disk; the levels are sized before any tile is
+            # written, so the files are sparse and only the blocks that were written count
+            size = sum(
+                os.stat(os.path.join(root, entry)).st_blocks * 512
+                for root, _, entries in os.walk(str(directory / ".qed"))
+                for entry in entries
+            )
+            # the workspace of the server holds the levels, which have served their purpose
+            workspace = directory / ".qed"
+            # so if it is there
+            if workspace.exists():
+                # remove it
+                shutil.rmtree(str(workspace))
+            # record the build
+            with self._records(path=f"{stem}-pyramid.csv", headers=self._pyramidHeaders) as out:
+                # in one row
+                out.writerow((host, dataset.pyre_name, name, team, seeded, ready, status, size))
+            # and report it
+            channel.line(
+                f"team of {team}: {status}; seeded after "
+                + (f"{seeded:.1f} s" if seeded is not None else "never")
+                + ", ready after "
+                + (f"{ready:.1f} s" if ready is not None else "never")
+                + f"; {size / 2**20:.0f} MiB of levels"
+            )
+        # flush the report
+        channel.log()
+        # all done
+        return 0
+
     @qed.export(tip="measure how the chunks of each dataset occupy the pages of its file")
     def pages(self, plexus, **kwds):
         """
@@ -523,7 +636,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # the reader, read here so its validator runs before anything is spent
         flavor = self.flavor
         # the directory that collects the results
-        results = self._s3results()
+        results = self._results()
         # a directory that exists already would mix records from different runs
         if results.exists():
             # so refuse it
@@ -549,9 +662,9 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         channel.log()
 
         # record the installation, so the numbers can be tied to the code that produced them
-        self._s3about(channel=channel, results=results)
+        self._about(channel=channel, results=results)
         # write the configuration every measurement reads
-        self._s3configure(results=results)
+        self._configure(directory=results, uri=self.granule, flavor=flavor)
         # find out what the granule holds, which also checks that it can be reached at all
         datasets = self._s3survey()
         # keep the description of the granule
@@ -573,7 +686,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # if the granule lacks what was asked for
         if target is None:
             # the reason has been reported; pack what there is, so the record is complete
-            self._s3pack(channel=channel, results=results)
+            self._pack(channel=channel, results=results)
             # and bail
             return 1
         # unpack the choice
@@ -667,6 +780,23 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 failures=failures,
             )
 
+        # the pyramid: built from scratch by a server of each team size, which reads every
+        # chunk of the dataset from the bucket once
+        self._s3run(
+            channel=channel,
+            results=results,
+            label="pyramid construction",
+            args=[
+                "pyramid",
+                *restrictions,
+                f"--crews={','.join(map(str, teams))}",
+                "--sample=no",
+                f"--port={self.port}",
+                f"--output={results / 'build.csv'}",
+            ],
+            failures=failures,
+        )
+
         # say it is over
         channel.line("done")
         # and list whatever did not complete, so a partial result is never mistaken for a whole
@@ -676,7 +806,141 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # flush
         channel.log()
         # pack the results
-        self._s3pack(channel=channel, results=results)
+        self._pack(channel=channel, results=results)
+        # report failures through the exit status too
+        return 1 if failures else 0
+
+    @qed.export(tip="measure the page layout of a sample of the NISAR products in a bucket")
+    def census(self, plexus, **kwds):
+        """
+        Measure the page layout of {quota} granules of each of the {kinds} of NISAR product in
+        {bucket}, spread over the dates on offer, and collect the summaries of every dataset in
+        one table, so the structure of the products can be compared across kinds and dates
+
+        Each granule is measured by {measure pages} in a fresh process, {workers} at a time;
+        only metadata is read, so the census is cheap next to the data
+        """
+        # make a channel for the problems that stop the census before it starts
+        error = journal.error("qed.measure.census")
+        # every kind needs a reader
+        unknown = [kind for kind in self.kinds if self._flavor(kind=kind) is None]
+        # so a kind without one is a mistake
+        if unknown:
+            # say which
+            error.log(f"no reader for {', '.join(unknown)}")
+            # and bail
+            return 1
+        # the bucket has to be a bucket
+        if not self.bucket.startswith("s3://"):
+            # or else this is the wrong program
+            error.log(f"'{self.bucket}' is not an s3 uri")
+            # so bail
+            return 1
+        # the census lists the bucket through the AWS client, which qed does not require
+        try:
+            # so look for it
+            import boto3
+        # if it is not there
+        except ImportError:
+            # say so
+            error.log("the census lists the bucket with 'boto3', which is not installed")
+            # and bail
+            return 1
+        # the measurements run in child processes of the installed qed
+        if shutil.which("qed") is None:
+            # so it must be on the path
+            error.log("there is no 'qed' on the path to run the measurements")
+            # or there is nothing to measure with
+            return 1
+        # the directory that collects the results
+        results = self._results(kind="census")
+        # a directory that exists already would mix records from different runs
+        if results.exists():
+            # so refuse it
+            error.log(f"'{results}' already exists")
+            # and bail
+            return 1
+        # make it
+        results.mkdir(parents=True)
+
+        # make a channel for the progress of the census
+        channel = journal.info("qed.measure.census")
+        # which reaches the console and the run log alike
+        channel.device = journal.tee(paths=[str(results / "run.log")])
+        # say what is about to happen
+        channel.line(f"on {self.pyre_host.nickname}")
+        channel.line(f"{self.quota} granules of each of {', '.join(self.kinds)}")
+        channel.line(f"from {self.bucket}")
+        channel.line(f"results in {results}")
+        # flush
+        channel.log()
+        # record the installation, so the numbers can be tied to the code that produced them
+        self._about(channel=channel, results=results)
+
+        # split the bucket from the prefix
+        bucket, _, prefix = self.bucket.removeprefix("s3://").partition("/")
+        # make a client, with the credentials of the standard AWS chain
+        client = boto3.client("s3")
+        # the granules to measure, as (kind, granule, key, bytes)
+        jobs = []
+        # go through the kinds
+        for kind in self.kinds:
+            # choose its granules
+            chosen = self._choose(client=client, bucket=bucket, prefix=f"{prefix}{kind}/")
+            # say how many there are
+            channel.line(f"{kind}: {len(chosen)} granules")
+            # and add them to the pile
+            jobs.extend((kind, granule, key, size) for granule, key, size in chosen)
+        # flush
+        channel.log()
+
+        # the granules whose measurement did not complete
+        failures = []
+        # measure them, a few at a time
+        with concurrent.futures.ThreadPoolExecutor(max_workers=self.workers) as pool:
+            # launch every measurement
+            futures = {
+                pool.submit(
+                    self._census,
+                    results=results,
+                    bucket=bucket,
+                    kind=kind,
+                    granule=granule,
+                    key=key,
+                ): (kind, granule)
+                for kind, granule, key, _ in jobs
+            }
+            # and collect them as they complete
+            for future in concurrent.futures.as_completed(futures):
+                # identify the granule
+                kind, granule = futures[future]
+                # get the exit status of its measurement
+                status = future.result()
+                # if it failed
+                if status != 0:
+                    # remember it for the summary
+                    failures.append(f"{kind} {granule}")
+                    # say so
+                    channel.log(f"{kind} {granule}: failed with status {status}")
+                    # and move on
+                    continue
+                # otherwise, say it is done
+                channel.log(f"{kind} {granule}: measured")
+
+        # gather the summaries into one table
+        rows = self._gather(results=results, jobs=jobs)
+        # and report them by kind
+        self._tally(channel=channel, rows=rows)
+        # list whatever did not complete, so a partial census is never mistaken for a whole
+        for label in failures:
+            # one per line
+            channel.line(f"incomplete: {label}")
+        # say it is over
+        channel.line(f"done: {len(jobs) - len(failures)} of {len(jobs)} granules measured")
+        # flush
+        channel.log()
+        # pack the results
+        self._pack(channel=channel, results=results)
         # report failures through the exit status too
         return 1 if failures else 0
 
@@ -1450,14 +1714,20 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # all done
         return windows
 
-    def _launch(self, reader):
+    def _launch(self, reader, team=None, levels=None, directory=None, path=None):
         """
-        Launch the installed qed server with the swarm configuration
+        Launch the installed qed server with the swarm configuration, with a crew of {team}
+        workers, or my {team}, building {levels}, or not, as my {levels} say, from
+        {directory}, or from here, logging to {path}, or next to the measurement records
         """
-        # the server output lands next to the measurement records
-        stem = os.path.splitext(self.output)[0]
+        # the size of the crew
+        team = self.team if team is None else team
+        # whether it builds levels
+        levels = self.levels if levels is None else levels
+        # the server output lands next to the measurement records, unless told otherwise
+        path = f"{os.path.splitext(self.output)[0]}-server.log" if path is None else path
         # open its log
-        log = open(f"{stem}-server.log", mode="w")
+        log = open(path, mode="w")
         # assemble the launch command; the {nexus} node is not an application trait, so its
         # settings must use the fully qualified names
         cmd = [
@@ -1471,12 +1741,14 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # with the tile cache off, so every request is an actual render
             "--qed.app.nexus.services.web.fleet.cache.capacity=0",
             # with the requested team size for the target reader
-            f"--qed.app.nexus.services.web.fleet.{reader.pyre_name}.size={self.team}",
+            f"--qed.app.nexus.services.web.fleet.{reader.pyre_name}.size={team}",
             # building the levels of the product, unless asked not to
-            f"--qed.app.pyramids={'yes' if self.levels else 'no'}",
+            f"--qed.app.pyramids={'yes' if levels else 'no'}",
         ]
-        # launch
-        process = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT)
+        # launch, from the directory whose configuration and workspace the server uses
+        process = subprocess.Popen(
+            cmd, cwd=directory, stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT
+        )
         # hand back the process and its log
         return process, log
 
@@ -1756,21 +2028,21 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # otherwise, it is
         return True
 
-    def _s3results(self):
+    def _results(self, kind="measure"):
         """
-        The directory that collects the results: my {results}, or one named after the host and
-        the time
+        The directory that collects the results: my {results}, or one named after the {kind}
+        of run, the host, and the time
         """
         # if one was named
         if self.results is not None:
             # use it
             return self.results.resolve()
-        # otherwise, stamp one with the host and the time
-        stamp = f"qed-measure-{self.pyre_host.nickname}-{datetime.datetime.now():%Y%m%d-%H%M%S}"
+        # otherwise, stamp one with the kind of run, the host, and the time
+        stamp = f"qed-{kind}-{self.pyre_host.nickname}-{datetime.datetime.now():%Y%m%d-%H%M%S}"
         # in the current directory
         return qed.primitives.path(stamp).resolve()
 
-    def _s3about(self, channel, results):
+    def _about(self, channel, results):
         """
         Record the versions and revisions of qed and the pyre underneath it in {results}
         """
@@ -1800,10 +2072,11 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # all done
         return
 
-    def _s3configure(self, results):
+    def _configure(self, directory, uri, flavor):
         """
-        Write the configuration every measurement reads into {results}: the granule and its
-        reader, and nothing else, since the credentials come from the standard AWS chain
+        Write the configuration the measurements read into {directory}: the granule at {uri}
+        and its {flavor} of reader, and nothing else, since the credentials come from the
+        standard AWS chain
         """
         # the settings
         settings = (
@@ -1811,14 +2084,14 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             "\n"
             "# the granule under measurement\n"
             "product:\n"
-            f"    uri: {self.granule}\n"
+            f"    uri: {uri}\n"
             "\n"
             "# register it\n"
             "datasets:\n"
-            f"    - nisar.{self.flavor}#product\n"
+            f"    - nisar.{flavor}#product\n"
         )
         # write them
-        with open(results / "qed.yaml", mode="w") as stream:
+        with open(directory / "qed.yaml", mode="w") as stream:
             # all at once
             stream.write(settings)
         # all done
@@ -1992,7 +2265,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # all done
         return
 
-    def _s3pack(self, channel, results):
+    def _pack(self, channel, results):
         """
         Pack the {results} directory into a tarball next to it
         """
@@ -2000,14 +2273,340 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         tarball = results.parent / f"{results.name}.tar.gz"
         # make it
         with tarfile.open(tarball, mode="w:gz") as archive:
-            # with the whole directory, under its own name
-            archive.add(str(results), arcname=results.name)
+            # with the whole directory, under its own name, leaving out the workspaces of the
+            # servers, whose levels and caches are derived from the product and can be huge
+            archive.add(
+                str(results),
+                arcname=results.name,
+                filter=lambda entry: None if ".qed" in entry.name.split("/") else entry,
+            )
         # say where it is
         channel.log(f"results packed in {tarball}")
         # all done
         return
 
+    # implementation details: the pyramid
+    def _build(self, reader, dataset, name, team, directory):
+        """
+        Launch a server with a crew of {team} from {directory}, select the {dataset} of {reader}
+        through the channel {name}, and time the construction of its pyramid, as the seconds
+        until it is seeded, the seconds until it is ready, and the state it ended in
+        """
+        # launch the server, building levels, with its log in the folder of the build
+        process, log = self._launch(
+            reader=reader,
+            team=team,
+            levels=True,
+            directory=str(directory),
+            path=str(directory / "server.log"),
+        )
+        # the times, unknown until they happen
+        seeded = None
+        ready = None
+        # and the state the build ends in
+        status = "unknown"
+        # from here on, the server must come down no matter what happens
+        try:
+            # wait for it to accept connections
+            if not self._ready():
+                # if it never came up, say so
+                return seeded, ready, "no server"
+            # make first contact before the clock starts, so the time is the build's alone
+            self._stage()
+            # selecting the dataset is what starts the build, so the clock starts here
+            start = time.perf_counter()
+            # drive the selections the way the client would
+            self._select(reader=reader, dataset=dataset, channel=name)
+            # watch the preparation, but not forever
+            while time.perf_counter() - start < self._buildPatience:
+                # ask the server how it is going
+                reply = self._graphql(query="{ qed { views { preparation } } }")
+                # the state of the view i drove
+                status = reply["data"]["qed"]["views"][0]["preparation"] or "none"
+                # the time so far
+                elapsed = time.perf_counter() - start
+                # a seeded build, or one that got past it, has been seeded
+                if seeded is None and status in ("seeded", "ready"):
+                    # so note when
+                    seeded = elapsed
+                # a build that is done
+                if status == "ready":
+                    # is done
+                    ready = elapsed
+                    # so stop watching
+                    break
+                # a build that failed, or a dataset nobody is preparing, will not get better
+                if status in ("failed", "none"):
+                    # so stop watching
+                    break
+                # otherwise, wait a beat
+                time.sleep(self._buildBeat)
+            # if the watch ran out
+            else:
+                # say so
+                status = f"{status}, gave up after {self._buildPatience} s"
+        # no matter how the build went
+        finally:
+            # bring the server down
+            self._stop(process=process, log=log)
+        # hand off the times and the state
+        return seeded, ready, status
+
+    # implementation details: the census
+    def _flavor(self, kind):
+        """
+        The reader of the products of {kind}, named the way the bucket names them, or {None}
+        """
+        # the kind of product is the last part of the name
+        flavor = kind.rsplit("_", 1)[-1].lower()
+        # hand it off, if there is a reader for it
+        return flavor if flavor in FLAVORS else None
+
+    def _folders(self, client, bucket, prefix):
+        """
+        List the folders directly under {prefix} in {bucket}, in order
+        """
+        # the folders
+        folders = []
+        # the listing comes in pages
+        pages = client.get_paginator("list_objects_v2")
+        # go through them
+        for page in pages.paginate(Bucket=bucket, Prefix=prefix, Delimiter="/"):
+            # and collect the folders of each
+            folders.extend(entry["Prefix"] for entry in page.get("CommonPrefixes", []))
+        # hand them off, in order
+        return sorted(folders)
+
+    def _choose(self, client, bucket, prefix):
+        """
+        Choose my {quota} of granules under {prefix}, spread evenly over the dates on offer, as
+        (granule, key, bytes)
+        """
+        # the dates on offer, as their folders
+        days = [prefix]
+        # the layout goes year, month, and day
+        for _ in range(3):
+            # so descend one level at a time
+            days = [
+                folder
+                for parent in days
+                for folder in self._folders(client=client, bucket=bucket, prefix=parent)
+            ]
+        # the number of days to draw from
+        count = min(self.quota, len(days))
+        # with nothing to draw from, or nothing to draw
+        if count < 1:
+            # there is nothing to choose
+            return []
+        # spread the days evenly over the ones on offer
+        picks = (
+            [days[round(i * (len(days) - 1) / (count - 1))] for i in range(count)]
+            if count > 1
+            else [days[len(days) // 2]]
+        )
+        # the granules of each chosen day
+        folders = [self._folders(client=client, bucket=bucket, prefix=day) for day in picks]
+        # take them one per day in turn, until the quota is met or the days run out
+        chosen = []
+        # starting with the first granule of each day
+        depth = 0
+        # until done
+        while len(chosen) < self.quota and any(depth < len(day) for day in folders):
+            # go through the days
+            for day in folders:
+                # take the next granule of each, as long as there is one and room for it
+                if depth < len(day) and len(chosen) < self.quota:
+                    # by adding it to the pile
+                    chosen.append(day[depth])
+            # move on to the next granule of each day
+            depth += 1
+        # the errors of the AWS client
+        import botocore.exceptions
+
+        # the product file of each granule
+        granules = []
+        # go through the chosen ones
+        for folder in chosen:
+            # the granule is named after its folder
+            granule = folder.rstrip("/").rsplit("/", 1)[-1]
+            # and so is its product file
+            key = f"{folder}{granule}.h5"
+            # attempt to
+            try:
+                # look it up
+                head = client.head_object(Bucket=bucket, Key=key)
+            # if it is not there
+            except botocore.exceptions.ClientError:
+                # the folder holds something else, so leave it out
+                continue
+            # otherwise, add it to the pile, with its size
+            granules.append((granule, key, head["ContentLength"]))
+        # hand off the granules
+        return granules
+
+    def _census(self, results, bucket, kind, granule, key):
+        """
+        Measure the page layout of the {granule} of {kind} at {key} in {bucket}, in a fresh
+        process, with everything it records in its own folder under {results}
+        """
+        # the folder of the granule
+        directory = results / kind / granule
+        # make it
+        directory.mkdir(parents=True)
+        # write the configuration the measurement reads
+        self._configure(
+            directory=directory, uri=f"s3://{bucket}/{key}", flavor=self._flavor(kind=kind)
+        )
+        # capture everything the measurement says in its own log
+        with open(directory / "pages.log", mode="w") as log:
+            # launch it
+            process = subprocess.Popen(
+                [
+                    "qed",
+                    "--shell=script",
+                    "measure",
+                    "pages",
+                    "--only=product",
+                    f"--output={directory / 'layout.csv'}",
+                ],
+                cwd=directory,
+                stdin=subprocess.DEVNULL,
+                stdout=log,
+                stderr=subprocess.STDOUT,
+            )
+            # attempt to
+            try:
+                # wait for it, but not forever
+                return process.wait(timeout=self._patience)
+            # if it takes too long
+            except subprocess.TimeoutExpired:
+                # stop it
+                process.kill()
+                # and collect it
+                process.wait()
+                # leave a note in its log
+                log.write(f"census: gave up after {self._patience} seconds\n")
+        # and report the failure
+        return -1
+
+    def _gather(self, results, jobs):
+        """
+        Collect the summaries of every dataset of the granules in {jobs} into one table in
+        {results}, and hand them off as records
+        """
+        # the columns: the granule, then its dataset summaries
+        headers = ("kind", "granule", "bytes", "crid") + self._occupancyHeaders
+        # the records
+        rows = []
+        # open the table
+        with open(results / "census.csv", mode="w", newline="") as stream:
+            # make a writer
+            writer = csv.writer(stream)
+            # write the header
+            writer.writerow(headers)
+            # go through the granules
+            for kind, granule, _, size in jobs:
+                # the summaries of its datasets
+                path = results / kind / granule / "layout-occupancy.csv"
+                # a granule whose measurement did not complete has none
+                if not path.exists():
+                    # so skip it
+                    continue
+                # the processing version is the last token of the name of six characters, a
+                # letter and five digits
+                crid = [
+                    token
+                    for token in granule.split("_")
+                    if len(token) == 6 and token[0].isalpha() and token[1:].isdigit()
+                ]
+                # read the summaries
+                with open(path, newline="") as source:
+                    # one dataset at a time
+                    for record in csv.DictReader(source):
+                        # tag it with its granule
+                        row = {
+                            "kind": kind,
+                            "granule": granule,
+                            "bytes": size,
+                            "crid": crid[-1] if crid else "",
+                            **record,
+                        }
+                        # write it
+                        writer.writerow(row[header] for header in headers)
+                        # and keep it
+                        rows.append(row)
+        # hand off the records
+        return rows
+
+    def _tally(self, channel, rows):
+        """
+        Report the census {rows} by kind of product: the medians over the datasets of the
+        amplification, the fill of the pages, the nearly empty chunks, and the locality
+        """
+        # the records, by kind
+        kinds = {}
+        # go through them
+        for row in rows:
+            # and file each one
+            kinds.setdefault(row["kind"], []).append(row)
+        # go through the kinds
+        for kind, records in kinds.items():
+            # the numbers of a column, leaving out the datasets that have none
+            def column(name):
+                # convert what is there
+                return [float(record[name]) for record in records if record[name] != ""]
+
+            # the median of a column, or {None} when nothing has it
+            def median(name):
+                # get the numbers
+                values = column(name)
+                # and hand off their median, if there are any
+                return statistics.median(values) if values else None
+
+            # the share of the chunks of each dataset that are nearly empty
+            empty = [
+                float(record["empty"]) / float(record["written"])
+                for record in records
+                if float(record["written"])
+            ]
+            # the page sizes and strategies on offer
+            layouts = sorted({(record["strategy"], record["page_size"]) for record in records})
+            # sign on
+            channel.line(
+                f"{kind}: {len({record['granule'] for record in records})} granules, "
+                f"{len(records)} datasets; "
+                + ", ".join(
+                    f"{strategy} strategy with pages of {int(size) / 2**20:g} MiB"
+                    for strategy, size in layouts
+                )
+            )
+            # the medians over the datasets
+            numbers = {
+                "alone": median("alone"),
+                "once": median("once"),
+                "joint": median("joint"),
+                "fill": median("fill_mean"),
+                "total": median("total_mean"),
+                "locality": median("locality"),
+                "compression": median("compression"),
+            }
+            # render them, leaving out the ones nobody has
+            channel.line(
+                "  medians over the datasets: "
+                + ", ".join(
+                    f"{label} {value:.2f}" for label, value in numbers.items() if value is not None
+                )
+                + (f", nearly empty {statistics.median(empty):.0%}" if empty else "")
+            )
+        # all done
+        return
+
     # private data
+    # how long the census waits for the measurement of one granule, in seconds
+    _patience = 900
+    # how long the pyramid measurement waits for a build, and how often it looks, in seconds
+    _buildPatience = 7200
+    _buildBeat = 0.5
     # how long the output of a measurement can pause before what it said counts as an entry
     _s3quiet = 0.2
     # the cells that hold data, by dataset, found on first use
@@ -2044,6 +2643,17 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "median_ms",
         "p95_ms",
         "failures",
+    )
+    # the column labels of the pyramid construction records
+    _pyramidHeaders = (
+        "host",
+        "dataset",
+        "channel",
+        "team",
+        "seeded_s",
+        "ready_s",
+        "status",
+        "bytes",
     )
     # the column labels of the per dataset page occupancy summaries
     _occupancyHeaders = (
