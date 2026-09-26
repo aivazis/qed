@@ -36,6 +36,33 @@ qed::py::isce2::unwrapped::stats(py::module & m)
         // the docstring
         "compute the statistics of a tile");
 
+    // collect a mergeable sample of one band of a strided tile, the render footprint of a
+    // decimated view
+    m.def(
+        // the name of the function
+        "sample",
+        // the handler
+        [](const py::buffer & source, long band, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride) -> sample_t {
+            // the tile geometry arrives in the coordinates of the raster, as (line, sample)
+            auto o = asIndex<2>(origin);
+            auto t = asShape<2>(shape);
+            auto s = asIndex<2>(stride);
+            // lift it into the line interleaved layout, one band thick
+            auto o3 = pyre::grid::index_t<3> { o[0], band, o[1] };
+            auto t3 = pyre::grid::shape_t<3> { t[0], 1, t[1] };
+            auto s3 = pyre::grid::index_t<3> { s[0], 1, s[1] };
+            // dispatch on the buffer's cell type and sample the band
+            return onGrid<3, float, double>(source, [&](const auto & grid) {
+                return qed::isce2::unwrapped::sample(grid, band, o3, t3, s3);
+            });
+        },
+        // the signature
+        "source"_a, "band"_a, "origin"_a, "shape"_a, "stride"_a,
+        // the docstring
+        "collect a mergeable statistical sample of {band} of the strided tile at "
+        "{origin}+{shape}");
+
     // all done
     return;
 }
