@@ -65,7 +65,7 @@ journal.warning("qed.readers.native.flat").deactivate()
 app = qed.shells.qed(name="t")
 # and build its dispatcher explicitly, the way the test environment must since it has no
 # document root; constructing the store here used to die with an unhandled {FileNotFoundError}
-ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.local(root="."), pfs=app.pfs)
+ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.virtual(), pfs=app.pfs)
 
 # the store survived
 store = ux.store

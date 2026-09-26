@@ -27,7 +27,7 @@ import qed
 # load the app so the configuration in this directory is processed
 app = qed.shells.qed(name="qed.app")
 # build its dispatcher, which assembles the store and the graphql resolver
-ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.local(root="."), pfs=app.pfs)
+ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.virtual(), pfs=app.pfs)
 # a stand-in for the http server: the responses need its name and the document factories
 server = types.SimpleNamespace(
     name="qed.test", documents=pyre.http.documents, responses=pyre.http.responses

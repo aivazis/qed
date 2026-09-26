@@ -51,7 +51,7 @@ journal.warning("qed.cli").deactivate()
 # boot the application
 app = qed.shells.qed(name="t")
 # and build its dispatcher explicitly, the way the test environment must
-ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.local(root="."), pfs=app.pfs)
+ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.virtual(), pfs=app.pfs)
 # get the store
 store = ux.store
 

@@ -24,7 +24,7 @@ import qed
 # load the app so the configuration in this directory is processed
 app = qed.shells.qed(name="qed.app")
 # build its dispatcher, which assembles the store
-ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.local(root="."), pfs=app.pfs)
+ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.virtual(), pfs=app.pfs)
 # get the store
 store = ux.store
 # the store writes the archives back to the workspace file on every change; point the
