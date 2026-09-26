@@ -145,8 +145,12 @@ numbers: `--sample=no` skips the statistics a reader samples at first contact, `
 each concurrency level of a swarm tiles nobody has fetched, and `--levels=no` stops the launched
 server from building the pyramid, so every tile is read from the product. The swarm also leaves
 out the tiles that cover the windows the server samples at first contact, since the crew member
-that sampled them would serve them from its caches. `etc/perf/measure-s3.py` runs the whole
-program against a product in S3 with these settings and packs the results.
+that sampled them would serve them from its caches. `measure s3` runs the whole program against
+a NISAR granule in S3 with these settings, each measurement in a fresh process, and packs the
+results: `qed measure s3 --granule=s3://...` takes the reader from `--flavor` (default `gslc`),
+the passes from `--trials`, the deepest zoom from `--depth`, the team sizes from `--crews`, and
+the swarm workload from `--clients` and `--tiles`, and collects everything in `--results`, or in
+a directory named after the host and the time.
 
 `measure pages` reads the chunk table of each dataset and the page size of its file, and reports
 how the chunks sit on the pages: how many were written, how well they compress, how many pages
