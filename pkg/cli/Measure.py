@@ -886,9 +886,9 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # go through the kinds
         for kind in self.kinds:
             # choose its granules
-            chosen = self._choose(client=client, bucket=bucket, prefix=f"{prefix}{kind}/")
-            # say how many there are
-            channel.line(f"{kind}: {len(chosen)} granules")
+            chosen, skipped = self._choose(client=client, bucket=bucket, prefix=f"{prefix}{kind}/")
+            # say how many there are, and how many folders held no product
+            channel.line(f"{kind}: {len(chosen)} granules, {skipped} folders without a product")
             # and add them to the pile
             jobs.extend((kind, granule, key, size) for granule, key, size in chosen)
         # flush
@@ -2380,7 +2380,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     def _choose(self, client, bucket, prefix):
         """
         Choose my {quota} of granules under {prefix}, spread evenly over the dates on offer, as
-        (granule, key, bytes)
+        (granule, key, bytes), and count the folders passed over because they hold no product
         """
         # the dates on offer, as their folders
         days = [prefix]
@@ -2396,53 +2396,69 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         count = min(self.quota, len(days))
         # with nothing to draw from, or nothing to draw
         if count < 1:
-            # there is nothing to choose
-            return []
+            # there is nothing to choose, and nothing passed over
+            return [], 0
         # spread the days evenly over the ones on offer
         picks = (
             [days[round(i * (len(days) - 1) / (count - 1))] for i in range(count)]
             if count > 1
             else [days[len(days) // 2]]
         )
-        # the granules of each chosen day
-        folders = [self._folders(client=client, bucket=bucket, prefix=day) for day in picks]
-        # take them one per day in turn, until the quota is met or the days run out
-        chosen = []
-        # starting with the first granule of each day
-        depth = 0
-        # until done
-        while len(chosen) < self.quota and any(depth < len(day) for day in folders):
-            # go through the days
-            for day in folders:
-                # take the next granule of each, as long as there is one and room for it
-                if depth < len(day) and len(chosen) < self.quota:
-                    # by adding it to the pile
-                    chosen.append(day[depth])
-            # move on to the next granule of each day
-            depth += 1
+        # the granule folders of each chosen day, to draw from one at a time
+        pools = [iter(self._folders(client=client, bucket=bucket, prefix=day)) for day in picks]
+        # the granules chosen
+        granules = []
+        # and the folders passed over because they hold no product
+        skipped = 0
+        # draw one granule from each day in turn, until the quota is met or the days run dry
+        while len(granules) < self.quota and pools:
+            # go through the days that still have folders
+            for pool in list(pools):
+                # once the quota is met
+                if len(granules) >= self.quota:
+                    # there is nothing more to draw
+                    break
+                # look through the folders of this day
+                for folder in pool:
+                    # for one that holds its product
+                    found = self._product(client=client, bucket=bucket, folder=folder)
+                    # if this one does
+                    if found is not None:
+                        # choose it
+                        granules.append(found)
+                        # and move on to the next day
+                        break
+                    # otherwise, pass it over
+                    skipped += 1
+                # a day whose folders ran out
+                else:
+                    # has nothing more to offer
+                    pools.remove(pool)
+        # hand off the granules, and the number of folders passed over
+        return granules, skipped
+
+    def _product(self, client, bucket, folder):
+        """
+        Look up the product file of the granule in {folder} of {bucket}, as (granule, key,
+        bytes), or {None} if the folder holds only its metadata
+        """
         # the errors of the AWS client
         import botocore.exceptions
 
-        # the product file of each granule
-        granules = []
-        # go through the chosen ones
-        for folder in chosen:
-            # the granule is named after its folder
-            granule = folder.rstrip("/").rsplit("/", 1)[-1]
-            # and so is its product file
-            key = f"{folder}{granule}.h5"
-            # attempt to
-            try:
-                # look it up
-                head = client.head_object(Bucket=bucket, Key=key)
-            # if it is not there
-            except botocore.exceptions.ClientError:
-                # the folder holds something else, so leave it out
-                continue
-            # otherwise, add it to the pile, with its size
-            granules.append((granule, key, head["ContentLength"]))
-        # hand off the granules
-        return granules
+        # the granule is named after its folder
+        granule = folder.rstrip("/").rsplit("/", 1)[-1]
+        # and so is its product file
+        key = f"{folder}{granule}.h5"
+        # attempt to
+        try:
+            # look it up
+            head = client.head_object(Bucket=bucket, Key=key)
+        # if it is not there
+        except botocore.exceptions.ClientError:
+            # the folder has no product
+            return None
+        # otherwise, hand off the granule, with the size of its product
+        return granule, key, head["ContentLength"]
 
     def _census(self, results, bucket, kind, granule, key):
         """
