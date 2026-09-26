@@ -250,13 +250,13 @@ class Keeper:
                 if key != live:
                     # so only the parts are filtered
                     section = self._assigned(component=component, section=section)
-                # a part bound under the view's own name is the binding the framework makes
-                # at boot, so its reference is not worth recording; the part's own section
-                # carries what was assigned to it
+                # a part the component owns is the binding the framework makes at boot, so
+                # its reference is not worth recording; the part's own section carries what
+                # was assigned to it
                 section = {
                     trait: value
                     for trait, value in section.items()
-                    if not (isinstance(value, str) and value.endswith(f"#{live}.{trait}"))
+                    if not self._owns(component=component, trait=trait)
                 }
                 # the view's channel is a per-view pipeline, so it is recorded by its tag,
                 # which is how the view binds it at boot
@@ -275,6 +275,23 @@ class Keeper:
                 named[name + key[len(live) :]] = section
         # hand off the pile, and the names of the views
         return named, viewNames
+
+    def _owns(self, component, trait):
+        """
+        Check whether the {trait} of {component} is bound to a part the component owns: a
+        facility whose component is named after the trait, under the name of its owner, which
+        is how the framework binds parts at boot and how a recipe tells them apart
+        """
+        # get the descriptor of the trait
+        descriptor = component.pyre_trait(alias=trait)
+        # only facilities bind parts
+        if not descriptor.isFacility:
+            # so nothing else is owned
+            return False
+        # get the part
+        part = getattr(component, descriptor.name)
+        # it is owned when it is named after the trait, under the name of its owner
+        return part is not None and part.pyre_name == f"{component.pyre_name}.{descriptor.name}"
 
     def _assigned(self, component, section):
         """
