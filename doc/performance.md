@@ -153,11 +153,18 @@ the swarm workload from `--clients` and `--tiles`, and collects everything in `-
 a directory named after the host and the time.
 
 `measure pages` reads the chunk table of each dataset and the page size of its file, and reports
-how the chunks sit on the pages: how many were written, how well they compress, how many pages
-each one spans, how full those pages are, and the read amplification of a driver that fetches
-whole pages, e.g. `ros3`, both for a chunk read on its own and for the whole dataset read with
-every page fetched once. It reads only metadata, and records one line per chunk next to the other
-measurement records.
+how the chunks sit on the pages: how many were written, how well they compress, how many are
+nearly empty, how many pages each one spans, how full those pages are, and the read amplification
+of a driver that fetches whole pages, e.g. `ros3`. The amplification is given three ways: for a
+chunk read on its own, for the whole dataset read with every page fetched once, and for the
+dataset read together with the other datasets whose chunks share its pages, which it names. The
+share of each page the dataset fills and the share all the datasets together fill come with
+histograms, since the median and the mean of the first can differ a lot: in the GSLCs measured so
+far, the HH and HV chunks of a frequency are interleaved on the pages, so either one read alone
+moves 1.32 times its bytes, while both together move 1.05 times. Locality says how often two
+chunks that follow each other on a page are also neighbors on the raster. It reads only metadata,
+records one line per chunk in `{output}-pages.csv` and one summary line per dataset in
+`{output}-occupancy.csv`.
 
 ## Measurement categories
 
