@@ -56,8 +56,6 @@ class View(graphene.ObjectType):
     ready = graphene.Boolean(required=True)
     # and whether the work that makes it worth looking at has finished
     preparing = graphene.Boolean(required=True)
-    # the state of that work: working, seeded, ready, or failed, or nothing if there is none
-    preparation = graphene.String()
 
     # resolvers
     @staticmethod
@@ -93,22 +91,6 @@ class View(graphene.ObjectType):
         # otherwise, it is preparing while the work is still under way; a failure is not
         # worth waiting for, since the view renders anyway, just less well
         return record.status == record.working
-
-    @staticmethod
-    def resolve_preparation(view, info, **kwds):
-        """
-        Report the state of the work that makes the dataset of this view worth looking at
-        """
-        # a view with no dataset has nothing being prepared
-        dataset = view.dataset
-        # so it has no state to report
-        if dataset is None:
-            # and says so
-            return None
-        # look up what has been done for this dataset
-        record = info.context["store"].preparation(name=dataset.pyre_name)
-        # and report its state, if there is one
-        return None if record is None else record.status
 
     @staticmethod
     def resolve_id(view, info, **kwds):
