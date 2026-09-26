@@ -406,6 +406,16 @@ def main() -> int:
     # the measurements that did not complete
     failures = []
 
+    # the layout of the chunks on the pages of the file, which says how many bytes the driver
+    # fetches for every byte a tile needs; it reads nothing but metadata
+    measure(
+        log=log,
+        out=out,
+        label="page occupancy",
+        args=["pages", "--only=product", f"--output={out / 'layout.csv'}"],
+        failures=failures,
+    )
+
     # the zoom levels: a 512 tile, the one the client asks for, at every decimation the client
     # requests, each point in a fresh process so nothing is served from a cache
     for rep in range(1, options.reps + 1):
