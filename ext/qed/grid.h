@@ -12,9 +12,11 @@
 #include "external.h"
 // what the implementations need
 #include <bit>
+#include <complex>
 #include <optional>
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -39,12 +41,35 @@ namespace qed::py {
 
     // dispatch on a python buffer's cell format across the candidate cell types {cellTs}: rebuild
     // a read-only grid of rank {dim} over the buffer's block and hand it to {f}, whichever cell
-    // type matched; a buffer in a byte order other than the host's is refused
+    // type holds its cells; a buffer in a byte order other than the host's is refused
     template <int dim, typename... cellTs, typename F>
     auto onGrid(const py::buffer & source, F && f);
     // split a buffer's struct code into the code of the scalar itself and whether its leading
     // byte order marker, if there is one, names the order the host lacks
     inline auto splitFormat(const std::string & format) -> std::pair<std::string, bool>;
+
+    // the kinds of scalar a buffer can hold, as far as picking a cell type is concerned
+    enum class scalar_t { signedInteger, unsignedInteger, floating, complex, other };
+    // the kind of scalar the struct {code} of a buffer describes
+    inline auto kindOf(const std::string & code) -> scalar_t;
+    // the kind of scalar the cell type {cellT} is
+    template <typename cellT>
+    constexpr auto kindOf() -> scalar_t;
+    // whether a buffer whose scalar has struct {code} and occupies {itemsize} bytes holds cells
+    // of type {cellT}: the struct module has more than one code for the same integer, e.g. both
+    // 'l' and 'q' are eight byte signed integers on most hosts, and which one a producer picks
+    // is its own business, so the kind and the size decide rather than the spelling
+    template <typename cellT>
+    auto holds(const std::string & code, py::ssize_t itemsize) -> bool;
+    // pick the candidate among {cellTs} that holds the cells of a buffer with scalar {code} of
+    // {itemsize} bytes, and return what {g} makes of it; {g} is called with the tag
+    // {std::type_identity<cellT>} of the winner. a candidate whose descriptor spells the code
+    // exactly wins over one that merely holds the same kind and size, so a buffer never lands
+    // on a different kernel than its spelling names; {format} is the buffer's full struct
+    // code, for the complaint when nothing fits
+    template <typename... cellTs, typename G>
+    auto dispatch(
+        const std::string & code, py::ssize_t itemsize, const std::string & format, G && g);
     // run {f} over the tile at {origin}+{tile} with the given {stride} of the grid the buffer
     // {source} exports, dispatching on its cell type across {cellTs}; {f} is invoked as
     // {f(grid, origin, tile, stride)}: a buffer in the host's byte order is viewed in place, while

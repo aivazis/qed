@@ -97,24 +97,20 @@ qed::py::onGrid(const py::buffer & source, F && f)
         // otherwise the caller and the data disagree
         throw py::value_error("grid rank does not match the expected dimensionality");
     }
-    // the result type is the same whatever cell we dispatch to; take it from the first candidate
-    using first_t = typename std::tuple_element<0, std::tuple<cellTs...>>::type;
-    using result_t = decltype(f(std::declval<viewgrid_t<first_t, dim>>()));
-    // a slot for it
-    std::optional<result_t> result;
-    // try each candidate; the first whose struct code matches the buffer wins
-    bool matched =
-        (((info.format == py::format_descriptor<cellTs>::format()) ?
-              (result.emplace(f(asGrid<cellTs, dim>(info))), true) :
-              false)
-         || ...);
-    // an unmatched cell type is a caller mistake
-    if (!matched) {
-        // say which one
-        throw py::value_error("unsupported grid cell type '" + info.format + "'");
+    // separate the scalar code from the byte order
+    auto [code, foreign] = splitFormat(info.format);
+    // a buffer in the order the host lacks cannot be read in place, and these kernels read in place
+    if (foreign) {
+        // so refuse it
+        throw py::value_error("grid cells in foreign byte order '" + info.format + "'");
     }
-    // hand back what {f} produced, moved out since the result may be move-only
-    return std::move(*result);
+    // pick the candidate that holds the cells and hand {f} a grid of them
+    return dispatch<cellTs...>(code, info.itemsize, info.format, [&](auto tag) {
+        // the winning cell type
+        using cell_t = typename decltype(tag)::type;
+        // view the buffer through it
+        return f(asGrid<cell_t, dim>(info));
+    });
 }
 
 
@@ -141,6 +137,136 @@ qed::py::splitFormat(const std::string & format) -> std::pair<std::string, bool>
 }
 
 
+// the kind of scalar the struct {code} of a buffer describes
+auto
+qed::py::kindOf(const std::string & code) -> scalar_t
+{
+    // the struct module spells a complex scalar as its part, marked
+    if (code == "Zf" || code == "Zd" || code == "Zg") {
+        // so it is complex
+        return scalar_t::complex;
+    }
+    // every other scalar this cares about is spelled with a single character
+    if (code.size() != 1) {
+        // so anything longer is something else
+        return scalar_t::other;
+    }
+    // the signed integers, of every width
+    if (std::string("bhilqn").find(code[0]) != std::string::npos) {
+        // are signed
+        return scalar_t::signedInteger;
+    }
+    // the unsigned integers, of every width
+    if (std::string("BHILQN").find(code[0]) != std::string::npos) {
+        // are unsigned
+        return scalar_t::unsignedInteger;
+    }
+    // and the floating point numbers, of every width
+    if (std::string("efdg").find(code[0]) != std::string::npos) {
+        // are floating
+        return scalar_t::floating;
+    }
+    // characters, booleans, and the rest are none of these
+    return scalar_t::other;
+}
+
+
+// the kind of scalar the cell type {cellT} is
+template <typename cellT>
+constexpr auto
+qed::py::kindOf() -> scalar_t
+{
+    // a character stands for text, whatever its signedness, so it only ever matches its own
+    // spelling
+    if constexpr (std::is_same_v<cellT, char> || std::is_same_v<cellT, bool>) {
+        // and is none of the numeric kinds
+        return scalar_t::other;
+    }
+    // the signed integers
+    else if constexpr (std::is_integral_v<cellT> && std::is_signed_v<cellT>) {
+        // are signed
+        return scalar_t::signedInteger;
+    }
+    // the unsigned integers
+    else if constexpr (std::is_integral_v<cellT>) {
+        // are unsigned
+        return scalar_t::unsignedInteger;
+    }
+    // the floating point numbers
+    else if constexpr (std::is_floating_point_v<cellT>) {
+        // are floating
+        return scalar_t::floating;
+    }
+    // the complex numbers of either precision
+    else if constexpr (
+        std::is_same_v<cellT, std::complex<float>> || std::is_same_v<cellT, std::complex<double>>) {
+        // are complex
+        return scalar_t::complex;
+    }
+    // and nothing else is numeric
+    else {
+        // as far as this is concerned
+        return scalar_t::other;
+    }
+}
+
+
+// whether a buffer holds cells of type {cellT}
+template <typename cellT>
+auto
+qed::py::holds(const std::string & code, py::ssize_t itemsize) -> bool
+{
+    // the kind the cell type is
+    constexpr auto kind = kindOf<cellT>();
+    // a cell type that is not numeric only ever matches its own spelling
+    if constexpr (kind == scalar_t::other) {
+        // which is not what this checks
+        return false;
+    }
+    // otherwise, the kinds and the sizes have to agree
+    else {
+        // so compare them
+        return kindOf(code) == kind && itemsize == static_cast<py::ssize_t>(sizeof(cellT));
+    }
+}
+
+
+// pick the candidate that holds the cells of a buffer and return what {g} makes of it
+template <typename... cellTs, typename G>
+auto
+qed::py::dispatch(
+    const std::string & code, py::ssize_t itemsize, const std::string & format, G && g)
+{
+    // the result type is the same whatever cell wins; take it from the first candidate
+    using first_t = typename std::tuple_element<0, std::tuple<cellTs...>>::type;
+    using result_t = decltype(g(std::type_identity<first_t> {}));
+    // a slot for it
+    std::optional<result_t> result;
+    // a candidate whose descriptor spells the code exactly wins first
+    bool matched =
+        ((code == py::format_descriptor<cellTs>::format() ?
+              (result.emplace(g(std::type_identity<cellTs> {})), true) :
+              false)
+         || ...);
+    // failing that, a candidate of the same kind and size
+    if (!matched) {
+        // gets its chance
+        matched =
+            ((holds<cellTs>(code, itemsize) ?
+                  (result.emplace(g(std::type_identity<cellTs> {})), true) :
+                  false)
+             || ...);
+    }
+    // a buffer none of the candidates can hold is a caller mistake
+    if (!matched) {
+        // say which one
+        throw py::value_error("unsupported grid cell type '" + format + "'");
+    }
+    // hand back what {g} produced, moved out since the result may be move-only
+    return std::move(*result);
+}
+
+
 // run {f} over a tile of the buffer, swapping its bytes into the host's order on the way if
 // the buffer is in the other order
 template <int dim, typename... cellTs, typename F>
@@ -158,28 +284,19 @@ qed::py::onTile(
     }
     // separate the scalar code from the byte order
     auto [code, foreign] = splitFormat(info.format);
-    // the result type is the same whatever cell we dispatch to; take it from the first candidate
-    using first_t = typename std::tuple_element<0, std::tuple<cellTs...>>::type;
-    using result_t = decltype(f(std::declval<viewgrid_t<first_t, dim>>(), origin, tile, stride));
-    // a slot for it
-    std::optional<result_t> result;
-    // try each candidate; the first whose struct code matches the buffer wins, and the byte
-    // order decides whether the tile is viewed in place or copied through the swap
-    bool matched =
-        (((code == py::format_descriptor<cellTs>::format()) ?
-              (result.emplace(
-                   foreign ? swapTile<cellTs, dim>(info, origin, tile, stride, f) :
-                             f(asGrid<cellTs, dim>(info), origin, tile, stride)),
-               true) :
-              false)
-         || ...);
-    // an unmatched cell type is a caller mistake
-    if (!matched) {
-        // say which one
-        throw py::value_error("unsupported grid cell type '" + info.format + "'");
-    }
-    // hand back what {f} produced, moved out since the result may be move-only
-    return std::move(*result);
+    // pick the candidate that holds the cells; the byte order decides whether the tile is
+    // viewed in place or copied through the swap
+    return dispatch<cellTs...>(code, info.itemsize, info.format, [&](auto tag) {
+        // the winning cell type
+        using cell_t = typename decltype(tag)::type;
+        // a tile in the order the host lacks
+        if (foreign) {
+            // is copied through the swap first
+            return swapTile<cell_t, dim>(info, origin, tile, stride, f);
+        }
+        // everything else is viewed in place
+        return f(asGrid<cell_t, dim>(info), origin, tile, stride);
+    });
 }
 
 
@@ -242,28 +359,19 @@ qed::py::onCells(const py::buffer & source, F && f)
     }
     // separate the scalar code from the byte order
     auto [code, foreign] = splitFormat(info.format);
-    // the result type is the same whatever cell we dispatch to; take it from the first candidate
-    using first_t = typename std::tuple_element<0, std::tuple<cellTs...>>::type;
-    using result_t = decltype(f(std::declval<viewgrid_t<first_t, dim>>()));
-    // a slot for it
-    std::optional<result_t> result;
-    // try each candidate; the first whose struct code matches the buffer wins, and the byte
-    // order decides whether the cells are read as they are or through the swap
-    bool matched =
-        (((code == py::format_descriptor<cellTs>::format()) ?
-              (result.emplace(
-                   foreign ? f(asGrid<pyre::memory::foreign_t<cellTs>, dim>(info)) :
-                             f(asGrid<cellTs, dim>(info))),
-               true) :
-              false)
-         || ...);
-    // an unmatched cell type is a caller mistake
-    if (!matched) {
-        // say which one
-        throw py::value_error("unsupported grid cell type '" + info.format + "'");
-    }
-    // hand back what {f} produced, moved out since the result may be move-only
-    return std::move(*result);
+    // pick the candidate that holds the cells; the byte order decides whether they are read as
+    // they are or through the swap
+    return dispatch<cellTs...>(code, info.itemsize, info.format, [&](auto tag) {
+        // the winning cell type
+        using cell_t = typename decltype(tag)::type;
+        // cells in the order the host lacks
+        if (foreign) {
+            // swap on access
+            return f(asGrid<pyre::memory::foreign_t<cell_t>, dim>(info));
+        }
+        // everything else is read as it is
+        return f(asGrid<cell_t, dim>(info));
+    });
 }
 
 
