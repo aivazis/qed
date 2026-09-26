@@ -30,8 +30,8 @@ qed::py::native::stats(py::module & m)
             // kernel takes no stride, so the tile is dense, and a foreign order buffer arrives
             // as a native copy of it
             return onTile<
-                2, char, int8_t, int16_t, int32_t, int64_t, float, double, std::complex<float>,
-                std::complex<double>>(
+                2, char, int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t,
+                float, double, std::complex<float>, std::complex<double>>(
                 source, o, t, pyre::grid::index_t<2>::one(),
                 [&](const auto & grid, const auto & o, const auto & t, const auto &) {
                     return qed::native::stats(grid, o, t);
@@ -56,8 +56,8 @@ qed::py::native::stats(py::module & m)
             // dispatch on the buffer's cell type and sample the tile; a foreign order buffer
             // arrives as a native copy of the decimated footprint
             return onTile<
-                2, char, int8_t, int16_t, int32_t, int64_t, float, double, std::complex<float>,
-                std::complex<double>>(
+                2, char, int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t,
+                float, double, std::complex<float>, std::complex<double>>(
                 source, o, t, s,
                 [&](const auto & grid, const auto & o, const auto & t, const auto & s) {
                     return qed::native::sample(grid, o, t, s);

@@ -28,10 +28,11 @@ qed::py::native::profile(py::module & m)
             // foreign order buffer is read through cells that swap on access, since the path
             // visits arbitrary cells and the kernel stores native values
             return onCells<
-                2, char, int8_t, int16_t, int32_t, int64_t, float, double, std::complex<float>,
-                std::complex<double>>(source, [&](const auto & grid) -> py::object {
-                return py::cast(qed::native::profile(grid, points, closed));
-            });
+                2, char, int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t,
+                float, double, std::complex<float>, std::complex<double>>(
+                source, [&](const auto & grid) -> py::object {
+                    return py::cast(qed::native::profile(grid, points, closed));
+                });
         },
         // the signature
         "source"_a, "points"_a, "closed"_a = false,
