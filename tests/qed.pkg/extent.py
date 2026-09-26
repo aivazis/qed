@@ -22,7 +22,7 @@ journal.error("qed.ux.controllers").device = journal.trash()
 # load the app so the configuration in this directory is processed
 app = qed.shells.qed(name="qed.app")
 # build its dispatcher, which assembles the store with the local {d16} reader
-ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.local(root="."), pfs=app.pfs)
+ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.virtual(), pfs=app.pfs)
 # initiate first contact with the sources, the way the server does when it is ready
 ux.store.open()
 # get the view in the only viewport

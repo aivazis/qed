@@ -67,7 +67,7 @@ import qed
 # load the app
 app = qed.shells.qed(name="qed.app")
 # build its dispatcher, which assembles the store
-ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.local(root="."), pfs=app.pfs)
+ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.virtual(), pfs=app.pfs)
 # get the store
 store = ux.store
 # no fleet is attached, so listings run here
