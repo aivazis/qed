@@ -175,13 +175,12 @@ def preflight(*, uri: str, port: int, out: pyre.primitives.path) -> None:
     if shutil.which("qed") is None:
         # or there is nothing to measure with
         raise PreflightError("there is no 'qed' on the path")
-    # and so must the pyre underneath it, which reports its own version
-    if shutil.which("pyre") is None:
-        # or there is no telling which pyre produced the numbers
-        raise PreflightError("there is no 'pyre' on the path")
     # and it must know how to aim at the data and leave the pyramid alone
     help = subprocess.run(
-        ["qed", "--shell=script", "measure", "--help"], capture_output=True, text=True
+        ["qed", "--shell=script", "measure", "--help"],
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        text=True,
     )
     # which its help says
     if "--levels" not in help.stdout + help.stderr:
@@ -297,6 +296,7 @@ def measure(*, log: Log, out: pyre.primitives.path, label: str, args: list, fail
     process = subprocess.Popen(
         ["qed", "--shell=script", "measure", *args],
         cwd=out,
+        stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
@@ -367,19 +367,20 @@ def main() -> int:
     log.say(f"product {options.uri} as nisar.{options.flavor}")
     log.say(f"results in {out}")
 
-    # record the installation, so the numbers can be tied to the code that produced them: the
-    # versions and revisions of qed and of the pyre underneath it
-    about = "".join(
-        # what each one says about itself
-        result.stdout + result.stderr
-        # for both of them
-        for result in (
-            subprocess.run(command, cwd=out, capture_output=True, text=True)
-            for command in (
-                ["qed", "--shell=script", "about", "version"],
-                ["pyre", "about", "version"],
-            )
-        )
+    # record the installation, so the numbers can be tied to the code that produced them: what
+    # qed says about its version and revision
+    qed = subprocess.run(
+        ["qed", "--shell=script", "about", "version"],
+        cwd=out,
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        text=True,
+    )
+    # and the version and revision of the pyre underneath it, which is the one this driver runs on
+    about = (
+        qed.stdout
+        + qed.stderr
+        + f"pyre: {'.'.join(map(str, pyre.meta.version[:3]))} rev {pyre.meta.revision}\n"
     )
     # keep it
     with open(out / "about.txt", mode="w") as stream:
