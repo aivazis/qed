@@ -184,6 +184,7 @@ class Product(
             **kwds,
         )
 
+    @qed.export
     def sample(self, zoom: tuple, origin: tuple, shape: tuple) -> tuple:
         """
         Collect a mergeable statistical sample of the tile at {origin}+{shape}, visiting
