@@ -18,4 +18,7 @@ from .Metadata import Metadata as metadata
 # the statistics prober the dataset flavors seed themselves with
 from .probes import probe, windows
 
+# how the chunks of a dataset sit on the pages of its file
+from . import pages
+
 # end of file
