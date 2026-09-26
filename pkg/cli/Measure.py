@@ -469,14 +469,15 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     @qed.export(tip="measure the construction of the pyramid of a dataset against team size")
     def pyramid(self, plexus, **kwds):
         """
-        Build the pyramid of the first dataset the restrictions allow with a server of each of
-        my {crews} sizes, from scratch every time, and record how long it takes until the view
-        is worth looking at and until every level is built
+        Build the pyramid of the first dataset the restrictions allow, and of the rasters it is
+        read with, on a crew of each of my {crews} sizes, from scratch every time, and record
+        how long it takes until the view is worth looking at and until every level is built
 
-        Each server works out of a folder of its own next to the measurement records, so no
-        build finds the levels of an earlier one; once their size is on record the levels are
-        removed, since a sweep would otherwise keep several copies of a pyramid that can be as
-        large as the product, and the folder keeps the log of the server
+        The build is the one the server runs when a client selects the dataset: the same
+        layout of the levels, the same decimation tasks, the same crew. Each build works out
+        of a folder of its own next to the measurement records, so none finds the levels of
+        another; once their size is on record the levels are removed, since a sweep would
+        otherwise keep several copies of a pyramid that can be as large as the product
         """
         # make a channel
         channel = journal.info("qed.measure.pyramid")
@@ -495,8 +496,6 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         stem = os.path.splitext(self.output)[0]
         # the host label that lets records from different machines share a file
         host = self.pyre_host.nickname
-        # the configuration the servers read is the one in effect here
-        configuration = os.path.join(os.getcwd(), "qed.yaml")
         # go through the team sizes
         for team in self.crews:
             # the folder of this build
@@ -510,27 +509,19 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 return 1
             # make it
             directory.mkdir(parents=True)
-            # give it the configuration, if there is one
-            if os.path.exists(configuration):
-                # by copying it over
-                shutil.copy(configuration, str(directory / "qed.yaml"))
             # build the pyramid and time it
             seeded, ready, status = self._build(
-                reader=reader, dataset=dataset, name=name, team=team, directory=directory
+                reader=reader, dataset=dataset, team=team, directory=directory
             )
             # the bytes the levels occupy on disk; the levels are sized before any tile is
             # written, so the files are sparse and only the blocks that were written count
             size = sum(
                 os.stat(os.path.join(root, entry)).st_blocks * 512
-                for root, _, entries in os.walk(str(directory / ".qed"))
+                for root, _, entries in os.walk(str(directory))
                 for entry in entries
             )
-            # the workspace of the server holds the levels, which have served their purpose
-            workspace = directory / ".qed"
-            # so if it is there
-            if workspace.exists():
-                # remove it
-                shutil.rmtree(str(workspace))
+            # the levels have served their purpose
+            shutil.rmtree(str(directory))
             # record the build
             with self._records(path=f"{stem}-pyramid.csv", headers=self._pyramidHeaders) as out:
                 # in one row
@@ -1703,20 +1694,14 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # all done
         return windows
 
-    def _launch(self, reader, team=None, levels=None, directory=None, path=None):
+    def _launch(self, reader):
         """
-        Launch the installed qed server with the swarm configuration, with a crew of {team}
-        workers, or my {team}, building {levels}, or not, as my {levels} say, from
-        {directory}, or from here, logging to {path}, or next to the measurement records
+        Launch the installed qed server with the swarm configuration
         """
-        # the size of the crew
-        team = self.team if team is None else team
-        # whether it builds levels
-        levels = self.levels if levels is None else levels
-        # the server output lands next to the measurement records, unless told otherwise
-        path = f"{os.path.splitext(self.output)[0]}-server.log" if path is None else path
+        # the server output lands next to the measurement records
+        stem = os.path.splitext(self.output)[0]
         # open its log
-        log = open(path, mode="w")
+        log = open(f"{stem}-server.log", mode="w")
         # assemble the launch command; the {nexus} node is not an application trait, so its
         # settings must use the fully qualified names
         cmd = [
@@ -1730,13 +1715,13 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # with the tile cache off, so every request is an actual render
             "--qed.app.nexus.services.web.fleet.cache.capacity=0",
             # with the requested team size for the target reader
-            f"--qed.app.nexus.services.web.fleet.{reader.pyre_name}.size={team}",
+            f"--qed.app.nexus.services.web.fleet.{reader.pyre_name}.size={self.team}",
             # building the levels of the product, unless asked not to
-            f"--qed.app.pyramids={'yes' if levels else 'no'}",
+            f"--qed.app.pyramids={'yes' if self.levels else 'no'}",
         ]
-        # launch, from the directory whose configuration and workspace the server uses
+        # launch
         process = subprocess.Popen(
-            cmd, cwd=directory, stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT
+            cmd, stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT
         )
         # hand back the process and its log
         return process, log
@@ -2291,76 +2276,113 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         return
 
     # implementation details: the pyramid
-    def _build(self, reader, dataset, name, team, directory):
+    def _build(self, reader, dataset, team, directory):
         """
-        Launch a server with a crew of {team} from {directory}, select the {dataset} of {reader}
-        through the channel {name}, and time the construction of its pyramid, as the seconds
-        until it is seeded, the seconds until it is ready, and the state it ended in
+        Build the pyramid of {dataset}, and of the rasters it is read with, on a crew of {team}
+        members working out of {directory}, and time it, as the seconds until the dataset is
+        seeded, the seconds until every build is done, and the state they ended in
         """
-        # launch the server, building levels, with its log in the folder of the build
-        process, log = self._launch(
-            reader=reader,
-            team=team,
-            levels=True,
-            directory=str(directory),
-            path=str(directory / "server.log"),
-        )
+        # the workspace the levels go into
+        workspace = qed.workspaces.local(name=f"qed.measure.pyramid.team{team}.workspace")
+        # is the folder of this build
+        workspace.path = str(directory)
+        # the fleet, with an event loop of its own
+        fleet = qed.nexus.fleet(name=f"qed.measure.pyramid.team{team}")
+        fleet.dispatcher = pyre.ipc.newPSL()
+        # the team of the reader, with the size under measurement
+        fleet.team(reader=reader.pyre_name).size = team
+        # the clock of the build
+        clock = qed.timers.wall(f"qed.measure.pyramid.team{team}")
         # the times, unknown until they happen
-        seeded = None
-        ready = None
-        # and the state the build ends in
-        status = "unknown"
-        # from here on, the server must come down no matter what happens
-        try:
-            # wait for it to accept connections
-            if not self._ready():
-                # if it never came up, say so
-                return seeded, ready, "no server"
-            # make first contact before the clock starts, so the time is the build's alone
-            self._stage()
-            # selecting the dataset is what starts the build, so the clock starts here
-            clock = qed.timers.wall(f"qed.measure.pyramid.team{team}")
-            # afresh
-            clock.reset()
-            clock.start()
-            # drive the selections the way the client would
-            self._select(reader=reader, dataset=dataset, channel=name)
-            # watch the preparation, but not forever
-            while clock.sec() < self._buildPatience:
-                # ask the server how it is going
-                reply = self._graphql(query="{ qed { views { preparation } } }")
-                # the state of the view i drove
-                status = reply["data"]["qed"]["views"][0]["preparation"] or "none"
-                # the time so far
-                elapsed = clock.sec()
-                # a seeded build, or one that got past it, has been seeded
-                if seeded is None and status in ("seeded", "ready"):
-                    # so note when
-                    seeded = elapsed
-                # a build that is done
-                if status == "ready":
-                    # is done
-                    ready = elapsed
-                    # so stop watching
-                    break
-                # a build that failed, or a dataset nobody is preparing, will not get better
-                if status in ("failed", "none"):
-                    # so stop watching
-                    break
-                # otherwise, wait a beat
-                time.sleep(self._buildBeat)
-            # if the watch ran out
-            else:
-                # say so
-                status = f"{status}, gave up after {self._buildPatience} s"
-            # the build is over, one way or another
-            clock.stop()
-        # no matter how the build went
-        finally:
-            # bring the server down
-            self._stop(process=process, log=log)
+        marks = {"seeded": None, "ready": None}
+        # and the reasons of any failures
+        errors = []
+        # the builds, one per raster
+        builds = []
+
+        # when the dataset is worth looking at
+        def seeded(build):
+            """
+            The first tiles of the dataset have reported
+            """
+            # note when
+            marks["seeded"] = clock.sec()
+            # all done
+            return
+
+        # when a build is over
+        def over(build, error=None):
+            """
+            A build is done, or failed with {error}; once they all are, the loop stops
+            """
+            # a failure
+            if error is not None:
+                # has its reason noted
+                errors.append(str(error))
+            # once every build is over
+            if all(build.done for build in builds):
+                # note when
+                marks["ready"] = clock.sec()
+                # and stop the loop
+                fleet.dispatcher.stop()
+            # all done
+            return
+
+        # when the build takes too long
+        def overdue(timestamp):
+            """
+            The build has taken longer than its patience allows
+
+            N.B.: this is an alarm handler; returning {None} keeps it from being rescheduled
+            """
+            # note it
+            errors.append(f"gave up after {self._buildPatience} s")
+            # and stop the loop
+            fleet.dispatcher.stop()
+            # the alarm is done
+            return None
+
+        # the rasters: the dataset, and the ones it is read with, since a masked render reads
+        # all of them at one depth or none of them
+        rasters = [dataset] + list(dataset.companions().values())
+        # go through them
+        for raster in rasters:
+            # the pyramid, laid out in the workspace
+            pyramid = qed.readers.nisar.pyramid(reader=reader, dataset=raster, workspace=workspace)
+            # and its build; only the dataset reports its seed, as it does in the server
+            builds.append(
+                qed.nexus.build(
+                    reader=reader,
+                    dataset=raster,
+                    pyramid=pyramid,
+                    fleet=fleet,
+                    statistics=qed.ux.sample(),
+                    onSeeded=seeded if raster is dataset else None,
+                    onDone=over,
+                    onFailed=over,
+                )
+            )
+        # start the clock
+        clock.reset()
+        clock.start()
+        # start the builds
+        for build in builds:
+            # each hands out its first level
+            build.start()
+        # give up if they take too long
+        fleet.dispatcher.alarm(interval=self._buildPatience * second, call=overdue)
+        # unless they are over already
+        if not all(build.done for build in builds):
+            # run the loop until they are
+            fleet.dispatcher.watch()
+        # stop the clock
+        clock.stop()
+        # let the crew go
+        fleet.disband()
+        # the state the builds ended in
+        status = "; ".join(errors) if errors else "ready"
         # hand off the times and the state
-        return seeded, ready, status
+        return marks["seeded"], (marks["ready"] if not errors else None), status
 
     # implementation details: the census
     def _flavor(self, kind):
@@ -2741,9 +2763,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     _tilePatience = 900
     # how long the census waits for the measurement of one granule, in seconds
     _patience = 900
-    # how long the pyramid measurement waits for a build, and how often it looks, in seconds
+    # how long the pyramid measurement waits for a build, in seconds
     _buildPatience = 7200
-    _buildBeat = 0.5
     # how long the output of a measurement can pause before what it said counts as an entry
     _s3quiet = 0.2
     # the cells that hold data, by dataset, found on first use
