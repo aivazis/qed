@@ -173,11 +173,13 @@ and `census.csv` collects the summary of every dataset with its kind, granule, s
 version; the run log reports the medians of each kind. Only metadata is read, so a census next to
 the data is cheap.
 
-`measure pyramid` builds the pyramid of a dataset from scratch with a server of each of the
-`--crews` sizes, and records the seconds from the selection of the dataset until the view is
-seeded and until every level is built, with the space the levels take on disk. Each build works out
-of a folder of its own, so none finds the levels of another, and the levels are removed once
-measured. `measure s3` ends with it, so a product in a bucket gets the cost of reading all of it.
+`measure pyramid` builds the pyramid of a dataset, and of the rasters it is read with, from
+scratch on a crew of each of the `--crews` sizes. The build is the one the server runs when a client
+selects the dataset, `qed.nexus.build` on a fleet, driven here on an event loop of its own; the
+command records the seconds until the dataset is seeded and until every build is done, with the
+space the levels take on disk. Each build works out of a folder of its own, so none finds the
+levels of another, and the levels are removed once measured. `measure s3` ends with it, so a
+product in a bucket gets the cost of reading all of it.
 
 ## Measurement categories
 
