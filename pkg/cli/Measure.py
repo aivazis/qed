@@ -6,6 +6,7 @@
 
 # externals
 import concurrent.futures
+import contextlib
 import csv
 import datetime
 import journal
@@ -436,38 +437,46 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         channel = journal.info("qed.measure.pages")
         # the host label that lets records from different machines share a file
         host = self.pyre_host.nickname
-        # the per chunk records land next to the others
+        # the records land next to the others
         stem = os.path.splitext(self.output)[0]
-        # in their own file
-        path = f"{stem}-pages.csv"
-        # check whether this is first contact
-        fresh = not os.path.exists(path)
-        # open the file for appending, so runs accumulate
-        with open(path, mode="a", newline="") as stream:
-            # make a writer
-            writer = csv.writer(stream)
-            # on first contact
-            if fresh:
-                # write the header
-                writer.writerow(self._pageHeaders)
-            # go through the datasets the restrictions allow
-            for reader, dataset in self._rasters(plexus=plexus):
+        # the datasets the restrictions allow, grouped by the reader whose file holds them
+        readers = {}
+        # go through them
+        for reader, dataset in self._rasters(plexus=plexus):
+            # and file each one with its reader
+            readers.setdefault(reader, []).append(dataset)
+        # open the file of per chunk records and the file of per dataset summaries, for
+        # appending, so runs accumulate
+        with (
+            self._records(path=f"{stem}-pages.csv", headers=self._pageHeaders) as chunks,
+            self._records(path=f"{stem}-occupancy.csv", headers=self._occupancyHeaders) as sums,
+        ):
+            # go through the readers
+            for reader, datasets in readers.items():
                 # the file layout is shared by all the datasets of a reader
                 layout = self._layout(reader=reader)
                 # a reader whose file is not HDF5 has no pages to speak of
                 if layout is None:
                     # so say so
-                    channel.line(f"{dataset.pyre_name}: not an HDF5 product")
+                    channel.line(f"{reader.pyre_name}: not an HDF5 product")
                     # and move on
                     continue
-                # measure this one
-                self._occupancy(
-                    channel=channel,
-                    writer=writer,
-                    host=host,
-                    dataset=dataset,
-                    layout=layout,
-                )
+                # the chunk tables of every dataset in the file, since the datasets that share
+                # the pages of the one being measured decide how much of each page it needs
+                tables = self._chunks(reader=reader)
+                # go through the datasets to measure
+                for dataset in datasets:
+                    # and measure each one
+                    self._occupancy(
+                        channel=channel,
+                        chunks=chunks,
+                        summaries=sums,
+                        host=host,
+                        reader=reader,
+                        dataset=dataset,
+                        layout=layout,
+                        tables=tables,
+                    )
         # flush the report
         channel.log()
         # all done
@@ -728,15 +737,50 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # hand off what matters
         return fcpl.pageSize, strategy.strategy.name
 
-    def _occupancy(self, channel, writer, host, dataset, layout):
+    @contextlib.contextmanager
+    def _records(self, path, headers):
         """
-        Walk the chunk grid of {dataset}, record each chunk that was written, and report how
-        the chunks sit on the pages of the file
+        Open the file of records at {path} for appending, writing its {headers} on first
+        contact, and hand off a writer
+        """
+        # check whether this is first contact
+        fresh = not os.path.exists(path)
+        # open the file for appending, so runs accumulate
+        with open(path, mode="a", newline="") as stream:
+            # make a writer
+            writer = csv.writer(stream)
+            # on first contact
+            if fresh:
+                # write the header
+                writer.writerow(headers)
+            # hand off the writer
+            yield writer
+        # all done
+        return
+
+    def _chunks(self, reader):
+        """
+        Read the chunk table of every dataset of {reader} as lists of (address, bytes, origin)
+        """
+        # the tables, by dataset name
+        tables = {}
+        # go through the datasets of the reader
+        for dataset in reader.datasets:
+            # and record the chunks that were written
+            tables[dataset.pyre_name] = [
+                (chunk.address, chunk.bytes, tuple(chunk.origin))
+                for chunk in dataset.data.dataset.chunkTable()
+            ]
+        # hand off the tables
+        return tables
+
+    def _occupancy(self, channel, chunks, summaries, host, reader, dataset, layout, tables):
+        """
+        Record each chunk of {dataset} that was written, and report and summarize how its
+        chunks sit on the pages of the file, alone and next to the datasets in {tables}
         """
         # unpack the layout
         pageSize, strategy = layout
-        # get the low level dataset
-        h5 = dataset.data.dataset
         # unpack the extent and the tile
         rows, cols = tuple(dataset.shape)
         tileRows, tileCols = tuple(dataset.tile)
@@ -744,121 +788,166 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         raw = tileRows * tileCols * dataset.data.disktype.bytes
         # the number of chunks the tiling describes
         grid = -(-rows // tileRows) * -(-cols // tileCols)
-        # the chunks that were written, as (address, bytes)
-        chunks = []
-        # go through them
-        for chunk in h5.chunkTable():
+        # the name of the dataset
+        name = dataset.pyre_name
+        # go through its chunks
+        for address, size, (row, col) in tables[name]:
             # the pages it spans, when the file has pages
-            first = chunk.address // pageSize if pageSize else 0
-            last = (chunk.address + chunk.bytes - 1) // pageSize if pageSize else 0
-            # unpack its corner
-            row, col = chunk.origin
+            first = address // pageSize if pageSize else 0
+            last = (address + size - 1) // pageSize if pageSize else 0
             # record it
-            writer.writerow(
-                (
-                    host,
-                    dataset.pyre_name,
-                    row,
-                    col,
-                    chunk.address,
-                    chunk.bytes,
-                    raw,
-                    pageSize,
-                    first,
-                    last - first + 1,
-                )
+            chunks.writerow(
+                (host, name, row, col, address, size, raw, pageSize, first, last - first + 1)
             )
-            # and remember it
-            chunks.append((chunk.address, chunk.bytes))
+        # describe how it sits on the pages
+        record = qed.readers.pages.occupancy(
+            tables=tables,
+            name=name,
+            pageSize=pageSize,
+            raw=raw,
+            tile=(tileRows, tileCols),
+            grid=grid,
+        )
         # sign on
-        channel.line(f"{dataset.pyre_name}:")
+        channel.line(f"{name}:")
         channel.line(f"  file: {strategy} strategy, pages of {pageSize / 2**20:g} MiB")
         # if nothing was written
-        if not chunks:
+        if not record["written"]:
             # there is nothing else to say
             channel.line(f"  none of its {grid} chunks were written")
             # so bail
             return
-        # the stored sizes, in order
-        sizes = sorted(size for _, size in chunks)
-        # their total
-        stored = sum(sizes)
         # report the chunk table
         channel.line(
-            f"  chunks: {len(chunks)} of {grid} written ({len(chunks) / grid:.0%}), "
-            f"{stored / 2**20:.1f} MiB stored"
+            f"  chunks: {record['written']} of {grid} written ({record['written'] / grid:.0%}), "
+            f"{record['stored'] / 2**20:.1f} MiB stored"
         )
-        # and the sizes, against the raw chunk
+        # the sizes, against the raw chunk
         channel.line(
             f"  chunk size: raw {raw / 2**20:.2f} MiB; stored median "
-            f"{sizes[len(sizes) // 2] / 2**20:.2f} MiB, from {sizes[0] / 2**10:.1f} KiB "
-            f"to {sizes[-1] / 2**20:.2f} MiB; compression {raw * len(sizes) / stored:.2f}x"
+            f"{record['median'] / 2**20:.2f} MiB, from {record['smallest'] / 2**10:.1f} KiB "
+            f"to {record['largest'] / 2**20:.2f} MiB; compression {record['compression']:.2f}x"
         )
+        # the chunks that hold next to nothing
+        channel.line(
+            f"  nearly empty: {record['empty']} chunks "
+            f"({record['empty'] / record['written']:.0%}) store less than "
+            f"{qed.readers.pages.NEARLY_EMPTY:.0%} of their raw size"
+        )
+        # and the distribution of the sizes
+        channel.line("  stored size, as a share of the raw size:")
+        # one bin per line
+        for line in qed.readers.pages.bars(counts=record["sizes"]):
+            # indented under its title
+            channel.line(f"    {line}")
         # a file without pages is read in byte ranges, so the rest does not apply
         if not pageSize:
             # say so
             channel.line("  the file is not paged; a reader fetches each chunk as one range")
+            # summarize what there is
+            self._summarize(
+                summaries=summaries, host=host, reader=reader, strategy=strategy, record=record
+            )
             # and bail
             return
-        # the bytes of this dataset on each page, and the chunks that touch it
-        fill = {}
-        tenants = {}
-        # the number of pages each chunk spans
-        spans = []
-        # go through the chunks
-        for address, size in chunks:
-            # the pages it lands on
-            first = address // pageSize
-            last = (address + size - 1) // pageSize
-            # remember the span
-            spans.append(last - first + 1)
-            # and apportion its bytes among them
-            for page in range(first, last + 1):
-                # the part of the chunk that falls on this page
-                start = max(address, page * pageSize)
-                end = min(address + size, (page + 1) * pageSize)
-                # adds to its fill
-                fill[page] = fill.get(page, 0) + end - start
-                # and the chunk is one of its tenants
-                tenants[page] = tenants.get(page, 0) + 1
-        # tally the spans
-        histogram = {}
-        # by number of pages
-        for span in spans:
-            # lumping everything past three together
-            key = span if span < 3 else 3
-            # count it
-            histogram[key] = histogram.get(key, 0) + 1
+        # the spans
+        spans = record["spans"]
         # report them
         channel.line(
             "  pages per chunk: "
             + ", ".join(
-                f"{'3+' if key == 3 else key}: {count} ({count / len(spans):.0%})"
-                for key, count in sorted(histogram.items())
+                f"{'3+' if key == 3 else key}: {count} ({count / record['written']:.0%})"
+                for key, count in sorted(spans.items())
             )
         )
-        # the bytes a reader that fetches whole pages moves to read each chunk on its own
-        alone = sum(spans) * pageSize
-        # and the bytes it moves to read them all, with every page fetched once
-        together = len(fill) * pageSize
-        # report the amplification of both
+        # the datasets that share its pages
+        partners = ", ".join(
+            f"{other} ({share / 2**20:.0f} MiB)"
+            for other, share in sorted(record["partners"].items(), key=lambda item: -item[1])
+        )
+        # report the amplification of every way of reading it
         channel.line(
-            f"  read amplification: {alone / stored:.2f}x reading one chunk at a time, "
-            f"{together / stored:.2f}x reading every chunk with each page fetched once"
+            f"  read amplification: {record['alone']:.2f}x reading one chunk at a time, "
+            f"{record['once']:.2f}x reading every chunk with each page fetched once"
+        )
+        # and next to its partners
+        channel.line(
+            f"    {record['joint']:.2f}x reading it together with the datasets that share its "
+            f"pages: {partners or 'none'}"
         )
         # the occupancy of the pages that hold any of this dataset
-        occupancy = sorted(size / pageSize for size in fill.values())
+        channel.line(
+            f"  pages: {record['pages']} hold part of it; it fills a median of "
+            f"{record['fillMedian']:.0%} and a mean of {record['fillMean']:.0%} of each, and "
+            f"{record['fillFull']:.0%} of them at least 90%; all datasets together fill a mean "
+            f"of {record['totalMean']:.0%}"
+        )
+        # the distribution of its share of the pages
+        channel.line("  its share of each page:")
+        # one bin per line
+        for line in qed.readers.pages.bars(counts=record["fill"]):
+            # indented under its title
+            channel.line(f"    {line}")
+        # and the share of all datasets together
+        channel.line("  the share of all datasets together:")
+        # one bin per line
+        for line in qed.readers.pages.bars(counts=record["total"]):
+            # indented under its title
+            channel.line(f"    {line}")
+        # how crowded they are
+        channel.line(f"  tenants: a median of {record['tenants']:g} chunks per page")
+        # and whether the chunks that share a page are neighbors on the raster
+        locality = record["locality"]
         # report it
         channel.line(
-            f"  pages: {len(fill)} hold part of it; the dataset fills a median of "
-            f"{occupancy[len(occupancy) // 2]:.0%} of each, and "
-            f"{sum(1 for share in occupancy if share >= 0.9) / len(occupancy):.0%} of them "
-            f"at least 90%"
+            "  locality: "
+            + (
+                "no page holds two of its chunks"
+                if locality is None
+                else f"{locality:.0%} of the consecutive chunks on a page are raster neighbors"
+            )
         )
-        # and how crowded they are
-        channel.line(
-            f"  tenants: a median of {sorted(tenants.values())[len(tenants) // 2]} chunks per "
-            f"page, at most {max(tenants.values())}"
+        # summarize
+        self._summarize(
+            summaries=summaries, host=host, reader=reader, strategy=strategy, record=record
+        )
+        # all done
+        return
+
+    def _summarize(self, summaries, host, reader, strategy, record):
+        """
+        Add the summary {record} of a dataset of {reader} to the file of {summaries}
+        """
+        # the datasets that share its pages, compactly
+        partners = ";".join(
+            f"{other}:{share}" for other, share in sorted(record.get("partners", {}).items())
+        )
+        # write the row
+        summaries.writerow(
+            (
+                host,
+                reader.uri,
+                record["dataset"],
+                strategy,
+                record["pageSize"],
+                record["grid"],
+                record["written"],
+                record["stored"],
+                record["raw"],
+                record["compression"],
+                record["empty"],
+                record.get("pages"),
+                record.get("alone"),
+                record.get("once"),
+                record.get("joint"),
+                partners,
+                record.get("fillMedian"),
+                record.get("fillMean"),
+                record.get("fillFull"),
+                record.get("totalMean"),
+                record.get("tenants"),
+                record.get("locality"),
+            )
         )
         # all done
         return
@@ -1955,6 +2044,31 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "median_ms",
         "p95_ms",
         "failures",
+    )
+    # the column labels of the per dataset page occupancy summaries
+    _occupancyHeaders = (
+        "host",
+        "product",
+        "dataset",
+        "strategy",
+        "page_size",
+        "grid",
+        "written",
+        "stored",
+        "raw",
+        "compression",
+        "empty",
+        "pages",
+        "alone",
+        "once",
+        "joint",
+        "partners",
+        "fill_median",
+        "fill_mean",
+        "fill_full",
+        "total_mean",
+        "tenants",
+        "locality",
     )
     # the column labels of the chunk layout records
     _pageHeaders = (
