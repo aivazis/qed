@@ -168,7 +168,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     results.doc = (
         "the directory that collects the results of the s3 program, unset names one after the "
         "host and the time; for a census, the directory that holds a folder for each product, "
-        "named after the product and the cycle, e.g. census-rslc-31, unset is the current one"
+        "named after the cycle and the product, e.g. census-31-rslc, unset is the current one"
     )
 
     # the census of the layout of the NISAR products in a bucket
@@ -936,7 +936,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # the folder that holds the folders of the products: my {results}, or the current one
         parent = self.results.resolve() if self.results is not None else qed.primitives.path.cwd()
         # the folder of each product
-        folders = {product: parent / f"census-{product}-{self.cycle}" for product in products}
+        folders = {product: parent / f"census-{self.cycle}-{product}" for product in products}
         # a folder that exists already would mix records from different runs; check them all
         # before any of the work starts
         taken = [str(folder) for folder in folders.values() if folder.exists()]
