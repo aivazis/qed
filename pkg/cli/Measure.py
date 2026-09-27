@@ -169,36 +169,22 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     bucket = qed.properties.str()
     bucket.default = "s3://nisar-ops-rs-fwd/products/"
     bucket.doc = (
-        "the prefix under which the census finds the NISAR products, laid out by kind, date, "
-        "and granule"
+        "the prefix under which the census finds the NISAR products, in the canonical layout of "
+        "product, date, and granule"
     )
-
-    kinds = qed.properties.strings()
-    kinds.default = [
-        "L1_L_RSLC",
-        "L1_L_RIFG",
-        "L1_L_RUNW",
-        "L1_L_ROFF",
-        "L2_L_GSLC",
-        "L2_L_GUNW",
-        "L2_L_GCOV",
-        "L2_L_GOFF",
-    ]
-    kinds.doc = "the kinds of product the census measures, named the way the bucket names them"
 
     quota = qed.properties.int()
     quota.default = 24
     quota.doc = (
-        "the number of granules of each kind the census measures, spread over the dates or over "
-        "the cycle; unset measures every one"
+        "the number of granules of each product the census measures, spread evenly over the "
+        "cycle; unset measures every one"
     )
 
     scrape = qed.properties.path()
     scrape.default = None
     scrape.doc = (
-        "a scrape of the bucket, a folder with a list of granule ids for each kind named after "
-        "its reader, e.g. rslc.txt; the census takes its granules from it instead of listing "
-        "the bucket"
+        "a scrape of the bucket, a folder with a list of granule ids for each product named "
+        "after its reader, e.g. rslc.txt, that the census takes its granules from"
     )
 
     cycle = qed.properties.int()
@@ -837,25 +823,34 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     @qed.export(tip="measure the page layout of a sample of the NISAR products in a bucket")
     def census(self, plexus, **kwds):
         """
-        Measure the page layout of {quota} granules of each of the {kinds} of NISAR product in
-        {bucket}, spread over the dates on offer, and collect the summaries of every dataset in
-        one table, so the structure of the products can be compared across kinds and dates
+        Measure the page layout of the granules of one repeat {cycle} in a {scrape} of {bucket},
+        all of them or {quota} of each product, for the products my {only} restriction allows,
+        or all of them, and collect the summaries of every dataset in one table, so the
+        structure of the products can be compared across products and processing versions
 
         Each granule is measured by {measure pages} in a fresh process, {workers} at a time;
         only metadata is read, so the census is cheap next to the data
         """
         # make a channel for the problems that stop the census before it starts
         error = journal.error("qed.measure.census")
-        # every kind needs a reader
-        unknown = [kind for kind in self.kinds if self._flavor(kind=kind) is None]
-        # so a kind without one is a mistake
+        # the products to measure, named after their readers
+        products = list(self.only) or list(FLAVORS)
+        # a product without a reader is a mistake
+        unknown = [product for product in products if product not in FLAVORS]
+        # so say which
         if unknown:
-            # say which
-            error.log(f"no reader for {', '.join(unknown)}")
+            # and what there is
+            error.log(f"no reader for {', '.join(unknown)}; the readers are {', '.join(FLAVORS)}")
             # and bail
             return 1
-        # a scrape is read one cycle at a time
-        if self.scrape is not None and self.cycle is None:
+        # the granules come from a scrape
+        if self.scrape is None:
+            # so a census without one is a mistake
+            error.log("the census takes its granules from a scrape; point {scrape} at one")
+            # and bail
+            return 1
+        # which is read one cycle at a time
+        if self.cycle is None:
             # so a scrape without a cycle is a mistake
             error.log("the census reads one cycle of a scrape; name it with {cycle}")
             # and bail
@@ -866,14 +861,14 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             error.log(f"'{self.bucket}' is not an s3 uri")
             # so bail
             return 1
-        # the census lists the bucket through the AWS client, which qed does not require
+        # the census checks the bucket through the AWS client, which qed does not require
         try:
             # so look for it
             import boto3
         # if it is not there
         except ImportError:
             # say so
-            error.log("the census lists the bucket with 'boto3', which is not installed")
+            error.log("the census checks the bucket with 'boto3', which is not installed")
             # and bail
             return 1
         # the measurements run in child processes of the installed qed
@@ -901,8 +896,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         channel.line(f"on {self.pyre_host.nickname}")
         channel.line(
             f"{'every' if self.quota is None else self.quota} granule(s) of each of "
-            f"{', '.join(self.kinds)}"
-            + ("" if self.scrape is None else f", cycle {self.cycle} of the scrape {self.scrape}")
+            f"{', '.join(products)}, cycle {self.cycle} of the scrape {self.scrape}"
         )
         channel.line(f"from {self.bucket}")
         channel.line(f"results in {results}")
@@ -915,20 +909,41 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         bucket, _, prefix = self.bucket.removeprefix("s3://").partition("/")
         # make a client, with the credentials of the standard AWS chain
         client = boto3.client("s3")
-        # the granules to measure, as (kind, granule, key, bytes)
+        # the granules to measure, as (product, granule, key, bytes)
         jobs = []
-        # go through the kinds
-        for kind in self.kinds:
-            # choose its granules
-            chosen, skipped = (
-                self._choose(client=client, bucket=bucket, prefix=f"{prefix}{kind}/")
-                if self.scrape is None
-                else self._scraped(client=client, bucket=bucket, prefix=prefix, kind=kind)
-            )
+        # the errors of the AWS client
+        import botocore.exceptions
+
+        # the parser complains about every id it does not recognize; the census counts them
+        # instead, so they do not drown its report
+        journal.warning("qed.readers.nisar.daac").deactivate()
+        # go through the products
+        for product in products:
+            # a product the scrape has no list for
+            if not (self.scrape / f"{product}.txt").exists():
+                # has nothing to measure
+                channel.line(f"{product}: the scrape has no list")
+                # so move on
+                continue
+            # attempt to
+            try:
+                # choose its granules
+                chosen, skipped, unrecognized = self._scraped(
+                    client=client, bucket=bucket, prefix=prefix, product=product
+                )
+            # if the bucket cannot be asked, e.g. because the credentials expired
+            except (botocore.exceptions.ClientError, botocore.exceptions.BotoCoreError) as failure:
+                # say so
+                error.log(f"could not check the products in '{self.bucket}': {failure}")
+                # and bail
+                return 1
             # say how many there are, and how many folders held no product
-            channel.line(f"{kind}: {len(chosen)} granules, {skipped} folders without a product")
+            channel.line(
+                f"{product}: {len(chosen)} granules, {skipped} folders without a product, "
+                f"{unrecognized} ids the parser did not recognize"
+            )
             # and add them to the pile
-            jobs.extend((kind, granule, key, size) for granule, key, size in chosen)
+            jobs.extend((product, granule, key, size) for granule, key, size in chosen)
         # flush
         channel.log()
 
@@ -2427,104 +2442,20 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         return marks["seeded"], (marks["ready"] if not errors else None), status
 
     # implementation details: the census
-    def _flavor(self, kind):
+    def _scraped(self, client, bucket, prefix, product):
         """
-        The reader of the products of {kind}, named the way the bucket names them, or {None}
-        """
-        # the kind of product is the last part of the name
-        flavor = kind.rsplit("_", 1)[-1].lower()
-        # hand it off, if there is a reader for it
-        return flavor if flavor in FLAVORS else None
-
-    def _folders(self, client, bucket, prefix):
-        """
-        List the folders directly under {prefix} in {bucket}, in order
-        """
-        # the folders
-        folders = []
-        # the listing comes in pages
-        pages = client.get_paginator("list_objects_v2")
-        # go through them
-        for page in pages.paginate(Bucket=bucket, Prefix=prefix, Delimiter="/"):
-            # and collect the folders of each
-            folders.extend(entry["Prefix"] for entry in page.get("CommonPrefixes", []))
-        # hand them off, in order
-        return sorted(folders)
-
-    def _choose(self, client, bucket, prefix):
-        """
-        Choose my {quota} of granules under {prefix}, spread evenly over the dates on offer, as
-        (granule, key, bytes), and count the folders passed over because they hold no product
-        """
-        # the dates on offer, as their folders
-        days = [prefix]
-        # the layout goes year, month, and day
-        for _ in range(3):
-            # so descend one level at a time
-            days = [
-                folder
-                for parent in days
-                for folder in self._folders(client=client, bucket=bucket, prefix=parent)
-            ]
-        # the number of granules to choose; unset takes every one
-        quota = math.inf if self.quota is None else self.quota
-        # the number of days to draw from
-        count = min(quota, len(days))
-        # with nothing to draw from, or nothing to draw
-        if count < 1:
-            # there is nothing to choose, and nothing passed over
-            return [], 0
-        # spread the days evenly over the ones on offer
-        picks = (
-            [days[round(i * (len(days) - 1) / (count - 1))] for i in range(count)]
-            if count > 1
-            else [days[len(days) // 2]]
-        )
-        # the granule folders of each chosen day, to draw from one at a time
-        pools = [iter(self._folders(client=client, bucket=bucket, prefix=day)) for day in picks]
-        # the granules chosen
-        granules = []
-        # and the folders passed over because they hold no product
-        skipped = 0
-        # draw one granule from each day in turn, until the quota is met or the days run dry
-        while len(granules) < quota and pools:
-            # go through the days that still have folders
-            for pool in list(pools):
-                # once the quota is met
-                if len(granules) >= quota:
-                    # there is nothing more to draw
-                    break
-                # look through the folders of this day
-                for folder in pool:
-                    # for one that holds its product
-                    found = self._product(client=client, bucket=bucket, folder=folder)
-                    # if this one does
-                    if found is not None:
-                        # choose it
-                        granules.append(found)
-                        # and move on to the next day
-                        break
-                    # otherwise, pass it over
-                    skipped += 1
-                # a day whose folders ran out
-                else:
-                    # has nothing more to offer
-                    pools.remove(pool)
-        # hand off the granules, and the number of folders passed over
-        return granules, skipped
-
-    def _scraped(self, client, bucket, prefix, kind):
-        """
-        Choose the granules of {kind} in my {cycle} from my {scrape}, as (granule, key, bytes),
-        all of them or my {quota} spread evenly over the cycle, and count the ones passed over
-        because their folder in {bucket} holds no product
+        Choose the granules of {product} in my {cycle} from my {scrape}, as (granule, key,
+        bytes), all of them or my {quota} spread evenly over the cycle, and count the ones passed
+        over because their folder in {bucket} holds no product
         """
         # the parser of the granule ids
         registrar = qed.readers.nisar.daac.registrar()
-        # the list of the granules of this kind, named after its reader
-        path = self.scrape / f"{self._flavor(kind=kind)}.txt"
+        # the list of the granules of this product, named after its reader
+        path = self.scrape / f"{product}.txt"
         # the granules of the cycle, as (begin, granule, key)
         found = []
+        # and the number of ids the parser did not recognize
+        unrecognized = 0
         # go through the list
         with open(path) as stream:
             # one granule id per line
@@ -2535,29 +2466,28 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 if not granule:
                     # by moving on
                     continue
-                # parse the id; one the parser does not recognize is reported and comes back
-                # as nothing
+                # parse the id; one the parser does not recognize comes back as nothing
                 descriptor = registrar.parse(granule)
                 # so skip it
                 if descriptor is None:
-                    # by moving on
+                    # count it
+                    unrecognized += 1
+                    # and move on
                     continue
-                # a pair is filed under its reference acquisition
-                if isinstance(descriptor, qed.readers.nisar.daac.pair):
-                    # whose cycle and start it carries
-                    cycle, begin = descriptor.referenceCycle, descriptor.referenceBegin
-                # everybody else is filed under its own acquisition
-                else:
-                    # whose cycle and start it carries
-                    cycle, begin = descriptor.cycle, descriptor.begin
+                # the cycle of a pair is the one of its reference acquisition
+                cycle = (
+                    descriptor.referenceCycle
+                    if isinstance(descriptor, qed.readers.nisar.daac.pair)
+                    else descriptor.cycle
+                )
                 # a granule of another cycle
                 if int(cycle) != self.cycle:
                     # is not wanted
                     continue
-                # the bucket files it by kind and by the date it was acquired
-                key = f"{prefix}{kind}/{begin:%Y/%m/%d}/{granule}/{granule}.h5"
-                # add it to the pile
-                found.append((begin, granule, key))
+                # the key of its product in the canonical layout of the bucket
+                key = qed.readers.nisar.daac.canonical(prefix=prefix, descriptor=descriptor)
+                # add it to the pile, with the time that orders it
+                found.append((descriptor.mark, granule, key))
         # in the order they were acquired
         found.sort()
         # a quota picks that many, spread evenly over the cycle
@@ -2588,8 +2518,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 continue
             # otherwise, choose it
             granules.append(product)
-        # hand off the granules, and the number passed over
-        return granules, skipped
+        # hand off the granules, the number passed over, and the number not recognized
+        return granules, skipped, unrecognized
 
     def _product(self, client, bucket, folder):
         """
@@ -2607,10 +2537,14 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         try:
             # look it up
             head = client.head_object(Bucket=bucket, Key=key)
-        # if it is not there
-        except botocore.exceptions.ClientError:
-            # the folder has no product
-            return None
+        # if the bucket said no
+        except botocore.exceptions.ClientError as error:
+            # because the product is not there
+            if error.response.get("Error", {}).get("Code") in ("404", "NoSuchKey", "NotFound"):
+                # the folder has no product
+                return None
+            # anything else, e.g. credentials that expired, is not an answer about the product
+            raise
         # otherwise, hand off the granule, with the size of its product
         return granule, key, head["ContentLength"]
 
@@ -2734,18 +2668,16 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
 
     def _census(self, results, bucket, kind, granule, key):
         """
-        Start measuring the page layout of the {granule} of {kind} at {key} in {bucket} in a
-        fresh process, from a folder of its own under {results}, and hand off the process and
-        the log that collects its output
+        Start measuring the page layout of the {granule} of the product {kind}, named after its
+        reader, at {key} in {bucket} in a fresh process, from a folder of its own under
+        {results}, and hand off the process and the log that collects its output
         """
         # the folder of the granule
         directory = results / kind / granule
         # make it
         directory.mkdir(parents=True)
         # write the configuration the measurement reads
-        self._configure(
-            directory=directory, uri=f"s3://{bucket}/{key}", flavor=self._flavor(kind=kind)
-        )
+        self._configure(directory=directory, uri=f"s3://{bucket}/{key}", flavor=kind)
         # open the log that collects its output
         log = open(directory / "pages.log", mode="wb")
         # launch the measurement, with its output on a pipe the event loop watches
