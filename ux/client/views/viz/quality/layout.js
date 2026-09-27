@@ -12,6 +12,7 @@ import styled from 'styled-components'
 // hooks
 import { useLayout } from './useLayout'
 // components
+import { Census } from './census'
 import { Chunks } from './chunks'
 import { Histograms } from './histograms'
 import { Scorecard } from './scorecard'
@@ -32,6 +33,7 @@ export const Layout = ({ dataset }) => {
     return (
         <>
             <Scorecard layout={layout} />
+            {layout.census && <Census census={layout.census} />}
             <Chunks layout={layout} />
             <Histograms layout={layout} />
         </>
