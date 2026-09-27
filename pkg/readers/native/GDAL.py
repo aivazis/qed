@@ -72,7 +72,7 @@ class GDAL(qed.flow.factory, family="qed.readers.native.gdal", implements=qed.pr
             # add to the selector
             bands.append(str(rid))
             # make a dataset
-            band = datasets.gdal(name=f"s{self.pyre_name}.band_{rid:02}", rid=rid, dataset=dataset)
+            band = datasets.gdal(name=f"{self.pyre_name}.band_{rid:02}", rid=rid, dataset=dataset)
             # add it to my pile
             self.datasets.append(band)
         # remember the data product
