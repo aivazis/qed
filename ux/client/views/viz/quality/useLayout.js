@@ -77,6 +77,28 @@ const layoutQuery = graphql`
                 codes
                 sizes
             }
+            census {
+                census
+                product
+                cycle
+                kind
+                rasters
+                granules
+                measures {
+                    name
+                    label
+                    lower
+                    value
+                    count
+                    p10
+                    median
+                    p90
+                    max
+                    low
+                    high
+                    bins
+                }
+            }
         }
     }
 `
