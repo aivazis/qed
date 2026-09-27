@@ -52,6 +52,33 @@ class Registrar:
         # nothing on its behalf and it goes away when its clients let go of it
         return handler(granule=granule)
 
+    def fields(self, granule):
+        """
+        Extract the fields of the {granule} id as the strings the naming conventions spell
+        them with, without building a descriptor, or {None} if the id is not recognizable
+
+        This is the cheap way to sift through many ids, e.g. for the ones of one cycle, before
+        building descriptors for the ones that are wanted
+        """
+        # figure out the type of product
+        meta = self.grok(granule)
+        # a precursor product, recognized by its spacecraft id
+        if meta["sid"] == "S198":
+            # has a descriptor of its own
+            descriptor = Daphne
+        # everybody else
+        else:
+            # is identified by the product field, if there was one
+            descriptor = self.descriptors.get(meta["product"])
+        # an id that is not recognizable
+        if descriptor is None:
+            # has no fields
+            return None
+        # match the id against the conventions of its type
+        match = descriptor.regex.match(granule)
+        # and hand off its fields, if it matched
+        return match.groupdict() if match else None
+
     # implementation details
     def grok(self, granule):
         """
@@ -182,6 +209,22 @@ class Registrar:
         channel.log()
         # and bail
         return
+
+    # the descriptors of the standard products, by the product field of their ids
+    descriptors = {
+        "HST_DRT": HST_DRT,
+        "RRST": RRST,
+        "RRSD": RRSD,
+        "RSLC": RSLC,
+        "GSLC": GSLC,
+        "GCOV": GCOV,
+        "SME2": SME2,
+        "RIFG": RIFG,
+        "RUNW": RUNW,
+        "ROFF": ROFF,
+        "GUNW": GUNW,
+        "GOFF": GOFF,
+    }
 
     # the scanner
     scanner = (
