@@ -17,6 +17,7 @@ import { Provider } from './context'
 // hooks
 import { useConfig } from './useConfig'
 // components
+import { Axis } from './axis'
 import { Bars } from './bars'
 import { Frame } from './frame'
 import { Marker } from './marker'
@@ -47,6 +48,7 @@ const Drawing = () => {
         >
             <g aria-hidden="true">
                 <Frame />
+                <Axis />
                 <Ticks />
             </g>
             <Bars />

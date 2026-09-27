@@ -17,7 +17,7 @@ import styles from './styles'
 // the ticks at the edges of the bins, labeled at the ends and in the middle
 export const Ticks = () => {
     // get the geometry
-    const { counts, domain, bin, base, height, format, ticks } = useConfig()
+    const { counts, domain, left, bin, base, height, format, ticks } = useConfig()
     // a compact histogram has no ticks
     if (!ticks) {
         // so there is nothing to draw
@@ -34,9 +34,9 @@ export const Ticks = () => {
         <g>
             {Array.from({ length: bins + 1 }, (_, edge) => (
                 <g key={edge}>
-                    <path d={`M ${edge * bin} ${base} l 0 3`} style={styles.tick} />
+                    <path d={`M ${left + edge * bin} ${base} l 0 3`} style={styles.tick} />
                     {labeled.has(edge) &&
-                        <text x={edge * bin} y={height - 2} style={styles.label}
+                        <text x={left + edge * bin} y={height - 2} style={styles.label}
                             textAnchor={edge === 0 ? "start" : edge === bins ? "end" : "middle"}
                         >
                             {format(domain[0] + edge * step)}

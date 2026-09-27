@@ -29,16 +29,19 @@ export const Provider = ({ config, children }) => {
     const {
         counts, domain = [0, 1], width = 240, height = 80, log = false,
         label = null, marker = null, format = edge => `${Math.round(100 * edge)}%`,
-        ticks = true,
+        ticks = true, unit = null,
     } = config
-    // the room below the bars for the tick labels, if there are any, and above them for the
-    // tallest count
+    // the room below the bars for the tick labels, if there are any, above them for the tallest
+    // count and the name of what is counted, and to their left for the counts along the axis
     const gutter = ticks ? 14 : 2
-    const headroom = 4
+    const headroom = ticks && unit ? 12 : 4
+    const left = ticks ? 30 : 0
     // the height of the bars at their tallest
     const reach = height - gutter - headroom
+    // the width the bars share
+    const room = width - left
     // the width of a bin
-    const bin = counts.length > 0 ? width / counts.length : width
+    const bin = counts.length > 0 ? room / counts.length : room
     // the tallest bin sets the scale
     const tallest = Math.max(0, ...counts)
     // the scale: linear, or logarithmic so a dominant bin does not flatten the rest
@@ -49,13 +52,13 @@ export const Provider = ({ config, children }) => {
     const span = domain[1] - domain[0]
     // the position of a value of the domain along the axis; a domain of a single value puts
     // everything in the middle
-    const at = value => span > 0 ? width * (value - domain[0]) / span : width / 2
+    const at = value => left + (span > 0 ? room * (value - domain[0]) / span : room / 2)
     // the baseline
     const base = headroom + reach
     // assemble
     const value = {
-        counts, domain, width, height, log, label, marker, format, ticks,
-        gutter, headroom, reach, bin, tallest, scale, at, base,
+        counts, domain, width, height, log, label, marker, format, ticks, unit,
+        gutter, headroom, left, room, reach, bin, tallest, scale, at, base,
     }
     // provide
     return (

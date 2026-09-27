@@ -17,10 +17,10 @@ import styles from './styles'
 // the baseline under the bars
 export const Frame = () => {
     // get the geometry
-    const { width, base } = useConfig()
+    const { width, left, base } = useConfig()
     // render
     return (
-        <path d={`M 0 ${base} L ${width} ${base}`} style={styles.frame} />
+        <path d={`M ${left} ${base} L ${width} ${base}`} style={styles.frame} />
     )
 }
 

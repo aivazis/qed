@@ -17,14 +17,14 @@ import styles from './styles'
 // an optional marker at a value of the domain, e.g. where one raster falls among many
 export const Marker = () => {
     // get the geometry
-    const { marker, at, width, headroom, base } = useConfig()
+    const { marker, at, width, left, headroom, base } = useConfig()
     // without a marker
     if (marker === null || marker === undefined) {
         // there is nothing to draw
         return null
     }
     // the position of the marker, kept on the drawing
-    const x = Math.min(Math.max(at(marker.value), 1), width - 1)
+    const x = Math.min(Math.max(at(marker.value), left + 1), width - 1)
     // render
     return (
         <g data-qed-marker={marker.value}>
