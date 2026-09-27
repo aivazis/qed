@@ -166,6 +166,28 @@ chunks that follow each other on a page are also neighbors on the raster. It rea
 records one line per chunk in `{output}-pages.csv` and one summary line per dataset in
 `{output}-occupancy.csv`.
 
+The summary also compares what a dataset says it holds where there is no data with what it
+actually holds. It records the fill value the HDF5 library hands out for chunks that were never
+written, and whether the writer set it or left the default, next to the `_FillValue` attribute of
+the netCDF conventions. It then fetches the smallest written chunk, decodes it, and records the
+value it holds when all its cells are equal. When that value differs from the library's fill, the
+writer cannot leave the chunks without data unwritten, because a reader would then get the
+library's fill instead. The GCOV products declare zero to the library and NaN in the attribute,
+and store NaN. The same fetch times the cost of such a chunk: decoding it, against making it from
+its value the way the library fills a chunk that was never written, and against decoding the
+median chunk of data. Every chunk with the stored size of that chunk holds the same bytes, so
+their number and their bytes are what a declared fill would have spared; two of them are decoded
+to check. The deflate level that reproduces their stored size, and the time to encode one at that
+level, give what the writer spent on each. The bytes and the pages taken by the nearly empty
+chunks complete the record. These are the only reads of data in `measure pages`, a few pages per
+dataset.
+
+The pages of a file are shared by every dataset in it, not only the rasters its reader knows
+about, so the accounting of the pages walks the whole file: the datasets the reader does not
+know are counted under their path in the file, a contiguous one as a single extent. In a GCOV,
+the rasters qed reads hold less than half of the bytes of the file, and in the offset products
+about a sixth.
+
 `measure census` runs `measure pages` on the granules of one repeat cycle of the NISAR products in a
 bucket. It takes them from a scrape of the bucket, a folder with a list of granule ids for each
 product named after its reader, e.g. `rslc.txt`: `--scrape` names the folder and `--cycle` the
