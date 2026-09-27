@@ -431,7 +431,8 @@ def interpret(*, data: bytes, cell: str, swapped: bool = False):
 def paging(*, reader):
     """
     Read the page size, the file space strategy, and the size of the file behind {reader}, as a
-    tuple, or {None} when it is not an HDF5 product
+    tuple, or {None} when it is not an HDF5 product; the page size of a file that is not paged is
+    zero, whatever the library reports
     """
     # only the HDF5 readers have pages
     if not isinstance(reader, qed.readers.nisar.h5):
@@ -443,9 +444,12 @@ def paging(*, reader):
     # get the creation properties
     fcpl = h5._file._pyre_id.fcpl
     # and the free space strategy among them
-    strategy = fcpl.filespaceStrategy
+    strategy = fcpl.filespaceStrategy.strategy.name
+    # the library reports its default page size for a file of any strategy, but only a file with
+    # the paged strategy is laid out in pages; for the rest, a reader fetches what it needs
+    pageSize = fcpl.pageSize if strategy == "page" else 0
     # hand off what matters, with the size of the file, if the library can tell
-    return fcpl.pageSize, strategy.strategy.name, h5._file._pyre_id.bytes
+    return pageSize, strategy, h5._file._pyre_id.bytes
 
 
 def describe(*, dataset, tables: dict, paging: tuple) -> dict:
