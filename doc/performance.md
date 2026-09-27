@@ -212,7 +212,10 @@ with `--check=N`, looks up N granules of each product in each of those cycles in
 how many still hold their product; it writes `cycles-<scrape>.md`. `measure digest --inputs=...`
 summarizes each census, from its folder or its tarball: the storage settings of its rasters, the
 percentiles of every measure, the medians by raster, by frequency, and by the number of rasters in
-the product, and the pooled histograms; it writes `digest-<census>.md`. `measure compare
+the product, and the pooled histograms; it writes `digest-<census>.md`, and `digest-<census>.json`
+with the reference data the quality panel compares a raster against: the product and cycle the
+census covers, and the percentiles and a histogram of every measure, over all its rasters and over
+each kind of raster, e.g. `HHHH` or `mask`. `measure compare
 --inputs=<first>,<second>` pairs the rasters of the same name in the products of the same
 acquisition in two censuses, and reports the medians of every measure on both sides and the share of
 the pairs in which the second is worse, for all the pairs and by frequency; it writes

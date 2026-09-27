@@ -58,10 +58,13 @@ integers that is a few hundred kilobytes, delivered once.
 
 ### The census, as reference
 
-The census digests of each kind of product ship with the server under
-`share/qed/census/<product>.json`: the percentiles of every measure over a cycle. The panel places
-the product being viewed against them. They are regenerated with `qed measure digest` whenever a
-new census is taken, and carry the cycle and the date they describe.
+The census digests are fluid, so the server does not ship them: the `census` trait of the plexus
+names a folder, e.g. `qed.app.census: ~/data/census` in `qed.yaml`, and the server reads every
+`digest-*.json` in it, written by `qed measure digest`, the first time a layout is asked for. It
+keeps the latest cycle of each product, and compares a raster against the rasters of the same kind
+in it, e.g. a covariance term `HHHH` against the other `HHHH` rasters rather than against the masks.
+An unset trait, a missing folder, or a file that cannot be read means only that there is no
+comparison, with at most a warning on the `qed.census` channel.
 
 ## What the client does
 
@@ -185,7 +188,7 @@ linked highlight.
 - `pkg/readers/pages.py`: the chunk states and the per page breakdown, factored out of
   `occupancy` and `Measure._nodata` so the census and the panel compute the same things.
 - `pkg/gql/Layout.py` and its parts *(new)*: the `layout` field on a dataset.
-- `share/qed/census/` *(new)*: the digests of the latest census, as json.
+- `pkg/shells/Plexus.py`: the `census` trait, the folder of the census digests.
 - `ux/client/activities/quality/`, `ux/client/shapes/quality/` *(new)*: the activity.
 - `ux/client/views/viz/quality/` *(new)*: the panel, the maps, the scorecard, the histograms.
 - `ux/client/automation/qed.js`: the `quality` namespace.
@@ -208,7 +211,7 @@ linked highlight.
    at first contact would add a page fetch or two per raster to opening every product, in S3 too.
 3. **Products that are not HDF5.** Flat files and GDAL rasters have no pages to draw; the panel
    says so, and could still show the chunk map where the format has tiles.
-4. **Where the census reference comes from.** Shipping the digests in `share` is simple, but ages;
-   fetching them from a location the deployment configures is the alternative.
+4. **Where the census reference comes from.** Settled: a folder the user configures, since the
+   digests change with every census.
 
 <!-- end of file -->
