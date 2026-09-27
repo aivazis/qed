@@ -176,7 +176,8 @@ the NISAR products, `qed.readers.nisar.daac.canonical`; the list is sifted by th
 each id, and descriptors are built only for the ids of the cycle. Each granule is measured in a
 fresh process, `--workers` at a time, in a folder of its own that keeps its chunk records
 compressed; a measurement whose product is not in the bucket reports it with a status of its own,
-and the census counts it apart from the failures. `census.csv` collects the summary of every
+and the census counts it apart from the failures. The results land in `--results`, or else in
+`census-<products>-<cycle>`, e.g. `census-rslc-31`. `census.csv` collects the summary of every
 dataset with its product, granule, and processing version, and the run log reports each step as it
 ends, with its time, and the medians of each product. Only metadata is read, so a census next to
 the data is cheap.
