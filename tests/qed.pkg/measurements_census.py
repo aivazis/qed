@@ -12,6 +12,12 @@ measures derived from the recorded columns, the percentiles, the groups, the pai
 of the same scene in two censuses, and their comparison
 """
 
+# externals
+import csv
+import gzip
+import os
+import tempfile
+
 # support
 import qed
 
@@ -124,6 +130,45 @@ assert census.settings(rows=[liar])["deflate_level"] == {"4": 1}
 assert [census.agrees(row=r) for r in (liar, honest, full)] == ["no", "yes", ""]
 # and its tally among the settings
 assert census.settings(rows=[liar, honest, full])["fill_agrees"] == {"no": 1, "yes": 1, "": 1}
+
+# the chunks that hold nothing but the fill, in a census laid out the way it is on disk
+with tempfile.TemporaryDirectory() as folder:
+    # a granule of the GSLC
+    home = os.path.join(folder, "gslc", gslc)
+    # has a folder of its own
+    os.makedirs(home)
+    # its chunk records: three fill chunks of 10 bytes, one nearly empty chunk of 12 that holds a
+    # sliver of data, and two of data in HH; and two chunks of data in HV, the smallest of which is
+    # too large to be the fill
+    records = [("L.A.HH", size) for size in (10, 500, 10, 12, 10, 600)] + [
+        ("L.A.HV", size) for size in (400, 450)
+    ]
+    # write them the way a census does
+    with gzip.open(os.path.join(home, "layout-pages.csv.gz"), mode="wt", newline="") as stream:
+        # a writer
+        writer = csv.writer(stream)
+        # the header
+        writer.writerow(("host", "dataset", "row", "col", "address", "bytes", "raw"))
+        # and the records
+        for index, (raster, size) in enumerate(records):
+            # one per chunk
+            writer.writerow(("ods", f"product.{raster}", 0, index, 100 * index, size, 2000))
+    # count them, with the summaries saying the smallest chunk of HH holds a nan
+    tally = census.waste(
+        source=folder,
+        rows=[{"granule": gslc, "dataset": "product.L.A.HH", "smallest_holds": "nan"}],
+    )
+    # HH has three fill chunks, checked by the census
+    assert tally["L.A.HH"] == {
+        "rasters": 1,
+        "written": 6,
+        "stored": 1142,
+        "fill": 3,
+        "fillBytes": 30,
+        "checked": 1,
+    }
+    # and HV has none
+    assert tally["L.A.HV"]["fill"] == 0
 
 # the percentiles of ten numbers
 p10, median, p90, top = census.percentiles(numbers=[float(i) for i in range(10)])
