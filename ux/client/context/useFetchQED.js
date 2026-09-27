@@ -46,6 +46,8 @@ export const query = graphql`
             ...bodyGetSyncTableFragment
             # for the channel listing in the journal console
             ...channelsGetJournalFragment
+            # for the dataset the quality panel describes
+            ...qualityGetDatasetInViewFragment
         }
     }
 `
