@@ -193,6 +193,19 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "after its reader, e.g. rslc.txt, that the census takes its granules from"
     )
 
+    check = qed.properties.int()
+    check.default = None
+    check.doc = (
+        "the number of granules of each product in each complete cycle the cycles report looks up "
+        "in the bucket; unset looks up none"
+    )
+
+    inputs = qed.properties.strings()
+    inputs.default = []
+    inputs.doc = (
+        "the censuses to digest or compare, as the folders or the tarballs they left behind"
+    )
+
     cycle = qed.properties.int()
     cycle.default = None
     cycle.doc = "the repeat cycle whose granules the census takes from the scrape"
@@ -1025,6 +1038,298 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         self._pack(channel=channel, results=results)
         # hand back whether anything failed
         return bool(failures)
+
+    @qed.export(tip="count the granules of each product in a scrape by repeat cycle")
+    def cycles(self, plexus, **kwds):
+        """
+        Count the granules of every product my {scrape} has a list for by repeat cycle, mark the
+        cycles every product has, and, when asked to {check}, look up that many granules of each
+        product in each of those cycles in {bucket}, to see how many still hold their product
+        """
+        # make a channel for the problems that stop the report before it starts
+        error = journal.error("qed.measure.cycles")
+        # the counts come from a scrape
+        if self.scrape is None:
+            # so a report without one is a mistake
+            error.log("the report counts the granules of a scrape; point {scrape} at one")
+            # and bail
+            return 1
+        # make a channel for the report
+        channel = journal.info("qed.measure.cycles")
+        # the products: the ones named, or every list of the scrape
+        products = list(self.only) or qed.measurements.scrape.lists(scrape=str(self.scrape))
+        # count their granules by cycle
+        counts = qed.measurements.scrape.cycles(scrape=str(self.scrape), products=products)
+        # the cycles every product has
+        complete = qed.measurements.scrape.complete(counts=counts)
+        # the cycles any product has
+        every = sorted({cycle for tally in counts.values() for cycle in tally if cycle is not None})
+        # the report
+        lines = [f"# The granules of the scrape {self.scrape}, by repeat cycle", ""]
+        # the table of counts
+        lines += qed.measurements.census.markdown(
+            headers=("cycle", *products, "every product"),
+            rows=[
+                (cycle, *(counts[product][cycle] for product in products), cycle in complete)
+                for cycle in every
+            ]
+            + [("not recognized", *(counts[product][None] for product in products), "")],
+        )
+        # if asked to check the bucket
+        if self.check is not None and complete:
+            # make room
+            lines += ["", f"## Products in {self.bucket}, of {self.check} checked", ""]
+            # and add the table of what is there
+            lines += qed.measurements.census.markdown(
+                headers=("cycle", *products),
+                rows=[
+                    (cycle, *(self._present(product=product, cycle=cycle) for product in products))
+                    for cycle in complete
+                ],
+            )
+        # report
+        self._publish(
+            channel=channel, lines=lines, path=f"cycles-{os.path.basename(str(self.scrape))}.md"
+        )
+        # all done
+        return 0
+
+    @qed.export(tip="summarize the results of a census")
+    def digest(self, plexus, **kwds):
+        """
+        Summarize each census in my {inputs}, a folder or the tarball it was packed into: the
+        storage settings of its rasters, the percentiles of every measure, the medians by raster,
+        by frequency, and by the number of rasters in the product, and the pooled histograms
+        """
+        # make a channel
+        channel = journal.info("qed.measure.digest")
+        # go through the censuses
+        for source in self.inputs:
+            # read the summaries
+            rows = qed.measurements.census.load(source=source)
+            # the name of the census
+            name = self._censusName(source=source)
+            # and summarize them
+            self._publish(
+                channel=channel,
+                lines=self._digest(name=name, rows=rows),
+                path=f"digest-{name}.md",
+            )
+        # all done
+        return 0
+
+    @qed.export(tip="compare two censuses scene by scene")
+    def compare(self, plexus, **kwds):
+        """
+        Compare the two censuses in my {inputs} scene by scene: pair the rasters of the same
+        name in the products of the same acquisition, and report the medians of every measure on
+        both sides, and the share of the pairs in which the second is worse
+        """
+        # make a channel for the problems that stop the comparison before it starts
+        error = journal.error("qed.measure.compare")
+        # a comparison takes two
+        if len(self.inputs) != 2:
+            # so anything else is a mistake
+            error.log("a comparison takes two censuses; name them with {inputs}")
+            # and bail
+            return 1
+        # make a channel
+        channel = journal.info("qed.measure.compare")
+        # the two censuses
+        first, second = self.inputs
+        # their names
+        names = [self._censusName(source=source) for source in (first, second)]
+        # read them
+        a = qed.measurements.census.load(source=first)
+        b = qed.measurements.census.load(source=second)
+        # pair their rasters
+        matched = qed.measurements.census.pairs(first=a, second=b)
+        # the report
+        lines = [
+            f"# {names[0]} and {names[1]}, scene by scene",
+            "",
+            f"{len(matched)} pairs of rasters in "
+            f"{len({qed.measurements.census.scene(row=x) for x, _ in matched})} scenes; "
+            f"{names[0]} has {len(a)} rasters and {names[1]} has {len(b)}",
+        ]
+        # the comparison of all the pairs, and of the pairs of each frequency
+        for label, subset in [("all the pairs", matched)] + sorted(
+            (
+                (f"frequency {key}", group)
+                for key, group in qed.measurements.census.groups(
+                    rows=matched,
+                    key=lambda row: qed.measurements.census.frequency(row=row[1]),
+                ).items()
+            )
+        ):
+            # make room
+            lines += ["", f"## {label}, {len(subset)} pairs", ""]
+            # and add the table
+            lines += qed.measurements.census.markdown(
+                headers=(
+                    "measure, median over the pairs",
+                    names[0],
+                    names[1],
+                    f"pairs in which {names[1]} is worse (%)",
+                ),
+                rows=[
+                    (label, x, y, None if worse is None else round(100 * worse))
+                    for _, label, x, y, worse in qed.measurements.census.compare(matched=subset)
+                ],
+            )
+        # report
+        self._publish(channel=channel, lines=lines, path=f"compare-{names[0]}-{names[1]}.md")
+        # all done
+        return 0
+
+    # implementation details: the analyses
+    def _censusName(self, source):
+        """
+        The name of the census at {source}, from its folder or its tarball
+        """
+        # the last part of the path
+        name = os.path.basename(str(source).rstrip("/"))
+        # without the ending of a tarball
+        for ending in (".tar.gz", ".tgz"):
+            # if it has one
+            if name.endswith(ending):
+                # strip it
+                return name[: -len(ending)]
+        # otherwise, it is the name of a folder
+        return name
+
+    def _digest(self, name, rows):
+        """
+        Summarize the census {name} from its {rows}, as the lines of a Markdown report
+        """
+        # the analyses
+        census = qed.measurements.census
+        # the measures, by name
+        measures = [measure for measure, _, _ in census.MEASURES]
+        # the header
+        lines = [
+            f"# {name}",
+            "",
+            f"{len(rows)} rasters in {len({row['granule'] for row in rows})} granules",
+            "",
+            "## Storage settings",
+            "",
+        ]
+        # the settings and how many rasters have each
+        lines += census.markdown(
+            headers=("setting", "value", "rasters"),
+            rows=[
+                (setting, value, count)
+                for setting, tally in census.settings(rows=rows).items()
+                for value, count in tally.most_common()
+            ],
+        )
+        # the percentiles of every measure
+        lines += ["", "## Measures", ""]
+        lines += census.markdown(
+            headers=("measure", "p10", "median", "p90", "max", "rasters"),
+            rows=[
+                (label, *(census.percentiles(numbers=numbers) or (None,) * 4), len(numbers))
+                for numbers, label in (
+                    (census.values(rows=rows, name=measure), label)
+                    for measure, label, _ in census.MEASURES
+                )
+            ],
+        )
+        # the medians by raster, by frequency, and by the number of rasters in the product
+        for title, filed in (
+            ("By raster", census.groups(rows=rows, key=census.raster)),
+            ("By frequency", census.groups(rows=rows, key=census.frequency)),
+            ("By the number of rasters in the product", census.rasters(rows=rows)),
+        ):
+            # make room
+            lines += ["", f"## {title}, medians", ""]
+            # and add the table
+            lines += census.markdown(
+                headers=("group", "rasters", *measures),
+                rows=[
+                    (key, len(group), *census.medians(rows=group, names=tuple(measures)))
+                    for key, group in sorted(filed.items())
+                ],
+            )
+        # the pooled histograms
+        lines += ["", "## Pooled histograms, counts by tenth of the range", ""]
+        lines += census.markdown(
+            headers=("histogram", *(f"{10 * i}-{10 * (i + 1)}%" for i in range(10))),
+            rows=[
+                (label, *census.histogram(rows=rows, name=column))
+                for column, label in (
+                    ("size_histogram", "stored size of a chunk, share of its raw size"),
+                    ("fill_histogram", "share of a page the raster fills"),
+                    ("total_histogram", "share of a page all the rasters fill"),
+                )
+            ],
+        )
+        # hand off the report
+        return lines
+
+    def _present(self, product, cycle):
+        """
+        Look up my {check} of granules of {product} in {cycle} in my {bucket}, and report how
+        many hold their product
+        """
+        # the AWS client, which qed does not require
+        import boto3
+        import botocore.exceptions
+
+        # the bucket and the prefix
+        bucket, _, prefix = self.bucket.removeprefix("s3://").partition("/")
+        # the parser
+        registrar = qed.readers.nisar.daac.registrar()
+        # the client, with the credentials of the standard AWS chain
+        client = boto3.client("s3")
+        # the granules to look up
+        picked = qed.measurements.scrape.spread(
+            scrape=str(self.scrape), product=product, cycle=cycle, count=self.check
+        )
+        # the ones that hold their product
+        present = 0
+        # go through them
+        for granule in picked:
+            # the key of the product
+            key = qed.readers.nisar.daac.canonical(
+                prefix=prefix, descriptor=registrar.parse(granule)
+            )
+            # attempt to
+            try:
+                # look it up
+                client.head_object(Bucket=bucket, Key=key)
+            # if the bucket said no
+            except botocore.exceptions.ClientError as error:
+                # because the product is not there
+                if error.response.get("Error", {}).get("Code") in ("404", "NoSuchKey", "NotFound"):
+                    # it does not count
+                    continue
+                # anything else is not an answer
+                raise
+            # otherwise, it counts
+            present += 1
+        # hand off the count, out of the ones looked up
+        return f"{present} of {len(picked)}"
+
+    def _publish(self, channel, lines, path):
+        """
+        Write the report {lines} to the file at {path}, and to {channel}
+        """
+        # write the file
+        with open(path, mode="w") as stream:
+            # a line at a time
+            stream.write("\n".join(lines) + "\n")
+        # show the report
+        for line in lines:
+            # a line at a time
+            channel.line(line)
+        # and say where it is
+        channel.line(f"written to {os.path.abspath(path)}")
+        # flush
+        channel.log()
+        # all done
+        return
 
     # implementation details: page occupancy
     def _rasters(self, plexus):
