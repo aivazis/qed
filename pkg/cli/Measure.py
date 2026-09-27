@@ -894,6 +894,11 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # make it
         results.mkdir(parents=True)
 
+        # the clock of the whole census
+        total = qed.timers.wall("qed.measure.census.total")
+        # started afresh
+        total.reset()
+        total.start()
         # make a channel for the progress of the census
         channel = journal.info("qed.measure.census")
         # which reaches the console and the run log alike
@@ -935,7 +940,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             try:
                 # choose its granules
                 chosen, skipped, unrecognized = self._scraped(
-                    client=client, bucket=bucket, prefix=prefix, product=product
+                    channel=channel, client=client, bucket=bucket, prefix=prefix, product=product
                 )
             # if the bucket cannot be asked, e.g. because the credentials expired
             except (botocore.exceptions.ClientError, botocore.exceptions.BotoCoreError) as failure:
@@ -944,17 +949,25 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 # and bail
                 return 1
             # say how many there are, and how many folders held no product
-            channel.line(
-                f"{product}: {len(chosen)} granules, {skipped} folders without a product, "
-                f"{unrecognized} ids the parser did not recognize"
-            )
-            # and add them to the pile
+            # add them to the pile
             jobs.extend((product, granule, key, size) for granule, key, size in chosen)
         # flush
         channel.log()
 
+        # the clock of the measurements
+        clock = qed.timers.wall("qed.measure.census.measure")
+        # started afresh
+        clock.reset()
+        clock.start()
         # measure the granules, a few at a time, on the pyre event loop
         failures = self._survey(channel=channel, results=results, bucket=bucket, jobs=jobs)
+        # stop the clock
+        clock.stop()
+        # and report the measurements
+        channel.log(
+            f"measured {len(jobs) - len(failures)} of {len(jobs)} granules in {clock.sec():.1f} s, "
+            f"{self.workers} at a time"
+        )
 
         # gather the summaries into one table
         rows = self._gather(results=results, jobs=jobs)
@@ -964,8 +977,13 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         for label in failures:
             # one per line
             channel.line(f"incomplete: {label}")
+        # stop the clock of the whole census
+        total.stop()
         # say it is over
-        channel.line(f"done: {len(jobs) - len(failures)} of {len(jobs)} granules measured")
+        channel.line(
+            f"done: {len(jobs) - len(failures)} of {len(jobs)} granules measured, "
+            f"in {total.sec():.1f} s in all"
+        )
         # flush
         channel.log()
         # pack the results
@@ -2492,14 +2510,22 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         return marks["seeded"], (marks["ready"] if not errors else None), status
 
     # implementation details: the census
-    def _scraped(self, client, bucket, prefix, product):
+    def _scraped(self, channel, client, bucket, prefix, product):
         """
         Choose the granules of {product} in my {cycle} from my {scrape}, as (granule, key,
         bytes), all of them or my {quota} spread evenly over the cycle, and count the ones passed
-        over because their folder in {bucket} holds no product
+        over because their folder in {bucket} holds no product; report the parse and the checks
+        to {channel} as each one ends
         """
         # the parser of the granule ids
         registrar = qed.readers.nisar.daac.registrar()
+        # the clock of the parse
+        clock = qed.timers.wall(f"qed.measure.census.parse.{product}")
+        # started afresh
+        clock.reset()
+        clock.start()
+        # the number of ids in the list
+        ids = 0
         # the list of the granules of this product, named after its reader
         path = self.scrape / f"{product}.txt"
         # the granules of the cycle, as (begin, granule, key)
@@ -2516,6 +2542,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 if not granule:
                     # by moving on
                     continue
+                # count the id
+                ids += 1
                 # parse the id; one the parser does not recognize comes back as nothing
                 descriptor = registrar.parse(granule)
                 # so skip it
@@ -2538,6 +2566,13 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 key = qed.readers.nisar.daac.canonical(prefix=prefix, descriptor=descriptor)
                 # add it to the pile, with the time that orders it
                 found.append((descriptor.mark, granule, key))
+        # stop the clock of the parse
+        clock.stop()
+        # and report it
+        channel.log(
+            f"{product}: parsed {ids} ids in {clock.sec():.1f} s; {len(found)} in cycle "
+            f"{self.cycle}, {unrecognized} not recognized"
+        )
         # in the order they were acquired
         found.sort()
         # a quota picks that many, spread evenly over the cycle
@@ -2550,6 +2585,11 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         elif self.quota == 1 and found:
             # of the pile
             found = [found[len(found) // 2]]
+        # the clock of the checks
+        clock = qed.timers.wall(f"qed.measure.census.check.{product}")
+        # started afresh
+        clock.reset()
+        clock.start()
         # the granules chosen
         granules = []
         # and the ones passed over
@@ -2558,16 +2598,23 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         for _, granule, key in found:
             # the folder of the granule
             folder = key.rsplit("/", 1)[0] + "/"
-            # look up its product
-            product = self._product(client=client, bucket=bucket, folder=folder)
+            # look up its product file
+            entry = self._product(client=client, bucket=bucket, folder=folder)
             # if there is none
-            if product is None:
+            if entry is None:
                 # pass it over
                 skipped += 1
                 # and move on
                 continue
             # otherwise, choose it
-            granules.append(product)
+            granules.append(entry)
+        # stop the clock of the checks
+        clock.stop()
+        # and report them
+        channel.log(
+            f"{product}: checked {len(found)} granules in the bucket in {clock.sec():.1f} s; "
+            f"{len(granules)} hold a product, {skipped} do not"
+        )
         # hand off the granules, the number passed over, and the number not recognized
         return granules, skipped, unrecognized
 
