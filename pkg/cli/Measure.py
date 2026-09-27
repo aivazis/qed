@@ -180,7 +180,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     )
 
     quota = qed.properties.int()
-    quota.default = 24
+    quota.default = None
     quota.doc = (
         "the number of granules of each product the census measures, spread evenly over the "
         "cycle; unset measures every one"
