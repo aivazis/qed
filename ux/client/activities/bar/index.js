@@ -31,8 +31,8 @@ export const Bar = ({ style }) => {
             <Explore size={size} style={paint} />
             <Data size={size} style={paint} />
             <Controls size={size} style={paint} />
-            <Console size={size} style={paint} />
             <Quality size={size} style={paint} />
+            <Console size={size} style={paint} />
             <Help size={size} style={paint} />
 
             <Spacer />
