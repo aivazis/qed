@@ -6,6 +6,7 @@
 
 // support
 import fs from "fs"
+import { release } from "mm-playwright"
 
 
 // remove the scratch area the servers under test worked out of
@@ -22,7 +23,9 @@ const teardown = async () => {
         // so leave
         return
     }
-    // otherwise, remove it and everything in it
+    // undo whatever the browser needed there that would keep it from being removed
+    release({ scratch })
+    // and remove it and everything in it
     fs.rmSync(scratch, { recursive: true, force: true })
     // all done
     return
