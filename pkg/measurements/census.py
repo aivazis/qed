@@ -15,6 +15,9 @@ import os
 import statistics
 import tarfile
 
+# support
+import qed
+
 # the measures of a raster the analyses report, as (name, label, whether lower is better)
 MEASURES = (
     ("once", "bytes moved per byte stored, the raster read alone, each page fetched once", True),
@@ -83,6 +86,134 @@ def load(*, source: str) -> list:
     with open(path, newline="") as stream:
         # and parse them
         return list(csv.DictReader(stream))
+
+
+def cycle(*, granule: str, registrar):
+    """
+    The repeat cycle of {granule}, as the granule id {registrar} reads it, or {None} if the id is
+    not recognized; for a pair, the cycle of its reference acquisition
+    """
+    # the raw fields of the id
+    fields = registrar.fields(granule)
+    # an id the parser does not recognize
+    if fields is None:
+        # has no cycle
+        return None
+    # otherwise, the cycle, which for a pair is the one of its reference acquisition
+    found = fields.get("cycle") or fields.get("referenceCycle")
+    # as a number
+    return int(found) if found is not None else None
+
+
+def reference(*, name: str, rows: list, bins: int = 10) -> dict:
+    """
+    Summarize the census {name} from its {rows} as reference data for the comparison of a single
+    raster against its kind: the product and cycle it covers, the summary of all its rasters, and
+    one for each kind of raster, named by the last part of the raster name, e.g. {HHHH} or {mask}
+    """
+    # the products the census covers, and the most common one
+    products = collections.Counter(row["kind"] for row in rows)
+    # the parser of the granule ids
+    registrar = qed.readers.nisar.daac.registrar()
+    # the cycles of the granules, and the most common one
+    cycles = collections.Counter(
+        cycle(granule=granule, registrar=registrar) for granule in {row["granule"] for row in rows}
+    )
+    # the rasters by their kind
+    kinds = groups(rows=rows, key=lambda row: raster(row=row).split(".")[-1])
+    # assemble
+    return {
+        "census": name,
+        "product": products.most_common(1)[0][0] if products else None,
+        "cycle": cycles.most_common(1)[0][0] if cycles else None,
+        "rasters": len(rows),
+        "granules": len({row["granule"] for row in rows}),
+        "measures": summarize(rows=rows, bins=bins),
+        "groups": {
+            kind: {"rasters": len(members), "measures": summarize(rows=members, bins=bins)}
+            for kind, members in sorted(kinds.items())
+        },
+    }
+
+
+def summarize(*, rows: list, bins: int = 10) -> dict:
+    """
+    The percentiles of every measure over {rows}, and a histogram of its values in {bins} bins of
+    equal width from the smallest value to the 90th percentile, with every value past that in the
+    last bin, so that a long tail does not crowd the rest into the first bin
+    """
+    # the measures
+    measures = {}
+    # go through them
+    for measure, label, lower in MEASURES:
+        # the values the census recorded
+        numbers = values(rows=rows, name=measure)
+        # without any
+        if not numbers:
+            # there is nothing to report
+            continue
+        # the percentiles
+        p10, median, p90, top = percentiles(numbers=numbers)
+        # the range of the histogram: from the smallest to the 90th percentile, unless that
+        # leaves nothing to spread, in which case to the largest
+        low = min(numbers)
+        high = p90 if p90 > low else top
+        # the width of a bin, with a degenerate range spread over a single unit
+        width = (high - low) / bins if high > low else 1
+        # count the values in each bin, keeping everything past the top edge in the last one
+        counts = [0] * bins
+        for number in numbers:
+            # by finding its bin
+            counts[min(int((number - low) / width), bins - 1)] += 1
+        # record
+        measures[measure] = {
+            "label": label,
+            "lower": lower,
+            "count": len(numbers),
+            "p10": p10,
+            "median": median,
+            "p90": p90,
+            "max": top,
+            "low": low,
+            "high": high,
+            "bins": counts,
+        }
+    # hand off the measures
+    return measures
+
+
+def measures(*, description: dict) -> dict:
+    """
+    The measures of a single raster, from the {description} of how it sits in its file that
+    {qed.readers.pages.describe} makes, by the names the census gives them
+    """
+    # unpack
+    record = description["record"]
+    fill = description["nodata"]
+    # divide, leaving out what cannot be computed
+    ratio = lambda top, bottom: top / bottom if top is not None and bottom else None
+    # scale, leaving out what is missing
+    scale = lambda value, factor: value * factor if value is not None else None
+    # the measures
+    return {
+        "once": record.get("once"),
+        "joint": record.get("joint"),
+        "alone": record.get("alone"),
+        "fill_mean": record.get("fillMean"),
+        "locality": record.get("locality"),
+        "empty": ratio(record["empty"], record["written"]),
+        "unwritten": 1 - record["written"] / record["grid"] if record["grid"] else None,
+        "compression": record.get("compression"),
+        "stored_mib": record["stored"] / 2**20,
+        "empty_mib": record["emptyStored"] / 2**20,
+        "empty_page_share": ratio(record.get("emptyPages"), record.get("pages")),
+        "decode_ms": scale(fill.get("decode"), 1e3),
+        "make_ms": scale(fill.get("make"), 1e3),
+        "data_decode_ms": scale(fill.get("data"), 1e3),
+        "fill_mib": scale(fill.get("fillBytes"), 2**-20),
+        "fill_chunks": fill.get("fillChunks"),
+        "encode_ms": scale(fill.get("encode"), 1e3),
+    }
 
 
 def chunks(*, source: str):
