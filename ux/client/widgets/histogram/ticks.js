@@ -17,7 +17,12 @@ import styles from './styles'
 // the ticks at the edges of the bins, labeled at the ends and in the middle
 export const Ticks = () => {
     // get the geometry
-    const { counts, domain, bin, base, height, format } = useConfig()
+    const { counts, domain, bin, base, height, format, ticks } = useConfig()
+    // a compact histogram has no ticks
+    if (!ticks) {
+        // so there is nothing to draw
+        return null
+    }
     // the number of bins
     const bins = counts.length
     // the edges that get a label: the two ends and the middle
