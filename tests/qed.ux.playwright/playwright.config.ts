@@ -73,8 +73,16 @@ if (!(engine in devicesByEngine)) {
         `choose among: ${Object.keys(devicesByEngine).join(", ")}`
     )
 }
+// macOS keeps the data folder of an installed application, e.g. the one of an installed Firefox in
+// {~/Library/Application Support/Firefox}, out of reach of other applications; the Firefox that
+// playwright drives is another application with the same name, so it is turned away from that
+// folder and gives up before it starts. {CFFIXED_USER_HOME} gives it a home of its own in the
+// scratch area, where it finds nothing it may not touch; the other engines do not need one
+const launch = engine === "firefox" && process.platform === "darwin"
+    ? { launchOptions: { env: { ...process.env, CFFIXED_USER_HOME: workspace("firefox-home") } } }
+    : {}
 // the device every project drives
-const device = devices[devicesByEngine[engine]]
+const device = { ...devices[devicesByEngine[engine]], ...launch }
 
 
 // the qed.ux suite drives the built client in a headless browser to enforce the semantic-markup
