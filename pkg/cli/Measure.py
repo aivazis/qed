@@ -138,6 +138,11 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     resolution.default = 2048
     resolution.doc = "the target long axis of the decimated whole-dataset pass"
 
+    # page occupancy
+    chunks = qed.properties.bool()
+    chunks.default = True
+    chunks.doc = "record every chunk of each dataset; off keeps only the per dataset summaries"
+
     # the s3 program; not {product}, since the program registers its granule under that name,
     # and panel traits alias globally
     granule = qed.properties.str()
@@ -183,7 +188,22 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
 
     quota = qed.properties.int()
     quota.default = 24
-    quota.doc = "the number of granules of each kind the census measures, spread over the dates"
+    quota.doc = (
+        "the number of granules of each kind the census measures, spread over the dates or over "
+        "the cycle; unset measures every one"
+    )
+
+    scrape = qed.properties.path()
+    scrape.default = None
+    scrape.doc = (
+        "a scrape of the bucket, a folder with a list of granule ids for each kind named after "
+        "its reader, e.g. rslc.txt; the census takes its granules from it instead of listing "
+        "the bucket"
+    )
+
+    cycle = qed.properties.int()
+    cycle.default = None
+    cycle.doc = "the repeat cycle whose granules the census takes from the scrape"
 
     workers = qed.properties.int()
     workers.default = 8
@@ -563,7 +583,9 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # open the file of per chunk records and the file of per dataset summaries, for
         # appending, so runs accumulate
         with (
-            self._records(path=f"{stem}-pages.csv", headers=self._pageHeaders) as chunks,
+            self._records(
+                path=f"{stem}-pages.csv" if self.chunks else None, headers=self._pageHeaders
+            ) as chunks,
             self._records(path=f"{stem}-occupancy.csv", headers=self._occupancyHeaders) as sums,
         ):
             # go through the readers
@@ -832,6 +854,12 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             error.log(f"no reader for {', '.join(unknown)}")
             # and bail
             return 1
+        # a scrape is read one cycle at a time
+        if self.scrape is not None and self.cycle is None:
+            # so a scrape without a cycle is a mistake
+            error.log("the census reads one cycle of a scrape; name it with {cycle}")
+            # and bail
+            return 1
         # the bucket has to be a bucket
         if not self.bucket.startswith("s3://"):
             # or else this is the wrong program
@@ -871,7 +899,11 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         channel.device = journal.tee(paths=[str(results / "run.log")])
         # say what is about to happen
         channel.line(f"on {self.pyre_host.nickname}")
-        channel.line(f"{self.quota} granules of each of {', '.join(self.kinds)}")
+        channel.line(
+            f"{'every' if self.quota is None else self.quota} granule(s) of each of "
+            f"{', '.join(self.kinds)}"
+            + ("" if self.scrape is None else f", cycle {self.cycle} of the scrape {self.scrape}")
+        )
         channel.line(f"from {self.bucket}")
         channel.line(f"results in {results}")
         # flush
@@ -888,7 +920,11 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # go through the kinds
         for kind in self.kinds:
             # choose its granules
-            chosen, skipped = self._choose(client=client, bucket=bucket, prefix=f"{prefix}{kind}/")
+            chosen, skipped = (
+                self._choose(client=client, bucket=bucket, prefix=f"{prefix}{kind}/")
+                if self.scrape is None
+                else self._scraped(client=client, bucket=bucket, prefix=prefix, kind=kind)
+            )
             # say how many there are, and how many folders held no product
             channel.line(f"{kind}: {len(chosen)} granules, {skipped} folders without a product")
             # and add them to the pile
@@ -977,8 +1013,14 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     def _records(self, path, headers):
         """
         Open the file of records at {path} for appending, writing its {headers} on first
-        contact, and hand off a writer
+        contact, and hand off a writer, or {None} when there is no {path}
         """
+        # without a file there is nothing to write to
+        if path is None:
+            # so hand off nothing
+            yield None
+            # and bail
+            return
         # check whether this is first contact
         fresh = not os.path.exists(path)
         # open the file for appending, so runs accumulate
@@ -1026,8 +1068,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         grid = -(-rows // tileRows) * -(-cols // tileCols)
         # the name of the dataset
         name = dataset.pyre_name
-        # go through its chunks
-        for address, size, (row, col) in tables[name]:
+        # go through its chunks, unless nobody wants them one by one
+        for address, size, (row, col) in tables[name] if chunks is not None else ():
             # the pages it spans, when the file has pages
             first = address // pageSize if pageSize else 0
             last = (address + size - 1) // pageSize if pageSize else 0
@@ -2424,8 +2466,10 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 for parent in days
                 for folder in self._folders(client=client, bucket=bucket, prefix=parent)
             ]
+        # the number of granules to choose; unset takes every one
+        quota = math.inf if self.quota is None else self.quota
         # the number of days to draw from
-        count = min(self.quota, len(days))
+        count = min(quota, len(days))
         # with nothing to draw from, or nothing to draw
         if count < 1:
             # there is nothing to choose, and nothing passed over
@@ -2443,11 +2487,11 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # and the folders passed over because they hold no product
         skipped = 0
         # draw one granule from each day in turn, until the quota is met or the days run dry
-        while len(granules) < self.quota and pools:
+        while len(granules) < quota and pools:
             # go through the days that still have folders
             for pool in list(pools):
                 # once the quota is met
-                if len(granules) >= self.quota:
+                if len(granules) >= quota:
                     # there is nothing more to draw
                     break
                 # look through the folders of this day
@@ -2467,6 +2511,84 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                     # has nothing more to offer
                     pools.remove(pool)
         # hand off the granules, and the number of folders passed over
+        return granules, skipped
+
+    def _scraped(self, client, bucket, prefix, kind):
+        """
+        Choose the granules of {kind} in my {cycle} from my {scrape}, as (granule, key, bytes),
+        all of them or my {quota} spread evenly over the cycle, and count the ones passed over
+        because their folder in {bucket} holds no product
+        """
+        # the parser of the granule ids
+        registrar = qed.readers.nisar.daac.registrar()
+        # the list of the granules of this kind, named after its reader
+        path = self.scrape / f"{self._flavor(kind=kind)}.txt"
+        # the granules of the cycle, as (begin, granule, key)
+        found = []
+        # go through the list
+        with open(path) as stream:
+            # one granule id per line
+            for line in stream:
+                # clean it up
+                granule = line.strip()
+                # skip blank lines
+                if not granule:
+                    # by moving on
+                    continue
+                # parse the id; one the parser does not recognize is reported and comes back
+                # as nothing
+                descriptor = registrar.parse(granule)
+                # so skip it
+                if descriptor is None:
+                    # by moving on
+                    continue
+                # a pair is filed under its reference acquisition
+                if isinstance(descriptor, qed.readers.nisar.daac.pair):
+                    # whose cycle and start it carries
+                    cycle, begin = descriptor.referenceCycle, descriptor.referenceBegin
+                # everybody else is filed under its own acquisition
+                else:
+                    # whose cycle and start it carries
+                    cycle, begin = descriptor.cycle, descriptor.begin
+                # a granule of another cycle
+                if int(cycle) != self.cycle:
+                    # is not wanted
+                    continue
+                # the bucket files it by kind and by the date it was acquired
+                key = f"{prefix}{kind}/{begin:%Y/%m/%d}/{granule}/{granule}.h5"
+                # add it to the pile
+                found.append((begin, granule, key))
+        # in the order they were acquired
+        found.sort()
+        # a quota picks that many, spread evenly over the cycle
+        if self.quota is not None and 1 < self.quota < len(found):
+            # by striding through the pile
+            found = [
+                found[round(i * (len(found) - 1) / (self.quota - 1))] for i in range(self.quota)
+            ]
+        # a quota of one takes the one in the middle
+        elif self.quota == 1 and found:
+            # of the pile
+            found = [found[len(found) // 2]]
+        # the granules chosen
+        granules = []
+        # and the ones passed over
+        skipped = 0
+        # go through the ones found
+        for _, granule, key in found:
+            # the folder of the granule
+            folder = key.rsplit("/", 1)[0] + "/"
+            # look up its product
+            product = self._product(client=client, bucket=bucket, folder=folder)
+            # if there is none
+            if product is None:
+                # pass it over
+                skipped += 1
+                # and move on
+                continue
+            # otherwise, choose it
+            granules.append(product)
+        # hand off the granules, and the number passed over
         return granules, skipped
 
     def _product(self, client, bucket, folder):
@@ -2634,6 +2756,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 "measure",
                 "pages",
                 "--only=product",
+                "--chunks=no",
                 f"--output={directory / 'layout.csv'}",
             ],
             cwd=directory,
