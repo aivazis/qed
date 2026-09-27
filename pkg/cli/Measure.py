@@ -1200,7 +1200,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         """
         Summarize each census in my {inputs}, a folder or the tarball it was packed into: the
         storage settings of its rasters, the percentiles of every measure, the medians by raster,
-        by frequency, and by the number of rasters in the product, and the pooled histograms
+        by frequency, and by the number of rasters in the product, and the pooled histograms; and
+        write the reference data the quality panel compares a raster against, as json
         """
         # make a channel
         channel = journal.info("qed.measure.digest")
@@ -1216,6 +1217,14 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 lines=self._digest(name=name, rows=rows),
                 path=f"digest-{name}.md",
             )
+            # the reference data the quality panel compares a raster against
+            path = f"digest-{name}.json"
+            # go with them
+            with open(path, mode="w") as stream:
+                # as json
+                json.dump(qed.measurements.census.reference(name=name, rows=rows), stream, indent=1)
+            # say where it is
+            channel.log(f"reference data written to {os.path.abspath(path)}")
         # all done
         return 0
 
