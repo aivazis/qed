@@ -118,16 +118,17 @@ frame never written and a fringe of fill along the edges.
   +--------------------------------------+
 ```
 
-A toggle shades the data chunks by compression ratio instead, which shows where the scene is
-busy and where it is uniform.
+A toggle, *not built yet*, shades the data chunks by compression ratio instead, which shows where
+the scene is busy and where it is uniform.
 
 **The file map.** *Built as the page strip, per raster: the pages the raster lands on rather than
 every page of the file, each filled with the bytes of the raster, of the other datasets, and the
-room left over; hovering a page names what it holds.* The pages of the file, one cell per page, laid out in rows of a fixed width in
-file order. Each cell is a small stacked bar of the datasets on it, in the colors of a legend;
-pages that hold chunks of fill are hatched, and pages that hold no raw data are grey. It is the
-view that shows interleaving: a GSLC whose HH and HV polarizations were written at the same time
-shows pages split between the two colors, where an RSLC shows long runs of one.
+room left over; hovering a page names what it holds.* The pages of the file, one cell per page, laid
+out in rows of a fixed width in file order. Each cell is a small stacked bar of the datasets on it,
+in the colors of a legend; pages that hold chunks of fill are hatched, and pages that hold no raw
+data are grey. It is the view that shows interleaving: a GSLC whose HH and HV polarizations were
+written at the same time shows pages split between the two colors, where an RSLC shows long runs of
+one.
 
 ```
   file map: 1270 pages of 4 MiB                 H L.A.HH   V L.A.HV   m mask
