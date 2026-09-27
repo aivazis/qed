@@ -26,12 +26,12 @@ export const Histograms = ({ layout }) => {
         <Tray title="histograms" initially={true} state="enabled" scale={0.5}>
             <Housing>
                 <Title>stored size of a chunk, as a share of its raw size</Title>
-                <Histogram counts={summary.sizes} width={360} height={80} log={true}
+                <Histogram counts={summary.sizes} width={360} height={90} log={true} unit="chunks"
                     label="stored size of a chunk as a share of its raw size" />
                 {summary.fill &&
                     <>
                         <Title>share of each page the raster fills</Title>
-                        <Histogram counts={summary.fill} width={360} height={80} log={true}
+                        <Histogram counts={summary.fill} width={360} height={90} log={true} unit="pages"
                             label="share of each page the raster fills" />
                     </>
                 }
