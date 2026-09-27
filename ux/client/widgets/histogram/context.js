@@ -33,9 +33,9 @@ export const Provider = ({ config, children }) => {
     } = config
     // the room below the bars for the tick labels, if there are any, above them for the tallest
     // count and the name of what is counted, and to their left for the counts along the axis
-    const gutter = ticks ? 14 : 2
-    const headroom = ticks && unit ? 12 : 4
-    const left = ticks ? 30 : 0
+    const gutter = ticks ? 16 : 2
+    const headroom = ticks && unit ? 15 : 4
+    const left = ticks ? 36 : 0
     // the height of the bars at their tallest
     const reach = height - gutter - headroom
     // the width the bars share

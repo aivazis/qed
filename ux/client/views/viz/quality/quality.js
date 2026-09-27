@@ -61,7 +61,7 @@ const Panel = styled.div`
 // a note in place of the contents
 const Note = styled.div`
     font-family: inconsolata;
-    font-size: 75%;
+    font-size: 90%;
     cursor: default;
     padding: 0.5rem 1.0rem;
     color: ${styles.dim};

@@ -34,7 +34,7 @@ const tick = {
 const label = {
     fill: theme.page.dim,
     fontFamily: "inconsolata",
-    fontSize: "9px",
+    fontSize: "11px",
 }
 
 // the marker
