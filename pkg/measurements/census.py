@@ -14,8 +14,10 @@ import itertools
 import os
 import statistics
 import tarfile
+import zlib
 
 # support
+import journal
 import qed
 
 # the measures of a raster the analyses report, as (name, label, whether lower is better)
@@ -234,8 +236,12 @@ def chunks(*, source: str):
                 # the granule is the name of the folder
                 granule = member.name.split("/")[-2]
                 # read them whole, since the stream of a compressed archive cannot seek
-                text = gzip.decompress(archive.extractfile(member).read()).decode("utf-8")
-                # and hand them off
+                text = _decompress(granule=granule, data=archive.extractfile(member).read())
+                # a file that cannot be read
+                if text is None:
+                    # leaves its granule out
+                    continue
+                # hand the rest off
                 yield from _chunks(granule=granule, stream=io.StringIO(text))
         # all done
         return
@@ -245,12 +251,40 @@ def chunks(*, source: str):
         if "layout-pages.csv.gz" not in files:
             # are the only ones of interest
             continue
-        # open them
-        with gzip.open(os.path.join(folder, "layout-pages.csv.gz"), mode="rt") as stream:
-            # and hand them off
-            yield from _chunks(granule=os.path.basename(folder), stream=stream)
+        # the granule is the name of the folder
+        granule = os.path.basename(folder)
+        # read them whole
+        with open(os.path.join(folder, "layout-pages.csv.gz"), mode="rb") as stream:
+            # and decompress them
+            text = _decompress(granule=granule, data=stream.read())
+        # a file that cannot be read
+        if text is None:
+            # leaves its granule out
+            continue
+        # hand the rest off
+        yield from _chunks(granule=granule, stream=io.StringIO(text))
     # all done
     return
+
+
+def _decompress(*, granule: str, data: bytes):
+    """
+    Decompress the chunk records of {granule} in {data}, or return {None}, with a warning, when
+    they are damaged, e.g. by a measurement that was stopped while it was writing them; a partial
+    table would undercount the chunks of the granule, so none of it is used
+    """
+    # carefully
+    try:
+        # decompress them
+        return gzip.decompress(data).decode("utf-8")
+    # if they are damaged
+    except (EOFError, OSError, zlib.error, UnicodeDecodeError) as error:
+        # make a channel
+        channel = journal.warning("qed.measurements.census")
+        # say so
+        channel.log(f"the chunk records of '{granule}' are damaged, so it is left out: {error}")
+        # and hand back nothing
+        return None
 
 
 def _chunks(*, granule: str, stream):
