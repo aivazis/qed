@@ -150,6 +150,24 @@ assert [pages.STATES[code] for code in grid["codes"]] == [
 ]
 # and the sizes of the chunks, zero where there are none
 assert grid["sizes"] == [5, 7, 0, 40, 0, 45]
+# without pages, no chunk starts on one
+assert grid["pages"] == [-1] * 6
+
+# the strip of the pages of {a}, which shares its first page with {b}
+described = pages.strip(tables=tables, name="a", pageSize=100)
+# it lands on two pages
+assert described["pages"] == [0, 1]
+# with 60 of its bytes and two chunks on the first, and 90 bytes and two chunks on the second
+assert described["mine"] == [60, 90] and described["chunks"] == [2, 2]
+# {b} has 30 bytes on the first, and nobody else is on the second
+assert described["others"] == [30, 0]
+assert described["partner"] == ["b", ""] and described["partnerBytes"] == [30, 0]
+# a file without pages has no strip
+assert pages.strip(tables=tables, name="a", pageSize=0) is None
+# and the chunks of {a} start on the pages their addresses fall in
+assert pages.states(table=tables["a"], shape=(4, 4), tile=(2, 2), raw=50, pageSize=100)[
+    "pages"
+] == [0, 0, 1, 1]
 
 # a file without pages describes the chunks and nothing else
 record = occupancy(tables=tables, name="a", pageSize=0, raw=50, tile=(2, 2), grid=4)
