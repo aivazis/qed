@@ -49,6 +49,13 @@ def row(granule, dataset, once, locality, written, empty, grid=100, stored=2**20
         "grid": str(grid),
         "stored": str(stored),
         "size_histogram": "1|2",
+        "strategy": "page",
+        "page_size": "4194304",
+        "cell": "complex64",
+        "tile_rows": "512",
+        "tile_cols": "512",
+        "filters": "shuffle>deflate",
+        "crid": "P05023",
     }
 
 
@@ -74,6 +81,49 @@ assert census.value(row=second[0], name="stored_mib") == 1.0
 assert census.value(row=second[0], name="once") == 1.4
 # a raster with no written chunks has no share of empty ones
 assert census.value(row=row(gslc, "L.B.HV", 1, 1, 0, 0), name="empty") is None
+
+# a census that predates the fill columns has no measures of them
+assert census.value(row=second[0], name="empty_mib") is None
+assert census.value(row=second[0], name="decode_ms") is None
+# and blank fill settings
+assert census.settings(rows=second)["hdf5_fill"] == {"": 3}
+
+# a raster whose empty chunks hold nan while the library's fill is zero
+liar = {
+    **row(gslc, "L.A.HHHH", 1.3, 0.8, 100, 60),
+    "pages": "40",
+    "empty_stored": str(3 * 2**20),
+    "empty_pages": "2",
+    "hdf5_fill_status": "default",
+    "hdf5_fill": "0.0",
+    "cf_fill": "nan",
+    "smallest_holds": "nan",
+    "decode_s": "0.0015",
+    "make_s": "2e-05",
+    "data_decode_s": "0.006",
+    "fill_chunks": "512",
+    "fill_bytes": str(512 * 4096),
+    "encode_s": "0.004",
+    "deflate_level": "4",
+}
+# one whose empty chunks hold the fill it declares
+honest = {**liar, "hdf5_fill_status": "user_defined", "hdf5_fill": "nan"}
+# and one whose smallest chunk holds data
+full = {**liar, "smallest_holds": "data"}
+# the derived measures of the fill
+assert census.value(row=liar, name="empty_mib") == 3.0
+assert census.value(row=liar, name="empty_page_share") == 0.05
+assert abs(census.value(row=liar, name="decode_ms") - 1.5) < 1e-12
+assert abs(census.value(row=liar, name="make_ms") - 0.02) < 1e-12
+assert abs(census.value(row=liar, name="data_decode_ms") - 6) < 1e-12
+assert census.value(row=liar, name="fill_mib") == 2.0
+assert census.value(row=liar, name="fill_chunks") == 512
+assert abs(census.value(row=liar, name="encode_ms") - 4) < 1e-12
+assert census.settings(rows=[liar])["deflate_level"] == {"4": 1}
+# whether the fill agrees with what the empty chunks hold
+assert [census.agrees(row=r) for r in (liar, honest, full)] == ["no", "yes", ""]
+# and its tally among the settings
+assert census.settings(rows=[liar, honest, full])["fill_agrees"] == {"no": 1, "yes": 1, "": 1}
 
 # the percentiles of ten numbers
 p10, median, p90, top = census.percentiles(numbers=[float(i) for i in range(10)])
