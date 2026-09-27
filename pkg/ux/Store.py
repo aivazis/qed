@@ -7,6 +7,7 @@
 # support
 import functools
 import json
+import os
 import pyre
 import qed
 import journal
@@ -1305,6 +1306,9 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             )
             # and carry on without
             return references
+        # the rank of the reference kept for each product: its cycle, and when its file was written,
+        # so that of two digests of the same cycle the newer one wins
+        ranks = {}
         # go through its digests
         for path in sorted(
             (
@@ -1328,13 +1332,16 @@ class Store(qed.shells.command, family="qed.cli.ux"):
                 channel.log(f"could not read the census digest '{path}': {error}")
                 # and move on
                 continue
-            # the product and the cycle it covers
+            # the product it covers
             product = reference.get("product")
-            cycle = reference.get("cycle") or 0
-            # keep the latest cycle of each product
-            if product is not None and cycle >= (references.get(product, {}).get("cycle") or 0):
+            # and its rank: the cycle, and when the file was written
+            rank = (reference.get("cycle") or 0, os.path.getmtime(str(path)))
+            # keep the latest cycle of each product, and the newest digest of that cycle
+            if product is not None and rank > ranks.get(product, (-1, 0)):
                 # by replacing an older one
                 references[product] = reference
+                # and remembering why
+                ranks[product] = rank
         # hand off the references
         return references
 
