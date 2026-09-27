@@ -104,6 +104,14 @@ const dark = {
 
     // journal colors
     journal: wheel.journal,
+
+    // the states of the chunks of a raster, as the quality panel draws them
+    quality: {
+        unwritten: "hsl(0deg, 0%, 12%)",
+        fill: "hsl(8deg, 55%, 45%)",
+        sliver: wheel.pyre.orange,
+        data: wheel.pyre.blue,
+    },
 }
 
 
