@@ -1,0 +1,52 @@
+// -*- web -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+
+// externals
+import React from 'react'
+import styled from 'styled-components'
+
+// locals
+// hooks
+import { useLayout } from './useLayout'
+// components
+import { Chunks } from './chunks'
+import { Histograms } from './histograms'
+import { Scorecard } from './scorecard'
+// styles
+import styles from './styles'
+
+
+// the description of how {dataset} sits in its file
+export const Layout = ({ dataset }) => {
+    // get the layout
+    const layout = useLayout(dataset)
+    // a product that is not an HDF5 file has none
+    if (layout === null) {
+        // so say so
+        return <Note>{dataset} is not stored in an HDF5 file, so there is no layout to show</Note>
+    }
+    // render
+    return (
+        <>
+            <Scorecard layout={layout} />
+            <Chunks layout={layout} />
+            <Histograms layout={layout} />
+        </>
+    )
+}
+
+
+// a note in place of the contents
+const Note = styled.div`
+    font-family: inconsolata;
+    font-size: 75%;
+    cursor: default;
+    padding: 0.5rem 1.0rem;
+    color: ${styles.dim};
+`
+
+
+// end of file
