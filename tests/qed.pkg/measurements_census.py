@@ -19,6 +19,7 @@ import os
 import tempfile
 
 # support
+import journal
 import qed
 
 # the analyses
@@ -169,6 +170,22 @@ with tempfile.TemporaryDirectory() as folder:
     }
     # and HV has none
     assert tally["L.A.HV"]["fill"] == 0
+
+    # a second granule whose chunk records were cut short while they were being written
+    home = os.path.join(folder, "gslc", gslc.replace("_001", "_002"))
+    # has a folder of its own
+    os.makedirs(home)
+    # with the first half of a compressed file
+    whole = gzip.compress(
+        b"host,dataset,row,col,address,bytes,raw\n" + b"ods,product.L.A.HH,0,0,0,10,2000\n" * 100
+    )
+    with open(os.path.join(home, "layout-pages.csv.gz"), "wb") as stream:
+        # cut in the middle
+        stream.write(whole[: len(whole) // 2])
+    # the warning is expected, so it goes to the trash
+    journal.warning("qed.measurements.census").device = journal.trash()
+    # it is left out, and the first granule is counted as before
+    assert census.waste(source=folder, rows=[])["L.A.HH"]["rasters"] == 1
 
 # the reference data of the second census: its product, its cycle, and its measures
 reference = census.reference(name="census-31-gslc", rows=[{**r, "kind": "gslc"} for r in second])
