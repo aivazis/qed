@@ -199,7 +199,7 @@ its granule id through the canonical layout of the NISAR products,
 are built only for the ids of the cycle. Each granule is measured in a fresh process, `--workers` at
 a time, in a folder of its own that keeps its chunk records compressed; a measurement whose product
 is not in the bucket reports it with a status of its own, and the census counts it apart from the
-failures. Each product gets a folder of its own, `census-<product>-<cycle>`, e.g. `census-rslc-31`,
+failures. Each product gets a folder of its own, `census-<cycle>-<product>`, e.g. `census-31-rslc`,
 in `--results` or else in the current directory, and the products are measured one after the other.
 `census.csv` collects the summary of every dataset with its product, granule, and processing
 version, and the run log reports each step as it ends, with its time, and the medians of each
