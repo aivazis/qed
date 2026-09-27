@@ -609,7 +609,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # go through the readers
             for reader, datasets in readers.items():
                 # the file layout is shared by all the datasets of a reader
-                layout = self._layout(reader=reader)
+                layout = qed.readers.pages.paging(reader=reader)
                 # a reader whose file is not HDF5 has no pages to speak of
                 if layout is None:
                     # so say so
@@ -1470,25 +1470,6 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # all done
         return
 
-    def _layout(self, reader):
-        """
-        Read the page size and the file space strategy of the file behind {reader}, or report
-        that it is not an HDF5 product
-        """
-        # only the HDF5 readers have pages
-        if not isinstance(reader, qed.readers.nisar.h5):
-            # so everybody else has no layout
-            return None
-        # the file creation properties are only reachable through the file itself, so open it
-        # again, with the same credentials; this reads nothing but metadata
-        h5 = qed.h5.reader(uri=reader.uri, credentials=reader.grant())
-        # get the creation properties
-        fcpl = h5._file._pyre_id.fcpl
-        # and the free space strategy among them
-        strategy = fcpl.filespaceStrategy
-        # hand off what matters, with the size of the file, if the library can tell
-        return fcpl.pageSize, strategy.strategy.name, h5._file._pyre_id.bytes
-
     @contextlib.contextmanager
     def _records(self, path, headers):
         """
@@ -1525,19 +1506,18 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         chunks sit on the pages of the file, alone and next to the datasets in {tables}
         """
         # unpack the layout
-        pageSize, strategy, fileBytes = layout
-        # unpack the extent
-        rows, cols = tuple(dataset.shape)
-        # a dataset stored in chunks is tiled by them, and any other is one tile
-        chunked = dataset.data.dataset.dcpl.layout.name == "chunked"
-        # unpack the tile
-        tileRows, tileCols = tuple(dataset.tile) if chunked else (rows, cols)
-        # the size of a chunk before the filters had their way with it
-        raw = tileRows * tileCols * dataset.data.disktype.bytes
-        # the number of chunks the tiling describes
-        grid = -(-rows // tileRows) * -(-cols // tileCols)
-        # the name of the dataset
-        name = dataset.pyre_name
+        pageSize, strategy, _ = layout
+        # describe the dataset
+        description = qed.readers.pages.describe(dataset=dataset, tables=tables, paging=layout)
+        # unpack
+        name = description["name"]
+        rows, cols = description["storage"]["shape"]
+        tileRows, tileCols = description["storage"]["tile"]
+        raw = description["raw"]
+        grid = description["grid"]
+        storage = description["storage"]
+        record = description["record"]
+        nodata = description["nodata"]
         # go through its chunks, unless nobody wants them one by one
         for address, size, (row, col) in tables[name] if chunks is not None else ():
             # the pages it spans, when the file has pages
@@ -1547,26 +1527,6 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             chunks.writerow(
                 (host, name, row, col, address, size, raw, pageSize, first, last - first + 1)
             )
-        # describe how it sits on the pages
-        record = qed.readers.pages.occupancy(
-            tables=tables,
-            name=name,
-            pageSize=pageSize,
-            raw=raw,
-            tile=(tileRows, tileCols),
-            grid=grid,
-        )
-        # the storage of the dataset: its shape, the shape of its chunks, its cells, and the
-        # filters its chunks pass through, in the order they are applied
-        storage = {
-            "bytes": fileBytes,
-            "shape": (rows, cols),
-            "tile": (tileRows, tileCols),
-            "cell": dataset.cell.pyre_family().rsplit(".", 1)[-1],
-            "filters": [entry.name for entry in dataset.data.dataset.dcpl.filters],
-        }
-        # what the dataset declares it holds where there is nothing, and what it really holds
-        nodata = qed.readers.pages.nodata(dataset=dataset, table=tables[name], raw=raw)
         # sign on
         channel.line(f"{name}:")
         channel.line(f"  file: {strategy} strategy, pages of {pageSize / 2**20:g} MiB")
