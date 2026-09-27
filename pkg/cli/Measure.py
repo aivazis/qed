@@ -10,6 +10,7 @@ import contextlib
 import csv
 import datetime
 import functools
+import gzip
 import journal
 import json
 import math
@@ -142,6 +143,10 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     chunks = qed.properties.bool()
     chunks.default = True
     chunks.doc = "record every chunk of each dataset; off keeps only the per dataset summaries"
+
+    compress = qed.properties.bool()
+    compress.default = False
+    compress.doc = "compress the records of the chunks with gzip"
 
     # the s3 program; not {product}, since the program registers its granule under that name,
     # and panel traits alias globally
@@ -570,7 +575,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # appending, so runs accumulate
         with (
             self._records(
-                path=f"{stem}-pages.csv" if self.chunks else None, headers=self._pageHeaders
+                path=(f"{stem}-pages.csv{'.gz' if self.compress else ''}" if self.chunks else None),
+                headers=self._pageHeaders,
             ) as chunks,
             self._records(path=f"{stem}-occupancy.csv", headers=self._occupancyHeaders) as sums,
         ):
@@ -1038,8 +1044,11 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             return
         # check whether this is first contact
         fresh = not os.path.exists(path)
+        # a compressed file gets a compressed stream; appending adds a member, which readers of
+        # the format concatenate
+        opener = gzip.open if path.endswith(".gz") else open
         # open the file for appending, so runs accumulate
-        with open(path, mode="a", newline="") as stream:
+        with opener(path, mode="at", newline="") as stream:
             # make a writer
             writer = csv.writer(stream)
             # on first contact
@@ -1101,9 +1110,21 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             tile=(tileRows, tileCols),
             grid=grid,
         )
+        # the storage of the dataset: its shape, the shape of its chunks, its cells, and the
+        # filters its chunks pass through, in the order they are applied
+        storage = {
+            "shape": (rows, cols),
+            "tile": (tileRows, tileCols),
+            "cell": dataset.cell.pyre_family().rsplit(".", 1)[-1],
+            "filters": [entry.name for entry in dataset.data.dataset.dcpl.filters],
+        }
         # sign on
         channel.line(f"{name}:")
         channel.line(f"  file: {strategy} strategy, pages of {pageSize / 2**20:g} MiB")
+        channel.line(
+            f"  storage: {rows}x{cols} {storage['cell']} in chunks of {tileRows}x{tileCols}, "
+            f"filters: {', '.join(storage['filters']) or 'none'}"
+        )
         # if nothing was written
         if not record["written"]:
             # there is nothing else to say
@@ -1139,7 +1160,12 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             channel.line("  the file is not paged; a reader fetches each chunk as one range")
             # summarize what there is
             self._summarize(
-                summaries=summaries, host=host, reader=reader, strategy=strategy, record=record
+                summaries=summaries,
+                host=host,
+                reader=reader,
+                strategy=strategy,
+                storage=storage,
+                record=record,
             )
             # and bail
             return
@@ -1202,15 +1228,30 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         )
         # summarize
         self._summarize(
-            summaries=summaries, host=host, reader=reader, strategy=strategy, record=record
+            summaries=summaries,
+            host=host,
+            reader=reader,
+            strategy=strategy,
+            storage=storage,
+            record=record,
         )
         # all done
         return
 
-    def _summarize(self, summaries, host, reader, strategy, record):
+    def _summarize(self, summaries, host, reader, strategy, storage, record):
         """
-        Add the summary {record} of a dataset of {reader} to the file of {summaries}
+        Add the summary {record} of a dataset of {reader}, with its {storage}, to the file of
+        {summaries}
         """
+
+        # the histograms, compactly, as the counts of their bins
+        def bins(counts):
+            """
+            Render the {counts} of a histogram, or nothing when there is no histogram
+            """
+            # join them, if there are any
+            return "|".join(map(str, counts)) if counts is not None else ""
+
         # the datasets that share its pages, compactly
         partners = ";".join(
             f"{other}:{share}" for other, share in sorted(record.get("partners", {}).items())
@@ -1240,6 +1281,15 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 record.get("totalMean"),
                 record.get("tenants"),
                 record.get("locality"),
+                storage["shape"][0],
+                storage["shape"][1],
+                storage["tile"][0],
+                storage["tile"][1],
+                storage["cell"],
+                ">".join(storage["filters"]),
+                bins(record.get("sizes")),
+                bins(record.get("fill")),
+                bins(record.get("total")),
             )
         )
         # all done
@@ -2688,7 +2738,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 "measure",
                 "pages",
                 "--only=product",
-                "--chunks=no",
+                "--compress=yes",
                 f"--output={directory / 'layout.csv'}",
             ],
             cwd=directory,
@@ -2892,6 +2942,15 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "total_mean",
         "tenants",
         "locality",
+        "rows",
+        "cols",
+        "tile_rows",
+        "tile_cols",
+        "cell",
+        "filters",
+        "size_histogram",
+        "fill_histogram",
+        "total_histogram",
     )
     # the column labels of the chunk layout records
     _pageHeaders = (
