@@ -10,7 +10,7 @@ import type { Page } from "@playwright/test"
 
 
 // the routes that, between them, surface the bulk of the interactive controls
-export const routes = ["/", "/controls", "/console", "/explore", "/doc"]
+export const routes = ["/", "/controls", "/console", "/quality", "/explore", "/doc"]
 
 
 // load each {route}, run a read-only DOM {check} inside the page, and tag every problem line it
