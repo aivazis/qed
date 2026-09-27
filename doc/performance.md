@@ -166,15 +166,17 @@ chunks that follow each other on a page are also neighbors on the raster. It rea
 records one line per chunk in `{output}-pages.csv` and one summary line per dataset in
 `{output}-occupancy.csv`.
 
-`measure census` runs `measure pages` on a sample of the NISAR products in a bucket: `--quota`
-granules of each of the `--kinds` of product, spread evenly over the dates on offer under
-`--bucket`, each in a fresh process, `--workers` at a time. Every granule gets a folder of its own,
-and `census.csv` collects the summary of every dataset with its kind, granule, size, and processing
-version; the run log reports the medians of each kind. Only metadata is read, so a census next to
-the data is cheap. With `--scrape` pointing at a scrape of the bucket, a folder with a list of
-granule ids for each kind named after its reader, and `--cycle` naming a repeat cycle, the census
-takes the granules of that cycle from the scrape instead of listing the bucket, all of them unless
-`--quota` asks for fewer, and keeps only the per dataset summaries of each.
+`measure census` runs `measure pages` on the granules of one repeat cycle of the NISAR products in
+a bucket. It takes them from a scrape of the bucket, a folder with a list of granule ids for each
+product named after its reader, e.g. `rslc.txt`: `--scrape` names the folder and `--cycle` the
+cycle, `--only` restricts the products to the readers it names, and `--quota` takes that many
+granules of each product, spread evenly over the cycle, instead of all of them. The key of each
+product in the bucket under `--bucket` follows from its granule id through the canonical layout of
+the NISAR products, `qed.readers.nisar.daac.canonical`. Each granule is measured in a fresh
+process, `--workers` at a time, in a folder of its own, keeping only the per dataset summaries;
+`census.csv` collects the summary of every dataset with its product, granule, size, and processing
+version, and the run log reports the medians of each product. Only metadata is read, so a census
+next to the data is cheap.
 
 `measure pyramid` builds the pyramid of a dataset, and of the rasters it is read with, from
 scratch on a crew of each of the `--crews` sizes. The build is the one the server runs when a client
