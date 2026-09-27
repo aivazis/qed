@@ -172,11 +172,14 @@ product named after its reader, e.g. `rslc.txt`: `--scrape` names the folder and
 cycle, `--only` restricts the products to the readers it names, and `--quota` takes that many
 granules of each product, spread evenly over the cycle, instead of all of them. The key of each
 product in the bucket under `--bucket` follows from its granule id through the canonical layout of
-the NISAR products, `qed.readers.nisar.daac.canonical`. Each granule is measured in a fresh
-process, `--workers` at a time, in a folder of its own, keeping only the per dataset summaries;
-`census.csv` collects the summary of every dataset with its product, granule, size, and processing
-version, and the run log reports the medians of each product. Only metadata is read, so a census
-next to the data is cheap.
+the NISAR products, `qed.readers.nisar.daac.canonical`; the list is sifted by the raw fields of
+each id, and descriptors are built only for the ids of the cycle. Each granule is measured in a
+fresh process, `--workers` at a time, in a folder of its own that keeps its chunk records
+compressed; a measurement whose product is not in the bucket reports it with a status of its own,
+and the census counts it apart from the failures. `census.csv` collects the summary of every
+dataset with its product, granule, and processing version, and the run log reports each step as it
+ends, with its time, and the medians of each product. Only metadata is read, so a census next to
+the data is cheap.
 
 `measure pyramid` builds the pyramid of a dataset, and of the rasters it is read with, from
 scratch on a crew of each of the `--crews` sizes. The build is the one the server runs when a client
