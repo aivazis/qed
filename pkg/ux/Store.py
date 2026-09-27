@@ -6,6 +6,7 @@
 
 # support
 import functools
+import json
 import pyre
 import qed
 import journal
@@ -258,10 +259,25 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         described = qed.readers.pages.describe(dataset=peer, tables=tables, paging=paging)
         # under the name the client knows it by
         described["name"] = dataset.pyre_name
+        # the census of its kind of product, if there is one to compare against
+        described["census"] = self.census(product=source.pyre_family().split(".")[-1])
         # remember it
         self._layouts[dataset.pyre_name] = described
         # and hand it off
         return described
+
+    def census(self, product):
+        """
+        The reference data of the latest census of the kind of {product}, from the folder the
+        plexus names, or {None} when there is none; the folder is read the first time somebody
+        asks, and its absence, or a file that cannot be read, only means there is no comparison
+        """
+        # the first time
+        if self._census is None:
+            # read the folder
+            self._census = self._loadCensus()
+        # look up the product
+        return self._census.get(product)
 
     def open(self, name: str | None = None):
         """
@@ -1254,6 +1270,8 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # name, and the descriptions of their datasets, keyed by dataset name
         self._storages = {}
         self._layouts = {}
+        # the reference data of the census, by product, read on first use
+        self._census = None
         # what has been done to make each dataset worth looking at, keyed by dataset name
         self._preparations = {}
         # the pyramid builds behind them, keyed the same way, while they are under way
@@ -1263,6 +1281,63 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         return
 
     # implementation details
+    # the census
+    def _loadCensus(self):
+        """
+        Read the reference data of every census in the folder the plexus names, keeping the
+        latest cycle of each product
+        """
+        # the references, by product
+        references = {}
+        # the folder
+        folder = self._plexus.census
+        # when there is none
+        if folder is None:
+            # there is nothing to compare against, which is fine
+            return references
+        # a folder that is not there
+        if not folder.isDirectory():
+            # is worth a word, since somebody asked for it
+            channel = journal.warning("qed.census")
+            # say so
+            channel.log(
+                f"there is no census folder at '{folder}'; the quality panel makes no comparison"
+            )
+            # and carry on without
+            return references
+        # go through its digests
+        for path in sorted(
+            (
+                entry
+                for entry in folder.contents
+                if entry.name.startswith("digest-") and entry.name.endswith(".json")
+            ),
+            key=str,
+        ):
+            # carefully
+            try:
+                # read one
+                with open(path) as stream:
+                    # it is json
+                    reference = json.load(stream)
+            # if it cannot be read
+            except (OSError, json.JSONDecodeError) as error:
+                # make a channel
+                channel = journal.warning("qed.census")
+                # say so
+                channel.log(f"could not read the census digest '{path}': {error}")
+                # and move on
+                continue
+            # the product and the cycle it covers
+            product = reference.get("product")
+            cycle = reference.get("cycle") or 0
+            # keep the latest cycle of each product
+            if product is not None and cycle >= (references.get(product, {}).get("cycle") or 0):
+                # by replacing an older one
+                references[product] = reference
+        # hand off the references
+        return references
+
     # staging
     def _ownerOf(self, dataset):
         """
