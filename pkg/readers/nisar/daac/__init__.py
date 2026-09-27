@@ -19,6 +19,9 @@ from .Filter import Filter as filter
 from .Single import Single as single
 from .Pair import Pair as pair
 
+# the key of a product in a bucket that follows the canonical layout
+from .layout import canonical
+
 # the product descriptors
 # precursor
 from .Daphne import Daphne as daphne
