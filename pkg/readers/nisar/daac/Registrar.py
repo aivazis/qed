@@ -48,8 +48,9 @@ class Registrar:
             product = meta["product"].lower()
             # and use it to get the correct handler
             handler = getattr(self, product)
-        # build the descriptor and return it
-        return handler(name=f"{granule}.descriptor", granule=granule)
+        # build the descriptor and return it; it is anonymous, so the configuration store holds
+        # nothing on its behalf and it goes away when its clients let go of it
+        return handler(granule=granule)
 
     # implementation details
     def grok(self, granule):

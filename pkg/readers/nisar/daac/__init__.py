@@ -15,6 +15,10 @@ from .Registrar import Registrar as registrar
 # the filter generator
 from .Filter import Filter as filter
 
+# the two shapes of descriptor: a product of one acquisition, and a product of a pair
+from .Single import Single as single
+from .Pair import Pair as pair
+
 # the product descriptors
 # precursor
 from .Daphne import Daphne as daphne
