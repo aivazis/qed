@@ -8,7 +8,9 @@
 # externals
 import collections
 import csv
+import gzip
 import io
+import itertools
 import os
 import statistics
 import tarfile
@@ -81,6 +83,110 @@ def load(*, source: str) -> list:
     with open(path, newline="") as stream:
         # and parse them
         return list(csv.DictReader(stream))
+
+
+def chunks(*, source: str):
+    """
+    Generate the per chunk records of a census in {source}, its folder or the tarball it was
+    packed into, as (granule, dataset, stored bytes, raw bytes)
+    """
+    # a tarball
+    if source.endswith((".tar.gz", ".tgz")):
+        # is read as a stream
+        with tarfile.open(source, mode="r|gz") as archive:
+            # go through its members
+            for member in archive:
+                # the chunk records of a granule sit in its folder
+                if not member.name.endswith("/layout-pages.csv.gz"):
+                    # so skip everything else
+                    continue
+                # the granule is the name of the folder
+                granule = member.name.split("/")[-2]
+                # read them whole, since the stream of a compressed archive cannot seek
+                text = gzip.decompress(archive.extractfile(member).read()).decode("utf-8")
+                # and hand them off
+                yield from _chunks(granule=granule, stream=io.StringIO(text))
+        # all done
+        return
+    # a folder holds a folder for each product, and one for each granule in it
+    for folder, _, files in sorted(os.walk(source)):
+        # the ones with chunk records
+        if "layout-pages.csv.gz" not in files:
+            # are the only ones of interest
+            continue
+        # open them
+        with gzip.open(os.path.join(folder, "layout-pages.csv.gz"), mode="rt") as stream:
+            # and hand them off
+            yield from _chunks(granule=os.path.basename(folder), stream=stream)
+    # all done
+    return
+
+
+def _chunks(*, granule: str, stream):
+    """
+    Generate the chunk records of {granule} in {stream} as (granule, dataset, stored, raw)
+    """
+    # go through them
+    for record in csv.DictReader(stream):
+        # skip the extra headers of runs that appended to the file
+        if record["dataset"] == "dataset":
+            # by moving on
+            continue
+        # hand off the ones that matter
+        yield granule, record["dataset"], int(record["bytes"]), int(record["raw"])
+    # all done
+    return
+
+
+def waste(*, source: str, rows: list, nearly: float = 0.01) -> dict:
+    """
+    Count, raster by raster, the chunks of the census in {source} that hold nothing but the fill:
+    the chunks with the stored size of the smallest chunk, when that one is nearly empty, i.e.
+    smaller than {nearly} of the raw size, and holds one value where the summaries in {rows} say
+    what it holds; the result is by the name of the raster within its product
+    """
+    # what the summaries say the smallest chunk of each raster holds
+    holds = {(row["granule"], row["dataset"]): row.get("smallest_holds") for row in rows}
+    # the tally, by raster name
+    tally = collections.defaultdict(
+        lambda: {"rasters": 0, "written": 0, "stored": 0, "fill": 0, "fillBytes": 0, "checked": 0}
+    )
+    # the records of a granule come together, so take them a granule at a time
+    for granule, records in itertools.groupby(chunks(source=source), key=lambda r: r[0]):
+        # the sizes of the chunks of each of its rasters, and their raw size
+        sizes = collections.defaultdict(list)
+        raws = {}
+        # go through its chunk records
+        for _, dataset, stored, raw in records:
+            # file each one with its raster
+            sizes[dataset].append(stored)
+            # and remember the raw size
+            raws[dataset] = raw
+        # go through its rasters
+        for dataset, stored in sizes.items():
+            # the entry of its name
+            entry = tally[dataset.split(".", 1)[1]]
+            # count it
+            entry["rasters"] += 1
+            entry["written"] += len(stored)
+            entry["stored"] += sum(stored)
+            # its smallest chunk
+            smallest = min(stored)
+            # what the census found in it, if it looked
+            found = holds.get((granule, dataset)) or ""
+            # a chunk that holds data, or one too large to be the fill
+            if found in ("data", "unknown") or smallest >= nearly * raws[dataset]:
+                # spares nothing
+                continue
+            # a census that looked has checked this raster
+            entry["checked"] += found not in ("", "None")
+            # the chunks that hold the same bytes as the smallest
+            twins = stored.count(smallest)
+            # are the ones a declared fill would have spared
+            entry["fill"] += twins
+            entry["fillBytes"] += twins * smallest
+    # hand off the tally
+    return dict(tally)
 
 
 def value(*, row: dict, name: str):
