@@ -71,6 +71,9 @@ from . import stacks
 # support for concurrent tile production
 from . import nexus
 
+# the analysis of measurements
+from . import measurements
+
 # schema
 from . import gql
 

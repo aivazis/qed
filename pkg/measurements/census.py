@@ -1,0 +1,305 @@
+# -*- Python -*-
+# -*- coding: utf-8 -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2026 all rights reserved
+
+
+# externals
+import collections
+import csv
+import io
+import os
+import statistics
+import tarfile
+
+# the measures of a raster the analyses report, as (name, label, whether lower is better)
+MEASURES = (
+    ("once", "bytes moved per byte stored, the raster read alone, each page fetched once", True),
+    (
+        "joint",
+        "bytes moved per byte stored, the raster read with the rasters sharing its pages",
+        True,
+    ),
+    ("alone", "bytes moved per byte stored, the chunks read one at a time", True),
+    ("fill_mean", "share of each page the raster fills, mean", False),
+    ("locality", "share of consecutive chunks on a page that are neighbors on the raster", False),
+    ("empty", "share of the written chunks that are nearly empty", True),
+    ("unwritten", "share of the chunk grid never written", True),
+    ("compression", "compression ratio", None),
+    ("stored_mib", "bytes the raster stores, in MiB", None),
+)
+# the storage settings every raster records
+SETTINGS = ("strategy", "page_size", "cell", "tile", "filters", "crid")
+
+
+def load(*, source: str) -> list:
+    """
+    Read the summaries of a census from {source}: its {census.csv}, the folder that holds it, or
+    the tarball the census packed it into
+    """
+    # a tarball
+    if source.endswith((".tar.gz", ".tgz")):
+        # is read as a stream, stopping at the summaries, which come early
+        with tarfile.open(source, mode="r|gz") as archive:
+            # go through its members
+            for member in archive:
+                # the summaries of the census sit at the top of its folder
+                if member.name.count("/") == 1 and member.name.endswith("/census.csv"):
+                    # read them whole, since the stream of a compressed archive cannot seek
+                    text = archive.extractfile(member).read().decode("utf-8")
+                    # and parse them
+                    return list(csv.DictReader(io.StringIO(text)))
+        # a tarball without them is a mistake
+        raise FileNotFoundError(f"'{source}' holds no census.csv")
+    # a folder holds its summaries in {census.csv}
+    path = os.path.join(source, "census.csv") if os.path.isdir(source) else source
+    # read them
+    with open(path, newline="") as stream:
+        # and parse them
+        return list(csv.DictReader(stream))
+
+
+def value(*, row: dict, name: str):
+    """
+    The measure {name} of the raster in {row}, or {None} if the census did not record it
+    """
+    # the share of the written chunks that are nearly empty
+    if name == "empty":
+        # needs chunks that were written
+        written = int(row["written"])
+        # and is otherwise the ratio
+        return int(row["empty"]) / written if written else None
+    # the share of the chunk grid that was never written
+    if name == "unwritten":
+        # the ratio of the unwritten to all the chunks the tiling describes
+        return 1 - int(row["written"]) / int(row["grid"])
+    # the bytes the raster stores, in MiB
+    if name == "stored_mib":
+        # converted from bytes
+        return int(row["stored"]) / 2**20
+    # everything else is recorded as is
+    recorded = row.get(name, "")
+    # unless it is blank
+    return float(recorded) if recorded not in ("", "None") else None
+
+
+def values(*, rows: list, name: str) -> list:
+    """
+    The measure {name} of every raster in {rows} that has one
+    """
+    # collect them, leaving out the ones the census did not record
+    return [v for v in (value(row=row, name=name) for row in rows) if v is not None]
+
+
+def percentiles(*, numbers: list) -> tuple:
+    """
+    The 10th percentile, the median, the 90th percentile, and the maximum of {numbers}, or
+    {None} if there are none
+    """
+    # without numbers
+    if not numbers:
+        # there is nothing to report
+        return None
+    # in order
+    ordered = sorted(numbers)
+    # the value at a fraction of the way through
+    at = lambda fraction: ordered[min(len(ordered) - 1, int(fraction * len(ordered)))]
+    # hand off the four
+    return at(0.1), statistics.median(ordered), at(0.9), ordered[-1]
+
+
+def medians(*, rows: list, names: tuple) -> list:
+    """
+    The median of each of the measures {names} over the rasters in {rows}, or {None} for a
+    measure none of them has
+    """
+    # go through the measures
+    return [
+        statistics.median(numbers) if numbers else None
+        for numbers in (values(rows=rows, name=name) for name in names)
+    ]
+
+
+def histogram(*, rows: list, name: str) -> list:
+    """
+    Pool the histograms {name} of the rasters in {rows} into one, bin by bin
+    """
+    # the pooled counts
+    pooled = []
+    # go through the rows
+    for row in rows:
+        # skip the ones without the histogram
+        if not row.get(name):
+            # by moving on
+            continue
+        # the counts of this one
+        counts = [int(count) for count in row[name].split("|")]
+        # make room
+        pooled += [0] * (len(counts) - len(pooled))
+        # and add them in
+        for index, count in enumerate(counts):
+            # bin by bin
+            pooled[index] += count
+    # hand off the pooled counts
+    return pooled
+
+
+def settings(*, rows: list) -> dict:
+    """
+    Count the storage settings of the rasters in {rows}, by setting and value
+    """
+
+    # the tile is recorded as two columns
+    def get(row, name):
+        """
+        The setting {name} of {row}
+        """
+        # the tile joins its two columns
+        if name == "tile":
+            # into one value
+            return f"{row['tile_rows']}x{row['tile_cols']}"
+        # everything else is recorded as is
+        return row[name]
+
+    # count each one
+    return {name: collections.Counter(get(row, name) for row in rows) for name in SETTINGS}
+
+
+def raster(*, row: dict) -> str:
+    """
+    The name of the raster of {row} within its product, e.g. {L.A.HH}
+    """
+    # everything after the name of the product
+    return row["dataset"].split(".", 1)[1]
+
+
+def frequency(*, row: dict) -> str:
+    """
+    The frequency of the raster of {row}
+    """
+    # the third field of its name
+    return row["dataset"].split(".")[2]
+
+
+def scene(*, row: dict) -> str:
+    """
+    The scene of the granule of {row}: its id past the level, processing type, and product, which
+    the products of one acquisition share
+    """
+    # drop the first four fields of the id
+    return row["granule"].split("_", 4)[4]
+
+
+def groups(*, rows: list, key) -> dict:
+    """
+    File the rows by the value {key} computes from each one
+    """
+    # the groups
+    filed = collections.defaultdict(list)
+    # go through the rows
+    for row in rows:
+        # and file each one
+        filed[key(row=row)].append(row)
+    # hand off the groups
+    return dict(filed)
+
+
+def rasters(*, rows: list) -> dict:
+    """
+    File the rows by the number of rasters in their product
+    """
+    # count the rasters of each product
+    count = collections.Counter(row["granule"] for row in rows)
+    # and file each row by the count of its product
+    return groups(rows=rows, key=lambda row: count[row["granule"]])
+
+
+def pairs(*, first: list, second: list) -> list:
+    """
+    Match the rasters of the census {first} with the ones of {second} that belong to the same
+    scene and have the same name, as (first, second)
+    """
+    # index the first
+    index = {(scene(row=row), raster(row=row)): row for row in first}
+    # and match the second against it
+    return [
+        (index[key], row)
+        for row, key in ((row, (scene(row=row), raster(row=row))) for row in second)
+        if key in index
+    ]
+
+
+def compare(*, matched: list) -> list:
+    """
+    Compare the {matched} rasters measure by measure, as (name, label, median of the first,
+    median of the second, share of the pairs in which the second is worse or {None})
+    """
+    # the comparison
+    table = []
+    # go through the measures
+    for name, label, lower in MEASURES:
+        # the pairs that have the measure on both sides
+        both = [
+            (a, b)
+            for a, b in ((value(row=x, name=name), value(row=y, name=name)) for x, y in matched)
+            if a is not None and b is not None
+        ]
+        # without any
+        if not both:
+            # there is nothing to compare
+            continue
+        # the share of the pairs in which the second is worse, for a measure that has a better
+        worse = (
+            sum(1 for a, b in both if (b > a if lower else b < a)) / len(both)
+            if lower is not None
+            else None
+        )
+        # add the row
+        table.append(
+            (
+                name,
+                label,
+                statistics.median(a for a, _ in both),
+                statistics.median(b for _, b in both),
+                worse,
+            )
+        )
+    # hand off the comparison
+    return table
+
+
+def markdown(*, headers: tuple, rows: list) -> list:
+    """
+    Render a table with {headers} and {rows} as the lines of a Markdown table
+    """
+
+    # render a cell
+    def cell(entry):
+        """
+        Render one {entry} of the table
+        """
+        # nothing is blank
+        if entry is None:
+            # so render it that way
+            return ""
+        # large numbers are rounded to whole ones
+        if isinstance(entry, float) and abs(entry) >= 100:
+            # which keeps them out of scientific notation
+            return f"{entry:.0f}"
+        # the rest get three significant figures
+        if isinstance(entry, float):
+            # which keeps the columns readable
+            return f"{entry:.3g}"
+        # everything else is rendered as is
+        return str(entry)
+
+    # the header, the separator, and the rows
+    return (
+        ["| " + " | ".join(headers) + " |"]
+        + ["|" + "|".join("---" for _ in headers) + "|"]
+        + ["| " + " | ".join(cell(entry) for entry in row) + " |" for row in rows]
+    )
+
+
+# end of file
