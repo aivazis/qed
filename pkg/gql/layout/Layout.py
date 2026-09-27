@@ -11,6 +11,7 @@ import graphene
 import qed
 
 # my parts
+from .LayoutCensus import LayoutCensus
 from .LayoutFill import LayoutFill
 from .LayoutGrid import LayoutGrid
 from .LayoutPartner import LayoutPartner
@@ -43,6 +44,8 @@ class Layout(graphene.ObjectType):
     fill = graphene.Field(LayoutFill, required=True)
     # the states of the cells of its chunk grid
     grid = graphene.Field(LayoutGrid, required=True)
+    # the census of its kind of product, when there is one to compare against
+    census = graphene.Field(LayoutCensus)
 
     # the resolvers
     @staticmethod
@@ -159,6 +162,34 @@ class Layout(graphene.ObjectType):
             "makeMs": ms(fill.get("make")),
             "encodeMs": ms(fill.get("encode")),
             "dataDecodeMs": ms(fill.get("data")),
+        }
+
+    @staticmethod
+    def resolve_census(described, *_):
+        """
+        The census of its kind of product, and where it falls in it
+        """
+        # the reference data
+        reference = described.get("census")
+        # without any
+        if reference is None:
+            # there is no comparison
+            return None
+        # the kind of the raster, the last part of its name, e.g. {HHHH} or {mask}
+        kind = described["name"].split(".")[-1]
+        # the rasters of the same kind, if the census has them, or else all of them
+        group = reference.get("groups", {}).get(kind) or reference
+        # the measures of this raster
+        mine = qed.measurements.census.measures(description=described)
+        # assemble
+        return {
+            **reference,
+            "kind": kind if group is not reference else None,
+            "rasters": group["rasters"],
+            "measures": [
+                {"name": name, "value": mine.get(name), **measure}
+                for name, measure in group["measures"].items()
+            ],
         }
 
     @staticmethod
