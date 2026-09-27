@@ -28,9 +28,32 @@ MEASURES = (
     ("unwritten", "share of the chunk grid never written", True),
     ("compression", "compression ratio", None),
     ("stored_mib", "bytes the raster stores, in MiB", None),
+    ("empty_mib", "bytes the nearly empty chunks store, in MiB", True),
+    ("empty_page_share", "share of the pages that hold nothing but nearly empty chunks", True),
+    ("decode_ms", "time to decode the smallest chunk, in ms", True),
+    ("make_ms", "time to make the smallest chunk from its one value, in ms", None),
+    ("data_decode_ms", "time to decode the median chunk of data, in ms", None),
+    ("fill_mib", "bytes stored by the chunks that hold nothing but the fill, in MiB", True),
+    ("fill_chunks", "chunks that hold nothing but the fill", True),
+    ("encode_ms", "time to encode a chunk that holds nothing but the fill, in ms", None),
 )
 # the storage settings every raster records
-SETTINGS = ("strategy", "page_size", "cell", "tile", "filters", "crid")
+SETTINGS = (
+    "strategy",
+    "page_size",
+    "cell",
+    "tile",
+    "filters",
+    "crid",
+    "hdf5_fill_status",
+    "hdf5_fill",
+    "cf_fill",
+    "smallest_holds",
+    "fill_agrees",
+    "deflate_level",
+)
+# the settings a census records only since it started looking at the fill
+FILL = ("hdf5_fill_status", "hdf5_fill", "cf_fill", "smallest_holds", "deflate_level")
 
 
 def load(*, source: str) -> list:
@@ -78,6 +101,32 @@ def value(*, row: dict, name: str):
     if name == "stored_mib":
         # converted from bytes
         return int(row["stored"]) / 2**20
+    # the bytes its nearly empty chunks store, in MiB, if the census recorded them
+    if name == "empty_mib":
+        # converted from bytes
+        return int(row["empty_stored"]) / 2**20 if row.get("empty_stored") else None
+    # the share of its pages that hold nothing but nearly empty chunks, if recorded
+    if name == "empty_page_share":
+        # needs pages
+        return (
+            int(row["empty_pages"]) / int(row["pages"])
+            if row.get("empty_pages") and row.get("pages")
+            else None
+        )
+    # the bytes stored by the chunks that hold nothing but the fill, in MiB, if recorded
+    if name == "fill_mib":
+        # converted from bytes
+        return (
+            int(row["fill_bytes"]) / 2**20
+            if row.get("fill_bytes") not in (None, "", "None")
+            else None
+        )
+    # the times, in ms, if recorded
+    if name in ("decode_ms", "make_ms", "data_decode_ms", "encode_ms"):
+        # from the time in seconds
+        recorded = row.get(name[:-3] + "_s", "")
+        # converted
+        return 1e3 * float(recorded) if recorded not in ("", "None") else None
     # everything else is recorded as is
     recorded = row.get(name, "")
     # unless it is blank
@@ -159,11 +208,35 @@ def settings(*, rows: list) -> dict:
         if name == "tile":
             # into one value
             return f"{row['tile_rows']}x{row['tile_cols']}"
+        # whether the fill the library knows about is what the empty chunks hold
+        if name == "fill_agrees":
+            # is decided elsewhere
+            return agrees(row=row)
+        # the fill settings are missing from a census that predates them
+        if name in FILL:
+            # so they are blank there
+            return row.get(name) or ""
         # everything else is recorded as is
         return row[name]
 
     # count each one
     return {name: collections.Counter(get(row, name) for row in rows) for name in SETTINGS}
+
+
+def agrees(*, row: dict) -> str:
+    """
+    Whether the smallest chunk of the raster of {row}, when it holds one value, holds the fill
+    value the library hands out for the chunks that were never written: "yes", "no", or blank
+    when the chunk holds data or the census did not look
+    """
+    # what the chunk holds
+    holds = row.get("smallest_holds") or ""
+    # data, or something the census could not decode, or nothing recorded
+    if holds in ("", "None", "data", "unknown"):
+        # says nothing about the fill
+        return ""
+    # otherwise compare it with the library's fill, as rendered, so a nan matches a nan
+    return "yes" if holds == row.get("hdf5_fill") else "no"
 
 
 def raster(*, row: dict) -> str:
