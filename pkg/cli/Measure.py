@@ -567,10 +567,22 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         stem = os.path.splitext(self.output)[0]
         # the datasets the restrictions allow, grouped by the reader whose file holds them
         readers = {}
-        # go through them
-        for reader, dataset in self._rasters(plexus=plexus):
-            # and file each one with its reader
-            readers.setdefault(reader, []).append(dataset)
+        # attempt to
+        try:
+            # go through them
+            for reader, dataset in self._rasters(plexus=plexus):
+                # and file each one with its reader
+                readers.setdefault(reader, []).append(dataset)
+        # if a product could not be opened
+        except qed.h5.api.exceptions.OpenError as error:
+            # and that is because it is not there
+            if self._missing(uri=error.uri):
+                # say so
+                channel.log(f"there is no product at '{error.uri}'")
+                # and report it with the status that says so
+                return self._absent
+            # anything else is a failure, and says why
+            raise
         # open the file of per chunk records and the file of per dataset summaries, for
         # appending, so runs accumulate
         with (
@@ -867,14 +879,15 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             error.log(f"'{self.bucket}' is not an s3 uri")
             # so bail
             return 1
-        # the census checks the bucket through the AWS client, which qed does not require
+        # the measurements tell a missing product from a failure by asking the bucket through the
+        # AWS client, which qed does not require
         try:
             # so look for it
             import boto3
         # if it is not there
         except ImportError:
             # say so
-            error.log("the census checks the bucket with 'boto3', which is not installed")
+            error.log("the census asks the bucket with 'boto3', which is not installed")
             # and bail
             return 1
         # the measurements run in child processes of the installed qed
@@ -918,16 +931,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
 
         # split the bucket from the prefix
         bucket, _, prefix = self.bucket.removeprefix("s3://").partition("/")
-        # make a client, with the credentials of the standard AWS chain
-        client = boto3.client("s3")
-        # the granules to measure, as (product, granule, key, bytes)
+        # the granules to measure, as (product, granule, key)
         jobs = []
-        # the errors of the AWS client
-        import botocore.exceptions
-
-        # the parser complains about every id it does not recognize; the census counts them
-        # instead, so they do not drown its report
-        journal.warning("qed.readers.nisar.daac").deactivate()
         # go through the products
         for product in products:
             # a product the scrape has no list for
@@ -936,21 +941,10 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 channel.line(f"{product}: the scrape has no list")
                 # so move on
                 continue
-            # attempt to
-            try:
-                # choose its granules
-                chosen, skipped, unrecognized = self._scraped(
-                    channel=channel, client=client, bucket=bucket, prefix=prefix, product=product
-                )
-            # if the bucket cannot be asked, e.g. because the credentials expired
-            except (botocore.exceptions.ClientError, botocore.exceptions.BotoCoreError) as failure:
-                # say so
-                error.log(f"could not check the products in '{self.bucket}': {failure}")
-                # and bail
-                return 1
-            # say how many there are, and how many folders held no product
-            # add them to the pile
-            jobs.extend((product, granule, key, size) for granule, key, size in chosen)
+            # choose its granules
+            chosen = self._scraped(channel=channel, prefix=prefix, product=product)
+            # and add them to the pile
+            jobs.extend((product, granule, key) for granule, key in chosen)
         # flush
         channel.log()
 
@@ -960,13 +954,14 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         clock.reset()
         clock.start()
         # measure the granules, a few at a time, on the pyre event loop
-        failures = self._survey(channel=channel, results=results, bucket=bucket, jobs=jobs)
+        failures, absent = self._survey(channel=channel, results=results, bucket=bucket, jobs=jobs)
         # stop the clock
         clock.stop()
         # and report the measurements
         channel.log(
-            f"measured {len(jobs) - len(failures)} of {len(jobs)} granules in {clock.sec():.1f} s, "
-            f"{self.workers} at a time"
+            f"measured {len(jobs) - len(failures) - len(absent)} of {len(jobs)} granules in "
+            f"{clock.sec():.1f} s, {self.workers} at a time; {len(absent)} had no product, "
+            f"{len(failures)} failed"
         )
 
         # gather the summaries into one table
@@ -981,7 +976,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         total.stop()
         # say it is over
         channel.line(
-            f"done: {len(jobs) - len(failures)} of {len(jobs)} granules measured, "
+            f"done: {len(jobs) - len(failures) - len(absent)} of {len(jobs)} granules measured, "
             f"in {total.sec():.1f} s in all"
         )
         # flush
@@ -1045,8 +1040,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         fcpl = h5._file._pyre_id.fcpl
         # and the free space strategy among them
         strategy = fcpl.filespaceStrategy
-        # hand off what matters
-        return fcpl.pageSize, strategy.strategy.name
+        # hand off what matters, with the size of the file, if the library can tell
+        return fcpl.pageSize, strategy.strategy.name, h5._file._pyre_id.bytes
 
     @contextlib.contextmanager
     def _records(self, path, headers):
@@ -1100,7 +1095,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         chunks sit on the pages of the file, alone and next to the datasets in {tables}
         """
         # unpack the layout
-        pageSize, strategy = layout
+        pageSize, strategy, fileBytes = layout
         # unpack the extent and the tile
         rows, cols = tuple(dataset.shape)
         tileRows, tileCols = tuple(dataset.tile)
@@ -1131,6 +1126,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # the storage of the dataset: its shape, the shape of its chunks, its cells, and the
         # filters its chunks pass through, in the order they are applied
         storage = {
+            "bytes": fileBytes,
             "shape": (rows, cols),
             "tile": (tileRows, tileCols),
             "cell": dataset.cell.pyre_family().rsplit(".", 1)[-1],
@@ -1299,6 +1295,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 record.get("totalMean"),
                 record.get("tenants"),
                 record.get("locality"),
+                storage["bytes"],
                 storage["shape"][0],
                 storage["shape"][1],
                 storage["tile"][0],
@@ -2510,12 +2507,10 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         return marks["seeded"], (marks["ready"] if not errors else None), status
 
     # implementation details: the census
-    def _scraped(self, channel, client, bucket, prefix, product):
+    def _scraped(self, channel, prefix, product):
         """
-        Choose the granules of {product} in my {cycle} from my {scrape}, as (granule, key,
-        bytes), all of them or my {quota} spread evenly over the cycle, and count the ones passed
-        over because their folder in {bucket} holds no product; report the parse and the checks
-        to {channel} as each one ends
+        Choose the granules of {product} in my {cycle} from my {scrape}, as (granule, key), all
+        of them or my {quota} spread evenly over the cycle, and report the parse to {channel}
         """
         # the parser of the granule ids
         registrar = qed.readers.nisar.daac.registrar()
@@ -2526,14 +2521,12 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         clock.start()
         # the number of ids in the list
         ids = 0
-        # the list of the granules of this product, named after its reader
-        path = self.scrape / f"{product}.txt"
-        # the granules of the cycle, as (begin, granule, key)
+        # the granules of the cycle, as (mark, granule, key)
         found = []
         # and the number of ids the parser did not recognize
         unrecognized = 0
         # go through the list
-        with open(path) as stream:
+        with open(self.scrape / f"{product}.txt") as stream:
             # one granule id per line
             for line in stream:
                 # clean it up
@@ -2544,25 +2537,23 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                     continue
                 # count the id
                 ids += 1
-                # parse the id; one the parser does not recognize comes back as nothing
-                descriptor = registrar.parse(granule)
-                # so skip it
-                if descriptor is None:
-                    # count it
+                # sift it by its raw fields, which is cheap
+                fields = registrar.fields(granule)
+                # an id the parser does not recognize
+                if fields is None:
+                    # is counted
                     unrecognized += 1
-                    # and move on
+                    # and skipped
                     continue
-                # the cycle of a pair is the one of its reference acquisition
-                cycle = (
-                    descriptor.referenceCycle
-                    if isinstance(descriptor, qed.readers.nisar.daac.pair)
-                    else descriptor.cycle
-                )
+                # the cycle, which for a pair is the one of its reference acquisition
+                cycle = fields.get("cycle") or fields.get("referenceCycle")
                 # a granule of another cycle
                 if int(cycle) != self.cycle:
                     # is not wanted
                     continue
-                # the key of its product in the canonical layout of the bucket
+                # the ones that are get a descriptor
+                descriptor = registrar.parse(granule)
+                # and the key of their product in the canonical layout of the bucket
                 key = qed.readers.nisar.daac.canonical(prefix=prefix, descriptor=descriptor)
                 # add it to the pile, with the time that orders it
                 found.append((descriptor.mark, granule, key))
@@ -2585,71 +2576,47 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         elif self.quota == 1 and found:
             # of the pile
             found = [found[len(found) // 2]]
-        # the clock of the checks
-        clock = qed.timers.wall(f"qed.measure.census.check.{product}")
-        # started afresh
-        clock.reset()
-        clock.start()
-        # the granules chosen
-        granules = []
-        # and the ones passed over
-        skipped = 0
-        # go through the ones found
-        for _, granule, key in found:
-            # the folder of the granule
-            folder = key.rsplit("/", 1)[0] + "/"
-            # look up its product file
-            entry = self._product(client=client, bucket=bucket, folder=folder)
-            # if there is none
-            if entry is None:
-                # pass it over
-                skipped += 1
-                # and move on
-                continue
-            # otherwise, choose it
-            granules.append(entry)
-        # stop the clock of the checks
-        clock.stop()
-        # and report them
-        channel.log(
-            f"{product}: checked {len(found)} granules in the bucket in {clock.sec():.1f} s; "
-            f"{len(granules)} hold a product, {skipped} do not"
-        )
-        # hand off the granules, the number passed over, and the number not recognized
-        return granules, skipped, unrecognized
+        # hand off the granules and their keys
+        return [(granule, key) for _, granule, key in found]
 
-    def _product(self, client, bucket, folder):
+    def _missing(self, uri):
         """
-        Look up the product file of the granule in {folder} of {bucket}, as (granule, key,
-        bytes), or {None} if the folder holds only its metadata
+        Decide whether the product at {uri} could not be opened because it is not there; only a
+        product in a bucket can tell, by asking the bucket
         """
-        # the errors of the AWS client
-        import botocore.exceptions
-
-        # the granule is named after its folder
-        granule = folder.rstrip("/").rsplit("/", 1)[-1]
-        # and so is its product file
-        key = f"{folder}{granule}.h5"
+        # normalize the location
+        uri = qed.primitives.uri.parse(value=str(uri), scheme="file")
+        # a product that is not in a bucket
+        if uri.scheme != "s3":
+            # has no bucket to ask
+            return False
+        # the bucket is asked through the AWS client, which qed does not require
+        try:
+            # so look for it
+            import boto3
+            import botocore.exceptions
+        # without it
+        except ImportError:
+            # there is no way to tell
+            return False
+        # the bucket and the key
+        bucket, _, key = f"{uri.authority}{uri.address}".partition("/")
         # attempt to
         try:
-            # look it up
-            head = client.head_object(Bucket=bucket, Key=key)
+            # look the product up, with the credentials of the standard AWS chain
+            boto3.client("s3").head_object(Bucket=bucket, Key=key)
         # if the bucket said no
         except botocore.exceptions.ClientError as error:
-            # because the product is not there
-            if error.response.get("Error", {}).get("Code") in ("404", "NoSuchKey", "NotFound"):
-                # the folder has no product
-                return None
-            # anything else, e.g. credentials that expired, is not an answer about the product
-            raise
-        # otherwise, hand off the granule, with the size of its product
-        return granule, key, head["ContentLength"]
+            # it is missing if the bucket says it is not there, and anything else is a failure
+            return error.response.get("Error", {}).get("Code") in ("404", "NoSuchKey", "NotFound")
+        # otherwise, it is there, so it failed to open for some other reason
+        return False
 
     def _survey(self, channel, results, bucket, jobs):
         """
         Measure the granules in {jobs}, my {workers} of them at a time, each in a fresh process
         whose output the event loop collects into its log, and hand off the ones that did not
-        complete
+        complete and the ones whose product is not there
         """
         # the journal channel that reports the progress, since the handlers of the event loop
         # are handed the channel they watch under the same name
@@ -2660,8 +2627,10 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         pending = collections.deque(jobs)
         # the measurements under way
         running = set()
-        # and the ones that did not complete
+        # the ones that did not complete
         failures = []
+        # and the ones whose product is not there
+        absent = []
 
         # start as many measurements as there is room for
         def launch():
@@ -2671,7 +2640,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # while there is room and work
             while pending and len(running) < self.workers:
                 # take the next granule
-                kind, granule, key, _ = pending.popleft()
+                kind, granule, key = pending.popleft()
                 # start measuring it
                 process, log = self._census(
                     results=results, bucket=bucket, kind=kind, granule=granule, key=key
@@ -2717,8 +2686,14 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             log.close()
             # it is no longer under way
             running.discard(process)
+            # if its product is not there
+            if status == self._absent:
+                # remember it
+                absent.append(f"{kind} {granule}")
+                # and say so
+                message = f"{kind} {granule}: no product"
             # if it failed
-            if status != 0:
+            elif status != 0:
                 # remember it for the summary
                 failures.append(f"{kind} {granule}")
                 # and say so
@@ -2760,8 +2735,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if running:
             # watch until the last one is done
             selector.watch()
-        # hand off the ones that did not complete
-        return failures
+        # hand off the ones that did not complete, and the ones whose product is not there
+        return failures, absent
 
     def _census(self, results, bucket, kind, granule, key):
         """
@@ -2802,7 +2777,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         {results}, and hand them off as records
         """
         # the columns: the granule, then its dataset summaries
-        headers = ("kind", "granule", "bytes", "crid") + self._occupancyHeaders
+        headers = ("kind", "granule", "crid") + self._occupancyHeaders
         # the records
         rows = []
         # open the table
@@ -2812,7 +2787,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # write the header
             writer.writerow(headers)
             # go through the granules
-            for kind, granule, _, size in jobs:
+            for kind, granule, _ in jobs:
                 # the summaries of its datasets
                 path = results / kind / granule / "layout-occupancy.csv"
                 # a granule whose measurement did not complete has none
@@ -2834,7 +2809,6 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                         row = {
                             "kind": kind,
                             "granule": granule,
-                            "bytes": size,
                             "crid": crid[-1] if crid else "",
                             **record,
                         }
@@ -2913,6 +2887,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     # team behind many clients over a remote product can keep a request waiting in line for
     # minutes, which is a result rather than a failure
     _tilePatience = 900
+    # the exit status of a measurement of a product that is not there
+    _absent = 3
     # how long the census waits for the measurement of one granule, in seconds
     _patience = 900
     # how long the pyramid measurement waits for a build, in seconds
@@ -2989,6 +2965,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "total_mean",
         "tenants",
         "locality",
+        "file_bytes",
         "rows",
         "cols",
         "tile_rows",
