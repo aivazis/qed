@@ -155,7 +155,64 @@ def occupancy(*, tables: dict, name: str, pageSize: int, raw: int, tile: tuple, 
     return record
 
 
-def states(*, table: list, shape: tuple, tile: tuple, raw: int, fill: int = None) -> dict:
+def strip(*, tables: dict, name: str, pageSize: int):
+    """
+    Describe the pages the chunks of the dataset {name} land on, in file order, given the chunk
+    {tables} of every dataset in the file and the {pageSize}: for each page, the bytes of the
+    dataset, the number of its chunks, the bytes of all the other datasets together, and the
+    other dataset with the most bytes on it; {None} for a file that is not paged
+
+    The description is a set of parallel lists, one entry per page
+    """
+    # a file without pages
+    if not pageSize:
+        # has nothing to describe
+        return None
+    # the bytes of the dataset on each of its pages, and the number of its chunks on each
+    mine = collections.Counter()
+    count = collections.Counter()
+    # go through its chunks
+    for address, size, _ in tables[name]:
+        # and the pages each one lands on
+        for page, share in apportion(address=address, size=size, pageSize=pageSize):
+            # add its bytes
+            mine[page] += share
+            # and count it
+            count[page] += 1
+    # the bytes of every other dataset on those pages
+    others = collections.defaultdict(collections.Counter)
+    # go through the other datasets
+    for other, table in tables.items():
+        # skipping this one
+        if other == name:
+            # by moving on
+            continue
+        # go through their chunks
+        for address, size, _ in table:
+            # and the pages each one lands on
+            for page, share in apportion(address=address, size=size, pageSize=pageSize):
+                # the pages of the dataset are the only ones of interest
+                if page in mine:
+                    # record the share
+                    others[page][other] += share
+    # the pages, in file order
+    pages = sorted(mine)
+    # the largest other tenant of each page
+    largest = [others[page].most_common(1)[0] if others[page] else ("", 0) for page in pages]
+    # hand off the description
+    return {
+        "pages": pages,
+        "mine": [mine[page] for page in pages],
+        "chunks": [count[page] for page in pages],
+        "others": [sum(others[page].values()) for page in pages],
+        "partner": [partner for partner, _ in largest],
+        "partnerBytes": [share for _, share in largest],
+    }
+
+
+def states(
+    *, table: list, shape: tuple, tile: tuple, raw: int, fill: int = None, pageSize: int = 0
+) -> dict:
     """
     Classify the cells of the chunk grid of a raster of {shape} in chunks of {tile}, given its
     chunk {table} as a list of (address, bytes, origin), the {raw} size of a chunk, and the
@@ -163,7 +220,8 @@ def states(*, table: list, shape: tuple, tile: tuple, raw: int, fill: int = None
     a sliver that holds a little data among the fill, or data
 
     The grid is described in row major order, by the code of the state of each cell, its index in
-    {STATES}, and the stored size of its chunk, zero for the cells never written
+    {STATES}, the stored size of its chunk, zero for the cells never written, and, in a file with
+    pages of {pageSize}, the page its chunk starts on, -1 for the cells never written
     """
     # unpack the shape and the tile
     rows, cols = shape
@@ -174,8 +232,9 @@ def states(*, table: list, shape: tuple, tile: tuple, raw: int, fill: int = None
     # every cell starts out unwritten
     codes = [0] * (gridRows * gridCols)
     sizes = [0] * (gridRows * gridCols)
+    pages = [-1] * (gridRows * gridCols)
     # go through the written chunks
-    for _, size, (row, col) in table:
+    for address, size, (row, col) in table:
         # the cell of the chunk
         cell = (row // tileRows) * gridCols + col // tileCols
         # a chunk of the size of the fill holds nothing but the fill
@@ -192,8 +251,10 @@ def states(*, table: list, shape: tuple, tile: tuple, raw: int, fill: int = None
             codes[cell] = 3
         # record its size
         sizes[cell] = size
+        # and the page it starts on, when the file has pages
+        pages[cell] = address // pageSize if pageSize else -1
     # hand off the grid
-    return {"rows": gridRows, "cols": gridCols, "codes": codes, "sizes": sizes}
+    return {"rows": gridRows, "cols": gridCols, "codes": codes, "sizes": sizes, "pages": pages}
 
 
 def apportion(*, address: int, size: int, pageSize: int):
@@ -432,7 +493,12 @@ def describe(*, dataset, tables: dict, paging: tuple) -> dict:
     size = min(chunk[1] for chunk in tables[name]) if fill["fillChunks"] else None
     # classify the cells of the chunk grid
     cells = states(
-        table=tables[name], shape=(rows, cols), tile=(tileRows, tileCols), raw=raw, fill=size
+        table=tables[name],
+        shape=(rows, cols),
+        tile=(tileRows, tileCols),
+        raw=raw,
+        fill=size,
+        pageSize=pageSize,
     )
     # hand off the description
     return {
@@ -443,6 +509,7 @@ def describe(*, dataset, tables: dict, paging: tuple) -> dict:
         "record": record,
         "nodata": fill,
         "states": cells,
+        "strip": strip(tables=tables, name=name, pageSize=pageSize),
     }
 
 
