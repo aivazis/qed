@@ -158,8 +158,9 @@ class Store(qed.shells.command, family="qed.cli.ux"):
                 # build a live instance with file handles of its own; the derived name
                 # keeps it clear of the passive source it stands in for
                 live = factory(name=f"{name}.local", **recipe.config)
-                # and make first contact
-                live.open()
+                # and make first contact; the copy only lends its payload to the twin, which
+                # keeps its own channels, so it has no use for statistics of its own
+                live.open(measure=False)
             # if anything goes wrong
             except Exception as error:
                 # make a channel
