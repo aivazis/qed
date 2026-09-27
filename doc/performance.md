@@ -171,7 +171,10 @@ granules of each of the `--kinds` of product, spread evenly over the dates on of
 `--bucket`, each in a fresh process, `--workers` at a time. Every granule gets a folder of its own,
 and `census.csv` collects the summary of every dataset with its kind, granule, size, and processing
 version; the run log reports the medians of each kind. Only metadata is read, so a census next to
-the data is cheap.
+the data is cheap. With `--scrape` pointing at a scrape of the bucket, a folder with a list of
+granule ids for each kind named after its reader, and `--cycle` naming a repeat cycle, the census
+takes the granules of that cycle from the scrape instead of listing the bucket, all of them unless
+`--quota` asks for fewer, and keeps only the per dataset summaries of each.
 
 `measure pyramid` builds the pyramid of a dataset, and of the rasters it is read with, from
 scratch on a crew of each of the `--crews` sizes. The build is the one the server runs when a client
