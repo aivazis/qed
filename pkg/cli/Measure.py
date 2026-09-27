@@ -166,9 +166,9 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     results = qed.properties.path()
     results.default = None
     results.doc = (
-        "the directory that collects the results of the s3 program or the census; unset names "
-        "the one of a census after its products and its cycle, e.g. census-rslc-31, and the one "
-        "of the s3 program after the host and the time"
+        "the directory that collects the results of the s3 program, unset names one after the "
+        "host and the time; for a census, the directory that holds a folder for each product, "
+        "named after the product and the cycle, e.g. census-rslc-31, unset is the current one"
     )
 
     # the census of the layout of the NISAR products in a bucket
@@ -843,17 +843,32 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     def census(self, plexus, **kwds):
         """
         Measure the page layout of the granules of one repeat {cycle} in a {scrape} of {bucket},
-        all of them or {quota} of each product, for the products my {only} restriction allows,
-        or all of them, and collect the summaries of every dataset in one table, so the
-        structure of the products can be compared across products and processing versions
+        all of them or {quota} of each product, for the products my {only} restriction names, or
+        for every list in the scrape that qed has a reader for, and collect the summaries of every
+        dataset in one table, so the structure of the products can be compared across products
+        and processing versions
 
         Each granule is measured by {measure pages} in a fresh process, {workers} at a time;
         only metadata is read, so the census is cheap next to the data
         """
         # make a channel for the problems that stop the census before it starts
         error = journal.error("qed.measure.census")
-        # the products to measure, named after their readers
-        products = list(self.only) or list(FLAVORS)
+        # the granules come from a scrape
+        if self.scrape is None:
+            # so a census without one is a mistake
+            error.log("the census takes its granules from a scrape; point {scrape} at one")
+            # and bail
+            return 1
+        # whose lists are named after their products
+        lists = sorted(
+            name.removesuffix(".txt")
+            for name in os.listdir(str(self.scrape))
+            if name.endswith(".txt")
+        )
+        # the products to measure: the ones named, or every list qed has a reader for
+        products = list(self.only) or [name for name in lists if name in FLAVORS]
+        # and the lists left out, when nothing was named
+        ignored = [] if self.only else [name for name in lists if name not in FLAVORS]
         # a product without a reader is a mistake
         unknown = [product for product in products if product not in FLAVORS]
         # so say which
@@ -862,11 +877,19 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             error.log(f"no reader for {', '.join(unknown)}; the readers are {', '.join(FLAVORS)}")
             # and bail
             return 1
-        # the granules come from a scrape
-        if self.scrape is None:
-            # so a census without one is a mistake
-            error.log("the census takes its granules from a scrape; point {scrape} at one")
+        # so is one the scrape has no list for
+        unlisted = [product for product in products if product not in lists]
+        # so say which
+        if unlisted:
+            # and where the lists are
+            error.log(f"the scrape '{self.scrape}' has no list for {', '.join(unlisted)}")
             # and bail
+            return 1
+        # and a scrape with nothing to measure
+        if not products:
+            # is a mistake too
+            error.log(f"the scrape '{self.scrape}' has no list of a product qed can read")
+            # so bail
             return 1
         # which is read one cycle at a time
         if self.cycle is None:
@@ -897,33 +920,61 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             error.log("there is no 'qed' on the path to run the measurements")
             # or there is nothing to measure with
             return 1
-        # the directory that collects the results
-        results = self._results(kind="census", name=f"census-{'-'.join(products)}-{self.cycle}")
-        # a directory that exists already would mix records from different runs
-        if results.exists():
-            # so refuse it
-            error.log(f"'{results}' already exists")
+        # the folder that holds the folders of the products: my {results}, or the current one
+        parent = self.results.resolve() if self.results is not None else qed.primitives.path.cwd()
+        # the folder of each product
+        folders = {product: parent / f"census-{product}-{self.cycle}" for product in products}
+        # a folder that exists already would mix records from different runs; check them all
+        # before any of the work starts
+        taken = [str(folder) for folder in folders.values() if folder.exists()]
+        # so refuse them
+        if taken:
+            # say which
+            error.log(f"already there: {', '.join(taken)}")
             # and bail
             return 1
-        # make it
-        results.mkdir(parents=True)
+        # the products whose census did not complete
+        incomplete = []
+        # go through the products, one after the other
+        for product in products:
+            # take the census of each one in its own folder
+            if self._tour(
+                product=product,
+                results=folders[product],
+                ignored=ignored if product is products[0] else [],
+            ):
+                # and note the ones that did not complete
+                incomplete.append(product)
+        # report failures through the exit status too
+        return 1 if incomplete else 0
 
-        # the clock of the whole census
-        total = qed.timers.wall("qed.measure.census.total")
+    def _tour(self, product, results, ignored):
+        """
+        Take the census of one {product} in the {results} folder, and report the {ignored}
+        lists of the scrape; hand back whether anything failed
+        """
+        # make the folder
+        results.mkdir(parents=True)
+        # the clock of the whole census of this product
+        total = qed.timers.wall(f"qed.measure.census.total.{product}")
         # started afresh
         total.reset()
         total.start()
         # make a channel for the progress of the census
         channel = journal.info("qed.measure.census")
-        # which reaches the console and the run log alike
+        # which reaches the console and the run log of this product alike
         channel.device = journal.tee(paths=[str(results / "run.log")])
         # say what is about to happen
         channel.line(f"on {self.pyre_host.nickname}")
         channel.line(
-            f"{'every' if self.quota is None else self.quota} granule(s) of each of "
-            f"{', '.join(products)}, cycle {self.cycle} of the scrape {self.scrape}"
+            f"{'every' if self.quota is None else self.quota} granule(s) of {product}, "
+            f"cycle {self.cycle} of the scrape {self.scrape}"
         )
         channel.line(f"from {self.bucket}")
+        # the lists of the scrape left out, so nothing goes missing silently
+        if ignored:
+            # say which
+            channel.line(f"lists without a reader, left out: {', '.join(ignored)}")
         channel.line(f"results in {results}")
         # flush
         channel.log()
@@ -932,25 +983,13 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
 
         # split the bucket from the prefix
         bucket, _, prefix = self.bucket.removeprefix("s3://").partition("/")
+        # choose the granules
+        chosen = self._scraped(channel=channel, prefix=prefix, product=product)
         # the granules to measure, as (product, granule, key)
-        jobs = []
-        # go through the products
-        for product in products:
-            # a product the scrape has no list for
-            if not (self.scrape / f"{product}.txt").exists():
-                # has nothing to measure
-                channel.line(f"{product}: the scrape has no list")
-                # so move on
-                continue
-            # choose its granules
-            chosen = self._scraped(channel=channel, prefix=prefix, product=product)
-            # and add them to the pile
-            jobs.extend((product, granule, key) for granule, key in chosen)
-        # flush
-        channel.log()
+        jobs = [(product, granule, key) for granule, key in chosen]
 
         # the clock of the measurements
-        clock = qed.timers.wall("qed.measure.census.measure")
+        clock = qed.timers.wall(f"qed.measure.census.measure.{product}")
         # started afresh
         clock.reset()
         clock.start()
@@ -967,7 +1006,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
 
         # gather the summaries into one table
         rows = self._gather(results=results, jobs=jobs)
-        # and report them by kind
+        # and report them
         self._tally(channel=channel, rows=rows)
         # list whatever did not complete, so a partial census is never mistaken for a whole
         for label in failures:
@@ -984,8 +1023,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         channel.log()
         # pack the results
         self._pack(channel=channel, results=results)
-        # report failures through the exit status too
-        return 1 if failures else 0
+        # hand back whether anything failed
+        return bool(failures)
 
     # implementation details: page occupancy
     def _rasters(self, plexus):
@@ -2141,19 +2180,15 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # otherwise, it is
         return True
 
-    def _results(self, kind="measure", name=None):
+    def _results(self, kind="measure"):
         """
-        The directory that collects the results: my {results}, or the {name} the run gives it,
-        or one named after the {kind} of run, the host, and the time
+        The directory that collects the results: my {results}, or one named after the {kind}
+        of run, the host, and the time
         """
         # if one was named
         if self.results is not None:
             # use it
             return self.results.resolve()
-        # if the run knows what to call it
-        if name is not None:
-            # use that, in the current directory
-            return qed.primitives.path(name).resolve()
         # otherwise, stamp one with the kind of run, the host, and the time
         stamp = f"qed-{kind}-{self.pyre_host.nickname}-{datetime.datetime.now():%Y%m%d-%H%M%S}"
         # in the current directory
@@ -2567,7 +2602,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # and report it
         channel.log(
             f"{product}: parsed {ids} ids in {clock.sec():.1f} s; {len(found)} in cycle "
-            f"{self.cycle}, {unrecognized} not recognized"
+            f"{self.cycle}; {unrecognized} of all the ids in the list not recognized"
         )
         # in the order they were acquired
         found.sort()
