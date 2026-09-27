@@ -9,6 +9,10 @@ const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+// the kind of build: mm says so through {NODE_ENV}, {production} for a deployment and anything
+// else, or nothing, for development
+const production = process.env.NODE_ENV === "production"
+
 // local geography
 const rootDir = __dirname
 const sourceDir = path.join(rootDir, 'client')
@@ -18,6 +22,9 @@ const generatedDir = path.join(rootDir, 'generated')
 
 // the configuration
 module.exports = {
+    // optimized for delivery, or for development
+    mode: production ? "production" : "development",
+
     // the main entry point
     entry: {
         qed: path.join(sourceDir, "qed.js"),
@@ -29,8 +36,8 @@ module.exports = {
         filename: '[name].js',
     },
 
-    // source maps
-    devtool: 'inline-source-map',
+    // source maps, which a development build carries inline and a production build leaves out
+    devtool: production ? false : 'inline-source-map',
 
     // loader rules
     module: {
