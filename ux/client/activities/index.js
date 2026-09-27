@@ -19,6 +19,7 @@ export { Data } from './data'
 export { Explore } from './explore'
 export { Help } from './help'
 export { Kill } from './kill'
+export { Quality } from './quality'
 
 
 // end of file
