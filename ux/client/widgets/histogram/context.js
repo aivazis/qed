@@ -29,9 +29,11 @@ export const Provider = ({ config, children }) => {
     const {
         counts, domain = [0, 1], width = 240, height = 80, log = false,
         label = null, marker = null, format = edge => `${Math.round(100 * edge)}%`,
+        ticks = true,
     } = config
-    // the room below the bars for the tick labels, and above them for the tallest count
-    const gutter = 14
+    // the room below the bars for the tick labels, if there are any, and above them for the
+    // tallest count
+    const gutter = ticks ? 14 : 2
     const headroom = 4
     // the height of the bars at their tallest
     const reach = height - gutter - headroom
@@ -43,13 +45,16 @@ export const Provider = ({ config, children }) => {
     const scale = count => tallest === 0 ? 0 : log
         ? reach * Math.log1p(count) / Math.log1p(tallest)
         : reach * count / tallest
-    // the position of a value of the domain along the axis
-    const at = value => width * (value - domain[0]) / (domain[1] - domain[0])
+    // the extent of the domain
+    const span = domain[1] - domain[0]
+    // the position of a value of the domain along the axis; a domain of a single value puts
+    // everything in the middle
+    const at = value => span > 0 ? width * (value - domain[0]) / span : width / 2
     // the baseline
     const base = headroom + reach
     // assemble
     const value = {
-        counts, domain, width, height, log, label, marker, format,
+        counts, domain, width, height, log, label, marker, format, ticks,
         gutter, headroom, reach, bin, tallest, scale, at, base,
     }
     // provide
