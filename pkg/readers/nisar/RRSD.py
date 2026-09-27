@@ -96,8 +96,24 @@ class RRSD(H5, family="qed.readers.nisar.rrsd"):
                     for rxPol in rxPolarizations:
                         # assemble the combined polarization marker
                         pol = f"{txPol}{rxPol}"
-                        #   open the group
-                        rx = getattr(tx, f"rx{rxPol}")
+                        # attempt to
+                        try:
+                            # open the group
+                            rx = getattr(tx, f"rx{rxPol}")
+                        # the product may list a receive polarization it holds no group for
+                        except AttributeError:
+                            # so grab a channel
+                            channel = journal.warning("qed.nisar.rrsd")
+                            # and complain
+                            channel.line(f"while exploring '{self.pyre_name}'")
+                            channel.line(
+                                f"no 'rx{rxPol}' group for the '{txPol}' transmit polarization "
+                                f"in the '{frequency}' swath"
+                            )
+                            # flush
+                            channel.log()
+                            # and move on
+                            continue
                         # attempt to
                         try:
                             # get the dataset
