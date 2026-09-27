@@ -40,7 +40,7 @@ from pyre.ipc.Pipe import Pipe
 from pyre.units.SI import second
 
 # the NISAR readers the programs that measure products in a bucket know about
-FLAVORS = ("rslc", "rifg", "runw", "roff", "gslc", "gunw", "gcov", "goff")
+FLAVORS = ("rrsd", "rslc", "rifg", "runw", "roff", "gslc", "gunw", "gcov", "goff")
 
 
 # declaration
@@ -1531,11 +1531,17 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         known = set()
         # go through the datasets of the reader
         for dataset in reader.datasets:
-            # and record the chunks that were written
-            tables[dataset.pyre_name] = [
-                (chunk.address, chunk.bytes, tuple(chunk.origin))
-                for chunk in dataset.data.dataset.chunkTable()
-            ]
+            # the dataset, as the library sees it
+            h5 = dataset.data.dataset
+            # the chunks that were written
+            table = h5.chunkTable()
+            # record them, or, for a dataset that is not stored in chunks, its one extent, which
+            # is the whole raster
+            tables[dataset.pyre_name] = (
+                [(chunk.address, chunk.bytes, tuple(chunk.origin)) for chunk in table]
+                if table is not None
+                else [(h5.offset, h5.disksize, (0, 0))] if h5.disksize else []
+            )
             # remember where they are
             known.update(address for address, _, _ in tables[dataset.pyre_name])
         # open the file again, with the same credentials; this reads nothing but metadata
@@ -1600,9 +1606,12 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         """
         # unpack the layout
         pageSize, strategy, fileBytes = layout
-        # unpack the extent and the tile
+        # unpack the extent
         rows, cols = tuple(dataset.shape)
-        tileRows, tileCols = tuple(dataset.tile)
+        # a dataset stored in chunks is tiled by them, and any other is one tile
+        chunked = dataset.data.dataset.dcpl.layout.name == "chunked"
+        # unpack the tile
+        tileRows, tileCols = tuple(dataset.tile) if chunked else (rows, cols)
         # the size of a chunk before the filters had their way with it
         raw = tileRows * tileCols * dataset.data.disktype.bytes
         # the number of chunks the tiling describes
@@ -1823,8 +1832,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             "level": None,
             "encode": None,
         }
-        # without chunks
-        if not table:
+        # without chunks, or with a dataset that is not stored in chunks
+        if not table or h5.dcpl.layout.name != "chunked":
             # there is nothing else to say
             return nodata
         # the size of a cell
