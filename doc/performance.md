@@ -205,7 +205,7 @@ in `--results` or else in the current directory, and the products are measured o
 version, and the run log reports each step as it ends, with its time, and the medians of each
 product. Only metadata is read, so a census next to the data is cheap.
 
-Three commands analyze what the census and the scrape leave behind, and write their tables to the
+Four commands analyze what the census and the scrape leave behind, and write their tables to the
 log and, as Markdown, to a file in the current directory. `measure cycles --scrape=...` counts the
 granules of every product in the scrape by repeat cycle, marks the cycles every product has, and,
 with `--check=N`, looks up N granules of each product in each of those cycles in the bucket to see
@@ -216,7 +216,13 @@ the product, and the pooled histograms; it writes `digest-<census>.md`. `measure
 --inputs=<first>,<second>` pairs the rasters of the same name in the products of the same
 acquisition in two censuses, and reports the medians of every measure on both sides and the share of
 the pairs in which the second is worse, for all the pairs and by frequency; it writes
-`compare-<first>-<second>.md`. The analyses themselves are in `qed.measurements`.
+`compare-<first>-<second>.md`. `measure waste --inputs=...` goes through the chunk records of each
+census and counts, raster by raster, the chunks that hold nothing but the fill: those with the
+stored size of the smallest chunk of their raster, when that one is nearly empty and, where the
+census looked, holds a single value. These chunks would not have been written had the writer
+declared the fill and skipped them. The command reports their number and bytes, and, from the
+times the census took, the seconds spent encoding them once and decoding them on every read of the
+whole raster; it writes `waste-<census>.md`. The analyses themselves are in `qed.measurements`.
 
 `measure pyramid` builds the pyramid of a dataset, and of the rasters it is read with, from
 scratch on a crew of each of the `--crews` sizes. The build is the one the server runs when a client
