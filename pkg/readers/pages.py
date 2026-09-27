@@ -678,24 +678,15 @@ def fetch(*, h5, origin: tuple, cell: int) -> tuple:
 
 def attribute(*, h5, name: str):
     """
-    The value of the attribute {name} of the dataset {h5}, when it has one that is a number
+    The value of the attribute {name} of the dataset {h5} in its own terms, or {None} when it has
+    no such attribute
     """
     # a dataset without the attribute
     if not h5.hasAttribute(name):
         # has no value for it
         return None
-    # get it
-    attribute = h5.getAttribute(name)
-    # an integer
-    if attribute.cell == attribute.cell.int:
-        # is read as one
-        return attribute.int()
-    # a floating point number
-    if attribute.cell == attribute.cell.float:
-        # is read as one
-        return attribute.double()
-    # anything else, e.g. a complex number, is beyond the bindings
-    return "unreadable"
+    # otherwise, read it in its own terms
+    return h5.getAttribute(name).value
 
 
 def histogram(*, values: list) -> list:
