@@ -170,6 +170,22 @@ with tempfile.TemporaryDirectory() as folder:
     # and HV has none
     assert tally["L.A.HV"]["fill"] == 0
 
+# the reference data of the second census: its product, its cycle, and its measures
+reference = census.reference(name="census-31-gslc", rows=[{**r, "kind": "gslc"} for r in second])
+assert (reference["product"], reference["cycle"]) == ("gslc", 31)
+assert (reference["rasters"], reference["granules"]) == (3, 1)
+# the read amplification of the three rasters, 1.4, 1.3, and 1.7
+once = reference["measures"]["once"]
+assert abs(once["median"] - 1.4) < 1e-12 and once["max"] == 1.7 and once["count"] == 3
+# spread over bins from the smallest to the 90th percentile, which of three values is the largest
+assert (once["low"], once["high"]) == (1.3, 1.7)
+assert sum(once["bins"]) == 3 and once["bins"][0] == 1 and once["bins"][-1] == 1
+# the rasters are also summarized by their kind, the last part of their name
+assert set(reference["groups"]) == {"HH", "HV"}
+assert reference["groups"]["HH"]["rasters"] == 2
+# a measure no raster recorded is left out
+assert "decode_ms" not in reference["measures"]
+
 # the percentiles of ten numbers
 p10, median, p90, top = census.percentiles(numbers=[float(i) for i in range(10)])
 assert (p10, median, p90, top) == (1.0, 4.5, 9.0, 9.0)

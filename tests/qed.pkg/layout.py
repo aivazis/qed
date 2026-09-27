@@ -84,6 +84,13 @@ assert view["hdf5"] == "0.0" and view["holds"] == "nan" and view["agrees"] is Fa
 # and the grid carries the names of the states
 assert Layout.resolve_grid(described)["states"] == list(qed.readers.pages.STATES)
 
+# the measures of the raster, by the names the census gives them, cover every measure of a census
+mine = qed.measurements.census.measures(description=described)
+assert {name for name, _, _ in qed.measurements.census.MEASURES} <= set(mine)
+# and agree with the description
+assert mine["fill_chunks"] == fill["fillChunks"]
+assert mine["unwritten"] == 0
+
 # the mask uses 255 for the places outside the swath, which the library does not know either
 fill = qed.readers.pages.describe(dataset=mask, tables=tables, paging=paging)["nodata"]
 assert fill["hdf5"] == 0 and fill["cf"] == 255 and fill["found"] == 255
