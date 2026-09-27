@@ -8,12 +8,30 @@
 # externals
 import collections
 import statistics
+import struct
+import sys
+import zlib
 
 # the share of its raw size below which a written chunk counts as nearly empty: such a chunk
 # holds almost nothing but the fill value, and costs a reader as much as a full one
 NEARLY_EMPTY = 0.01
 # the number of bins of the histograms, each covering an equal share of the range
 BINS = 10
+# the layout of a cell, by the name of its pyre memory cell
+LAYOUTS = {
+    "int8": "b",
+    "uint8": "B",
+    "int16": "h",
+    "uint16": "H",
+    "int32": "i",
+    "uint32": "I",
+    "int64": "q",
+    "uint64": "Q",
+    "float32": "f",
+    "float64": "d",
+    "complex64": "ff",
+    "complex128": "dd",
+}
 
 
 def occupancy(*, tables: dict, name: str, pageSize: int, raw: int, tile: tuple, grid: int) -> dict:
@@ -45,6 +63,7 @@ def occupancy(*, tables: dict, name: str, pageSize: int, raw: int, tile: tuple, 
         "largest": sizes[-1] if sizes else None,
         "compression": raw * len(sizes) / stored if stored else None,
         "empty": sum(1 for size in sizes if size < NEARLY_EMPTY * raw),
+        "emptyStored": sum(size for size in sizes if size < NEARLY_EMPTY * raw),
         "sizes": histogram(values=[size / raw for size in sizes]),
         "pageSize": pageSize,
     }
@@ -68,6 +87,13 @@ def occupancy(*, tables: dict, name: str, pageSize: int, raw: int, tile: tuple, 
                 crowd[page] += 1
     # the pages this dataset touches
     mine = sorted(page for page, tenants in pages.items() if name in tenants)
+    # and the ones among them that hold at least one of its chunks that is not nearly empty
+    substantive = {
+        page
+        for address, size, _ in chunks
+        if size >= NEARLY_EMPTY * raw
+        for page, _ in apportion(address=address, size=size, pageSize=pageSize)
+    }
     # the number of pages each of its chunks spans
     spans = [
         (address + size - 1) // pageSize - address // pageSize + 1 for address, size, _ in chunks
@@ -102,6 +128,8 @@ def occupancy(*, tables: dict, name: str, pageSize: int, raw: int, tile: tuple, 
             "alone": sum(spans) * pageSize / stored,
             # reading every chunk, with each page fetched once
             "once": len(mine) * pageSize / stored,
+            # the pages a reader of the dataset fetches for nothing but its nearly empty chunks
+            "emptyPages": len(mine) - len(substantive),
             # and reading it together with its partners, with each page fetched once
             "joint": len(joint) * pageSize / together,
             "partners": dict(partners),
@@ -164,6 +192,133 @@ def locality(*, chunks: list, pageSize: int, tile: tuple):
         neighbors += (abs(r1 - r0), abs(c1 - c0)) in ((rows, 0), (0, cols))
     # hand off the share, if there is one
     return neighbors / pairs if pairs else None
+
+
+def decode(*, stored: bytes, filters: list, mask: int, cell: int) -> bytes:
+    """
+    Undo the {filters} a chunk of cells {cell} bytes wide went through on its way to its
+    {stored} bytes, skipping the ones whose bit is set in the filter {mask}, or return {None}
+    when one of them is a filter this function does not know how to undo
+    """
+    # the bytes, as they come through each stage
+    data = stored
+    # the filters were applied in order, so undo them in reverse
+    for index, name in reversed(list(enumerate(filters))):
+        # the library skips a filter that fails on a chunk and says so in the mask
+        if mask & (1 << index):
+            # so this one has nothing to undo
+            continue
+        # deflate
+        if name == "deflate":
+            # inflates
+            data = zlib.decompress(data)
+            # and moves on
+            continue
+        # the shuffle
+        if name == "shuffle":
+            # gathered byte k of every cell into plane k, so interleave the planes again
+            data = unshuffle(data=data, cell=cell)
+            # and move on
+            continue
+        # anything else is beyond me
+        return None
+    # hand off the cells
+    return data
+
+
+def encode(*, data: bytes, filters: list, cell: int, level: int) -> bytes:
+    """
+    Pass the chunk {data}, of cells {cell} bytes wide, through {filters} in order, deflating at
+    {level}, or return {None} when one of them is a filter this function does not know
+    """
+    # the bytes, as they come through each stage
+    encoded = data
+    # go through the filters in order
+    for name in filters:
+        # deflate
+        if name == "deflate":
+            # compresses
+            encoded = zlib.compress(encoded, level)
+            # and moves on
+            continue
+        # the shuffle
+        if name == "shuffle":
+            # gathers byte k of every cell into plane k
+            encoded = shuffle(data=encoded, cell=cell)
+            # and moves on
+            continue
+        # anything else is beyond me
+        return None
+    # hand off the stored bytes
+    return encoded
+
+
+def shuffle(*, data: bytes, cell: int) -> bytes:
+    """
+    Shuffle the bytes of {data}, whose cells are {cell} bytes wide: byte k of every cell goes to
+    plane k, and any bytes past the last whole cell stay as they are
+    """
+    # single byte cells are left alone
+    if cell == 1:
+        # so there is nothing to do
+        return data
+    # the number of whole cells
+    count = len(data) // cell
+    # gather the planes, and keep the leftover bytes at the end
+    return b"".join(data[k : cell * count : cell] for k in range(cell)) + data[cell * count :]
+
+
+def unshuffle(*, data: bytes, cell: int) -> bytes:
+    """
+    Undo the byte shuffle of {data}, whose cells are {cell} bytes wide: the shuffle stores byte
+    k of every cell in plane k, and any bytes past the last whole cell as they were
+    """
+    # single byte cells are left alone by the shuffle
+    if cell == 1:
+        # so there is nothing to do
+        return data
+    # the number of whole cells
+    count = len(data) // cell
+    # the cells, reassembled
+    cells = bytearray(len(data))
+    # go through the planes, one per byte of a cell
+    for k in range(cell):
+        # and put each one back in its place: every {cell} bytes, starting at byte {k}
+        cells[k : cell * count : cell] = data[k * count : (k + 1) * count]
+    # the leftover bytes stay where they were
+    cells[cell * count :] = data[cell * count :]
+    # hand off the cells
+    return bytes(cells)
+
+
+def uniform(*, data: bytes, cell: int) -> bytes:
+    """
+    The one cell, {cell} bytes wide, that every cell of {data} repeats, or {None} if they
+    differ
+    """
+    # the first cell
+    first = data[:cell]
+    # is the answer if repeating it reproduces the data
+    return first if first * (len(data) // cell) == data else None
+
+
+def interpret(*, data: bytes, cell: str, swapped: bool = False):
+    """
+    The value of the one {cell} in {data}, whose bytes are in the order the host lacks when
+    {swapped}, or {None} for a cell whose layout is unknown
+    """
+    # the layout of the cell
+    layout = LAYOUTS.get(cell)
+    # an unknown cell
+    if layout is None:
+        # has no value i can tell
+        return None
+    # the byte order: the host's, unless swapped
+    order = "<" if (sys.byteorder == "little") != swapped else ">"
+    # unpack the parts
+    parts = struct.unpack(order + layout, data)
+    # a pair of parts is a complex number, and a lone part is the value
+    return complex(*parts) if len(parts) == 2 else parts[0]
 
 
 def histogram(*, values: list) -> list:
