@@ -14,6 +14,7 @@ import journal
 
 # types
 from .datasets.ProductMetadata import ProductMetadata
+from .layout.Layout import Layout
 from .QED import QED
 from .datasets.Sample import Sample
 from .datasets.Shape import Shape
@@ -42,6 +43,8 @@ class Query(graphene.ObjectType):
     sample = graphene.Field(
         Sample, dataset=graphene.ID(), sample=graphene.Int(), line=graphene.Int()
     )
+    # how a dataset sits in its file
+    layout = graphene.Field(Layout, dataset=graphene.String(required=True))
     # generation of shape guesses from a raster size
     guessShape = graphene.Field(
         graphene.List(Shape), size=graphene.String(), aspect=graphene.String()
@@ -207,6 +210,23 @@ class Query(graphene.ObjectType):
         }
         # and hand it to the sample resolver
         return context
+
+    # layouts
+    @staticmethod
+    def resolve_layout(root, info, dataset, **kwds):
+        """
+        Describe how a dataset sits in its file
+        """
+        # grab the store
+        store = info.context["store"]
+        # resolve the dataset
+        found = store.dataset(name=dataset)
+        # a name the store does not know
+        if found is None:
+            # has no layout
+            return None
+        # otherwise, ask the store, which reads the file the first time
+        return store.layout(dataset=found)
 
     # the viz controls
     @staticmethod
