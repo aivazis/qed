@@ -167,7 +167,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     results.default = None
     results.doc = (
         "the directory that collects the results of the s3 program or the census; unset names "
-        "one after the kind of run, the host, and the time"
+        "the one of a census after its products and its cycle, e.g. census-rslc-31, and the one "
+        "of the s3 program after the host and the time"
     )
 
     # the census of the layout of the NISAR products in a bucket
@@ -897,7 +898,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # or there is nothing to measure with
             return 1
         # the directory that collects the results
-        results = self._results(kind="census")
+        results = self._results(kind="census", name=f"census-{'-'.join(products)}-{self.cycle}")
         # a directory that exists already would mix records from different runs
         if results.exists():
             # so refuse it
@@ -2140,15 +2141,19 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # otherwise, it is
         return True
 
-    def _results(self, kind="measure"):
+    def _results(self, kind="measure", name=None):
         """
-        The directory that collects the results: my {results}, or one named after the {kind}
-        of run, the host, and the time
+        The directory that collects the results: my {results}, or the {name} the run gives it,
+        or one named after the {kind} of run, the host, and the time
         """
         # if one was named
         if self.results is not None:
             # use it
             return self.results.resolve()
+        # if the run knows what to call it
+        if name is not None:
+            # use that, in the current directory
+            return qed.primitives.path(name).resolve()
         # otherwise, stamp one with the kind of run, the host, and the time
         stamp = f"qed-{kind}-{self.pyre_host.nickname}-{datetime.datetime.now():%Y%m%d-%H%M%S}"
         # in the current directory
