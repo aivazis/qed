@@ -37,6 +37,13 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     pyramids.default = True
     pyramids.doc = "build the reduced resolution levels of the datasets clients look at"
 
+    census = qed.properties.path()
+    census.default = None
+    census.doc = (
+        "the folder with the census digests the quality panel compares a dataset against; "
+        "unset, or missing, the panel makes no comparison"
+    )
+
     # the pile of known datasets
     datasets = qed.properties.list(schema=qed.protocols.reader())
     datasets.aliases = {"ds"}
