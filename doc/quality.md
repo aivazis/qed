@@ -7,7 +7,11 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 
 # quality: how a product sits in its file
 
-> Status: **design**, for discussion. Nothing described here is built yet.
+> Status: **built in part** (qed#110). The measurements, the `layout` query, the census reference,
+> and the panel with its scorecard, census comparison, chunk map, page strip, their linking, and the
+> histograms are in place; the read cost overlay, the `window.qed.quality` namespace, and a
+> Playwright behavior spec are not. The sections below keep the design as it was proposed, with
+> notes where the build differs.
 
 What a tile costs depends as much on how a product was written as on the reader: how its
 chunks sit on the pages of the file, which datasets share those pages, whether the chunks that
@@ -24,8 +28,8 @@ writers of the products, for whom the pictures make the recommendations of the c
 
 ### The measurements
 
-Everything the panel draws is already computed by `qed.readers.pages` and `Measure._nodata`, for
-local products and products in S3 alike:
+Everything the panel draws is computed by `qed.readers.pages`, which `qed measure pages` uses as
+well, for local products and products in S3 alike:
 
 - **the chunk table of every dataset in the file**: the address, stored size, and origin of each
   written chunk, and the shape of the chunk grid, which also says which chunks were never written;
@@ -40,18 +44,31 @@ Only the fill check reads data, one to three pages per raster.
 
 ### The query
 
-A GraphQL field on a dataset, `layout`, resolved lazily when the panel asks for it, and cached on
-the dataset once computed, since a product's layout does not change while it is open:
+A top level GraphQL query, `layout(dataset: String!)`, beside the pixel `sample`. The store
+computes the description the first time it is asked for, through `realize`, which opens the
+product in the server process the way the pixel peek does, and keeps it, since the layout of a
+product does not change while it is connected; disconnecting the source lets go of it. The walk
+of the storage of the file is kept per product, so the other rasters of the same product cost only
+their fill check. A product that is not an HDF5 file has no layout, and the query answers `null`.
 
-- `summary`: the record of `occupancy`, plus the fill;
-- `chunks`: parallel arrays of the chunk grid coordinates, stored sizes, pages, and a state per
-  chunk (`unwritten`, `fill`, `sliver`, `data`, where a sliver is a nearly empty chunk that holds
-  some data);
-- `pages`: for each page of the file, the bytes of each dataset on it, as a list of
-  `(dataset, bytes)` pairs, and whether it holds any chunk of fill; the pages that hold no raw data
-  are metadata or free space;
-- `datasets`: the names of the datasets on the pages, including the ones the reader does not know,
-  under their paths in the file.
+`Layout` carries:
+
+- the storage settings: the file space strategy, the page size, zero for a file without pages, the
+  size of the file, the shape of the raster and of its chunks, its cell, and its filters;
+- `summary`: the occupancy record: the chunks written and nearly empty, the bytes they store, the
+  three amplifications, the fill of the pages, the locality, and the histograms;
+- `partners`: the datasets that share the pages of the raster, and their bytes on them;
+- `fill`: the fill the library knows about, the `_FillValue` attribute, what the smallest chunk
+  holds, whether the two agree, the chunks that hold nothing but the fill, and the time to decode,
+  make, and encode one;
+- `grid`: for every cell of the chunk grid, in row major order, its state (`unwritten`, `fill`,
+  `sliver`, `data`), the stored size of its chunk, and the page the chunk starts on; a sliver is a
+  nearly empty chunk that is not all fill;
+- `strip`: for every page the raster lands on, in file order, the bytes of the raster, the number
+  of its chunks, the bytes of every other dataset, and the other dataset with the most bytes on it;
+  `null` for a file without pages;
+- `census`: the comparison against the rasters of the same kind in the latest census of the
+  product, `null` without one.
 
 A large GSLC has about 22,500 chunks per raster and 3,000 pages per raster; as parallel arrays of
 integers that is a few hundred kilobytes, delivered once.
@@ -104,7 +121,9 @@ frame never written and a fringe of fill along the edges.
 A toggle shades the data chunks by compression ratio instead, which shows where the scene is
 busy and where it is uniform.
 
-**The file map.** The pages of the file, one cell per page, laid out in rows of a fixed width in
+**The file map.** *Built as the page strip, per raster: the pages the raster lands on rather than
+every page of the file, each filled with the bytes of the raster, of the other datasets, and the
+room left over; hovering a page names what it holds.* The pages of the file, one cell per page, laid out in rows of a fixed width in
 file order. Each cell is a small stacked bar of the datasets on it, in the colors of a legend;
 pages that hold chunks of fill are hatched, and pages that hold no raw data are grey. It is the
 view that shows interleaving: a GSLC whose HH and HV polarizations were written at the same time
@@ -139,12 +158,14 @@ are poor locality. Hovering a page on the file map outlines its chunks on the ch
   +--------------------------+
 ```
 
-**The read cost overlay.** The chunk map colored by what fetching each chunk costs a reader that
-fetches whole pages: the bytes of its page over its own bytes, alone or together with its page
-mates. A second mode applies it to the viewport: for the tiles on screen, the bytes fetched
+**The read cost overlay.** *Not built yet.* The chunk map colored by what fetching each chunk costs
+a reader that fetches whole pages: the bytes of its page over its own bytes, alone or together with
+its page mates. A second mode applies it to the viewport: for the tiles on screen, the bytes fetched
 against the bytes needed, which connects the layout to the wait the user sees.
 
-**The scorecard.** One row per raster of the product, with a gauge per measure: the read
+**The scorecard.** *Built as two trays for the raster in view: `layout`, with its numbers and the
+fill check, and `census`, with a sparkline per measure, drawn by the `widgets/histogram` widget,
+marked where the raster falls.* One row per raster of the product, with a gauge per measure: the read
 amplification alone and together, the fill of its pages, the locality, the shares of the grid
 unwritten and of the written chunks that are fill, and a badge that says whether the fill the
 library knows about is what the fill chunks hold. Behind each gauge, a sparkline of the census
@@ -167,50 +188,56 @@ each page the raster fills, as in the progress report, drawn live for this produ
 
 ### Markup and automation
 
-The panel carries `data-qed-panel="quality"`; the maps carry `data-qed-view` with their names,
-and the hovered chunk and page are reflected in `data-qed-chunk` and `data-qed-page`, so the
-Playwright suite can drive the linking without coordinates. `window.qed` gains a `quality`
-namespace: `quality.layout(dataset)` returns the query, and `quality.hover(chunk)` drives the
-linked highlight.
+The panel carries `data-qed-panel="quality"`; the scorecard and the census are regions with a
+`data-qed-measure` on each row; the maps carry `data-qed-view` with their names (`chunk-map`,
+`page-strip`), the chunk under the pointer is reflected in `data-qed-chunk` and the page in focus
+in `data-qed-page`; the bars of the histograms carry `data-qed-bin` and `data-qed-count`. Not built
+yet: a `quality` namespace on `window.qed`, with `quality.layout(dataset)` returning the query and
+`quality.hover(chunk)` driving the linked highlight.
 
 ## Tests
 
-- `tests/qed.pkg/`: the chunk states and the page occupancy for small synthetic products, one
-  with a declared fill and unwritten chunks, one with written fill and an undeclared fill, and one
-  whose rasters are interleaved; the same fixtures the census tests use.
-- `tests/qed.ux.playwright/behavior/quality.spec.ts`: the panel mounts, the counts match the query,
+- `tests/qed.pkg/pages.py`: the chunk codec, the states of a chunk grid, and the strip of pages,
+  on chunk tables worked out by hand.
+- `tests/qed.pkg/layout.py`: the description of the rasters of the GCOV fixture, which is written
+  the way the GCOV writer does it: the fill the library knows about differs from the one the
+  rasters hold.
+- `tests/qed.pkg/measurements_census.py`: the reference data of a census, and the measures of a
+  raster by the names the census gives them.
+- the identity and ARIA sweeps of the Playwright suite visit `/quality`. Not built yet:
+  `tests/qed.ux.playwright/behavior/quality.spec.ts`: the panel mounts, the counts match the query,
   hovering a chunk highlights its page and its page mates.
 
 ## Change map
 
 `qed`:
 
-- `pkg/readers/pages.py`: the chunk states and the per page breakdown, factored out of
-  `occupancy` and `Measure._nodata` so the census and the panel compute the same things.
-- `pkg/gql/Layout.py` and its parts *(new)*: the `layout` field on a dataset.
+- `pkg/readers/pages.py`: the description of a raster: storage, paging, occupancy, fill, the
+  states of the chunk grid, and the strip of pages, shared with `qed measure pages`.
+- `pkg/measurements/census.py`: the reference data of a census, and the measures of a raster.
+- `pkg/cli/Measure.py`: `measure digest` writes the reference data as json.
 - `pkg/shells/Plexus.py`: the `census` trait, the folder of the census digests.
+- `pkg/ux/Store.py`: `layout` and `census`, and the release of both on disconnect.
+- `pkg/gql/layout/` *(new)*: `Layout` and its parts; `pkg/gql/Query.py`: the `layout` query.
+- `ux/client/widgets/histogram/` *(new)*: the histogram widget.
 - `ux/client/activities/quality/`, `ux/client/shapes/quality/` *(new)*: the activity.
-- `ux/client/views/viz/quality/` *(new)*: the panel, the maps, the scorecard, the histograms.
-- `ux/client/automation/qed.js`: the `quality` namespace.
-- `doc/automation-surface.md`: a pointer.
+- `ux/client/views/viz/quality/` *(new)*: the panel and its trays.
+- `ux/client/widgets/flex/`: a flex box lets the mouse events through unless a panel is flexing.
 
 ## Sequencing
 
-1. The server side: chunk states, page breakdown, the `layout` field. Verifiable from GraphQL
-   before any client work.
-2. The chunk map with its counts and the fill badge.
-3. The file map, and the linking of the two.
-4. The scorecard, with the census reference data.
-5. The read cost overlay, and the histograms.
+Built, in order: the server side; the scorecard, the chunk map, and the histograms; the census
+comparison; the page strip and its linking to the chunk map. Next: the read cost overlay, the
+`window.qed.quality` namespace, and the behavior spec.
 
 ## Open questions
 
-1. **Every raster, or the selected one?** The chunk map is per raster; the file map is per file.
-   Showing the file map for the whole product, with the selected raster emphasized, is proposed.
-2. **When is the layout computed?** On demand, when the panel first asks, is proposed; computing it
-   at first contact would add a page fetch or two per raster to opening every product, in S3 too.
-3. **Products that are not HDF5.** Flat files and GDAL rasters have no pages to draw; the panel
-   says so, and could still show the chunk map where the format has tiles.
+1. **Every raster, or the selected one?** Settled for now: the panel describes the raster in the
+   active view, and the page strip shows the pages that raster lands on; a map of every page of the
+   file, with the selected raster emphasized, remains possible.
+2. **When is the layout computed?** Settled: on demand, when the panel first asks, and kept.
+3. **Products that are not HDF5.** The panel says there is no layout to show; a chunk map for
+   formats with tiles remains possible.
 4. **Where the census reference comes from.** Settled: a folder the user configures, since the
    digests change with every census.
 
