@@ -27,16 +27,15 @@ export const Chunks = ({ layout }) => {
     const { rows, cols, states, codes, sizes } = layout.grid
     // the size of a cell, in pixels, so the grid fits the panel
     const cell = Math.max(1, Math.floor(room / Math.max(rows, cols)))
-    // the canvas
-    const canvas = React.useRef(null)
+    // the canvas; it is kept as state, since collapsing the tray unmounts it and expanding it
+    // mounts a fresh one, which must be drawn on too
+    const [node, setNode] = React.useState(null)
     // the cell under the pointer
     const [hover, setHover] = React.useState(null)
 
-    // draw the grid whenever it changes
+    // draw the grid whenever it or the canvas changes
     React.useEffect(() => {
-        // get the canvas
-        const node = canvas.current
-        // if it is not there yet
+        // if the canvas is not there yet
         if (!node) {
             // there is nothing to draw on
             return
@@ -56,7 +55,7 @@ export const Chunks = ({ layout }) => {
         })
         // all done
         return
-    }, [codes, rows, cols, cell])
+    }, [node, codes, rows, cols, cell])
 
     // the census of the states
     const census = states.map((name, code) => [name, codes.filter(c => c === code).length])
@@ -85,7 +84,7 @@ export const Chunks = ({ layout }) => {
     return (
         <Tray title="chunks" initially={true} state="enabled" scale={0.5}>
             <Housing>
-                <canvas ref={canvas} width={cols * cell} height={rows * cell}
+                <canvas ref={setNode} width={cols * cell} height={rows * cell}
                     onMouseMove={track} onMouseLeave={() => setHover(null)}
                     role="img" aria-label={census.map(([name, count]) => `${name}: ${count}`).join(", ")}
                     data-qed-view="chunk-map" data-qed-chunk={hover ? `${hover.row},${hover.col}` : ""}
