@@ -618,7 +618,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                     continue
                 # the chunk tables of every dataset in the file, since the datasets that share
                 # the pages of the one being measured decide how much of each page it needs
-                tables = self._chunks(reader=reader)
+                tables = qed.readers.pages.tables(reader=reader)
                 # go through the datasets to measure
                 for dataset in datasets:
                     # and measure each one
@@ -1519,86 +1519,6 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # all done
         return
 
-    def _chunks(self, reader):
-        """
-        Read the chunk table of every dataset of {reader} as lists of (address, bytes, origin),
-        together with the storage of every other dataset in its file, since they all share the
-        pages; the datasets the reader does not know are filed under their path in the file
-        """
-        # the tables, by dataset name
-        tables = {}
-        # the addresses of the chunks the reader knows about
-        known = set()
-        # go through the datasets of the reader
-        for dataset in reader.datasets:
-            # the dataset, as the library sees it
-            h5 = dataset.data.dataset
-            # the chunks that were written
-            table = h5.chunkTable()
-            # record them, or, for a dataset that is not stored in chunks, its one extent, which
-            # is the whole raster
-            tables[dataset.pyre_name] = (
-                [(chunk.address, chunk.bytes, tuple(chunk.origin)) for chunk in table]
-                if table is not None
-                else [(h5.offset, h5.disksize, (0, 0))] if h5.disksize else []
-            )
-            # remember where they are
-            known.update(address for address, _, _ in tables[dataset.pyre_name])
-        # open the file again, with the same credentials; this reads nothing but metadata
-        h5 = qed.h5.reader(uri=reader.uri, credentials=reader.grant())
-        # go through every dataset in it
-        for path, storage in self._storage(group=h5._file._pyre_id, path=""):
-            # skip the ones the reader knows about
-            if storage and storage[0][0] in known:
-                # by moving on
-                continue
-            # and file the rest, if they occupy any space
-            if storage:
-                # under their path
-                tables[path] = storage
-        # hand off the tables
-        return tables
-
-    def _storage(self, group, path):
-        """
-        Generate the path and the storage, as a list of (address, bytes, origin), of every
-        dataset under {group}, which sits at {path} in its file
-        """
-        # go through the members of the group
-        for name in group.members():
-            # get the member
-            member = group.get(path=name)
-            # its path
-            where = f"{path}/{name}"
-            # the kind of object it is
-            kind = member.objectType.name
-            # a group
-            if kind == "group":
-                # holds more
-                yield from self._storage(group=member, path=where)
-                # and nothing else
-                continue
-            # anything else that is not a dataset has no storage
-            if kind != "dataset":
-                # so move on
-                continue
-            # the chunks of a chunked dataset
-            table = member.chunkTable()
-            # a dataset stored in chunks
-            if table is not None:
-                # occupies the places its chunks do
-                yield where, [(chunk.address, chunk.bytes, tuple(chunk.origin)) for chunk in table]
-                # and nothing else
-                continue
-            # a compact dataset lives in its object header, among the metadata
-            if member.dcpl.layout.name != "contiguous":
-                # so it has no storage of its own
-                continue
-            # a contiguous one occupies one extent, once it is written
-            yield where, [(member.offset, member.disksize, None)] if member.disksize else []
-        # all done
-        return
-
     def _occupancy(self, channel, chunks, summaries, host, reader, dataset, layout, tables):
         """
         Record each chunk of {dataset} that was written, and report and summarize how its
@@ -1646,7 +1566,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             "filters": [entry.name for entry in dataset.data.dataset.dcpl.filters],
         }
         # what the dataset declares it holds where there is nothing, and what it really holds
-        nodata = self._nodata(dataset=dataset, table=tables[name], raw=raw)
+        nodata = qed.readers.pages.nodata(dataset=dataset, table=tables[name], raw=raw)
         # sign on
         channel.line(f"{name}:")
         channel.line(f"  file: {strategy} strategy, pages of {pageSize / 2**20:g} MiB")
@@ -1801,174 +1721,6 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         )
         # all done
         return
-
-    def _nodata(self, dataset, table, raw):
-        """
-        Compare what {dataset} declares it holds where there is nothing with what the smallest
-        of the chunks in its {table} really holds, and time decoding that chunk against making
-        it from its value, which is what the library does for a chunk that was never written,
-        and against decoding a typical chunk of data, one of {raw} bytes before compression
-        """
-        # the dataset, as the library sees it
-        h5 = dataset.data.dataset
-        # its fill value status
-        status = h5.dcpl.fillValueStatus.name
-        # the fill value the library hands out for chunks that were never written
-        hdf5 = h5.fillValue
-        # the fill value the conventions of the format declare, if any
-        cf = self._attribute(h5=h5, name="_FillValue")
-        # start the record
-        nodata = {
-            "status": status,
-            "hdf5": hdf5,
-            "cf": cf,
-            "found": None,
-            "decode": None,
-            "make": None,
-            "data": None,
-            "fillChunks": None,
-            "fillBytes": None,
-            "verified": None,
-            "level": None,
-            "encode": None,
-        }
-        # without chunks, or with a dataset that is not stored in chunks
-        if not table or h5.dcpl.layout.name != "chunked":
-            # there is nothing else to say
-            return nodata
-        # the size of a cell
-        width = dataset.cell.bytes
-        # the chunks that are not nearly empty, by size
-        full = sorted(
-            (chunk for chunk in table if chunk[1] >= qed.readers.pages.NEARLY_EMPTY * raw),
-            key=lambda chunk: chunk[1],
-        )
-        # if there are any
-        if full:
-            # time decoding the median one, which is what a chunk of data costs
-            _, nodata["data"] = self._decode(h5=h5, origin=full[len(full) // 2][2], cell=width)
-        # the smallest chunk is the one most likely to hold nothing but the fill
-        _, _, origin = min(table, key=lambda chunk: chunk[1])
-        # decode it
-        data, seconds = self._decode(h5=h5, origin=origin, cell=width)
-        # a chunk that went through a filter i cannot undo
-        if data is None:
-            # holds something i cannot tell
-            nodata["found"] = "unknown"
-            # and there is nothing else to say
-            return nodata
-        # the one cell every cell of the chunk repeats, if there is one
-        cell = qed.readers.pages.uniform(data=data, cell=width)
-        # a chunk with different cells
-        if cell is None:
-            # holds data
-            nodata["found"] = "data"
-            # and there is nothing else to say
-            return nodata
-        # the clock of making the chunk
-        making = qed.timers.wall("qed.measure.pages.make")
-        # make it from its value, the way the library fills a chunk that was never written
-        making.reset()
-        making.start()
-        cell * (len(data) // width)
-        making.stop()
-        # record the value
-        nodata["found"] = qed.readers.pages.interpret(
-            data=cell, cell=dataset.cell.cell, swapped=dataset.cell.byteswap
-        )
-        # and the times
-        nodata["decode"] = seconds
-        nodata["make"] = making.sec()
-        # the size of the chunk that holds nothing but this value
-        size = min(chunk[1] for chunk in table)
-        # every chunk of that size holds the same bytes, since the filters are deterministic
-        twins = [chunk for chunk in table if chunk[1] == size]
-        # so they are the chunks a declared fill would have spared
-        nodata["fillChunks"] = len(twins)
-        nodata["fillBytes"] = len(twins) * size
-        # check the claim on the first and the last of them in the order of the file
-        nodata["verified"] = sum(
-            1
-            for twin in (min(twins), max(twins))
-            if self._decode(h5=h5, origin=twin[2], cell=width)[0] == data
-        )
-        # time what the writer spent on each of them: filtering the chunk at the deflate level
-        # that reproduces its stored bytes
-        nodata["level"], nodata["encode"] = self._encode(
-            data=data, stored=size, filters=[entry.name for entry in h5.dcpl.filters], cell=width
-        )
-        # hand off the record
-        return nodata
-
-    def _encode(self, data, stored, filters, cell):
-        """
-        Find the deflate level at which the chunk {data}, of cells of {cell} bytes, passes
-        through {filters} to exactly {stored} bytes, and time that encoding; both are {None}
-        when no level does, or when there are filters i cannot apply
-        """
-        # the clock
-        encoding = qed.timers.wall("qed.measure.pages.encode")
-        # go through the levels
-        for level in range(1, 10):
-            # encode at this one
-            encoding.reset()
-            encoding.start()
-            encoded = qed.readers.pages.encode(data=data, filters=filters, cell=cell, level=level)
-            encoding.stop()
-            # a pipeline i cannot apply
-            if encoded is None:
-                # has no level
-                return None, None
-            # the level that reproduces the stored size
-            if len(encoded) == stored:
-                # is the one the writer used
-                return level, encoding.sec()
-        # no level matched, so the writer used a compressor other than this one
-        return None, None
-
-    def _decode(self, h5, origin, cell):
-        """
-        Read the chunk of the dataset {h5} at {origin} as it is stored, and decode it into its
-        cells of {cell} bytes, timing the decoding; the data is {None} when the chunk went
-        through a filter i cannot undo
-        """
-        # read it as it is stored; this fetches the page that holds it
-        mask, stored = h5.readChunk(origin=origin)
-        # the clock
-        decoding = qed.timers.wall("qed.measure.pages.decode")
-        # decode it
-        decoding.reset()
-        decoding.start()
-        data = qed.readers.pages.decode(
-            stored=stored,
-            filters=[entry.name for entry in h5.dcpl.filters],
-            mask=mask,
-            cell=cell,
-        )
-        decoding.stop()
-        # hand off the cells and the time it took
-        return data, decoding.sec()
-
-    def _attribute(self, h5, name):
-        """
-        The value of the attribute {name} of the dataset {h5}, when it has one that is a number
-        """
-        # a dataset without the attribute
-        if not h5.hasAttribute(name):
-            # has no value for it
-            return None
-        # get it
-        attribute = h5.getAttribute(name)
-        # an integer
-        if attribute.cell == attribute.cell.int:
-            # is read as one
-            return attribute.int()
-        # a floating point number
-        if attribute.cell == attribute.cell.float:
-            # is read as one
-            return attribute.double()
-        # anything else, e.g. a complex number, is beyond the bindings
-        return "unreadable"
 
     def _summarize(self, summaries, host, reader, strategy, storage, nodata, record):
         """
