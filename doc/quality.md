@@ -70,7 +70,7 @@ comparison, with at most a warning on the `qed.census` channel.
 
 ### The activity
 
-A new activity, `quality`, on the navigation rail after `journal`, following the pattern of the
+A new activity, `quality`, on the navigation rail right above `journal`, following the pattern of the
 console: a directory under `ux/client/activities/quality`, a shape, one line in the bar. It sits
 in the `viz` layout beside `controls` and the readers, so the panel can be read next to the
 viewport of the raster it describes. It follows the dataset selected in the active viewport.
