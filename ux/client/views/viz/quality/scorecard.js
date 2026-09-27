@@ -13,35 +13,10 @@ import styled from 'styled-components'
 import { Tray } from '~/widgets'
 
 // locals
+// formatting
+import { bytes, number, percent } from './format'
 // styles
 import styles from './styles'
-
-
-// render a number with {digits} significant figures, or a dash when there is none
-const number = (value, digits = 3) => value === null || value === undefined
-    ? "-" : Number(value).toPrecision(digits).replace(/\.?0+$/, "")
-// render a share as a percentage
-const percent = value => value === null || value === undefined
-    ? "-" : `${Math.round(100 * value)}%`
-// render a byte count in the largest unit that keeps it above one
-const bytes = value => {
-    // nothing
-    if (value === null || value === undefined) {
-        // renders as a dash
-        return "-"
-    }
-    // the units
-    const units = ["B", "KiB", "MiB", "GiB", "TiB"]
-    // find the one that fits
-    let unit = 0
-    while (value >= 1024 && unit < units.length - 1) {
-        // by moving up
-        value /= 1024
-        unit += 1
-    }
-    // and render
-    return `${number(value)} ${units[unit]}`
-}
 
 
 // the numbers that describe the layout of a raster

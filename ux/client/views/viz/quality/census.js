@@ -13,6 +13,8 @@ import styled from 'styled-components'
 import { Histogram, Tray } from '~/widgets'
 
 // locals
+// formatting
+import { number } from './format'
 // styles
 import styles from './styles'
 
@@ -33,9 +35,6 @@ const names = {
     encode_ms: "encode fill, ms",
 }
 
-// render a number with three significant figures, or a dash when there is none
-const number = value => value === null || value === undefined
-    ? "-" : Number(value).toPrecision(3).replace(/\.?0+$/, "")
 
 
 // where the raster falls among the rasters of the census of its kind of product
