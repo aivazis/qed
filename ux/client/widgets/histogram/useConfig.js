@@ -16,13 +16,13 @@ import { Context } from './context'
 export const useConfig = () => {
     // pull what i need from {context}
     const {
-        counts, domain, width, height, log, label, marker, format, ticks,
-        gutter, headroom, reach, bin, tallest, scale, at, base,
+        counts, domain, width, height, log, label, marker, format, ticks, unit,
+        gutter, headroom, left, room, reach, bin, tallest, scale, at, base,
     } = React.useContext(Context)
     // and publish
     return {
-        counts, domain, width, height, log, label, marker, format, ticks,
-        gutter, headroom, reach, bin, tallest, scale, at, base,
+        counts, domain, width, height, log, label, marker, format, ticks, unit,
+        gutter, headroom, left, room, reach, bin, tallest, scale, at, base,
     }
 }
 
