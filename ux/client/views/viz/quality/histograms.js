@@ -26,12 +26,12 @@ export const Histograms = ({ layout }) => {
         <Tray title="histograms" initially={true} state="enabled" scale={0.5}>
             <Housing>
                 <Title>stored size of a chunk, as a share of its raw size</Title>
-                <Histogram counts={summary.sizes} width={360} height={90} log={true} unit="chunks"
+                <Histogram counts={summary.sizes} width={360} height={100} log={true} unit="chunks"
                     label="stored size of a chunk as a share of its raw size" />
                 {summary.fill &&
                     <>
                         <Title>share of each page the raster fills</Title>
-                        <Histogram counts={summary.fill} width={360} height={90} log={true} unit="pages"
+                        <Histogram counts={summary.fill} width={360} height={100} log={true} unit="pages"
                             label="share of each page the raster fills" />
                     </>
                 }
@@ -49,7 +49,7 @@ const Housing = styled.div`
 // the title of a histogram
 const Title = styled.div`
     font-family: inconsolata;
-    font-size: 75%;
+    font-size: 90%;
     cursor: default;
     color: ${styles.dim};
     margin: 0.25rem 0;

@@ -93,7 +93,7 @@ export const Census = ({ census }) => {
 const Housing = styled.div`
     margin: 0.25rem 1.0rem 0.5rem 1.0rem;
     font-family: inconsolata;
-    font-size: 75%;
+    font-size: 90%;
     cursor: default;
 `
 

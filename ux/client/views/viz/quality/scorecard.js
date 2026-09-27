@@ -111,7 +111,7 @@ export const Scorecard = ({ layout }) => {
 // the table
 const Table = styled.table`
     font-family: inconsolata;
-    font-size: 75%;
+    font-size: 90%;
     cursor: default;
     margin: 0.25rem 1.0rem 0.5rem 1.0rem;
     border-collapse: collapse;
