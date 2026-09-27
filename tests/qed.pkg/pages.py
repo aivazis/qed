@@ -12,11 +12,19 @@ out by hand: two datasets share the pages of a file, and a reader that fetches w
 moves the bytes of both
 """
 
+# externals
+import math
+import struct
+import sys
+import zlib
+
 # support
 import qed
 
-# the page occupancy calculator
-occupancy = qed.readers.pages.occupancy
+# the page analyses
+pages = qed.readers.pages
+# and the page occupancy calculator among them
+occupancy = pages.occupancy
 
 # pages of 100 bytes, chunks of 2x2 cells that are 50 bytes before compression; dataset {a}
 # has two chunks on the first page, with a chunk of {b} between them, and two on the second
@@ -73,6 +81,52 @@ sparse = {"d": [(0, 0, (0, 0)), (1, 50, (0, 2))]}
 record = occupancy(tables=sparse, name="d", pageSize=100, raw=50, tile=(2, 2), grid=4)
 # one of its two chunks is nearly empty
 assert record["empty"] == 1
+
+# a nearly empty chunk alone on a page costs a page of its own
+lonely = {"e": [(0, 500, (0, 0)), (100, 5, (0, 2))]}
+# describe it
+record = occupancy(tables=lonely, name="e", pageSize=100, raw=1000, tile=(2, 2), grid=4)
+# one of its chunks is nearly empty, and stores five bytes
+assert record["empty"] == 1
+assert record["emptyStored"] == 5
+# the other spans pages 0 through 4, so the empty one has page 1 to share with it
+assert record["emptyPages"] == 0
+# but moved past the end of the other, it has a page to itself
+lonely = {"e": [(0, 500, (0, 0)), (500, 5, (0, 2))]}
+# describe it
+record = occupancy(tables=lonely, name="e", pageSize=100, raw=1000, tile=(2, 2), grid=4)
+# and a reader fetches that page for nothing else
+assert record["emptyPages"] == 1
+
+# a chunk of four cells of four bytes each, as a writer that declares no fill would store it
+cells = struct.pack("<4f", *([math.nan] * 4))
+# shuffled: byte k of every cell in plane k
+shuffled = bytes(cells[k + 4 * i] for k in range(4) for i in range(4))
+# and deflated
+stored = zlib.compress(shuffled)
+# decoding undoes both
+decoded = pages.decode(stored=stored, filters=["shuffle", "deflate"], mask=0, cell=4)
+assert decoded == cells
+# encoding shuffles and deflates, which reproduces the stored bytes at the level they were made
+assert pages.shuffle(data=cells, cell=4) == shuffled
+assert pages.encode(data=cells, filters=["shuffle", "deflate"], cell=4, level=6) == stored
+# and a filter the encoder does not know stops it
+assert pages.encode(data=cells, filters=["szip"], cell=4, level=6) is None
+# a filter the library skipped, as the mask says, is not undone
+assert pages.decode(stored=shuffled, filters=["shuffle", "deflate"], mask=0b10, cell=4) == cells
+# a filter the decoder does not know stops it
+assert pages.decode(stored=stored, filters=["szip"], mask=0, cell=4) is None
+# the chunk repeats one cell
+cell = pages.uniform(data=decoded, cell=4)
+assert cell == cells[:4]
+# which is a nan
+assert math.isnan(pages.interpret(data=cell, cell="float32"))
+# a chunk with different cells repeats none
+assert pages.uniform(data=struct.pack("<4f", 1, 2, 3, 4), cell=4) is None
+# a complex cell is a pair of parts
+assert pages.interpret(data=struct.pack("<2f", 1, -2), cell="complex64") == complex(1, -2)
+# and a cell in the order the host lacks is swapped back
+assert pages.interpret(data=b"\x01\x00", cell="uint16", swapped=sys.byteorder == "big") == 1
 
 # a file without pages describes the chunks and nothing else
 record = occupancy(tables=tables, name="a", pageSize=0, raw=50, tile=(2, 2), grid=4)
