@@ -20,16 +20,15 @@ export default () => {
 
     // when flexing ends
     const endFlex = (evt) => {
-        // stop this event from bubbling up
-        evt.stopPropagation()
-        // an quash any side effects
-        evt.preventDefault()
-
         // if no panel is flexing
         if (flexingPanel == null) {
-            // nothing to do
+            // the event belongs to whoever is under the pointer, so let it through
             return
         }
+        // otherwise, the event ends my flex: stop it from bubbling up
+        evt.stopPropagation()
+        // and quash any side effects
+        evt.preventDefault()
 
         const refs = Array.from(panels.keys())
         // collect placement and sizing information for all panels
