@@ -128,6 +128,29 @@ assert pages.interpret(data=struct.pack("<2f", 1, -2), cell="complex64") == comp
 # and a cell in the order the host lacks is swapped back
 assert pages.interpret(data=b"\x01\x00", cell="uint16", swapped=sys.byteorder == "big") == 1
 
+# the states of a grid of two by three chunks of 2x2 cells, over a raster of 4x5 cells: one chunk
+# of fill, one sliver, two of data, and two never written
+grid = pages.states(
+    table=[(0, 5, (0, 0)), (5, 7, (0, 2)), (12, 40, (2, 0)), (52, 45, (2, 4))],
+    shape=(4, 5),
+    tile=(2, 2),
+    raw=1000,
+    fill=5,
+)
+# the grid is two by three
+assert (grid["rows"], grid["cols"]) == (2, 3)
+# with the states in row major order
+assert [pages.STATES[code] for code in grid["codes"]] == [
+    "fill",
+    "sliver",
+    "unwritten",
+    "data",
+    "unwritten",
+    "data",
+]
+# and the sizes of the chunks, zero where there are none
+assert grid["sizes"] == [5, 7, 0, 40, 0, 45]
+
 # a file without pages describes the chunks and nothing else
 record = occupancy(tables=tables, name="a", pageSize=0, raw=50, tile=(2, 2), grid=4)
 # the chunk table is there
