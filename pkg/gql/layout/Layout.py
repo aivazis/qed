@@ -15,6 +15,7 @@ from .LayoutCensus import LayoutCensus
 from .LayoutFill import LayoutFill
 from .LayoutGrid import LayoutGrid
 from .LayoutPartner import LayoutPartner
+from .LayoutStrip import LayoutStrip
 from .LayoutSummary import LayoutSummary
 
 
@@ -44,6 +45,8 @@ class Layout(graphene.ObjectType):
     fill = graphene.Field(LayoutFill, required=True)
     # the states of the cells of its chunk grid
     grid = graphene.Field(LayoutGrid, required=True)
+    # the pages its chunks land on, when the file is paged
+    strip = graphene.Field(LayoutStrip)
     # the census of its kind of product, when there is one to compare against
     census = graphene.Field(LayoutCensus)
 
@@ -163,6 +166,14 @@ class Layout(graphene.ObjectType):
             "encodeMs": ms(fill.get("encode")),
             "dataDecodeMs": ms(fill.get("data")),
         }
+
+    @staticmethod
+    def resolve_strip(described, *_):
+        """
+        The pages its chunks land on
+        """
+        # as described
+        return described.get("strip")
 
     @staticmethod
     def resolve_census(described, *_):

@@ -12,7 +12,8 @@ import graphene
 class LayoutGrid(graphene.ObjectType):
     """
     The cells of the chunk grid of a raster, in row major order: the state of each, as its
-    index in {states}, and the stored size of its chunk, zero for the cells never written
+    index in {states}, the stored size of its chunk, zero for the cells never written, and the
+    page its chunk starts on
     """
 
     # the extent of the grid
@@ -22,8 +23,10 @@ class LayoutGrid(graphene.ObjectType):
     states = graphene.List(graphene.NonNull(graphene.String), required=True)
     # the state of each cell
     codes = graphene.List(graphene.NonNull(graphene.Int), required=True)
-    # and the stored size of its chunk
+    # the stored size of its chunk
     sizes = graphene.List(graphene.NonNull(graphene.Int), required=True)
+    # and the page its chunk starts on, -1 for the cells never written or a file without pages
+    pages = graphene.List(graphene.NonNull(graphene.Int), required=True)
 
 
 # end of file
