@@ -42,12 +42,9 @@ class Descriptor(qed.actor):
 
     def __call__(self, granule, name=None, **kwds):
         """
-        Parse the {granule} and use it to create an instance of the product descriptor
+        Parse the {granule} and use it to create an instance of the product descriptor, named
+        {name} if the caller wants one to configure, and anonymous otherwise
         """
-        # make sure all descriptors have names
-        if name is None:
-            # by deriving a name from the {granule] id as the {name} when necessary
-            name = f"{granule}.descriptor"
         # if we are not supposed to touch this record
         if self.pyre_internal:
             # chain up and move on with the descriptor instantiation
