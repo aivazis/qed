@@ -367,6 +367,85 @@ def interpret(*, data: bytes, cell: str, swapped: bool = False):
     return complex(*parts) if len(parts) == 2 else parts[0]
 
 
+def paging(*, reader):
+    """
+    Read the page size, the file space strategy, and the size of the file behind {reader}, as a
+    tuple, or {None} when it is not an HDF5 product
+    """
+    # only the HDF5 readers have pages
+    if not isinstance(reader, qed.readers.nisar.h5):
+        # so everybody else has no layout
+        return None
+    # the file creation properties are only reachable through the file itself, so open it
+    # again, with the same credentials; this reads nothing but metadata
+    h5 = qed.h5.reader(uri=reader.uri, credentials=reader.grant())
+    # get the creation properties
+    fcpl = h5._file._pyre_id.fcpl
+    # and the free space strategy among them
+    strategy = fcpl.filespaceStrategy
+    # hand off what matters, with the size of the file, if the library can tell
+    return fcpl.pageSize, strategy.strategy.name, h5._file._pyre_id.bytes
+
+
+def describe(*, dataset, tables: dict, paging: tuple) -> dict:
+    """
+    Describe how the raster {dataset} sits in its file, given the storage {tables} of every
+    dataset in the file and its {paging}: its storage settings, how its chunks sit on the pages,
+    what it holds where there is no data, and the states of the cells of its chunk grid
+    """
+    # unpack the paging
+    pageSize, strategy, fileBytes = paging
+    # the name of the dataset
+    name = dataset.pyre_name
+    # unpack the extent
+    rows, cols = tuple(dataset.shape)
+    # a dataset stored in chunks is tiled by them, and any other is one tile
+    chunked = dataset.data.dataset.dcpl.layout.name == "chunked"
+    # unpack the tile
+    tileRows, tileCols = tuple(dataset.tile) if chunked else (rows, cols)
+    # the size of a chunk before the filters had their way with it
+    raw = tileRows * tileCols * dataset.data.disktype.bytes
+    # the number of chunks the tiling describes
+    grid = -(-rows // tileRows) * -(-cols // tileCols)
+    # describe how it sits on the pages
+    record = occupancy(
+        tables=tables,
+        name=name,
+        pageSize=pageSize,
+        raw=raw,
+        tile=(tileRows, tileCols),
+        grid=grid,
+    )
+    # the storage of the dataset: the file, its shape, the shape of its chunks, its cells, and
+    # the filters its chunks pass through, in the order they are applied
+    settings = {
+        "strategy": strategy,
+        "bytes": fileBytes,
+        "shape": (rows, cols),
+        "tile": (tileRows, tileCols),
+        "cell": dataset.cell.pyre_family().rsplit(".", 1)[-1],
+        "filters": [entry.name for entry in dataset.data.dataset.dcpl.filters],
+    }
+    # what the dataset declares it holds where there is nothing, and what it really holds
+    fill = nodata(dataset=dataset, table=tables[name], raw=raw)
+    # the stored size of a chunk that holds nothing but the fill, when there are such chunks
+    size = min(chunk[1] for chunk in tables[name]) if fill["fillChunks"] else None
+    # classify the cells of the chunk grid
+    cells = states(
+        table=tables[name], shape=(rows, cols), tile=(tileRows, tileCols), raw=raw, fill=size
+    )
+    # hand off the description
+    return {
+        "name": name,
+        "raw": raw,
+        "grid": grid,
+        "storage": settings,
+        "record": record,
+        "nodata": fill,
+        "states": cells,
+    }
+
+
 def tables(*, reader) -> dict:
     """
     Read the chunk table of every dataset of {reader} as lists of (address, bytes, origin),
