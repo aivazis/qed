@@ -22,9 +22,9 @@ const room = 360
 
 
 // the chunk map: every cell of the chunk grid, colored by what its chunk holds
-export const Chunks = ({ layout }) => {
+export const Chunks = ({ layout, focus, setFocus }) => {
     // unpack the grid
-    const { rows, cols, states, codes, sizes } = layout.grid
+    const { rows, cols, states, codes, sizes, pages } = layout.grid
     // the size of a cell, in pixels, so the grid fits the panel
     const cell = Math.max(1, Math.floor(room / Math.max(rows, cols)))
     // the canvas; it is kept as state, since collapsing the tray unmounts it and expanding it
@@ -42,6 +42,8 @@ export const Chunks = ({ layout }) => {
         }
         // get its context
         const context = node.getContext("2d")
+        // start afresh
+        context.clearRect(0, 0, node.width, node.height)
         // go through the cells
         codes.forEach((code, index) => {
             // paint each one in the color of its state
@@ -53,9 +55,26 @@ export const Chunks = ({ layout }) => {
                 (index % cols) * cell, Math.floor(index / cols) * cell, cell - gap, cell - gap
             )
         })
+        // with a page in focus
+        if (focus !== null) {
+            // outline the chunks that start on it, which a reader fetches together
+            context.strokeStyle = styles.focus
+            context.lineWidth = cell > 3 ? 2 : 1
+            // go through the cells
+            pages.forEach((page, index) => {
+                // the ones on the page in focus
+                if (page === focus) {
+                    // get an outline, inside the cell
+                    context.strokeRect(
+                        (index % cols) * cell + 1, Math.floor(index / cols) * cell + 1,
+                        Math.max(1, cell - 3), Math.max(1, cell - 3)
+                    )
+                }
+            })
+        }
         // all done
         return
-    }, [node, codes, rows, cols, cell])
+    }, [node, codes, pages, rows, cols, cell, focus])
 
     // the census of the states
     const census = states.map((name, code) => [name, codes.filter(c => c === code).length])
@@ -69,13 +88,26 @@ export const Chunks = ({ layout }) => {
         if (row < 0 || row >= rows || col < 0 || col >= cols) {
             // there is no cell
             setHover(null)
+            // nor a page in focus
+            setFocus(null)
             // and nothing more to do
             return
         }
         // the index of the cell
         const index = row * cols + col
         // remember it
-        setHover({ row, col, state: states[codes[index]], size: sizes[index] })
+        setHover({ row, col, state: states[codes[index]], size: sizes[index], page: pages[index] })
+        // and put the page of its chunk in focus, if it has one
+        setFocus(pages[index] >= 0 ? pages[index] : null)
+        // all done
+        return
+    }
+    // let go of the cell
+    const leave = () => {
+        // forget it
+        setHover(null)
+        // and let go of the focus
+        setFocus(null)
         // all done
         return
     }
@@ -85,7 +117,7 @@ export const Chunks = ({ layout }) => {
         <Tray title="chunks" initially={true} state="enabled" scale={0.5}>
             <Housing>
                 <canvas ref={setNode} width={cols * cell} height={rows * cell}
-                    onMouseMove={track} onMouseLeave={() => setHover(null)}
+                    onMouseMove={track} onMouseLeave={leave}
                     role="img" aria-label={census.map(([name, count]) => `${name}: ${count}`).join(", ")}
                     data-qed-view="chunk-map" data-qed-chunk={hover ? `${hover.row},${hover.col}` : ""}
                 />
@@ -99,8 +131,10 @@ export const Chunks = ({ layout }) => {
                 </Legend>
                 <Readout>
                     {hover
-                        ? `chunk ${hover.row}, ${hover.col}: ${hover.state}` + (hover.size ? `, ${hover.size} bytes` : "")
-                        : "point at a chunk"}
+                        ? `chunk ${hover.row}, ${hover.col}: ${hover.state}`
+                        + (hover.size ? `, ${hover.size} bytes` : "")
+                        + (hover.page >= 0 ? `, on page ${hover.page} with the outlined chunks` : "")
+                        : "hover over a chunk to see what it holds"}
                 </Readout>
             </Housing>
         </Tray>

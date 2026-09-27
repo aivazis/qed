@@ -76,6 +76,15 @@ const layoutQuery = graphql`
                 states
                 codes
                 sizes
+                pages
+            }
+            strip {
+                pages
+                mine
+                chunks
+                others
+                partner
+                partnerBytes
             }
             census {
                 census
