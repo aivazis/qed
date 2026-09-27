@@ -1094,6 +1094,107 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # all done
         return 0
 
+    @qed.export(tip="count the chunks of a census that hold nothing but the fill")
+    def waste(self, plexus, **kwds):
+        """
+        Count, for each census in my {inputs}, the chunks that hold nothing but the fill and
+        would not have been written had the fill been declared and honored: how many there are,
+        the bytes they store, and, when the census timed them, what they cost to encode and to
+        decode on every read of the whole raster
+        """
+        # make a channel
+        channel = journal.info("qed.measure.waste")
+        # the analyses
+        census = qed.measurements.census
+        # go through the censuses
+        for source in self.inputs:
+            # the name of the census
+            name = self._censusName(source=source)
+            # read the summaries
+            rows = census.load(source=source)
+            # count the chunks
+            tally = census.waste(source=source, rows=rows)
+            # the summaries by raster name, for the times
+            filed = census.groups(rows=rows, key=census.raster)
+            # the table
+            table = []
+            # and its totals
+            totals = collections.Counter()
+            # go through the rasters by name
+            for raster, entry in sorted(tally.items()):
+                # the median times of this raster, in ms, if the census took them
+                decode, encode = census.medians(
+                    rows=filed.get(raster, []), names=("decode_ms", "encode_ms")
+                )
+                # the seconds spent on the fill chunks, encoding them once and decoding them on
+                # every read of the whole raster
+                encoding = entry["fill"] * encode / 1e3 if encode is not None else None
+                decoding = entry["fill"] * decode / 1e3 if decode is not None else None
+                # add the row
+                table.append(
+                    (
+                        raster,
+                        entry["rasters"],
+                        entry["written"],
+                        entry["fill"],
+                        entry["fill"] / entry["written"] if entry["written"] else None,
+                        entry["fillBytes"] / 2**20,
+                        entry["fillBytes"] / entry["stored"] if entry["stored"] else None,
+                        entry["checked"],
+                        encoding,
+                        decoding,
+                    )
+                )
+                # and fold it into the totals
+                totals.update({key: value for key, value in entry.items()})
+                totals["encoding"] += encoding or 0
+                totals["decoding"] += decoding or 0
+            # the totals
+            table.append(
+                (
+                    "all",
+                    totals["rasters"],
+                    totals["written"],
+                    totals["fill"],
+                    totals["fill"] / totals["written"] if totals["written"] else None,
+                    totals["fillBytes"] / 2**20,
+                    totals["fillBytes"] / totals["stored"] if totals["stored"] else None,
+                    totals["checked"],
+                    totals["encoding"] or None,
+                    totals["decoding"] or None,
+                )
+            )
+            # the report
+            lines = [
+                f"# {name}: the chunks that hold nothing but the fill",
+                "",
+                "A chunk holds nothing but the fill when it has the stored size of the smallest",
+                "chunk of its raster and that one is nearly empty; `checked` counts the rasters",
+                "whose smallest chunk the census decoded and found to hold one value. The seconds",
+                "are the median time per chunk of each raster times the number of chunks.",
+                "",
+            ]
+            # the table
+            lines += census.markdown(
+                headers=(
+                    "raster",
+                    "rasters",
+                    "written",
+                    "fill chunks",
+                    "share of written",
+                    "fill MiB",
+                    "share of stored",
+                    "checked",
+                    "encode s",
+                    "decode s per read",
+                ),
+                rows=table,
+            )
+            # publish it
+            self._publish(channel=channel, lines=lines, path=f"waste-{name}.md")
+        # all done
+        return 0
+
     @qed.export(tip="summarize the results of a census")
     def digest(self, plexus, **kwds):
         """
