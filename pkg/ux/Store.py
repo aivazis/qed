@@ -200,6 +200,68 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # hand it back untouched
         return dataset
 
+    def layout(self, dataset):
+        """
+        Describe how {dataset} sits in its file: its storage settings, how its chunks sit on the
+        pages, what it holds where there is no data, and the states of the cells of its chunk
+        grid; {None} for a dataset whose product is not an HDF5 file
+
+        The description reads the metadata of the whole file and a chunk or two of the
+        dataset, in this process, the first time somebody asks; it is kept, since the layout
+        of a product does not change while it is connected
+        """
+        # if the dataset has been described already
+        described = self._layouts.get(dataset.pyre_name)
+        # there is nothing to do
+        if described is not None:
+            # but hand it off
+            return described
+        # the description reads the file, so a metadata-only twin has to open its product
+        dataset = self.realize(dataset=dataset)
+        # find the source that owns it
+        source = self._ownerOf(dataset=dataset)
+        # a dataset with no owner has no file to describe
+        if source is None:
+            # so say so
+            return None
+        # the reader that holds the file open: the live copy opened for a twin, or the source
+        live = self._realized.get(source.pyre_name, source)
+        # the page layout of the file, which only HDF5 products have
+        paging = qed.readers.pages.paging(reader=live)
+        # a product without one
+        if paging is None:
+            # has nothing to describe
+            return None
+        # the storage of every dataset in the file, which all its datasets share
+        tables = self._storages.get(source.pyre_name)
+        # the first time the file is described
+        if tables is None:
+            # walk it
+            tables = qed.readers.pages.tables(reader=live)
+            # and remember it
+            self._storages[source.pyre_name] = tables
+        # the dataset of the live reader with the same identity
+        peer = next(
+            (
+                candidate
+                for candidate in live.datasets
+                if dict(candidate.selector) == dict(dataset.selector)
+            ),
+            None,
+        )
+        # not finding one means the product changed under us
+        if peer is None:
+            # so there is nothing to describe
+            return None
+        # describe it
+        described = qed.readers.pages.describe(dataset=peer, tables=tables, paging=paging)
+        # under the name the client knows it by
+        described["name"] = dataset.pyre_name
+        # remember it
+        self._layouts[dataset.pyre_name] = described
+        # and hand it off
+        return described
+
     def open(self, name: str | None = None):
         """
         Initiate first contact with the connected data sources in this process, which
@@ -574,6 +636,13 @@ class Store(qed.shells.command, family="qed.cli.ux"):
             self._keep(lambda keeper: keeper.forgetReader(reader=source))
             # and it is no longer among the ones the files know about
             self.savedSources.discard(name)
+            # let go of the live copy a direct read opened, so its file is closed
+            self._realized.pop(name, None)
+            # and of the layout of its file and its datasets
+            self._storages.pop(name, None)
+            for dataset in source.datasets:
+                # one at a time
+                self._layouts.pop(dataset.pyre_name, None)
         # hand it back
         return source
 
@@ -1180,6 +1249,10 @@ class Store(qed.shells.command, family="qed.cli.ux"):
         # the live copies of surveyed products, keyed by source name, opened on demand by
         # the handful of paths that read individual values in this process
         self._realized = {}
+        # the storage of the files of the sources whose layout was asked for, keyed by source
+        # name, and the descriptions of their datasets, keyed by dataset name
+        self._storages = {}
+        self._layouts = {}
         # what has been done to make each dataset worth looking at, keyed by dataset name
         self._preparations = {}
         # the pyramid builds behind them, keyed the same way, while they are under way
