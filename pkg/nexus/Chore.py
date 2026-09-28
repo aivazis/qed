@@ -352,18 +352,20 @@ class Chore(pyre.nexus.task):
         # and hand it off
         return reader
 
-    def _locateDataset(self, reader):
+    def _locateDataset(self, reader, selector=None):
         """
-        Find the dataset of {reader} that matches my selector
+        Find the dataset of {reader} that matches {selector}, or mine
         """
+        # the selector to match
+        selector = self.selector if selector is None else selector
         # go through the reader datasets
         for dataset in reader.datasets:
-            # looking for the one whose selector matches mine
-            if dict(dataset.selector) == self.selector:
+            # looking for the one whose selector matches
+            if dict(dataset.selector) == selector:
                 # hand it off
                 return dataset
         # not finding one means the reconstruction diverged from the team side view
-        raise self.RecoverableError(description=f"no dataset matches the selector {self.selector}")
+        raise self.RecoverableError(description=f"no dataset matches the selector {selector}")
 
     def _configure(self, component, config):
         """
