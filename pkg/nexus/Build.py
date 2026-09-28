@@ -74,6 +74,7 @@ class Build:
         statistics,
         onSeeded=None,
         onProgress=None,
+        onLevel=None,
         onDone=None,
         onFailed=None,
         run: int = 8,
@@ -96,6 +97,7 @@ class Build:
         # the hooks
         self.onSeeded = onSeeded
         self.onProgress = onProgress
+        self.onLevel = onLevel
         self.onDone = onDone
         self.onFailed = onFailed
         # how many tiles travel in one task
@@ -106,6 +108,7 @@ class Build:
         self.depth = 0
         self.exponent = 0
         self.occupancy = None
+        self.runs = 0
         self.outstanding = set()
         self.seeds = set()
         # whether the seed has reported, and whether the build is over
@@ -160,6 +163,8 @@ class Build:
         # the crew serves the newest task first, so the seeds go in last and come out
         # first; the bulk is reversed so the rows come out in order
         runs.reverse()
+        # remember how many there are, so the progress of the level can be told
+        self.runs = len(runs)
         # make a channel
         channel = journal.debug("qed.nexus.build")
         # show me
@@ -248,6 +253,10 @@ class Build:
         if exponent == 1:
             # by writing the sidecar
             self.pyramid.remember()
+        # the level exists now, which is worth telling whoever offers it to a client
+        if self.onLevel is not None:
+            # by calling the hook
+            self.onLevel(build=self, exponent=exponent)
         # the next level, if there is one
         following = exponent + 1
         # if there is
@@ -260,6 +269,36 @@ class Build:
         self._finish()
         # all done
         return
+
+    def reach(self) -> int:
+        """
+        Report the deepest level available, counting from the first without gaps
+        """
+        # start below the first level
+        reach = 0
+        # and climb for as long as the next level exists
+        while reach < self.depth and self.pyramid.holds(exponent=reach + 1):
+            # one more
+            reach += 1
+        # all done
+        return reach
+
+    def describe(self) -> dict:
+        """
+        Describe the state of the build: the raster, how deep its pyramid goes and how deep it
+        is available, and the level under construction with its runs and the ones still out
+        """
+        # the level under construction, while there is one
+        level = self.exponent if self.exponent and not self.done else None
+        # assemble the description
+        return {
+            "raster": self.dataset.pyre_name,
+            "depth": self.depth,
+            "reach": self.reach(),
+            "level": level,
+            "runs": self.runs if level is not None else 0,
+            "outstanding": len(self.outstanding) if level is not None else 0,
+        }
 
     def _seeds(self) -> set:
         """
