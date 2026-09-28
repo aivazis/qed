@@ -89,6 +89,24 @@ class Team(Staff, family="qed.nexus.teams.tile"):
         # all done
         return self
 
+    def describe(self, kind: str, owner: str) -> dict:
+        """
+        Describe my roster and my schedule, as a team of {kind} that works for {owner}
+        """
+        # assemble the description
+        return {
+            "name": self.pyre_name,
+            "kind": kind,
+            "owner": owner,
+            "size": self.size,
+            "idle": len(self.idle),
+            "active": len(self.active),
+            "queued": len(self.workplan),
+            "pending": len(self.pending),
+            "deaf": self._deaf(),
+            "waking": self._waking(),
+        }
+
     def census(self) -> str:
         """
         Report what my roster and my schedule are doing, in one line

@@ -97,6 +97,20 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         # all done
         return self
 
+    def describe(self) -> list:
+        """
+        Describe every team i have formed: the one that renders the tiles of each reader, and
+        the scouts of each archive
+        """
+        # the teams of the readers
+        teams = [team.describe(kind="tile", owner=reader) for reader, team in self.teams.items()]
+        # and the scouts of the archives
+        scouts = [
+            team.describe(kind="scout", owner=archive) for archive, team in self.explorers.items()
+        ]
+        # all of them
+        return teams + scouts
+
     def team(self, reader):
         """
         Retrieve the team dedicated to {reader}, building it on first contact

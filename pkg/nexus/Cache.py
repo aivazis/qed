@@ -35,6 +35,20 @@ class Cache(qed.component, family="qed.nexus.caches.tile"):
     )
 
     # interface
+    def describe(self) -> dict:
+        """
+        Describe what i am holding against both my budgets, and how i am doing
+        """
+        # assemble the description
+        return {
+            "capacity": self.capacity,
+            "slots": self.limit,
+            "entries": len(self.entries),
+            "bytes": self.held,
+            "hits": self.hits,
+            "misses": self.misses,
+        }
+
     def census(self) -> str:
         """
         Describe what i am holding, in one line
