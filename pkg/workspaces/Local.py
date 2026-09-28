@@ -4,6 +4,9 @@
 # (c) 1998-2026 all rights reserved
 
 
+# externals
+import os
+
 # support
 import journal
 import qed
@@ -30,6 +33,36 @@ class Local(qed.component, family="qed.workspaces.local", implements=qed.protoco
     caches = qed.properties.str()
     caches.default = ".qed"
     caches.doc = "the name of the folder, within my path, that holds derived data"
+
+    # interface
+    def describe(self) -> dict:
+        """
+        Describe where i am and what i hold: each product that has derived data here, the kind
+        of data, and the bytes it occupies on disk, counting only the blocks that were written,
+        since the levels of a pyramid are sparse files
+        """
+        # the folder that gathers everything qed derives
+        root = self.path / self.caches
+        # the products, by kind
+        products = []
+        # if the folder is there
+        if root.isDirectory():
+            # go through the kinds of derived data, e.g. the pyramids
+            for kind in sorted(os.scandir(str(root)), key=lambda entry: entry.name):
+                # skipping anything that is not a folder
+                if not kind.is_dir():
+                    continue
+                # and the products within each
+                for product in sorted(os.scandir(kind.path), key=lambda entry: entry.name):
+                    # skipping anything that is not a folder
+                    if not product.is_dir():
+                        continue
+                    # measure it
+                    products.append(
+                        {"kind": kind.name, "name": product.name, "bytes": self._size(product.path)}
+                    )
+        # assemble the description
+        return {"path": str(self.path), "products": products}
 
     # obligations
     @qed.export
@@ -74,6 +107,27 @@ class Local(qed.component, family="qed.workspaces.local", implements=qed.protoco
             return None
         # hand off the location
         return location
+
+    # implementation details
+    def _size(self, folder: str) -> int:
+        """
+        Measure the bytes the files under {folder} occupy on disk
+        """
+        # the total
+        total = 0
+        # go through the files
+        for directory, _, names in os.walk(folder):
+            for name in names:
+                # carefully, since a build may replace a file while it is being counted
+                try:
+                    # add its blocks, in the units the system reports them in
+                    total += os.stat(os.path.join(directory, name)).st_blocks * 512
+                # a file that is gone
+                except FileNotFoundError:
+                    # occupies nothing
+                    continue
+        # all done
+        return total
 
 
 # end of file
