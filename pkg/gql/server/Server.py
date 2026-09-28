@@ -13,6 +13,7 @@ from .Fleet import Fleet
 from .ServerProcess import ServerProcess
 from .ServerRequests import ServerRequests
 from .TileCache import TileCache
+from .Workspace import Workspace
 
 
 # the server
@@ -30,6 +31,8 @@ class Server(graphene.ObjectType):
     fleet = graphene.Field(Fleet)
     # the preparation of every dataset a client has asked about
     builds = graphene.List(graphene.NonNull(Build), required=True)
+    # the workspace, unless the application has none that can describe itself
+    workspace = graphene.Field(Workspace)
 
     # resolvers
     @staticmethod
@@ -71,6 +74,18 @@ class Server(graphene.ObjectType):
         fleet = store.fleet
         # which describes its teams, if there is one
         return {"teams": fleet.describe()} if fleet is not None else None
+
+    @staticmethod
+    def resolve_workspace(store, info, **kwds):
+        """
+        Describe the workspace
+        """
+        # the application owns it
+        workspace = info.context["plexus"].workspace
+        # and it describes itself, if it knows how
+        describe = getattr(workspace, "describe", None)
+        # so ask it, if it can
+        return describe() if describe is not None else None
 
     @staticmethod
     def resolve_builds(store, info, **kwds):
