@@ -18,6 +18,7 @@ from .layout.Layout import Layout
 from .QED import QED
 from .datasets.Sample import Sample
 from .datasets.Shape import Shape
+from .server.Server import Server
 from .Version import Version
 
 
@@ -32,6 +33,8 @@ class Query(graphene.ObjectType):
     version = graphene.Field(Version, required=True)
     # the session manager
     qed = graphene.Field(QED)
+    # what the server is doing
+    server = graphene.Field(Server, required=True)
     # dataset auto discovery
     discover = graphene.Field(
         ProductMetadata,
@@ -61,6 +64,15 @@ class Query(graphene.ObjectType):
         store = info.context["store"]
         # and pass it on
         return store
+
+    # the server
+    @staticmethod
+    def resolve_server(root, info, **kwds):
+        """
+        Get the state of the server
+        """
+        # the store is the root the parts of the server resolve against
+        return info.context["store"]
 
     # product metadata
     @staticmethod
