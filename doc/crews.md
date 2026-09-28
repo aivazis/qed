@@ -97,8 +97,31 @@ rather than disband, since pyre hands back the same team for the same name and a
 never work again, and the next build brings them back. A reader that is disconnected has its team
 stand down for the same reason.
 
-The builds are still planned by rows of tiles, one raster at a time; planning them by pages, below,
-is next.
+Every run of a build reports the pages it fetched, as the misses of the page buffer of the worker's
+file, and a build adds them up (`RasterBuild.fetched`, and `measure pyramid`). A dataset leads the
+builds of the rasters it is read with: their first levels are made in the same runs, tile by tile,
+so a page is fetched once for all of them while it is in the page buffer. A run longer than a row
+of tiles carries on into the next row, so that a run can be a band of rows.
+
+On the covariance fixture, HHHH of frequency A and its mask, whose chunks occupy 219 distinct
+pages, the builds fetched:
+
+| Builders | Runs of 8 tiles | One band each | Each raster on its own |
+|----------|-----------------|---------------|------------------------|
+| 1        | 183             |               | 183                    |
+| 4        | 313 to 318      | 269           | 318                    |
+| 16       | 370 to 376      | 356           | 375                    |
+
+Building the rasters together changes little on its own, because their builds already run at the
+same time and their runs meet on the same workers. What multiplies the pages is the number of
+workers: the chunks of the mask are scattered over 193 pages, those of the other covariance term
+included, so every region of the raster needs pages from all over the file, and any division of
+the raster among workers fetches some pages more than once. Bands of rows help a little, and slow
+the build when they leave workers idle. Doing better takes the plan below: the work ordered by where
+the pages are in the file, not where the tiles are in the raster, and balanced by bytes. The fixture
+is small, 219 pages in all, and a product in a bucket is where the difference is worth measuring.
+The count of pages for the mask built alone, 159, is below the 193 pages its chunks occupy, which
+is still to be explained.
 
 
 ## Planning from the chunk table
