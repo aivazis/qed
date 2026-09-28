@@ -9,6 +9,7 @@ import functools
 import json
 import os
 import pyre
+import time
 import qed
 import journal
 import uuid
@@ -115,6 +116,23 @@ class Store(qed.component, family="qed.ux.store"):
         """
         # a dataset nobody has asked about has not been prepared
         return self._preparations.get(name)
+
+    def builds(self):
+        """
+        Describe the preparation of every dataset a client has asked about
+        """
+        # in the order they were asked about
+        return [record.describe() for record in self._preparations.values()]
+
+    def build(self, name):
+        """
+        Describe the preparation of the dataset called {name}, or {None} if nobody has asked
+        about it
+        """
+        # look up its record
+        record = self.preparation(name=name)
+        # and describe it, if there is one
+        return record.describe() if record is not None else None
 
     def prepared(self, dataset) -> bool:
         """
@@ -1239,6 +1257,8 @@ class Store(qed.component, family="qed.ux.store"):
     # the place derived data goes, wired by whoever owns it; the crews are told where it is,
     # so the levels they build land where this process will look for them
     workspace = None
+    # the shortest time between two announcements of the progress of a build, in seconds
+    _pace = 0.25
 
     # metamethods
     def __init__(self, plexus, docroot, **kwds):
@@ -1277,6 +1297,8 @@ class Store(qed.component, family="qed.ux.store"):
         self._preparations = {}
         # the pyramid builds behind them, keyed the same way, while they are under way
         self._builds = {}
+        # when the progress of a build was last told to the clients
+        self._told = 0.0
 
         # all done
         return
@@ -1493,7 +1515,7 @@ class Store(qed.component, family="qed.ux.store"):
             # so leave the view alone
             return view
         # open a record and mark the work as under way
-        record = Preparation()
+        record = Preparation(name=name)
         # remember it before dispatching, so a second request finds it
         self._preparations[name] = record
         # the rasters the dataset is read alongside get their levels too, since a masked
@@ -1518,6 +1540,7 @@ class Store(qed.component, family="qed.ux.store"):
                 fleet=self.fleet,
                 statistics=statistics,
                 onProgress=functools.partial(self._progressed, name=raster.pyre_name),
+                onLevel=functools.partial(self._leveled, name=name),
                 onSeeded=(
                     functools.partial(self._seeded, name=name) if raster is dataset else None
                 ),
@@ -1528,6 +1551,8 @@ class Store(qed.component, family="qed.ux.store"):
             builds.append(build)
         # keep the pile, so completion can be judged over all of them
         self._builds[name] = builds
+        # and hand it to the record, which describes them long after they are done
+        record.builds = builds
         # and start them
         for build in builds:
             # each hands out its first level
@@ -1544,10 +1569,24 @@ class Store(qed.component, family="qed.ux.store"):
         """
         # widen the controller bounds; the picks and the session token stay put
         touched = self._reconcile(name=name, sample=build.statistics)
-        # if anything moved, let the clients know
-        if touched:
-            # by announcing
+        # the time now
+        now = time.time()
+        # if anything moved, or the progress of the level has not been told for a while
+        if touched or now - self._told >= self._pace:
+            # note when it was told
+            self._told = now
+            # and let the clients know
             self._announce()
+        # all done
+        return self
+
+    def _leveled(self, name, build, exponent):
+        """
+        A level of the pyramid of one of the rasters behind the dataset called {name} exists
+        now, so a client may be able to offer another zoom level
+        """
+        # let the clients know
+        self._announce()
         # all done
         return self
 

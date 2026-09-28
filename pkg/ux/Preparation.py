@@ -41,6 +41,8 @@ class Preparation:
             return self
         # otherwise, mark it
         self.status = self.seeded
+        # and note when
+        self.sown = time.time()
         # all done
         return self
 
@@ -71,17 +73,48 @@ class Preparation:
         return self
 
     # metamethods
-    def __init__(self, **kwds):
+    def describe(self) -> dict:
+        """
+        Describe the state of the work: its status and times, the depth of the pyramid of the
+        dataset and how much of it is available, and the build of each raster behind it
+
+        A dataset is read at one depth with the rasters that accompany it, so its depth and
+        its reach are the smallest among its rasters
+        """
+        # describe the builds
+        rasters = [build.describe() for build in self.builds]
+        # assemble the description
+        return {
+            "dataset": self.name,
+            "status": self.status,
+            "error": self.error,
+            "started": self.started,
+            "seeded": self.sown,
+            "finished": self.finished,
+            "depth": min((raster["depth"] for raster in rasters), default=0),
+            "reach": min((raster["reach"] for raster in rasters), default=0),
+            "rasters": rasters,
+        }
+
+    def __init__(self, name: str | None = None, **kwds):
         # chain up
         super().__init__(**kwds)
+        # the dataset the work is for
+        self.name = name
         # the work begins the moment the record is opened
         self.status = self.working
         # with nothing to report
         self.error = None
         # and no measured attempt
         self.elapsed = None
+        # the builds behind the work, one for each raster, attached by whoever starts them
+        self.builds = []
+        # when the work started, when it was seeded, and when it finished
+        self.started = time.time()
+        self.sown = None
+        self.finished = None
         # start the clock
-        self._started = time.time()
+        self._started = self.started
         # all done
         return
 
@@ -92,8 +125,10 @@ class Preparation:
         """
         # if the clock was started
         if self._started is not None:
+            # note when the work finished
+            self.finished = time.time()
             # measure the attempt
-            self.elapsed = time.time() - self._started
+            self.elapsed = self.finished - self._started
             # and idle the clock
             self._started = None
         # all done
