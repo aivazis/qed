@@ -7,8 +7,12 @@
 # externals
 import graphene
 
+# support
+import qed
+
 # my parts
 from .Build import Build
+from .ConfiguredComponent import ConfiguredComponent
 from .Fleet import Fleet
 from .ServerProcess import ServerProcess
 from .ServerRequests import ServerRequests
@@ -33,6 +37,8 @@ class Server(graphene.ObjectType):
     builds = graphene.List(graphene.NonNull(Build), required=True)
     # the workspace, unless the application has none that can describe itself
     workspace = graphene.Field(Workspace)
+    # the configuration of every component reachable from the application
+    configuration = graphene.List(graphene.NonNull(ConfiguredComponent), required=True)
 
     # resolvers
     @staticmethod
@@ -86,6 +92,14 @@ class Server(graphene.ObjectType):
         describe = getattr(workspace, "describe", None)
         # so ask it, if it can
         return describe() if describe is not None else None
+
+    @staticmethod
+    def resolve_configuration(store, info, **kwds):
+        """
+        Describe the configuration of every component reachable from the application
+        """
+        # walk from the application
+        return qed.ux.configuration(root=info.context["plexus"])
 
     @staticmethod
     def resolve_builds(store, info, **kwds):

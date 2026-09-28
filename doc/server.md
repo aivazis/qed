@@ -51,7 +51,7 @@ type Server {
   fleet: Fleet            # missing when there is no fleet
   builds: [Build!]!
   workspace: Workspace    # missing when the workspace cannot describe itself
-  # reserved: configuration, see below
+  configuration: [ConfiguredComponent!]!
 }
 ```
 
@@ -205,18 +205,40 @@ type WorkspaceProduct {
 Source: the workspace (`pkg/workspaces/Local.py`) and the folders of the pyramids in it. Computing
 the bytes walks the folders, so it happens only when asked.
 
-### `configuration` (reserved, last)
+### `configuration`
 
-The effective configuration of the server: its components, their traits, the value of each, and
-the source that set it, from the command line, a configuration file, or a default. pyre already
-knows how to walk its component tree and where each value came from; this field presents that
-walk.
+The effective configuration of the server: every component reachable from the application
+through its traits, the value of each trait, and the source that set it.
 
-Nothing in pyre prevents a component from reaching, through its traits, a component that reaches
-back, so the walk can meet cycles. It visits each component once and reports a component it has
-already reported as a reference to it, by name, rather than again.
+```graphql
+type ConfiguredComponent {
+  name: String!
+  family: String
+  traits: [ConfiguredTrait!]!
+}
 
-The field name is reserved and the type is left open until the rest is in place.
+type ConfiguredTrait {
+  name: String!
+  kind: String!           # property, facility
+  schema: String!
+  value: String           # missing when the trait is secret, or has no value
+  secret: Boolean!
+  priority: String        # the category of the source of the value: defaults, user, command...
+  locator: String         # where exactly the value came from
+  components: [String!]!  # the components the value refers to, by name
+}
+```
+
+`Server.configuration` is a list of `ConfiguredComponent`, starting with the application. The walk
+follows every trait whose value is a component, or a list, a tuple, a set, or a dictionary that
+holds components. Nothing in pyre prevents a component from reaching, through its traits, a
+component that reaches back, so the walk describes each component once, in the order it reaches
+it, and every other mention of it is a reference by name.
+
+A trait whose value must not be shown, e.g. a credential, is marked secret where it is declared,
+`credentials.secret = True`, and its value is never reported. pyre's own displays of a
+configuration withhold it too. Source: `qed.ux.configuration` (`pkg/ux/configuration.py`), over
+pyre's inventory, which knows the priority and the locator of every value.
 
 
 ## Order of work
