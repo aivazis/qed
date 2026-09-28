@@ -221,8 +221,9 @@ On the local GSLC, 64 chunks on 22 pages:
 The same measurement over the internet, from a laptop, on the GSLC of cycle 31 in the operations
 bucket, a block of 16 chunks on 10 pages:
 
-- the HDF5 driver for S3 (version 2.2) gives a file a page buffer of 64 MiB when none is asked
-  for, so a reader in a bucket always has one;
+- the HDF5 library on the laptop, version 2.2, gives a file it reads from a bucket a page buffer
+  of 64 MiB when none is asked for; the library on the On-Demand system does not, so whether a
+  reader in a bucket has a page buffer without asking for one depends on the build of HDF5;
 - streaming fetches every page exactly once, whatever the page buffer;
 - revisiting with a chunk cache that holds the block takes 1 to 4 ms the second time; with the
   default chunk cache and a page buffer that keeps the pages, the driver's own or 4 GiB, 82 to 87
@@ -230,12 +231,38 @@ bucket, a block of 16 chunks on 10 pages:
   the pages, 11.1 s, every page fetched again. An undersized page buffer costs a round trip per
   page, and asking for one explicitly can do worse than the driver's default.
 
+Next to the data, on the On-Demand system, a block of 64 chunks on 30 pages:
+
+- streaming fetches the 30 pages in about 2.1 s with a page buffer, about 70 ms for a page of 4
+  MiB from one process, and in 3.2 to 3.6 s without one, when every chunk is fetched on its own;
+- revisiting with a page buffer of 4 GiB hits all 30 pages the second time and takes 357 ms, all
+  of it decoding, about 5.6 ms a chunk; with a page buffer of 64 MiB, which cannot hold 120 MiB of
+  pages, every page is fetched again;
+- a chunk cache of 64 MiB cannot hold the 128 MiB the block decodes to, so it thrashes, and the
+  second pass costs what the first did; the chunk cache has to be sized to the decoded working
+  set, which the local measurement shows is worth two orders of magnitude.
+
 **Tiles during a build** (`qed measure contention`) run a build and a steady stream of tiles at full
 resolution on the same crew, in one process, and then the same stream once the build is over. On
 the local GSLC, 20 tiles of 512 by 512 a second: with a team of four, the build took 15.5 s and the
 tiles took a median of 26.6 ms and a 95th percentile of 55.7 ms, against 20.0 and 21.1 ms after it;
-with a team of eight, 7.3 s, and 20.5 and 38.6 ms. The runs of a local build are short; the same
-measurement next to the data in a bucket is still to be taken.
+with a team of eight, 7.3 s, and 20.5 and 38.6 ms. The runs of a local build are short.
+
+Next to the data, on the On-Demand system, 20 tiles of 512 by 512 a second, while the pyramid of
+the HH polarization of the GSLC of cycle 31 was built by the same team, and 200 tiles once it was
+done:
+
+| Team | Build (s) | During the build, median / p95 (ms) | After it, median / p95 (ms) |
+|------|-----------|-------------------------------------|-----------------------------|
+| 16   | 92        | 215 / 1,577                         | 71 / 191                    |
+| 32   | 74        | 440 / 3,404                         | 70 / 168                    |
+| 64   | 61        | 1,420 / 6,984                       | 71 / 173                    |
+
+A tile that shares its team with a build waits behind the runs of the build, each of which fetches
+its pages from the bucket, and a larger team, which finishes the build sooner, makes the wait
+longer, up to 11.4 s for the slowest tile with a team of 64. The latency is worst in the fourth
+and fifth sixths of the build. Once the build is over, a tile takes about 71 ms, whatever the size
+of the team. This is the case for a team of its own for the tiles.
 
 **The ceiling of the server** (`qed measure swarm --workload`) sends the same swarm with tiles that
 cost nothing, served from the tile cache, with tiles of fill, and with tiles of data. On macOS all
@@ -244,4 +271,12 @@ delivery of every tile: the server mapped the spool file the worker left the til
 `mmap` on macOS flushes the file it maps, about 6 ms each time. The server now sends the spool with
 `sendfile` instead. On the same machine and the same swarm, cached tiles went from 138 to 3,915 a
 second, tiles of fill from 142 to 1,796, and tiles of data, with a team of eight, from 147 to 833.
-The limit of the server on Linux, where `mmap` does not flush, is still to be measured.
+
+On Linux, next to the data, on the On-Demand system, with tiles of 512 by 512 and batches of 128
+tiles, most of which finish in less than a second, so the numbers show a trend rather than precise
+values: tiles served from the cache reach about 1,300 a second, about 1 GB/s from the one thread of
+the server; tiles of fill, which go to a worker that reads nothing, about 600 a second, so handing
+a task to a worker and taking delivery of its tile costs the server about 1 ms; tiles of data from
+the bucket about 200 a second with a team of 16, 350 with 32, and no more with 64. The event loop
+of the server is not what limits the tiles of data in a bucket; whether 32 is the size beyond which
+a team gains nothing takes batches long enough to keep every member busy.
