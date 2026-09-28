@@ -221,9 +221,10 @@ On the local GSLC, 64 chunks on 22 pages:
 The same measurement over the internet, from a laptop, on the GSLC of cycle 31 in the operations
 bucket, a block of 16 chunks on 10 pages:
 
-- the HDF5 library on the laptop, version 2.2, gives a file it reads from a bucket a page buffer
-  of 64 MiB when none is asked for; the library on the On-Demand system does not, so whether a
-  reader in a bucket has a page buffer without asking for one depends on the build of HDF5;
+- HDF5 2.2, on the laptop, gives a file it reads from a bucket a page buffer of 64 MiB when none is
+  asked for; HDF5 1.14.4, on the On-Demand system at the time of these measurements, does not, so
+  whether a reader in a bucket has a page buffer without asking for one depends on the version of
+  the library;
 - streaming fetches every page exactly once, whatever the page buffer;
 - revisiting with a chunk cache that holds the block takes 1 to 4 ms the second time; with the
   default chunk cache and a page buffer that keeps the pages, the driver's own or 4 GiB, 82 to 87
