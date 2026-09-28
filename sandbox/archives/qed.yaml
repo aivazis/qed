@@ -4,21 +4,28 @@
 # (c) 1998-2026 all rights reserved
 
 
-# the archive: a query of the NISAR L0B collection over crete
-example:
-    uri: earth:example
-    collection: NISAR_L0B_RRSD_BETA_V1
-    conceptId: C3622228339-ASF
+# an example earth-access archive
+crete:
+    uri: earth:crete
+    collection: NISAR_L2_GUNW_PROVISIONAL_V1
+    conceptId: C2854335566-ASF
     polygon:
         - (23.3547, 34.7211)
         - (26.4923, 34.7211)
         - (26.4923, 35.7146)
         - (23.3547, 35.7146)
 
-# connect it
 archives:
-    - qed.archives.earth#example
+    - qed.archives.earth#crete
 
+
+# attach the configured datasets
+datasets: []
+
+
+# crew size
+qed.nexus.teams.tile:
+    size: 4
 
 # overall application configuration
 qed.app:
@@ -30,10 +37,25 @@ qed.app:
     nexus.services.web:
         # pin the port for serving web content to some number in user space
         address: ip4:0.0.0.0:8005
+    # journal
+    journal:
+        # the channel list is a trait of the app's own journal facility, so it nests under {qed.app}
+        channels:
+            - debug, qed.nexus.fleet
+            - debug, qed.nexus.heartbeat
+            - debug, qed.ux.tiles
+
+# while the switches are addressed by the app's NICKNAME, which is {qed} rather than {qed.app}
+qed.journal.debug:
+    qed.nexus.fleet.active: no
+    qed.nexus.heartbeat.active: yes
+    qed.ux.tiles.active: no
+
 
 # configure the {web} shell
 pyre.shells.web#qed.app.shell:
     # spawn a new browser window/tab every time the server starts?
     auto: no
+
 
 # end of file
