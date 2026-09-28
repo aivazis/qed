@@ -124,6 +124,19 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "warm the workers with a full pass first; off gives every level tiles nobody has fetched"
     )
 
+    rate = qed.properties.float()
+    rate.default = 20.0
+    rate.doc = "the tiles per second the contention program asks for, the way a panning client does"
+
+    workload = qed.properties.str()
+    workload.default = "data"
+    workload.validators = qed.constraints.isMember("data", "fill", "cached")
+    workload.doc = (
+        "what the tiles of the swarm cost: 'data' aims them at data; 'fill' aims them at chunks "
+        "that were never written, which the workers answer without reading anything; 'cached' "
+        "replays tiles the server keeps in its tile cache, which involves no worker at all"
+    )
+
     levels = qed.properties.bool()
     levels.default = True
     levels.doc = (
@@ -138,6 +151,37 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     resolution = qed.properties.int()
     resolution.default = 2048
     resolution.doc = "the target long axis of the decimated whole-dataset pass"
+
+    # the caches of the HDF5 library
+    buffers = qed.properties.tuple(schema=qed.properties.int())
+    buffers.default = (0, 64, 4096)
+    buffers.doc = "the page buffer sizes the cache program sweeps, in MiB; zero means none"
+
+    budgets = qed.properties.tuple(schema=qed.properties.int())
+    budgets.default = (0, 64)
+    budgets.doc = (
+        "the chunk cache sizes the cache program sweeps, in MiB; zero keeps the library default"
+    )
+
+    patterns = qed.properties.strings()
+    patterns.default = ["stream", "revisit"]
+    patterns.validators = qed.constraints.isSubset(choices=["stream", "revisit"])
+    patterns.doc = (
+        "the access patterns the cache program sweeps: 'stream' reads every chunk of a block "
+        "once, in the order of their addresses, the way a build does; 'revisit' reads the "
+        "block twice, a chunk at a time in raster order, the way a tile team does"
+    )
+
+    block = qed.properties.int()
+    block.default = 8
+    block.doc = "the side of the block the cache program reads, in chunks"
+
+    location = qed.properties.str()
+    location.default = None
+    location.doc = (
+        "the path of the measured dataset in its file; the cache program sets it for the "
+        "processes it launches, so they open the dataset before the reader does"
+    )
 
     # page occupancy
     chunks = qed.properties.bool()
@@ -261,7 +305,10 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         record the throughput at each concurrency level
 
         This is the validation half of the program: the single-process sweeps forecast the
-        parallel ceiling through Amdahl's law, and the swarm measures the actual speedup
+        parallel ceiling through Amdahl's law, and the swarm measures the actual speedup. The
+        {workload} decides what the tiles cost: tiles that cost nothing, served from the tile
+        cache or made of fill, measure the ceiling of the server itself, and a swarm of tiles of
+        data that reaches the same ceiling is limited by the server rather than by the data
         """
         # make a channel
         channel = journal.info("qed.measure.swarm")
@@ -279,14 +326,24 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # the workload geometry: the smallest configured tile at the lowest configured zoom
         span = 2 ** self.shapes[0]
         zoom = self.zooms[0]
+        # tiles served from the cache have to be put there first, by a warm up pass
+        warm = self.warm or self.workload == "cached"
         # a warm swarm replays one workload at every level; a cold one needs a workload for
         # each level, so that no level is served tiles an earlier one already fetched
-        batches = 1 if self.warm else len(self.clients)
-        # lay out the workload as a grid of distinct tiles; identical in-flight requests
-        # collapse in the team workplan, so distinct tiles are essential to load the workers
-        origins = list(
-            self._grid(dataset=dataset, span=span, zoom=zoom, count=self.tiles * batches)
-        )
+        batches = 1 if warm else len(self.clients)
+        # the tiles of fill
+        if self.workload == "fill":
+            # lie where no chunk was written
+            origins = list(
+                self._void(dataset=dataset, span=span, zoom=zoom, count=self.tiles * batches)
+            )
+        # all others
+        else:
+            # lay out the workload as a grid of distinct tiles; identical in-flight requests
+            # collapse in the team workplan, so distinct tiles are essential to load the workers
+            origins = list(
+                self._grid(dataset=dataset, span=span, zoom=zoom, count=self.tiles * batches)
+            )
         # if the raster cannot hold even one tile per batch
         if len(origins) < batches:
             # complain
@@ -309,8 +366,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             ]
             for batch in range(batches)
         ]
-        # launch the server
-        process, log = self._launch(reader=reader)
+        # launch the server, with its tile cache on only when the workload is served from it
+        process, log = self._launch(reader=reader, cache=self.workload == "cached")
         # from here on, the server must come down no matter what happens
         try:
             # wait for it to accept connections
@@ -324,7 +381,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # selections the way the client would
             self._select(reader=reader, dataset=dataset, channel=name)
             # a warm swarm
-            if self.warm:
+            if warm:
                 # warms up with one full pass so every concurrency level sees the same caches
                 self._batch(urls=workloads[0], workers=max(self.clients))
             # the collected results, one entry per concurrency level
@@ -564,6 +621,208 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             )
         # flush the report
         channel.log()
+        # all done
+        return 0
+
+    @qed.export(
+        tip="measure the latency of tiles while the team builds the pyramid of their dataset"
+    )
+    def contention(self, plexus, **kwds):
+        """
+        Keep a few tiles of the first dataset the restrictions allow in flight on its team
+        while the team builds the pyramid of the dataset, and again once the build is over, and
+        record the latency of every tile
+
+        The build and the tiles run in this process, on a crew of {team}, the way the server
+        runs them, so what is measured is how long a tile waits behind the build in the
+        workplan of the team; the path of a request through the server is left out, since the
+        swarm measures it on its own. Tiles are asked for at a steady {rate}, for as long as the
+        build runs, and then {tiles} more at the same rate; the first of {shapes} and {zooms}
+        are their size and zoom
+        """
+        # make a channel
+        channel = journal.info("qed.measure.contention")
+        # pick the first target the restrictions allow
+        first = next(self._targets(plexus=plexus), None)
+        # if there is none
+        if first is None:
+            # complain
+            error = journal.error("qed.measure.contention")
+            error.log("no dataset to measure; check the configuration and the restrictions")
+            # and bail
+            return 1
+        # unpack the target
+        reader, dataset, name, _ = first
+        # a tile task is described by a view, so point one at the target
+        view = self._view(plexus=plexus, reader=reader, dataset=dataset, channel=name)
+        # if the view did not land on it
+        if view is None:
+            # complain
+            error = journal.error("qed.measure.contention")
+            error.log(f"could not point a view at '{dataset.pyre_name}.{name}'")
+            # and bail
+            return 1
+        # the records land next to the others
+        stem = os.path.splitext(self.output)[0]
+        # the folder the levels of this build go into
+        directory = qed.primitives.path(f"{stem}-contention-team{self.team}").resolve()
+        # a folder that exists already may hold the levels of an earlier build
+        if directory.exists():
+            # which would make this one a measurement of nothing, so refuse it
+            error = journal.error("qed.measure.contention")
+            error.log(f"'{directory}' already exists; its levels would be reused")
+            # and bail
+            return 1
+        # make it
+        directory.mkdir(parents=True)
+        # the levels must go, whatever happens
+        try:
+            # run the tiles against the build
+            seeded, ready, status, records = self._contend(
+                reader=reader, dataset=dataset, name=name, view=view, directory=directory
+            )
+        # no matter how it went
+        finally:
+            # the levels have served their purpose
+            shutil.rmtree(str(directory))
+        # the host label that lets records from different machines share a file
+        host = self.pyre_host.nickname
+        # the shape of the tiles
+        span = 2 ** self.shapes[0]
+        # record every tile
+        with self._records(path=f"{stem}-contention.csv", headers=self._contentionHeaders) as out:
+            # one row each
+            for phase, submitted, latency, failure in records:
+                # with everything that distinguishes the run
+                out.writerow(
+                    (
+                        host,
+                        dataset.pyre_name,
+                        name,
+                        self.team,
+                        self.rate,
+                        self.zooms[0],
+                        span,
+                        phase,
+                        f"{submitted:.3f}",
+                        f"{latency:.1f}",
+                        "failed" if failure else "ok",
+                        f"{seeded:.3f}" if seeded is not None else "",
+                        f"{ready:.3f}" if ready is not None else "",
+                    )
+                )
+        # report the build
+        channel.line(
+            f"{dataset.pyre_name}.{name}, team of {self.team}, {self.rate:g} tiles of "
+            f"{span}x{span} @ zoom {self.zooms[0]} per second: build {status}, seeded after "
+            + (f"{seeded:.1f} s" if seeded is not None else "never")
+            + ", ready after "
+            + (f"{ready:.1f} s" if ready is not None else "never")
+        )
+        # and the latencies of each phase
+        for phase in ("build", "after"):
+            # the tiles of this phase that were delivered
+            latencies = sorted(
+                latency for kind, _, latency, failure in records if kind == phase and not failure
+            )
+            # the ones that were not
+            failures = sum(1 for kind, _, _, failure in records if kind == phase and failure)
+            # a phase without tiles
+            if not latencies:
+                # says so
+                channel.line(f"  {phase:5}: no tiles, {failures} failed")
+                # and moves on
+                continue
+            # the summary of the rest
+            channel.line(
+                f"  {phase:5}: {len(latencies)} tiles, "
+                f"median {latencies[len(latencies) // 2]:.1f} ms, "
+                f"p95 {latencies[int(len(latencies) * 0.95)]:.1f} ms, "
+                f"max {latencies[-1]:.1f} ms, {failures} failed"
+            )
+        # flush the report
+        channel.log()
+        # all done
+        return 0
+
+    @qed.export(tip="measure the page buffer and the chunk cache in the access patterns of crews")
+    def caches(self, plexus, **kwds):
+        """
+        Read a block of chunks that hold data from the first dataset the restrictions allow,
+        in each access pattern, with each page buffer size and chunk cache size, and record the
+        resident memory, the activity of the page buffer, and the time of every pass
+
+        Every configuration runs in a fresh process, so that neither the caches nor the memory
+        of one configuration carry over to the next. The process opens the dataset before the
+        reader does: a second open of a file, or of a dataset, in the same process shares the
+        caches of the first, whatever its access lists ask for
+        """
+        # make a channel for the problems that stop the program before it starts
+        error = journal.error("qed.measure.caches")
+        # a process launched by a sweep knows where its dataset is
+        if self.location is not None:
+            # so it measures its one configuration and reports its status
+            return self._cacheRun(
+                plexus=plexus,
+                pattern=self.patterns[0],
+                buffer=self.buffers[0],
+                budget=self.budgets[0],
+            )
+        # otherwise, pick the first raster the restrictions allow
+        first = next(self._rasters(plexus=plexus), None)
+        # if there is none
+        if first is None:
+            # complain
+            error.log("no dataset to measure; check the configuration and the restrictions")
+            # and bail
+            return 1
+        # unpack it
+        reader, dataset = first
+        # a reader that is not an HDF5 product
+        if not isinstance(reader, qed.readers.nisar.h5):
+            # has no caches to measure
+            error.log(f"'{reader.pyre_name}' is not an HDF5 product")
+            # so bail
+            return 1
+        # the configurations to measure
+        configurations = [
+            (pattern, buffer, budget)
+            for pattern in self.patterns
+            for buffer in self.buffers
+            for budget in self.budgets
+        ]
+        # make a channel for the progress report
+        channel = journal.info("qed.measure.caches")
+        # go through the configurations
+        for pattern, buffer, budget in configurations:
+            # narrow the sweep to this one and hand it to a fresh process
+            cmd = [
+                "qed",
+                "measure",
+                "caches",
+                # the configuration may prefer the web shell; the child is a CLI run
+                "--shell=script",
+                f"--only={reader.pyre_name}",
+                f"--rasters={dataset.pyre_name}",
+                f"--patterns={pattern}",
+                f"--buffers={buffer}",
+                f"--budgets={budget}",
+                f"--block={self.block}",
+                f"--location={dataset.data._dataset._pyre_location}",
+                f"--output={self.output}",
+            ]
+            # show me
+            channel.log(
+                f"{dataset.pyre_name}: {pattern}, page buffer {buffer} MiB, "
+                f"chunk cache {budget or 'default'} MiB"
+            )
+            # launch and wait
+            got = subprocess.run(cmd)
+            # if the configuration failed
+            if got.returncode != 0:
+                # a missing record is easy to miss, so make it loud
+                warning = journal.warning("qed.measure.caches")
+                warning.log(f"{pattern}, {buffer} MiB, {budget} MiB: failed")
         # all done
         return 0
 
@@ -2259,6 +2518,55 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # all done
         return
 
+    def _void(self, dataset, span, zoom, count):
+        """
+        Lay out up to {count} distinct in-bounds tile origins, in decimated coordinates, whose
+        footprint holds no chunk that was written, so that producing them reads nothing
+        """
+        # the chunk table of the dataset, as the library sees it
+        table = dataset.data.dataset.chunkTable()
+        # a dataset that is not stored in chunks
+        if table is None:
+            # has no holes
+            return
+        # the origins of the chunks that were written
+        written = {tuple(chunk.origin) for chunk in table}
+        # unpack the shape of a chunk
+        tileRows, tileCols = tuple(dataset.tile)
+        # unpack the raster shape
+        rows, cols = dataset.shape
+        # the footprint of a tile at full resolution
+        extent = span << zoom
+        # the number of tiles laid out so far
+        found = 0
+        # go through the tiles of the client's grid that fit inside the raster
+        for r in range(0, (rows >> zoom) - span + 1, span):
+            for c in range(0, (cols >> zoom) - span + 1, span):
+                # the chunks under the footprint
+                under = (
+                    (row, col)
+                    for row in range(
+                        (r << zoom) // tileRows * tileRows, (r << zoom) + extent, tileRows
+                    )
+                    for col in range(
+                        (c << zoom) // tileCols * tileCols, (c << zoom) + extent, tileCols
+                    )
+                )
+                # a tile over any chunk that was written
+                if any(chunk in written for chunk in under):
+                    # reads something, so skip it
+                    continue
+                # publish the rest
+                yield (r, c)
+                # count it
+                found += 1
+                # and stop when there are enough
+                if found == count:
+                    # of them
+                    return
+        # all done
+        return
+
     def _probed(self, dataset):
         """
         The windows of {dataset} the probe samples when the server makes first contact, as
@@ -2272,9 +2580,10 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # all done
         return windows
 
-    def _launch(self, reader):
+    def _launch(self, reader, cache=False):
         """
-        Launch the installed qed server with the swarm configuration
+        Launch the installed qed server with the swarm configuration, with its tile {cache} on
+        or off
         """
         # the server output lands next to the measurement records
         stem = os.path.splitext(self.output)[0]
@@ -2290,13 +2599,15 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             "--shell.auto=no",
             # on the swarm port
             f"--qed.app.nexus.services.web.address=ip4:127.0.0.1:{self.port}",
-            # with the tile cache off, so every request is an actual render
-            "--qed.app.nexus.services.web.fleet.cache.capacity=0",
             # with the requested team size for the target reader
             f"--qed.app.nexus.services.web.fleet.{reader.pyre_name}.size={self.team}",
             # building the levels of the product, unless asked not to
             f"--qed.app.pyramids={'yes' if self.levels else 'no'}",
         ]
+        # unless asked for it
+        if not cache:
+            # the tile cache is off, so every request is an actual render
+            cmd.append("--qed.app.nexus.services.web.fleet.cache.capacity=0")
         # launch
         process = subprocess.Popen(
             cmd, stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT
@@ -2539,7 +2850,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # sign on
             channel.line(
                 f"swarm: {dataset.pyre_name}.{name}, {count} tiles of "
-                f"{span}x{span} @ zoom {zoom}, team of {self.team}:"
+                f"{span}x{span} @ zoom {zoom}, {self.workload}, team of {self.team}:"
             )
             # go through the levels
             for workers, elapsed, rate, latencies, failures in results:
@@ -2568,6 +2879,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                         f"{median:.1f}",
                         f"{p95:.1f}",
                         failures,
+                        self.workload,
                     )
                 )
                 # and report it
@@ -2965,6 +3277,474 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # hand off the times and the state
         return marks["seeded"], (marks["ready"] if not errors else None), status
 
+    # implementation details: tiles during a build
+    def _view(self, plexus, reader, dataset, channel):
+        """
+        Point the view of viewport 0 at {dataset} of {reader} and its {channel}, the way the
+        client would, and hand it back, or {None} if it did not land there
+
+        The store of this process has no fleet, so pointing a view does not start a build
+        """
+        # get the store
+        store = plexus._ux.store
+        # select the reader
+        store.selectSource(viewport=0, name=reader.pyre_name)
+        # the view was made before the reader discovered its datasets, so let it catch up
+        store.view(viewport=0).refresh()
+        # a product whose axes are not all single valued does not resolve from the reader
+        # selection alone, so pin each axis to the coordinate that identifies the dataset
+        for axis, value in dict(dataset.selector).items():
+            # an axis already sitting on the value i want needs no help; toggling it would
+            # clear the selection rather than confirm it
+            if store.view(viewport=0).selections.get(axis) == value:
+                # so leave it alone
+                continue
+            # otherwise, pin it
+            store.toggleCoordinate(viewport=0, source=reader.pyre_name, axis=axis, coordinate=value)
+        # pick the channel; the store hands back the views it touched as it goes
+        for _ in store.channelSet(viewport=0, source=reader.pyre_name, tag=channel):
+            # and there is nothing to do with them
+            pass
+        # get the view
+        view = store.view(viewport=0)
+        # if it did not land on the dataset
+        if view.dataset is None or view.dataset.pyre_name != dataset.pyre_name:
+            # say so
+            return None
+        # otherwise, hand it off
+        return view
+
+    def _contend(self, reader, dataset, name, view, directory):
+        """
+        Build the pyramid of {dataset}, and of the rasters it is read with, on a crew of {team}
+        members working out of {directory}, ask the same crew for tiles of its {name} channel at
+        a steady rate while it builds, and again once it is done; hand back the seconds until the
+        dataset is seeded and until the build is done, the state it ended in, and a record of
+        every tile, as (phase, seconds since the start, latency in ms, failure)
+        """
+        # the workspace the levels go into
+        workspace = qed.workspaces.local(name=f"qed.measure.contention.team{self.team}.workspace")
+        # is the folder of this build
+        workspace.path = str(directory)
+        # the fleet, with an event loop of its own
+        fleet = qed.nexus.fleet(name=f"qed.measure.contention.team{self.team}")
+        fleet.dispatcher = pyre.ipc.newPSL()
+        # the team of the reader, with the size under measurement
+        fleet.team(reader=reader.pyre_name).size = self.team
+        # the clock of the run
+        clock = qed.timers.wall(f"qed.measure.contention.team{self.team}")
+        # the geometry of the tiles
+        span = 2 ** self.shapes[0]
+        zoom = self.zooms[0]
+        # distinct tiles for both phases, so that neither is served from the caches the other
+        # warmed up, taken alternately from the tiles nearest the data, so that both phases
+        # sample the same neighborhood; the build takes as many as it lasts for
+        origins = list(self._grid(dataset=dataset, span=span, zoom=zoom, count=self._crowd))
+        # split between the phases
+        queues = {
+            "build": collections.deque(origins[0::2]),
+            "after": collections.deque(origins[1::2][: self.tiles]),
+        }
+        # the time between tiles
+        interval = 1 / self.rate
+        # the record of every tile
+        records = []
+        # the state of the run: the phase, the tiles in flight, and the times of the build
+        state = {"phase": "build", "flight": 0, "seeded": None, "ready": None}
+        # the reasons of any failures of the build
+        errors = []
+        # the builds, one per raster
+        builds = []
+
+        # ask for tiles at a steady rate
+        def pace(timestamp):
+            """
+            Send the next tile of the current phase
+
+            N.B.: this is an alarm handler; it hands back the time until its next call, or
+            {None} once the tiles of the second phase have all been sent
+            """
+            # the tiles of the current phase
+            queue = queues[state["phase"]]
+            # if there is one left
+            if queue:
+                # send it
+                submit(origin=queue.popleft(), phase=state["phase"])
+            # the second phase ends when its tiles have all been sent
+            if state["phase"] == "after" and not queue:
+                # so stop pacing
+                return None
+            # otherwise, keep going
+            return interval * second
+
+        # the end of the run
+        def settle():
+            """
+            Stop the loop once the build is over and every tile of the second phase is back
+            """
+            # if that is the case
+            if state["phase"] == "after" and not queues["after"] and state["flight"] == 0:
+                # the run is over
+                fleet.dispatcher.stop()
+            # all done
+            return
+
+        # send a tile to the crew
+        def submit(origin, phase):
+            """
+            Send the tile at {origin} to the crew, as part of {phase}
+            """
+            # describe it the way the server does
+            task = qed.nexus.tile(
+                view=view,
+                channel=f"{dataset.pyre_name}.{name}",
+                zoom=(zoom, zoom),
+                origin=origin,
+                shape=(span, span),
+                workspace=workspace,
+            )
+            # note when it left
+            start = clock.sec()
+
+            # when it comes back
+            def delivered(result=None, error=None):
+                """
+                Record the tile, and end the run if it was the last one
+                """
+                # record it
+                records.append((phase, start, (clock.sec() - start) * 1000, error is not None))
+                # it is no longer in flight
+                state["flight"] -= 1
+                # and the run may be over
+                settle()
+                # all done
+                return
+
+            # it is in flight
+            state["flight"] += 1
+            # send it
+            fleet.render(task=task, callback=delivered)
+            # all done
+            return
+
+        # when the dataset is worth looking at
+        def seeded(build):
+            """
+            The first tiles of the dataset have reported
+            """
+            # note when
+            state["seeded"] = clock.sec()
+            # all done
+            return
+
+        # when a build is over
+        def over(build, error=None):
+            """
+            A build is done, or failed with {error}; once they all are, the second phase starts
+            """
+            # a failure
+            if error is not None:
+                # has its reason noted
+                errors.append(str(error))
+            # once every build is over
+            if all(build.done for build in builds):
+                # note when
+                state["ready"] = clock.sec()
+                # switch to the second phase; the pacer takes it from here
+                state["phase"] = "after"
+                # unless there is nothing left to wait for
+                settle()
+            # all done
+            return
+
+        # when the run takes too long
+        def overdue(timestamp):
+            """
+            The run has taken longer than its patience allows
+
+            N.B.: this is an alarm handler; returning {None} keeps it from being rescheduled
+            """
+            # note it
+            errors.append(f"gave up after {self._buildPatience} s")
+            # and stop the loop
+            fleet.dispatcher.stop()
+            # the alarm is done
+            return None
+
+        # the rasters: the dataset, and the ones it is read with, since a masked render reads
+        # all of them at one depth or none of them
+        rasters = [dataset] + list(dataset.companions().values())
+        # go through them
+        for raster in rasters:
+            # the pyramid, laid out in the workspace
+            pyramid = qed.readers.nisar.pyramid(reader=reader, dataset=raster, workspace=workspace)
+            # and its build; only the dataset reports its seed, as it does in the server
+            builds.append(
+                qed.nexus.build(
+                    reader=reader,
+                    dataset=raster,
+                    pyramid=pyramid,
+                    fleet=fleet,
+                    statistics=qed.ux.sample(),
+                    onSeeded=seeded if raster is dataset else None,
+                    onDone=over,
+                    onFailed=over,
+                )
+            )
+        # start the clock
+        clock.reset()
+        clock.start()
+        # start the builds
+        for build in builds:
+            # each hands out its first level
+            build.start()
+        # and the tiles, which join the workplan behind the first level
+        fleet.dispatcher.alarm(interval=interval * second, call=pace)
+        # give up if the run takes too long
+        fleet.dispatcher.alarm(interval=self._buildPatience * second, call=overdue)
+        # run the loop until the run is over
+        fleet.dispatcher.watch()
+        # stop the clock
+        clock.stop()
+        # let the crew go
+        fleet.disband()
+        # the state the builds ended in
+        status = "; ".join(errors) if errors else "ready"
+        # hand off the times, the state, and the tiles
+        return state["seeded"], state["ready"], status, records
+
+    # implementation details: the caches
+    def _cacheRun(self, plexus, pattern, buffer, budget):
+        """
+        Read a block of chunks of the dataset at my {location} in the access {pattern}, through
+        a page buffer of {buffer} MiB and a chunk cache of {budget} MiB, and record what it cost
+        """
+        # make a channel
+        channel = journal.info("qed.measure.caches")
+        # the host label that lets records from different machines share a file
+        host = self.pyre_host.nickname
+        # the records land next to the others
+        stem = os.path.splitext(self.output)[0]
+        # the store is the authority on the connected data sources
+        ux = plexus._ux
+        # find the reader the sweep named, without opening it
+        reader = next(
+            (
+                source
+                for source in (ux.store.sources if ux else [])
+                if source.pyre_name in self.only
+            ),
+            None,
+        )
+        # if it is not there
+        if reader is None:
+            # complain
+            error = journal.error("qed.measure.caches")
+            error.log(f"no reader among {', '.join(self.only)}")
+            # and bail
+            return 1
+        # the access list of the file, with the page buffer under measurement; the shares of
+        # metadata and raw data are those of the NISAR readers
+        fapl = qed.h5.libh5.properties.fapl()
+        # a page buffer, when asked for
+        if buffer:
+            # gets its size
+            fapl.pageBufferSize = qed.h5.libh5.properties.PageBuffer(
+                bytes=buffer * 2**20, metadata=5, raw=50
+            )
+        # the access list of the dataset, with the chunk cache under measurement
+        dapl = qed.h5.libh5.properties.dapl()
+        # a chunk cache, when asked for
+        if budget:
+            # gets its size; the index gets many more slots than the cache holds chunks, a prime
+            # number of them, the way the library recommends
+            dapl.chunkCache = qed.h5.libh5.properties.ChunkCache(
+                slots=100003, bytes=budget * 2**20, preemption=0.75
+            )
+        # before the file is opened, measure the process
+        before = self._resident()
+        # open the file with the credentials of the reader, before the reader does, since the
+        # opens that follow share the caches of the first
+        h5 = qed.h5.reader(uri=reader.uri, credentials=reader.grant(), fapl=fapl)
+        # get the file itself
+        file = h5._file._pyre_id
+        # and the dataset, through its access list
+        h5ds = file.dataset(self.location, dapl)
+        # once it is open, measure the process again
+        opened = self._resident()
+        # now the reader can make first contact; the layout is metadata, so nothing is sampled
+        reader.open(measure=False)
+        # find the dataset the sweep named
+        dataset = next(
+            (entry for entry in reader.datasets if entry.pyre_name in self.rasters), None
+        )
+        # if it is not there
+        if dataset is None:
+            # complain
+            error = journal.error("qed.measure.caches")
+            error.log(f"'{reader.pyre_name}' has no dataset among {', '.join(self.rasters)}")
+            # and bail
+            return 1
+        # the layout of the file, which the sweep checked is HDF5
+        pageSize, _, _ = qed.readers.pages.paging(reader=reader)
+        # the chunk table of the dataset, as (address, bytes, origin)
+        table = qed.readers.pages.tables(reader=reader)[dataset.pyre_name]
+        # the shape of a chunk
+        tile = tuple(dataset.tile)
+        # the size of a chunk before the filters
+        raw = tile[0] * tile[1] * dataset.data.disktype.bytes
+        # what the dataset holds where there is nothing
+        fill = qed.readers.pages.nodata(dataset=dataset, table=table, raw=raw)
+        # the stored size of a chunk of fill, when there are such chunks
+        empty = min(size for _, size, _ in table) if fill["fillChunks"] else None
+        # the chunks that hold data, by origin
+        chunks = {origin: (address, size) for address, size, origin in table if size != empty}
+        # find a block of them
+        side, corner = self._solid(chunks=chunks, tile=tile, side=self.block)
+        # if there is none
+        if corner is None:
+            # complain
+            error = journal.error("qed.measure.caches")
+            error.log(f"'{dataset.pyre_name}' has no block of chunks that all hold data")
+            # and bail
+            return 1
+        # the origins of the chunks of the block, in raster order
+        origins = [
+            (corner[0] + i * tile[0], corner[1] + j * tile[1])
+            for i in range(side)
+            for j in range(side)
+        ]
+        # the pages they occupy
+        pages = {chunks[origin][0] // pageSize for origin in origins} if pageSize else set()
+        # the bytes they store
+        stored = sum(chunks[origin][1] for origin in origins)
+        # start the tally of the page buffer over, so the survey of the layout is not counted
+        file.resetPageBuffer()
+        # and measure the process right before the passes
+        ready = self._resident()
+        # the type of its cells, as they are stored, so that nothing is converted
+        memtype = dataset.data.disktype
+        # a buffer for a chunk
+        data = bytearray(raw)
+        # the passes of the pattern: a stream reads every chunk once, in the order of their
+        # addresses; a revisit reads them in raster order, twice
+        if pattern == "stream":
+            # one pass, in the order of their addresses
+            passes = [sorted(origins, key=lambda origin: chunks[origin][0])]
+        # otherwise
+        else:
+            # two passes in raster order
+            passes = [origins, origins]
+        # the clocks
+        wallclock = qed.timers.wall("qed.measure.caches.wall")
+        cpuclock = qed.timers.cpu("qed.measure.caches.cpu")
+        # open the file of records for appending
+        with self._records(path=f"{stem}-caches.csv", headers=self._cacheHeaders) as out:
+            # go through the passes
+            for index, order in enumerate(passes):
+                # start the tally of the page buffer over, when there is one
+                file.resetPageBuffer()
+                # start both clocks afresh
+                wallclock.reset()
+                cpuclock.reset()
+                wallclock.start()
+                cpuclock.start()
+                # read the chunks
+                for origin in order:
+                    # one at a time
+                    h5ds.read(data=data, memtype=memtype, origin=origin, shape=tile)
+                # stop the clocks
+                wallclock.stop()
+                cpuclock.stop()
+                # what the page buffer saw, if there is one, as (metadata, raw data)
+                seen = file.pageBuffer
+                # the page activity of the raw data
+                accesses, hits, misses = (
+                    (seen.accesses[1], seen.hits[1], seen.misses[1]) if seen else (0, 0, 0)
+                )
+                # the process, after the pass
+                after = self._resident()
+                # record the pass
+                out.writerow(
+                    (
+                        host,
+                        dataset.pyre_name,
+                        pattern,
+                        buffer,
+                        budget,
+                        side,
+                        len(origins),
+                        len(pages),
+                        stored,
+                        index + 1,
+                        f"{wallclock.ms():.3f}",
+                        f"{cpuclock.ms():.3f}",
+                        accesses,
+                        hits,
+                        misses,
+                        (opened - before) // 2**20,
+                        (after - ready) // 2**20,
+                    )
+                )
+                # and report it
+                channel.line(
+                    f"{dataset.pyre_name}: {pattern} pass {index + 1}, "
+                    f"page buffer {buffer} MiB, chunk cache {budget or 'default'} MiB: "
+                    f"{len(origins)} chunks on {len(pages)} pages, "
+                    f"{wallclock.ms():.1f} ms wall, {cpuclock.ms():.1f} ms cpu, "
+                    f"page misses {misses} of {accesses}, "
+                    f"{(after - ready) / 2**20:.0f} MiB more resident than before the passes"
+                )
+        # flush the report
+        channel.log()
+        # all done
+        return 0
+
+    def _solid(self, chunks, tile, side):
+        """
+        Find the corner of a block of {side} by {side} {chunks} that all hold data, as near the
+        center of their extent as possible, shrinking the block when there is no such block;
+        hand back the side of the block that was found, and its corner, or {None}
+        """
+        # the extent of the chunks that hold data
+        rows = [origin[0] for origin in chunks]
+        cols = [origin[1] for origin in chunks]
+        # and its center
+        center = ((min(rows) + max(rows)) / 2, (min(cols) + max(cols)) / 2)
+        # the candidate corners, nearest the center first
+        corners = sorted(chunks, key=lambda o: (o[0] - center[0]) ** 2 + (o[1] - center[1]) ** 2)
+        # try blocks of decreasing size
+        for size in range(side, 0, -1):
+            # go through the candidates
+            for row, col in corners:
+                # a block whose every chunk holds data
+                if all(
+                    (row + i * tile[0], col + j * tile[1]) in chunks
+                    for i in range(size)
+                    for j in range(size)
+                ):
+                    # is the one
+                    return size, (row, col)
+        # nothing holds data
+        return 0, None
+
+    def _resident(self):
+        """
+        Measure the resident memory of this process, in bytes
+        """
+        # on linux, the kernel publishes it
+        if os.path.exists("/proc/self/statm"):
+            # as a number of pages, the second entry of the record
+            with open("/proc/self/statm") as stream:
+                # so read it
+                pages = int(stream.read().split()[1])
+            # and convert
+            return pages * os.sysconf("SC_PAGE_SIZE")
+        # elsewhere, ask the process table, which reports KiB
+        kib = subprocess.check_output(["ps", "-o", "rss=", "-p", str(os.getpid())])
+        # and convert
+        return int(kib) * 1024
+
     # implementation details: the census
     def _scraped(self, channel, prefix, product):
         """
@@ -3350,6 +4130,9 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     _absent = 3
     # how long the census waits for the measurement of one granule, in seconds
     _patience = 900
+    # the most tiles the contention program lays out, which bounds how long it can keep asking
+    # for tiles while a build runs
+    _crowd = 100000
     # how long the pyramid measurement waits for a build, in seconds
     _buildPatience = 7200
     # how long the output of a measurement can pause before what it said counts as an entry
@@ -3388,6 +4171,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "median_ms",
         "p95_ms",
         "failures",
+        "workload",
     )
     # the column labels of the pyramid construction records
     _pyramidHeaders = (
@@ -3399,6 +4183,42 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "ready_s",
         "status",
         "bytes",
+    )
+    # the column labels of the records of tiles during a build
+    _contentionHeaders = (
+        "host",
+        "dataset",
+        "channel",
+        "team",
+        "rate",
+        "zoom",
+        "span",
+        "phase",
+        "submitted_s",
+        "latency_ms",
+        "status",
+        "seeded_s",
+        "ready_s",
+    )
+    # the column labels of the cache records
+    _cacheHeaders = (
+        "host",
+        "dataset",
+        "pattern",
+        "buffer_mib",
+        "budget_mib",
+        "side",
+        "chunks",
+        "pages",
+        "stored",
+        "pass",
+        "wall_ms",
+        "cpu_ms",
+        "page_accesses",
+        "page_hits",
+        "page_misses",
+        "open_mib",
+        "resident_mib",
     )
     # the column labels of the per dataset page occupancy summaries
     _occupancyHeaders = (
