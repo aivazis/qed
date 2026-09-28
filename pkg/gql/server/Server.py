@@ -11,6 +11,7 @@ import graphene
 from .Build import Build
 from .Fleet import Fleet
 from .ServerProcess import ServerProcess
+from .ServerRequests import ServerRequests
 from .TileCache import TileCache
 
 
@@ -22,6 +23,8 @@ class Server(graphene.ObjectType):
 
     # the process, unless the server cannot describe it
     process = graphene.Field(ServerProcess)
+    # the tile requests
+    requests = graphene.Field(ServerRequests, required=True)
     # the cache of rendered tiles and the teams of workers, unless there is no fleet
     cache = graphene.Field(TileCache)
     fleet = graphene.Field(Fleet)
@@ -40,6 +43,14 @@ class Server(graphene.ObjectType):
         describe = getattr(server, "describe", None)
         # so ask it, if it can
         return describe() if describe is not None else None
+
+    @staticmethod
+    def resolve_requests(store, info, **kwds):
+        """
+        Describe the tile requests
+        """
+        # the dispatcher keeps track of them
+        return info.context["dispatcher"].describe()
 
     @staticmethod
     def resolve_cache(store, info, **kwds):

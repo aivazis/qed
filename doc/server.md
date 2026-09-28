@@ -97,7 +97,7 @@ type ZoomTally {
 
 # how the recent tiles were served
 type TileTally {
-  via: String!            # crew, hit, inline, refused, starved, abandoned
+  via: String!            # crew, hit, inline, refused, starved, hangup
   count: Int!
   median: Float!          # seconds of wall time
   p95: Float!
