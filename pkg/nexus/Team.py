@@ -44,6 +44,46 @@ class Team(Staff, family="qed.nexus.teams.tile"):
     recruiter = pyre.nexus.recruiter(default=Fork)
     recruiter.doc = "the strategy for recruiting crew members"
 
+    pages = pyre.properties.int(default=None)
+    pages.doc = (
+        "the page buffer my members open a product with, in pages of 4 KiB; unset keeps the "
+        "setting of the reader"
+    )
+
+    chunks = pyre.properties.int(default=256)
+    chunks.doc = (
+        "the chunk cache of each dataset my members open, in MiB; unset keeps the setting of "
+        "the reader; a view at full resolution revisits the same few chunks, so decoding them "
+        "once pays"
+    )
+
+    # the kind of work i do
+    kind = "tile"
+
+    # interface
+    def assign(self, task, callback):
+        """
+        Queue {task}, marked with the budgets of the caches my members open products with, and
+        arrange for {callback} to receive the outcome
+        """
+        # mark the task with my budgets; they are not part of its identity, so a task that is
+        # already queued is joined as it was
+        task.budget = self.budget()
+        # and chain up
+        return super().assign(task=task, callback=callback)
+
+    def budget(self) -> dict:
+        """
+        The settings of the caches my members open products with, as reader settings, leaving
+        out the ones i have no opinion on
+        """
+        # the settings i have an opinion on
+        return {
+            name: value
+            for name, value in (("pages", self.pages), ("chunks", self.chunks))
+            if value is not None
+        }
+
     # implementation details
     def collect(self, task, result):
         """
@@ -89,14 +129,14 @@ class Team(Staff, family="qed.nexus.teams.tile"):
         # all done
         return self
 
-    def describe(self, kind: str, owner: str) -> dict:
+    def describe(self, owner: str) -> dict:
         """
-        Describe my roster and my schedule, as a team of {kind} that works for {owner}
+        Describe my roster and my schedule, as a team that works for {owner}
         """
         # assemble the description
         return {
             "name": self.pyre_name,
-            "kind": kind,
+            "kind": self.kind,
             "owner": owner,
             "size": self.size,
             "idle": len(self.idle),

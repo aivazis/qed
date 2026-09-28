@@ -11,6 +11,7 @@ import journal
 
 # the teams i manage
 from .Team import Team
+from .Builders import Builders
 from .Scouts import Scouts
 
 # the cache of rendered tiles they share
@@ -68,48 +69,89 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
 
     def stage(self, reader, callback):
         """
-        Send {reader} to its team for first contact, and arrange for {callback} to receive
+        Send {reader} to its builders for first contact, and arrange for {callback} to receive
         the discovery record
         """
         # describe the product as a task that can travel to a worker
         task = Survey(reader=reader)
-        # form the team now, rather than at first tile: the worker that opens the product
-        # for the survey keeps it open, so the first tile finds a warm process
-        team = self.team(reader=task.reader)
-        # hand it the work; the workplan serves newest first, which is harmless here,
-        # since the survey is assigned before any tile of this product can exist
+        # first contact is the start of the work that makes the product worth looking at, so
+        # it belongs to the builders; the team that serves tiles opens the product when its
+        # first tile arrives
+        team = self.builders(reader=task.reader)
+        # hand it the work
         team.assign(task=task, callback=callback)
         # all done
         return self
 
     def decimate(self, task, callback):
         """
-        Route the decimation {task} to the team dedicated to its data source and arrange for
+        Route the decimation {task} to the builders of its data source and arrange for
         {callback} to receive the records of its tiles
         """
-        # find the team that owns this product; it exists already, since a dataset cannot
-        # be selected before its source has been surveyed
-        team = self.team(reader=task.reader)
-        # hand it the work; the workplan serves newest first, so a decimation queued
-        # behind a burst of tile requests waits for them, which is the right order: the
-        # user is looking at those tiles now
+        # find the builders of this product, forming them if they have been released since
+        # first contact; the tiles are served by another team, so they never wait behind a
+        # decimation
+        team = self.builders(reader=task.reader)
+        # hand it the work
         team.assign(task=task, callback=callback)
+        # all done
+        return self
+
+    def builders(self, reader):
+        """
+        Retrieve the team that makes first contact with {reader} and builds its pyramids,
+        forming it on first use
+        """
+        # look it up
+        team = self.builds.get(reader)
+        # if it is there
+        if team is not None:
+            # hand it off
+            return team
+        # otherwise, form it; its name places its configuration under the team that serves
+        # the tiles of the same reader, e.g. '{fleet}.{reader}.builders.size'
+        team = Builders(name=f"{self.pyre_name}.{reader}.builders")
+        # it shares the event loop
+        team.dispatcher = self.dispatcher
+        # it renders no tiles, so it neither feeds the cache nor takes samples of them
+        team.cache = None
+        team.stats = None
+        # register it
+        self.builds[reader] = team
+        # make a channel
+        channel = journal.debug("qed.nexus.fleet")
+        # and say so
+        channel.log(f"formed a team of {team.size} builders for '{reader}'")
+        # all done
+        return team
+
+    def retire(self, reader):
+        """
+        Release the builders of {reader}, since there is nothing left for them to build
+        """
+        # look them up, removing them from my registry
+        team = self.builds.pop(reader, None)
+        # if they are there
+        if team is not None:
+            # send them home; a team that stood down, unlike one that was disbanded, can be
+            # formed again under its name, since pyre hands back the same instance for it
+            team.standDown()
         # all done
         return self
 
     def describe(self) -> list:
         """
-        Describe every team i have formed: the one that renders the tiles of each reader, and
-        the scouts of each archive
+        Describe every team i have formed: the one that renders the tiles of each reader, the
+        builders of each reader, and the scouts of each archive
         """
         # the teams of the readers
-        teams = [team.describe(kind="tile", owner=reader) for reader, team in self.teams.items()]
+        teams = [team.describe(owner=reader) for reader, team in self.teams.items()]
+        # the builders of the readers
+        builds = [team.describe(owner=reader) for reader, team in self.builds.items()]
         # and the scouts of the archives
-        scouts = [
-            team.describe(kind="scout", owner=archive) for archive, team in self.explorers.items()
-        ]
+        scouts = [team.describe(owner=archive) for archive, team in self.explorers.items()]
         # all of them
-        return teams + scouts
+        return teams + builds + scouts
 
     def team(self, reader):
         """
@@ -217,8 +259,11 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         team = self.teams.pop(reader, None)
         # if there is one
         if team is not None:
-            # send its crews home
-            team.disband()
+            # send its crews home; standing down, rather than disbanding, leaves a team that a
+            # reader connected again under the same name can put back to work
+            team.standDown()
+        # its builders go too
+        self.retire(reader=reader)
         # and drop the departed product's renders from the cache
         self.cache.purge(reader=reader)
         # all done
@@ -228,8 +273,8 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         """
         Apply the journal {control} to every team, and so to every running crew member
         """
-        # go through my teams and my scouts
-        for team in (*self.teams.values(), *self.explorers.values()):
+        # go through my teams, my builders, and my scouts
+        for team in (*self.teams.values(), *self.builds.values(), *self.explorers.values()):
             # and pass the word to each one
             team.instruct(control=control)
         # all done
@@ -245,6 +290,12 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
             team.disband()
         # empty the registry
         self.teams.clear()
+        # go through my builders
+        for team in self.builds.values():
+            # and send each one's crews home
+            team.disband()
+        # empty their registry
+        self.builds.clear()
         # go through my scouts
         for team in self.explorers.values():
             # and send each one's crews home
@@ -262,6 +313,9 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         super().__init__(**kwds)
         # the table of teams, keyed by the name of their data source
         self.teams = {}
+        # the builders, keyed by the name of their data source, while there is something for
+        # them to build
+        self.builds = {}
         # the scouts, keyed by archive name
         self.explorers = {}
         # the cache of rendered tiles, shared by all of them; its name places its

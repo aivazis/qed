@@ -49,6 +49,9 @@ from .Forkserver import Forkserver as forkserver
 # the pool of persistent tile rendering processes
 from .Team import Team as team
 
+# the pool of processes that make first contact and build pyramids
+from .Builders import Builders as builders
+
 # the pool of persistent archive listing processes
 from .Scouts import Scouts as scouts
 

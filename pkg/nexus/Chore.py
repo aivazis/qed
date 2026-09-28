@@ -24,6 +24,11 @@ class Chore(pyre.nexus.task):
     lets equal tasks share a single execution
     """
 
+    # public data
+    # the budgets of the caches of the team that runs me, as reader settings; stamped by the team
+    # when i am assigned, and not part of my identity
+    budget = None
+
     # metamethods
     def __hash__(self):
         # my identity is my specification
@@ -308,6 +313,18 @@ class Chore(pyre.nexus.task):
         factory = qed.protocols.reader.pyre_resolveSpecification(spec=self.factory)
         # work on a copy of the recipe, since member recipes get materialized in place
         config = dict(self.config)
+        # the team that runs me decides how large the caches of the readers of its members are
+        for name, value in (self.budget or {}).items():
+            # for the settings the reader has
+            try:
+                # which the factory can find
+                factory.pyre_trait(alias=name)
+            # a reader without the setting
+            except factory.TraitNotFoundError:
+                # has nothing to budget
+                continue
+            # the rest take the budget of the team
+            config[name] = value
         # go through the settings
         for name, value in config.items():
             # looking for member recipes, e.g. the readers of a stack
