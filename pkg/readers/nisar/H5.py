@@ -90,6 +90,29 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
         return
 
     # interface
+    def paging(self):
+        """
+        Report what the page buffer of my file has seen of raw data since the file was opened,
+        as (accesses, hits, misses), or {None} when my file is not open or has no page buffer;
+        a miss is a page fetched from the file
+        """
+        # the file, if i have opened one
+        file = getattr(getattr(self, "_reader", None), "_file", None)
+        # the handle of the library, if the open succeeded
+        handle = getattr(file, "_pyre_id", None) if file is not None else None
+        # without one
+        if handle is None:
+            # there is nothing to report
+            return None
+        # what its page buffer has seen, if it has one
+        seen = handle.pageBuffer
+        # without one
+        if seen is None:
+            # there is nothing to report either
+            return None
+        # the counts are kept for metadata and raw data separately; the second are the chunks
+        return seen.accesses[1], seen.hits[1], seen.misses[1]
+
     def grant(self, resolve=True):
         """
         Assemble what gets presented to the infrastructure in order to open my product
@@ -225,8 +248,10 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
             )
         # assemble what it takes to get at my product, looking up whatever is missing
         credentials = self.grant()
-        # open my file
-        self.product = qed.h5.reader(uri=self.uri, credentials=credentials, fapl=fapl).read()
+        # open my file, and keep hold of it, since the file is what knows about its caches
+        self._reader = qed.h5.reader(uri=self.uri, credentials=credentials, fapl=fapl)
+        # and read its structure
+        self.product = self._reader.read()
 
         # load the datasets
         self._loadDatasets()
