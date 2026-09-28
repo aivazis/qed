@@ -23,9 +23,9 @@ def collections():
     # go through them
     for idx, dataset in enumerate(datasets):
         # get the summary
-        summary = dataset.summary()
+        summary = dataset.summary
         # sign on
-        channel.line(f"{idx:03}: {dataset.concept_id()}")
+        channel.line(f"{idx:03}: {dataset.concept_id}")
         # indent
         channel.indent()
         # report
@@ -77,7 +77,7 @@ def search(**kwds):
         # indent
         channel.indent()
         # report
-        channel.line(f"size: {granule.size()}")
+        channel.line(f"size: {granule.size}")
         channel.line(f"links: {granule.data_links(access='direct')}")
         channel.line(f"s3 credentials endpoint: {granule.get_s3_credentials_endpoint()}")
         channel.line(f"umm: keys={tuple(granule['umm'].keys())}")
