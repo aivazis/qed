@@ -124,6 +124,13 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "warm the workers with a full pass first; off gives every level tiles nobody has fetched"
     )
 
+    builders = qed.properties.int()
+    builders.default = None
+    builders.doc = (
+        "the size of the team that builds the pyramid in the contention program; unset makes "
+        "it the size of the {team} that serves the tiles"
+    )
+
     rate = qed.properties.float()
     rate.default = 20.0
     rate.doc = "the tiles per second the contention program asks for, the way a panning client does"
@@ -712,11 +719,14 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                         "failed" if failure else "ok",
                         f"{seeded:.3f}" if seeded is not None else "",
                         f"{ready:.3f}" if ready is not None else "",
+                        self.builders if self.builders is not None else self.team,
                     )
                 )
         # report the build
         channel.line(
-            f"{dataset.pyre_name}.{name}, team of {self.team}, {self.rate:g} tiles of "
+            f"{dataset.pyre_name}.{name}, team of {self.team}, "
+            f"{self.builders if self.builders is not None else self.team} builders, "
+            f"{self.rate:g} tiles of "
             f"{span}x{span} @ zoom {self.zooms[0]} per second: build {status}, seeded after "
             + (f"{seeded:.1f} s" if seeded is not None else "never")
             + ", ready after "
@@ -3185,8 +3195,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # whose crews are forked by the helper, and whose journal is heard on its event loop
         fleet.recruiter = qed.nexus.forkserver()
         fleet.recruiter.start(dispatcher=fleet.dispatcher)
-        # the team of the reader, with the size under measurement
-        fleet.team(reader=reader.pyre_name).size = team
+        # the builders of the reader, with the size under measurement
+        fleet.builders(reader=reader.pyre_name).size = team
         # the clock of the build
         clock = qed.timers.wall(f"qed.measure.pyramid.team{team}")
         # the times, unknown until they happen
@@ -3332,8 +3342,12 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # the fleet, with an event loop of its own
         fleet = qed.nexus.fleet(name=f"qed.measure.contention.team{self.team}")
         fleet.dispatcher = pyre.ipc.newPSL()
-        # the team of the reader, with the size under measurement
+        # the team that serves the tiles of the reader, with the size under measurement
         fleet.team(reader=reader.pyre_name).size = self.team
+        # and the builders, with theirs
+        fleet.builders(reader=reader.pyre_name).size = (
+            self.builders if self.builders is not None else self.team
+        )
         # the clock of the run
         clock = qed.timers.wall(f"qed.measure.contention.team{self.team}")
         # the geometry of the tiles
@@ -4202,6 +4216,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "status",
         "seeded_s",
         "ready_s",
+        "builders",
     )
     # the column labels of the cache records
     _cacheHeaders = (
