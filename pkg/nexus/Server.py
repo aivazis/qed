@@ -8,6 +8,7 @@
 import json
 import os
 import resource
+import time
 import uuid
 
 # support
@@ -79,6 +80,8 @@ class Server(http, family="qed.nexus.servers.http"):
         # the next one on the same host and port; a client that finds a different token on
         # the other end of a connection it thought it knew is talking to somebody else
         self.instance = str(uuid.uuid4())
+        # note when this run of the server came up
+        self.started = time.time()
         # hold on to the application; it is the only thing in reach of everything the
         # heartbeat wants to report on
         self._app = app
@@ -217,7 +220,18 @@ class Server(http, family="qed.nexus.servers.http"):
 
     def _descriptors(self) -> str:
         """
-        Report how many file descriptors this process holds, against how many it may
+        Report how many file descriptors this process holds, against how many it may, in one
+        line
+        """
+        # count them
+        held, ceiling = self._held()
+        # and say so, or say that the count is not available
+        return f"{held if held is not None else '?'}/{ceiling}"
+
+    def _held(self) -> tuple:
+        """
+        Count the file descriptors this process holds, against how many it may, as a pair; the
+        count is {None} on a platform that cannot tell
 
         This is the number that turns a server which has stopped answering into a diagnosis
         rather than a mystery. Everything that serves a static asset or renders a tile needs
@@ -237,9 +251,9 @@ class Server(http, family="qed.nexus.servers.http"):
         # a platform without it
         except OSError:
             # says nothing rather than guessing
-            return f"?/{ceiling}"
+            return None, ceiling
         # otherwise, the count against the ceiling
-        return f"{held}/{ceiling}"
+        return held, ceiling
 
     def _workload(self) -> str:
         """
@@ -280,6 +294,31 @@ class Server(http, family="qed.nexus.servers.http"):
             return f"workload unavailable: {error}"
 
     # interface
+    def describe(self) -> dict:
+        """
+        Describe the process: what it is, where it runs, how long it has been up, and the
+        descriptors it holds against its ceiling
+        """
+        # the system
+        system = os.uname()
+        # the descriptors
+        held, ceiling = self._held()
+        # the time now
+        now = time.time()
+        # assemble the description
+        return {
+            "pid": os.getpid(),
+            "host": system.nodename,
+            "platform": f"{system.sysname.lower()}-{system.machine}",
+            "cores": os.cpu_count(),
+            "memory": os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES"),
+            "started": self.started,
+            "uptime": now - self.started if self.started is not None else 0.0,
+            "descriptors": held,
+            "ceiling": ceiling,
+            "beats": self._beat,
+        }
+
     def hello(self):
         """
         Frame the greeting that opens every event stream, which says which run of the server
@@ -342,6 +381,7 @@ class Server(http, family="qed.nexus.servers.http"):
     _helloFrame = None  # the constant greeting frame, built on first use
     _app = None  # the application, held so the heartbeat can describe what it is carrying
     _beat = 0  # how many times the heartbeat has been raised
+    started = None  # when this run of the server came up, set on activation
 
 
 # end of file
