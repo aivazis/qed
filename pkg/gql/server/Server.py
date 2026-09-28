@@ -109,7 +109,8 @@ class Server(graphene.ObjectType):
         roots = [plexus, getattr(plexus, "nexus", None)]
         # the fleet, its cache, and its teams
         if fleet is not None:
-            roots.extend([fleet, fleet.cache, *fleet.teams.values(), *fleet.explorers.values()])
+            roots.extend([fleet, fleet.cache, *fleet.teams.values()])
+            roots.extend([*fleet.builds.values(), *fleet.explorers.values()])
         # the data sources, the archives, and the views in the store
         roots.extend([*store.sources, *store.archives])
         roots.extend(port.view() for port in store.viewports)
