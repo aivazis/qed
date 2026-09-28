@@ -34,6 +34,33 @@ class Build:
     """
 
     # interface
+    def lead(self, partners) -> "Build":
+        """
+        Build the first level of the {partners} along with mine, a run of tiles at a time, so
+        the pages of the product each run needs are fetched once for all of us
+
+        A partner qualifies when its first level has the layout of mine and, like mine, does
+        not exist yet; the others build theirs on their own
+        """
+        # the layout of my first level
+        mine = self.pyramid.layout(exponent=1)
+        # whether it has to be built
+        missing = not self.pyramid.holds(exponent=1)
+        # go through the candidates
+        for partner in partners:
+            # the ones whose first level is laid out like mine and is missing like mine
+            if (
+                missing
+                and partner.pyramid.layout(exponent=1) == mine
+                and not partner.pyramid.holds(exponent=1)
+            ):
+                # follow me
+                partner.leader = self
+                # and join my pile
+                self.partners.append(partner)
+        # all done
+        return self
+
     def start(self) -> "Build":
         """
         Hand out the first level that does not exist yet
@@ -42,6 +69,10 @@ class Build:
         pyramid = self.pyramid
         # how deep it goes
         self.depth = pyramid.depth()
+        # a build whose first level is made by its leader waits for it
+        if self.leader is not None:
+            # which hands it the level when it starts
+            return self
         # look for the first missing level; the ones below it exist, since levels are
         # built in order and committed one at a time
         for exponent in range(1, self.depth + 1):
@@ -104,12 +135,18 @@ class Build:
         self.run = run
         # how many sample windows per axis the seed spreads over the extent
         self.windows = windows
+        # the build that makes my first level along with its own, and the builds whose first
+        # levels i make along with mine
+        self.leader = None
+        self.partners = []
         # the state of the level being built
         self.depth = 0
         self.exponent = 0
         self.occupancy = None
         self.runs = 0
         self.outstanding = set()
+        # the pages the runs fetched from the product
+        self.fetched = 0
         self.seeds = set()
         # whether the seed has reported, and whether the build is over
         self.seeded = False
@@ -119,6 +156,32 @@ class Build:
         return
 
     # implementation details
+    def _receive(self, exponent: int, keys) -> None:
+        """
+        Get ready to take delivery of the level at {exponent}, whose runs, named by {keys}, my
+        leader hands out along with its own
+        """
+        # the pyramid
+        pyramid = self.pyramid
+        # how deep it goes
+        self.depth = pyramid.depth()
+        # anything from an earlier run is on hand before more is measured
+        pyramid.recall()
+        # make the file, at its full padded size, before any worker can write into it
+        pyramid.create(exponent=exponent)
+        # the layout of the level
+        _, _, grid = pyramid.layout(exponent=exponent)
+        # the record of what gets written, nothing so far
+        self.exponent = exponent
+        self.occupancy = bytearray(grid[0] * grid[1])
+        # the seed belongs to the leader
+        self.seeds = set()
+        # the runs, all of them outstanding
+        self.outstanding = set(keys)
+        self.runs = len(self.outstanding)
+        # all done
+        return
+
     def _dispatch(self, exponent: int) -> None:
         """
         Hand out every run of the level at {exponent}
@@ -134,23 +197,22 @@ class Build:
         self.occupancy = bytearray(grid[0] * grid[1])
         # the tiles the seed samples, which only the first level has
         self.seeds = self._seeds() if exponent == 1 else set()
-        # the runs: the seed tiles one at a time, and the rest in runs along each row
+        # the runs: the seed tiles one at a time, and the rest in runs in raster order; a run no
+        # longer than a row stays within its row, and a longer one carries on into the next,
+        # so that a run as long as a band of rows is built by one worker, whose page buffer
+        # keeps the pages the rows of the band share
         runs = [[seed] for seed in sorted(self.seeds)]
+        # whether a run carries on past the end of a row
+        wrap = self.run > grid[1]
+        # the tiles of the current run
+        stretch = []
         # go through the rows
         for row in range(grid[0]):
-            # and the columns that are not seeds, in consecutive stretches
-            stretch = []
-            # by walking the row
-            for col in range(grid[1] + 1):
-                # a seed, or the end of the row, breaks a stretch
-                if col == grid[1] or (row, col) in self.seeds:
-                    # so whatever was accumulated is a run
-                    if stretch:
-                        # add it to the pile
-                        runs.append(stretch)
-                        # and start over
-                        stretch = []
-                    # move on
+            # and the columns
+            for col in range(grid[1]):
+                # a seed is a run of its own
+                if (row, col) in self.seeds:
+                    # and is skipped here
                     continue
                 # a run that is long enough is handed out as is
                 if len(stretch) == self.run:
@@ -160,11 +222,27 @@ class Build:
                     stretch = []
                 # add the tile to the current run
                 stretch.append((row, col))
+            # a run that stays within its row ends with it
+            if not wrap and stretch:
+                # add it to the pile
+                runs.append(stretch)
+                # and start over
+                stretch = []
+        # whatever is left is a run too
+        if stretch:
+            # add it to the pile
+            runs.append(stretch)
         # the crew serves the newest task first, so the seeds go in last and come out
         # first; the bulk is reversed so the rows come out in order
         runs.reverse()
         # remember how many there are, so the progress of the level can be told
         self.runs = len(runs)
+        # the partners, which only the first level has
+        partners = self.partners if exponent == 1 else []
+        # get them ready for the same runs
+        for partner in partners:
+            # by naming the runs
+            partner._receive(exponent=exponent, keys=[tuple(tiles) for tiles in runs])
         # make a channel
         channel = journal.debug("qed.nexus.build")
         # show me
@@ -185,6 +263,7 @@ class Build:
                 workspace=self.pyramid.workspace,
                 exponent=exponent,
                 tiles=tiles,
+                partners=[partner.dataset for partner in partners],
             )
             # and hand it to the crew
             self.fleet.decimate(
@@ -206,6 +285,14 @@ class Build:
         if error is not None:
             # so say so
             self._fail(error=error)
+            # a run of the first level was a run of my partners too
+            if exponent == 1:
+                # so theirs fail as well
+                for partner in self.partners:
+                    # unless they are over already
+                    if not partner.done:
+                        # say so
+                        partner._fail(error=error)
             # and stop
             return
         # a run from a level other than the one being built is a bug
@@ -221,6 +308,18 @@ class Build:
             return
         # the width of the grid of tiles, for placing an entry in the record
         _, _, grid = self.pyramid.layout(exponent=exponent)
+        # unpack the records of each raster of the run, and the pages it fetched to make them
+        piles, fetched = result
+        # count the pages
+        self.fetched += fetched
+        # mine come first
+        result = piles[0]
+        # the rest belong to my partners, in their order, on the first level
+        if exponent == 1:
+            # go through them
+            for partner, pile in zip(self.partners, piles[1:]):
+                # and hand each its own records; the pages are counted once, here
+                partner._collect(exponent=exponent, key=key, result=([pile], 0))
         # go through the records
         for (row, col), record in result:
             # a tile that held anything was written
@@ -298,6 +397,7 @@ class Build:
             "level": level,
             "runs": self.runs if level is not None else 0,
             "outstanding": len(self.outstanding) if level is not None else 0,
+            "fetched": self.fetched,
         }
 
     def _seeds(self) -> set:
