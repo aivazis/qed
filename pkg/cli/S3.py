@@ -40,6 +40,7 @@ class S3(qed.shells.command, family="qed.cli.s3"):
 
     token = qed.properties.str()
     token.default = ""
+    token.secret = True
     token.doc = "the web identity token"
 
     page = qed.properties.int()

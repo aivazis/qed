@@ -40,6 +40,7 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
     pages.doc = "the number of 4K pages in the aggregation cache"
 
     credentials = qed.properties.kv()
+    credentials.secret = True
     credentials.doc = "how to get access to my product, e.g. the AWS {profile} and {region}"
 
     # constants
