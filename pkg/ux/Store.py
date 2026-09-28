@@ -1553,6 +1553,9 @@ class Store(qed.component, family="qed.ux.store"):
         self._builds[name] = builds
         # and hand it to the record, which describes them long after they are done
         record.builds = builds
+        # the dataset makes the first level of the rasters it is read with along with its own,
+        # so the pages of the product they share are fetched once
+        builds[0].lead(partners=builds[1:])
         # and start them
         for build in builds:
             # each hands out its first level
