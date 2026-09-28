@@ -40,7 +40,7 @@ are rendered on-demand by a Python/C++ server.
 ### What is already efficient
 
 - **Lazy C++ iterator pipelines** — `decimate_t → parametric_t → colormap → bmp_t.encode()` are fully lazy; no intermediate arrays.
-- **BMP delivery** — `memoryview(tile)` in `pkg/ux/Dispatcher.py:172` is zero-copy to HTTP response.
+- **BMP delivery** — a rendered tile travels from its worker as the descriptor of an unlinked spool file, and the server sends it to the client with `sendfile` (`Spool.share()` in `pkg/nexus/Spool.py`, `Server.transmit` in pyre's http server), so its bytes never pass through the server process. Mapping the spool instead cost ~6 ms per tile on macOS, where CPython's `mmap` flushes the file, and capped the server at ~140 tiles/s.
 - **HDF5 page buffer** — `pkg/readers/nisar/H5.py:33–96` sets a 4 GB aggregation cache (50% raw data).
 - **Memory-mapped flat files** — `pkg/readers/native/datasets/MemoryMap.py` avoids read() syscalls.
 - **Statistics at open time** — min/max sampled once from a 256×256 center tile; not repeated per request.
