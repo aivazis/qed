@@ -1625,7 +1625,9 @@ class Store(qed.component, family="qed.ux.store"):
                 # otherwise, the work succeeded
                 record.succeed()
             # let go of the builds
-            self._builds.pop(name, None)
+            builds = self._builds.pop(name, ())
+            # release the builders of the reader, if they have nothing left to build
+            self._release(builds=builds)
             # and let the clients know
             self._announce()
         # all done
@@ -1652,9 +1654,36 @@ class Store(qed.component, family="qed.ux.store"):
         # less well
         record.fail(error=error)
         # let go of the builds
-        self._builds.pop(name, None)
+        builds = self._builds.pop(name, ())
+        # release the builders of the reader, if they have nothing left to build
+        self._release(builds=builds)
         # and let the clients know
         self._announce()
+        # all done
+        return self
+
+    def _release(self, builds):
+        """
+        Release the builders of the reader behind {builds}, unless another dataset of the same
+        reader is still being built
+        """
+        # without a fleet or builds, there is nobody to release
+        if self.fleet is None or not builds:
+            # so do nothing
+            return self
+        # the reader the builds were for
+        reader = builds[0].reader.pyre_name
+        # if any build under way is for the same reader
+        if any(
+            build.reader.pyre_name == reader
+            for pile in self._builds.values()
+            for build in pile
+            if not build.done
+        ):
+            # its builders are still needed
+            return self
+        # otherwise, let them go
+        self.fleet.retire(reader=reader)
         # all done
         return self
 
