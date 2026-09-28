@@ -50,7 +50,7 @@ type Server {
   cache: TileCache        # missing when there is no fleet
   fleet: Fleet            # missing when there is no fleet
   builds: [Build!]!
-  workspace: Workspace!
+  workspace: Workspace    # missing when the workspace cannot describe itself
   # reserved: configuration, see below
 }
 ```
@@ -196,7 +196,8 @@ type Workspace {
 }
 
 type WorkspaceProduct {
-  name: String!
+  kind: String!           # the kind of derived data, e.g. pyramids
+  name: String!           # the product, by its granule id or a digest of its address
   bytes: Float!           # on disk, counting only the blocks that were written
 }
 ```
