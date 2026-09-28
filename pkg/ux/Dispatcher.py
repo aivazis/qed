@@ -331,10 +331,10 @@ class Dispatcher:
         if cached is not None:
             # record the hit
             record(code=200, via="hit")
-            # map it; the response document holds the view until the payload is on the wire
+            # share it; the response document owns its file until the payload is on the wire
             return self._dataDocument(
                 server=server,
-                tile=cached.view(),
+                payload=cached.share(),
                 datasetName=datasetName,
                 channelName=channelName,
                 zoomSpec=zoomSpec,
@@ -542,17 +542,17 @@ class Dispatcher:
             # and deliver whatever came out
             return deferred.resolve(response=response)
 
-        # on success, the tile arrives parked in a spool; map its payload, carefully, since
-        # the mapping needs a descriptor of its own and this process may have none left
+        # on success, the tile arrives parked in a spool; share its payload, carefully, since
+        # the share needs a descriptor of its own and this process may have none left
         try:
-            # map it
-            view = result.view()
+            # share it
+            payload = result.share()
         # if the process is out of descriptors
         except OSError as error:
             # tell me
             chnl = journal.warning("qed.nexus.tiles")
             # what happened
-            chnl.line(f"could not map the payload of a '{channelName}' tile of '{datasetName}'")
+            chnl.line(f"could not share the payload of a '{channelName}' tile of '{datasetName}'")
             chnl.line(f"with shape {shape} at {origin}")
             chnl.line(f"got: {error}")
             chnl.line(f"the process is probably out of file descriptors")
@@ -566,7 +566,7 @@ class Dispatcher:
         # and wrap it up as a document
         response = self._dataDocument(
             server=server,
-            tile=view,
+            payload=payload,
             datasetName=datasetName,
             channelName=channelName,
             zoomSpec=zoomSpec,
@@ -580,16 +580,17 @@ class Dispatcher:
             record(code=200, via="crew")
         # deliver it; the write to the client happens within
         status = deferred.resolve(response=response)
-        # the payload is on the wire; release my mapping of it. the spool itself is owned by
-        # the team, which releases it once every subscriber has been served
-        view.close()
+        # the payload is on the wire, and the server has closed its file; if the client hung up
+        # it never will be, so close it here too, which does nothing to a file that is closed
+        # already. the spool itself is owned by the team, which releases it once every
+        # subscriber has been served
+        payload.close()
         # all done
         return status
 
     def _dataDocument(
         self,
         server,
-        tile,
         datasetName,
         channelName,
         zoomSpec,
@@ -597,14 +598,17 @@ class Dispatcher:
         spec,
         origin,
         shape,
+        tile=b"",
+        payload=None,
     ):
         """
-        Wrap a rendered {tile} in a BMP response document
+        Wrap a rendered tile in a BMP response document: either the {tile} itself, or the
+        {payload}, a file that holds it, which the server sends straight to the peer
         """
         # attempt to
         try:
             # build the response
-            response = server.documents.BMP(server=server, bmp=tile)
+            response = server.documents.BMP(server=server, bmp=tile, payload=payload)
             # suggest a file name, in case the user wants to save the tile
             filename = f"{datasetName}.{channelName}.{zoomSpec}.{spec}.bmp"
             # encode it
@@ -630,6 +634,10 @@ class Dispatcher:
             chnl.line(f"at zoom level {zoom}")
             # and flush
             chnl.log()
+        # a payload that will not be sent
+        if payload is not None:
+            # still holds a descriptor, so let it go
+            payload.close()
         # let the client know
         return server.responses.NotFound(server=server)
 

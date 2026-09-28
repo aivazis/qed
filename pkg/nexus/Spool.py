@@ -18,7 +18,8 @@ class Spool:
 
     Workers {stash} their product and ship the spool with their completion report: the pickled
     part is just the size, and the descriptor follows as ancillary data on the crew channel.
-    The team side {adopt}s the descriptor and hands out {view}s of the payload. The file is
+    The team side {adopt}s the descriptor and hands out {share}s of the payload, files of their
+    own that a response sends straight to the peer, or {view}s of it. The file is
     unlinked from birth, so the kernel reclaims the storage when the last descriptor closes,
     no matter how either process exits
     """
@@ -49,6 +50,13 @@ class Spool:
         self.file = os.fdopen(descriptor, "rb")
         # all done
         return self
+
+    def share(self):
+        """
+        Hand out a file of its own over the payload, for a response to send and then close
+        """
+        # a duplicate of my descriptor outlives me, so the response owns what it sends
+        return os.fdopen(os.dup(self.file.fileno()), "rb")
 
     def view(self):
         """

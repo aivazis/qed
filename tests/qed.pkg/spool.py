@@ -7,10 +7,11 @@
 
 """
 Check that spooled payloads survive their trip: stashed, pickled as a stub, their descriptor
-shipped over a channel, adopted, and mapped
+shipped over a channel, adopted, mapped, and shared with a response that outlives the spool
 """
 
 # externals
+import os
 import pickle
 
 # support
@@ -49,9 +50,18 @@ clone.adopt(descriptor=descriptors[0])
 # the payload survives the round trip
 view = clone.view()
 assert bytes(view) == payload
-# release the mapping and the spool
+# release the mapping
 view.close()
+
+# a share is a file of its own over the payload
+share = clone.share()
+# which holds the payload
+assert os.pread(share.fileno(), clone.size, 0) == payload
+# and outlives the spool, the way a response outlives the eviction of its tile from the cache
 clone.close()
+assert os.pread(share.fileno(), len(payload), 0) == payload
+# until the response lets it go
+share.close()
 
 
 # end of file
