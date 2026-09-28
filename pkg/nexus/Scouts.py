@@ -26,5 +26,11 @@ class Scouts(Team, family="qed.nexus.teams.archive"):
     size = pyre.properties.int(default=1)
     size.doc = "the number of crew members to recruit"
 
+    chunks = pyre.properties.int(default=None)
+    chunks.doc = "my members list folders and open no datasets, so they have no chunk cache to size"
+
+    # the kind of work i do
+    kind = "scout"
+
 
 # end of file

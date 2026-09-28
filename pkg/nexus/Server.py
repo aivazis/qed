@@ -272,10 +272,19 @@ class Server(http, family="qed.nexus.servers.http"):
             waiting, oldest = ux.backlog() if ux is not None else (0, 0.0)
             # the fleet owns the teams that do the work
             fleet = getattr(ux.store, "fleet", None) if ux is not None else None
-            # describe each team that has been formed
+            # every team that has been formed: the ones that serve tiles, and the builders
+            formed = (
+                [
+                    *fleet.teams.items(),
+                    *((f"{name}.builders", team) for name, team in fleet.builds.items()),
+                ]
+                if fleet is not None
+                else []
+            )
+            # describe each one
             teams = (
-                " | ".join(f"{name}: {team.census()}" for name, team in fleet.teams.items())
-                if fleet is not None and fleet.teams
+                " | ".join(f"{name}: {team.census()}" for name, team in formed)
+                if formed
                 else "no teams yet"
             )
             # the cache is what turns rendered tiles into held descriptors, so it reports
