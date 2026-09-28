@@ -1476,6 +1476,9 @@ class Store(qed.component, family="qed.ux.store"):
             standing.succeed()
             # let the views catch up with what it found
             self._refreshViewports()
+        # the builders surveyed the source; unless the views that caught up started building
+        # one of its datasets, they have nothing left to do
+        self._releaseBuilders(reader=name)
         # either way, the standing moved, so let the clients know
         self._announce()
         # all done
@@ -1670,13 +1673,23 @@ class Store(qed.component, family="qed.ux.store"):
         Release the builders of the reader behind {builds}, unless another dataset of the same
         reader is still being built
         """
-        # without a fleet or builds, there is nobody to release
-        if self.fleet is None or not builds:
+        # without builds, there is nobody to release
+        if not builds:
             # so do nothing
             return self
-        # the reader the builds were for
-        reader = builds[0].reader.pyre_name
-        # if any build under way is for the same reader
+        # otherwise, release the builders of the reader the builds were for
+        return self._releaseBuilders(reader=builds[0].reader.pyre_name)
+
+    def _releaseBuilders(self, reader):
+        """
+        Release the builders of the reader called {reader}, unless one of its datasets is being
+        built
+        """
+        # without a fleet, there is nobody to release
+        if self.fleet is None:
+            # so do nothing
+            return self
+        # if any build under way is for this reader
         if any(
             build.reader.pyre_name == reader
             for pile in self._builds.values()
