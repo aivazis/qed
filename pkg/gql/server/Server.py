@@ -8,6 +8,7 @@
 import graphene
 
 # support
+import pyre
 import qed
 
 # my parts
@@ -96,10 +97,26 @@ class Server(graphene.ObjectType):
     @staticmethod
     def resolve_configuration(store, info, **kwds):
         """
-        Describe the configuration of every component reachable from the application
+        Describe the configuration of every component reachable from the application: through
+        its traits, and through the state the server keeps outside of them, e.g. the data
+        sources in the store and the teams in the fleet
         """
-        # walk from the application
-        return qed.ux.configuration(root=info.context["plexus"])
+        # the application
+        plexus = info.context["plexus"]
+        # the fleet, if the server has one
+        fleet = getattr(info.context["server"], "fleet", None)
+        # the roots of the walk: the application and the nexus it runs on
+        roots = [plexus, getattr(plexus, "nexus", None)]
+        # the fleet, its cache, and its teams
+        if fleet is not None:
+            roots.extend([fleet, fleet.cache, *fleet.teams.values(), *fleet.explorers.values()])
+        # the data sources, the archives, and the views in the store
+        roots.extend([*store.sources, *store.archives])
+        roots.extend(port.view() for port in store.viewports)
+        # walk from the ones that are components
+        return qed.ux.configuration(
+            roots=[root for root in roots if isinstance(root, pyre.component)]
+        )
 
     @staticmethod
     def resolve_builds(store, info, **kwds):
