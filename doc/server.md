@@ -229,9 +229,12 @@ type ConfiguredTrait {
 }
 ```
 
-`Server.configuration` is a list of `ConfiguredComponent`, starting with the application. The walk
-follows every trait whose value is a component, or a list, a tuple, a set, or a dictionary that
-holds components. Nothing in pyre prevents a component from reaching, through its traits, a
+`Server.configuration` is a list of `ConfiguredComponent`, starting with the application. Much of
+what the server does is held outside the traits of the application: the nexus it runs on, the
+fleet of the http server and its cache and teams, and the data sources, archives, and views of the
+store. The walk starts from all of them, and follows every trait whose value is a component, or a
+collection or a mapping that holds components, including the mappings pyre builds for its
+dictionary traits. Nothing in pyre prevents a component from reaching, through its traits, a
 component that reaches back, so the walk describes each component once, in the order it reaches
 it, and every other mention of it is a reference by name.
 

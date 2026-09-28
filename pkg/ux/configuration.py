@@ -6,24 +6,35 @@
 
 # externals
 import collections
+import collections.abc
 
 # support
 import pyre
 
 
-def configuration(*, root) -> list:
+def configuration(*, roots) -> list:
     """
-    Describe the configuration of every component reachable from {root} through its traits: the
-    value of each trait, where the value came from, and the components it refers to
+    Describe the configuration of every component reachable from the components in {roots}
+    through their traits: the value of each trait, where the value came from, and the components
+    it refers to
 
     Components may refer to each other, so each one is described once, in the order the walk
     reaches it, and a reference to it is reported by name. The values of secret traits are not
     described
     """
-    # the components waiting to be described
-    pending = collections.deque([root])
+    # the components waiting to be described, each root once
+    pending = collections.deque()
     # the ones reached so far
-    reached = {id(root)}
+    reached = set()
+    # go through the roots
+    for root in roots:
+        # a root reached already
+        if id(root) in reached:
+            # is not described twice
+            continue
+        # the rest are waiting
+        reached.add(id(root))
+        pending.append(root)
     # the descriptions
     components = []
     # go through the components
@@ -86,12 +97,14 @@ def _components(*, value):
         yield value
         # and that is all
         return
-    # a mapping
-    if isinstance(value, dict):
+    # a mapping, including the ones pyre builds for the values of its dictionary traits
+    if isinstance(value, collections.abc.Mapping):
         # holds its components among its values
         value = value.values()
-    # a collection
-    if isinstance(value, (list, tuple, set, frozenset, type({}.values()))):
+    # a collection other than a string of characters or of bytes
+    if isinstance(value, collections.abc.Collection) and not isinstance(
+        value, (str, bytes, bytearray)
+    ):
         # holds its components among its members
         yield from (member for member in value if isinstance(member, pyre.component))
     # all done
@@ -110,8 +123,8 @@ def _render(*, value):
     if isinstance(value, pyre.component):
         # is its name
         return value.pyre_name
-    # a mapping
-    if isinstance(value, dict):
+    # a mapping, including the ones pyre builds for the values of its dictionary traits
+    if isinstance(value, collections.abc.Mapping):
         # is its entries
         return str({key: _name(value=member) for key, member in value.items()})
     # a collection
