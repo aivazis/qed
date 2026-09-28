@@ -45,10 +45,10 @@ type Query {
 }
 
 type Server {
-  process: ServerProcess!
+  process: ServerProcess  # missing when the http server is not the qed server
   requests: ServerRequests!
-  cache: TileCache!
-  fleet: Fleet!
+  cache: TileCache        # missing when there is no fleet
+  fleet: Fleet            # missing when there is no fleet
   builds: [Build!]!
   workspace: Workspace!
   # reserved: configuration, see below
@@ -66,9 +66,9 @@ type ServerProcess {
   platform: String!
   cores: Int!
   memory: Float!          # bytes
-  started: Float!
+  started: Float           # missing until the server is activated
   uptime: Float!
-  descriptors: Int!       # held
+  descriptors: Int         # held; missing on a platform that cannot tell
   ceiling: Int!           # the soft limit on descriptors
   beats: Int!             # heartbeats so far
 }
