@@ -39,6 +39,11 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
     pages.default = 1024**2
     pages.doc = "the number of 4K pages in the aggregation cache"
 
+    chunks = qed.properties.int(default=None)
+    chunks.doc = (
+        "the size of the chunk cache of each dataset, in MiB; unset keeps the library's default"
+    )
+
     credentials = qed.properties.kv()
     credentials.secret = True
     credentials.doc = "how to get access to my product, e.g. the AWS {profile} and {region}"
@@ -204,6 +209,20 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
             size = 4 * 1024 * pages
             # adjust the {fapl}
             fapl.pageBufferSize = qed.h5.libh5.properties.PageBuffer(bytes=size, metadata=5, raw=50)
+        # get the size of the chunk cache of each dataset
+        chunks = self.chunks
+        # if it is non-trivial
+        if chunks:
+            # the default caches of the file, whose other settings stay as they are
+            current = fapl.cache
+            # hold that many bytes of decoded chunks per dataset, indexed by many more slots
+            # than it can hold chunks, a prime number of them, the way the library recommends
+            fapl.cache = qed.h5.libh5.properties.Cache(
+                metadataElements=current.metadataElements,
+                slots=100003,
+                bytes=chunks * 2**20,
+                preemption=current.preemption,
+            )
         # assemble what it takes to get at my product, looking up whatever is missing
         credentials = self.grant()
         # open my file
