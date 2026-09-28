@@ -84,6 +84,23 @@ The fleet owns the memory these caches take. Page buffers and chunk caches are s
 team, as budgets, not left at ceilings that every member of a large team can grow into.
 
 
+### What is in place
+
+Each reader has both teams. The builders, `qed.nexus.teams.build`, sixteen members by default,
+configured as `{fleet}.{reader}.builders`, make first contact and run the pyramid builds; the team
+that serves tiles, `qed.nexus.teams.tile`, configured as `{fleet}.{reader}`, renders tiles only.
+Each team marks the tasks it runs with the budgets of its caches, and a member opens its reader with
+them, for the settings the reader has: the builders use a page buffer of 64 MiB and the library's
+chunk cache, the tile team the reader's page buffer and a chunk cache of 256 MiB per dataset. The
+store releases the builders of a reader once none of its datasets is being built; they stand down,
+rather than disband, since pyre hands back the same team for the same name and a disbanded one can
+never work again, and the next build brings them back. A reader that is disconnected has its team
+stand down for the same reason.
+
+The builds are still planned by rows of tiles, one raster at a time; planning them by pages, below,
+is next.
+
+
 ## Planning from the chunk table
 
 The chunk table of every raster, together with the page size of the file, is cheap to read, even
