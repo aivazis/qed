@@ -131,6 +131,17 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "it the size of the {team} that serves the tiles"
     )
 
+    run = qed.properties.int()
+    run.default = 8
+    run.doc = "the most tiles of a pyramid level one task of its construction builds"
+
+    joint = qed.properties.bool()
+    joint.default = True
+    joint.doc = (
+        "build the first level of a dataset and of the rasters it is read with in one pass, the "
+        "way the server does; off builds each raster on its own"
+    )
+
     rate = qed.properties.float()
     rate.default = 20.0
     rate.doc = "the tiles per second the contention program asks for, the way a panning client does"
@@ -605,7 +616,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # make it
             directory.mkdir(parents=True)
             # build the pyramid and time it
-            seeded, ready, status = self._build(
+            seeded, ready, status, pages = self._build(
                 reader=reader, dataset=dataset, team=team, directory=directory
             )
             # the bytes the levels occupy on disk; the levels are sized before any tile is
@@ -620,14 +631,16 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # record the build
             with self._records(path=f"{stem}-pyramid.csv", headers=self._pyramidHeaders) as out:
                 # in one row
-                out.writerow((host, dataset.pyre_name, name, team, seeded, ready, status, size))
+                out.writerow(
+                    (host, dataset.pyre_name, name, team, seeded, ready, status, size, pages)
+                )
             # and report it
             channel.line(
                 f"team of {team}: {status}; seeded after "
                 + (f"{seeded:.1f} s" if seeded is not None else "never")
                 + ", ready after "
                 + (f"{ready:.1f} s" if ready is not None else "never")
-                + f"; {size / 2**20:.0f} MiB of levels"
+                + f"; {size / 2**20:.0f} MiB of levels, {pages} pages fetched"
             )
         # flush the report
         channel.log()
@@ -3266,11 +3279,17 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                     onSeeded=seeded if raster is dataset else None,
                     onDone=over,
                     onFailed=over,
+                    run=self.run,
                 )
             )
         # start the clock
         clock.reset()
         clock.start()
+        # when asked to, the dataset makes the first level of the rasters it is read with along
+        # with its own, so the pages of the product they share are fetched once
+        if self.joint:
+            # by leading them
+            builds[0].lead(partners=builds[1:])
         # start the builds
         for build in builds:
             # each hands out its first level
@@ -3287,8 +3306,13 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         fleet.disband()
         # the state the builds ended in
         status = "; ".join(errors) if errors else "ready"
-        # hand off the times and the state
-        return marks["seeded"], (marks["ready"] if not errors else None), status
+        # hand off the times, the state, and the pages fetched from the product
+        return (
+            marks["seeded"],
+            (marks["ready"] if not errors else None),
+            status,
+            sum(build.fetched for build in builds),
+        )
 
     # implementation details: tiles during a build
     def _view(self, plexus, reader, dataset, channel):
@@ -3506,11 +3530,17 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                     onSeeded=seeded if raster is dataset else None,
                     onDone=over,
                     onFailed=over,
+                    run=self.run,
                 )
             )
         # start the clock
         clock.reset()
         clock.start()
+        # when asked to, the dataset makes the first level of the rasters it is read with along
+        # with its own, so the pages of the product they share are fetched once
+        if self.joint:
+            # by leading them
+            builds[0].lead(partners=builds[1:])
         # start the builds
         for build in builds:
             # each hands out its first level
@@ -4200,6 +4230,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "ready_s",
         "status",
         "bytes",
+        "pages",
     )
     # the column labels of the records of tiles during a build
     _contentionHeaders = (
