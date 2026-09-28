@@ -71,6 +71,8 @@ class Dispatcher:
         super().__init__(**kwds)
         # the tile requests by zoom, since the server started
         self.zooms = collections.Counter()
+        # how the most recent tiles were served, and how long each took, in seconds
+        self._recent = collections.deque(maxlen=self._window)
         # save the location of my document root so i can serve static assets
         self.docroot = docroot.discover()
         # attach it to the app's private filesystem
@@ -218,10 +220,11 @@ class Dispatcher:
         # diagnostic: when the {qed.ux.tiles} channel is active (off by default), each tile
         # request gets one compact line -- client, session, outcome, and timings
         tiles = journal.debug("qed.ux.tiles")
-        # capture the request clocks only when someone is listening, so the common inactive
-        # case pays nothing; per-request captures, unlike shared named timers, survive the
-        # concurrency of the deferred path
-        clocks = (time.perf_counter(), time.process_time()) if tiles.active else None
+        # capture the request clocks; the record of the recent tiles needs the wall time of
+        # every request, and reading two clocks costs next to nothing next to formatting the
+        # line, which only happens when someone is listening; per-request captures, unlike
+        # shared named timers, survive the concurrency of the deferred path
+        clocks = (time.perf_counter(), time.process_time())
         # name this request, so its arrival and its outcome can be paired in the log; a
         # request that arrives and never completes is otherwise indistinguishable from one
         # that never arrived, and those are opposite faults
@@ -864,6 +867,46 @@ class Dispatcher:
             for (vertical, horizontal), count in sorted(self.zooms.items())
         )
 
+    def describe(self) -> dict:
+        """
+        Describe the tile requests: how many are waiting and for how long, how many arrived at
+        each zoom, and how the most recent ones were served, with their median and 95th
+        percentile wall times, in seconds
+        """
+        # the requests that are waiting
+        waiting, oldest = self.backlog()
+        # the recent tiles, grouped by how they were served
+        routes = collections.defaultdict(list)
+        # go through them
+        for via, elapsed in self._recent:
+            # and file each one
+            routes[via].append(elapsed)
+        # the tally of each route
+        tiles = []
+        # go through the routes, in order of name
+        for via, times in sorted(routes.items()):
+            # order the times
+            times.sort()
+            # and tally them
+            tiles.append(
+                {
+                    "via": via,
+                    "count": len(times),
+                    "median": times[len(times) // 2],
+                    "p95": times[int(len(times) * 0.95)],
+                }
+            )
+        # assemble the description
+        return {
+            "waiting": waiting,
+            "oldest": oldest,
+            "zooms": [
+                {"vertical": vertical, "horizontal": horizontal, "count": count}
+                for (vertical, horizontal), count in sorted(self.zooms.items())
+            ],
+            "tiles": tiles,
+        }
+
     def backlog(self) -> tuple:
         """
         Report how many tile requests are waiting for an answer, and how long the most
@@ -908,6 +951,8 @@ class Dispatcher:
         else:
             # every other outcome retires it, including the ones that fail
             self._parked.pop(sequence, None)
+            # and joins the record of the recent tiles, with how long it took
+            self._recent.append((via, time.perf_counter() - clocks[0] if clocks else 0.0))
         # nothing further unless someone has turned the channel on; this guard keeps the
         # gathering and formatting below -- the only real cost -- out of the hot path in the
         # common inactive case
@@ -951,6 +996,8 @@ class Dispatcher:
         )
 
     # private data
+    # how many of the most recent tiles the record of how they were served keeps
+    _window = 1024
     # recognizer fragments
     uuid = r"\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"
     pyreid = r"[^&?#:\s]+"
