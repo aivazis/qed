@@ -17,6 +17,9 @@ from .Preparation import Preparation as preparation
 # the journal device that reaches the browser
 from .Journal import Journal as journal
 
+# the description of the configuration of the components reachable from a root
+from .configuration import configuration
+
 # configurable state
 from .Source import Source as source
 
