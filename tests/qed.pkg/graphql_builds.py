@@ -58,8 +58,10 @@ class Built:
 record = qed.ux.preparation(name="gcov.L.B.HHHH")
 # with the builds of its two rasters
 record.builds = [
-    Built(raster="gcov.L.B.HHHH", depth=5, reach=3, level=4, runs=12, outstanding=7),
-    Built(raster="gcov.L.B.HHHH.mask", depth=5, reach=2, level=3, runs=48, outstanding=40),
+    Built(raster="gcov.L.B.HHHH", depth=5, reach=3, level=4, runs=12, outstanding=7, fetched=90),
+    Built(
+        raster="gcov.L.B.HHHH.mask", depth=5, reach=2, level=3, runs=48, outstanding=40, fetched=35
+    ),
 ]
 # far enough along to render by
 record.seed()
@@ -94,7 +96,7 @@ def ask(query):
 # ask for the builds
 data = ask(
     "query { server { builds { dataset status error started seeded finished depth reach "
-    "rasters { raster depth reach level runs outstanding } } } }"
+    "rasters { raster depth reach level runs outstanding fetched } } } }"
 )
 # there is one
 builds = data["server"]["builds"]
@@ -120,6 +122,7 @@ assert build["rasters"][1] == {
     "level": 3,
     "runs": 48,
     "outstanding": 40,
+    "fetched": 35,
 }
 
 # once the work is over

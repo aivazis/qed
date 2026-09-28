@@ -26,6 +26,8 @@ class RasterBuild(graphene.ObjectType):
     # the runs of that level, and the ones still out
     runs = graphene.Int(required=True)
     outstanding = graphene.Int(required=True)
+    # the pages its runs fetched from the product, as far as the file can tell
+    fetched = graphene.Int(required=True)
 
 
 # end of file
