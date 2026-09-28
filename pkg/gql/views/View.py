@@ -16,6 +16,7 @@ from ..datasets.Dataset import Dataset
 from ..readers.Reader import Reader
 from ..readers.Selector import Selector
 from ..readers.SelectorAxis import SelectorAxis
+from ..server.Build import Build
 from .ViewCenter import ViewCenter
 from .ViewMeasure import ViewMeasure
 from .ViewSync import ViewSync
@@ -56,6 +57,8 @@ class View(graphene.ObjectType):
     ready = graphene.Boolean(required=True)
     # and whether the work that makes it worth looking at has finished
     preparing = graphene.Boolean(required=True)
+    # the preparation of the dataset, with how deep its levels are available
+    build = graphene.Field(Build)
 
     # resolvers
     @staticmethod
@@ -91,6 +94,20 @@ class View(graphene.ObjectType):
         # otherwise, it is preparing while the work is still under way; a failure is not
         # worth waiting for, since the view renders anyway, just less well
         return record.status == record.working
+
+    @staticmethod
+    def resolve_build(view, info, **kwds):
+        """
+        Describe the preparation of the dataset this view shows
+        """
+        # a view with no dataset
+        dataset = view.dataset
+        # has nothing being prepared
+        if dataset is None:
+            # so says so
+            return None
+        # otherwise, ask the store
+        return info.context["store"].build(name=dataset.pyre_name)
 
     @staticmethod
     def resolve_id(view, info, **kwds):
