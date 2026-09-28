@@ -218,6 +218,18 @@ On the local GSLC, 64 chunks on 22 pages:
 - a chunk cache that holds the block makes the second pass 3 to 4 ms against 290 ms for the first:
   decoding is the whole cost of a revisit.
 
+The same measurement over the internet, from a laptop, on the GSLC of cycle 31 in the operations
+bucket, a block of 16 chunks on 10 pages:
+
+- the HDF5 driver for S3 (version 2.2) gives a file a page buffer of 64 MiB when none is asked
+  for, so a reader in a bucket always has one;
+- streaming fetches every page exactly once, whatever the page buffer;
+- revisiting with a chunk cache that holds the block takes 1 to 4 ms the second time; with the
+  default chunk cache and a page buffer that keeps the pages, the driver's own or 4 GiB, 82 to 87
+  ms, every page a hit and every chunk decoded again; with a page buffer of 16 MiB, too small for
+  the pages, 11.1 s, every page fetched again. An undersized page buffer costs a round trip per
+  page, and asking for one explicitly can do worse than the driver's default.
+
 **Tiles during a build** (`qed measure contention`) run a build and a steady stream of tiles at full
 resolution on the same crew, in one process, and then the same stream once the build is over. On
 the local GSLC, 20 tiles of 512 by 512 a second: with a team of four, the build took 15.5 s and the

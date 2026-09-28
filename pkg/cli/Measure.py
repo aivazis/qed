@@ -155,7 +155,10 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     # the caches of the HDF5 library
     buffers = qed.properties.tuple(schema=qed.properties.int())
     buffers.default = (0, 64, 4096)
-    buffers.doc = "the page buffer sizes the cache program sweeps, in MiB; zero means none"
+    buffers.doc = (
+        "the page buffer sizes the cache program sweeps, in MiB; zero asks for none, which the "
+        "HDF5 driver for S3 replaces with a buffer of 64 MiB of its own"
+    )
 
     budgets = qed.properties.tuple(schema=qed.properties.int())
     budgets.default = (0, 64)
