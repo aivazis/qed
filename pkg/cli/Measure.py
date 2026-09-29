@@ -665,6 +665,9 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         """
         # make a channel
         channel = journal.info("qed.measure.contention")
+        # the crews are forked by a clean helper, as the server's are; start it before anything
+        # here opens a product: the members must not be copies of a process that has opened one
+        qed.nexus.forkserver.start()
         # pick the first target the restrictions allow
         first = next(self._targets(plexus=plexus), None)
         # if there is none
@@ -3366,6 +3369,9 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # the fleet, with an event loop of its own
         fleet = qed.nexus.fleet(name=f"qed.measure.contention.team{self.team}")
         fleet.dispatcher = pyre.ipc.newPSL()
+        # whose crews are forked by the helper, and whose journal is heard on its event loop
+        fleet.recruiter = qed.nexus.forkserver()
+        fleet.recruiter.start(dispatcher=fleet.dispatcher)
         # the team that serves the tiles of the reader, with the size under measurement
         fleet.team(reader=reader.pyre_name).size = self.team
         # and the builders, with theirs
