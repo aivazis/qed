@@ -3323,7 +3323,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         The store of this process has no fleet, so pointing a view does not start a build
         """
         # get the store
-        store = plexus._ux.store
+        store = plexus.ux.store
         # select the reader
         store.selectSource(viewport=0, name=reader.pyre_name)
         # the view was made before the reader discovered its datasets, so let it catch up
@@ -3573,7 +3573,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # the records land next to the others
         stem = os.path.splitext(self.output)[0]
         # the store is the authority on the connected data sources
-        ux = plexus._ux
+        ux = plexus.ux
         # find the reader the sweep named, without opening it
         reader = next(
             (
