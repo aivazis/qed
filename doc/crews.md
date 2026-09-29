@@ -234,6 +234,63 @@ asked for when that level becomes available, unless the user has changed the zoo
 meantime.
 
 
+## Preparing ahead of time
+
+A build is paid once per product: its levels and the statistics it measured are kept in the
+workspace, and a pyramid takes back the levels it finds there. It is also the one activity that
+spoils the tiles while someone is looking, since it takes the connection to the bucket the tiles
+need. So the build is best done before anyone looks: a user who names the products of interest can
+have them prepared while away, and find the viewer fast on return.
+
+**The tool.** A panel of the command line, e.g. `qed prep`, reads the same configuration as the
+server, finds the same readers, and works in the same workspace. It goes through the configured
+readers one at a time, since the construction is bound by the connection rather than by the number
+of workers, and for each:
+
+1. makes first contact, unless a saved survey of the product is in the workspace, and saves the
+   survey;
+2. builds the pyramids of every raster of the product, each dataset leading the rasters it is read
+   with, on builders sized for the connection, about 32 next to the data, with no tile team to
+   leave room for;
+3. reports what it did: whether the survey was made or found, which rasters were built and which
+   were already complete, the time, and the pages fetched.
+
+A reader that fails, e.g. because its product is unreachable, is reported and skipped, and the
+batch goes on. Its progress goes to a journal channel of its own, `qed.prep`.
+
+**Keeping the survey.** What a survey learns about a product does not change, so it is kept like
+the levels: the survey's record, `Discovery`, which holds plain values, is written into the
+workspace next to the pyramids of the product, in a form that does not depend on the version of
+qed that wrote it, e.g. JSON with a version number. The server looks for it before it sends a
+reader to the builders for first contact: when it finds it, it hydrates the reader from it at once,
+without touching the product, and the reader is ready as soon as it is connected. The server also
+writes the record after every survey it makes, so an interactive session prepares the next one.
+
+**Identifying the product.** The saved survey and the levels are found by the identity of the
+product, which has to be known before the product is opened:
+
+- a NISAR product is identified by its granule id, which is unique, stable, and names the version
+  of the processing; the naming convention of the mission makes it the name of the file, so it is
+  known from the uri alone, and it is what the pyramids already use once the product is open;
+- a local file of any other kind is identified by its address, its size, and the time it was last
+  written;
+- a file of any other kind in a bucket is identified by its address alone, which does not notice a
+  file replaced at the same address.
+
+**Resuming.** A build commits its levels one at a time, and a level counts only once every run of it
+has reported, so a batch that is interrupted, or fails on one reader, is run again and picks up at
+the first level that is not complete.
+
+**Credentials.** A batch over many products can outlive temporary credentials, e.g. a token that
+lasts four hours. The builders take their credentials with every task, fresh from the reader or its
+archive, so they last as long as whatever the reader resolves them from; when they expire, the
+readers still to go fail with the reason, and a new run after the credentials are renewed resumes.
+
+**What it does not do.** It prepares what the configuration names; it does not decide what is of
+interest. It does not bound the disk the levels take, which is the open question of the workspace's
+budget below.
+
+
 ## Open questions
 
 - How large the build team should be, as a function of the source: next to the data, the
@@ -242,10 +299,8 @@ meantime.
   active: fewer builders while a tile team has work, a limit on the fetches in flight, or builders
   that pause while the tiles queue. Measuring the traffic of the instance during a build would
   confirm that the connection is what they share.
-- Whether to build ahead of time: a batch that surveys every reader of a configuration and builds
-  all their pyramids, with every builder the connection allows, so the viewer is fast when the
-  user comes back. It needs the survey to be kept in the workspace along with the levels, which it
-  is not today, and products in buckets identified by more than their address.
+- The identity of files that are neither NISAR products nor local: a file in a bucket replaced at
+  the same address is not noticed.
 - Where the serial six percent of the construction goes: the barrier between levels, the
   bookkeeping of the server, which runs on its event loop, or the recruitment of the workers.
 - Whether tasks of consecutive pages need to be shaped by locality, e.g. for the GSLC, whose
