@@ -20,7 +20,7 @@ import { useConfig } from "./useConfig"
 // render the major tick marks
 export const Major = ({ setValue = null, ...rest }) => {
     // get the major tick mark values and the mark generator
-    const { enabled, major, majorPosition } = useConfig()
+    const { enabled, floor, ceiling, major, majorPosition } = useConfig()
     // build a handler factory that uses my exact value
     const pick = value => {
         // make a handler
@@ -39,10 +39,12 @@ export const Major = ({ setValue = null, ...rest }) => {
     return (
         <g>
             {major.map(tick => {
+                // a tick outside the part of the scale a pick can land in is shown but not offered
+                const usable = enabled && tick >= floor && tick <= ceiling
                 // pick an implementation based on my state
-                const Path = enabled ? Enabled : Disabled
+                const Path = usable ? Enabled : Disabled
                 // build my behaviors
-                const behaviors = setValue ? { onClick: pick(tick) } : {}
+                const behaviors = setValue && usable ? { onClick: pick(tick) } : {}
                 // render
                 return (
                     <Path key={tick} d={majorPosition(tick)} {...behaviors} {...rest} />
