@@ -85,8 +85,8 @@ class Survey(pyre.application, family="tests.qed.forkserver.survey"):
         assert error is None, error
         # with what the product holds
         assert len(record.findings) == 1, record.findings
-        # the members of the team of the reader
-        team = fleet.team(reader=reader.pyre_name)
+        # the members of the builders of the reader, who make first contact
+        team = fleet.builders(reader=reader.pyre_name)
         pids = [crew.pid for crew in team.crews()]
         # exist
         assert pids
