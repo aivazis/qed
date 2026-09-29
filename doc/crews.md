@@ -17,15 +17,15 @@ them.
 
 ## Where things stand
 
-Every reader gets one team of worker processes, formed on first contact and sized once, four
-members by default, configurable per reader as `{fleet}.{reader}.size`. The team has one
-workplan, served newest first. Everything the reader needs goes through it: the survey, the
-tiles a client requests, and the runs of the pyramid build, which are handed out a level at a
-time, in runs of up to eight tiles along a row, with each level waiting for the one before it.
+Each reader has two teams, described in `doc/teams.md`: the builders, sixteen members by default,
+make first contact and build the pyramids of its rasters; the tile team, four members by default,
+renders the tiles a client asks for at full resolution. Every member is forked by the helper, opens
+its own copy of the product, and opens it with the cache budgets of its team, described under
+"What is in place" below. The builders stand down once there is nothing left to build.
 
-Every member opens its own copy of the product. The HDF5 access list gives it a page buffer of up
-to 4 GiB, with at least 5 percent of it reserved for metadata and at least half for raw data, and
-the library's default chunk cache of 8 MiB per dataset.
+Before the split, one team per reader did everything, from one workplan served newest first, and
+the tiles waited behind the runs of the build. The measurements of the split, next to the data, are
+under "Tiles during a build, on teams of their own".
 
 
 ## What the measurements say
@@ -238,6 +238,14 @@ meantime.
 
 - How large the build team should be, as a function of the source: next to the data, the
   construction stopped improving at 32 workers, and larger teams delayed the first view.
+- How the builders leave the tiles their share of the connection to the bucket while a view is
+  active: fewer builders while a tile team has work, a limit on the fetches in flight, or builders
+  that pause while the tiles queue. Measuring the traffic of the instance during a build would
+  confirm that the connection is what they share.
+- Whether to build ahead of time: a batch that surveys every reader of a configuration and builds
+  all their pyramids, with every builder the connection allows, so the viewer is fast when the
+  user comes back. It needs the survey to be kept in the workspace along with the levels, which it
+  is not today, and products in buckets identified by more than their address.
 - Where the serial six percent of the construction goes: the barrier between levels, the
   bookkeeping of the server, which runs on its event loop, or the recruitment of the workers.
 - Whether tasks of consecutive pages need to be shaped by locality, e.g. for the GSLC, whose
@@ -314,6 +322,36 @@ longer, up to 11.4 s for the slowest tile with a team of 64. The latency is wors
 and fifth sixths of the build. Once the build is over, a tile takes about 71 ms, whatever the size
 of the team. This is the case for a team of its own for the tiles.
 
+**Tiles during a build, on teams of their own.** The same measurement, next to the data, after the
+split: a team of 16 serves the tiles and builders of each size build the pyramid of the HH
+polarization of the GSLC, on an instance with 192 cores; 20 tiles of 512 by 512 a second during the
+build, and 200 once it is done:
+
+| Builders | Build (s) | During the build, median / p95 / max (ms) | After it, median / p95 (ms) |
+|----------|-----------|-------------------------------------------|-----------------------------|
+| 16       | 68        | 153 / 1,816 / 7,285                       | 101 / 265                   |
+| 32       | 47        | 472 / 7,739 / 15,548                      | 92 / 189                    |
+| 64       | 44        | 3,179 / 38,075 / 43,677                   | 90 / 203                    |
+| 128      | 43        | 6,896 / 40,338 / 43,396                   | 87 / 174                    |
+
+With 16 builders, against the single team of 16 above, the build is faster, 68 s against 92, and
+the median tile is faster, 153 ms against 215, with the 95th percentile about the same. More
+builders shorten the build to about 43 s, which it does not go below, and make the tiles wait far
+longer, up to tens of seconds, although the tiles no longer share a workplan with the build. The
+process that runs the build and the tiles is not the cause: every 100 ms it recorded how late its
+event loop ran and how much cpu it had spent, and the loop was late by less than 2 ms at the 95th
+percentile, with the process on the cpu 3 to 4 percent of the time, with any number of builders.
+Nor is the cpu of the machine, with at most 144 workers on 192 cores. What the builders and the
+tile team share is the connection to the bucket and the object they read, and a build that stops
+getting faster past 32 builders is bound by it; this is the likely cause, and has not been
+confirmed by measuring the traffic. Once a tile takes longer than the team can absorb, 0.8 s for 16
+members at 20 tiles a second, the queue of the tile team grows with every tile, which accounts for
+the waits of tens of seconds.
+
+The division into teams is necessary but not sufficient: the builders also have to leave the tiles
+their share of the bandwidth while someone is looking. Since a build is paid once per product, and
+its levels are kept, the other way out is to build before anyone looks.
+
 **The ceiling of the server** (`qed measure swarm --workload`) sends the same swarm with tiles that
 cost nothing, served from the tile cache, with tiles of fill, and with tiles of data. On macOS all
 three stopped at about 140 tiles/s, with the server and its clients mostly idle. The cause was the
@@ -330,6 +368,19 @@ a task to a worker and taking delivery of its tile costs the server about 1 ms; 
 the bucket about 200 a second with a team of 16, 350 with 32, and no more with 64. The event loop
 of the server is not what limits the tiles of data in a bucket; whether 32 is the size beyond which
 a team gains nothing takes batches long enough to keep every member busy.
+
+With batches of 2,048 tiles of 512 by 512 and up to 256 in flight, on the instance with 192 cores:
+
+| Team | 8 in flight | 32 | 128 | 256 (tiles/s) |
+|------|-------------|----|-----|---------------|
+| 16   | 112         | 249 | 280 | 308          |
+| 32   | 104         | 403 | 469 | 470          |
+| 64   | 96          | 361 | 661 | 699          |
+| 128  | 98          | 324 | 487 | 431          |
+
+A team of 64 serves about 700 tiles a second; a team of 128 serves fewer, which is what a limit
+shared by all the workers, such as the connection to the bucket, would do. With teams of 16 and 32
+and 128 or more tiles in flight, the 95th percentile of the latency reaches several seconds.
 
 
 <!-- end of file -->
