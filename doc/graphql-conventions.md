@@ -1,6 +1,7 @@
-<!-- -*- markdown -*- -->
-<!-- -*- coding: utf-8 -*- -->
 <!--
+-*- markdown -*-
+-*- coding: utf-8 -*-
+
 michael a.g. aïvázis <michael.aivazis@para-sim.com>
 (c) 1998-2026 all rights reserved
 -->
@@ -151,5 +152,6 @@ existing shape mismatches (`viewSyncToggleAll` → `views`, `viewSyncToggleViewp
    `ux/schema/qed.gql` by hand.
 4. Run the relay compiler; update client `.graphql` operations to match.
 5. Build and test.
+
 
 <!-- end of file -->

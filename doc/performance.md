@@ -1,6 +1,7 @@
-<!-- -*- markdown -*- -->
-<!-- -*- coding: utf-8 -*- -->
 <!--
+-*- markdown -*-
+-*- coding: utf-8 -*-
+
 michael a.g. aïvázis <michael.aivazis@para-sim.com>
 (c) 1998-2026 all rights reserved
 -->
@@ -376,5 +377,6 @@ shared resources that contention will serialize — and Amdahl's law gives the c
 amount of parallelism can return, along with the point of diminishing returns. The conclusion is
 expected to be easy to anticipate. The purpose of this program is to make it **inescapable**
 instead.
+
 
 <!-- end of file -->
