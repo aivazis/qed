@@ -20,6 +20,10 @@ from pyre.units.SI import second
 # the stock http server; its package does not re-export it, so reach in
 from pyre.http.Server import Server as http
 
+# the recruiters that fork crew members from a clean helper; the package does not re-export
+# them either
+from pyre.nexus.Forkserver import Forkserver
+
 # the manager of the tile rendering teams
 from .Fleet import Fleet
 
@@ -97,6 +101,20 @@ class Server(http, family="qed.nexus.servers.http"):
         # its teams must never spin their own event loops: crew traffic is serviced by the
         # node's selector, so hand the fleet the shared dispatcher
         fleet.dispatcher = dispatcher
+        # the server prefers crew members forked by a clean helper, since sooner or later it
+        # touches libraries whose threads do not survive a fork; deposit the preference at
+        # {package} priority, so it loses to any user or command line configuration
+        fleet.pyre_setTrait(
+            alias="recruiter",
+            value="import:qed.nexus.forkserver",
+            priority=self.pyre_executive.priority.package(),
+            locator=pyre.tracking.simple("while activating the qed server"),
+        )
+        # if the fleet recruits through a helper
+        if isinstance(fleet.recruiter, Forkserver):
+            # start it now, while this process has touched nothing, with its journal on the
+            # shared event loop; the helper inherits the descriptor ceiling raised above
+            fleet.recruiter.start(dispatcher=dispatcher)
         # find the ux manager, which builds on first use
         ux = getattr(app, "ux", None)
         # if it is there
