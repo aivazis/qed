@@ -5,6 +5,7 @@
 
 
 # support
+import pyre
 import qed
 import journal
 
@@ -14,6 +15,9 @@ from .Scouts import Scouts
 
 # the cache of rendered tiles they share
 from .Cache import Cache
+
+# the stock recruiter
+from .Fork import Fork
 
 # the unit of work that establishes first contact
 from .Survey import Survey
@@ -31,6 +35,10 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
     queues of slow products from snappy ones, and lets a product's resources be released when
     it is disconnected
     """
+
+    # user configurable state
+    recruiter = pyre.nexus.recruiter(default=Fork)
+    recruiter.doc = "the strategy the teams i form use to recruit their crew members"
 
     # interface
     def lookup(self, task):
@@ -103,6 +111,8 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         # adjust individual team sizes, e.g. '{fleet}.{reader}.size'; the fleet itself grows
         # with the loaded data products, so total worker load is the user's call
         team = Team(name=f"{self.pyre_name}.{reader}")
+        # its members are recruited my way
+        team.recruiter = self.recruiter
         # the team's crew traffic rides the shared event loop
         team.dispatcher = self.dispatcher
         # its successful renders land in the shared cache
@@ -143,6 +153,8 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         # form the team; its name places its configuration under my namespace, so users can
         # adjust its size, e.g. '{fleet}.{archive}.size'
         team = Scouts(name=f"{self.pyre_name}.{archive}")
+        # its members are recruited my way
+        team.recruiter = self.recruiter
         # the team's crew traffic rides the shared event loop
         team.dispatcher = self.dispatcher
         # manifests are neither cached nor sampled
