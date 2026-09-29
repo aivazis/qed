@@ -43,6 +43,9 @@ from .Crew import Crew as crew
 # the recruiter that manages crews over unix domain socket pairs
 from .Fork import Fork as fork
 
+# the recruiter that asks a clean helper process for crew members
+from .Forkserver import Forkserver as forkserver
+
 # the pool of persistent tile rendering processes
 from .Team import Team as team
 
