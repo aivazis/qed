@@ -35,10 +35,10 @@ export const Slider = ({ value, setValue, ...config }) => {
 
 // lay out the control
 const Controller = ({ value, setValue }) => {
-    // the client names the thumb; the limits bound a typed pick
-    const { label = null, min, max } = useConfig()
-    // a typed pick may go anywhere between the limits
-    const check = candidate => candidate >= min && candidate <= max
+    // the client names the thumb; the part of the scale a pick can land in bounds a typed pick
+    const { label = null, floor, ceiling } = useConfig()
+    // a typed pick may go anywhere a pick can land
+    const check = candidate => candidate >= floor && candidate <= ceiling
     // and goes straight to the client
     const commit = candidate => setValue(candidate)
     // render; the axis, ticks, and tick labels are a decorative scale that duplicates the

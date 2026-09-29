@@ -27,6 +27,8 @@ export const Provider = ({ config, children }) => {
     const { height, width } = config
     // extract the controller limits and tick marks
     const { min, max, major = [], minor = [] } = config
+    // the part of the scale a pick can land in; the whole scale, unless the client says otherwise
+    const { floor = min, ceiling = max } = config
     // the label display precision
     const { tickPrecision = 1, markerPrecision = 1 } = config
     // the optional hand-editable extent: accessible {names} for the two end labels, the
@@ -138,8 +140,8 @@ export const Provider = ({ config, children }) => {
         const offset = viewportScale * (pixels / ils - margin)
         // project to user coordinates
         let value = flipped ? max - offset : min + offset
-        // clip it
-        value = Math.min(Math.max(value, min), max)
+        // clip it to the part of the scale a pick can land in
+        value = Math.min(Math.max(value, floor), ceiling)
         // and return it
         return value
     }
@@ -209,8 +211,8 @@ export const Provider = ({ config, children }) => {
         direction, arrows, labels, markers,
         // the layout of the controller in client coordinates
         height, width,
-        // the limits and tick marks
-        min, max, major, minor,
+        // the limits, the part of the scale a pick can land in, and the tick marks
+        min, max, floor, ceiling, major, minor,
         // the display precision of labels
         tickPrecision, markerPrecision,
         // the hand-editable extent, if any
@@ -275,7 +277,7 @@ export const Context = React.createContext(
         // the layout of the controller in client coordinates
         height: null, width: null,
         // the limits and tick marks
-        min: null, max: null, major: null, minor: null,
+        min: null, max: null, floor: null, ceiling: null, major: null, minor: null,
         // the display precision of labels
         tickPrecision: null, markerPrecision: null,
         // the hand-editable extent

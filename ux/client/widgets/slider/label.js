@@ -23,7 +23,9 @@ import { Hitbox } from './hitbox'
 // render a single label
 export const Label = ({ tick, value = null, setValue = null }) => {
     // unpack the geometry
-    const { enabled, arrows, labels, labelPosition, tickPrecision, min, max, extent } = useConfig()
+    const {
+        enabled, arrows, labels, labelPosition, tickPrecision, min, max, floor, ceiling, extent,
+    } = useConfig()
 
     // an end label of a slider with a hand-editable extent doubles as its editor
     const end = extent === null ? null : (tick === min ? "min" : (tick === max ? "max" : null))
@@ -53,13 +55,15 @@ export const Label = ({ tick, value = null, setValue = null }) => {
         return null
     }
 
+    // a label outside the part of the scale a pick can land in is shown but not offered
+    const usable = enabled && tick >= floor && tick <= ceiling
     // pick an implementation based on my state
-    const Label = enabled ? (selected ? Selected : Enabled) : Disabled
+    const Label = usable ? (selected ? Selected : Enabled) : Disabled
 
     // set up my behaviors
     const behaviors = {}
-    // when i have a way to notify the client, am enabled, but not selected
-    if (setValue != null && enabled && !selected) {
+    // when i have a way to notify the client, can be picked, but am not selected
+    if (setValue != null && usable && !selected) {
         // on click, set the value; an editable end label gives up this shortcut, since a double
         // click would trip it on the way to the editor, and the thumb can be dragged to the end
         behaviors["onClick"] = evt => {
