@@ -26,11 +26,15 @@ import { Save } from './save'
 
 
 //  display the zoom control
-export const Zoom = ({ viewport, view, min = -6, max = 4, ils = 200 }) => {
+export const Zoom = ({ viewport, view, max = 4, ils = 200 }) => {
     // unpack the view
-    const { session, reader, dataset, channel, zoom } = useFragment(
+    const { session, reader, dataset, channel, zoom, depth, reach } = useFragment(
         zoomControlsGetZoomStateFragment, view
     )
+    // zooming out stops at the level a thumbnail of the dataset comes from
+    const min = -depth
+    // and, while its pyramid is being built, at the deepest level that exists
+    const floor = -reach
 
     // inspect the view components to initialize my state
     const enabled = (reader && dataset && channel) ? true : false
@@ -76,15 +80,16 @@ export const Zoom = ({ viewport, view, min = -6, max = 4, ils = 200 }) => {
         return
     }
 
-    // set up the tick marks
-    const major = [...Array((max - min) / 2 + 1).keys()].map((_, idx) => min + 2 * idx)
-    const minor = [...Array((max - min) / 2).keys()].map((_, idx) => min + 1 + 2 * idx)
+    // set up the tick marks: every level on the scale, the even ones major and the odd ones minor
+    const levels = [...Array(max - min + 1).keys()].map(idx => min + idx)
+    const major = levels.filter(level => level % 2 === 0)
+    const minor = levels.filter(level => level % 2 !== 0)
     // slider configuration
     const xSlider = {
         value: zoom.horizontal, setValue: setHorizontalZoom,
         // name the thumb after the axis it controls, so it is uniquely addressable
         label: "zoom horizontal",
-        min, max, major, minor, tickPrecision: 0, markerPrecision: 1,
+        min, max, floor, major, minor, tickPrecision: 0, markerPrecision: 1,
         direction: "row", labels: "top", arrows: "bottom", markers: true,
         height: ils / 2, width: ils,
     }
@@ -92,7 +97,7 @@ export const Zoom = ({ viewport, view, min = -6, max = 4, ils = 200 }) => {
         value: zoom.vertical, setValue: setVerticalZoom,
         // name the thumb after the axis it controls, so it is uniquely addressable
         label: "zoom vertical",
-        min, max, major, minor, tickPrecision: 0, markerPrecision: 1,
+        min, max, floor, major, minor, tickPrecision: 0, markerPrecision: 1,
         direction: "column", flipped: true, labels: "right", arrows: "left", markers: true,
         height: ils, width: ils / 2,
     }
@@ -178,6 +183,8 @@ const zoomControlsGetZoomStateFragment = graphql`
             horizontal
             vertical
         }
+        depth
+        reach
     }
 `
 
