@@ -1,6 +1,7 @@
-<!-- -*- markdown -*- -->
-<!-- -*- coding: utf-8 -*- -->
 <!--
+-*- markdown -*-
+-*- coding: utf-8 -*-
+
 michael a.g. aïvázis <michael.aivazis@para-sim.com>
 (c) 1998-2026 all rights reserved
 -->
@@ -241,5 +242,6 @@ comparison; the page strip and its linking to the chunk map. Next: the read cost
    formats with tiles remains possible.
 4. **Where the census reference comes from.** Settled: a folder the user configures, since the
    digests change with every census.
+
 
 <!-- end of file -->

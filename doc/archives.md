@@ -1,6 +1,7 @@
-<!-- -*- markdown -*- -->
-<!-- -*- coding: utf-8 -*- -->
 <!--
+-*- markdown -*-
+-*- coding: utf-8 -*-
+
 michael a.g. aïvázis <michael.aivazis@para-sim.com>
 (c) 1998-2026 all rights reserved
 -->
@@ -422,5 +423,6 @@ redesign that starts from server state is cheaper than one that has to build it.
    unfiltered listings is decided, see 3.6. With the grammar of 3.8 in hand the grouping
    applies to local and s3 folders of granules as well, so it is a property of the browser,
    not of the earth archive.
+
 
 <!-- end of file -->

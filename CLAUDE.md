@@ -1,3 +1,11 @@
+<!--
+-*- markdown -*-
+-*- coding: utf-8 -*-
+
+michael a.g. aïvázis <michael.aivazis@para-sim.com>
+(c) 1998-2026 all rights reserved
+-->
+
 # qed — project context for Claude Code
 
 ## What qed is
@@ -84,3 +92,6 @@ are rendered on-demand by a Python/C++ server.
 ### Client-side issues
 
 Client-side performance issues exist but have not been detailed yet.
+
+
+<!-- end of file -->

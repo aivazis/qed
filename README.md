@@ -1,6 +1,9 @@
 <!--
-  michael a.g. aïvázis <michael.aivazis@para-sim.com>
-  (c) 1998-2026 all rights reserved
+-*- markdown -*-
+-*- coding: utf-8 -*-
+
+michael a.g. aïvázis <michael.aivazis@para-sim.com>
+(c) 1998-2026 all rights reserved
 -->
 
 # qed
@@ -351,5 +354,6 @@ Settings from a `qed.yaml` in the current working directory override these globa
 have complete control over how the application behaves by creating local configuration files next
 to your data. More details about application configuration, both from the command line and from
 within configuration files can be found in the section on configuring the app.
+
 
 <!-- end of file -->

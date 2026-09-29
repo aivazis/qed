@@ -1,6 +1,7 @@
-<!-- -*- markdown -*- -->
-<!-- -*- coding: utf-8 -*- -->
 <!--
+-*- markdown -*-
+-*- coding: utf-8 -*-
+
 michael a.g. aïvázis <michael.aivazis@para-sim.com>
 (c) 1998-2026 all rights reserved
 -->
@@ -155,5 +156,6 @@ reason this redesign precedes it.
    silent.
 3. **Trait identifier form** — resolved: `Stack.membership` lists member *names*, matched
    against each member reader's `pyre_name` in `_resolveMask` (robust to yaml reordering).
+
 
 <!-- end of file -->
