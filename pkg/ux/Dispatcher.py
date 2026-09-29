@@ -99,6 +99,9 @@ class Dispatcher:
         # a browser whose connection pool fills with them cannot ask for anything at all,
         # which looks exactly like a server that has stopped serving
         self._parked = {}
+        # the burst of requests of each viewport: the settings it was made with, and the requests
+        # still waiting in it, by name
+        self._bursts = {}
         self._sequence = 0
 
         # all done
@@ -347,6 +350,24 @@ class Dispatcher:
                 shape=shape,
             )
 
+        # the settings the request was made with; clients that do not name them, e.g. the
+        # measurements, take no part in the bursts
+        session = urllib.parse.parse_qs(urllib.parse.urlsplit(request.url).query).get(
+            "session", [None]
+        )[0]
+        # if they are named
+        if session is not None:
+            # a request made with settings the view has since replaced belongs to a burst that
+            # is over, and would render a tile nobody will look at
+            if session != str(view.session):
+                # so it is refused
+                record(code=410, via="obsolete")
+                # as gone
+                return server.responses.Gone(server=server)
+            # otherwise, it starts or joins the current burst of its viewport, which retires
+            # whatever is left of the earlier ones
+            self._burst(viewport=viewport, session=session, fleet=fleet, server=server)
+
         # make a placeholder response that parks the connection
         deferred = server.deferred()
         # build the delivery callback
@@ -369,10 +390,50 @@ class Dispatcher:
 
         # arm the hangup hook
         deferred.abandoned = abandoned
+
+        # if the request names its settings
+        if session is not None:
+            # it waits among the requests of the current burst of its viewport
+            self._bursts[viewport][1][sequence] = (task, callback, deferred, record)
+
         # queue the task with the team dedicated to its data source
         fleet.render(task=task, callback=callback)
         # and hand the placeholder to the server
         return deferred
+
+    def _burst(self, viewport, session, fleet, server):
+        """
+        Make {session} the current burst of requests of {viewport}, and discard the requests
+        still waiting from the bursts before it
+
+        A change to the settings of a view gives it new settings, and every tile a client asks
+        for after that names them; the tiles still waiting under the earlier settings will not
+        be looked at, so they are withdrawn from the teams, which drop the work nobody else is
+        waiting for, and their connections are answered at once, so the client can use them
+        for the tiles it does want
+        """
+        # get the burst of the viewport
+        burst = self._bursts.get(viewport)
+        # if it is the current one
+        if burst is not None and burst[0] == session:
+            # there is nothing to discard
+            return self
+        # otherwise, the new burst starts empty
+        self._bursts[viewport] = (session, {})
+        # without an earlier one
+        if burst is None:
+            # there is nothing to discard either
+            return self
+        # go through the requests still waiting in the earlier burst
+        for task, callback, deferred, record in burst[1].values():
+            # withdraw each from its team
+            fleet.revoke(task=task, callback=callback)
+            # record its end
+            record(code=410, via="obsolete")
+            # and answer its connection
+            deferred.resolve(response=server.responses.Gone(server=server))
+        # all done
+        return self
 
     def _dataInBounds(self, dataset, zoom, origin, shape):
         """
@@ -951,6 +1012,12 @@ class Dispatcher:
         else:
             # every other outcome retires it, including the ones that fail
             self._parked.pop(sequence, None)
+            # from its burst as well, if it was waiting in one
+            burst = self._bursts.get(viewport)
+            # if there is a burst
+            if burst is not None:
+                # take it out
+                burst[1].pop(sequence, None)
             # and joins the record of the recent tiles, with how long it took
             self._recent.append((via, time.perf_counter() - clocks[0] if clocks else 0.0))
         # nothing further unless someone has turned the channel on; this guard keeps the
