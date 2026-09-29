@@ -230,13 +230,15 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
                 channel.line(f"disabling the web shell")
                 channel.log()
                 # mark the UX as unavailable
-                self._ux = None
+                self._docroot = None
                 # and bail
                 break
         # if all goes well and we reach the intended folder without errors
         else:
-            # instantiate and attach my dispatcher
-            self._ux = qed.ux.dispatcher(plexus=self, docroot=docroot, pfs=pfs)
+            # remember where the web documents are, and my private filespace, for the
+            # dispatcher that gets built on first use
+            self._docroot = docroot
+            self._pfs = pfs
             # get my shell
             shell = self.shell
             # web shells field requests through a configurable service
@@ -254,13 +256,33 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         # all done
         return pfs
 
+    # the ux manager
+    @property
+    def ux(self):
+        """
+        My dispatcher, built on first use so that constructing the application builds none of
+        the state it manages; {None} when the installation has no web documents
+        """
+        # if i have one already
+        if self._ux is not None:
+            # hand it off
+            return self._ux
+        # if the installation has no web documents
+        if self._docroot is None:
+            # there is no dispatcher to build
+            return None
+        # build my dispatcher, and with it the store and everything it manages
+        self._ux = qed.ux.dispatcher(plexus=self, docroot=self._docroot, pfs=self._pfs)
+        # and hand it off
+        return self._ux
+
     # main entry point for the web shell
     def pyre_respond(self, server, request):
         """
         Fulfill an HTTP request
         """
         # get my dispatcher
-        ux = self._ux
+        ux = self.ux
         # if i don't have one, there is something wrong with my installation
         if ux is None:
             # so everything is an error
@@ -465,7 +487,9 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
 
     # private data
     _ds = 0
-    _ux = None  # the UX manager
+    _ux = None  # the UX manager, built on first use
+    _docroot = None  # the folder with the web documents, if the installation has one
+    _pfs = None  # my private filespace, which the UX manager needs
     _cliSources = None  # readers built from bare command line uris, drained by the store
 
 

@@ -1451,7 +1451,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # the dataset restriction
         rasters = set(self.rasters)
         # the store is the authority on the connected data sources
-        ux = plexus._ux
+        ux = plexus.ux
         # without one
         if ux is None:
             # there are no sources to measure
@@ -1945,9 +1945,9 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         channels = set(self.channels)
         # the dataset restriction
         rasters = set(self.rasters)
-        # the plexus hands its readers to the ux store at construction, so the store is the
+        # the plexus hands its readers to the ux store when the store is built, so the store is the
         # authority on the connected data sources; without ux support there is nothing to do
-        ux = plexus._ux
+        ux = plexus.ux
         # if it is missing
         if ux is None:
             # there are no sources to measure
