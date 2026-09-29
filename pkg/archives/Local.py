@@ -37,8 +37,8 @@ class Local(Archive, family="qed.archives.local"):
         Retrieve my contents at {uri}, a location expected to belong within the archive document
         space
         """
-        # get my root
-        root = self.fs
+        # get my root, mounting my filesystem on first contact
+        root = self.fs if self.fs is not None else self.mount()
         # and the filter state
         all = self.all
         # get the target address, resolved the way the root was when the filesystem was
@@ -69,14 +69,16 @@ class Local(Archive, family="qed.archives.local"):
         # present them in this order
         return folders + datasets
 
-    # metamethods
-    def __init__(self, **kwds):
-        # chain up
-        super().__init__(**kwds)
-        # mount my local filesystem
-        self.fs = qed.filesystem.local(root=self.uri.address)
-        # all done
-        return
+    def mount(self):
+        """
+        Mount the local filesystem at my location
+        """
+        # build the filesystem
+        fs = qed.filesystem.local(root=self.uri.address)
+        # attach it
+        self.fs = fs
+        # and hand it back
+        return fs
 
     # hooks
     @classmethod
@@ -90,6 +92,10 @@ class Local(Archive, family="qed.archives.local"):
     # constants
     tag = "local"
     label = "local"
+
+    # private data
+    # my filesystem, mounted on first contact
+    fs = None
 
 
 # end of file

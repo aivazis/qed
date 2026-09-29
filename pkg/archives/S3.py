@@ -7,7 +7,6 @@
 # support
 import qed
 import journal
-import boto3
 
 # superclass
 from .Archive import Archive
@@ -42,8 +41,8 @@ class S3(Archive, family="qed.archives.s3"):
         Retrieve the archive contents at {uri}, a location expected to belong within the archive
         document space
         """
-        # get my root
-        root = self.fs
+        # get my root, mounting my filesystem on first contact
+        root = self.fs if self.fs is not None else self.mount()
         # normalize the {uri}, until the primitives does this automatically
         uri.address = qed.primitives.path(uri.address)
         # project the request
@@ -91,8 +90,8 @@ class S3(Archive, family="qed.archives.s3"):
         """
         # prime by chaining up
         credentials = super().credentials()
-        # unpack my state
-        session = self.fs.session
+        # get my session
+        session = self.session()
         # we need the region
         region = session.region_name
         # and the session credentials
@@ -105,28 +104,14 @@ class S3(Archive, family="qed.archives.s3"):
         # and hand them off
         return credentials
 
-    # metamethods
-    def __init__(self, **kwds):
-        # chain up
-        super().__init__(**kwds)
-        # unpack my state
-        uri = self.uri
-        profile = self.profile
-        region = self.region
-        # build the AWS credentials
-        opts = {}
-        # if i know the profile
-        if profile:
-            # add it to the pile
-            opts["profile_name"] = profile
-        # if i know the region
-        if region:
-            # add it to the pile
-            opts["region_name"] = region
-        # make a session
-        session = boto3.Session(**opts)
-        # mount my s3 filesystem
-        self.fs = qed.filesystem.s3(root=uri, session=session).discover(levels=1)
+    def mount(self):
+        """
+        Mount the filesystem over my bucket, listing its top level
+        """
+        # build the filesystem over my session, and take a look at the top
+        fs = qed.filesystem.s3(root=self.uri, session=self.session()).discover(levels=1)
+        # attach it
+        self.fs = fs
 
         # make a channel
         channel = journal.debug("qed.archives.s3")
@@ -135,12 +120,40 @@ class S3(Archive, family="qed.archives.s3"):
             # make an explorer
             explorer = qed.filesystem.treeExplorer()
             # show me
-            channel.report(report=explorer.explore(node=self.fs, label=self.fs.location().address))
+            channel.report(report=explorer.explore(node=fs, label=fs.location().address))
             # flush
             channel.log()
 
-        # all done
-        return
+        # and hand it back
+        return fs
+
+    def session(self):
+        """
+        Build the AWS session that grants access to my bucket, on first request
+        """
+        # if i have one already
+        if self._session is not None:
+            # hand it off
+            return self._session
+        # get the package, which is only needed once an archive in a bucket is used
+        import boto3
+
+        # the session options
+        opts = {}
+        # if i know the profile
+        if self.profile:
+            # add it to the pile
+            opts["profile_name"] = self.profile
+        # if i know the region
+        if self.region:
+            # add it to the pile
+            opts["region_name"] = self.region
+        # make a session
+        session = boto3.Session(**opts)
+        # keep it
+        self._session = session
+        # and hand it off
+        return session
 
     # hooks
     @classmethod
@@ -158,6 +171,12 @@ class S3(Archive, family="qed.archives.s3"):
             return False
         # otherwise, chances are good the runtime support is present
         return True
+
+    # private data
+    # my filesystem, mounted on first contact
+    fs = None
+    # the session that grants access to my bucket, built on first request
+    _session = None
 
     # constants
     tag = "s3"
