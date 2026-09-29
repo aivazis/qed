@@ -19,18 +19,18 @@ from .UInt32 import UInt32 as uint32
 from .UInt64 import UInt64 as uint64
 
 # real numbers
-from .Float import Float as float
-from .Double import Double as double
+from .Float import Float as real32
+from .Double import Double as real64
 
 # complex numbers
 from .ComplexFloat import ComplexFloat as complex64
 from .ComplexDouble import ComplexDouble as complex128
 
 # aliases
-float32 = float
-float64 = double
-real32 = float
-real64 = double
+float = real32
+double = real64
+float32 = real32
+float64 = real64
 
 # gdal
 # NYI: cint16, cint32

@@ -9,7 +9,7 @@ from .Integer import Integer
 
 
 # a single byte integer
-class Char(Integer, family="qed.datatypes.Char"):
+class Char(Integer, family="qed.datatypes.char"):
     """
     The specification for one byte integers
     """
