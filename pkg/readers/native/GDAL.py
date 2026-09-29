@@ -4,7 +4,6 @@
 # (c) 1998-2026 all rights reserved
 
 # support
-import os
 import qed
 import journal
 from osgeo import gdal
@@ -124,22 +123,8 @@ class GDAL(qed.flow.factory, family="qed.readers.native.gdal", implements=qed.pr
             return gdal.Open(str(uri.address))
         # s3 buckets
         if uri.scheme == "s3":
-            # extract the profile and region
-            region, _, profile, _ = uri.server
-            # the uri specifies a profile
-            if profile:
-                # override the value in the the environment
-                os.environ["AWS_PROFILE"] = profile
-            # if the uri specifies a region
-            if region:
-                # override the value in the the environment
-                os.environ["AWS_REGION"] = region
-            # get the address, expected to be of the form {/bucket/path-to-file}
-            address = uri.address
-            # assemble the filename
-            name = f"/vsis3{address}"
-            # get the dataset and return it
-            return gdal.Open(name)
+            # get the dataset through the name gdal knows it by, with my access settings in place
+            return gdal.Open(self._vsis3(uri=uri))
         # anything else is unsupported
         channel = journal.error("qed.readers.native")
         # so complain
@@ -151,6 +136,31 @@ class GDAL(qed.flow.factory, family="qed.readers.native.gdal", implements=qed.pr
         channel.log()
         # and bail, just in case errors aren't fatal
         return
+
+    def _vsis3(self, uri):
+        """
+        Build the name gdal knows the object in a bucket at {uri} by, and scope the profile and
+        the region {uri} names to the folder of the object, so they reach whatever gdal reads
+        from there on my behalf, e.g. the overviews and the sidecar files next to the object,
+        and nothing else: not the environment of this process, from which everything else here
+        takes its own defaults, and not the objects of other readers
+        """
+        # extract the profile and region
+        region, _, profile, _ = uri.server
+        # the address is expected to be of the form {/bucket/path-to-file}; assemble the name
+        name = f"/vsis3{uri.address}"
+        # the folder of the object
+        scope = name.rpartition("/")[0]
+        # if the uri specifies a profile
+        if profile:
+            # apply it to the folder
+            gdal.SetPathSpecificOption(scope, "AWS_PROFILE", profile)
+        # if the uri specifies a region
+        if region:
+            # apply it to the folder
+            gdal.SetPathSpecificOption(scope, "AWS_REGION", region)
+        # hand off the name
+        return name
 
 
 # end of file
