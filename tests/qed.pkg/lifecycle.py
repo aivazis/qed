@@ -47,12 +47,23 @@ class Fleet:
         # all done
         return self
 
+    def retire(self, reader):
+        """
+        Record that the builders of {reader} were released
+        """
+        # remember whose they were
+        self.retired.append(reader)
+        # all done
+        return self
+
     # metamethods
     def __init__(self, **kwds):
         # chain up
         super().__init__(**kwds)
         # the staging requests i have received
         self.requests = []
+        # the readers whose builders were released
+        self.retired = []
         # all done
         return
 
@@ -149,6 +160,8 @@ assert store.lifecycle(name="gslc").elapsed is not None
 assert store.dataset(name="gslc.L.A.HH") is not None
 # and the clients were told again, so they refetch and see the discovery
 assert notifier.count == 2
+# the builders that surveyed it were let go, since nothing is being built
+assert fleet.retired == ["gslc"]
 
 # the hydrated twins hold no payload
 twin = store.dataset(name="gslc.L.A.HH")
@@ -171,6 +184,8 @@ callback(result=None, error=qed.nexus.exceptions.RecoverableError(description="n
 assert store.lifecycle(name="doomed").status == "failed"
 # retaining the reason, which is what the client displays
 assert "no file" in store.lifecycle(name="doomed").error
+# and its builders were let go as well
+assert fleet.retired == ["gslc", "doomed"]
 # and it stays listed, so the user can see it and ask for a retry
 assert store.source(name="doomed") is not None
 
