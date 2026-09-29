@@ -16,7 +16,7 @@ from .products.OFF import OFF
 
 
 # the GOFF reader
-class GOFF(H5):
+class GOFF(H5, family="qed.readers.nisar.goff"):
     """
     The reader of GOFF files
     """

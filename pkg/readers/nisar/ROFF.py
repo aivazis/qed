@@ -16,7 +16,7 @@ from .products.OFF import OFF
 
 
 # the ROFF reader
-class ROFF(H5):
+class ROFF(H5, family="qed.readers.nisar.roff"):
     """
     The reader of ROFF files
     """
