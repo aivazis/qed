@@ -704,7 +704,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # the levels must go, whatever happens
         try:
             # run the tiles against the build
-            seeded, ready, status, records = self._contend(
+            seeded, ready, status, records, beats = self._contend(
                 reader=reader, dataset=dataset, name=name, view=view, directory=directory
             )
         # no matter how it went
@@ -738,10 +738,31 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                         self.builders if self.builders is not None else self.team,
                     )
                 )
+        # the builders, as the records name them
+        builders = self.builders if self.builders is not None else self.team
+        # record every beat of the event loop
+        with self._records(path=f"{stem}-loop.csv", headers=self._loopHeaders) as out:
+            # one row each
+            for phase, moment, lag, spent in beats:
+                # with everything that distinguishes the run
+                out.writerow(
+                    (
+                        host,
+                        dataset.pyre_name,
+                        name,
+                        self.team,
+                        builders,
+                        self.rate,
+                        phase,
+                        f"{moment:.3f}",
+                        f"{lag:.1f}",
+                        f"{spent:.3f}",
+                    )
+                )
         # report the build
         channel.line(
             f"{dataset.pyre_name}.{name}, team of {self.team}, "
-            f"{self.builders if self.builders is not None else self.team} builders, "
+            f"{builders} builders, "
             f"{self.rate:g} tiles of "
             f"{span}x{span} @ zoom {self.zooms[0]} per second: build {status}, seeded after "
             + (f"{seeded:.1f} s" if seeded is not None else "never")
@@ -768,6 +789,24 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 f"median {latencies[len(latencies) // 2]:.1f} ms, "
                 f"p95 {latencies[int(len(latencies) * 0.95)]:.1f} ms, "
                 f"max {latencies[-1]:.1f} ms, {failures} failed"
+            )
+        # and how the event loop of this process fared in each phase
+        for phase in ("build", "after"):
+            # the beats of this phase
+            mine = [(moment, lag, spent) for kind, moment, lag, spent in beats if kind == phase]
+            # a phase too short to have two beats
+            if len(mine) < 2:
+                # has nothing to say
+                continue
+            # how late they came
+            lags = sorted(lag for _, lag, _ in mine)
+            # and the share of the phase this process spent on the cpu
+            busy = (mine[-1][2] - mine[0][2]) / max(mine[-1][0] - mine[0][0], 1e-9)
+            # report
+            channel.line(
+                f"  {phase:5}: event loop late by a median of {lags[len(lags) // 2]:.1f} ms, "
+                f"p95 {lags[int(len(lags) * 0.95)]:.1f} ms, max {lags[-1]:.1f} ms; "
+                f"on the cpu {100 * busy:.0f}% of the time"
             )
         # flush the report
         channel.log()
@@ -3380,6 +3419,11 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         )
         # the clock of the run
         clock = qed.timers.wall(f"qed.measure.contention.team{self.team}")
+        # and the cpu this process spends, which tells a loop that is busy with its own work
+        # from one that is waiting; it runs from here to the end of the run
+        cpu = qed.timers.cpu(f"qed.measure.contention.team{self.team}.cpu")
+        cpu.reset()
+        cpu.start()
         # the geometry of the tiles
         span = 2 ** self.shapes[0]
         zoom = self.zooms[0]
@@ -3396,8 +3440,12 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         interval = 1 / self.rate
         # the record of every tile
         records = []
-        # the state of the run: the phase, the tiles in flight, and the times of the build
-        state = {"phase": "build", "flight": 0, "seeded": None, "ready": None}
+        # the record of every beat of the event loop, as (phase, seconds since the start, how
+        # late it came in ms, cpu seconds this process has spent)
+        beats = []
+        # the state of the run: the phase, the tiles in flight, the times of the build, and the
+        # time of the last beat of the event loop
+        state = {"phase": "build", "flight": 0, "seeded": None, "ready": None, "beat": None}
         # the reasons of any failures of the build
         errors = []
         # the builds, one per raster
@@ -3423,6 +3471,26 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 return None
             # otherwise, keep going
             return interval * second
+
+        # check on the event loop
+        def beat(timestamp):
+            """
+            Record how late this beat came, and the cpu this process has spent so far
+
+            N.B.: this is an alarm handler; it hands back the time until its next call
+            """
+            # the time now
+            now = clock.sec()
+            # after the first beat
+            if state["beat"] is not None:
+                # record how late this one is compared to when it was due
+                lag = max(0.0, now - state["beat"] - self._tick) * 1000
+                # along with the cpu spent so far
+                beats.append((state["phase"], now, lag, cpu.sec()))
+            # this beat is the reference for the next
+            state["beat"] = now
+            # and keep beating
+            return self._tick * second
 
         # the end of the run
         def settle():
@@ -3553,18 +3621,22 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             build.start()
         # and the tiles, which join the workplan behind the first level
         fleet.dispatcher.alarm(interval=interval * second, call=pace)
+        # check on the event loop for as long as it turns
+        fleet.dispatcher.alarm(interval=self._tick * second, call=beat)
         # give up if the run takes too long
         fleet.dispatcher.alarm(interval=self._buildPatience * second, call=overdue)
         # run the loop until the run is over
         fleet.dispatcher.watch()
         # stop the clock
         clock.stop()
+        # stop the cpu clock
+        cpu.stop()
         # let the crew go
         fleet.disband()
         # the state the builds ended in
         status = "; ".join(errors) if errors else "ready"
-        # hand off the times, the state, and the tiles
-        return state["seeded"], state["ready"], status, records
+        # hand off the times, the state, the tiles, and the beats of the event loop
+        return state["seeded"], state["ready"], status, records, beats
 
     # implementation details: the caches
     def _cacheRun(self, plexus, pattern, buffer, budget):
@@ -4188,6 +4260,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     _crowd = 100000
     # how long the pyramid measurement waits for a build, in seconds
     _buildPatience = 7200
+    # how often the contention program checks on its own event loop, in seconds
+    _tick = 0.1
     # how long the output of a measurement can pause before what it said counts as an entry
     _s3quiet = 0.2
     # the cells that hold data, by dataset, found on first use
@@ -4254,6 +4328,19 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "seeded_s",
         "ready_s",
         "builders",
+    )
+    # the column labels of the records of the event loop of the contention program
+    _loopHeaders = (
+        "host",
+        "dataset",
+        "channel",
+        "team",
+        "builders",
+        "rate",
+        "phase",
+        "time_s",
+        "lag_ms",
+        "cpu_s",
     )
     # the column labels of the cache records
     _cacheHeaders = (
