@@ -8,16 +8,20 @@
 import React from 'react'
 import { graphql, useMutation } from 'react-relay/hooks'
 
+// locals
+import { quiet } from '../../traffic'
+
 
 // send the updated state of a range controller to the server side store
 export const useUpdateRangeController = ({ viewport, channel }) => {
     // updating the controller state mutates the server side store
     const [commit] = useMutation(useUpdateRangeControllerMutation)
 
-    // a drag fires updates far faster than the server round trip, so we keep at most one mutation
-    // in flight and, while it is, remember only the LATEST update; when the in-flight one settles
-    // we send that latest value. this coalesces the storm yet guarantees the final resting value is
-    // never dropped (the bug fixed here), regardless of where in the round trip the drag ends
+    // a drag fires updates far faster than the server can render them, so we keep at most one
+    // update in flight and, while it is, remember only the LATEST one; when the in-flight one has
+    // settled and the viewport shows its tiles, or a second has passed, we send that latest value.
+    // this paces the updates by the screen, so the server renders only screens that get seen, yet
+    // guarantees the final resting value is never dropped, wherever the drag ends
     const inflight = React.useRef(false)
     const queued = React.useRef(null)
 
@@ -46,8 +50,10 @@ export const useUpdateRangeController = ({ viewport, channel }) => {
             variables: {
                 input: { viewport, channel, controller, ...range, ...extent },
             },
-            // on success, flush the latest queued update
-            onCompleted: settle,
+            // on success, flush the latest queued update once the viewport shows the tiles of
+            // this one, but wait no longer than a second: a change invalidates every tile on the
+            // screen, and a change sent before they arrive asks for a screen nobody will see
+            onCompleted: () => quiet(viewport).then(settle),
             // on failure, report and still flush, so a transient error does not strand the value
             onError: errors => {
                 // show me
