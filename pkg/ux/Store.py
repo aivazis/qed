@@ -26,7 +26,7 @@ from .Viewport import Viewport
 
 
 # the server side of the application store
-class Store(qed.shells.command, family="qed.cli.ux"):
+class Store(qed.component, family="qed.ux.store"):
     """
     The application state as known to the server
     """
@@ -1243,7 +1243,7 @@ class Store(qed.shells.command, family="qed.cli.ux"):
     # metamethods
     def __init__(self, plexus, docroot, **kwds):
         # chain up
-        super().__init__(plexus=plexus, spec="store", **kwds)
+        super().__init__(**kwds)
         # save the root of the document
         self._docroot = docroot
         # and the plexus, which knows the workspace and names the configuration lists
