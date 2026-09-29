@@ -97,8 +97,8 @@ class Server(http, family="qed.nexus.servers.http"):
         # its teams must never spin their own event loops: crew traffic is serviced by the
         # node's selector, so hand the fleet the shared dispatcher
         fleet.dispatcher = dispatcher
-        # find the ux manager, mounted while the application folders were being assembled
-        ux = getattr(app, "_ux", None)
+        # find the ux manager, which builds on first use
+        ux = getattr(app, "ux", None)
         # if it is there
         if ux is not None:
             # the statistical samples the crews take drain into the store, where they
@@ -235,7 +235,7 @@ class Server(http, family="qed.nexus.servers.http"):
         # carefully, since this runs on a timer and must never be the thing that breaks
         try:
             # the ux manager owns the ledger of parked requests
-            ux = getattr(self._app, "_ux", None)
+            ux = getattr(self._app, "ux", None)
             # ask it how many are waiting and how long the oldest has waited
             waiting, oldest = ux.backlog() if ux is not None else (0, 0.0)
             # the fleet owns the teams that do the work

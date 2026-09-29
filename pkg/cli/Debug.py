@@ -36,7 +36,7 @@ class Debug(qed.shells.command, family="qed.cli.debug"):
         # indent
         channel.indent()
         # go through the archives
-        for archive in plexus._ux.store._dataArchives.archives():
+        for archive in plexus.ux.store._dataArchives.archives():
             # sign on
             channel.line(f"{archive.pyre_name}: {archive.uri}")
         # back out
@@ -58,7 +58,7 @@ class Debug(qed.shells.command, family="qed.cli.debug"):
         # indent
         channel.indent()
         # go through the datasets
-        for dataset in plexus._ux.store._dataSources.sources():
+        for dataset in plexus.ux.store._dataSources.sources():
             # sign on
             channel.line(f"{dataset.pyre_name}: {dataset.uri}")
         # back out
