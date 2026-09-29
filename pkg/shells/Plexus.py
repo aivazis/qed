@@ -146,7 +146,7 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         # if i have a logfile
         if self.logfile:
             # redirect all journal output to the file
-            journal.logfile(name=str(self.logfile), mode="a")
+            journal.logfile(path=str(self.logfile), mode="a")
         # all done
         return
 
