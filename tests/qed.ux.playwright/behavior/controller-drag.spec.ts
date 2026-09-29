@@ -47,6 +47,18 @@ const dragBy = async (page: Page, thumb: Locator, dx: number) => {
     await page.mouse.up()
 }
 
+// drag {thumb} to the horizontal position {x}, in many small steps; a slider ends a drag when the
+// pointer leaves it, so {x} must lie within the slider for the drag to end where it points
+const dragTo = async (page: Page, thumb: Locator, x: number) => {
+    const box = await thumb.boundingBox()
+    const y = box!.y + box!.height / 2
+    const x0 = box!.x + box!.width / 2
+    await page.mouse.move(x0, y)
+    await page.mouse.down()
+    for (let i = 1; i <= 12; ++i) await page.mouse.move(x0 + (x - x0) * (i / 12), y)
+    await page.mouse.up()
+}
+
 // the current value a thumb reports
 const valueOf = (thumb: Locator) => thumb.getAttribute("aria-valuenow").then(Number)
 
@@ -102,9 +114,15 @@ test.describe.serial("a controller drag's final value is not dropped", () => {
         // the lowest level the slider allows; dragging far past it clamps here -- a known endpoint
         const min = Number(await driverZoom.getAttribute("aria-valuemin"))
 
-        // drag the horizontal thumb far left under latency, so it lands on the min level
+        // the horizontal zoom track, whose left margin lies beyond its lowest level
+        const track = driver.locator('[data-pyre-widget="slider"][data-pyre-widget-part="track"]')
+            .filter({ has: driver.getByRole("slider", { name: "zoom horizontal" }) })
+        const trackBox = (await track.boundingBox())!
+
+        // drag the horizontal thumb under latency into that margin, so it lands on the min level;
+        // dragging past the slider altogether would end the drag wherever the pointer left it
         await throttle(driver)
-        await dragBy(driver, driverZoom, -400)
+        await dragTo(driver, driverZoom, trackBox.x + 2)
 
         // the observer must reach the min level; a dropped final value would strand it short of it
         await expect

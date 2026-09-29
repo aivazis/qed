@@ -65,12 +65,11 @@ test.describe.serial("the minimap tracks the current zoom", () => {
         await page.goto("/controls", { waitUntil: "load" })
 
         // the minimap's data rect (Placemat, Data, Viewport -> the second one) and the horizontal
-        // zoom slider (the slider with a horizontal thumb whose ticks include -6)
+        // zoom slider (the slider whose thumb is named after the horizontal zoom)
         const dataRect = page.locator('[data-qed-control="minimap"] rect').nth(1)
         await dataRect.waitFor({ timeout: 10_000 })
         const zoomTrack = page.locator('[data-pyre-widget="slider"][data-pyre-widget-part="track"]')
-            .filter({ has: page.locator('[aria-orientation="horizontal"]') })
-            .filter({ hasText: "-6" })
+            .filter({ has: page.getByRole("slider", { name: "zoom horizontal" }) })
 
         const clickAt = { position: { x: 60, y: 30 } }
 

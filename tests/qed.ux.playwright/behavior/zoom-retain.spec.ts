@@ -51,8 +51,7 @@ const readCenter = async (page: Page) => {
 // click the named tick on the horizontal zoom track and wait for the level to settle
 const setHorizontalZoom = async (page: Page, level: number) => {
     const track = page.locator('[data-pyre-widget="slider"][data-pyre-widget-part="track"]')
-        .filter({ has: page.locator('[aria-orientation="horizontal"]') })
-        .filter({ hasText: "-6" })
+        .filter({ has: page.getByRole("slider", { name: "zoom horizontal" }) })
     // aim at the tick's group: webkit misplaces positioned svg text, so a click on the
     // text itself misses
     await track.locator(`[data-pyre-widget-part="tick"][data-pyre-tick="${level}"]`).click()
