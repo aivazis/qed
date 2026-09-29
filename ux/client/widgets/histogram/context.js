@@ -50,9 +50,11 @@ export const Provider = ({ config, children }) => {
         : reach * count / tallest
     // the extent of the domain
     const span = domain[1] - domain[0]
-    // the position of a value of the domain along the axis; a domain of a single value puts
-    // everything in the middle
-    const at = value => left + (span > 0 ? room * (value - domain[0]) / span : room / 2)
+    // the position of a value of the domain along the axis; a domain of a single value holds
+    // nothing but that value, which goes at the low edge, where the bins that count it start
+    const at = value => left + (
+        span > 0 ? room * (value - domain[0]) / span : (value > domain[0] ? room : 0)
+    )
     // the baseline
     const base = headroom + reach
     // assemble
