@@ -23,6 +23,8 @@ import { tileURI } from '.'
 import { useLookAt } from './useLookAt'
 // components
 import { Measure } from '../measure'
+// the tiles each viewport is waiting for
+import { listen } from '../traffic'
 
 
 // how close two look-at centers must be, in source pixels, to count as the same place; this absorbs
@@ -262,6 +264,9 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
         onDoubleClick: center,
     }
 
+    // watch the tiles of every viewport, so the controllers can pace their updates by them
+    React.useEffect(listen, [])
+
     // compute my state
     const active = activeViewport === viewport
 
@@ -269,6 +274,7 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
     return (
         <Box ref={registrar} $state={active} {...controllers} {...rest}
             data-qed-region="viewport"
+            data-qed-viewport={viewport}
             data-qed-shape={shape.join(",")}
             data-qed-zoom={[zoom.vertical, zoom.horizontal].join(",")} >
             {/* the data tiles */}
