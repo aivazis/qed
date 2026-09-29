@@ -219,12 +219,22 @@ class Pyramid:
         so nothing above it would buy anything. A raster that fits in a tile to begin with
         gets no levels at all
         """
+        # by the rule every raster follows
+        return self.levels(shape=self._shape, tile=self._tile)
+
+    @staticmethod
+    def levels(shape, tile) -> int:
+        """
+        Count the levels a raster of {shape} supports when it is cut in tiles of {tile}: halve it
+        until it fits within a single tile; the level that does is the one a thumbnail of the
+        raster comes from, and zooming out further buys nothing
+        """
         # start at the base
         depth = 0
         # and the full extent
-        extent = list(self._shape)
+        extent = list(shape)
         # halve until the extent fits in a tile on both axes
-        while any(axis > width for axis, width in zip(extent, self._tile)):
+        while any(axis > width for axis, width in zip(extent, tile)):
             # one more level
             depth += 1
             # and the extent shrinks
