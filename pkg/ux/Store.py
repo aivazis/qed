@@ -19,6 +19,7 @@ from .Harvester import Harvester
 
 # my parts
 from .Archives import Archives
+from .EffectiveZoom import EffectiveZoom
 from .Keeper import Keeper
 from .Preparation import Preparation
 from .Sample import Sample
@@ -1214,8 +1215,8 @@ class Store(qed.component, family="qed.ux.store"):
         for port in self._syncedWith(viewport=viewport, aspect="zoom"):
             # set the zoom level
             view = port.zoomSetLevel(horizontal=horizontal, vertical=vertical)
-            # and hand the zoom settings off
-            yield view.zoom
+            # and hand the zoom settings off, as they are shown
+            yield self.shown(view=view)
         # all done
         return
 
@@ -1231,8 +1232,8 @@ class Store(qed.component, family="qed.ux.store"):
         for port in self._syncedWith(viewport=viewport, aspect="zoom"):
             # set the flag
             view = port.zoomSetCoupled(flag=flag)
-            # hand the zoom setting off
-            yield view.zoom
+            # hand the zoom setting off, as it is shown
+            yield self.shown(view=view)
         # all done
         return
 
@@ -1244,8 +1245,48 @@ class Store(qed.component, family="qed.ux.store"):
         port = self._viewports[viewport]
         # delegate
         view = port.zoomReset()
-        # all done
-        return view.zoom
+        # and hand the zoom off, as it is shown
+        return self.shown(view=view)
+
+    def depth(self, dataset) -> int:
+        """
+        Count the levels {dataset} supports, the last of them the size of a thumbnail
+        """
+        # without a dataset
+        if dataset is None:
+            # there are no levels beyond the base
+            return 0
+        # otherwise, halve the dataset until it fits in one of its tiles
+        return qed.readers.nisar.pyramid.levels(shape=dataset.shape, tile=dataset.tile)
+
+    def reach(self, dataset) -> int:
+        """
+        Count the levels of {dataset} that can be shown now
+        """
+        # the levels the dataset supports
+        depth = self.depth(dataset=dataset)
+        # without a dataset
+        if dataset is None:
+            # there is nothing being built
+            return depth
+        # look up what is being done for it
+        record = self.preparation(name=dataset.pyre_name)
+        # a dataset without a pyramid, or with one that is done or has failed
+        if record is None or record.status in (record.ready, record.failed):
+            # shows every level it supports; the ones a pyramid does not hold are read from the
+            # product, as before
+            return depth
+        # otherwise, it shows the levels that exist
+        return min(depth, record.describe()["reach"])
+
+    def shown(self, view):
+        """
+        The zoom of {view} as it is shown: no further out than the levels that can be shown now
+        """
+        # the furthest out level that can be shown, as a zoom level
+        floor = -self.reach(dataset=view.dataset)
+        # and the zoom of the view, clamped to it
+        return EffectiveZoom(zoom=view.zoom, floor=floor)
 
     # private data
     # the change broadcaster, wired by whoever owns the client connections; when set, it is

@@ -59,6 +59,10 @@ class View(graphene.ObjectType):
     preparing = graphene.Boolean(required=True)
     # the preparation of the dataset, with how deep its levels are available
     build = graphene.Field(Build)
+    # how many levels the dataset supports, the last one the size of a thumbnail
+    depth = graphene.Int(required=True)
+    # and how many of them can be shown now
+    reach = graphene.Int(required=True)
 
     # resolvers
     @staticmethod
@@ -94,6 +98,36 @@ class View(graphene.ObjectType):
         # otherwise, it is preparing while the work is still under way; a failure is not
         # worth waiting for, since the view renders anyway, just less well
         return record.status == record.working
+
+    @staticmethod
+    def resolve_depth(view, info, **kwds):
+        """
+        Count the levels the dataset of this view supports
+        """
+        # easy enough
+        return info.context["store"].depth(dataset=view.dataset)
+
+    @staticmethod
+    def resolve_reach(view, info, **kwds):
+        """
+        Count the levels of the dataset of this view that can be shown now
+        """
+        # easy enough
+        return info.context["store"].reach(dataset=view.dataset)
+
+    @staticmethod
+    def resolve_zoom(view, info, **kwds):
+        """
+        Show the zoom of this view no further out than the levels that can be shown now
+        """
+        # a view without a zoom
+        zoom = view.zoom
+        # has nothing to show
+        if zoom is None:
+            # so says so
+            return None
+        # otherwise, ask the store how it is shown
+        return info.context["store"].shown(view=view)
 
     @staticmethod
     def resolve_build(view, info, **kwds):
