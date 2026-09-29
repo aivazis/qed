@@ -97,12 +97,12 @@ class Datatype(Specification, family="qed.datatypes"):
         "uint64": "qed.datatypes.uint64",
         # single precision numbers
         "r4": "qed.datatypes.real32",
-        "real32": "qed.datatypes.float",
-        "float32": "qed.datatypes.float",
+        "real32": "qed.datatypes.real32",
+        "float32": "qed.datatypes.real32",
         # double precision numbers
-        "r8": "qed.datatypes.double",
-        "real64": "qed.datatypes.double",
-        "float64": "qed.datatypes.double",
+        "r8": "qed.datatypes.real64",
+        "real64": "qed.datatypes.real64",
+        "float64": "qed.datatypes.real64",
         # single precision complex numbers
         "c8": "qed.datatypes.complex64",
         "complex64": "qed.datatypes.complex64",
