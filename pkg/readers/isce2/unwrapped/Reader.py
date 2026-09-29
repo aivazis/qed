@@ -20,7 +20,7 @@ from .Dataset import Dataset
 # with a line of amplitudes, followed by a line of phases
 class Reader(
     qed.flow.factory,
-    family="qed.readers.isce2.unwwrapped",
+    family="qed.readers.isce2.unwrapped",
     implements=qed.protocols.reader,
 ):
     """
