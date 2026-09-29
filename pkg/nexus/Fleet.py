@@ -111,6 +111,8 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         # otherwise, form it; its name places its configuration under the team that serves
         # the tiles of the same reader, e.g. '{fleet}.{reader}.builders.size'
         team = Builders(name=f"{self.pyre_name}.{reader}.builders")
+        # its members are recruited my way
+        team.recruiter = self.recruiter
         # it shares the event loop
         team.dispatcher = self.dispatcher
         # it renders no tiles, so it neither feeds the cache nor takes samples of them
