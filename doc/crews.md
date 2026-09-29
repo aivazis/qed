@@ -1,9 +1,18 @@
+<!--
+-*- markdown -*-
+-*- coding: utf-8 -*-
+
+michael a.g. aïvázis <michael.aivazis@para-sim.com>
+(c) 1998-2026 all rights reserved
+-->
+
 # Crews
 
 This note describes how the work a reader generates is divided among worker processes, and what
 the census of the NISAR products and the measurements of the pyramid imply for that division. It
 is a working document: the broad strokes are agreed, the details are to be refined as the pieces
-are implemented and measured.
+are implemented and measured. `doc/teams.md` describes the teams as they are, and the words used for
+them.
 
 
 ## Where things stand
@@ -321,3 +330,6 @@ a task to a worker and taking delivery of its tile costs the server about 1 ms; 
 the bucket about 200 a second with a team of 16, 350 with 32, and no more with 64. The event loop
 of the server is not what limits the tiles of data in a bucket; whether 32 is the size beyond which
 a team gains nothing takes batches long enough to keep every member busy.
+
+
+<!-- end of file -->
