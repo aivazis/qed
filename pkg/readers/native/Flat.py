@@ -27,6 +27,10 @@ class Flat(qed.flow.factory, family="qed.readers.native.flat", implements=qed.pr
     shape = qed.properties.tuple(schema=qed.properties.int())
     shape.doc = "the size of the dataset in (lines, samples)"
 
+    offset = qed.properties.int()
+    offset.default = None
+    offset.doc = "the number of bytes in front of the first cell, e.g. an embedded header"
+
     selectors = qed.protocols.selectors()
     selectors.persistent = False
     selectors.default = {}
@@ -123,6 +127,7 @@ class Flat(qed.flow.factory, family="qed.readers.native.flat", implements=qed.pr
         # unpack my state into a dataset configuration
         config = {
             "uri": self.uri,
+            "offset": self._skip(),
             "shape": shape,
             "cell": cell,
             "tile": cell.tile,
@@ -162,8 +167,8 @@ class Flat(qed.flow.factory, family="qed.readers.native.flat", implements=qed.pr
         uri = self.uri
         # convert its address into a path
         path = qed.primitives.path(uri.address)
-        # get the file size
-        filesize = path.stat().st_size
+        # the cells are whatever the file holds past the bytes in front of them
+        filesize = path.stat().st_size - self._skip()
         # if the width is missing but we know the height
         if shape[1] == 0 and shape[0]:
             # set it from the file size
@@ -206,8 +211,21 @@ class Flat(qed.flow.factory, family="qed.readers.native.flat", implements=qed.pr
         Check that my file is large enough to hold {shape} samples of {cellsPerSample}
         {cell} instances each
         """
-        # compute the size the declared shape requires
-        required = shape[0] * shape[1] * cellsPerSample * cell.bytes
+        # the bytes in front of the first cell
+        skip = self._skip()
+        # cannot reach before the start of the file
+        if skip < 0:
+            # make a channel
+            channel = journal.error("qed.readers.native.flat")
+            # complain
+            channel.line(f"could not load a dataset from '{self.uri.address}'")
+            channel.line(f"the offset of the first cell cannot be negative, but it is {skip}")
+            # flush
+            channel.log()
+            # and reject
+            return False
+        # compute the size the declared shape requires, past the bytes in front of it
+        required = skip + shape[0] * shape[1] * cellsPerSample * cell.bytes
         # measure the file
         actual = qed.primitives.path(self.uri.address).stat().st_size
         # if it holds enough
@@ -218,12 +236,22 @@ class Flat(qed.flow.factory, family="qed.readers.native.flat", implements=qed.pr
         channel = journal.warning("qed.readers.native.flat")
         # complain
         channel.line(f"'{self.uri.address}' is too small for the declared shape")
-        channel.line(f"shape {tuple(shape)} requires {required} bytes")
+        channel.line(
+            f"shape {tuple(shape)} past an offset of {skip} bytes requires {required} bytes"
+        )
         channel.line(f"but the file holds only {actual}")
         # flush
         channel.log()
         # and reject
         return False
+
+    def _skip(self):
+        """
+        The number of bytes in front of my first cell: my offset, if one was declared, and none
+        otherwise
+        """
+        # without a declared offset, the cells start at the beginning of the file
+        return self.offset if self.offset is not None else 0
 
 
 # end of file
