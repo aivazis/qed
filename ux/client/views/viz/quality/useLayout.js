@@ -86,6 +86,16 @@ const layoutQuery = graphql`
                 partner
                 partnerBytes
             }
+            filemap {
+                pages
+                rasters {
+                    name
+                    bytes
+                    chunks
+                }
+                selected
+                others
+            }
             census {
                 census
                 product

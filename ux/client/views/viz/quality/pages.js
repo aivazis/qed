@@ -14,7 +14,7 @@ import { Tray } from '~/widgets'
 
 // locals
 // formatting
-import { bytes, percent } from './format'
+import { bytes, percent, plural } from './format'
 // styles
 import styles from './styles'
 
@@ -141,7 +141,7 @@ export const Pages = ({ layout, focus, setFocus }) => {
         const unused = Math.max(0, pageSize - mine - others)
         // the description
         return [
-            `page ${strip.pages[position]}: this raster ${bytes(mine)} in ${strip.chunks[position]} chunks (${percent(mine / pageSize)})`,
+            `page ${strip.pages[position]}: this raster ${bytes(mine)} in ${plural(strip.chunks[position], "chunk")} (${percent(mine / pageSize)})`,
             others > 0
                 ? `others ${bytes(others)}, mostly ${short(partner)} ${bytes(strip.partnerBytes[position])}`
                 : "no other dataset",

@@ -18,6 +18,8 @@ const trim = text => text.includes("e") || !text.includes(".")
 // render a share as a percentage
 export const percent = value => value === null || value === undefined
     ? "-" : `${Math.round(100 * value)}%`
+// render a {count} of things called {name}, in the plural unless there is exactly one
+export const plural = (count, name) => `${count} ${name}${count === 1 ? "" : "s"}`
 // render a byte count in the largest unit that keeps it above one
 export const bytes = value => {
     // nothing
