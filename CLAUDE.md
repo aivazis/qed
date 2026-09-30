@@ -12,8 +12,9 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 
 qed is a web-based visualizer for very large scientific rasters (SAR, NISAR,
 ISCE2 interferograms, and generic flat/HDF5/GDAL files). The browser client
-requests 512×512 tiles as `<img>` elements via lazysizes lazy-loading; tiles
-are rendered on-demand by a Python/C++ server.
+requests 512×512 tiles as `<img>` elements, fetched by an IntersectionObserver once
+they come within a quarter tile of the screen; tiles are rendered on-demand by a
+Python/C++ server.
 
 ## Stack layers (top to bottom)
 
@@ -32,7 +33,8 @@ are rendered on-demand by a Python/C++ server.
 
 - NISAR HDF5: RSLC, GUNW, GCOV, covariance, coherence, mask
 - ISCE2 interferograms
-- Memory-mapped flat binary
+- Memory-mapped flat binary, and ENVI products described by a header (with an embedded-header offset)
+- CEOS SAR image files (the raster only, from the file descriptor record)
 - GDAL-backed rasters
 
 ## Performance work (roadmap as of 2026-05-15)
