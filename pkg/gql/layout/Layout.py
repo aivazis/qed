@@ -12,6 +12,7 @@ import qed
 
 # my parts
 from .LayoutCensus import LayoutCensus
+from .LayoutFileMap import LayoutFileMap
 from .LayoutFill import LayoutFill
 from .LayoutGrid import LayoutGrid
 from .LayoutPartner import LayoutPartner
@@ -23,7 +24,8 @@ from .LayoutSummary import LayoutSummary
 class Layout(graphene.ObjectType):
     """
     How a raster sits in its file: the storage settings, how its chunks sit on the pages of the
-    file, what it holds where there is no data, and the states of the cells of its chunk grid
+    file, what it holds where there is no data, the states of the cells of its chunk grid, and
+    what every page of the file holds
     """
 
     # the name of the raster
@@ -47,6 +49,8 @@ class Layout(graphene.ObjectType):
     grid = graphene.Field(LayoutGrid, required=True)
     # the pages its chunks land on, when the file is paged
     strip = graphene.Field(LayoutStrip)
+    # what every page of the file holds, when the file is paged
+    filemap = graphene.Field(LayoutFileMap)
     # the census of its kind of product, when there is one to compare against
     census = graphene.Field(LayoutCensus)
 
@@ -174,6 +178,14 @@ class Layout(graphene.ObjectType):
         """
         # as described
         return described.get("strip")
+
+    @staticmethod
+    def resolve_filemap(described, *_):
+        """
+        What every page of its file holds
+        """
+        # as described
+        return described.get("filemap")
 
     @staticmethod
     def resolve_census(described, *_):
