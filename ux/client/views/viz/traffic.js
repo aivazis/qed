@@ -91,8 +91,8 @@ export const listen = () => {
         // there is nothing to do
         return
     }
-    // the lazy loader announces each tile it is about to fetch
-    document.addEventListener("lazybeforeunveil", unveil, true)
+    // the tile loader announces each tile it is about to fetch
+    document.addEventListener("tilefetch", unveil, true)
     // an image announces its arrival, and its failure, to listeners that capture it, since these
     // events do not bubble
     document.addEventListener("load", arrive, true)
