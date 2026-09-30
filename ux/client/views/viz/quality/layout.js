@@ -14,6 +14,7 @@ import { useLayout } from './useLayout'
 // components
 import { Census } from './census'
 import { Chunks } from './chunks'
+import { FileMap } from './filemap'
 import { Histograms } from './histograms'
 import { Pages } from './pages'
 import { Scorecard } from './scorecard'
@@ -25,8 +26,8 @@ import styles from './styles'
 export const Layout = ({ dataset }) => {
     // get the layout
     const layout = useLayout(dataset)
-    // the page in focus, which the chunk map and the page strip share: hovering a chunk puts its
-    // page in focus, and hovering a page puts it there directly
+    // the page in focus, which the chunk map, the page strip, and the file map share: hovering a
+    // chunk puts its page in focus, and hovering a page puts it there directly
     const [focus, setFocus] = React.useState(null)
     // a product that is not an HDF5 file has none
     if (layout === null) {
@@ -40,6 +41,7 @@ export const Layout = ({ dataset }) => {
             {layout.census && <Census census={layout.census} />}
             <Chunks layout={layout} focus={focus} setFocus={setFocus} />
             {layout.strip && <Pages layout={layout} focus={focus} setFocus={setFocus} />}
+            {layout.filemap && <FileMap layout={layout} focus={focus} setFocus={setFocus} />}
             <Histograms layout={layout} />
         </>
     )

@@ -105,12 +105,24 @@ const dark = {
     // journal colors
     journal: wheel.journal,
 
-    // the states of the chunks of a raster, as the quality panel draws them
+    // the quality panel: quiet slates for the data, so the orange of the focus is the one warm
+    // color on it, and the hues of the fill the viz pipeline paints where a raster is empty
     quality: {
+        // the states of the chunks of a raster
         unwritten: "hsl(0deg, 0%, 12%)",
-        fill: "hsl(8deg, 55%, 45%)",
-        sliver: wheel.pyre.orange,
-        data: wheel.pyre.blue,
+        data: "hsl(210deg, 22%, 52%)",
+        sliver: "hsl(210deg, 30%, 72%)",
+        // chunks of fill: brick when the fill the library knows about is what they hold, as
+        // {qed::nisar::Absence} paints a declared fill, and teal when the library is told
+        // something else, as it paints a fill nobody declared
+        fill: "hsl(0deg, 38%, 36%)",
+        lie: "hsl(173deg, 47%, 32%)",
+        // the map of a file, told apart by lightness rather than hue: the raster in view is drawn
+        // as the data, the other rasters of the product a step darker, every other dataset darker
+        // still, and the raster picked from the legend in a pale tone above them all
+        neighbor: "hsl(35deg, 12%, 38%)",
+        others: "hsl(0deg, 0%, 24%)",
+        spot: "hsl(210deg, 25%, 86%)",
     },
 }
 

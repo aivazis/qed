@@ -25,6 +25,8 @@ const room = 360
 export const Chunks = ({ layout, focus, setFocus }) => {
     // unpack the grid
     const { rows, cols, states, codes, sizes, pages } = layout.grid
+    // the color of each state, with the fill told apart by whether the library knows its value
+    const tint = { ...styles.states, fill: styles.fill(layout.fill.agrees) }
     // the size of a cell, in pixels, so the grid fits the panel
     const cell = Math.max(1, Math.floor(room / Math.max(rows, cols)))
     // the canvas; it is kept as state, since collapsing the tray unmounts it and expanding it
@@ -47,7 +49,7 @@ export const Chunks = ({ layout, focus, setFocus }) => {
         // go through the cells
         codes.forEach((code, index) => {
             // paint each one in the color of its state
-            context.fillStyle = styles.states[states[code]]
+            context.fillStyle = tint[states[code]]
             // leaving a hairline between cells when they are large enough to show it
             const gap = cell > 3 ? 1 : 0
             // at its place on the grid
@@ -124,7 +126,7 @@ export const Chunks = ({ layout, focus, setFocus }) => {
                 <Legend>
                     {census.map(([name, count]) => (
                         <Key key={name} data-qed-state={name} data-qed-count={count}>
-                            <Swatch color={styles.states[name]} />
+                            <Swatch color={tint[name]} />
                             {name} {count}
                         </Key>
                     ))}

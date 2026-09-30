@@ -27,9 +27,23 @@ const states = theme.quality
 // the colors of the pages: the bytes of the raster, of everybody else, and the room left over
 const strip = {
     mine: theme.quality.data,
-    others: theme.page.normal,
+    others: theme.page.dim,
     unused: theme.page.relief,
 }
+
+// the colors of the map of the file: the raster in view, as the chunk map draws its data, the other
+// rasters of the product, everybody else, the metadata and the free space, and the raster picked
+// from the legend
+const filemap = {
+    mine: theme.quality.data,
+    neighbor: theme.quality.neighbor,
+    others: theme.quality.others,
+    free: theme.page.relief,
+    spot: theme.quality.spot,
+}
+
+// the color of chunks of fill, by whether the library knows the value they hold
+const fill = agrees => agrees === false ? theme.quality.lie : theme.quality.fill
 
 // the outline of the chunks and the page in focus
 const focus = theme.page.highlight
@@ -43,6 +57,8 @@ export default {
     danger,
     states,
     strip,
+    filemap,
+    fill,
     focus,
 }
 
