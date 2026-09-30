@@ -1,6 +1,6 @@
 {
     "name": "qed.ux.playwright",
-    "version": "0.9.5",
+    "version": "0.10.0",
     "private": true,
     "description": "dedicated test dependencies for the qed.ux playwright suite; kept out of the client bundle",
     "devDependencies": {
