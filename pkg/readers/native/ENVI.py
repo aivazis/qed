@@ -50,9 +50,11 @@ class ENVI(Flat, family="qed.readers.native.envi"):
         layout = hdr.shape
         # the path to the product
         path = qed.primitives.path(self.uri.address)
-        # the file must hold the whole product; a short file would let the render machinery read
-        # past the end of the mapping
-        required = math.prod(layout) * cell.bytes
+        # the bytes in front of the first cell
+        skip = self._skip()
+        # the file must hold the whole product past them; a short file would let the render
+        # machinery read past the end of the mapping
+        required = skip + math.prod(layout) * cell.bytes
         # measure it
         actual = path.stat().st_size
         # if it is too small
@@ -61,14 +63,17 @@ class ENVI(Flat, family="qed.readers.native.envi"):
             channel = journal.error("qed.readers.native.envi")
             # complain
             channel.line(f"'{path}' is too small for the declared layout")
-            channel.line(f"{bands} bands of {tuple(shape)} {cell.cell} cells require")
+            channel.line(f"{bands} bands of {tuple(shape)} {cell.cell} cells")
+            channel.line(f"past an offset of {skip} bytes require")
             channel.line(f"{required} bytes, but the file holds only {actual}")
             # flush
             channel.log()
             # and bail
             return
-        # lay a grid over the whole product, in the byte order of the file
-        cube = qed.libpyre.grid.map(uri=str(path), shape=layout, cell=cell.ordered, create=False)
+        # lay a grid over the whole product, in the byte order of the file, past its offset
+        cube = qed.libpyre.grid.map(
+            uri=str(path), shape=layout, cell=cell.ordered, create=False, offset=skip
+        )
         # the band axis sits where the interleave put it
         axis = self.axes[hdr.interleave or "bsq"]
         # the bands are known by the names in the header when it names them all, and by their
@@ -119,19 +124,10 @@ class ENVI(Flat, family="qed.readers.native.envi"):
         hdr = self._header = self._describe()
         # if there is one
         if hdr is not None:
-            # a product with an embedded header needs a mapping with an offset, which the flat
-            # dataset does not have
-            if hdr.offset:
-                # make a channel
-                channel = journal.error("qed.readers.native.envi")
-                # complain
-                channel.line(f"could not load a dataset from '{self.uri.address}'")
-                channel.line(f"the header declares an offset of {hdr.offset} bytes")
-                channel.line(f"products with embedded headers are not supported yet")
-                # flush
-                channel.log()
-                # and bail
-                return
+            # if the user did not pin an offset
+            if self.offset is None:
+                # the header supplies the size of the embedded header, if any
+                self.offset = hdr.offset
             # if the user did not pin a cell type
             if not self.cell:
                 # the header supplies it, with the byte order of the product

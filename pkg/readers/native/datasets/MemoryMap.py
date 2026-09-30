@@ -28,6 +28,10 @@ class MemoryMap(
     uri.default = None
     uri.doc = "the path to the data source"
 
+    offset = qed.properties.int()
+    offset.default = 0
+    offset.doc = "the number of bytes in front of the first cell, e.g. an embedded header"
+
     # the data layout
     cell = qed.protocols.datatype()
     cell.default = None
@@ -249,10 +253,10 @@ class MemoryMap(
 
         # grab the path to the dataset
         path = qed.primitives.path(uri.address)
-        # the bytes my shape needs; a mapping is laid over the file without looking, and a
-        # read past the end of a file that is shorter than its declared shape is a crash
-        # rather than an error, so the file is measured first
-        required = math.prod(self.shape) * self.cell.bytes
+        # the bytes my shape needs past my offset; a mapping is laid over the file without
+        # looking, and a read past the end of a file that is shorter than its declared shape is
+        # a crash rather than an error, so the file is measured first
+        required = self.offset + math.prod(self.shape) * self.cell.bytes
         # carefully, since the file may not be there
         try:
             # measure it
@@ -274,7 +278,8 @@ class MemoryMap(
             channel = journal.error("qed.readers.native")
             # complain
             channel.line(f"'{path}' is too small for the declared shape")
-            channel.line(f"shape {tuple(self.shape)} of {self.cell.cell} cells requires")
+            channel.line(f"shape {tuple(self.shape)} of {self.cell.cell} cells")
+            channel.line(f"past an offset of {self.offset} bytes requires")
             channel.line(f"{required} bytes, but the file holds only {actual}")
             # flush
             channel.log()
@@ -283,9 +288,15 @@ class MemoryMap(
         # lay an erased grid of my cell type over the memory-mapped file and return it; it presents
         # the buffer protocol, which is what the tile generators consume; the cell name carries the
         # byte order of the file, so a product written on a machine of the other endianness reads
-        # in place, and the buffer description says so for the generators to notice
+        # in place, and the buffer description says so for the generators to notice; the grid
+        # starts past my offset, and when that leaves the cells misaligned the buffer description
+        # says so too, and the generators copy them rather than read them in place
         return qed.libpyre.grid.map(
-            uri=str(path), shape=self.shape, cell=self.cell.ordered, create=False
+            uri=str(path),
+            shape=self.shape,
+            cell=self.cell.ordered,
+            create=False,
+            offset=self.offset,
         )
 
     def _collectStatistics(self):
