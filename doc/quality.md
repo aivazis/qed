@@ -122,9 +122,14 @@ frame never written and a fringe of fill along the edges.
 A toggle, *not built yet*, shades the data chunks by compression ratio instead, which shows where
 the scene is busy and where it is uniform.
 
-**The file map.** *Built as the page strip, per raster: the pages the raster lands on rather than
-every page of the file, each filled with the bytes of the raster, of the other datasets, and the
-room left over; hovering a page names what it holds.* The pages of the file, one cell per page, laid
+**The file map.** *Built as two trays. The `pages` tray is the page strip of the raster: the pages
+it lands on, each filled with the bytes of the raster, of the other datasets, and the room left
+over. The `file map` tray is the whole file, told apart by lightness rather than by a color per
+raster: the raster in view, the other rasters of the product, the datasets the product does not
+display, and the metadata or free space. The rasters are listed under the map; hovering one lights
+up its pages and a click pins it. Chunks of fill count as their raster's bytes; the chunk map is the
+view that tells them apart. A file that is not paged has no file map. Hovering a page in either
+tray names what it holds.* The pages of the file, one cell per page, laid
 out in rows of a fixed width in file order. Each cell is a small stacked bar of the datasets on it,
 in the colors of a legend; pages that hold chunks of fill are hatched, and pages that hold no raw
 data are grey. It is the view that shows interleaving: a GSLC whose HH and HV polarizations were
