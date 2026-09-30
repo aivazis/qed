@@ -243,9 +243,12 @@ class Dataset(qed.flow.product, family="qed.datasets.isce2.unw", implements=qed.
 
         # grab the path to the dataset
         path = str(uri.address)
-        # lay an erased grid of my cell type over the memory-mapped file and return it; it presents
+        # lay an erased, read-only grid of my cell type over the memory-mapped file and return it,
+        # since qed never writes to a product; it presents
         # the buffer protocol, which is what the tile generators consume
-        return qed.libpyre.grid.map(uri=path, shape=self.layout, cell=self.cell.cell, create=False)
+        return qed.libpyre.grid.map(
+            uri=path, shape=self.layout, cell=self.cell.cell, create=False, writable=False
+        )
 
     def _collectStatistics(self):
         """
