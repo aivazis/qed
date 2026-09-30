@@ -167,32 +167,125 @@ def test():
     else:
         # is a failure
         assert False, "a product without a header was accepted"
-    # a product with an embedded header
-    pyre.envi.writer().write(header=describe(order=0, headerOffset=128), uri="envi_offset.hdr")
-    with open("envi_offset.dat", "wb") as product:
-        product.write(bytes(128 + 4 * LINES * SAMPLES))
-    try:
-        # is refused
-        contact(name="envi.offset", uri="envi_offset.dat")
-    # fatally
-    except journal.ApplicationError:
-        # as expected
-        pass
-    # anything else
-    else:
-        # is a failure
-        assert False, "a product with an embedded header was accepted"
+    # products with an embedded header read exactly like the ones without
+    offsets(expected=expected)
     # multi-band products come apart into one dataset per band
     bands()
+    # even past an embedded header that leaves their cells misaligned
+    bands(offset=5)
 
     # all done
     return
 
 
-def bands():
+def offsets(expected):
+    """
+    A product whose cells sit past an embedded header reads exactly like the {expected} one
+    without it, in either byte order, whether the header leaves the cells aligned or not
+    """
+    # the number of cells
+    cells = LINES * SAMPLES
+    # the datasets to check
+    datasets = []
+    # a header that leaves the cells aligned, and two that do not
+    for offset in (128, 3, 6):
+        # in either byte order
+        for order, code in ((0, "<"), (1, ">")):
+            # the stem of the product
+            stem = f"envi_offset_{offset}_{order}"
+            # write the embedded header, which is junk as far as the cells are concerned, and
+            # the cells after it
+            with open(f"{stem}.dat", "wb") as product:
+                product.write(b"\xab" * offset)
+                product.write(struct.pack(f"{code}{cells}f", *VALUES))
+            # and the ENVI header that says how long the embedded one is
+            pyre.envi.writer().write(
+                header=describe(order=order, headerOffset=offset), uri=f"{stem}.hdr"
+            )
+            # open it
+            reader = contact(name=f"envi.offset.{offset}.{order}", uri=f"{stem}.dat")
+            # the reader adopted the offset from the header
+            assert reader.offset == offset
+            # exactly one dataset
+            (dataset,) = reader.datasets
+            # that starts past the embedded header
+            assert dataset.offset == offset
+            # of the declared shape
+            assert dataset.shape == (LINES, SAMPLES)
+            # add it to the pile
+            datasets.append(dataset)
+    # the flat reader, told where the cells start, over a product that leaves them misaligned
+    flat = qed.readers.native.flat(
+        name="envi.offset.flat",
+        uri=f"envi_offset_3_{0 if sys.byteorder == 'little' else 1}.dat",
+        shape=(LINES, SAMPLES),
+        cell="float32",
+        offset=3,
+    )
+    flat.open()
+    # add its dataset to the pile
+    datasets.extend(flat.datasets)
+
+    # go through them
+    for dataset in datasets:
+        # cells read as their values
+        assert dataset.data[3, 5] == VALUES[3 * SAMPLES + 5]
+        assert dataset.data[LINES - 1, SAMPLES - 1] == VALUES[-1]
+        # tiles render exactly like the reference, including footprints that stride
+        for zoom, origin, shape in [((0, 0), (0, 0), (32, 32)), ((1, 1), (2, 3), (8, 8))]:
+            # the reference tile
+            tile = bytes(
+                memoryview(
+                    expected.render(
+                        channel=expected.channel(name="value"),
+                        zoom=zoom,
+                        origin=origin,
+                        shape=shape,
+                    )
+                )
+            )
+            # and this one
+            actual = bytes(
+                memoryview(
+                    dataset.render(
+                        channel=dataset.channel(name="value"),
+                        zoom=zoom,
+                        origin=origin,
+                        shape=shape,
+                    )
+                )
+            )
+            # must agree
+            assert actual == tile
+        # so do the statistics, samples, and profiles
+        assert dataset.stats == expected.stats
+        assert dataset.sample(zoom=(1, 0), origin=(3, 4), shape=(10, 10)) == expected.sample(
+            zoom=(1, 0), origin=(3, 4), shape=(10, 10)
+        )
+        points = [(1, 2), (10, 20), (30, 60)]
+        assert dataset.profile(points=points) == expected.profile(points=points)
+
+    # an offset that leaves the file too short for the declared shape is refused
+    pyre.envi.writer().write(header=describe(order=0, headerOffset=64), uri="envi_offset_short.hdr")
+    # by writing the cells without the embedded header in front of them
+    with open("envi_offset_short.dat", "wb") as product:
+        product.write(struct.pack(f"<{cells}f", *VALUES))
+    # the complaint is expected, so send it to the trash
+    journal.warning("qed.readers.native.flat").device = journal.trash()
+    # the reader
+    short = contact(name="envi.offset.short", uri="envi_offset_short.dat")
+    # builds no datasets
+    assert not short.datasets
+
+    # all done
+    return
+
+
+def bands(offset=0):
     """
     A multi-band product yields one dataset per band, selectable by name, in every interleave and
-    in either byte order, each reading exactly like the band written out on its own
+    in either byte order, each reading exactly like the band written out on its own; the cells
+    sit past an embedded header of {offset} bytes
     """
     # the host's order
     host = sys.byteorder
@@ -206,10 +299,13 @@ def bands():
     # the reference: each band on its own, in the host's order, through the flat reader
     references = []
     for b, plane in enumerate(cube):
-        with open(f"envi_band{b}.dat", "wb") as product:
+        with open(f"envi_band{b}_{offset}.dat", "wb") as product:
             product.write(struct.pack(f"={LINES * SAMPLES}f", *plane))
         reader = qed.readers.native.flat(
-            name=f"envi.band{b}", uri=f"envi_band{b}.dat", shape=(LINES, SAMPLES), cell="float32"
+            name=f"envi.band{b}.{offset}",
+            uri=f"envi_band{b}_{offset}.dat",
+            shape=(LINES, SAMPLES),
+            cell="float32",
         )
         reader.open()
         (dataset,) = reader.datasets
@@ -237,19 +333,28 @@ def bands():
                 for j in range(SAMPLES):
                     for b in range(3):
                         cells.append(cube[b][i * SAMPLES + j])
-        # write the product
-        with open(f"envi_{interleave}.dat", "wb") as product:
+        # the stem of the product
+        stem = f"envi_{interleave}_{offset}"
+        # write the product, past its embedded header
+        with open(f"{stem}.dat", "wb") as product:
+            product.write(b"\xab" * offset)
             product.write(struct.pack(f"{code}{len(cells)}f", *cells))
         # and its header
         pyre.envi.writer().write(
-            header=describe(order=order, bands=3, interleave=interleave, bandNames=names),
-            uri=f"envi_{interleave}.hdr",
+            header=describe(
+                order=order,
+                bands=3,
+                interleave=interleave,
+                bandNames=names,
+                headerOffset=offset,
+            ),
+            uri=f"{stem}.hdr",
         )
         # open it
-        reader = contact(name=f"envi.{interleave}", uri=f"envi_{interleave}.dat")
+        reader = contact(name=f"envi.{interleave}.{offset}", uri=f"{stem}.dat")
         # one dataset per band, named by ordinal
         assert [dataset.pyre_name for dataset in reader.datasets] == [
-            f"envi.{interleave}.{b + 1}" for b in range(3)
+            f"envi.{interleave}.{offset}.{b + 1}" for b in range(3)
         ]
         # the selector names the bands
         assert reader.selectors == {"band": tuple(names)}
