@@ -13,6 +13,7 @@
 // what the implementations need
 #include <bit>
 #include <complex>
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <tuple>
@@ -41,9 +42,15 @@ namespace qed::py {
 
     // dispatch on a python buffer's cell format across the candidate cell types {cellTs}: rebuild
     // a read-only grid of rank {dim} over the buffer's block and hand it to {f}, whichever cell
-    // type holds its cells; a buffer in a byte order other than the host's is refused
+    // type holds its cells; a buffer in a byte order other than the host's, or whose cells do not
+    // sit on their alignment, is refused
     template <int dim, typename... cellTs, typename F>
     auto onGrid(const py::buffer & source, F && f);
+    // whether the cells of the buffer described by {info} sit on the alignment of {cellT}; a
+    // product mapped past a header whose length is not a multiple of the alignment has cells
+    // that do not, and reading them through a plain {cellT} pointer is undefined
+    template <typename cellT>
+    auto aligned(const py::buffer_info & info) -> bool;
     // split a buffer's struct code into the code of the scalar itself and whether its leading
     // byte order marker, if there is one, names the order the host lacks
     inline auto splitFormat(const std::string & format) -> std::pair<std::string, bool>;
@@ -72,22 +79,25 @@ namespace qed::py {
         const std::string & code, py::ssize_t itemsize, const std::string & format, G && g);
     // run {f} over the tile at {origin}+{tile} with the given {stride} of the grid the buffer
     // {source} exports, dispatching on its cell type across {cellTs}; {f} is invoked as
-    // {f(grid, origin, tile, stride)}: a buffer in the host's byte order is viewed in place, while
-    // one in the other order has the footprint of the tile copied through the swap into a native
-    // block first, so that {f} sees a tile that starts at the origin with unit stride and the
-    // kernels never meet a swapped cell
+    // {f(grid, origin, tile, stride)}: a buffer in the host's byte order whose cells sit on their
+    // alignment is viewed in place, while one in the other order, or whose cells are misaligned,
+    // has the footprint of the tile copied into a native block first, so that {f} sees a tile
+    // that starts at the origin with unit stride and the kernels never meet a swapped or
+    // misaligned cell
     template <int dim, typename... cellTs, typename F>
     auto onTile(
         const py::buffer & source, const pyre::grid::index_t<dim> & origin,
         const pyre::grid::shape_t<dim> & tile, const pyre::grid::index_t<dim> & stride, F && f);
-    // the foreign order leg of {onTile}: copy the footprint of the tile through the swap and hand
-    // {f} a native view over the copy
-    template <typename cellT, int dim, typename F>
-    auto swapTile(
+    // the copying leg of {onTile}: read the footprint of the tile through cells of type {sourceT},
+    // which swap or merely copy bytes as the buffer requires, and hand {f} a native view of
+    // {cellT} over the copy
+    template <typename cellT, typename sourceT, int dim, typename F>
+    auto copyTile(
         const py::buffer_info & info, const pyre::grid::index_t<dim> & origin,
         const pyre::grid::shape_t<dim> & tile, const pyre::grid::index_t<dim> & stride, F && f);
     // like {onGrid}, but a buffer in the byte order the host lacks yields a grid whose cells swap
-    // on access, for kernels that visit arbitrary cells and can pay for the swap cell by cell
+    // on access, and one whose cells are misaligned a grid whose cells copy their bytes on access,
+    // for kernels that visit arbitrary cells and can pay for either cell by cell
     template <int dim, typename... cellTs, typename F>
     auto onCells(const py::buffer & source, F && f);
 }    // namespace qed::py
