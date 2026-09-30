@@ -20,9 +20,11 @@ class Amplitude(Channel, family="qed.channels.isce2.unw.amplitude"):
     # configurable state
     scale = qed.protocols.controller(default=qed.controllers.value)
     scale.doc = "the overall amplitude scaling"
+    scale.quantity = "scale"
 
     exponent = qed.protocols.controller(default=qed.controllers.value)
     exponent.doc = "the amplitude exponent"
+    exponent.quantity = "exponent"
 
     # interface
     def autotune(self, stats=None, **kwds):
