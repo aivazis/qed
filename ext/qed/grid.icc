@@ -108,9 +108,27 @@ qed::py::onGrid(const py::buffer & source, F && f)
     return dispatch<cellTs...>(code, info.itemsize, info.format, [&](auto tag) {
         // the winning cell type
         using cell_t = typename decltype(tag)::type;
+        // cells that do not sit on their alignment cannot be read in place either
+        if (!aligned<cell_t>(info)) {
+            // so refuse them
+            throw py::value_error("grid cells that are not aligned in memory");
+        }
         // view the buffer through it
         return f(asGrid<cell_t, dim>(info));
     });
+}
+
+
+// whether the cells of a buffer sit on the alignment of {cellT}
+template <typename cellT>
+auto
+qed::py::aligned(const py::buffer_info & info) -> bool
+{
+    // the address of the first cell
+    auto address = reinterpret_cast<std::uintptr_t>(info.ptr);
+    // every other cell is a whole number of cells away, and the size of a type is a multiple of
+    // its alignment, so the first cell decides for all of them
+    return address % alignof(cellT) == 0;
 }
 
 
@@ -284,15 +302,22 @@ qed::py::onTile(
     }
     // separate the scalar code from the byte order
     auto [code, foreign] = splitFormat(info.format);
-    // pick the candidate that holds the cells; the byte order decides whether the tile is
-    // viewed in place or copied through the swap
+    // pick the candidate that holds the cells; the byte order and the alignment decide whether
+    // the tile is viewed in place or copied first
     return dispatch<cellTs...>(code, info.itemsize, info.format, [&](auto tag) {
         // the winning cell type
         using cell_t = typename decltype(tag)::type;
         // a tile in the order the host lacks
         if (foreign) {
             // is copied through the swap first
-            return swapTile<cell_t, dim>(info, origin, tile, stride, f);
+            return copyTile<cell_t, pyre::memory::foreign_t<cell_t>, dim>(
+                info, origin, tile, stride, f);
+        }
+        // a tile whose cells do not sit on their alignment
+        if (!aligned<cell_t>(info)) {
+            // is copied byte by byte into an aligned block first
+            return copyTile<cell_t, pyre::memory::unaligned_t<cell_t>, dim>(
+                info, origin, tile, stride, f);
         }
         // everything else is viewed in place
         return f(asGrid<cell_t, dim>(info), origin, tile, stride);
@@ -300,17 +325,15 @@ qed::py::onTile(
 }
 
 
-// copy the footprint of a tile through the swap and run {f} over the native copy
-template <typename cellT, int dim, typename F>
+// copy the footprint of a tile through the cells of the buffer and run {f} over the native copy
+template <typename cellT, typename sourceT, int dim, typename F>
 auto
-qed::py::swapTile(
+qed::py::copyTile(
     const py::buffer_info & info, const pyre::grid::index_t<dim> & origin,
     const pyre::grid::shape_t<dim> & tile, const pyre::grid::index_t<dim> & stride, F && f)
 {
-    // the cells as they sit in the buffer: in the order the host lacks
-    using foreign_t = pyre::memory::foreign_t<cellT>;
-    // a view over the buffer that reads them as native values
-    auto source = asGrid<foreign_t, dim>(info);
+    // a view over the buffer that reads its cells, as they sit, as native values
+    auto source = asGrid<sourceT, dim>(info);
     // the extent of the source along each axis
     const auto & extent = source.packing().shape();
     // the layout of the tile
@@ -334,7 +357,7 @@ qed::py::swapTile(
                 throw py::value_error("tile footprint lies outside the source");
             }
         }
-        // read the source cell, which swaps into the host's order on the way out, and store it
+        // read the source cell, which lands in the host's order and alignment, and store it
         block[packing.offset(idx)] = source[src];
     }
     // a native view over the copy, with the tile's own layout
@@ -359,15 +382,20 @@ qed::py::onCells(const py::buffer & source, F && f)
     }
     // separate the scalar code from the byte order
     auto [code, foreign] = splitFormat(info.format);
-    // pick the candidate that holds the cells; the byte order decides whether they are read as
-    // they are or through the swap
+    // pick the candidate that holds the cells; the byte order and the alignment decide whether
+    // they are read as they are, through the swap, or by copying their bytes
     return dispatch<cellTs...>(code, info.itemsize, info.format, [&](auto tag) {
         // the winning cell type
         using cell_t = typename decltype(tag)::type;
         // cells in the order the host lacks
         if (foreign) {
-            // swap on access
+            // swap on access, which also reads them wherever they sit
             return f(asGrid<pyre::memory::foreign_t<cell_t>, dim>(info));
+        }
+        // cells that do not sit on their alignment
+        if (!aligned<cell_t>(info)) {
+            // copy their bytes on access
+            return f(asGrid<pyre::memory::unaligned_t<cell_t>, dim>(info));
         }
         // everything else is read as it is
         return f(asGrid<cell_t, dim>(info));
