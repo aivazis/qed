@@ -279,6 +279,10 @@ class Store(qed.component, family="qed.ux.store"):
         described = qed.readers.pages.describe(dataset=peer, tables=tables, paging=paging)
         # under the name the client knows it by
         described["name"] = dataset.pyre_name
+        # the rasters on the file map, by their names within the product
+        for raster in (described["filemap"] or {}).get("rasters", []):
+            # which are what follows the name of the reader
+            raster["name"] = raster["name"].removeprefix(f"{live.pyre_name}.")
         # the census of its kind of product, if there is one to compare against
         described["census"] = self.census(product=source.pyre_family().split(".")[-1])
         # remember it

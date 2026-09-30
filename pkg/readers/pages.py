@@ -210,6 +210,68 @@ def strip(*, tables: dict, name: str, pageSize: int):
     }
 
 
+def filemap(*, tables: dict, name: str, pageSize: int, fileBytes: int = None):
+    """
+    Describe every page of a file with pages of {pageSize}, given the chunk {tables} of every
+    dataset in it: for each page, the bytes and the number of chunks of each raster of the
+    product, and the bytes of all the datasets the product does not display; the raster {name}
+    is the one in view; {None} for a file that is not paged
+
+    The rasters are the datasets filed under their names rather than their paths in the file;
+    each gets dense lists with one entry per page, so the room left on a page is what the
+    metadata and the free space take
+    """
+    # a file without pages
+    if not pageSize:
+        # has nothing to describe
+        return None
+    # the rasters of the product, in the order of its reader
+    rasters = [other for other in tables if not other.startswith("/")]
+    # the last page any chunk reaches
+    last = max(
+        (
+            (address + size - 1) // pageSize
+            for table in tables.values()
+            for address, size, _ in table
+        ),
+        default=-1,
+    )
+    # the pages of the file: as many as its size spans, or as the chunks reach when it is unknown
+    count = max(-(-fileBytes // pageSize) if fileBytes else 0, last + 1)
+    # the bytes and the chunks of each raster on each page
+    mine = {raster: [0] * count for raster in rasters}
+    chunks = {raster: [0] * count for raster in rasters}
+    # and the bytes of everything else on each page
+    others = [0] * count
+    # go through every dataset in the file
+    for other, table in tables.items():
+        # find out whether it is a raster of the product
+        raster = other in mine
+        # go through its chunks
+        for address, size, _ in table:
+            # and the pages each one lands on
+            for page, share in apportion(address=address, size=size, pageSize=pageSize):
+                # a dataset the product does not display
+                if not raster:
+                    # adds its bytes to everybody else
+                    others[page] += share
+                    # and nothing more
+                    continue
+                # a raster adds its bytes to its own account
+                mine[other][page] += share
+                # and counts its chunk
+                chunks[other][page] += 1
+    # hand off the description
+    return {
+        "pages": count,
+        "rasters": [
+            {"name": raster, "bytes": mine[raster], "chunks": chunks[raster]} for raster in rasters
+        ],
+        "selected": rasters.index(name) if name in mine else None,
+        "others": others,
+    }
+
+
 def states(
     *, table: list, shape: tuple, tile: tuple, raw: int, fill: int = None, pageSize: int = 0
 ) -> dict:
@@ -456,7 +518,8 @@ def describe(*, dataset, tables: dict, paging: tuple) -> dict:
     """
     Describe how the raster {dataset} sits in its file, given the storage {tables} of every
     dataset in the file and its {paging}: its storage settings, how its chunks sit on the pages,
-    what it holds where there is no data, and the states of the cells of its chunk grid
+    what it holds where there is no data, the states of the cells of its chunk grid, and what
+    every page of the file holds
     """
     # unpack the paging
     pageSize, strategy, fileBytes = paging
@@ -514,6 +577,7 @@ def describe(*, dataset, tables: dict, paging: tuple) -> dict:
         "nodata": fill,
         "states": cells,
         "strip": strip(tables=tables, name=name, pageSize=pageSize),
+        "filemap": filemap(tables=tables, name=name, pageSize=pageSize, fileBytes=fileBytes),
     }
 
 

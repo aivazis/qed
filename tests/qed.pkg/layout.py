@@ -78,6 +78,30 @@ assert states["fill"] == fill["fillChunks"] > 0
 # and the chunks of fill were checked by decoding two of them
 assert fill["verified"] == 2
 
+# the map of the file covers every one of its pages
+filemap = described["filemap"]
+assert filemap["pages"] == -(-size // pageSize)
+# with every raster of the product, and the covariance term among them
+rasters = filemap["rasters"]
+assert len(rasters) == len(reader.datasets)
+assert rasters[filemap["selected"]]["name"] == term.pyre_name
+# each raster accounts for every byte and every chunk it stores
+for raster in rasters:
+    # its bytes
+    assert sum(raster["bytes"]) == sum(size for _, size, _ in tables[raster["name"]])
+    # and its chunks, each counted at least once
+    assert sum(raster["chunks"]) >= len(tables[raster["name"]])
+# the datasets the product does not display account for the rest of the stored bytes
+assert sum(filemap["others"]) == sum(
+    size for name, table in tables.items() if name.startswith("/") for _, size, _ in table
+)
+# no page holds more than it can
+for page in range(filemap["pages"]):
+    # counting the rasters and everybody else
+    assert filemap["others"][page] + sum(raster["bytes"][page] for raster in rasters) <= pageSize
+# which the graphql view hands over as is
+assert Layout.resolve_filemap(described) is filemap
+
 # the graphql view of the fill says the two disagree
 view = Layout.resolve_fill(described)
 assert view["hdf5"] == "0.0" and view["holds"] == "nan" and view["agrees"] is False
