@@ -167,6 +167,8 @@ def test():
     else:
         # is a failure
         assert False, "a product without a header was accepted"
+    # a product the user may not write to reads like any other
+    readonly(expected=expected)
     # products with an embedded header read exactly like the ones without
     offsets(expected=expected)
     # multi-band products come apart into one dataset per band
@@ -174,6 +176,51 @@ def test():
     # even past an embedded header that leaves their cells misaligned
     bands(offset=5)
 
+    # all done
+    return
+
+
+def readonly(expected):
+    """
+    A product whose file the user may not write to reads exactly like the {expected} one
+    """
+    # support
+    import os
+    import stat
+
+    # write the product in the host's order
+    with open("envi_readonly.dat", "wb") as product:
+        product.write(struct.pack(f"={LINES * SAMPLES}f", *VALUES))
+    # with its header
+    pyre.envi.writer().write(
+        header=describe(order=0 if sys.byteorder == "little" else 1), uri="envi_readonly.hdr"
+    )
+    # take away the permission to write to it
+    os.chmod("envi_readonly.dat", stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+    # open it
+    reader = contact(name="envi.readonly", uri="envi_readonly.dat")
+    # exactly one dataset
+    (dataset,) = reader.datasets
+    # whose cells read as their values
+    assert dataset.data[3, 5] == VALUES[3 * SAMPLES + 5]
+    # and whose buffer is read-only
+    assert memoryview(dataset.data).readonly
+    # and whose tiles match the reference
+    tile = bytes(
+        memoryview(
+            expected.render(
+                channel=expected.channel(name="value"), zoom=(0, 0), origin=(0, 0), shape=(32, 32)
+            )
+        )
+    )
+    actual = bytes(
+        memoryview(
+            dataset.render(
+                channel=dataset.channel(name="value"), zoom=(0, 0), origin=(0, 0), shape=(32, 32)
+            )
+        )
+    )
+    assert actual == tile
     # all done
     return
 
