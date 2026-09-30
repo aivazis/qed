@@ -7,6 +7,7 @@
 # datasets
 # memory mapped files from the local filesystem
 from .MemoryMap import MemoryMap as mmap
+
 # lines laid out in the records of a file, e.g. the image file of a CEOS product
 from .Records import Records as records
 
