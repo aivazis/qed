@@ -14,8 +14,8 @@ data_c16:
     shape: 3929, 6049
     cell: c16
 
-    # pin the visualization pipeline so renders never depend on sampled statistics
-    data.complex:
+    # pin the controllers the channels share, so renders never depend on sampled statistics
+    data.controllers:
         amplitude:
             auto: no
             min: 0.0
@@ -33,21 +33,6 @@ data_c16:
             min: 0.0
             value: 0.5
             max: 1.0
-    data.amplitude:
-        amplitude:
-            auto: no
-            min: 0.0
-            low: 0.5
-            high: 5.0
-            max: 50.0
-    data.phase:
-        phase:
-            auto: no
-            min: -3.15
-            low: -1.6
-            high: 1.6
-            max: 3.15
-
 
 # attach the dataset to the application
 datasets:
