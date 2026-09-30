@@ -9,6 +9,13 @@ qed.pkg.tests.stem := qed.pkg
 # depends on
 qed.pkg.tests.prerequisites := qed.pkg qed.ext
 
+# the CEOS driver writes its own image files, and the flat references it compares them to
+tests.qed.pkg.ceos.clean := \
+    ceos_alos.dat ceos_sgf.dat ceos_asf.dat ceos_real.dat ceos_bsq.dat ceos_bil.dat \
+    ceos_vary.dat ceos_cint.dat ceos_flat.dat ceos_alos_reference.dat ceos_sgf_reference.dat \
+    ceos_asf_reference.dat ceos_real_reference.dat ceos_bsq0_reference.dat \
+    ceos_bsq1_reference.dat ceos_bil0_reference.dat ceos_bil1_reference.dat
+
 # the ENVI driver writes its own products and headers
 tests.qed.pkg.envi.clean := \
     envi_le.dat envi_le.hdr envi_readonly.dat envi_readonly.hdr envi_be.dat envi_be.dat.hdr \
