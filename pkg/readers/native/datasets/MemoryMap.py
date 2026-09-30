@@ -285,7 +285,8 @@ class MemoryMap(
             channel.log()
             # and bail
             return
-        # lay an erased grid of my cell type over the memory-mapped file and return it; it presents
+        # lay an erased, read-only grid of my cell type over the memory-mapped file and return it,
+        # since qed never writes to a product and read-only products are common; it presents
         # the buffer protocol, which is what the tile generators consume; the cell name carries the
         # byte order of the file, so a product written on a machine of the other endianness reads
         # in place, and the buffer description says so for the generators to notice; the grid
@@ -296,6 +297,7 @@ class MemoryMap(
             shape=self.shape,
             cell=self.cell.ordered,
             create=False,
+            writable=False,
             offset=self.offset,
         )
 

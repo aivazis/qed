@@ -70,9 +70,15 @@ class ENVI(Flat, family="qed.readers.native.envi"):
             channel.log()
             # and bail
             return
-        # lay a grid over the whole product, in the byte order of the file, past its offset
+        # lay a read-only grid over the whole product, in the byte order of the file, past its
+        # offset; qed never writes to a product, and read-only products are common
         cube = qed.libpyre.grid.map(
-            uri=str(path), shape=layout, cell=cell.ordered, create=False, offset=skip
+            uri=str(path),
+            shape=layout,
+            cell=cell.ordered,
+            create=False,
+            writable=False,
+            offset=skip,
         )
         # the band axis sits where the interleave put it
         axis = self.axes[hdr.interleave or "bsq"]
