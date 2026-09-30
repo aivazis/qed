@@ -36,7 +36,6 @@
     },
     "dependencies": {
         "graphql": "latest",
-        "lazysizes": "latest",
         "lodash": "latest",
         "path-browserify": "latest",
         "react": "<19",
