@@ -69,6 +69,13 @@ class Keeper:
             component = recipe.components[name]
             # keep only what the session assigned
             section = self._assigned(component=component, section=section)
+            # leaving out the controllers a channel shares with the other channels of its
+            # dataset, which are bound again at boot and write their own sections
+            section = {
+                trait: value
+                for trait, value in section.items()
+                if not self._coupled(component=component, trait=trait)
+            }
             # of those, find the ones that say nothing, and whose entries should go
             vacuous = self._vacuous(component=component, section=section)
             # a section with nothing to say and nothing to take back
@@ -292,6 +299,16 @@ class Keeper:
         part = getattr(component, descriptor.name)
         # it is owned when it is named after the trait, under the name of its owner
         return part is not None and part.pyre_name == f"{component.pyre_name}.{descriptor.name}"
+
+    def _coupled(self, component, trait):
+        """
+        Check whether the {trait} of {component} binds a controller the component shares with
+        others: a facility that declares the quantity its controller governs
+        """
+        # get the descriptor of the trait
+        descriptor = component.pyre_trait(alias=trait)
+        # only facilities bind controllers, and only the ones with a quantity are shared
+        return descriptor.isFacility and getattr(descriptor, "quantity", None) is not None
 
     def _assigned(self, component, section):
         """
