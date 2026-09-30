@@ -14,6 +14,7 @@ from . import datasets
 # readers
 from .Flat import Flat as flat
 from .ENVI import ENVI as envi
+from .CEOS import CEOS as ceos
 
 
 # make one
