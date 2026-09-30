@@ -21,12 +21,15 @@ class Phase(Channel, family="qed.channels.native.phase"):
     # user configurable state
     phase = qed.protocols.controller(default=qed.controllers.linearRange)
     phase.doc = "the manager of the range of values to render"
+    phase.quantity = "phase"
 
     brightness = qed.protocols.controller(default=qed.controllers.value)
     brightness.doc = "the brightness"
+    brightness.quantity = "brightness"
 
     saturation = qed.protocols.controller(default=qed.controllers.value)
     saturation.doc = "the saturation"
+    saturation.quantity = "saturation"
 
     # interface
     def autotune(self, **kwds):

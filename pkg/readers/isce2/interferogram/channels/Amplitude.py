@@ -20,6 +20,7 @@ class Amplitude(Channel, family="qed.channels.isce2.int.amplitude"):
     # configurable state
     amplitude = qed.protocols.controller(default=qed.controllers.logRange)
     amplitude.doc = "the manager of the range of values to render"
+    amplitude.quantity = "amplitude"
 
     # interface
     def autotune(self, **kwds):

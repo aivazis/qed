@@ -21,9 +21,11 @@ class UnwrappedPhaseMasked(Channel, family="qed.channels.nisar.unwrappedPhaseMas
     # user configurable state
     phase = qed.protocols.controller(default=qed.controllers.linearRange)
     phase.doc = "the manager of the range of values to render"
+    phase.quantity = "phase"
 
     brightness = qed.protocols.controller(default=qed.controllers.value)
     brightness.doc = "the brightness"
+    brightness.quantity = "brightness"
 
     # interface
     def autotune(self, **kwds):

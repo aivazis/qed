@@ -21,6 +21,7 @@ class CovarianceMasked(Channel, family="qed.channels.nisar.covarianceMasked"):
     # user configurable state
     amplitude = qed.protocols.controller(default=qed.controllers.logRange)
     amplitude.doc = "the manager of the range of values to render"
+    amplitude.quantity = "amplitude"
 
     # interface
     def autotune(self, **kwds):

@@ -74,12 +74,16 @@ class BFPQSLC(Product, family="qed.datasets.nisar.products.bfpqslc"):
         """
         Build my visualization pipelines
         """
+        # the controllers my channels share, by the quantity they govern
+        shared = {}
         # go through the default channels provided by my data type
         for channel in self._retrieveChannels():
             # get the factory from my bindings
             cls = getattr(channels, f"{channel}BFPQ")
             # instantiate it
             pipeline = cls(name=f"{context}.{channel}", bfpq=self.bfpq)
+            # hand it the controllers it shares with my other channels
+            qed.controllers.couple(pipeline=pipeline, context=context, shared=shared)
             # autotune it, if necessary
             pipeline.autotune(stats=self.stats)
             # and make it available

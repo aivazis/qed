@@ -21,6 +21,7 @@ class Coherence(Channel, family="qed.channels.nisar.coherence"):
     # user configurable state
     range = qed.protocols.controller(default=qed.controllers.linearRange)
     range.doc = "the manager of the range of values to render"
+    range.quantity = "coherence"
 
     # interface
     def autotune(self, **kwds):

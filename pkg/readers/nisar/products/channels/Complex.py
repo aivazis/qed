@@ -20,12 +20,15 @@ class Complex(Channel, family="qed.channels.nisar.complex"):
     # configurable state
     amplitude = qed.protocols.controller(default=qed.controllers.logRange)
     amplitude.doc = "the manager of the range of values to render"
+    amplitude.quantity = "amplitude"
 
     phase = qed.protocols.controller(default=qed.controllers.linearRange)
     phase.doc = "the manager of the range of values to render"
+    phase.quantity = "phase"
 
     saturation = qed.protocols.controller(default=qed.controllers.value)
     saturation.doc = "the saturation"
+    saturation.quantity = "saturation"
 
     # interface
     def autotune(self, **kwds):

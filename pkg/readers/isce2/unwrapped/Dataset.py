@@ -126,11 +126,15 @@ class Dataset(qed.flow.product, family="qed.datasets.isce2.unw", implements=qed.
         """
         Build my standard visualization pipelines using the given naming {context}
         """
+        # the controllers my channels share, by the quantity they govern
+        shared = {}
         # go through the default channels provided by my data type
         # go through the registry
         for channel in channelRegistry():
             # instantiate a workflow
             pipeline = channel(name=f"{context}.{channel.tag}")
+            # hand it the controllers it shares with my other channels
+            qed.controllers.couple(pipeline=pipeline, context=context, shared=shared)
             # autotune
             pipeline.autotune(stats=self.stats)
             # and make it available

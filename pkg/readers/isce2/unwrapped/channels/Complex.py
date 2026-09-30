@@ -23,12 +23,15 @@ class Complex(Channel, family="qed.channels.isce2.unw.complex"):
     # configurable state
     scale = qed.protocols.controller(default=qed.controllers.value)
     scale.doc = "the overall amplitude scaling"
+    scale.quantity = "scale"
 
     exponent = qed.protocols.controller(default=qed.controllers.value)
     exponent.doc = "the amplitude exponent"
+    exponent.quantity = "exponent"
 
     phase = qed.protocols.controller(default=qed.controllers.linearRange)
     phase.doc = "the manager of the range of values to render"
+    phase.quantity = "phase"
 
     # interface
     def autotune(self, stats=None, **kwds):
