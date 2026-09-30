@@ -45,8 +45,10 @@ design the sequence we actually want.
 
 ### Path A — product present at page load
 
-- **A0.** The bundle configures lazysizes before React exists: load only when visible, with
-  the trigger rect shrunk by 20px. This is the only knob governing when a tile is requested.
+- **A0.** Tiles are fetched by the tile loader (`ux/client/widgets/tile/loader.js`): one
+  `IntersectionObserver` per scroll container, which copies a tile's `data-src` into `src` once
+  the tile comes within 128 pixels, a quarter of a tile, of the visible part of its viewport.
+  This margin is the only knob governing when a tile is requested.
 - **A1.** The live-sync `EventSource` opens before any data is fetched (it mounts outside
   the Suspense boundary).
 - **A2.** One application query fetches everything — readers with selectors, availability,
@@ -59,12 +61,13 @@ design the sequence we actually want.
 - **A4.** Gate open: the viewport destructures `dataset.shape/origin/tile` **unguarded** — a
   null crashes into the root ErrorBoundary and replaces the entire application with the
   dead screen. The mosaic partitions the shape into `<img>` elements carrying only
-  `data-src`; the network stays idle until lazysizes' next visibility pass swaps `data-src`
-  into `src` — the first tile request happens asynchronously after paint, with nothing on
-  screen marking it. A server-carried center scrolls in a post-paint effect, racing
-  lazysizes and potentially doubling the first request set.
-- **A5.** Tiles pop in individually. No ordering, no progress, no completion signal, no
-  error path, no retry. The `.lazyload` class has no CSS rule — it is purely functional.
+  `data-src`; the network stays idle until the loader's observer reports the tiles within
+  reach and swaps `data-src` into `src` — the first tile request happens asynchronously after
+  paint, with nothing on screen marking it. A server-carried center scrolls in a post-paint effect, racing
+  the loader and potentially doubling the first request set.
+- **A5.** Tiles pop in individually. No ordering, no progress, no completion signal on the
+  screen, no error path, no retry. Each fetch is announced with a `tilefetch` event, which the controllers
+  use to pace their updates by the screen (`ux/client/views/viz/traffic.js`).
 
 ### Path B — runtime connect through the explorer
 
@@ -106,8 +109,8 @@ design the sequence we actually want.
   too, when the dataset has exactly one). That same commit opens the viewer gate: the
   Blank icon becomes a dark rectangle, and tiles trickle in some frames later. There is no
   intermediate state and no signal that work has started.
-- On a session roll the mosaic does not remount: `data-src` attributes change, the
-  lazysizes `attrchange` plugin re-arms, and stale pixels persist until replacements
+- On a session roll the mosaic does not remount: `data-src` attributes change, each tile
+  hands its image back to the loader, and stale pixels persist until replacements
   decode. No indication distinguishes stale from current.
 
 The one well-modeled loader in the client is the minimap thumbnail: a load ledger,
