@@ -7,18 +7,15 @@
 // get colors
 import { theme } from '~/palette'
 
-// the text color
+// the color of the letters
 const paint = theme.page.highlight
 
 // publish
 export default {
     // logo
     logo: {
-        fontFamily: "didot",
-        fontSize: 700,
         stroke: "none",
         fill: paint,
-        textAnchor: "middle",
     }
 }
 
