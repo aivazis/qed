@@ -379,7 +379,7 @@ def csi3(code):
     """
     Make a control sequence for the given color code
     """
-    # easy wnough
+    # easy enough
     return f"{rl_hide}{ascii_esc}[{code}m{rl_unhide}"
 
 
