@@ -23,8 +23,9 @@ def lists(*, scrape: str) -> list:
 
 def granules(*, scrape: str, product: str):
     """
-    Generate the (granule, cycle) pairs of the list of {product} in {scrape}; a granule the parser
-    does not recognize comes with a cycle of {None}
+    Generate the (granule, cycle) pairs of the list of {product} in {scrape}; a granule without a
+    repeat cycle, either because the parser does not recognize it or because its product has none,
+    e.g. a stream of raw telemetry, comes with a cycle of {None}
     """
     # the parser
     registrar = qed.readers.nisar.daac.registrar()
@@ -48,16 +49,17 @@ def granules(*, scrape: str, product: str):
                 continue
             # the cycle, which for a pair is the one of its reference acquisition
             cycle = fields.get("cycle") or fields.get("referenceCycle")
-            # hand off the granule and its cycle
-            yield granule, int(cycle)
+            # hand off the granule and its cycle, if its product has one
+            yield granule, None if cycle is None else int(cycle)
     # all done
     return
 
 
 def cycles(*, scrape: str, products: list) -> dict:
     """
-    Count the granules of each of {products} in {scrape} by repeat cycle, with the ids the parser
-    does not recognize counted under {None}
+    Count the granules of each of {products} in {scrape} by repeat cycle, with the ids that have no
+    cycle, the ones the parser does not recognize and the ones of products without one, counted
+    under {None}
     """
     # the counts, by product
     return {
@@ -68,10 +70,13 @@ def cycles(*, scrape: str, products: list) -> dict:
 
 def complete(*, counts: dict) -> list:
     """
-    The cycles for which every product in {counts} has granules
+    The cycles for which every product in {counts} has granules; a product with no cycles at all,
+    e.g. a stream of raw telemetry, has no say
     """
     # the cycles each product has
-    known = [set(cycle for cycle in tally if cycle is not None) for tally in counts.values()]
+    cycles = [set(cycle for cycle in tally if cycle is not None) for tally in counts.values()]
+    # the products that have any
+    known = [held for held in cycles if held]
     # the ones they all have, in order
     return sorted(set.intersection(*known)) if known else []
 
