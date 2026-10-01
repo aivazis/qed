@@ -76,6 +76,11 @@ class GDALBand(
 
         # go through the channels marked as special by my data type
         for name in cell.summary:
+            # skipping the ones i can't render, since my tiles come only from the channels
+            # that know how to draw a GDAL tile
+            if name not in channels:
+                # and move on
+                continue
             # get the corresponding channel
             channel = channels[name]
             # and ask each one for {value} representations
@@ -138,6 +143,10 @@ class GDALBand(
         channels = self.channels
         # ask my cell type for its list
         for name in self.cell.summary:
+            # skipping the ones i can't render
+            if name not in channels:
+                # and move on
+                continue
             # resolve into the actual channel
             channel = channels[name]
             # and make it available
