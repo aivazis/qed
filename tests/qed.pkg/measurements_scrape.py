@@ -45,14 +45,23 @@ with tempfile.TemporaryDirectory() as folder:
     with open(os.path.join(folder, "gunw.txt"), "w") as stream:
         # on its own line
         stream.write(pair + "\n")
+    # and a stream of raw telemetry, which the parser recognizes but which has no repeat cycle
+    with open(os.path.join(folder, "rrst.txt"), "w") as stream:
+        # on its own line
+        stream.write("NISAR_L0_RRST_VC25_20250819T233022_20250819T233027_P00408_J_001\n")
 
     # the lists are named after the products
-    assert scrape.lists(scrape=folder) == ["gunw", "rslc"]
+    assert scrape.lists(scrape=folder) == ["gunw", "rrst", "rslc"]
+    # a product without a repeat cycle is counted under none
+    assert scrape.cycles(scrape=folder, products=["rrst"]) == {"rrst": {None: 1}}
     # the counts by cycle, with a pair counted under the cycle of its reference acquisition
     counts = scrape.cycles(scrape=folder, products=["rslc", "gunw"])
     assert counts["rslc"] == {31: 3, 13: 1, None: 1}
     assert counts["gunw"] == {13: 1}
     # the one cycle both products have
+    assert scrape.complete(counts=counts) == [13]
+    # which a product without cycles leaves alone
+    counts.update(scrape.cycles(scrape=folder, products=["rrst"]))
     assert scrape.complete(counts=counts) == [13]
     # an even sample of two of the three RSLC of cycle 31: the first and the last
     picked = scrape.spread(scrape=folder, product="rslc", cycle=31, count=2)
