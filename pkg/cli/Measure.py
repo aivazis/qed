@@ -1403,7 +1403,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 (cycle, *(counts[product][cycle] for product in products), cycle in complete)
                 for cycle in every
             ]
-            + [("not recognized", *(counts[product][None] for product in products), "")],
+            + [("no cycle", *(counts[product][None] for product in products), "")],
         )
         # if asked to check the bucket
         if self.check is not None and complete:
