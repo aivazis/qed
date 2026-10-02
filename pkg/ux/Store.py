@@ -690,9 +690,9 @@ class Store(qed.component, family="qed.ux.store"):
 
     def persistSource(self, name):
         """
-        Write the data source called {name} into the user's configuration files, along with
-        the state of its controllers, so that the next session finds it the way this one
-        leaves it
+        Write the data source called {name} into the user's configuration files, so that the
+        next session finds it in the workspace; what is written is what the source is and how
+        to get at its product, not the state of its controllers
         """
         # look it up
         source = self._dataSources.source(name=name)
