@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# -*- python -*-
 # -*- coding: utf-8 -*-
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
@@ -64,5 +65,6 @@ dataset = qed.readers.native.datasets.mmap(
 assert dataset.data is not None
 # with the declared shape
 assert tuple(dataset.shape) == (65, 65)
+
 
 # end of file

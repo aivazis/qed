@@ -4,6 +4,7 @@
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 // (c) 1998-2026 all rights reserved
 
+
 // the archive tree at the model level: a spec owns a scratch directory on the server's host,
 // connects it as a local archive, and drives the tree through {window.qed} -- expanding lists a
 // folder, a change on disk shows only after a refresh, collapsing forgets the subtree, and
@@ -84,5 +85,6 @@ test.describe.serial("the automation surface drives the archive tree", () => {
         expect(remaining).not.toContain(uri)
     })
 })
+
 
 // end of file

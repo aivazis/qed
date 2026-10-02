@@ -1,4 +1,4 @@
-// -*- C++ -*-
+// -*- c++ -*-
 // -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
@@ -31,5 +31,6 @@
 #include "profile.h"
 // statistics
 #include "stats.h"
+
 
 // end of file

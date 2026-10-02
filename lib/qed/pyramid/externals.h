@@ -30,4 +30,5 @@ namespace qed::pyramid {
     using occupancy_t = pyre::memory::constmap_t<std::uint8_t>;
 }    // namespace qed::pyramid
 
+
 // end of file

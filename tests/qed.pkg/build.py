@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# -*- python -*-
 # -*- coding: utf-8 -*-
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
@@ -217,5 +218,6 @@ reference.close()
 # and clean up
 for area in (scratch, alone):
     shutil.rmtree(str(area))
+
 
 # end of file

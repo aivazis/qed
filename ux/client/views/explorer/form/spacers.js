@@ -1,4 +1,5 @@
 // -*- web -*-
+// -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 // (c) 1998-2026 all rights reserved
@@ -17,5 +18,6 @@ export const SpacerBetween = styled.span`
     padding-left: 1.0em;
     padding-right: 0.25em;
 `
+
 
 // end of file

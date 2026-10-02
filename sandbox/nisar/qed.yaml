@@ -1,4 +1,5 @@
 # -*- yaml -*-
+# -*- coding: utf-8 -*-
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # (c) 1998-2026 all rights reserved
@@ -72,5 +73,6 @@ qed.app:
 pyre.shells.web#qed.app.shell:
     # spawn a new browser window/tab every time the server starts?
     auto: yes
+
 
 # end of file

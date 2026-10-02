@@ -4,6 +4,7 @@
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 // (c) 1998-2026 all rights reserved
 
+
 // support
 #include <cassert>
 #include <cmath>
@@ -211,5 +212,6 @@ main(int argc, char * argv[])
     // all done
     return 0;
 }
+
 
 // end of file

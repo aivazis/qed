@@ -1,4 +1,4 @@
-// -*- C++ -*-
+// -*- c++ -*-
 // -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
@@ -69,5 +69,6 @@ namespace qed::isce2 {
     template <typename sourceT>
     using real_t = pyre::viz::iterators::filters::real_t<sourceT>;
 }
+
 
 // end of file

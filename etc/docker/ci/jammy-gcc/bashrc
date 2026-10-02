@@ -1,7 +1,10 @@
 #!/bin/bash
+# -*- bash -*-
+# -*- coding: utf-8 -*-
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # (c) 1998-2026 all rights reserved
+
 
 # the system profile
 if [ -r /etc/profile ]; then
@@ -34,5 +37,6 @@ alias git.tag='git describe --tags --long --always'
 export SRCDIR=@SRCDIR@
 # mm 4.x
 alias mm='python3 ${SRCDIR}/mm/mm.py'
+
 
 # end of file

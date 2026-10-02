@@ -1,4 +1,4 @@
-// -*- C++ -*-
+// -*- c++ -*-
 // -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
@@ -13,5 +13,6 @@
 #include "imaginary.h"
 #include "phase.h"
 #include "real.h"
+
 
 // end of file
