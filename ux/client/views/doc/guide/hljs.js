@@ -1,3 +1,10 @@
+// -*- web -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+
 export default {
   "hljs-comment": {
     "fontStyle": "italic",
@@ -103,3 +110,6 @@ export default {
     "color": "hsl(0deg, 30%, 70%)",
   }
 };
+
+
+// end of file

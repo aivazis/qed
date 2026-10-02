@@ -1,4 +1,4 @@
-// -*- C++ -*-
+// -*- c++ -*-
 // -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
@@ -14,5 +14,6 @@
 #include "amplitude.h"
 #include "complex.h"
 #include "phase.h"
+
 
 // end of file

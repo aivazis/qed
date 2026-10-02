@@ -1,4 +1,4 @@
-// -*- C++ -*-
+// -*- c++ -*-
 // -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
@@ -18,5 +18,6 @@
 // implementation
 #include "interferogram/interferogram.h"
 #include "unwrapped/unwrapped.h"
+
 
 // end of file

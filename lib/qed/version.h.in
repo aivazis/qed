@@ -1,4 +1,4 @@
-// -*- C++ -*-
+// -*- c++ -*-
 // -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
@@ -36,5 +36,6 @@ namespace qed::version {
     // clang-format on
 
 }    // namespace qed::version
+
 
 // end of file

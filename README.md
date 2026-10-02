@@ -171,7 +171,7 @@ source rather than install it as a `conda` package. Let `mm` know where it will 
 the following in `~/.config/mm/config.mm`:
 
 ``` makefile
-# -*- Makefile -*-
+# -*- makefile -*-
 
 # external dependencies
 # pyre is built from source and installed into the conda environment

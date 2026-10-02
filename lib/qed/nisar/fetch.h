@@ -48,4 +48,5 @@ namespace qed::nisar {
 // the inline definitions
 #include "fetch.icc"
 
+
 // end of file

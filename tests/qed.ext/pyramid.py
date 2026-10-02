@@ -1,8 +1,9 @@
-# -*- Python -*-
+# -*- python -*-
 # -*- coding: utf-8 -*-
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # (c) 1998-2026 all rights reserved
+
 
 """
 Exercise the pyramid bindings: a level written through a draft reads back its tiles and
@@ -162,5 +163,6 @@ assert np.array_equal(
 # clean up
 for name in (tiles, occupancy, above, aboveOccupancy):
     os.remove(name)
+
 
 # end of file

@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# -*- python -*-
 # -*- coding: utf-8 -*-
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
@@ -145,9 +146,10 @@ for mine, theirs in zip(alone, joint):
         for index, held in enumerate(occupancy):
             # skipping the ones that were not
             if held:
-                assert tiles[index * size : (index + 1) * size] == otherTiles[
-                    index * size : (index + 1) * size
-                ], (mine.dataset.pyre_name, exponent, index)
+                assert (
+                    tiles[index * size : (index + 1) * size]
+                    == otherTiles[index * size : (index + 1) * size]
+                ), (mine.dataset.pyre_name, exponent, index)
     # and the same statistics
     assert mine.statistics.count == theirs.statistics.count
     assert mine.statistics.min == theirs.statistics.min

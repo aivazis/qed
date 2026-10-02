@@ -4,6 +4,7 @@
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 // (c) 1998-2026 all rights reserved
 
+
 // the archive trays follow the tree the server keeps: expanding through the facade opens the
 // archive's tray and shows its folders as trays of their own, and collapsing closes it
 
@@ -45,5 +46,6 @@ test.describe.serial("the archive trays follow the server", () => {
         await expect(tray(page, name)).toHaveCount(0)
     })
 })
+
 
 // end of file

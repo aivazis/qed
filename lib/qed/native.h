@@ -1,4 +1,4 @@
-// -*- C++ -*-
+// -*- c++ -*-
 // -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
@@ -10,5 +10,6 @@
 // publish
 // the api is in "native.api.h"
 #include "native/public.h"
+
 
 // end of file

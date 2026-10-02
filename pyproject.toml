@@ -1,4 +1,5 @@
 # -*- toml -*-
+# -*- coding: utf-8 -*-
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # (c) 1998-2026 all rights reserved
@@ -7,6 +8,13 @@
 # formatting: wrap at column 100, the width pyre uses, so the two agree
 [tool.black]
 line-length = 100
+
+
+# the files the preamble and c++ formatting checks of pyre's {etc/ci/conventions/check.py} leave
+# alone, as patterns: the graphql configuration is json, which cannot carry comments, and the
+# license is kept as it is written
+[tool.conventions]
+exempt = [".graphqlconfig", "LICENSE"]
 
 
 # end of file

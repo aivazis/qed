@@ -1,4 +1,4 @@
-// -*- C++ -*-
+// -*- c++ -*-
 // -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
@@ -10,5 +10,6 @@
 // publish
 // the api is in "isce2.api.h"
 #include "isce2/public.h"
+
 
 // end of file

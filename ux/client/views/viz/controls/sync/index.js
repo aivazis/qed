@@ -1,4 +1,5 @@
 // -*- web -*-
+// -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 // (c) 1998-2026 all rights reserved
@@ -11,5 +12,6 @@ export { Sync } from './sync'
 // the hooks
 export { useSyncToggleAll } from './useSyncToggleAll'
 export { useSyncToggleViewport } from './useSyncToggleViewport'
+
 
 // end of file

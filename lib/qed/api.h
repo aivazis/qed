@@ -1,4 +1,4 @@
-// -*- C++ -*-
+// -*- c++ -*-
 // -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
@@ -25,5 +25,6 @@ namespace qed::api {
 
 // include the definitions
 #include "api.icc"
+
 
 // end of file

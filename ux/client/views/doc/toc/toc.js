@@ -1,7 +1,9 @@
 // -*- web -*-
+// -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 // (c) 1998-2026 all rights reserved
+
 
 // external
 import React from 'react'
@@ -46,5 +48,6 @@ const Contents = styled.div`
     display: flex;
     flex-direction: column;
 `
+
 
 // end of file

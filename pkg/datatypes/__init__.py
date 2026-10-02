@@ -1,3 +1,4 @@
+# -*- python -*-
 # -*- coding: utf-8 -*-
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
@@ -37,5 +38,6 @@ float64 = real64
 byte = char
 cfloat32 = complex64
 cfloat64 = complex128
+
 
 # end of file
