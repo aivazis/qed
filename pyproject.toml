@@ -8,6 +8,9 @@
 # formatting: wrap at column 100, the width pyre uses, so the two agree
 [tool.black]
 line-length = 100
+# the versions of python the code is formatted for, the ones pyre supports; without an explicit
+# list, black infers one file by file
+target-version = ["py311", "py312", "py313", "py314"]
 
 
 # the files the preamble and c++ formatting checks of pyre's {etc/ci/conventions/check.py} leave
