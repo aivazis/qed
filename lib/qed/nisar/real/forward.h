@@ -23,7 +23,7 @@ namespace qed::nisar::real {
     template <class sourceT, class maskT>
     class MaskedCovariance;
 
-}
+} // namespace qed::nisar::real
 
 
 // end of file

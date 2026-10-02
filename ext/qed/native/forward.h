@@ -22,7 +22,7 @@ namespace qed::py::native {
     void profile(py::module &);
     // statistics
     void stats(py::module &);
-}
+} // namespace qed::py::native
 
 
 // end of file

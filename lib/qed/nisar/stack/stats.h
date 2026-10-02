@@ -27,7 +27,7 @@ namespace qed::nisar::stack {
         typename sourceT::index_type origin,
         // how big the sample tile is
         typename sourceT::shape_type tile) -> native::stats_t;
-}
+} // namespace qed::nisar::stack
 
 
 // the implementations

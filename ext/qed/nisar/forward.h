@@ -30,7 +30,7 @@ namespace qed::py::nisar {
 
     // the kernels that read a raster of a given cell type
     void cells(py::module &);
-}
+} // namespace qed::py::nisar
 
 
 // end of file

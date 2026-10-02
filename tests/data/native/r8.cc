@@ -30,8 +30,8 @@ using grid_t = pyre::grid::grid_t<packing_t, storage_t>;
 
 // forward declarations
 // override the default {shape} with the first two positional command line arguments, when present
-static auto shapeFromCommandLine(int argc, char * argv[], grid_t::shape_type shape)
-    -> grid_t::shape_type;
+static auto
+shapeFromCommandLine(int argc, char * argv[], grid_t::shape_type shape) -> grid_t::shape_type;
 
 
 // build a dataset

@@ -47,7 +47,7 @@ namespace qed::nisar {
         typename sourceT::shape_type tile,
         // the decimation, applied to the source
         typename sourceT::index_type stride) -> native::sample_t;
-}
+} // namespace qed::nisar
 
 
 // pull in the implementations

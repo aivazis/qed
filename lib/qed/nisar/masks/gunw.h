@@ -34,7 +34,7 @@ namespace qed::nisar::masks {
         typename sourceT::shape_type tile,
         // the stride
         typename sourceT::index_type stride) -> bmp_t;
-}
+} // namespace qed::nisar::masks
 
 
 // pull in the implementations

@@ -34,7 +34,7 @@ namespace qed::nisar::bfpq {
         double low, double high,
         // the range of values to render
         double saturation, double brightness) -> bmp_t;
-}
+} // namespace qed::nisar::bfpq
 
 
 // pull in the implementations

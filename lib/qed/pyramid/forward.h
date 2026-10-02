@@ -21,7 +21,7 @@ namespace qed::pyramid {
     using level_t = Level<cellT>;
     template <class cellT>
     using draft_t = Draft<cellT>;
-}    // namespace qed::pyramid
+} // namespace qed::pyramid
 
 
 // end of file

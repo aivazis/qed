@@ -14,7 +14,7 @@
 namespace qed::py::pyramid {
     // the module initializer
     void pyramid(py::module &);
-}    // namespace qed::py::pyramid
+} // namespace qed::py::pyramid
 
 
 // end of file

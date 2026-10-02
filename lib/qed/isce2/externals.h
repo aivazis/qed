@@ -68,7 +68,7 @@ namespace qed::isce2 {
     // extract the real part of a complex source
     template <typename sourceT>
     using real_t = pyre::viz::iterators::filters::real_t<sourceT>;
-}
+} // namespace qed::isce2
 
 
 // end of file

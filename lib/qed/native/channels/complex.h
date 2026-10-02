@@ -28,7 +28,7 @@ namespace qed::native::channels {
         typename sourceT::index_type stride,
         // the range of values to render
         double min, double max, double phaseMin, double phaseMax, double saturation) -> bmp_t;
-}
+} // namespace qed::native::channels
 
 
 // the implementations

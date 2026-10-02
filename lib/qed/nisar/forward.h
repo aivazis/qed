@@ -25,7 +25,7 @@ namespace qed::nisar {
     using bfpq_slc_storage_t = pyre::memory::heap_t<bfpq_slc_cell_t>;
     using bfpq_slc_layout_t = pyre::grid::canonical_t<2>;
     using bfpq_slc_t = pyre::grid::grid_t<bfpq_slc_layout_t, bfpq_slc_storage_t>;
-}
+} // namespace qed::nisar
 
 
 // end of file

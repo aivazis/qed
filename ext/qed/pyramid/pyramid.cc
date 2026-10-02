@@ -245,7 +245,7 @@ namespace qed::py::pyramid {
         // all done
         return;
     }
-}    // namespace qed::py::pyramid
+} // namespace qed::py::pyramid
 
 
 // the pyramid submodule

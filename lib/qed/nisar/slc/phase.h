@@ -35,7 +35,7 @@ namespace qed::nisar::slc {
         double low, double high,
         // the range of values to render
         double saturation, double brightness) -> bmp_t;
-}
+} // namespace qed::nisar::slc
 
 
 // pull in the implementations

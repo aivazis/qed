@@ -28,7 +28,7 @@ namespace qed::pyramid {
     // the record of which tiles of a level were actually written: one byte per tile, in
     // tile order, and never a bit, so that two writers never share a byte
     using occupancy_t = pyre::memory::constmap_t<std::uint8_t>;
-}    // namespace qed::pyramid
+} // namespace qed::pyramid
 
 
 // end of file

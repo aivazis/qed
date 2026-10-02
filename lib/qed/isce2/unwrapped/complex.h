@@ -28,7 +28,7 @@ namespace qed::isce2::unwrapped::channels {
         typename sourceT::index_type stride,
         // the range of values to render
         double mean, double scale, double exponent, double phaseMin, double phaseMax) -> bmp_t;
-}
+} // namespace qed::isce2::unwrapped::channels
 
 
 // pull in the implementations

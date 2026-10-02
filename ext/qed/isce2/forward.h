@@ -23,7 +23,7 @@ namespace qed::py::isce2 {
     namespace unwrapped {
         void unwrapped(py::module &);
     }
-}
+} // namespace qed::py::isce2
 
 
 // end of file

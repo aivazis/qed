@@ -43,7 +43,7 @@ namespace qed::isce2::unwrapped {
         const points_t &,
         // the closed path indicator
         bool closed = false) -> values_t<typename sourceT::value_type>;
-}
+} // namespace qed::isce2::unwrapped
 
 
 // pull in the implementations
