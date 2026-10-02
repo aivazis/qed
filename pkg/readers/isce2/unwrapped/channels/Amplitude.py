@@ -115,7 +115,7 @@ class Amplitude(Channel, family="qed.channels.isce2.unw.amplitude"):
             mean=mean,
             scale=scale,
             exponent=exponent,
-            **kwds
+            **kwds,
         )
         # and return it
         return tile

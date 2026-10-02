@@ -131,7 +131,7 @@ class Complex(Channel, family="qed.channels.isce2.unw.complex"):
             exponent=exponent,
             minPhase=minPhase,
             maxPhase=maxPhase,
-            **kwds
+            **kwds,
         )
         # and return it
         return tile

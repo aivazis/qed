@@ -121,7 +121,7 @@ class Phase(Channel, family="qed.channels.isce2.unw.phase"):
             low=low,
             high=high,
             brightness=brightness,
-            **kwds
+            **kwds,
         )
         # and return it
         return tile

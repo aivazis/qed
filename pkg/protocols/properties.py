@@ -18,7 +18,7 @@ def selectors(default={}, **kwds):
     return qed.properties.dict(
         schema=qed.properties.tuple(schema=qed.properties.str(), default=()),
         default=default,
-        **kwds
+        **kwds,
     )
 
 
