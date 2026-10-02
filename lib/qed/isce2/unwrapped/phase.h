@@ -30,7 +30,7 @@ namespace qed::isce2::unwrapped::channels {
         double low, double high,
         // the range of values to render
         double brightness) -> bmp_t;
-}
+} // namespace qed::isce2::unwrapped::channels
 
 
 // pull in the implementations

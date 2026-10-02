@@ -22,7 +22,7 @@ namespace qed::py::isce2::unwrapped {
     void profile(py::module &);
     // statistics
     void stats(py::module &);
-}
+} // namespace qed::py::isce2::unwrapped
 
 
 // end of file

@@ -20,7 +20,7 @@ namespace qed::api {
 
     // the generator of shape guesses
     auto factor(long product, long aspect = 10) -> pairs_t;
-}
+} // namespace qed::api
 
 
 // include the definitions

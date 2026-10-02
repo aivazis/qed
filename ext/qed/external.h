@@ -64,7 +64,7 @@ namespace qed::py {
     using level_t = qed::pyramid::level_t<cellT>;
     template <class cellT>
     using draft_t = qed::pyramid::draft_t<cellT>;
-}
+} // namespace qed::py
 
 // type aliases for pyre types
 namespace qed::py {
@@ -99,7 +99,7 @@ namespace qed::py {
     // map a range of values to the unit interval
     template <typename sourceT>
     using parametric_t = pyre::viz::iterators::filters::parametric_t<sourceT>;
-}
+} // namespace qed::py
 
 
 // the helpers that rebuild a typed grid over a python buffer and dispatch on its cell type; these

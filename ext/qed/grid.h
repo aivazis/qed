@@ -100,7 +100,7 @@ namespace qed::py {
     // for kernels that visit arbitrary cells and can pay for either cell by cell
     template <int dim, typename... cellTs, typename F>
     auto onCells(const py::buffer & source, F && f);
-}    // namespace qed::py
+} // namespace qed::py
 
 
 // the inline implementations

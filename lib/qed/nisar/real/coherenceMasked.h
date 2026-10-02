@@ -39,7 +39,7 @@ namespace qed::nisar::real {
         double min, double max,
         // the magnitude of the value the product declared as its fill
         double fill) -> bmp_t;
-}
+} // namespace qed::nisar::real
 
 
 // the implementation

@@ -43,7 +43,7 @@ namespace qed::nisar {
     inline auto deposit(
         draft_t<cellT> & destination, const datatype_t &, const typename gridT::index_type & origin,
         const gridT & data) -> void;
-}    // namespace qed::nisar
+} // namespace qed::nisar
 
 // the inline definitions
 #include "fetch.icc"

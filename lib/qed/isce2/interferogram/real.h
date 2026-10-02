@@ -28,7 +28,7 @@ namespace qed::isce2::interferogram::channels {
         typename sourceT::index_type stride,
         // the range of values to render
         double min, double max) -> bmp_t;
-}
+} // namespace qed::isce2::interferogram::channels
 
 
 // pull in the implementations

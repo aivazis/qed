@@ -31,18 +31,18 @@ namespace qed::py {
     namespace datasets {
         // the initializer
         void datasets(py::module &);
-    }
+    } // namespace datasets
 
     // native support
     namespace native {
         // the initializer
         void native(py::module &);
-    }
+    } // namespace native
     // isce2 support
     namespace isce2 {
         // the initializer
         void isce2(py::module &);
-    }
+    } // namespace isce2
     // nisar support
     namespace pyramid {
         void pyramid(py::module &);
@@ -50,8 +50,8 @@ namespace qed::py {
     namespace nisar {
         // the initializer
         void nisar(py::module &);
-    }
-}
+    } // namespace nisar
+} // namespace qed::py
 
 
 // end of file

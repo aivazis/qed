@@ -32,7 +32,7 @@ namespace qed::nisar::bfpq {
         typename sourceT::index_type stride,
         // the range of values to render
         double min, double max) -> bmp_t;
-}
+} // namespace qed::nisar::bfpq
 
 
 // pull in the implementations

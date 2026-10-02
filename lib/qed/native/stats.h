@@ -54,7 +54,7 @@ namespace qed::native {
         typename sourceT::shape_type tile,
         // the strides
         typename sourceT::index_type stride) -> sample_t;
-}
+} // namespace qed::native
 
 
 // pull in the implementations

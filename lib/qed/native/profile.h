@@ -43,7 +43,7 @@ namespace qed::native {
         const points_t &,
         // the closed flag
         bool closed = false) -> values_t<pyre::memory::native_t<typename sourceT::value_type>>;
-}
+} // namespace qed::native
 
 
 // pull in the implementations

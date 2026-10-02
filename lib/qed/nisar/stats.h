@@ -73,7 +73,7 @@ namespace qed::nisar {
         typename sourceT::shape_type tile,
         // the strides
         typename sourceT::index_type stride) -> native::sample_t;
-}
+} // namespace qed::nisar
 
 
 // pull in the implementations

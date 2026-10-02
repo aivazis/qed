@@ -72,7 +72,7 @@ namespace qed::native::channels {
         typename sourceT::index_type stride,
         // the range of coherence values that maps onto the full color scale
         double min, double max) -> bmp_t;
-}
+} // namespace qed::native::channels
 
 
 // the implementations

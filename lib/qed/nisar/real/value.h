@@ -35,7 +35,7 @@ namespace qed::nisar::real {
         typename sourceT::index_type stride,
         // the range of values to render
         double min, double max) -> bmp_t;
-}
+} // namespace qed::nisar::real
 
 
 // pull in the implementations

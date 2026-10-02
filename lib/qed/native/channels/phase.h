@@ -30,7 +30,7 @@ namespace qed::native::channels {
         double low, double high,
         // the range of values to render
         double saturation, double brightness) -> bmp_t;
-}
+} // namespace qed::native::channels
 
 
 // the implementations

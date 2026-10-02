@@ -38,7 +38,7 @@ namespace qed::isce2::unwrapped {
         typename sourceT::shape_type tile,
         // the spacing of the samples in the source
         typename sourceT::index_type stride) -> native::sample_t;
-}
+} // namespace qed::isce2::unwrapped
 
 
 // pull in the implementations

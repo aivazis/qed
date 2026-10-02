@@ -15,7 +15,7 @@ namespace qed::nisar::masks {
     // the gate that paints the GUNW mask codes
     template <class sourceT>
     class GUNWMask;
-}    // namespace qed::nisar::masks
+} // namespace qed::nisar::masks
 
 
 // end of file

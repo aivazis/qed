@@ -31,7 +31,7 @@ namespace qed::nisar::stack {
         typename sourceT::index_type stride,
         // the range of coherence values that maps onto the full color scale
         double min, double max) -> bmp_t;
-}
+} // namespace qed::nisar::stack
 
 
 // the implementations

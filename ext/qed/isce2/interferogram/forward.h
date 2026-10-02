@@ -22,7 +22,7 @@ namespace qed::py::isce2::interferogram {
     void profile(py::module &);
     // statistics
     void stats(py::module &);
-}
+} // namespace qed::py::isce2::interferogram
 
 
 // end of file

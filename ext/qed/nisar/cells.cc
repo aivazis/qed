@@ -108,7 +108,7 @@ namespace qed::py::nisar {
         // all done
         return;
     }
-}    // namespace qed::py::nisar
+} // namespace qed::py::nisar
 
 
 // cells

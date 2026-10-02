@@ -79,7 +79,7 @@ namespace qed::nisar {
     // extract the real part of a complex source
     template <typename sourceT>
     using real_t = pyre::viz::iterators::filters::real_t<sourceT>;
-}
+} // namespace qed::nisar
 
 
 // end of file

@@ -40,7 +40,7 @@ namespace qed::nisar {
         const native::points_t &,
         // the closed path indicator
         bool closed = false) -> native::values_t<typename sourceT::value_type>;
-}
+} // namespace qed::nisar
 
 
 // pull in the implementations
