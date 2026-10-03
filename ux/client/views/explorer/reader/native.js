@@ -28,7 +28,7 @@ import { Form, Body, Field, Values, Error } from '../form'
 
 
 // associate a native reader with a given data product
-export const Native = ({ view, setType, hide }) => {
+export const Native = ({ view, nickname, setType, hide }) => {
     // preload the metadata query
     const [qref, getMetadata] = useProductMetadataLoader()
     // schedule the fetch; once, at mount time
@@ -53,14 +53,14 @@ export const Native = ({ view, setType, hide }) => {
     // render
     return (
         <ErrorBoundary fallback={<ProblemReport view={view} setType={setType} />}>
-            <Spec qref={qref} view={view} setType={setType} hide={hide} />
+            <Spec qref={qref} view={view} nickname={nickname} setType={setType} hide={hide} />
         </ErrorBoundary>
     )
 }
 
 
 // the panel
-const Spec = ({ qref, view, setType, hide }) => {
+const Spec = ({ qref, view, nickname, setType, hide }) => {
     // unpack the product metadata
     const { uri, product, bytes, cells, shape } = useQueryProductMetadata(qref)
     // build the map of product types to their data type size
@@ -88,7 +88,7 @@ const Spec = ({ qref, view, setType, hide }) => {
         // build the form initializer and return it
         return {
             // the pyre name of the reader
-            name: "",
+            name: nickname,
             // the data product
             product,
             // its shape
@@ -134,7 +134,7 @@ const Spec = ({ qref, view, setType, hide }) => {
             <Form>
                 <Body>
                     <Type value="native" update={setType} readers={view.reader.readers} />
-                    <Name value={form.name} update={update} />
+                    <Name value={form.name} suggestion={nickname} update={update} />
                     <Cells value={form.product} update={update} />
                     <Shape lines={form.lines} samples={form.samples} update={update} />
                     {form.cells &&

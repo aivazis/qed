@@ -28,7 +28,7 @@ import { Form, Body, Field, Values, Error } from '../form'
 
 
 // associate an ISCE2 reader with a given data product
-export const ISCE2 = ({ view, setType, hide }) => {
+export const ISCE2 = ({ view, nickname, setType, hide }) => {
     // preload the metadata query
     const [qref, getMetadata] = useProductMetadataLoader()
     // schedule the fetch; once, at mount time
@@ -53,14 +53,14 @@ export const ISCE2 = ({ view, setType, hide }) => {
     // render
     return (
         <ErrorBoundary fallback={<ProblemReport view={view} setType={setType} />}>
-            <Spec qref={qref} view={view} setType={setType} hide={hide} />
+            <Spec qref={qref} view={view} nickname={nickname} setType={setType} hide={hide} />
         </ErrorBoundary>
     )
 }
 
 
 // the panel
-const Spec = ({ qref, view, setType, hide }) => {
+const Spec = ({ qref, view, nickname, setType, hide }) => {
     // unpack the product metadata
     const { uri, product, bytes, cells, shape, } = useQueryProductMetadata(qref)
     // build the map of product types to their data type size
@@ -82,7 +82,8 @@ const Spec = ({ qref, view, setType, hide }) => {
         }
         // build the form initializer and return it
         return {
-            name: "",
+            // the pyre name of the reader
+            name: nickname,
             // the data product
             product,
             // its shape
@@ -127,7 +128,7 @@ const Spec = ({ qref, view, setType, hide }) => {
                 <Body>
                     <Type value="isce2" update={setType} readers={view.reader.readers} />
                     <Products value={form.product} update={update} />
-                    <Name value={form.name} update={update} />
+                    <Name value={form.name} suggestion={nickname} update={update} />
                     <Shape lines={form.lines} samples={form.samples} update={update} />
                     {form.cells &&
                         <Guesses
