@@ -13,6 +13,10 @@ import styled from 'styled-components'
 // project
 // colors
 import { theme } from "~/palette"
+// shapes
+import { X } from '~/shapes'
+// widgets
+import { Badge } from '~/widgets'
 
 
 // compute the spectrum of the rectangle the measure path spans, and show it
@@ -108,6 +112,8 @@ export const Spectrum = ({ viewport, view }) => {
     }
     // pick the look of the control
     const Control = fits ? Enabled : Disabled
+    // the control that clears the picture answers the mouse and the keyboard
+    const { onClick, onKeyDown } = pressable(clear, true)
     // render
     return (
         <Box>
@@ -135,16 +141,18 @@ export const Spectrum = ({ viewport, view }) => {
                     <Picture src={picture.address} alt="the spectrum of the region"
                         onLoad={settle(picture.address, "ready")}
                         onError={settle(picture.address, "failed")} />
+                    <Close>
+                        <Badge size={10} state="enabled" tabIndex={0}
+                            behaviors={{ onClick, onKeyDown }}
+                            aria-label="clear the spectrum" title="clear the spectrum">
+                            <X />
+                        </Badge>
+                    </Close>
                 </Frame>
             }
             {picture?.status === "ready" &&
                 <Caption>
                     {picture.shape[0]}x{picture.shape[1]}, {picture.tapered ? "hann" : "untapered"}
-                    {" "}
-                    <Enabled {...pressable(clear, true)} aria-label="clear the spectrum"
-                        title="clear the spectrum">
-                        ×
-                    </Enabled>
                 </Caption>
             }
         </Box>
@@ -209,6 +217,32 @@ const Toggle = styled(Enabled)`
     }
 `
 
+// the control that clears the picture, in a disc in the upper right corner of its frame
+const Close = styled.div`
+    & {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: hsl(0deg, 0%, 0%, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    &:hover, &:focus-within {
+        background-color: hsl(0deg, 0%, 0%, 0.8);
+    }
+
+    & > div {
+        display: flex;
+        outline: none;
+    }
+`
+
 // what the picture on display is, under its frame
 const Caption = styled.div`
     width: 256px;
@@ -233,6 +267,7 @@ const Disabled = styled.span`
 
 // the frame of the spectrum, laid out like the window of the peek
 const Frame = styled.div`
+    position: relative;
     width: 256px;
     height: 256px;
     background-color: ${() => theme.page.shaded};
