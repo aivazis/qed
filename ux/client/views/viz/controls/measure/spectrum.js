@@ -217,16 +217,18 @@ const Toggle = styled(Enabled)`
     }
 `
 
-// the control that clears the picture, in a disc in the upper right corner of its frame
+// the control that clears the picture, in a disc that sits mostly outside the upper right
+// corner of its frame, the way cancel buttons usually do
 const Close = styled.div`
     & {
         position: absolute;
-        top: 6px;
-        right: 6px;
+        top: -12px;
+        right: -12px;
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        background-color: hsl(0deg, 0%, 0%, 0.5);
+        background-color: hsl(0deg, 0%, 20%, 0.85);
+        border: 1px solid hsl(0deg, 0%, 40%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -234,7 +236,7 @@ const Close = styled.div`
     }
 
     &:hover, &:focus-within {
-        background-color: hsl(0deg, 0%, 0%, 0.8);
+        background-color: hsl(0deg, 0%, 30%, 0.95);
     }
 
     & > div {
