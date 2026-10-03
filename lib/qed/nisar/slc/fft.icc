@@ -26,7 +26,9 @@ qed::nisar::slc::fft(
     // the shape of the region
     typename sourceT::shape_type shape,
     // the decibels below the peak that span the gray scale
-    double range) -> bmp_t
+    double range,
+    // whether to taper the region before transforming it
+    bool taper) -> bmp_t
 {
     // a region that is empty, or longer than the limit along either axis
     if (shape[0] < 1 || shape[1] < 1 || shape[0] > fftLimit || shape[1] > fftLimit) {
@@ -49,6 +51,13 @@ qed::nisar::slc::fft(
     }
     // read the region at full resolution
     auto region = fetch<sourceT>(dataset, datatype, origin, shape, { 1, 1 });
+    // the samples the product marks as fill contribute nothing
+    native::zeroNonFinite(region);
+    // if asked to
+    if (taper) {
+        // bring it smoothly to zero towards its edges, so the edges leak less into the spectrum
+        native::hann(region);
+    }
     // transform it
     auto spectrum = native::fft(region);
     // and render it

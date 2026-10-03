@@ -1,0 +1,31 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// clear the marks
+template <typename gridT>
+auto
+qed::native::zeroNonFinite(gridT & region) -> void
+{
+    // go through the cells
+    for (auto idx : region.packing()) {
+        // get the cell
+        auto & cell = region[idx];
+        // and if it is a mark rather than a measurement
+        if (!std::isfinite(cell.real()) || !std::isfinite(cell.imag())) {
+            // it contributes nothing
+            cell = 0;
+        }
+    }
+    // all done
+    return;
+}
+
+
+// end of file
