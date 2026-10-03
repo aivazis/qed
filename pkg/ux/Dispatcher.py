@@ -780,6 +780,14 @@ class Dispatcher:
             return self._spectrumRefused(
                 server=server, reason="the range is not a number", **regionspec
             )
+        # the taper that brings the region to zero towards its edges, if any
+        taper = query.get("taper", ["none"])[0]
+        # only the hann window is known
+        if taper not in ("none", "hann"):
+            # so anything else is malformed
+            return self._spectrumRefused(
+                server=server, reason=f"the taper '{taper}' is not known", **regionspec
+            )
 
         # attempt to
         try:
@@ -830,7 +838,9 @@ class Dispatcher:
                 server=server, reason="this server has no crews to compute it", **regionspec
             )
         # describe the request as a task
-        task = qed.nexus.spectrum(view=view, origin=origin, shape=shape, range=span)
+        task = qed.nexus.spectrum(
+            view=view, origin=origin, shape=shape, range=span, taper=taper == "hann"
+        )
         # a request whose work took a crew member down before is refused on the spot
         if fleet.suspected(task=task):
             # so it cannot take down another one
