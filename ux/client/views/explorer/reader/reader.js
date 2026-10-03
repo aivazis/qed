@@ -8,13 +8,10 @@
 // externals
 import React from 'react'
 
-// project
-import { ErrorBoundary } from '~/boundary'
-
 // locals
 // hooks
 import { useCollapseViewport } from '../explorer/useCollapseViewport'
-import { useNicknameLoader, useQueryNickname } from './useFetchNickname'
+import { useFetchNickname } from './useFetchNickname'
 // components
 import { Panel } from './panel'
 import { Cancel, DisabledConnect } from './buttons'
@@ -35,19 +32,11 @@ export const Reader = ({ view, viewport }) => {
     const [type, setType] = React.useState(supported.length == 1 ? supported[0] : null)
     // make a handler that collapses this viewport
     const hide = useCollapseViewport(viewport)
-    // preload the suggestion for the reader name
-    const [qref, getNickname] = useNicknameLoader()
-    // ask for it once, at mount time; it does not depend on the reader type
-    React.useEffect(() => {
-        // the dataset whose reader needs a name
-        const variables = { archive: view.reader.archive, uri: view.reader.uri }
-        // ask the server every time, since the names in use change as readers connect
-        const options = { fetchPolicy: "network-only" }
-        // fetch
-        getNickname(variables, options)
-        // all done
-        return
-    }, [])
+    // ask for a name for the reader whenever the user picks a reader type, since each product
+    // family names its products in its own way
+    const suggestion = useFetchNickname({
+        archive: view.reader.archive, uri: view.reader.uri, module: modules[type] ?? null
+    })
     // build a selector with the generic signature
     const update = (field, value) => {
         // set the type
@@ -81,32 +70,18 @@ export const Reader = ({ view, viewport }) => {
             </Panel>
         )
     }
-    // if the suggestion has not been requested yet
-    if (qref === null) {
+    // if the answer for this type has not arrived yet
+    if (suggestion === null) {
         // bail
         return
     }
     // otherwise, resolve the connector
     const Connector = types[type]
-    // a server that cannot suggest a name leaves the user to type one, as before there were
-    // suggestions
-    const fallback = <Connector view={view} nickname="" setType={update} hide={hide} />
-    // render the connector with the suggested name in hand
+    // and render it with the suggested name, or with the reason there is none
     return (
-        <ErrorBoundary fallback={fallback}>
-            <Suggested qref={qref} Connector={Connector} view={view} setType={update} hide={hide} />
-        </ErrorBoundary>
-    )
-}
-
-
-// the connector of the selected reader type, seeded with the suggested name
-const Suggested = ({ qref, Connector, view, setType, hide }) => {
-    // get the name the server suggests
-    const nickname = useQueryNickname(qref)
-    // and render the connector with it
-    return (
-        <Connector view={view} nickname={nickname} setType={setType} hide={hide} />
+        <Connector view={view}
+            nickname={suggestion.nickname} nicknameError={suggestion.error}
+            setType={update} hide={hide} />
     )
 }
 
@@ -117,6 +92,14 @@ const types = {
     isce2: ISCE2,
     native: Native,
     nisar: NISAR,
+}
+
+// the packages of the product families, which know how to name their products
+const modules = {
+    gdal: "qed.readers.native",
+    isce2: "qed.readers.isce2",
+    native: "qed.readers.native",
+    nisar: "qed.readers.nisar",
 }
 
 

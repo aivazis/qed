@@ -8,7 +8,7 @@
 // the form that connects a dataset to a reader starts with the name the server suggests: the
 // nickname field holds it; emptied, it shows the suggestion dimmed and disables connect; the right
 // arrow or the restore control brings the suggestion back, and any character starts a name of the
-// user's own
+// user's own. a server that cannot suggest a name leaves the field to the user and says why
 
 // support
 import { test, expect, type Page } from "@playwright/test"
@@ -121,6 +121,8 @@ test.describe.serial("the reader form suggests a nickname", () => {
         // and there is nothing to restore
         await expect(page.getByRole("button", { name: "use the suggested nickname" }))
             .toHaveCount(0)
+        // the form says why
+        await expect(page.getByText("could not suggest a name: no suggestion")).toBeVisible()
         // clean up the server
         await closeArchive(page)
     })

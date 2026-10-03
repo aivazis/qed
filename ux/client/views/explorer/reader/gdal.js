@@ -20,7 +20,7 @@ import { Form, Body, Error } from '../form'
 
 
 // associate a GDAL reader with a given data product
-export const GDAL = ({ view, nickname, setType, hide }) => {
+export const GDAL = ({ view, nickname, nicknameError, setType, hide }) => {
     // set up my state
     const [form, setForm] = React.useState({
         // the pyre name of the reader
@@ -59,6 +59,7 @@ export const GDAL = ({ view, nickname, setType, hide }) => {
             </Form>
             <Connect connect={connect} />
             <Cancel onClick={cancel}>cancel</Cancel>
+            {nicknameError && <Error errors={`could not suggest a name: ${nicknameError}`} />}
             {error && <Error errors={error} />}
         </Panel>
     )

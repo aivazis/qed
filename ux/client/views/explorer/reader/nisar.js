@@ -25,7 +25,7 @@ import { Form, Body, Field, Values, Error } from '../form'
 
 
 // associate a NISAR reader with a given data product
-export const NISAR = ({ view, nickname, setType, hide }) => {
+export const NISAR = ({ view, nickname, nicknameError, setType, hide }) => {
     // preload the metadata query
     const [qref, getMetadata] = useProductMetadataLoader()
     // schedule the fetch; once, at mount time
@@ -50,12 +50,14 @@ export const NISAR = ({ view, nickname, setType, hide }) => {
     // render
     return (
         <ErrorBoundary fallback={<ProblemReport view={view} setType={setType} />}>
-            <Spec qref={qref} view={view} nickname={nickname} setType={setType} hide={hide} />
+            <Spec qref={qref} view={view}
+                nickname={nickname} nicknameError={nicknameError}
+                setType={setType} hide={hide} />
         </ErrorBoundary>
     )
 }
 
-const Spec = ({ qref, view, nickname, setType, hide }) => {
+const Spec = ({ qref, view, nickname, nicknameError, setType, hide }) => {
     // unpack the product metadata
     const { uri, product } = useQueryProductMetadata(qref)
     // set up my state
@@ -100,6 +102,7 @@ const Spec = ({ qref, view, nickname, setType, hide }) => {
             </Form>
             <Connect connect={connect} />
             <Cancel onClick={cancel}>cancel</Cancel>
+            {nicknameError && <Error errors={`could not suggest a name: ${nicknameError}`} />}
             {error && <Error errors={error} />}
         </Panel>
     )
