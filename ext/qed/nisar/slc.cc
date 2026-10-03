@@ -101,6 +101,21 @@ namespace qed::py::nisar {
             "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
             // the docstring
             "render the real part of a complex slc tile");
+        slc.def(
+            // the name
+            "fft",
+            // the handler
+            [](const rasterT & source, const datatype_t & datatype, const py::iterable & origin,
+               const py::iterable & shape, double range) -> bmp_t {
+                // read the region, transform it, and render its spectrum
+                return qed::nisar::slc::fft<grid_t>(
+                    source, datatype, asIndex<2>(origin), asShape<2>(shape), range);
+            },
+            // the signature
+            "source"_a, "datatype"_a, "origin"_a, "shape"_a, "range"_a = 60.0,
+            // the docstring
+            "render the spectrum of the region at {origin}+{shape} of a complex slc, with the "
+            "{range} decibels below its strongest frequency spanning the gray scale");
         // all done
         return;
     }
