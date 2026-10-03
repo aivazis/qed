@@ -227,7 +227,7 @@ const Close = styled.div`
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        background-color: hsl(0deg, 0%, 20%, 0.85);
+        background-color: hsl(0deg, 0%, 10%, 0.85);
         border: 1px solid hsl(0deg, 0%, 20%);
         display: flex;
         align-items: center;
@@ -236,7 +236,7 @@ const Close = styled.div`
     }
 
     &:hover, &:focus-within {
-        background-color: hsl(0deg, 0%, 30%, 0.95);
+        background-color: hsl(0deg, 0%, 20%, 0.95);
     }
 
     & > div {
