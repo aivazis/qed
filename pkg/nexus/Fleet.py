@@ -50,6 +50,22 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         # consult the cache
         return self.cache.lookup(task=task)
 
+    def suspect(self, task):
+        """
+        Remember that {task} took its crew member down, so it is never handed to a worker again
+        """
+        # add it to the pile
+        self.suspects.add(task)
+        # all done
+        return self
+
+    def suspected(self, task) -> bool:
+        """
+        Check whether {task} is known to take its crew member down
+        """
+        # look it up
+        return task in self.suspects
+
     def render(self, task, callback):
         """
         Route {task} to the team dedicated to its data source and arrange for {callback} to
@@ -267,8 +283,10 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
             team.standDown()
         # its builders go too
         self.retire(reader=reader)
-        # and drop the departed product's renders from the cache
+        # drop the departed product's renders from the cache
         self.cache.purge(reader=reader)
+        # and forget its suspect tasks; a product connected again gets a fresh start
+        self.suspects = {task for task in self.suspects if task.reader != reader}
         # all done
         return self
 
@@ -324,6 +342,8 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         # the cache of rendered tiles, shared by all of them; its name places its
         # configuration under my namespace, e.g. '{fleet}.cache.capacity'
         self.cache = Cache(name=f"{self.pyre_name}.cache")
+        # the tasks that took their crew member down, which are refused rather than retried
+        self.suspects = set()
         # the shared event loop; whoever builds me is responsible for setting it before any
         # tiles are rendered
         self.dispatcher = None

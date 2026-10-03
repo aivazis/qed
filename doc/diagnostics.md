@@ -271,14 +271,15 @@ already speaking.
 | `qed.ux.dispatch.url` | debug | the recognizer's verdict on each incoming url |
 | `qed.ux.tiles` | debug | one compact line per tile: client, viewport, `dataset.channel`, zoom, origin, shape, session, look-at, HTTP code, `via`, wall and cpu milliseconds |
 | `qed.ux.dispatch` | debug, error, firewall | what was served; failures during generation; a tile refused for falling outside the raster |
-| `qed.nexus.tiles` | warning | a task that took its crew member down, and a task that failed benignly, e.g. by running out of time; the client gets a 503 and may ask again |
+| `qed.nexus.tiles` | warning | a task that took its crew member down, which is remembered and refused from then on, and a task that failed benignly, e.g. by running out of time; the client gets a 503 and may ask again |
 
 `qed.ux.tiles` is the one to reach for first. Its `via` field names the route the tile
 actually took, and the vocabulary is the whole story: `hit` (served from the cache), `crew`
 (rendered by a worker, or a 503 when the worker failed benignly), `inline` (rendered on the
 server's own thread, which means there is no crew path for this tile), `refused` (out of
-bounds), `starved` (the server ran out of file descriptors), `hangup` (the client left before
-the tile was ready).
+bounds), `suspect` (a tile whose render took a crew member down earlier, refused without
+another try), `starved` (the server ran out of file descriptors), `hangup` (the client left
+before the tile was ready).
 
 **The view and the store — `pkg/ux/Store.py`, `pkg/ux/View.py`**
 
