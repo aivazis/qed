@@ -136,6 +136,9 @@ qed::py::nisar::slc(py::module & m)
     bindSLC<dataset_t>(slc);
     // and over pyramid levels, the way a zoomed out view is read
     bindSLC<level_t<std::complex<float>>>(slc);
+    // publish the longest side of a region whose spectrum can be computed, so the callers
+    // can check a request before handing it to a worker
+    slc.attr("fftLimit") = qed::nisar::slc::fftLimit;
     // all done
     return;
 }
