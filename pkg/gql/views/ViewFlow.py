@@ -12,10 +12,10 @@ import graphene
 from ..Node import Node
 
 
-# my node type
-class Flow(graphene.ObjectType):
+# the state of the flow layer of a view
+class ViewFlow(graphene.ObjectType):
     """
-    The store managed state of a dataset channel
+    The store managed state of the flow layer of a view
     """
 
     # {graphene} metadata

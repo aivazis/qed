@@ -58,7 +58,7 @@ class Mutation(graphene.ObjectType):
     viewPersist = views.viewPersist.Field()
 
     # flow
-    viewFlowToggleLayer = views.flowToggleLayer.Field()
+    viewFlowToggleLayer = views.viewFlowToggleLayer.Field()
 
     # measure
     viewMeasureToggleLayer = views.viewMeasureToggleLayer.Field()
