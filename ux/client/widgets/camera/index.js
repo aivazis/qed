@@ -1,7 +1,9 @@
 // -*- web -*-
+// -*- coding: utf-8 -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
-// (c) 1998-2024 all rights reserved
+// (c) 1998-2026 all rights reserved
+
 
 // {camera} is the manager of the user's point of view
 // this is a 3-axis zooming camera:
