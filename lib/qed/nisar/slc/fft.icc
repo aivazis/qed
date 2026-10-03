@@ -1,0 +1,59 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+// the gather that knows both kinds of raster
+#include "../fetch.h"
+// my declaration
+#include "fft.h"
+
+
+// the spectrum of a region
+template <typename sourceT, typename rasterT>
+auto
+qed::nisar::slc::fft(
+    // the source
+    const rasterT & dataset,
+    // the layout
+    const datatype_t & datatype,
+    // the origin of the region
+    typename sourceT::index_type origin,
+    // the shape of the region
+    typename sourceT::shape_type shape,
+    // the decibels below the peak that span the gray scale
+    double range) -> bmp_t
+{
+    // a region that is empty, or longer than the limit along either axis
+    if (shape[0] < 1 || shape[1] < 1 || shape[0] > fftLimit || shape[1] > fftLimit) {
+        // is not transformed
+        auto channel = pyre::journal::error_t("qed.nisar.slc.fft");
+        // say why
+        channel
+            // where
+            << pyre::journal::at()
+            // what
+            << "cannot transform a region of shape " << shape
+            << pyre::journal::newline
+            // the limit
+            << "each side must be between 1 and " << fftLimit
+            << " cells"
+            // done
+            << pyre::journal::endl;
+        // and hand back an empty tile, in case errors aren't fatal
+        return bmp_t(0, 0);
+    }
+    // read the region at full resolution
+    auto region = fetch<sourceT>(dataset, datatype, origin, shape, { 1, 1 });
+    // transform it
+    auto spectrum = native::fft(region);
+    // and render it
+    return native::channels::spectrum(spectrum, range);
+}
+
+
+// end of file

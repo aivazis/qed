@@ -13,6 +13,8 @@
 #include "imaginary.h"
 #include "phase.h"
 #include "real.h"
+// the spectrum of a region
+#include "fft.h"
 
 
 // end of file
