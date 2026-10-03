@@ -71,6 +71,8 @@ class View(graphene.ObjectType):
     reach = graphene.Int(required=True)
     # the visualization pipeline diagram
     diagram = graphene.Field(diagram.diagram)
+    # the longest side of a region whose spectrum can be computed, if the dataset has one
+    spectrum = graphene.Int()
 
     # resolvers
     # metadata
@@ -201,6 +203,15 @@ class View(graphene.ObjectType):
         """
         # easy enough
         return view.diagram()
+
+    # the spectrum of a region
+    @staticmethod
+    def resolve_spectrum(view, info, **kwds):
+        """
+        Report the longest side of a region whose spectrum can be computed, if any
+        """
+        # the view decides
+        return view.spectrumLimit()
 
 
 # end of file
