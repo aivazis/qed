@@ -1,0 +1,59 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// the taper
+template <typename gridT>
+auto
+qed::native::hann(gridT & region) -> void
+{
+    // my index
+    using index_t = typename gridT::index_type;
+
+    // the shape of the region
+    auto shape = region.packing().shape();
+    // the number of lines
+    const auto lines = static_cast<long>(shape[0]);
+    // and samples in it
+    const auto samples = static_cast<long>(shape[1]);
+    // the weight of position {n} along an axis {length} cells long
+    auto weight = [](long n, long length) -> double {
+        // an axis one cell long has nowhere to taper to
+        if (length < 2) {
+            // so its only cell keeps its value
+            return 1.0;
+        }
+        // otherwise, a raised cosine that is zero at both ends and one in the middle
+        return 0.5 * (1.0 - std::cos(2.0 * std::numbers::pi * n / (length - 1)));
+    };
+    // the weights along the samples are the same on every line, so compute them once
+    auto across = std::vector<double>(samples);
+    // go through the samples
+    for (auto sample = 0l; sample < samples; ++sample) {
+        // and record the weight of each one
+        across[sample] = weight(sample, samples);
+    }
+    // go through the lines
+    for (auto line = 0l; line < lines; ++line) {
+        // the weight of this line
+        auto down = weight(line, lines);
+        // go through its samples
+        for (auto sample = 0l; sample < samples; ++sample) {
+            // the cell at this spot
+            auto & cell = region[index_t { line, sample }];
+            // is scaled by the weight of its line and its sample
+            cell *= static_cast<float>(down * across[sample]);
+        }
+    }
+    // all done
+    return;
+}
+
+
+// end of file

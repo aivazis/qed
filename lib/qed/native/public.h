@@ -30,6 +30,10 @@
 
 // the fourier transform
 #include "fft.h"
+// and the steps that can precede it: the fill that contributes nothing
+#include "finite.h"
+// and the taper
+#include "hann.h"
 // profile
 #include "profile.h"
 // statistics

@@ -53,7 +53,15 @@ qed::native::channels::spectrum(const sourceT & spectrum, double range) -> bmp_t
         }
     }
 
-    // render the power, with the {range} decibels below the peak spanning the gray scale
+    // the power of a frequency with none, in decibels
+    const auto silence = 10.0 * std::log10(floor);
+    // a spectrum with no power anywhere, e.g. of a region the product has no samples for
+    if (peak <= silence) {
+        // is black throughout, so put every frequency at the bottom of the gray scale
+        return value(power, index_t { 0, 0 }, shape, index_t { 1, 1 }, peak, peak + range);
+    }
+    // otherwise, render the power, with the {range} decibels below the peak spanning the gray
+    // scale
     return value(power, index_t { 0, 0 }, shape, index_t { 1, 1 }, peak - range, peak);
 }
 
