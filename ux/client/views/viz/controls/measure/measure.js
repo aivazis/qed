@@ -24,6 +24,7 @@ import { Path } from './path'
 import { Peek } from './peek'
 import { Reset } from './reset'
 import { Save } from './save'
+import { Spectrum } from './spectrum'
 
 
 // display the {measure} layer controls
@@ -62,6 +63,8 @@ export const Measure = ({ viewport, view }) => {
             </Help>
             {/* render the pixel path */}
             <Path view={view} />
+            {/* the spectrum of the rectangle the path spans */}
+            <Spectrum viewport={viewport} view={view} />
         </Tray>
     )
 }

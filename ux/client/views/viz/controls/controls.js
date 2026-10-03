@@ -93,6 +93,8 @@ const controlsGetDatasetAndChannelInViewFragment = graphql`
             ...closeMeasureGetMeasureLayerFragment
             # for downloading the signal along the measure path
             ...profileMeasureGetMeasureLayerFragment
+            # for the spectrum of the rectangle the measure path spans
+            ...spectrumMeasureGetRegionFragment
             # for the zoom control
             ...zoomControlsGetZoomStateFragment
             # for the viz control
