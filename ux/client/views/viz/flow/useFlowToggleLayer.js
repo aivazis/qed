@@ -25,9 +25,11 @@ export const useFlowToggleLayer = () => {
         request({
             // input
             variables: {
-                // the payload
-                viewport,
-                reader
+                input: {
+                    // the payload
+                    viewport,
+                    reader,
+                }
             },
             onError: errors => {
                 // send the error to the console
@@ -49,8 +51,8 @@ export const useFlowToggleLayer = () => {
 
 // the mutation that toggles the flow layer state
 const flowToggleLayerMutation = graphql`
-    mutation useFlowToggleLayerMutation($viewport: Int!, $reader: String!) {
-        viewFlowToggleLayer(viewport: $viewport, reader: $reader) {
+    mutation useFlowToggleLayerMutation($input: ViewFlowToggleLayerInput!) {
+        viewFlowToggleLayer(input: $input) {
             flow {
                 active
             }
