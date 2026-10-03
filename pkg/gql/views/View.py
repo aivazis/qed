@@ -64,8 +64,18 @@ class View(graphene.ObjectType):
     depth = graphene.Int(required=True)
     # and how many of them can be shown now
     reach = graphene.Int(required=True)
+    # the longest side of a region whose spectrum can be computed, if the dataset has one
+    spectrum = graphene.Int()
 
     # resolvers
+    @staticmethod
+    def resolve_spectrum(view, info, **kwds):
+        """
+        Report the longest side of a region whose spectrum can be computed, if any
+        """
+        # the view decides
+        return view.spectrumLimit()
+
     @staticmethod
     def resolve_ready(view, info, **kwds):
         """

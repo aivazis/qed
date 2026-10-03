@@ -65,6 +65,19 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
     members.persistent = False
 
     # interface
+    def spectrumLimit(self) -> int | None:
+        """
+        The longest side of a region of my dataset whose spectrum can be computed, or {None} if
+        my dataset has none
+        """
+        # only the complex samples of an RSLC are transformed, and only once a dataset is on display
+        if self.dataset is None or not isinstance(self.reader, qed.readers.nisar.rslc):
+            # so everything else has no spectrum
+            return None
+        # the rest are bound by what the transform takes
+        return qed.libqed.nisar.slc.fftLimit
+
+    # interface
     def pipeline(self, channel):
         """
         Locate the visualization pipeline for the given {channel} spec

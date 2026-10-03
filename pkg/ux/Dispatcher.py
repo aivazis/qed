@@ -797,14 +797,15 @@ class Dispatcher:
         if dataset is None or dataset.pyre_name != datasetName:
             # is not an error; the request is just too late
             return server.responses.Gone(server=server)
-        # only the products of complex samples the transform understands are offered one
-        if not isinstance(view.reader, qed.readers.nisar.rslc):
-            # so anything else is a client that offered one where it should not have
+        # the longest side of a region of the dataset whose spectrum can be computed; the view
+        # decides, and tells the client the same thing, so the client offers only what is honored
+        limit = view.spectrumLimit()
+        # a dataset that has no spectrum
+        if limit is None:
+            # is a client that offered one where it should not have
             return self._spectrumRefused(
                 server=server, reason="only RSLC products have a spectrum", **regionspec
             )
-        # the longest side of a region the transform takes
-        limit = qed.libqed.nisar.slc.fftLimit
         # a region that is empty, too long, or hangs over the edge of the raster
         if (
             any(extent < 1 or extent > limit for extent in shape)
