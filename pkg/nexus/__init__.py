@@ -16,6 +16,9 @@ from .Chore import Chore as chore
 # the unit of work
 from .Tile import Tile as tile
 
+# the unit of work that computes the spectrum of a region
+from .Spectrum import Spectrum as spectrum
+
 # the unit of work that establishes first contact with a data product
 from .Survey import Survey as survey
 
