@@ -88,6 +88,20 @@ const VizPanel = ({ qed }) => {
                 }
                 // the view behaviors are attached to the flex panel because the {viewer} is not
                 // a real container, just a react fragment
+                // without the flow layer, the viewer has the panel to itself
+                if (!view.flow.active) {
+                    // so render it the way it always was
+                    return (
+                        <Flex.Panel key={`panel:${viewport}`}
+                            auto={true}
+                            data-qed-viewport={viewport}
+                            style={styles.flex} {...behaviors}
+                        >
+                            <Viewer viewport={viewport} view={view} registrar={registrar} />
+                        </Flex.Panel>
+                    )
+                }
+                // otherwise, the panel splits to show the flow below the viewer
                 return (
                     <Flex.Panel key={`panel:${viewport}`} auto={true}
                         data-qed-viewport={viewport} style={styles.flex}>
@@ -98,13 +112,9 @@ const VizPanel = ({ qed }) => {
                             >
                                 <Viewer viewport={viewport} view={view} registrar={registrar} />
                             </Flex.Panel>
-                            {/* when the flow layer is active */}
-                            {
-                                view.flow.active &&
-                                <Flex.Panel auto={true} style={styles.flex}>
-                                    <Flow viewport={viewport} view={view} />
-                                </Flex.Panel>
-                            }
+                            <Flex.Panel auto={true} style={styles.flex}>
+                                <Flow viewport={viewport} view={view} />
+                            </Flex.Panel>
                         </Flex.Box>
                     </Flex.Panel>
                 )
