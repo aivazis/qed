@@ -28,7 +28,7 @@ import { Form, Body, Field, Values, Error } from '../form'
 
 
 // associate an ISCE2 reader with a given data product
-export const ISCE2 = ({ view, nickname, setType, hide }) => {
+export const ISCE2 = ({ view, nickname, nicknameError, setType, hide }) => {
     // preload the metadata query
     const [qref, getMetadata] = useProductMetadataLoader()
     // schedule the fetch; once, at mount time
@@ -53,14 +53,16 @@ export const ISCE2 = ({ view, nickname, setType, hide }) => {
     // render
     return (
         <ErrorBoundary fallback={<ProblemReport view={view} setType={setType} />}>
-            <Spec qref={qref} view={view} nickname={nickname} setType={setType} hide={hide} />
+            <Spec qref={qref} view={view}
+                nickname={nickname} nicknameError={nicknameError}
+                setType={setType} hide={hide} />
         </ErrorBoundary>
     )
 }
 
 
 // the panel
-const Spec = ({ qref, view, nickname, setType, hide }) => {
+const Spec = ({ qref, view, nickname, nicknameError, setType, hide }) => {
     // unpack the product metadata
     const { uri, product, bytes, cells, shape, } = useQueryProductMetadata(qref)
     // build the map of product types to their data type size
@@ -140,6 +142,7 @@ const Spec = ({ qref, view, nickname, setType, hide }) => {
             </Form>
             <Connect connect={connect} />
             <Cancel onClick={cancel}>cancel</Cancel>
+            {nicknameError && <Error errors={`could not suggest a name: ${nicknameError}`} />}
             {error && <Error errors={error} />}
             {form.product && form.lines && form.samples &&
                 <Preview
