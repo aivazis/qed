@@ -746,6 +746,144 @@ class Dispatcher:
         # and send it off
         return response
 
+    def spectrum(self, server, request, match, **kwds):
+        """
+        Handle a request for the spectrum of a region of the dataset on display in a viewport
+        """
+        # unpack
+        viewport = int(match.group("spectrum_viewport"))
+        datasetName = match.group("spectrum_dataset")
+        spec = match.group("spectrum_region")
+        origin = tuple(map(int, match.group("spectrum_origin").split("x")))
+        shape = tuple(map(int, match.group("spectrum_shape").split("x")))
+        # bundle the request details the way the tile delivery expects them; a spectrum is
+        # computed at full resolution, and is named as a channel of its own
+        regionspec = {
+            "viewport": viewport,
+            "datasetName": datasetName,
+            "channelName": "spectrum",
+            "zoomSpec": "0x0",
+            "zoom": (0, 0),
+            "spec": spec,
+            "origin": origin,
+            "shape": shape,
+        }
+        # the settings in the query
+        query = urllib.parse.parse_qs(urllib.parse.urlsplit(request.url).query)
+        # carefully, since the request may name a window that is not a number
+        try:
+            # the decibels below the strongest frequency that span the gray scale
+            span = float(query.get("range", ["60"])[0])
+        # if it is not
+        except ValueError:
+            # the request is malformed
+            return self._spectrumRefused(
+                server=server, reason="the range is not a number", **regionspec
+            )
+
+        # attempt to
+        try:
+            # get the view behind the request
+            view = self.store.view(viewport=viewport)
+        # if the viewport is unknown
+        except IndexError:
+            # the request is malformed
+            return self._spectrumRefused(
+                server=server, reason="there is no such viewport", **regionspec
+            )
+        # the dataset on display
+        dataset = view.dataset
+        # a view that has moved on to another dataset since the request was made
+        if dataset is None or dataset.pyre_name != datasetName:
+            # is not an error; the request is just too late
+            return server.responses.Gone(server=server)
+        # only the products of complex samples the transform understands are offered one
+        if not isinstance(view.reader, qed.readers.nisar.rslc):
+            # so anything else is a client that offered one where it should not have
+            return self._spectrumRefused(
+                server=server, reason="only RSLC products have a spectrum", **regionspec
+            )
+        # the longest side of a region the transform takes
+        limit = qed.libqed.nisar.slc.fftLimit
+        # a region that is empty, too long, or hangs over the edge of the raster
+        if (
+            any(extent < 1 or extent > limit for extent in shape)
+            or any(corner < 0 for corner in origin)
+            or any(
+                corner + extent > size for corner, extent, size in zip(origin, shape, dataset.shape)
+            )
+        ):
+            # is refused before it costs a worker anything
+            return self._spectrumRefused(
+                server=server,
+                reason=f"the region must lie within {dataset.shape}, at most {limit} a side",
+                **regionspec,
+            )
+
+        # look for the fleet of tile rendering teams; only the qed flavor of the server has one
+        fleet = getattr(server, "fleet", None)
+        # if there is no fleet
+        if fleet is None:
+            # there is nobody to compute the spectrum; the server holds no copy of the product
+            return self._spectrumRefused(
+                server=server, reason="this server has no crews to compute it", **regionspec
+            )
+        # describe the request as a task
+        task = qed.nexus.spectrum(view=view, origin=origin, shape=shape, range=span)
+        # a request whose work took a crew member down before is refused on the spot
+        if fleet.suspected(task=task):
+            # so it cannot take down another one
+            return server.responses.NotFound(server=server)
+        # a cached picture of this exact request can be served on the spot
+        cached = fleet.lookup(task=task)
+        # if there is one
+        if cached is not None:
+            # the document needs everything but the viewport
+            document = {key: value for key, value in regionspec.items() if key != "viewport"}
+            # share it; the response document owns its file until the payload is on the wire
+            return self._dataDocument(server=server, payload=cached.share(), **document)
+
+        # make a placeholder response that parks the connection
+        deferred = server.deferred()
+        # build the delivery callback, which treats the picture exactly like a tile
+        callback = functools.partial(
+            self._dataDeliver,
+            server=server,
+            deferred=deferred,
+            fleet=fleet,
+            task=task,
+            **regionspec,
+        )
+
+        # if the client hangs up while the spectrum is queued
+        def abandoned():
+            # withdraw the request
+            fleet.revoke(task=task, callback=callback)
+            # all done
+            return
+
+        # arm the hangup hook
+        deferred.abandoned = abandoned
+        # queue the task with the team dedicated to the data source
+        fleet.render(task=task, callback=callback)
+        # and hand the placeholder to the server
+        return deferred
+
+    def _spectrumRefused(self, server, reason, datasetName, spec, **kwds):
+        """
+        Refuse a request for a spectrum that the client should not have made
+        """
+        # our own client only asks for spectra it was offered, of regions it drew on the
+        # raster, so a refusal is a bug in whoever built the request
+        firewall = journal.firewall("qed.ux.dispatch")
+        # complain
+        firewall.line(f"cannot compute the spectrum of '{datasetName}' over {spec}")
+        firewall.line(reason)
+        # flush
+        firewall.log()
+        # and refuse, in case firewalls aren't fatal
+        return server.responses.NotFound(server=server)
+
     def profile(self, server, match, request, **kwds):
         """
         Handle a request for a dataset profile
@@ -1140,6 +1278,17 @@ class Dispatcher:
                         r"zoom=(?P<preview_zoom>[^&]+)",
                         # the view shape
                         r"view=(?P<preview_view>[^&]+)",
+                    ]
+                )
+                + ")",
+                # the spectrum of a region of the dataset on display in a viewport
+                r"/(?P<spectrum>spectrum/"
+                + "/".join(
+                    [
+                        rf"(?P<spectrum_viewport>\d+)",
+                        rf"(?P<spectrum_dataset>{pyreid})",
+                        rf"(?P<spectrum_region>"
+                        rf"(?P<spectrum_origin>{origin})\+(?P<spectrum_shape>{shape}))",
                     ]
                 )
                 + ")",
