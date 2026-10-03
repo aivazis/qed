@@ -19,6 +19,9 @@ tests.qed.lib.nisar.masks.gcov.clean += gcov.bmp
 tests.qed.lib.nisar.masks.gunw.clean += gunw.bmp
 # the level driver writes its tiles and their occupancy record
 tests.qed.lib.pyramid.level.clean += level.tiles level.occupancy
+# the fourier transform driver writes its example spectra
+tests.qed.lib.native.fft.clean += \
+    fft-wave.bmp fft-between.bmp fft-between-hann.bmp fft-noise.bmp fft-slc.bmp
 
 
 # end of file
