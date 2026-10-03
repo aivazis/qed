@@ -13,6 +13,7 @@ import io
 import re
 import signal
 import time
+import traceback
 import urllib
 import uuid
 
@@ -526,7 +527,19 @@ class Dispatcher:
                 shape=shape,
             )
         # if anything else goes wrong
+        # N.B.: this catches far more than it should; the errors the renders of the readers
+        # can raise are being collected on the debug channel below, so this can be narrowed
         except Exception as error:
+            # put the details on the record
+            record = journal.debug("qed.ux.dispatch.inline")
+            # name the exception
+            record.line(f"{type(error).__module__}.{type(error).__qualname__}: {error}")
+            # say where it came from
+            record.line(f"while fetching a tile of '{channelName}' from '{datasetName}'")
+            # and show how it got here
+            record.report(report="".join(traceback.format_exception(error)).splitlines())
+            # flush
+            record.log()
             # we have a problem
             chnl = journal.error("qed.ux.dispatch")
             # show me

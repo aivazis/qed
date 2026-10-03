@@ -271,6 +271,7 @@ already speaking.
 | `qed.ux.dispatch.url` | debug | the recognizer's verdict on each incoming url |
 | `qed.ux.tiles` | debug | one compact line per tile: client, viewport, `dataset.channel`, zoom, origin, shape, session, look-at, HTTP code, `via`, wall and cpu milliseconds |
 | `qed.ux.dispatch` | debug, error, firewall | what was served; failures during generation; a tile refused for falling outside the raster |
+| `qed.ux.dispatch.inline` | debug | the type and traceback of every exception a render on the server's own thread raised, before it is turned into a 404 |
 | `qed.nexus.tiles` | warning | a task that took its crew member down, which is remembered and refused from then on, and a task that failed benignly, e.g. by running out of time; the client gets a 503 and may ask again |
 
 `qed.ux.tiles` is the one to reach for first. Its `via` field names the route the tile
