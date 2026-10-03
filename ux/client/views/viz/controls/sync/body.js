@@ -44,13 +44,6 @@ export const Body = ({ qed, mark }) => {
 }
 
 
-const foo = () => {
-    return (
-        <>
-        </>
-    )
-}
-
 // the table body
 const Container = styled.tbody`
     font-size: 100%;
