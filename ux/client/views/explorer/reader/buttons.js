@@ -15,8 +15,8 @@ import styled from 'styled-components'
 import { Button, EnabledPrimaryButton, EnabledSecondaryButton } from '../form'
 
 
-// the cancel button
-export const Cancel = styled(EnabledSecondaryButton)``
+// the cancel button, marked as a button so drivers can find it
+export const Cancel = styled(EnabledSecondaryButton).attrs({ role: "button" })``
 
 // the connect button
 export const EnabledConnect = ({ connect }) => {
@@ -26,7 +26,7 @@ export const EnabledConnect = ({ connect }) => {
         evt.stopPropagation()
         // and quash any side effects
         evt.preventDefault()
-        // add the data archive to the pile
+        // connect the dataset to its reader
         connect()
         // all done
         return
@@ -37,14 +37,10 @@ export const EnabledConnect = ({ connect }) => {
     }
     // render
     return (
-        <EnabledPrimaryButton {...behaviors}>
+        <EnabledPrimaryButton
+            role="button" aria-label="connect this dataset" aria-disabled={false} {...behaviors}>
             connect
         </EnabledPrimaryButton>
-    )
-    // otherwise, resolve the connector
-    // and render it
-    return (
-        null
     )
 }
 
@@ -52,7 +48,7 @@ export const EnabledConnect = ({ connect }) => {
 export const DisabledConnect = ({ children }) => {
     // render
     return (
-        <Button>
+        <Button role="button" aria-label="connect this dataset" aria-disabled={true}>
             connect
         </Button>
     )
