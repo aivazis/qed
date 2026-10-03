@@ -19,8 +19,19 @@ import { theme } from "~/palette"
 export const Spectrum = ({ viewport, view }) => {
     // unpack the view
     const { spectrum, dataset, measure } = useFragment(spectrumMeasureGetRegionFragment, view)
-    // the address of the picture on display, which stays put until the user asks again
+    // whether to taper the region towards its edges before transforming it
+    const [taper, setTaper] = React.useState(false)
+    // the picture on display, if any: its address, and whether it has arrived
     const [picture, setPicture] = React.useState(null)
+    // everything the picture depends on; any change to it makes the picture meaningless
+    const scene = JSON.stringify({ viewport, dataset: dataset?.name, path: measure.path, taper })
+    // so whenever it changes
+    React.useEffect(() => {
+        // the picture goes
+        setPicture(null)
+        // all done
+        return
+    }, [scene])
     // a dataset that has no spectrum, or no dataset at all
     if (spectrum === null || dataset === null) {
         // has nothing to offer
@@ -45,7 +56,7 @@ export const Spectrum = ({ viewport, view }) => {
     // the address of the spectrum of the rectangle
     const address = [
         "spectrum", viewport, dataset.name, `${origin[0]}x${origin[1]}+${shape[0]}x${shape[1]}`
-    ].join("/")
+    ].join("/") + (taper ? "?taper=hann" : "")
     // build the handler that asks for it
     const compute = () => {
         // a rectangle past the limit
@@ -53,19 +64,29 @@ export const Spectrum = ({ viewport, view }) => {
             // has no spectrum
             return
         }
-        // otherwise, show the spectrum of the rectangle
-        setPicture(address)
+        // otherwise, ask for the spectrum of the rectangle
+        setPicture({ address, status: "computing" })
         // all done
         return
     }
-    // let the keyboard press the control too
-    const press = evt => {
-        // only the keys that press a button
-        if (evt.key !== "Enter" && evt.key !== " ") return
-        // keep the space from scrolling the panel
-        evt.preventDefault()
-        // ask for the spectrum
-        compute()
+    // build the handler that removes the picture
+    const clear = () => {
+        // forget it
+        setPicture(null)
+        // all done
+        return
+    }
+    // build the handler that flips the taper
+    const flip = () => {
+        // flip it
+        setTaper(old => !old)
+        // all done
+        return
+    }
+    // record how the picture fared, for the request it was made for
+    const settle = status => () => {
+        // a picture that was cleared or replaced since
+        setPicture(old => old?.address === address ? { address, status } : old)
         // all done
         return
     }
@@ -76,18 +97,65 @@ export const Spectrum = ({ viewport, view }) => {
         <Box>
             <Action>
                 spectrum of {shape[0]}x{shape[1]}:{" "}
-                <Control role="button" tabIndex={fits ? 0 : -1}
-                    aria-label="compute the spectrum of the region" aria-disabled={!fits}
+                <Control {...pressable(compute, fits)}
+                    aria-label="compute the spectrum of the region"
                     title={fits ? "the spectrum of the rectangle the path spans"
-                        : `the rectangle must be at most ${spectrum} on a side`}
-                    onClick={compute} onKeyDown={press}>
+                        : `the rectangle must be at most ${spectrum} on a side`}>
                     fft
                 </Control>
+                {" "}
+                <Toggle {...pressable(flip, true)} aria-pressed={taper}
+                    aria-label="taper the region with a hann window"
+                    title="bring the region smoothly to zero towards its edges first">
+                    hann
+                </Toggle>
+                {picture &&
+                    <>
+                        {" "}
+                        <Enabled {...pressable(clear, true)} aria-label="clear the spectrum"
+                            title="clear the spectrum">
+                            ×
+                        </Enabled>
+                    </>
+                }
             </Action>
-            {picture && <Picture src={picture} alt="the spectrum of the region" />}
+            {picture?.status === "computing" && <Note>computing…</Note>}
+            {picture?.status === "failed" &&
+                <Note>the server could not compute this spectrum; press fft to try again</Note>
+            }
+            {picture && picture.status !== "failed" &&
+                <Frame hidden={picture.status !== "ready"}>
+                    <Picture src={picture.address} alt="the spectrum of the region"
+                        onLoad={settle("ready")} onError={settle("failed")} />
+                </Frame>
+            }
         </Box>
     )
 }
+
+
+// the attributes that make an element a control the mouse and the keyboard can press
+const pressable = (action, enabled) => ({
+    // it is a button
+    role: "button",
+    // that the keyboard can reach when it can be pressed
+    tabIndex: enabled ? 0 : -1,
+    // says whether it can be pressed
+    "aria-disabled": !enabled,
+    // and does its thing when clicked
+    onClick: action,
+    // or when the keys that press a button are pressed on it
+    onKeyDown: evt => {
+        // only those keys
+        if (evt.key !== "Enter" && evt.key !== " ") return
+        // keep the space from scrolling the panel
+        evt.preventDefault()
+        // and act
+        action()
+        // all done
+        return
+    },
+})
 
 
 // the container
@@ -116,6 +184,20 @@ const Enabled = styled.span`
     }
 `
 
+// a control that is on or off
+const Toggle = styled(Enabled)`
+    &[aria-pressed="false"] {
+        color: ${() => theme.page.dim};
+    }
+`
+
+// a line about the state of the picture
+const Note = styled.div`
+    font-family: rubik-light;
+    font-style: italic;
+    margin-top: 0.5rem;
+`
+
 // and when it cannot
 const Disabled = styled.span`
     font-family: inconsolata;
@@ -123,10 +205,18 @@ const Disabled = styled.span`
     color: ${() => theme.page.dim};
 `
 
-// the spectrum, fit into a box the size of the peek window
+// the frame of the spectrum, laid out like the window of the peek
+const Frame = styled.div`
+    width: 256px;
+    height: 256px;
+    background-color: ${() => theme.page.shaded};
+    margin: 0.5rem auto;
+    border: 1px solid ${() => theme.page.viewportBorder};
+`
+
+// the spectrum, fit into its frame without distortion
 const Picture = styled.img`
     display: block;
-    margin-top: 0.5rem;
     width: 256px;
     height: 256px;
     object-fit: contain;
