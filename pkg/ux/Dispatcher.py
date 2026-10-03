@@ -568,7 +568,7 @@ class Dispatcher:
             chnl = journal.warning("qed.nexus.tiles")
             # what happened
             chnl.line(str(error))
-            chnl.line(f"while rendering a '{channelName}' tile of '{datasetName}'")
+            chnl.line(f"while fetching a tile of '{channelName}' from '{datasetName}'")
             chnl.line(f"with shape {shape} at {origin}")
             chnl.line(f"the task is suspect; refusing to retry it in the server")
             # and flush
@@ -584,7 +584,7 @@ class Dispatcher:
             chnl = journal.warning("qed.nexus.tiles")
             # what happened
             chnl.line(str(error))
-            chnl.line(f"while rendering a '{channelName}' tile of '{datasetName}'")
+            chnl.line(f"while fetching a tile of '{channelName}' from '{datasetName}'")
             chnl.line(f"with shape {shape} at {origin}")
             chnl.line(f"falling back to the inline renderer")
             # and flush
@@ -617,7 +617,8 @@ class Dispatcher:
             # tell me
             chnl = journal.warning("qed.nexus.tiles")
             # what happened
-            chnl.line(f"could not share the payload of a '{channelName}' tile of '{datasetName}'")
+            chnl.line(f"could not share the payload")
+            chnl.line(f"while fetching a tile of '{channelName}' from '{datasetName}'")
             chnl.line(f"with shape {shape} at {origin}")
             chnl.line(f"got: {error}")
             chnl.line(f"the process is probably out of file descriptors")
@@ -694,7 +695,7 @@ class Dispatcher:
             chnl = journal.error("qed.ux.dispatch")
             # show me
             chnl.line(str(error))
-            chnl.line(f"while generating a '{channelName}' tile of '{datasetName}'")
+            chnl.line(f"while generating a tile of '{channelName}' from '{datasetName}'")
             chnl.line(f"with shape {shape} at {origin}")
             chnl.line(f"at zoom level {zoom}")
             # and flush
