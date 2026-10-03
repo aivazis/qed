@@ -11,10 +11,12 @@
 // STL
 #include <algorithm>
 #include <cmath>
+#include <complex>
 #include <limits>
 #include <map>
 #include <memory>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -23,8 +25,12 @@
 #include <pyre/journal.h>
 // pyre
 #include <pyre/grid.h>
+#include <pyre/memory.h>
 #include <pyre/timers.h>
 #include <pyre/viz.h>
+
+// fftw
+#include <fftw3.h>
 
 // type aliases
 namespace qed::native {
