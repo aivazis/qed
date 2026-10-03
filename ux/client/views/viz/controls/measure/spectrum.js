@@ -19,12 +19,13 @@ import { theme } from "~/palette"
 export const Spectrum = ({ viewport, view }) => {
     // unpack the view
     const { spectrum, dataset, measure } = useFragment(spectrumMeasureGetRegionFragment, view)
-    // whether to taper the region towards its edges before transforming it
-    const [taper, setTaper] = React.useState(false)
-    // the picture on display, if any: its address, and whether it has arrived
+    // whether to taper the region towards its edges before transforming it; almost always
+    // what one wants when reading a spectrum, so it starts out on
+    const [taper, setTaper] = React.useState(true)
+    // the picture on display, if any: its address, how it was made, and whether it has arrived
     const [picture, setPicture] = React.useState(null)
-    // everything the picture depends on; any change to it makes the picture meaningless
-    const scene = JSON.stringify({ viewport, dataset: dataset?.name, path: measure.path, taper })
+    // the region the picture belongs to; any change to it makes the picture meaningless
+    const scene = JSON.stringify({ viewport, dataset: dataset?.name, path: measure.path })
     // so whenever it changes
     React.useEffect(() => {
         // the picture goes
@@ -53,10 +54,18 @@ export const Spectrum = ({ viewport, view }) => {
     const shape = [Math.max(...lines) - origin[0] + 1, Math.max(...samples) - origin[1] + 1]
     // the server only transforms rectangles up to its limit along each side
     const fits = shape.every(extent => extent <= spectrum)
-    // the address of the spectrum of the rectangle
-    const address = [
-        "spectrum", viewport, dataset.name, `${origin[0]}x${origin[1]}+${shape[0]}x${shape[1]}`
-    ].join("/") + (taper ? "?taper=hann" : "")
+    // the request for the spectrum of the rectangle, tapered or not
+    const request = tapered => ({
+        // where to get it
+        address: [
+            "spectrum", viewport, dataset.name,
+            `${origin[0]}x${origin[1]}+${shape[0]}x${shape[1]}`,
+        ].join("/") + (tapered ? "?taper=hann" : ""),
+        // how it is made, for the caption
+        shape, tapered,
+        // and that it is on its way
+        status: "computing",
+    })
     // build the handler that asks for it
     const compute = () => {
         // a rectangle past the limit
@@ -65,7 +74,7 @@ export const Spectrum = ({ viewport, view }) => {
             return
         }
         // otherwise, ask for the spectrum of the rectangle
-        setPicture({ address, status: "computing" })
+        setPicture(request(taper))
         // all done
         return
     }
@@ -78,15 +87,22 @@ export const Spectrum = ({ viewport, view }) => {
     }
     // build the handler that flips the taper
     const flip = () => {
-        // flip it
-        setTaper(old => !old)
+        // the new setting
+        const tapered = !taper
+        // remember it
+        setTaper(tapered)
+        // a picture on display is remade the new way, so the two can be compared
+        if (picture !== null) {
+            // by asking for it again
+            setPicture(request(tapered))
+        }
         // all done
         return
     }
-    // record how the picture fared, for the request it was made for
-    const settle = status => () => {
-        // a picture that was cleared or replaced since
-        setPicture(old => old?.address === address ? { address, status } : old)
+    // record how the picture at {address} fared, unless it was cleared or replaced since
+    const settle = (address, status) => () => {
+        // update the picture it belongs to
+        setPicture(old => old?.address === address ? { ...old, status } : old)
         // all done
         return
     }
@@ -107,17 +123,8 @@ export const Spectrum = ({ viewport, view }) => {
                 <Toggle {...pressable(flip, true)} aria-pressed={taper}
                     aria-label="taper the region with a hann window"
                     title="bring the region smoothly to zero towards its edges first">
-                    hann
+                    hann: {taper ? "on" : "off"}
                 </Toggle>
-                {picture &&
-                    <>
-                        {" "}
-                        <Enabled {...pressable(clear, true)} aria-label="clear the spectrum"
-                            title="clear the spectrum">
-                            ×
-                        </Enabled>
-                    </>
-                }
             </Action>
             {picture?.status === "computing" && <Note>computing…</Note>}
             {picture?.status === "failed" &&
@@ -126,8 +133,19 @@ export const Spectrum = ({ viewport, view }) => {
             {picture && picture.status !== "failed" &&
                 <Frame hidden={picture.status !== "ready"}>
                     <Picture src={picture.address} alt="the spectrum of the region"
-                        onLoad={settle("ready")} onError={settle("failed")} />
+                        onLoad={settle(picture.address, "ready")}
+                        onError={settle(picture.address, "failed")} />
                 </Frame>
+            }
+            {picture?.status === "ready" &&
+                <Caption>
+                    {picture.shape[0]}x{picture.shape[1]}, {picture.tapered ? "hann" : "untapered"}
+                    {" "}
+                    <Enabled {...pressable(clear, true)} aria-label="clear the spectrum"
+                        title="clear the spectrum">
+                        ×
+                    </Enabled>
+                </Caption>
             }
         </Box>
     )
@@ -189,6 +207,14 @@ const Toggle = styled(Enabled)`
     &[aria-pressed="false"] {
         color: ${() => theme.page.dim};
     }
+`
+
+// what the picture on display is, under its frame
+const Caption = styled.div`
+    width: 256px;
+    margin: 0.0rem auto;
+    text-align: end;
+    font-family: inconsolata;
 `
 
 // a line about the state of the picture
