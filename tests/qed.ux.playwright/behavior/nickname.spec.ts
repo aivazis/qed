@@ -27,20 +27,27 @@ const uri = `file:${root}`
 const name = "nickname_archive"
 
 
-// open the form that connects the scratch file to a reader, with the type that needs nothing
-// from the file
-const openForm = async (page: Page) => {
+// select the scratch file, so the viewport turns into the form that connects it
+const selectFile = async (page: Page) => {
     // open the explorer and wait for the facade
     await page.goto("/explore", { waitUntil: "load" })
     await page.waitForFunction(() => Boolean(window.qed))
     // connect the archive and open its root, so the file shows up
     await page.evaluate(([name, uri]) => window.qed.connectArchive(name, uri), [name, uri])
     await page.evaluate(uri => window.qed.expandFolder(uri), uri)
-    // select the file; the viewport turns into the form that connects it
+    // select the file
     await page.locator('[title$="/raster.bin"]').click()
+}
+
+// open the form that connects the scratch file to a reader, with the type that needs nothing
+// from the file
+const openForm = async (page: Page) => {
+    // select the file
+    await selectFile(page)
     // pick the reader type that needs nothing from the file
     await page.getByText("gdal", { exact: true }).click()
 }
+
 
 // remove the scratch archive from the server
 const closeArchive = async (page: Page) => {
@@ -91,6 +98,59 @@ test.describe.serial("the reader form suggests a nickname", () => {
         await expect(nickname).toHaveValue(suggestion)
         await expect(nickname).toBeFocused()
         await expect(restore).toHaveCount(0)
+        // clean up the server
+        await closeArchive(page)
+    })
+
+    test("every reader type the archive offers is a family the server knows", async ({ page }) => {
+        // select the file
+        await selectFile(page)
+        // ask the server which reader types the archive offers, the same list the form shows
+        const readers: string[] = await page.evaluate(async uri => {
+            // through the client's own endpoint
+            const response = await fetch("graphql", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ query: "query { qed { archives { uri readers } } }" }),
+            })
+            // decode the answer
+            const { data } = await response.json()
+            // and pick out the scratch archive
+            return data.qed.archives.find(archive => archive.uri === uri).readers
+        }, uri)
+        // the local archive offers several
+        expect(readers.length).toBeGreaterThan(1)
+        // collect the answers of the server to the requests for a nickname; types that share a
+        // family share its answer, so not every choice sends one
+        const answers: Promise<any>[] = []
+        page.on("response", response => {
+            // the requests for a nickname name their query
+            if (response.request().postData()?.includes("useFetchNicknameQuery")) {
+                // keep the answer
+                answers.push(response.json())
+            }
+        })
+        // the form of a type shows up only once the answer for its family is in hand: either
+        // the nickname field, or the report that the scratch file is not that kind of product
+        const form = page.getByRole("textbox", { name: "nickname" })
+            .or(page.getByText(/does not appear to be/))
+        // go through the types
+        for (const reader of readers) {
+            // one step per type, so a failure names it
+            await test.step(`the '${reader}' reader`, async () => {
+                // pick the type
+                await page.getByText(reader, { exact: true }).click()
+                // and wait for its form
+                await expect(form).toBeVisible()
+            })
+        }
+        // every type asked about a family
+        expect(answers.length).toBeGreaterThan(0)
+        // and the server knew each one, and suggested a name for it
+        for (const body of await Promise.all(answers)) {
+            expect(body.errors).toBeUndefined()
+            expect(body.data.nickname).not.toBe("")
+        }
         // clean up the server
         await closeArchive(page)
     })
