@@ -578,7 +578,10 @@ class Dispatcher:
                 record(code=404, via="crew")
             # let the client know; it can always ask again
             return deferred.resolve(response=server.responses.NotFound(server=server))
-        # if the worker could not produce the tile for a benign reason
+        # if the worker could not produce the tile for a benign reason, e.g. it ran out of
+        # time on a slow read; the server holds only a metadata-only twin of the product, so
+        # it cannot render the tile itself, and repeating a read that just took too long on
+        # the event loop would stall every other request
         if error is not None:
             # tell me
             chnl = journal.warning("qed.nexus.tiles")
@@ -586,26 +589,14 @@ class Dispatcher:
             chnl.line(str(error))
             chnl.line(f"while fetching a tile of '{channelName}' from '{datasetName}'")
             chnl.line(f"with shape {shape} at {origin}")
-            chnl.line(f"falling back to the inline renderer")
+            chnl.line(f"the tile is not available for now")
             # and flush
             chnl.log()
-            # render on the spot so reconstruction gaps degrade gracefully
-            response = self._dataInline(
-                server=server,
-                viewport=viewport,
-                datasetName=datasetName,
-                channelName=channelName,
-                zoomSpec=zoomSpec,
-                zoom=zoom,
-                spec=spec,
-                origin=origin,
-                shape=shape,
-            )
-            # record the fallback outcome
+            # record the outcome
             if record is not None:
-                record(code=response.code, via="inline")
-            # and deliver whatever came out
-            return deferred.resolve(response=response)
+                record(code=503, via="crew")
+            # and let the client know it may ask again later
+            return deferred.resolve(response=server.responses.ServiceUnavailable(server=server))
 
         # on success, the tile arrives parked in a spool; share its payload, carefully, since
         # the share needs a descriptor of its own and this process may have none left
