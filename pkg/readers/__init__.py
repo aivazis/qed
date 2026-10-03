@@ -17,6 +17,9 @@ from . import asar
 # reader metadata
 from .Metadata import Metadata as metadata
 
+# the generic proposal for the name of a reader
+from .nickname import nickname
+
 # the statistics prober the dataset flavors seed themselves with
 from .probes import probe, windows
 
