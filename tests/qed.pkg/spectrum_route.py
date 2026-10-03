@@ -116,7 +116,11 @@ class Store:
         # chain up
         super().__init__(**kwds)
         # a single view of the dataset by {reader}
-        self.views = [types.SimpleNamespace(reader=reader, dataset=dataset)]
+        view = types.SimpleNamespace(reader=reader, dataset=dataset)
+        # that decides whether it has a spectrum the way the real one does
+        view.spectrumLimit = functools.partial(qed.ux.view.spectrumLimit, view)
+        # is all there is
+        self.views = [view]
         # all done
         return
 
@@ -149,6 +153,16 @@ def ask(url: str, reader=rslc, fleet=None):
         dispatcher, server=server, request=types.SimpleNamespace(url=url), match=match
     )
 
+
+# a view decides whether its dataset has a spectrum
+limit = qed.libqed.nisar.slc.fftLimit
+# the one of an RSLC does, bound by what the transform takes
+assert Store(reader=rslc).view(viewport=0).spectrumLimit() == limit
+# the one of any other product does not
+assert Store(reader=gslc).view(viewport=0).spectrumLimit() is None
+# and neither does a view with nothing on display
+empty = types.SimpleNamespace(reader=rslc, dataset=None)
+assert qed.ux.view.spectrumLimit(empty) is None
 
 # a region inside the raster
 good = "/spectrum/0/route_rslc.L.A.HH/100x200+64x48"
