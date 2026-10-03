@@ -351,6 +351,14 @@ class Dispatcher:
                 shape=shape,
             )
 
+        # a tile whose render took a crew member down is refused on the spot, so asking for it
+        # again, e.g. from a client recovering a failed load, cannot take down another one
+        if fleet.suspected(task=task):
+            # record the refusal
+            record(code=404, via="suspect")
+            # and refuse
+            return server.responses.NotFound(server=server)
+
         # the settings the request was made with; clients that do not name them, e.g. the
         # measurements, take no part in the bursts
         session = urllib.parse.parse_qs(urllib.parse.urlsplit(request.url).query).get(
@@ -376,6 +384,8 @@ class Dispatcher:
             self._dataDeliver,
             server=server,
             deferred=deferred,
+            fleet=fleet,
+            task=task,
             record=record,
             **tilespec,
         )
@@ -548,6 +558,8 @@ class Dispatcher:
         error,
         server,
         deferred,
+        fleet,
+        task,
         viewport,
         datasetName,
         channelName,
@@ -570,9 +582,12 @@ class Dispatcher:
             chnl.line(str(error))
             chnl.line(f"while fetching a tile of '{channelName}' from '{datasetName}'")
             chnl.line(f"with shape {shape} at {origin}")
-            chnl.line(f"the task is suspect; refusing to retry it in the server")
+            chnl.line(f"the task is suspect; refusing to retry it")
             # and flush
             chnl.log()
+            # remember it, so a request for the same tile is refused rather than handed to
+            # another crew member
+            fleet.suspect(task=task)
             # record the casualty
             if record is not None:
                 record(code=404, via="crew")
