@@ -1,0 +1,68 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// the transform
+template <typename gridT>
+auto
+qed::native::fft(const gridT & source) -> gridT
+{
+    // the transform reads and writes the cells as {fftwf_complex}, so they must be laid out
+    // like one; {std::complex<float>} is, by the standard
+    static_assert(
+        std::is_same_v<typename gridT::value_type, std::complex<float>>,
+        "the transform needs a grid of single precision complex cells");
+    // my grid type and its parts
+    using grid_t = gridT;
+    using packing_t = typename gridT::packing_type;
+    using storage_t = typename gridT::storage_type;
+
+    // the shape of the raster
+    auto shape = source.packing().shape();
+    // the number of its cells
+    auto cells = shape.cells();
+    // make a grid of the same shape for the frequencies
+    auto spectrum = grid_t { packing_t(shape), storage_t { cells } };
+    // and start it off with a copy of the cells, since the transform works in place
+    std::copy(source.data(), source.data() + cells, spectrum.data());
+
+    // view the cells the way the library sees them
+    auto data = reinterpret_cast<fftwf_complex *>(spectrum.data());
+    // plan the transform; estimating rather than measuring leaves the cells alone, and keeps
+    // the planning cheap for the one-off shapes the regions have
+    auto plan = fftwf_plan_dft_2d(
+        static_cast<int>(shape[0]), static_cast<int>(shape[1]), data, data, FFTW_FORWARD,
+        FFTW_ESTIMATE);
+    // if the library could not come up with a plan
+    if (plan == nullptr) {
+        // that's a bug, since every shape has one
+        auto channel = pyre::journal::firewall_t("qed.native.fft");
+        // complain
+        channel
+            // where
+            << pyre::journal::at()
+            // what
+            << "could not plan the transform of a raster of shape "
+            << shape
+            // done
+            << pyre::journal::endl;
+        // and hand back the untransformed copy, in case firewalls aren't fatal
+        return spectrum;
+    }
+    // transform
+    fftwf_execute(plan);
+    // and release the plan
+    fftwf_destroy_plan(plan);
+
+    // all done
+    return spectrum;
+}
+
+
+// end of file
