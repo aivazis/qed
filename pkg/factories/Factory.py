@@ -10,9 +10,7 @@ import qed
 
 
 # base class for local factories
-class Factory(
-    qed.flow.factory, implements=qed.protocols.factories.producer, internal=True
-):
+class Factory(qed.flow.factory, implements=qed.protocols.factories.producer, internal=True):
     """
     The base class for {qed} factories
     """

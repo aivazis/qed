@@ -8,5 +8,4 @@
 # publish
 from .Diagram import Diagram as diagram
 
-
 # end of file

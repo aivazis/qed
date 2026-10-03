@@ -141,9 +141,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             return
         # otherwise, build the diagram
         # MGA - FIXME: feed my channel to the diagram
-        diagram = qed.ux.diagram(
-            name=f"{channel.pyre_name}.diagram", flow=qed.channels.phase()
-        )
+        diagram = qed.ux.diagram(name=f"{channel.pyre_name}.diagram", flow=qed.channels.phase())
         # and return it
         return diagram
 

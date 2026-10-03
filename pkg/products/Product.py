@@ -10,9 +10,7 @@ import qed
 
 
 # base class for local products
-class Product(
-    qed.flow.product, implements=qed.protocols.products.specification, internal=True
-):
+class Product(qed.flow.product, implements=qed.protocols.products.specification, internal=True):
     """
     The base class for {qed} products
     """
