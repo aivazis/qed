@@ -49,6 +49,13 @@ class Fleet:
     """
 
     # interface
+    def suspected(self, task):
+        """
+        No task has ever taken a crew member down
+        """
+        # so none is suspect
+        return False
+
     def lookup(self, task):
         """
         Nothing is ever in the cache
