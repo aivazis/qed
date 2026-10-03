@@ -114,9 +114,7 @@ class Slot(Node):
         # take ownership of all the labels attached to {other}
         self.relabel(other=other, delta=deltaLabels)
         # connectors
-        self.rewire(
-            other=other, deltaLabels=deltaLabels, deltaConnectors=deltaConnectors
-        )
+        self.rewire(other=other, deltaLabels=deltaLabels, deltaConnectors=deltaConnectors)
 
         # return the changes
         return other, deltaLabels, deltaConnectors
@@ -160,9 +158,7 @@ class Slot(Node):
             # build the position of the label relative to me
             delta = (0, -1)
             # assemble and publish
-            yield Label(
-                text=text, category="product", delta=delta, position=self.position
-            )
+            yield Label(text=text, category="product", delta=delta, position=self.position)
 
         # chain up
         yield from super().generateLabels()

@@ -8,5 +8,4 @@
 # the diagram
 from .FlowDiagram import FlowDiagram as diagram
 
-
 # end of file

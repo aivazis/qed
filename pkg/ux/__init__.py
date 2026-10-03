@@ -34,5 +34,4 @@ from .Zoom import Zoom as zoom
 # the diagram data model
 from .diagram import diagram
 
-
 # end of file

@@ -9,7 +9,6 @@
 import graphene
 import journal
 
-
 # the result types
 from .Flow import Flow
 

@@ -92,9 +92,7 @@ class Connector(Labeled, Entity, set):
         position = self.placeLabel()
 
         # make a label
-        label = Label(
-            text=text, category=self.typename().lower(), delta=(0, 0), position=position
-        )
+        label = Label(text=text, category=self.typename().lower(), delta=(0, 0), position=position)
         # save it as my trait label
         self.traitLabel = label
         # publish it
@@ -133,9 +131,7 @@ class Connector(Labeled, Entity, set):
         Compute the location of my labels
         """
         # let subclasses handle this
-        raise NotImplementedError(
-            f"class '{type(self).__name__}' must override 'placeLabel"
-        )
+        raise NotImplementedError(f"class '{type(self).__name__}' must override 'placeLabel")
 
 
 # end of file
