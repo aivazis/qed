@@ -219,13 +219,22 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         # initialize the set of products
         inputs = [product for product, _ in flow.pyre_inputs()]
         outputs = [product for product, _ in flow.pyre_outputs()]
+        # show me the products the flow connects, when someone is listening
+        channel = journal.debug("qed.ux.diagram")
+        # the ones that come in
+        channel.line(f"input:")
         # go through them
-        print(f"input:")
         for product in inputs:
-            print(f"  {product}")
-        print(f"output:")
+            # and name each one
+            channel.line(f"  {product}")
+        # the ones that go out
+        channel.line(f"output:")
+        # go through them
         for product in outputs:
-            print(f"  {product}")
+            # and name each one
+            channel.line(f"  {product}")
+        # flush
+        channel.log()
 
         # all done
         return flow
