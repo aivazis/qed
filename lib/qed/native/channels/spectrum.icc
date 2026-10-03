@@ -1,0 +1,61 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+// the gray rendering of a real raster
+#include "value.h"
+
+
+// the spectrum renderer
+template <typename sourceT>
+auto
+qed::native::channels::spectrum(const sourceT & spectrum, double range) -> bmp_t
+{
+    // the grid type that holds the power of each frequency
+    using power_t =
+        pyre::grid::grid_t<typename sourceT::packing_type, pyre::memory::heap_t<double>>;
+    // and its parts
+    using packing_t = typename power_t::packing_type;
+    using storage_t = typename power_t::storage_type;
+    using index_t = typename power_t::index_type;
+
+    // the shape of the spectrum
+    auto shape = spectrum.packing().shape();
+    // the number of lines
+    const auto lines = static_cast<long>(shape[0]);
+    // and samples in it
+    const auto samples = static_cast<long>(shape[1]);
+    // make a grid of the same shape for the power
+    auto power = power_t { packing_t(shape), storage_t { shape.cells() } };
+    // the power that stands in for a frequency with none, so the logarithm stays finite
+    constexpr auto floor = std::numeric_limits<double>::min();
+    // the strongest power, in decibels
+    auto peak = -std::numeric_limits<double>::infinity();
+    // go through the lines of the spectrum
+    for (auto line = 0l; line < lines; ++line) {
+        // and the samples on each line
+        for (auto sample = 0l; sample < samples; ++sample) {
+            // the frequency in this cell
+            auto frequency = spectrum[index_t { line, sample }];
+            // its power in decibels
+            auto db = 10.0 * std::log10(std::max(static_cast<double>(std::norm(frequency)), floor));
+            // moves half way around each axis, which brings zero frequency to the center
+            auto spot = index_t { (line + lines / 2) % lines, (sample + samples / 2) % samples };
+            // record it there
+            power[spot] = db;
+            // and keep track of the strongest one
+            peak = std::max(peak, db);
+        }
+    }
+
+    // render the power, with the {range} decibels below the peak spanning the gray scale
+    return value(power, index_t { 0, 0 }, shape, index_t { 1, 1 }, peak - range, peak);
+}
+
+
+// end of file

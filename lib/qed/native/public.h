@@ -26,7 +26,10 @@
 #include "channels/magnitude.h"
 #include "channels/MeanPower.h"
 #include "channels/Coherence.h"
+#include "channels/spectrum.h"
 
+// the fourier transform
+#include "fft.h"
 // profile
 #include "profile.h"
 // statistics
