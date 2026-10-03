@@ -40,13 +40,14 @@ class Spectrum(Chore):
             dataset = self._locateDataset(reader=reader)
             # the region is read at full resolution, straight off the product
             data, _, _ = dataset.resolve(zoom=(0, 0))
-            # read it, transform it, and render the result
+            # read it, taper it if asked to, transform it, and render the result
             picture = qed.libqed.nisar.slc.fft(
                 source=data,
                 datatype=dataset.datatype.htype,
                 origin=self.origin,
                 shape=self.shape,
                 range=self.range,
+                taper=self.taper,
             )
         # any failure at all
         except Exception as error:
@@ -57,14 +58,16 @@ class Spectrum(Chore):
         return Spool.stash(data=memoryview(picture))
 
     # metamethods
-    def __init__(self, view, origin, shape, range=60.0, **kwds):
+    def __init__(self, view, origin, shape, range=60.0, taper=False, **kwds):
         # chain up
         super().__init__(**kwds)
         # record the region
         self.origin = tuple(origin)
         self.shape = tuple(shape)
-        # and the decibels below the strongest frequency that span the gray scale
+        # the decibels below the strongest frequency that span the gray scale
         self.range = float(range)
+        # and whether the region is tapered towards its edges before it is transformed
+        self.taper = bool(taper)
         # get the data source of the view
         reader = view.reader
         # record its name; it keys the worker side reader registry
@@ -91,6 +94,7 @@ class Spectrum(Chore):
                 self.origin,
                 self.shape,
                 self.range,
+                self.taper,
             )
         )
         # all done

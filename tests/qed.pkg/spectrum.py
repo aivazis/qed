@@ -75,6 +75,33 @@ assert task == qed.nexus.spectrum(view=view, origin=origin, shape=shape)
 assert task != qed.nexus.spectrum(view=view, origin=origin, shape=shape, range=40)
 # and neither is one over a different region
 assert task != qed.nexus.spectrum(view=view, origin=(1, 0), shape=shape)
+# or one whose region is tapered first
+tapered = qed.nexus.spectrum(view=view, origin=origin, shape=shape, taper=True)
+assert task != tapered
+
+# a tapered region makes the picture the kernel makes when asked to taper
+spool = tapered.execute(readers={})
+spool.file.seek(0)
+picture = spool.file.read()
+spool.close()
+assert picture == bytes(
+    memoryview(
+        qed.libqed.nisar.slc.fft(
+            source=data,
+            datatype=dataset.datatype.htype,
+            origin=origin,
+            shape=shape,
+            range=60,
+            taper=True,
+        )
+    )
+)
+
+# the region is outside the swath of the fixture, where the product marks its samples as fill
+# rather than measurements; the fill carries no energy, so the picture is black throughout; a
+# region that is only partly fill is checked by the tests of the library
+assert set(reference[54:]) == {0}, set(reference[54:])
+assert set(picture[54:]) == {0}, set(picture[54:])
 
 # a region longer than the limit is refused by the kernel; keep its report out of the output
 journal.error("qed.nisar.slc.fft").device = journal.trash()

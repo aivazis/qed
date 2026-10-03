@@ -177,6 +177,8 @@ assert ask(url="/spectrum/0/route_rslc.L.A.HH/990x200+64x48", fleet=Fleet()).cod
 assert ask(url="/spectrum/0/route_rslc.L.A.HH/0x0+4096x8", fleet=Fleet()).code == 404
 # with a window of decibels that is not a number
 assert ask(url=good + "?range=loud", fleet=Fleet()).code == 404
+# with a taper that is not known
+assert ask(url=good + "?taper=kaiser", fleet=Fleet()).code == 404
 # and to a server with no crews
 assert ask(url=good, fleet=None).code == 404
 
@@ -192,8 +194,15 @@ assert isinstance(response, Deferred), response
 assert response.abandoned is not None
 # while the crews get exactly one task
 (task,) = fleet.rendered
-# for the region and the window of decibels the client asked for
-assert (task.origin, task.shape, task.range) == ((100, 200), (64, 48), 40.0)
+# for the region and the window of decibels the client asked for, untapered
+assert (task.origin, task.shape, task.range, task.taper) == ((100, 200), (64, 48), 40.0, False)
+
+# a request for a tapered region
+fleet = Fleet()
+ask(url=good + "?taper=hann", fleet=fleet)
+# hands the crews a task that tapers
+(tapered,) = fleet.rendered
+assert tapered.taper is True
 
 # the same request, once its picture is on hand
 fleet = Fleet()
