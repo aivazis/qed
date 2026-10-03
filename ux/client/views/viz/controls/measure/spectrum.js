@@ -228,7 +228,7 @@ const Close = styled.div`
         height: 20px;
         border-radius: 50%;
         background-color: hsl(0deg, 0%, 20%, 0.85);
-        border: 1px solid hsl(0deg, 0%, 40%);
+        border: 1px solid hsl(0deg, 0%, 20%);
         display: flex;
         align-items: center;
         justify-content: center;
