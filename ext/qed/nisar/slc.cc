@@ -106,16 +106,17 @@ namespace qed::py::nisar {
             "fft",
             // the handler
             [](const rasterT & source, const datatype_t & datatype, const py::iterable & origin,
-               const py::iterable & shape, double range) -> bmp_t {
+               const py::iterable & shape, double range, bool taper) -> bmp_t {
                 // read the region, transform it, and render its spectrum
                 return qed::nisar::slc::fft<grid_t>(
-                    source, datatype, asIndex<2>(origin), asShape<2>(shape), range);
+                    source, datatype, asIndex<2>(origin), asShape<2>(shape), range, taper);
             },
             // the signature
-            "source"_a, "datatype"_a, "origin"_a, "shape"_a, "range"_a = 60.0,
+            "source"_a, "datatype"_a, "origin"_a, "shape"_a, "range"_a = 60.0, "taper"_a = false,
             // the docstring
             "render the spectrum of the region at {origin}+{shape} of a complex slc, with the "
-            "{range} decibels below its strongest frequency spanning the gray scale");
+            "{range} decibels below its strongest frequency spanning the gray scale; {taper} "
+            "brings the region smoothly to zero towards its edges first, with a hann window");
         // all done
         return;
     }
