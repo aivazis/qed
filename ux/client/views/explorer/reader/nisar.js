@@ -25,7 +25,7 @@ import { Form, Body, Field, Values, Error } from '../form'
 
 
 // associate a NISAR reader with a given data product
-export const NISAR = ({ view, setType, hide }) => {
+export const NISAR = ({ view, nickname, setType, hide }) => {
     // preload the metadata query
     const [qref, getMetadata] = useProductMetadataLoader()
     // schedule the fetch; once, at mount time
@@ -50,18 +50,18 @@ export const NISAR = ({ view, setType, hide }) => {
     // render
     return (
         <ErrorBoundary fallback={<ProblemReport view={view} setType={setType} />}>
-            <Spec qref={qref} view={view} setType={setType} hide={hide} />
+            <Spec qref={qref} view={view} nickname={nickname} setType={setType} hide={hide} />
         </ErrorBoundary>
     )
 }
 
-const Spec = ({ qref, view, setType, hide }) => {
+const Spec = ({ qref, view, nickname, setType, hide }) => {
     // unpack the product metadata
     const { uri, product } = useQueryProductMetadata(qref)
     // set up my state
     const [form, setForm] = React.useState({
         // the pyre name of the reader
-        name: "",
+        name: nickname,
         // the data product
         product,
     })
@@ -95,7 +95,7 @@ const Spec = ({ qref, view, setType, hide }) => {
                 <Body>
                     <Type value="nisar" update={setType} readers={view.reader.readers} />
                     <Products value={form.product} update={update} />
-                    <Name value={form.name} update={update} />
+                    <Name value={form.name} suggestion={nickname} update={update} />
                 </Body>
             </Form>
             <Connect connect={connect} />

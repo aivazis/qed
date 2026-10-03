@@ -20,11 +20,11 @@ import { Form, Body, Error } from '../form'
 
 
 // associate a GDAL reader with a given data product
-export const GDAL = ({ view, setType, hide }) => {
+export const GDAL = ({ view, nickname, setType, hide }) => {
     // set up my state
     const [form, setForm] = React.useState({
         // the pyre name of the reader
-        name: "",
+        name: nickname,
     })
     // get the reader connection support
     const { error, update, makeConnector, cancel, isInFlight } = useConnectReader(setForm, hide)
@@ -54,7 +54,7 @@ export const GDAL = ({ view, setType, hide }) => {
             <Form>
                 <Body>
                     <Type value="gdal" update={setType} readers={view.reader.readers} />
-                    <Name value={form.name} update={update} />
+                    <Name value={form.name} suggestion={nickname} update={update} />
                 </Body>
             </Form>
             <Connect connect={connect} />
