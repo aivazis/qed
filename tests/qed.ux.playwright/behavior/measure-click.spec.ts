@@ -143,6 +143,10 @@ test.describe.serial("the mouse on the measure layer", () => {
         // the control shows up with exactly two anchors
         const box = page.getByRole("button", { name: "make a box out of the two anchors" })
         await expect(box).toBeVisible()
+        // while the spectrum of the rectangle they span is not offered, since only the datasets
+        // of an RSLC have one
+        await expect(page.getByRole("button", { name: "compute the spectrum of the region" }))
+            .toHaveCount(0)
         // pressing it
         await box.click()
         // leaves the four corners of the rectangle the anchors span, in order around it
