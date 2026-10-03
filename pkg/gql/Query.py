@@ -53,6 +53,14 @@ class Query(graphene.ObjectType):
     guessShape = graphene.Field(
         graphene.List(Shape), size=graphene.String(), aspect=graphene.String()
     )
+    # a name for the reader of a new dataset
+    nickname = graphene.Field(
+        graphene.String,
+        required=True,
+        archive=graphene.String(required=True),
+        uri=graphene.String(required=True),
+        module=graphene.String(required=True),
+    )
 
     # the resolvers
     # the session manager
@@ -276,6 +284,44 @@ class Query(graphene.ObjectType):
             yield {"lines": lines, "samples": samples}
         # all done
         return
+
+    # reader names
+    @staticmethod
+    def resolve_nickname(root, info, archive, uri, module, **kwds):
+        """
+        Suggest a unique name for the reader of the dataset at {uri} in {archive}, in the
+        style of the product family whose readers live in {module}
+        """
+        # attempt to
+        try:
+            # get the package of the product family
+            family = importlib.import_module(module)
+        # the client takes the module from its table of reader types, so one that is not
+        # there means the table and the server have drifted apart
+        except ImportError as error:
+            # make a channel
+            channel = journal.firewall("qed.gql.nickname")
+            # complain
+            channel.line(f"'{module}' not found")
+            channel.indent()
+            channel.line(f"{error}")
+            channel.line(f"while suggesting a name for the reader")
+            channel.line(f"of dataset '{uri}'")
+            channel.line(f"in archive '{archive}'")
+            channel.outdent()
+            # flush
+            channel.log()
+            # and bail, in case firewalls aren't fatal
+            return None
+        # families with naming conventions of their own say how their products are called;
+        # the rest are named after their files
+        propose = getattr(family, "nickname", qed.readers.nickname)
+        # get the proposal
+        name = propose(uri=uri)
+        # grab the store
+        store = info.context["store"]
+        # and make sure no one else in the configuration store holds the name
+        return store.unclaimed(name=name)
 
     # version
     @staticmethod

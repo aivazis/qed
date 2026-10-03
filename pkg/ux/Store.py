@@ -7,8 +7,10 @@
 
 # support
 import functools
+import itertools
 import json
 import os
+import re
 import pyre
 import time
 import qed
@@ -657,6 +659,23 @@ class Store(qed.component, family="qed.ux.store"):
         """
         # easy enough
         return len(self._dataSources)
+
+    def unclaimed(self, name: str) -> str:
+        """
+        Turn the proposed {name} into one that no top-level entry of the configuration store holds
+        """
+        # the configuration store
+        nameserver = self.pyre_nameserver
+        # go through the proposal and its numbered variants
+        for count in itertools.count(start=1):
+            # the proposal itself first, then with a counter
+            candidate = name if count == 1 else f"{name}-{count}"
+            # a top-level name is held if any key is the name itself or starts a level below it
+            pattern = re.escape(candidate) + r"(\.|$)"
+            # if nobody holds it
+            if next(nameserver.find(pattern=pattern), None) is None:
+                # it is the one
+                return candidate
 
     def connectSource(self, source):
         """

@@ -33,6 +33,39 @@ from .GUNW import GUNW as gunw
 from .GCOV import GCOV as gcov
 
 
+# the name of a reader
+def nickname(uri: str, **kwds) -> str:
+    """
+    Propose a name for the reader of the product at {uri}, made from its granule id
+    """
+    # find the file the {uri} points to
+    address = qed.primitives.uri.parse(uri).address
+    # its name without the extension is the granule id, if it follows the conventions
+    granule = qed.primitives.path(address).stem
+    # take it apart
+    fields = daac.registrar().fields(granule=granule)
+    # a file whose name is not a granule id
+    if fields is None:
+        # gets the name any file would
+        return qed.readers.nickname(uri=uri, **kwds)
+    # a product of one acquisition has a cycle, a product of a pair a reference cycle
+    cycle = "cycle" if "cycle" in fields else "referenceCycle"
+    # a granule without a cycle, a track, or a pass direction, such as a raw telemetry stream,
+    if cycle not in fields or "track" not in fields or "direction" not in fields:
+        # gets the name any file would
+        return qed.readers.nickname(uri=uri, **kwds)
+    # the acquisition, in the order the granule id spells it: the cycle, the track, the pass
+    # direction, the frame along the track, for the products that have one, and the secondary
+    # cycle of a pair
+    order = (cycle, "track", "direction", "frame", "secondaryCycle")
+    # pick the ones this granule has
+    acquisition = "_".join(fields[field] for field in order if field in fields)
+    # the composite release id is spelled out by five fields
+    crid = "".join(fields[field] for field in ("environment", "phase", "major", "minor", "patch"))
+    # assemble the name: the product, the acquisition, and the release
+    return f"{fields['product'].lower()}-{acquisition}-{crid}"
+
+
 # metadata factory
 def metadata(uri, credentials, **kwds):
     """
