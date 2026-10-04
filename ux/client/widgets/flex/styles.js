@@ -17,6 +17,12 @@ export default {
     box: {
         display: "flex",
         overflow: "clip",
+        // a box takes the room its parent gives it, whatever the size of its contents; as a
+        // flex item, its automatic minimum is the size of its contents, and clipping does not
+        // waive it the way scrolling does, so a box nested in a panel would otherwise grow to
+        // hold everything it contains, e.g. a raster at full resolution
+        minWidth: 0,
+        minHeight: 0,
     },
 
     // the individual panels
