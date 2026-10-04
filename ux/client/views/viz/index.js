@@ -11,6 +11,7 @@ export { Viz } from './viz'
 export { Console } from './console'
 export { Quality } from './quality'
 export { Controls } from './controls'
+export { Nodes } from './nodes'
 export { Readers } from './readers'
 
 // hooks
