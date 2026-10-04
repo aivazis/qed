@@ -108,11 +108,11 @@ const VizPanel = ({ qed }) => {
                         <Flex.Box direction="column" style={styles.flex}>
                             <Flex.Panel
                                 auto={true}
-                                style={styles.flex} {...behaviors}
+                                style={styles.split} {...behaviors}
                             >
                                 <Viewer viewport={viewport} view={view} registrar={registrar} />
                             </Flex.Panel>
-                            <Flex.Panel auto={true} style={styles.flex}>
+                            <Flex.Panel auto={true} style={styles.split}>
                                 <Flow viewport={viewport} view={view} />
                             </Flex.Panel>
                         </Flex.Box>

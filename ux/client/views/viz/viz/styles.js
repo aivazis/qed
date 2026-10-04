@@ -38,6 +38,19 @@ const flex = {
     },
 }
 
+// the panels that split a viewport between the viewer and the flow
+const split = {
+    // inherit
+    ...flex,
+    // the panels
+    panel: {
+        // inherit
+        ...flex.panel,
+        // share the room evenly, whatever the size of the contents
+        flex: "1 1 0",
+    },
+}
+
 // the activity panels
 const activityPanels = {
     // the panel
@@ -71,6 +84,7 @@ const activityPanels = {
 export default {
     activityPanels,
     flex,
+    split,
 }
 
 
