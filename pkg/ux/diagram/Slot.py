@@ -136,7 +136,7 @@ class Slot(Node):
 
     def __str__(self):
         # build the binding decoration
-        bound = "(unbound)" if self.bound else "(bound)"
+        bound = "(bound)" if self.bound else "(unbound)"
         # add it to my textual representation
         return " ".join([super().__str__(), bound])
 
