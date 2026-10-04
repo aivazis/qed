@@ -47,7 +47,7 @@ export const Flow = ({ viewport, view }) => {
     return (
         <section ref={ref} tabIndex="-1" style={styles.panel}>
             <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
-                {...styles.canvas} {...behaviors}
+                {...styles.canvas} style={styles.surface} {...behaviors}
             >
                 {/* everything that is in ICS */}
                 <Camera ref={ref} viewport={viewport} scale={20}>

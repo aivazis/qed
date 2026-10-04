@@ -19,10 +19,21 @@ export default {
         ...base.panel,
     },
 
+    // the attributes of the canvas
     canvas: {
         // occupy all available space
         width: "100%",
         height: "100%",
+    },
+
+    // the paint of the canvas
+    surface: {
+        // dragging across the diagram moves things around; it must not sweep the labels into a
+        // text selection; cancelling the mouse down instead would also keep the panel from
+        // taking the focus the camera needs for its keys
+        userSelect: "none",
+        // webkit computes the standard property but still honors only its own
+        WebkitUserSelect: "none",
     },
 
     cell: {
