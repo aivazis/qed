@@ -177,8 +177,8 @@ class Slot(Node):
         if product is not None:
             # go through all the connections in {other}
             for connector in other.connections():
-                # get the factory
-                factory = connector.factory
+                # get the flow factory behind the diagram entity at the other end
+                factory = connector.factory.factory
                 # go through all the traits
                 for trait in connector:
                     # and bind them to my product
@@ -192,8 +192,8 @@ class Slot(Node):
             self.product = product
             # go through my connections
             for connector in self.connections():
-                # get the associated factory
-                factory = connector.factory
+                # get the flow factory behind the diagram entity at the other end
+                factory = connector.factory.factory
                 # go through all the traits
                 for trait in connector:
                     # and bind them to my new product

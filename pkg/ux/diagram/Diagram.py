@@ -220,6 +220,9 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         for index, factory in enumerate(self.order(flow=flow)):
             # and lay them out left to right, a {spacing} apart
             self.drawFactory(factory=factory, position=(index * self.spacing, 0))
+        # each factory drew a slot for every one of its traits; the products that factories
+        # share become one slot each
+        self.share()
 
         # initialize the set of products
         inputs = [product for product, _ in flow.pyre_inputs()]
@@ -243,6 +246,97 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
 
         # all done
         return flow
+
+    def share(self):
+        """
+        Merge the slots whose traits are bound to the same product into one slot that carries
+        the product, on the side of the factory that makes it, so the diagram shows the data
+        moving from its maker to its users
+        """
+        # the slots of each product, by product identity, since flow nodes need not be hashable
+        groups = {}
+        # go through my slots, in a stable order
+        for slot in sorted(self.slots, key=lambda slot: slot.position):
+            # find the product its traits are bound to
+            product = self.product(slot=slot)
+            # a slot whose traits are bound to nothing
+            if product is None:
+                # has nothing to share
+                continue
+            # otherwise, file it with the other slots of its product
+            groups.setdefault(id(product), (product, []))[1].append(slot)
+        # go through the products
+        for product, slots in groups.values():
+            # a product that only one slot knows about is not shared
+            if len(slots) < 2:
+                # so leave it alone
+                continue
+            # the slot that stays is the one its maker writes, if there is one
+            keeper = next((slot for slot in slots if slot.writers), slots[0])
+            # it carries the product
+            keeper.product = product
+            # and its label, which names the product
+            labels = keeper.labels
+            # add them to my pile of labels
+            self.labels |= labels
+            # and my index
+            self.nodes.update((label.eid, label) for label in labels)
+            # go through the other slots
+            for dead in slots:
+                # skipping the one that stays
+                if dead is keeper:
+                    # on to the next
+                    continue
+                # take the slot out of my slot index
+                self.slots.discard(dead)
+                # and my node index
+                del self.nodes[dead.eid]
+                # and out of the layout, if it holds the spot
+                if self.layout.get(dead.position) is dead:
+                    # by removing it
+                    del self.layout[dead.position]
+                # the slot that stays takes over its connections
+                _, deltaLabels, _ = keeper.merge(other=dead)
+                # the labels the merge made obsolete
+                _, obsolete, _ = deltaLabels
+                # go through them
+                for label in obsolete:
+                    # and forget each one
+                    self.labels.discard(label)
+                    # in both places
+                    self.nodes.pop(label.eid, None)
+            # the connectors that now reach the slot that stays
+            for connector in keeper.connections():
+                # place their labels next to it
+                connector.moved()
+        # all done
+        return
+
+    def product(self, slot):
+        """
+        Find the product that the traits connected to {slot} are bound to, or nothing when they
+        disagree or there are none
+        """
+        # the products, by identity
+        products = {}
+        # go through the connections of the slot
+        for connector in slot.connections():
+            # get the flow factory behind the diagram entity
+            factory = connector.factory.factory
+            # go through the traits of the connection
+            for trait in connector:
+                # look up the product bound to it
+                product = factory.pyre_inventory[trait].value
+                # and if there is one
+                if product is not None:
+                    # remember it
+                    products[id(product)] = product
+        # a slot whose traits agree on one product carries it
+        if len(products) == 1:
+            # so hand it off
+            return next(iter(products.values()))
+        # otherwise, there is nothing to say
+        return None
 
     def order(self, flow):
         """
