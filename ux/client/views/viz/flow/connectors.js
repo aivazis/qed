@@ -15,13 +15,15 @@ import { Connector } from './connector'
 
 // render the connectors
 export const Connectors = ({ diagram }) => {
-    // if anything went wrong extracting the flow diagram
-    if (!diagram) {
-        // bail silently
-        return
-    }
     // extract the connectors
-    const { connectors } = useFragment(connectorsFlowDiagramFragment, diagram)
+    const data = useFragment(connectorsFlowDiagramFragment, diagram)
+    // if anything went wrong extracting the flow diagram
+    if (!data) {
+        // bail silently
+        return null
+    }
+    // otherwise, unpack the connectors
+    const { connectors } = data
     // render
     return (
         <>

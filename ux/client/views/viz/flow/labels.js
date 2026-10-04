@@ -15,13 +15,15 @@ import { Label } from './label'
 
 // render the labels
 export const Labels = ({ diagram }) => {
-    // if anything went wrong extracting the flow diagram
-    if (!diagram) {
-        // bail silently
-        return
-    }
     // extract the labels
-    const { labels } = useFragment(labelsFlowDiagramFragment, diagram)
+    const data = useFragment(labelsFlowDiagramFragment, diagram)
+    // if anything went wrong extracting the flow diagram
+    if (!data) {
+        // bail silently
+        return null
+    }
+    // otherwise, unpack the labels
+    const { labels } = data
     // render
     return (
         <>

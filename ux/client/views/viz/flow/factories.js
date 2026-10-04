@@ -15,13 +15,15 @@ import { Factory } from './factory'
 
 // render the factory nodes
 export const Factories = ({ diagram }) => {
-    // if anything went wrong extracting the flow diagram
-    if (!diagram) {
-        // bail silently
-        return
-    }
     // extract the list of factories
-    const { factories } = useFragment(factoriesFlowDiagramFragment, diagram)
+    const data = useFragment(factoriesFlowDiagramFragment, diagram)
+    // if anything went wrong extracting the flow diagram
+    if (!data) {
+        // bail silently
+        return null
+    }
+    // otherwise, unpack the factories
+    const { factories } = data
     // render
     return (
         <>

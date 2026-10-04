@@ -15,13 +15,15 @@ import { Slot } from './slot'
 
 // render the slots
 export const Slots = ({ diagram }) => {
-    // if anything went wrong extracting the flow diagram
-    if (!diagram) {
-        // bail silently
-        return
-    }
     // extract the list of slots
-    const { slots } = useFragment(slotsFlowDiagramFragment, diagram)
+    const data = useFragment(slotsFlowDiagramFragment, diagram)
+    // if anything went wrong extracting the flow diagram
+    if (!data) {
+        // bail silently
+        return null
+    }
+    // otherwise, unpack the slots
+    const { slots } = data
     // render
     return (
         <>
