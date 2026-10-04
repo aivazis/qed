@@ -10,11 +10,33 @@ import React from 'react'
 
 
 // the provider factory
-export const Provider = React.forwardRef(({ viewport, scale, children }, clientRef) => {
+export const Provider = React.forwardRef(({ viewport, scale, focus, children }, clientRef) => {
     // save the external length scale
     const els = scale
     // build a camera
     const [camera, setCamera] = React.useState({ x: 0, y: 0, z: 1, phi: 0 })
+    // the camera that puts the {focus} at the center of my area, at the given zoom; without a
+    // focus, or before my area has a size, the origin goes to the top left corner
+    const home = (z = 1) => {
+        // get the extent of my area
+        const { width, height } = clientRef.current?.getBoundingClientRect() ?? {}
+        // if there is nothing to center or nowhere to center it
+        if (!focus || !width || !height) {
+            // fall back to the corner
+            return { x: 0, y: 0, z }
+        }
+        // otherwise, solve for the pan that maps the focus onto the middle of my area
+        return { x: width / (2 * els) - focus.x / z, y: height / (2 * els) - focus.y / z, z }
+    }
+    // center on my focus when i first show up, and whenever the focus moves; this waits until
+    // the commit is over, since my area belongs to my client, whose ref is attached after my
+    // own layout effects run
+    React.useEffect(() => {
+        // aim the camera, keeping its zoom and orientation
+        setCamera(camera => ({ ...camera, ...home(camera.z) }))
+        // all done
+        return
+    }, [focus?.x, focus?.y])
     // the cursor position in ICS
     const [cursor, setCursor] = React.useState(null)
 
@@ -133,17 +155,8 @@ export const Provider = React.forwardRef(({ viewport, scale, children }, clientR
         }
         // reset the camera
         if (key == "s") {
-            // reset
-            setCamera(camera => ({
-                // the current state
-                ...camera,
-                // reset the location along the x-axis
-                x: 0,
-                // reset the location along the y-axis
-                y: 0,
-                // reset the location along the z-axis
-                z: 1,
-            }))
+            // go back to the focus at the original zoom, keeping the orientation
+            setCamera(camera => ({ ...camera, ...home() }))
         }
         // ignore everything else
         return

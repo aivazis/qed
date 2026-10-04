@@ -30,6 +30,8 @@ export const Flow = ({ viewport, view }) => {
     const { diagram } = useFragment(flowVizGetFlowDiagramFragment, view)
     // build a reference to my container so we can measure it and install listeners
     const ref = React.useRef(null)
+    // the camera looks at the middle of the diagram
+    const focus = center(diagram)
 
     // clear the node selection
     const clearSelection = () => {
@@ -50,7 +52,7 @@ export const Flow = ({ viewport, view }) => {
                 {...styles.canvas} style={styles.surface} {...behaviors}
             >
                 {/* everything that is in ICS */}
-                <Camera ref={ref} viewport={viewport} scale={20}>
+                <Camera ref={ref} viewport={viewport} scale={20} focus={focus}>
                     {/* the orientation marker at the origin */}
                     {/* <Compass /> */}
                     {/* the current cell highlighter */}
@@ -70,6 +72,27 @@ export const Flow = ({ viewport, view }) => {
     )
 }
 
+// the middle of the box that holds the factories and slots of a {diagram}, or nothing for a
+// diagram that is missing or empty
+const center = (diagram) => {
+    // the positions of the nodes
+    const points = diagram ? [...diagram.factories, ...diagram.slots].map(node => node.at) : []
+    // an empty diagram
+    if (points.length == 0) {
+        // has no middle
+        return null
+    }
+    // the extent of the box along each axis
+    const xs = points.map(point => point.x)
+    const ys = points.map(point => point.y)
+    // its middle
+    return {
+        x: (Math.min(...xs) + Math.max(...xs)) / 2,
+        y: (Math.min(...ys) + Math.max(...ys)) / 2,
+    }
+}
+
+
 // my fragment
 const flowVizGetFlowDiagramFragment = graphql`
     fragment flowVizGetFlowDiagramFragment on View {
@@ -79,6 +102,19 @@ const flowVizGetFlowDiagramFragment = graphql`
             id
             name
             family
+            # where the nodes are, so the camera can look at the middle of the diagram
+            factories {
+                at {
+                    x
+                    y
+                }
+            }
+            slots {
+                at {
+                    x
+                    y
+                }
+            }
             # labels
             ...labelsFlowDiagramFragment
             # connectors
