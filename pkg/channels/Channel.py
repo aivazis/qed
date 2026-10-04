@@ -35,7 +35,7 @@ class Channel(qed.flow.workflow, family="qed.channels.channel"):
         Hook invoked after configuration is finished
         """
         # wire my output into the flow
-        self.codec.bmp = self.bmp
+        self.codec.image = self.bmp
         # all done
         return super().pyre_configured(**kwds)
 
