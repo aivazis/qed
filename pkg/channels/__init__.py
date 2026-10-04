@@ -9,6 +9,7 @@
 from .Channel import Channel as channel
 
 # specific channels
+from .Covariance import Covariance as covariance
 from .Phase import Phase as phase
 
 # end of file
