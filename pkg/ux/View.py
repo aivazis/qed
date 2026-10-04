@@ -67,6 +67,22 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
     members.doc = "the per-member participation mask, or None until seeded from a stack reader"
     members.persistent = False
 
+    # public data
+    @property
+    def flows(self):
+        """
+        The flows that describe what the channels compute, by channel tag
+        """
+        # the channels with a description so far
+        return {
+            # the real valued terms of a covariance matrix, painted gray; the masked flavor
+            # draws the same way, since the mask is not part of the description yet
+            "covariance": qed.channels.covariance,
+            "covarianceMasked": qed.channels.covariance,
+            # phase, painted with a color wheel
+            "phase": qed.channels.phase,
+        }
+
     # interface
     def pipeline(self, channel):
         """
@@ -130,7 +146,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
 
     def diagram(self):
         """
-        Build the visualization pipeline diagram
+        Build the visualization pipeline diagram, once per channel, so changes made to it last
         """
         # get my channel
         # MGA - FIXME: integrate the new channels into the view
@@ -139,9 +155,25 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         if not channel:
             # bail
             return
-        # otherwise, build the diagram
-        # MGA - FIXME: feed my channel to the diagram
-        diagram = qed.ux.diagram(name=f"{channel.pyre_name}.diagram", flow=qed.channels.phase())
+        # the diagram i drew last, and the channel i drew it for
+        drawn, diagram = self._diagram
+        # if it was drawn for this channel
+        if drawn is channel:
+            # it is the one
+            return diagram
+        # otherwise, find the flow that describes what my channel computes
+        flow = self.flows.get(channel.tag)
+        # a channel that has no description yet
+        if flow is None:
+            # has no diagram either
+            diagram = None
+        # otherwise
+        else:
+            # draw it; the name is unique, since a component asked for by a name it was built
+            # with before comes back as the old instance
+            diagram = qed.ux.diagram(name=f"{channel.pyre_name}.{uuid.uuid1()}", flow=flow())
+        # remember it, along with the channel it belongs to
+        self._diagram = channel, diagram
         # and return it
         return diagram
 
@@ -962,6 +994,8 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         super().__init__(**kwds)
         # build my visualization pipeline registry
         self._pipelines = {pipeline.pyre_name: pipeline for pipeline in self.pipelines()}
+        # the diagram of my channel, and the channel it was drawn for, once someone asks
+        self._diagram = None, None
         # resolve my state
         self.resolve()
         # show me
