@@ -21,6 +21,11 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
     The server side representation of the flow diagram
     """
 
+    # user configurable state
+    spacing = qed.properties.float()
+    spacing.default = 15
+    spacing.doc = "the distance between neighboring factories, enough to keep their slots apart"
+
     # public data
     @property
     def connectors(self):
@@ -210,11 +215,11 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
             # make an empty one and return it
             return qed.flow.dynamic()
 
-        # otherwise, harvest its nodes; go through the factories
-        for factory in flow.pyre_factories():
-            # and add them to the diagram
-            # MGA - FIXME: positions?
-            self.drawFactory(factory=factory, position=(0, 0))
+        # otherwise, harvest its nodes; go through the factories in the order the data flows
+        # through them
+        for index, factory in enumerate(self.order(flow=flow)):
+            # and lay them out left to right, a {spacing} apart
+            self.drawFactory(factory=factory, position=(index * self.spacing, 0))
 
         # initialize the set of products
         inputs = [product for product, _ in flow.pyre_inputs()]
@@ -238,6 +243,57 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
 
         # all done
         return flow
+
+    def order(self, flow):
+        """
+        Sort the factories of {flow} so that each one comes after the factories that make its
+        inputs, keeping the order the flow lists them in wherever the data does not decide
+        """
+        # the factories, in the order the flow lists them
+        pending = list(flow.pyre_factories())
+        # the factories that make each product, by product identity, since flow nodes need not
+        # be hashable
+        makers = {}
+        # go through the factories
+        for factory in pending:
+            # and their outputs
+            for product, _ in factory.pyre_outputs():
+                # an unbound output makes nothing
+                if product is not None:
+                    # otherwise, record its maker
+                    makers.setdefault(id(product), []).append(factory)
+        # the factories each one waits for, by identity: the makers of its inputs, other than
+        # itself
+        upstream = {
+            id(factory): {
+                id(maker)
+                for product, _ in factory.pyre_inputs()
+                if product is not None
+                for maker in makers.get(id(product), [])
+                if maker is not factory
+            }
+            for factory in pending
+        }
+        # the factories in flow order
+        ordered = []
+        # and the identities of the ones that have their places
+        placed = set()
+        # until every factory has a place
+        while pending:
+            # the first one whose upstream factories all have their places goes next; a cycle
+            # leaves none, and then the first one in line breaks it
+            ready = next(
+                (factory for factory in pending if upstream[id(factory)] <= placed),
+                pending[0],
+            )
+            # place it
+            ordered.append(ready)
+            # remember that it has its place
+            placed.add(id(ready))
+            # and take it out of line
+            pending.remove(ready)
+        # hand off the order
+        return ordered
 
     def drawFactory(self, factory, position):
         """

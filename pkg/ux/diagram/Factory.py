@@ -19,7 +19,7 @@ class Factory(Node):
     The representation of a factory
     """
 
-    # public daa
+    # public data
     @property
     def slots(self):
         """
@@ -94,17 +94,22 @@ class Factory(Node):
         # grab my factory node
         factory = self.factory
 
-        # put all input traits on a pile
-        ins = set(factory.pyre_inputTraits)
+        # put all input traits on a pile, in the order the factory declares them, so the slots
+        # line up the same way every time
+        ins = factory.pyre_inputTraits
         # and all output traits on another
-        outs = set(factory.pyre_outputTraits)
+        outs = factory.pyre_outputTraits
+        # traits overload the comparison operators to build expressions, so membership is
+        # decided by identity
+        inIds = {id(trait) for trait in ins}
+        outIds = {id(trait) for trait in outs}
 
         # isolate the ones that are just input
-        insOnly = ins - outs
+        insOnly = [trait for trait in ins if id(trait) not in outIds]
         # the ones that are just output
-        outsOnly = outs - ins
+        outsOnly = [trait for trait in outs if id(trait) not in inIds]
         # and the ones that are both
-        inouts = ins & outs
+        inouts = [trait for trait in ins if id(trait) in outIds]
 
         # make slots for my inputs
         yield from self._makeInputSlots(traits=insOnly)
