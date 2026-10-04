@@ -245,7 +245,7 @@ const selectorPaint = {
     base: {
         box: {
             cursor: "default",
-            vertcalAlign: "center",
+            verticalAlign: "center",
             paddingBottom: "0.25rem",
             overflow: "hidden",
             whiteSpace: "nowrap",
