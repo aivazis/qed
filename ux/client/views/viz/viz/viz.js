@@ -105,7 +105,7 @@ const VizPanel = ({ qed }) => {
                 return (
                     <Flex.Panel key={`panel:${viewport}`} auto={true}
                         data-qed-viewport={viewport} style={styles.flex}>
-                        <Flex.Box direction="column" style={styles.flex}>
+                        <Flex.Box direction="column" style={styles.split}>
                             <Flex.Panel
                                 auto={true}
                                 style={styles.split} {...behaviors}

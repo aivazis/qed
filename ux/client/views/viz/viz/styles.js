@@ -42,6 +42,15 @@ const flex = {
 const split = {
     // inherit
     ...flex,
+    // the box
+    box: {
+        // inherit
+        ...flex.box,
+        // the floor under the outer box is no place for a box nested in a viewport: it would
+        // make the split wider than the viewport that holds it, and the viewport would clip
+        // its right edge
+        minWidth: 0,
+    },
     // the panels
     panel: {
         // inherit
