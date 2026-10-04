@@ -75,8 +75,15 @@ const selectorPaint = {
     base: {
         box: {
             cursor: "default",
-            vertcalAlign: "center",
+            verticalAlign: "center",
             paddingBottom: "0.25rem",
+            // when the tab runs out of room, the title gives way to the buttons: it stays on one
+            // line, shrinks, and ends in an ellipsis
+            flex: "0 1 auto",
+            minWidth: 0,
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
         },
         name: {
             fontFamily: "rubik-light",
