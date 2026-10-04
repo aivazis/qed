@@ -9,7 +9,7 @@
 import React from 'react'
 import { graphql, useFragment } from 'react-relay/hooks'
 // routing
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 
 // project
 // hooks
@@ -57,7 +57,9 @@ const VizPanel = ({ qed }) => {
     // viewport initialization happens on every render, but so does viewport registration
     const { viewportRegistrar } = useInitializeViewports(views)
     // get the viewport information
-    const { activate, viewports } = useViewports()
+    const { activate, activeViewport, viewports } = useViewports()
+    // the flow editor is up while its activity is current
+    const editing = useLocation().pathname === "/flow"
     // build the scroll handler dispatch for my viewports
     const { dispatch } = useMakePanDispatcher({ viewports, synced, zooms })
     // get the state of the activity panel
@@ -88,8 +90,9 @@ const VizPanel = ({ qed }) => {
                 }
                 // the view behaviors are attached to the flex panel because the {viewer} is not
                 // a real container, just a react fragment
-                // without the flow layer, the viewer has the panel to itself
-                if (!view.flow.active) {
+                // unless its pipeline is being edited, the viewer has the panel to itself; the
+                // editor shows the pipeline of the active view only
+                if (!editing || viewport !== activeViewport) {
                     // so render it the way it always was
                     return (
                         <Flex.Panel key={`panel:${viewport}`}
@@ -145,10 +148,6 @@ const vizGetViewsFragment = graphql`
                 horizontal
                 vertical
             }
-            # the state of the flow layer
-            flow {
-                active
-            }
             # what i need for synced scrolling
             ...vizGetScrollSyncedViewsFragment
             # for the measure layer
@@ -161,7 +160,6 @@ const vizGetViewsFragment = graphql`
             ...infoViewerGetViewFragment
             # for the flow layer
             ...flowVizGetFlowDiagramFragment
-            ...flowViewerGetFlowLayerStateFragment
             # for the measure control
             ...measureViewerGetMeasureLayerStateFragment
             # for the sync control
@@ -195,13 +193,6 @@ const vizGetScrollSyncedViewsFragment = graphql`
    }
 `
 
-const vizGetFlowStateFragment = graphql`
-   fragment vizGetFlowStateFragment on View {
-        flow {
-            active
-        }
-   }
-`
 
 
 // end of file

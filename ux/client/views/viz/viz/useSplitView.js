@@ -77,7 +77,6 @@ export const splitMutation = graphql`
                 ...vizGetScrollSyncedViewsFragment
                 # for the flow layer
                 ...flowVizGetFlowDiagramFragment
-                ...flowViewerGetFlowLayerStateFragment
                 # for the measure layer
                 ...measureGetMeasureLayerFragment
                 # for the viewport, and for the gate that decides whether it renders at

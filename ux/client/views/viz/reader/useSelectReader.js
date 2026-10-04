@@ -87,7 +87,6 @@ export const selectReaderMutation = graphql`
                 ...contextReaderGetViewFragment
                 # for the flow layer
                 ...flowVizGetFlowDiagramFragment
-                ...flowViewerGetFlowLayerStateFragment
                 # for the measure layer control
                 ...measureViewerGetMeasureLayerStateFragment
                 # for the sync control

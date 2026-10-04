@@ -8,8 +8,5 @@
 // export the view
 export { Flow } from './flow'
 
-// and the hooks
-export { useFlowToggleLayer } from './useFlowToggleLayer'
-
 
 // end of file
