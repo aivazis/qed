@@ -31,7 +31,7 @@ export const Flow = ({ size, disabled = false, style }) => {
     // and render
     return (
         <Activity size={size} url={url} current={current} disabled={disabled} style={paint}
-            label="flow" >
+            label="visualization pipeline" >
             <Icon />
         </Activity>
     )

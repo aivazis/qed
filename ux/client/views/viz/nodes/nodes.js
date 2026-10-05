@@ -25,7 +25,7 @@ export const Nodes = () => {
     return (
         <Panel data-qed-panel="flow">
             {/* the title of the panel */}
-            <Header title="flow nodes" style={styles.header} />
+            <Header title="visualization pipeline" style={styles.header} />
         </Panel>
     )
 }
