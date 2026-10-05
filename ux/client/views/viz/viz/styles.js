@@ -20,6 +20,10 @@ const flex = {
 
     // individual panels
     panel: {
+        // the viewports share the row evenly, whatever they hold: sized by their contents, one
+        // with a raster in it starts out tens of thousands of pixels wide, and when the row
+        // shrinks to fit, its empty neighbors shrink to nothing
+        flex: "1 1 0",
         // styling
         backgroundColor: theme.page.background,
         // for my children
