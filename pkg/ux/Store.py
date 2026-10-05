@@ -1281,6 +1281,34 @@ class Store(qed.component, family="qed.ux.store"):
         # and hand off the diagram
         return diagram
 
+    def diagramMoveGroup(self, viewport, nodes, anchor, position):
+        """
+        Move the nodes of the pipeline diagram of {viewport} with the relay ids in {nodes} so that
+        the one with the relay id {anchor} lands at {position}, and hand back the diagram
+        """
+        # get the diagram of the view in {viewport}
+        diagram = self._viewports[viewport].view().diagram()
+        # a view without a pipeline has no diagram
+        if diagram is None:
+            # so there is nothing to move
+            return None
+        # find the nodes that can be moved, skipping the ones the diagram does not know
+        entities = [
+            entity
+            for entity in (diagram.locate(relay=node) for node in nodes)
+            if entity is not None and diagram.movable(node=entity)
+        ]
+        # and the anchor
+        lead = diagram.locate(relay=anchor)
+        # if the anchor is not among them
+        if lead is None or lead not in entities:
+            # there is no way to tell how far to go
+            return diagram
+        # make the move; one that is refused leaves everything where it was
+        diagram.moveGroup(nodes=entities, anchor=lead, position=tuple(position))
+        # and hand off the diagram
+        return diagram
+
     def diagramAdd(self, viewport, family, position):
         """
         Place a new factory of the given {family} on the pipeline diagram of {viewport} at

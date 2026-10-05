@@ -85,6 +85,7 @@ class Mutation(graphene.ObjectType):
     # the pipeline diagram
     viewDiagramAdd = views.viewDiagramAdd.Field()
     viewDiagramMove = views.viewDiagramMove.Field()
+    viewDiagramMoveGroup = views.viewDiagramMoveGroup.Field()
     viewDiagramRemove = views.viewDiagramRemove.Field()
 
     # zoom
