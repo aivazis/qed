@@ -11,12 +11,9 @@ import React from 'react'
 // project
 // the camera, which maps the pointer to diagram coordinates
 import { useCamera } from '~/widgets/camera'
-// the active viewport, and whether it syncs live
-import { useViewports } from '../viz/useViewports'
-import { useLive } from '../viz/useLive'
-
 // local
 // hooks
+import { useDiagram } from './diagram'
 import { useSelection } from './useSelection'
 import { useMoveNode } from './useMoveNode'
 import { useDrag } from './drag'
@@ -34,9 +31,8 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
     const { selection, select } = useSelection()
     // the mover
     const { move, step } = useMoveNode()
-    // whether my viewport syncs live, in which case the server hears every step of a drag
-    const { activeViewport } = useViewports()
-    const { enabled: live } = useLive(activeViewport)
+    // whether the server hears every step of a drag
+    const { live } = useDiagram()
     // the drag in progress, which the connectors and labels attached to me follow as well
     const { drag, setDrag, shiftOf, verdictOf, groupOf } = useDrag()
     // where the pointer grabbed me and where i was then, in diagram coordinates, during a drag,
@@ -110,7 +106,7 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
         setDrag({ id, tx, ty, ax: x, ay: y, group })
         // a drag of the selection keeps the picks when it ends
         moved.current = group !== null
-        // in a live viewport, the server hears every step
+        // on a live canvas, the server hears every step
         if (live) {
             // so tell it
             step({ id, x: tx, y: ty, z, group })

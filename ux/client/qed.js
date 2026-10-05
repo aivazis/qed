@@ -32,10 +32,12 @@ import {
     Viz, Console, Controls, Nodes, Quality, Readers,
     // embedded documentation
     Guide,
+    // the pipeline playground
+    Playground,
     // the main page
     Main,
     // boilerplate
-    Loading, NYI, Stop, Lost,
+    Loading, Stop, Lost,
 } from '~/views'
 
 
@@ -74,7 +76,8 @@ const QEDApp = ({ base }) => {
                 <Route path="doc/*" element={<Guide qed={qed} />} />
 
                 {/* specific activities */}
-                <Route path="about" element={<NYI base={base} />} />
+                {/* the pipeline playground, until there is something to say about qed */}
+                <Route path="about" element={<Playground qed={qed} />} />
 
             </Route>
 

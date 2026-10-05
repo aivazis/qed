@@ -13,6 +13,8 @@ import React from 'react'
 import { useCamera } from '~/widgets/camera'
 
 // local
+// the diagram on the canvas
+import { useDiagram } from './diagram'
 // the editor
 import { useEditDiagram } from './useEditDiagram'
 
@@ -26,8 +28,8 @@ export const factoryMediaType = "application/x-qed-factory"
 export const Drops = ({ canvas }) => {
     // the map from the pointer to diagram coordinates, rounded onto the grid
     const { toICS } = useCamera()
-    // the editor
-    const { add } = useEditDiagram()
+    // the editor of the diagram on the canvas
+    const { add } = useEditDiagram(useDiagram().id)
     // install the listeners on the canvas
     React.useEffect(() => {
         // get the canvas

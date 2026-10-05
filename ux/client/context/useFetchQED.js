@@ -54,6 +54,8 @@ export const query = graphql`
             ...activityBarGetViewsFragment
             # for the description of the node picked on the pipeline diagram
             ...nodesGetDiagramFragment
+            # for the pipeline playground
+            ...playgroundGetDiagramFragment
         }
     }
 `
