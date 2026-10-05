@@ -34,7 +34,7 @@ const EPSILON = 0.5
 
 // the source pixel under the center of {placemat}, derived from its rendered zoom and size; the
 // inverse of {lookAtCenter}, and the same mapping {window.qed.centerOn} and the minimap use
-const centerOf = placemat => {
+export const centerOf = placemat => {
     // read the rendered zoom off the markup, as "vertical,horizontal"
     const [vertical, horizontal] = placemat.getAttribute("data-qed-zoom").split(",").map(Number)
     // scroll offsets are in rendered pixels, which grow as 2**zoom; convert the center to source
@@ -45,7 +45,7 @@ const centerOf = placemat => {
 }
 
 // scroll {placemat} so the source pixel {row, col} sits at the center of the visible window
-const lookAtCenter = (placemat, { row, col }) => {
+export const lookAtCenter = (placemat, { row, col }) => {
     // read the rendered zoom off the markup, as "vertical,horizontal"
     const [vertical, horizontal] = placemat.getAttribute("data-qed-zoom").split(",").map(Number)
     // convert source pixels to rendered ones and place the target at the center
@@ -54,7 +54,7 @@ const lookAtCenter = (placemat, { row, col }) => {
 }
 
 // whether two look-at centers point at the same source pixel, within {EPSILON}
-const same = (a, b) =>
+export const same = (a, b) =>
     a != null && b != null && Math.abs(a.row - b.row) < EPSILON && Math.abs(a.col - b.col) < EPSILON
 
 // export the data viewport
@@ -147,6 +147,17 @@ export const Viewport = ({ viewport, view, registrar, ...rest }) => {
             // a programmatic scroll (the reconcile effect or the zoom rescale) lands on the
             // remembered center; recognize it as an echo and leave the server alone
             if (same(here, lastCenter.current)) {
+                return
+            }
+            // so does a scroll that keeps me in step with the viewport the user moved: the
+            // server moves me along with it, so pushing my center would only bounce between the
+            // clients that watch us; adopt it silently
+            if (same(here, placemat.qedFollowing)) {
+                // remember where i am
+                lastCenter.current = here
+                // the note is spent
+                placemat.qedFollowing = null
+                // and leave the server alone
                 return
             }
             // a real move: hold off server echoes and remember the latest spot

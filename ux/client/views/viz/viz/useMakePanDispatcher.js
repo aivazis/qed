@@ -5,10 +5,22 @@
 // (c) 1998-2026 all rights reserved
 
 
+// the mapping between the scroll position of a viewport and the source pixel at its center
+import { centerOf, lookAtCenter } from '../viewer/viewport'
+
+
 // get the viewport position
-export const useMakePanDispatcher = ({ synced, zooms, viewports }) => {
+export const useMakePanDispatcher = ({ synced, viewports }) => {
     // make a handler that pans the shared camera and scrolls the synced viewports
     const pan = (evt, idx) => {
+        // get the scrolling element
+        const element = evt.target
+        // the panel hears the scrolls of everything in it; only those of the viewport itself move
+        // its peers
+        if (element !== viewports[idx]) {
+            // so leave the rest alone
+            return
+        }
         // if i have a raised flag
         if (semaphores[idx] > 0) {
             // decrement the semaphore
@@ -23,31 +35,34 @@ export const useMakePanDispatcher = ({ synced, zooms, viewports }) => {
             // nothing to do
             return
         }
-        // get the scrolling element
-        const element = evt.target
-        // scroll offsets live in *rendered* pixels, which scale as 2**zoom; convert mine to source
-        // pixels -- zoom-independent, hence comparable to a viewport at any other zoom level
-        const [myH, myV] = [zooms[idx]?.horizontal ?? 0, zooms[idx]?.vertical ?? 0]
-        const x = Math.max(element.scrollLeft, 0) * 2 ** -myH
-        const y = Math.max(element.scrollTop, 0) * 2 ** -myV
+        // the source pixel at my center; centers, unlike scroll offsets, mean the same place in
+        // viewports of any size and zoom, which is what the server keeps in step as well
+        const here = centerOf(element)
         // go through the viewports
         viewports.forEach((port, i) => {
             // get the sync state
             const sync = synced[i]
-            // if i bumped into myself or a viewport that isn't synced
-            if (i === idx || !sync?.scroll) {
+            // if i bumped into myself, a viewport that isn't synced, or one that isn't up yet
+            if (i === idx || !sync?.scroll || !port) {
                 // move on
                 return
             }
-            // everybody else gets a bump on its semaphore
+            // remember where the peer is
+            const [left, top] = [port.scrollLeft, port.scrollTop]
+            // look at my center, shifted by the difference of our offsets: columns by x, rows by y
+            lookAtCenter(port, {
+                row: here.row + sync.offsets.y - mySync.offsets.y,
+                col: here.col + sync.offsets.x - mySync.offsets.x,
+            })
+            // a peer that was already there gets no scroll event, so there is nothing to suppress
+            if (port.scrollLeft === left && port.scrollTop === top) {
+                // move on
+                return
+            }
+            // otherwise, its scroll is mine: bump its semaphore, so it doesn't move the others
             ++semaphores[i]
-            // shift by the relative (source-pixel) offset, then convert into the peer's own
-            // rendered pixels, so the same source pixel lines up regardless of its zoom
-            const [h, v] = [zooms[i]?.horizontal ?? 0, zooms[i]?.vertical ?? 0]
-            port.scroll(
-                (x + sync.offsets.x - mySync.offsets.x) * 2 ** h,
-                (y + sync.offsets.y - mySync.offsets.y) * 2 ** v
-            )
+            // and leave a note of where it landed, so it doesn't report the move to the server
+            port.qedFollowing = centerOf(port)
             // all done
             return
         })
