@@ -48,6 +48,7 @@ from .ViewSyncReset import ViewSyncReset as viewSyncReset
 
 # look-at center
 from .ViewLookAt import ViewLookAt as viewLookAt
+from .ViewDiagramMove import ViewDiagramMove as viewDiagramMove
 
 # zoom
 from .ViewZoomSetLevel import ViewZoomSetLevel as viewZoomSetLevel
