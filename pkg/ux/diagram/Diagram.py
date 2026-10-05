@@ -499,9 +499,11 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         return node.merge(other=dead)
 
     # metamethods
-    def __init__(self, flow=None, **kwds):
+    def __init__(self, flow=None, editable=True, **kwds):
         # chain up
         super().__init__(**kwds)
+        # whether my structure can change: factories added or removed, slots bound or split
+        self.editable = editable
         # initialize my indices: the pile of slots
         self.slots = set()
         # factories
@@ -747,6 +749,11 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         """
         Check whether a binding between {n1} and {n2} is permissible
         """
+        # a diagram that cannot be edited
+        if not self.editable:
+            # binds nothing
+            return False
+
         # if either is a factory
         if isinstance(n1, Factory) or isinstance(n2, Factory):
             # the binding is not supported
