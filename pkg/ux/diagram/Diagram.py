@@ -115,6 +115,140 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         # and update the diagram
         return self.drawFactory(factory=factory, position=position)
 
+    def followers(self, node):
+        """
+        The slots that go wherever {node} goes: a factory's own unbound slots, the ones no other
+        factory connects to; other nodes have none
+        """
+        # only factories have followers
+        if not isinstance(node, Factory):
+            # so there are none
+            return []
+        # its slots that only it connects to and that carry no product
+        return [
+            slot
+            for slot in node.slots
+            if slot.product is None and set(slot.readers) | set(slot.writers) == {node}
+        ]
+
+    def split(self, slot):
+        """
+        Undo the binding {slot} stands for: every trait connected to it gets an unbound slot of its
+        own, at its home or nearby; a slot that is already one trait's own, unbound slot has
+        nothing to undo
+        """
+        # the connections of the slot, with their direction
+        connections = [(factory, connector, True) for factory, connector in slot.readers.items()]
+        connections += [(factory, connector, False) for factory, connector in slot.writers.items()]
+        # the traits connected to it, one entry each, with their factory and direction
+        traits = [
+            (factory, trait, reads)
+            for factory, connector, reads in connections
+            for trait in list(connector)
+        ]
+        # a slot that is one trait's own, and carries no product
+        if len(traits) <= 1 and slot.product is None:
+            # has nothing to undo
+            return False
+        # a slot in the middle of a move is no longer moving
+        if self.migrant is slot:
+            # so forget it
+            self.migrant = None
+        # forget the labels of its connectors
+        for _, connector, _ in connections:
+            # one connector at a time
+            self.forget(nodes=connector.labels)
+        # and the slot itself, along with its labels
+        self.forget(nodes=slot.labels)
+        self.forget(nodes=[slot])
+        # the factories no longer use the slot
+        for factory, _, _ in connections:
+            # so drop it from their piles
+            factory.slots.discard(slot)
+        # where each trait would like its slot
+        homes = [factory.home(trait) for factory, trait, _ in traits]
+        # a carefully packed diagram may have the bound slot right where several of the traits
+        # call home; each of those steps half a cell toward its own factory, so the binding comes
+        # apart along its own line instead of piling up on one spot
+        claims = {}
+        # count the claims on each spot
+        for home in homes:
+            # one at a time
+            claims[home] = claims.get(home, 0) + 1
+        # go through the traits
+        for (factory, trait, reads), home in zip(traits, homes):
+            # a spot claimed by more than one trait
+            if claims[home] > 1:
+                # gives way to a step toward the factory
+                home = self.toward(spot=home, factory=factory)
+            # make the slot, at the spot or the nearest free one
+            fresh = Slot(product=None, position=self.vacancy(spot=home))
+            # connected the way it was
+            if reads:
+                # as an input
+                fresh.connectReader(factory=factory, trait=trait)
+            # or
+            else:
+                # as an output
+                fresh.connectWriter(factory=factory, trait=trait)
+            # which the factory uses from now on
+            factory.slots.add(fresh)
+            # and the diagram knows about
+            self.adopt(slot=fresh)
+        # all done
+        return True
+
+    def toward(self, spot, factory):
+        """
+        The spot half a cell from {spot} in the direction of {factory}: across, when they are in
+        different columns, otherwise along the column
+        """
+        # unpack
+        x, y, z = spot
+        fx, fy, _ = factory.position
+        # if they are in different columns
+        if fx != x:
+            # step across
+            return (x + (1 if fx > x else -1), y, z)
+        # otherwise, step along the column
+        return (x, y + (1 if fy > y else -1), z)
+
+    def adopt(self, slot):
+        """
+        Add a new {slot} to my indices, my layout, and my piles, along with the labels of its
+        connectors
+        """
+        # the labels of its connectors
+        labels = [label for connector in slot.connections() for label in connector.labels]
+        # the slot
+        self.slots.add(slot)
+        self.nodes[slot.eid] = slot
+        self.layout[slot.position] = slot
+        # and the labels
+        self.labels |= set(labels)
+        self.nodes.update((label.eid, label) for label in labels)
+        # all done
+        return
+
+    def vacancy(self, spot):
+        """
+        The free spot nearest {spot} along its column, trying {spot} first
+        """
+        # unpack
+        x, y, z = spot
+        # walk away from it, a cell at a time, alternating sides
+        for step in range(64):
+            # the offset of this attempt: 0, +2, -2, +4, -4, ...
+            offset = 2 * ((step + 1) // 2) * (1 if step % 2 else -1)
+            # the candidate
+            candidate = (x, y + offset, z)
+            # if it is free
+            if candidate not in self.layout:
+                # it will do
+                return candidate
+        # if nothing is free nearby, settle for the spot itself
+        return spot
+
     def fits(self, factory, position):
         """
         Check whether {factory} placed at {position} would land on free spots, along with all
@@ -239,8 +373,38 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
                 # and if not, the move is illegal
                 return False
 
+        # a factory takes its own unbound slots along, so the figure keeps its shape
+        followers = self.followers(node=node)
+        # by as much as it moves
+        delta = tuple(p - q for p, q in zip(position, node.position))
+        # where each of them is headed
+        targets = [(slot, tuple(p + d for p, d in zip(slot.position, delta))) for slot in followers]
+        # the members of the group, which may land on each other's old spots
+        group = {id(member) for member in [node, *followers]}
+        # if any of them would land on somebody else
+        for _, target in targets:
+            # find out who is there
+            other = self.layout.get(target)
+            # if it is not one of us
+            if other is not None and id(other) not in group:
+                # the move is illegal
+                return False
+
         # mark whether this move caused a collision
         self.collision = occupant
+
+        # the followers leave their spots, all of them before any of them lands
+        for slot, _ in targets:
+            # if the slot holds its spot
+            if self.layout.get(slot.position) is slot:
+                # release it
+                del self.layout[slot.position]
+        # then they move, and take their new spots
+        for slot, target in targets:
+            # move the slot, along with its labels
+            slot.move(position=target)
+            # and take the spot
+            self.layout[target] = slot
 
         # move the node and its labels
         node.move(position=position)

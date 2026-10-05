@@ -1313,8 +1313,9 @@ class Store(qed.component, family="qed.ux.store"):
 
     def diagramRemove(self, viewport, node):
         """
-        Remove the factory with the relay id {node} from the pipeline diagram of {viewport}, and
-        hand back the diagram
+        Remove the node with the relay id {node} from the pipeline diagram of {viewport}, and hand
+        back the diagram: a factory goes, along with the slots only it used; a slot undoes the
+        binding it stands for, giving every trait connected to it a slot of its own
         """
         # get the diagram of the view in {viewport}
         diagram = self._viewports[viewport].view().diagram()
@@ -1324,10 +1325,14 @@ class Store(qed.component, family="qed.ux.store"):
             return None
         # find the node
         entity = diagram.locate(relay=node)
-        # only factories can be removed, for now
+        # a factory
         if entity is not None and entity in diagram.factories:
-            # so remove it
+            # goes
             diagram.removeFactory(entity=entity)
+        # a slot
+        elif entity is not None and entity in diagram.slots:
+            # undoes its binding
+            diagram.split(slot=entity)
         # hand off the diagram
         return diagram
 
