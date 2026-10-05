@@ -21,19 +21,22 @@ const Context = React.createContext(
         setDrag: () => { throw new Error('no drag provider') },
         // so there is no landing to judge
         landing: null,
+        // and nobody follows anybody
+        followers: {},
     }
 )
 
 
-// the provider; {nodes} are the nodes a drag can land on, with what decides whether it may
-export const DragProvider = ({ nodes = [], children }) => {
+// the provider; {nodes} are the nodes a drag can land on, with what decides whether it may, and
+// {followers} are the slots each factory takes along when it moves
+export const DragProvider = ({ nodes = [], followers = {}, children }) => {
     // the drag in progress, as { id, tx, ty, ax, ay }, or nothing
     const [drag, setDrag] = React.useState(null)
     // what a drop where the dragged node is headed would do
-    const landing = judge(drag, nodes)
+    const landing = judge(drag, nodes, followers)
     // provide for my children
     return (
-        <Context.Provider value={{ drag, setDrag, landing }}>
+        <Context.Provider value={{ drag, setDrag, landing, followers }}>
             {children}
         </Context.Provider>
     )
@@ -43,33 +46,15 @@ export const DragProvider = ({ nodes = [], children }) => {
 // access to the drag in progress
 export const useDrag = () => {
     // pull it from the context
-    const { drag, setDrag, landing } = React.useContext(Context)
+    const { drag, setDrag, landing, followers } = React.useContext(Context)
     // how far the node with {id} is from where it is headed, which is nowhere unless it is the
-    // one being dragged
-    const shiftOf = id => (drag !== null && drag.id === id)
+    // one being dragged, or one of the slots it takes along
+    const shiftOf = id => (drag !== null && (drag.id === id || followers[drag.id]?.includes(id)))
         ? { dx: drag.tx - drag.ax, dy: drag.ty - drag.ay }
         : { dx: 0, dy: 0 }
-    // what the drop would do, as seen by the node with {id}: the node it would land on hears
-    // "merge" or "blocked", and so does the dragged node when it would be sent back
-    const verdictOf = id => {
-        // without a node to land on, there is nothing to say
-        if (landing === null) {
-            // so say nothing
-            return null
-        }
-        // the node it would land on
-        if (landing.occupant === id) {
-            // hears the verdict
-            return landing.verdict
-        }
-        // the dragged node hears only that it would be sent back
-        if (drag.id === id && landing.verdict === "blocked") {
-            // so tell it
-            return "blocked"
-        }
-        // nobody else is involved
-        return null
-    }
+    // what the drop would do, as seen by the node with {id}: every node involved in it hears
+    // "merge" or "blocked", and nobody else hears anything
+    const verdictOf = id => landing?.[id] ?? null
     // publish
     return { drag, setDrag, shiftOf, verdictOf }
 }
@@ -77,8 +62,11 @@ export const useDrag = () => {
 
 // decide what dropping the dragged node where it is headed would do, by the rule the server
 // applies: nothing to say on an empty spot; a factory takes no company, and neither do two slots
-// that both carry products; anything else merges
-const judge = (drag, nodes) => {
+// that both carry products; anything else merges. a factory moves along with its own slots, so
+// it is sent back if any of them would land on somebody else. the verdict maps every node
+// involved to what it would see: the obstacles, the members of the group that would hit them, and
+// the dragged node itself
+const judge = (drag, nodes, followers) => {
     // without a drag, there is no landing
     if (drag === null) {
         // so say so
@@ -91,19 +79,56 @@ const judge = (drag, nodes) => {
         // there is nothing to say
         return null
     }
-    // the node already where it is headed, if any
-    const occupant = nodes.find(node =>
-        node.id !== mover.id && node.x === drag.tx && node.y === drag.ty && node.z === mover.z)
-    // an empty spot
-    if (!occupant) {
-        // is a plain move
-        return null
+    // the members of the group that moves
+    const group = new Set([mover.id, ...(followers[mover.id] ?? [])])
+    // whoever, outside the group, sits at a spot
+    const at = (x, y, z) => nodes.find(node => !group.has(node.id) && node.x === x && node.y === y && node.z === z)
+    // how far the group moves
+    const [dx, dy] = [drag.tx - mover.x, drag.ty - mover.y]
+    // the verdicts, by node
+    const verdicts = {}
+    // go through the slots that follow the mover
+    for (const id of group) {
+        // skipping the mover itself, whose landing is judged below
+        if (id === mover.id) {
+            // on to the next
+            continue
+        }
+        // the member
+        const member = nodes.find(node => node.id === id)
+        // whoever it would land on
+        const other = member ? at(member.x + dx, member.y + dy, member.z) : null
+        // a follower lands on somebody
+        if (other) {
+            // both of them see the collision
+            verdicts[other.id] = "blocked"
+            verdicts[member.id] = "blocked"
+        }
     }
-    // a factory on either side, or two slots that both carry products, cannot share a spot
-    const blocked = mover.kind === "factory" || occupant.kind === "factory"
-        || (mover.bound && occupant.bound)
-    // render the verdict
-    return { occupant: occupant.id, verdict: blocked ? "blocked" : "merge" }
+    // the node already where the mover is headed, if any
+    const occupant = at(drag.tx, drag.ty, mover.z)
+    // if there is one
+    if (occupant) {
+        // a factory on either side, or two slots that both carry products, cannot share a spot
+        const blocked = mover.kind === "factory" || occupant.kind === "factory"
+            || (mover.bound && occupant.bound)
+        // record what the occupant sees
+        verdicts[occupant.id] = blocked ? "blocked" : "merge"
+    }
+    // if anything is blocked, the whole move is sent back
+    if (Object.values(verdicts).includes("blocked")) {
+        // which the mover hears as well
+        verdicts[mover.id] = "blocked"
+        // and a merge that will not happen is not worth advertising
+        for (const [id, verdict] of Object.entries(verdicts)) {
+            // so turn it off
+            if (verdict === "merge") {
+                delete verdicts[id]
+            }
+        }
+    }
+    // an empty verdict means a plain move
+    return Object.keys(verdicts).length ? verdicts : null
 }
 
 
