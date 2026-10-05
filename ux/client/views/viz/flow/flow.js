@@ -36,6 +36,8 @@ export const Flow = ({ viewport, view }) => {
     const ref = React.useRef(null)
     // the camera looks at the middle of the diagram
     const focus = center(diagram)
+    // the nodes a drag can land on, with what decides whether it may
+    const nodes = occupants(diagram)
 
     // access the selection
     const { clear } = useSelection()
@@ -63,7 +65,7 @@ export const Flow = ({ viewport, view }) => {
                 {/* everything that is in ICS */}
                 <Camera ref={ref} viewport={viewport} scale={20} focus={focus} focusKey={diagram?.id}>
                     {/* the drag in progress, which the nodes publish and the rest follow */}
-                    <DragProvider>
+                    <DragProvider nodes={nodes}>
                         {/* the orientation marker at the origin */}
                         {/* <Compass /> */}
                         {/* the current cell highlighter */}
@@ -105,6 +107,23 @@ const center = (diagram) => {
 }
 
 
+// the nodes of a {diagram} that a drag can land on: where they are, what they are, and, for slots,
+// whether they carry a product
+const occupants = (diagram) => {
+    // a missing diagram has none
+    if (!diagram) {
+        // so say so
+        return []
+    }
+    // the factories
+    const factories = diagram.factories.map(({ id, at }) => ({ id, kind: "factory", ...at, bound: false }))
+    // the slots
+    const slots = diagram.slots.map(({ id, at, bound }) => ({ id, kind: "slot", ...at, bound }))
+    // all of them
+    return [...factories, ...slots]
+}
+
+
 // my fragment
 const flowVizGetFlowDiagramFragment = graphql`
     fragment flowVizGetFlowDiagramFragment on View {
@@ -114,18 +133,24 @@ const flowVizGetFlowDiagramFragment = graphql`
             id
             name
             family
-            # where the nodes are, so the camera can look at the middle of the diagram
+            # where the nodes are, so the camera can look at the middle of the diagram, and a drag
+            # can tell what it is about to land on
             factories {
+                id
                 at {
                     x
                     y
+                    z
                 }
             }
             slots {
+                id
                 at {
                     x
                     y
+                    z
                 }
+                bound
             }
             # labels
             ...labelsFlowDiagramFragment

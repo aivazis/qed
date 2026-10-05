@@ -53,6 +53,26 @@ export default {
         fill: "url(#gridGlow)",
     },
 
+    // the rings that tell what dropping a dragged node would do
+    drop: {
+        // merge with the node under it
+        merge: {
+            fill: "none",
+            stroke: "hsl(200deg, 80%, 55%)",
+            strokeWidth: 2,
+            vectorEffect: "non-scaling-stroke",
+            pointerEvents: "none",
+        },
+        // be sent back, since the spot is taken
+        blocked: {
+            fill: "none",
+            stroke: theme.page.danger,
+            strokeWidth: 2,
+            vectorEffect: "non-scaling-stroke",
+            pointerEvents: "none",
+        },
+    },
+
     // the connector lines
     connector: {
         // stroke
