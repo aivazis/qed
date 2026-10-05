@@ -15,7 +15,7 @@ import { Outlet } from 'react-router-dom'
 // context
 import { Provider } from './context'
 // view
-import { Status } from '~/views'
+import { Status, VizProvider } from '~/views'
 // activities
 import { ActivityBar } from '~/activities'
 // styles
@@ -24,13 +24,13 @@ import styles from './styles'
 
 // the main app working area
 // the layout is simple: the activity bar and activity dependent routing
-const Panel = () => {
+const Panel = ({ qed }) => {
     // lay out the main page
     return (
         <section style={styles.page} >
             <section style={styles.panel} >
                 {/* navigation bar */}
-                <ActivityBar style={styles.activitybar} />
+                <ActivityBar qed={qed} style={styles.activitybar} />
                 {/* the client area */}
                 <Outlet />
             </section>
@@ -45,7 +45,10 @@ export const Main = ({ qed }) => {
     // set up the context provider
     return (
         <Provider qed={qed}>
-            <Panel />
+            {/* the state of the viewports, shared by the activity bar and the panels */}
+            <VizProvider>
+                <Panel qed={qed} />
+            </VizProvider>
         </Provider>
     )
 }
