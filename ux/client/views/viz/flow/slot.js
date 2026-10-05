@@ -35,7 +35,7 @@ export const Slot = ({ slot }) => {
     const Slot = bound ? Bound : Unbound
     // assemble the graphic and render it
     return (
-        <Node id={id} position={at}>
+        <Node id={id} kind="slot" position={at} handles={{ "data-qed-bound": bound }}>
             <Slot highlight={selected} />
         </Node>
     )

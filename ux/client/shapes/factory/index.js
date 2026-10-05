@@ -24,7 +24,7 @@ export const Factory = ({ highlight, cell = 1, style }) => {
             <line style={conn} x1={-cell} y1="0" x2={cell} y2="0" />
             <line style={conn} x1="0" y1="0" x2="0" y2="-2" />
             <path style={ico} d="M -0.125 0 L 0 0.125 L 0.125 0 L 0 -0.125 Z" />
-            <circle style={ico} cx="0" cy="-1.5" r=".5" />
+            <circle style={ico} cx="0" cy="-1.5" r=".5" data-qed-grip />
             {highlight ? <circle cx="0" cy="-1.5" r=".75" style={deco} /> : null}
         </>
     )

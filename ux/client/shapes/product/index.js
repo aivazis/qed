@@ -21,7 +21,7 @@ export const Product = ({ highlight, style }) => {
     // i.e.a diagram cell is four grid cells
     return (
         <>
-            <circle cx="0" cy="0" r=".5" style={ico} />
+            <circle cx="0" cy="0" r=".5" style={ico} data-qed-grip />
             {highlight ? <circle cx="0" cy="0" r=".75" style={deco} /> : null}
         </>
     )
