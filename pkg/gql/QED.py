@@ -7,6 +7,7 @@
 
 # externals
 import graphene
+import inspect
 
 # support
 import qed
@@ -20,6 +21,8 @@ from .archives.Archive import Archive
 from .archives.ArchiveType import ArchiveType
 from .readers.Reader import Reader
 from .journal.JournalChannel import JournalChannel
+from .diagram.CatalogEntry import CatalogEntry
+from .diagram.CatalogGroup import CatalogGroup
 from . import views
 
 
@@ -42,6 +45,8 @@ class QED(graphene.ObjectType):
     archives = graphene.List(Archive)
     readers = graphene.List(Reader)
     journal = graphene.List(JournalChannel)
+    # the factories that can be placed on a pipeline diagram
+    catalog = graphene.List(graphene.NonNull(CatalogGroup), required=True)
 
     # resolvers
     @staticmethod
@@ -76,6 +81,57 @@ class QED(graphene.ObjectType):
 
     # journal channels
     @staticmethod
+    def resolve_catalog(store, info, **kwds):
+        """
+        Describe the factories that can be placed on a pipeline diagram, grouped by the protocol
+        they implement, in the order data meets them along a pipeline
+        """
+        # the protocols, in pipeline order
+        protocols = (
+            qed.viz.selector,
+            qed.viz.filter,
+            qed.viz.operator,
+            qed.viz.colormap,
+            qed.viz.codec,
+        )
+        # the groups
+        groups = []
+        # go through the protocols
+        for protocol in protocols:
+            # find the factories that implement it; some are reachable more than one way
+            found = {
+                implementer.pyre_family(): implementer
+                for _, _, implementer in protocol.pyre_locateAllImplementers(namespace="pyre")
+            }
+            # describe them, sorted by family
+            entries = [QED.describe(implementer=found[family]) for family in sorted(found)]
+            # and add the group
+            groups.append(
+                CatalogGroup(
+                    family=protocol.pyre_family(),
+                    name=protocol.pyre_family().split(".")[-1],
+                    entries=entries,
+                )
+            )
+        # hand off the groups
+        return groups
+
+    @staticmethod
+    def describe(implementer):
+        """
+        Describe a factory the palette offers
+        """
+        # a foundry hands out the class it stands for
+        factory = implementer() if isinstance(implementer, qed.foundry) else implementer
+        # describe it
+        return CatalogEntry(
+            family=factory.pyre_family(),
+            name=factory.pyre_family().split(".")[-1],
+            doc=inspect.cleandoc(factory.__doc__ or ""),
+            inputs=[trait.name for trait in factory.pyre_inputTraits],
+            outputs=[trait.name for trait in factory.pyre_outputTraits],
+        )
+
     def resolve_journal(store, info, **kwds):
         """
         Generate the journal channels the server knows about, as (severity, name) pairs
