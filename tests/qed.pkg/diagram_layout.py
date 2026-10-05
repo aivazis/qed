@@ -34,7 +34,7 @@ def test():
         "pyre.viz.codecs.bmp",
     ]
     # a {spacing} apart along the horizontal axis
-    assert [entity.position for entity in factories] == [(0, 0), (diagram.spacing, 0)]
+    assert [entity.position for entity in factories] == [(0, 0, 0), (diagram.spacing, 0, 0)]
     # every slot has a place of its own
     positions = [slot.position for slot in diagram.slots]
     assert len(positions) == len(set(positions))

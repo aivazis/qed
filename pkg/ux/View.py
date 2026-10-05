@@ -182,7 +182,7 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
                 if factory.pyre_family().startswith("pyre.viz.colormaps.")
             )
             # place it at the origin
-            diagram.addFactory(factory=colormap, position=(0, 0))
+            diagram.addFactory(factory=colormap, position=(0, 0, 0))
         # remember it, along with the channel it belongs to
         self._diagram = channel, diagram
         # and return it

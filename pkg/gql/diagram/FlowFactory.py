@@ -126,9 +126,9 @@ class FlowFactory(graphene.ObjectType):
         Resolve the factory position
         """
         # get the location
-        x, y = factory.position
+        x, y, z = factory.position
         # turn it into a point and return it
-        return Point(x=x, y=y)
+        return Point(x=x, y=y, z=z)
 
 
 # end of file

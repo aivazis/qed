@@ -18,6 +18,7 @@ class Point(graphene.ObjectType):
     # the fields
     x = graphene.Float(required=True)
     y = graphene.Float(required=True)
+    z = graphene.Float(required=True)
 
 
 # end of file

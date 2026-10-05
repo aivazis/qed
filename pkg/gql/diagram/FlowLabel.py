@@ -56,9 +56,9 @@ class FlowLabel(graphene.ObjectType):
         Resolve the label position
         """
         # get the location
-        x, y = label.position
+        x, y, z = label.position
         # turn it into a point and return it
-        return Point(x=x, y=y)
+        return Point(x=x, y=y, z=z)
 
 
 # end of file
