@@ -328,8 +328,10 @@ class Viewport(
         name = str(uuid.uuid1())
         # build the new instance
         clone = type(self)(name=name, view=view.clone())
-        # select my reader
-        clone.selectSource(source=view.reader)
+        # if i show a reader
+        if view.reader is not None:
+            # so does the clone; a blank viewport makes a blank clone
+            clone.selectSource(source=view.reader)
         # and return the clone
         return clone
 
