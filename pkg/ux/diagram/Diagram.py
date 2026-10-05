@@ -150,14 +150,21 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
             # it's a legal move
             return True
 
-        # get the current migrant node, and its original position
+        # get the node in the middle of a move, if any
         migrant = self.migrant
         # if it's not the current {node}
         if migrant is not node:
-            # make it so
+            # a different node left in the middle of a move, e.g. by a client that went away
+            # mid-drag, lands where it was last seen before this one takes off
+            if migrant is not None:
+                # settle it
+                self.resolve(node=migrant)
+            # the current {node} is now the one on the move
             self.migrant = node
-            # remove it from the layout
-            del self.layout[node.position]
+            # and leaves its spot on the layout, if it holds it
+            if self.layout.get(node.position) is node:
+                # by removing it
+                del self.layout[node.position]
 
         # check whether there is somebody already there
         occupant = self.layout.get(position)
@@ -219,8 +226,8 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         self.nodes = {}
         # a set of labels that are not associated with any entity
         self.labels = set()
-        # a record of the moving node and its initial position
-        self.migrant = None, ()
+        # the node in the middle of a move, if any
+        self.migrant = None
         # marker that a collision among nodes was detected during a move
         self.collision = None
         # set up my flow

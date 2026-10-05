@@ -1253,10 +1253,11 @@ class Store(qed.component, family="qed.ux.store"):
         # hand off the center
         return view.center
 
-    def diagramMove(self, viewport, node, position):
+    def diagramMove(self, viewport, node, position, settled=True):
         """
         Move the factory or slot with the relay id {node} of the pipeline diagram of {viewport}
-        to {position}, and hand back the diagram
+        to {position}, and hand back the diagram; a move that is not {settled} is a step of a drag
+        in progress, which moves the node without resolving where it landed
         """
         # get the diagram of the view in {viewport}
         diagram = self._viewports[viewport].view().diagram()
@@ -1273,8 +1274,10 @@ class Store(qed.component, family="qed.ux.store"):
             return diagram
         # make the move; one that is not permitted leaves the node where it was
         diagram.move(node=entity, position=tuple(position))
-        # either way, put the node back on the layout, merging it with whatever it landed on
-        diagram.resolve(node=entity)
+        # once the drag is over
+        if settled:
+            # put the node back on the layout, merging it with whatever it landed on
+            diagram.resolve(node=entity)
         # and hand off the diagram
         return diagram
 

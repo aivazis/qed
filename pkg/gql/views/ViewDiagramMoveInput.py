@@ -23,6 +23,8 @@ class ViewDiagramMoveInput(graphene.InputObjectType):
     x = graphene.Float(required=True)
     y = graphene.Float(required=True)
     z = graphene.Float(required=True)
+    # whether this is where the node lands, or a step of a drag still in progress
+    settled = graphene.Boolean(default_value=True)
 
 
 # end of file
