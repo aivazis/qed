@@ -8,11 +8,9 @@
 // externals
 import React from 'react'
 
-// MGA - FIXME: hooks
-// project
-// import { useSetSelection } from '~/views/flo2d'
 // local
-// import { useSetMovingNode } from './useSetMovingNode'
+// hooks
+import { useSelection } from './useSelection'
 
 
 // position a node on  the diagram and add its behavior
@@ -22,17 +20,19 @@ export const Node = ({ id, position, children }) => {
     // build the positioning transform
     const xform = `translate(${x} ${y})`
 
-    // MGA - FIXME:
-    // get the selection callback
-    const select = null // useSetSelection(id)
-    // mark me as a candidate for moving
-    const embark = null // useSetMovingNode(id)
-
-    // node controls
-    const nodeControls = {
-        onClick: select,
-        onMouseDown: embark,
+    // access the selection
+    const { select } = useSelection()
+    // a click picks me; with <shift>, it adds me to the selection or drops me from it
+    const onClick = evt => {
+        // the canvas clears the selection on a click, so keep this one to myself
+        evt.stopPropagation()
+        // pick me
+        select(id, evt.shiftKey)
+        // all done
+        return
     }
+    // node controls
+    const nodeControls = { onClick }
 
     // render
     return (

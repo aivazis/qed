@@ -14,6 +14,8 @@ import { graphql, useFragment } from 'react-relay/hooks'
 import { Factory as Shape, Plex, Terminal } from '~/shapes'
 
 // local
+// hooks
+import { useSelection } from './useSelection'
 // components
 import { Node } from './node'
 // styles
@@ -26,9 +28,7 @@ export const Factory = ({ factory }) => {
     const { id, at, inputs, outputs } = useFragment(factoryFlowDiagramFragment, factory)
 
     // get the current selection
-    // MGA - FIXME: enabled node selection
-    // const { selection } = useSelection()
-    const { selection } = { selection: [] }
+    const { selection } = useSelection()
     // am i selected
     const selected = selection.includes(id)
 

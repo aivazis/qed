@@ -13,6 +13,8 @@ import { graphql, useFragment } from 'react-relay/hooks'
 import { Camera, Compass } from '~/widgets'
 
 // local
+// hooks
+import { useSelection } from './useSelection'
 // components
 import { Grid } from './grid'
 // diagram nodes
@@ -33,8 +35,12 @@ export const Flow = ({ viewport, view }) => {
     // the camera looks at the middle of the diagram
     const focus = center(diagram)
 
-    // clear the node selection
+    // access the selection
+    const { clear } = useSelection()
+    // a click on the canvas, away from any node, clears it
     const clearSelection = () => {
+        // drop the selection
+        clear()
         // all done
         return
     }
