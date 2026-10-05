@@ -11,27 +11,50 @@ import React from 'react'
 // project
 // the camera, which maps the pointer to diagram coordinates
 import { useCamera } from '~/widgets/camera'
+// the active viewport, and whether it syncs live
+import { useViewports } from '../viz/useViewports'
+import { useLive } from '../viz/useLive'
 
 // local
 // hooks
 import { useSelection } from './useSelection'
 import { useMoveNode } from './useMoveNode'
+import { useDrag } from './drag'
 
 
 // position a node on the diagram, and let the user pick it and drag it around
-export const Node = ({ id, position, children }) => {
-    // unpack the position of the node
+export const Node = ({ id, kind, position, handles = {}, children }) => {
+    // unpack the position of the node, as the server has it
     const { x, y, z } = position
     // the map from the pointer to diagram coordinates, rounded onto the grid
     const { toICS } = useCamera()
     // access the selection
     const { select } = useSelection()
-    // and the mover
-    const { move } = useMoveNode()
-    // where the drag started, in diagram coordinates, while there is one
+    // the mover
+    const { move, step } = useMoveNode()
+    // whether my viewport syncs live, in which case the server hears every step of a drag
+    const { activeViewport } = useViewports()
+    const { enabled: live } = useLive(activeViewport)
+    // the drag in progress, which the connectors and labels attached to me follow as well
+    const { drag, setDrag, shiftOf } = useDrag()
+    // where the pointer grabbed me and where i was then, in diagram coordinates, during a drag
     const grab = React.useRef(null)
-    // how far the node has been dragged, in diagram coordinates
-    const [shift, setShift] = React.useState({ dx: 0, dy: 0 })
+    // whether i am the node being dragged
+    const dragging = drag !== null && drag.id === id
+
+    // while i am being dragged, keep the drag informed of where the server has me, so the shift
+    // stays the distance to where i am headed even when the server moves me mid-drag
+    React.useEffect(() => {
+        // if i am not being dragged
+        if (!dragging) {
+            // there is nothing to report
+            return
+        }
+        // otherwise, record where the server has me now
+        setDrag(old => (old !== null && old.id === id) ? { ...old, ax: x, ay: y } : old)
+        // all done
+        return
+    }, [x, y])
 
     // a press with the main button starts a drag
     const onPointerDown = evt => {
@@ -46,12 +69,12 @@ export const Node = ({ id, position, children }) => {
         evt.preventDefault()
         // follow the pointer wherever it goes until it lets go
         evt.currentTarget.setPointerCapture(evt.pointerId)
-        // remember where the drag started; the node keeps its distance from the pointer
-        grab.current = toICS({ x: evt.clientX, y: evt.clientY })
+        // remember where the pointer grabbed me and where i was; i keep my distance from it
+        grab.current = { pointer: toICS({ x: evt.clientX, y: evt.clientY }, false), x, y }
         // all done
         return
     }
-    // a move while the node is held drags it along, snapped to the grid
+    // a move while i am held drags me along, snapped to the grid
     const onPointerMove = evt => {
         // if i am not being dragged
         if (grab.current === null) {
@@ -59,13 +82,26 @@ export const Node = ({ id, position, children }) => {
             return
         }
         // where the pointer is now
-        const here = toICS({ x: evt.clientX, y: evt.clientY })
-        // shift the node by as much as the pointer moved
-        setShift({ dx: here.x - grab.current.x, dy: here.y - grab.current.y })
+        const here = toICS({ x: evt.clientX, y: evt.clientY }, false)
+        // where i am headed: where i was, shifted by as much as the pointer moved, on the grid
+        const tx = Math.round(grab.current.x + here.x - grab.current.pointer.x)
+        const ty = Math.round(grab.current.y + here.y - grab.current.pointer.y)
+        // if that is where i was already headed
+        if (dragging && drag.tx === tx && drag.ty === ty) {
+            // there is nothing new to report
+            return
+        }
+        // record it, along with where the server has me
+        setDrag({ id, tx, ty, ax: x, ay: y })
+        // in a live viewport, the server hears every step
+        if (live) {
+            // so tell it
+            step({ id, x: tx, y: ty, z })
+        }
         // all done
         return
     }
-    // letting go ends the drag; if the node moved, the server learns where it landed
+    // letting go ends the drag; if i moved, the server learns where i landed
     const onPointerUp = evt => {
         // if i was not being dragged
         if (grab.current === null) {
@@ -73,19 +109,21 @@ export const Node = ({ id, position, children }) => {
             return
         }
         // the drag is over
+        const start = grab.current
         grab.current = null
         evt.currentTarget.releasePointerCapture(evt.pointerId)
-        // if the node did not move
-        if (shift.dx === 0 && shift.dy === 0) {
-            // there is nothing to report
+        // where i was headed
+        const target = dragging ? { tx: drag.tx, ty: drag.ty } : { tx: start.x, ty: start.y }
+        // if i ended up where i started
+        if (target.tx === start.x && target.ty === start.y && !live) {
+            // there is nothing to report, and nothing being dragged
+            setDrag(null)
+            // all done
             return
         }
-        // otherwise, ask the server to move it, and keep it where it was dropped until the
-        // server's diagram replaces the one on screen
-        move(
-            { id, x: x + shift.dx, y: y + shift.dy, z },
-            () => setShift({ dx: 0, dy: 0 }),
-        )
+        // otherwise, ask the server to land me there, and keep me there until its diagram
+        // replaces the one on screen
+        move({ id, x: target.tx, y: target.ty, z }, () => setDrag(null))
         // all done
         return
     }
@@ -99,13 +137,26 @@ export const Node = ({ id, position, children }) => {
         return
     }
 
+    // how far i am from where i am headed
+    const shift = shiftOf(id)
+    // whether i am picked
+    const { selection } = useSelection()
+    // the handles that let a script find me and read my state: who i am, what i am, where the
+    // server has me, and whether i am picked, along with whatever my kind adds
+    const markers = {
+        "data-qed-node": id,
+        "data-qed-kind": kind,
+        "data-qed-at": `${x},${y},${z}`,
+        "data-qed-selected": selection.includes(id),
+        ...handles,
+    }
     // build the positioning transform, including the drag in progress
     const xform = `translate(${x + shift.dx} ${y + shift.dy})`
     // node controls
     const nodeControls = { onClick, onPointerDown, onPointerMove, onPointerUp }
     // render
     return (
-        <g transform={xform} {...nodeControls} >
+        <g transform={xform} {...markers} {...nodeControls} >
             {children}
         </g>
     )
