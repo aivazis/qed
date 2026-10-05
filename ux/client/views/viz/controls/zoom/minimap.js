@@ -237,7 +237,7 @@ export const Minimap = ({ viewport, ils, shape, zoom, reader, dataset, channel, 
         // so depending on {scale} alone would leave the handler bound to a stale zoom factor
     }, [viewports, activeViewport, dragging, scale, zoomX, zoomY, ils])
 
-    // the user can also click to place the viewport rep at a specific location
+    // the user can also click to center the viewport at a specific location
     React.useEffect(() => {
         // get the active viewport ref
         const viewport = viewports[activeViewport]
@@ -257,9 +257,10 @@ export const Minimap = ({ viewport, ils, shape, zoom, reader, dataset, channel, 
             // compute the displacement
             const dx = x - box.left
             const dy = y - box.top
-            // ask the active viewport to scroll by this much
-            viewport.scrollLeft = dx / (ils * scale * zoomX)
-            viewport.scrollTop = dy / (ils * scale * zoomY)
+            // ask the active viewport to center on the point: convert it to the viewport's own
+            // rendered pixels, and back off by half of what the viewport shows
+            viewport.scrollLeft = dx / (ils * scale * zoomX) - viewport.clientWidth / 2
+            viewport.scrollTop = dy / (ils * scale * zoomY) - viewport.clientHeight / 2
             // all done
             return
         }
