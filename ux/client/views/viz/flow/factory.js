@@ -25,7 +25,7 @@ import styles from './styles'
 // render a factory
 export const Factory = ({ factory }) => {
     // unpack
-    const { id, at, inputs, outputs } = useFragment(factoryFlowDiagramFragment, factory)
+    const { id, at, inputs, outputs, family } = useFragment(factoryFlowDiagramFragment, factory)
 
     // get the current selection
     const { selection } = useSelection()
@@ -48,7 +48,7 @@ export const Factory = ({ factory }) => {
     )
     // assemble the graphic and render it
     return (
-        <Node id={id} position={at}>
+        <Node id={id} kind="factory" position={at} handles={{ "data-qed-family": family }}>
             <Shape highlight={selected} cell={cell} style={styles} />
             {inplex}
             {outplex}
@@ -68,6 +68,8 @@ const factoryFlowDiagramFragment = graphql`
             y
             z
         }
+        # what it is
+        family
         # number of inputs
         inputs
         # number of outputs
