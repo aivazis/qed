@@ -47,10 +47,12 @@ const Lens = ({ style, children }) => {
 
 
 // assemble the camera
-export const Camera = React.forwardRef(({ viewport, scale = 25, focus, style, children }, viewRef) => {
+export const Camera = React.forwardRef((
+    { viewport, scale = 25, focus, focusKey, style, children }, viewRef
+) => {
     // set up the context provider and install the lens
     return (
-        <Provider ref={viewRef} viewport={viewport} scale={scale} focus={focus}>
+        <Provider ref={viewRef} viewport={viewport} scale={scale} focus={focus} focusKey={focusKey}>
             <Lens style={style}>
                 {children}
             </Lens>
