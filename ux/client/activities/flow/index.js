@@ -19,7 +19,7 @@ import styles from './styles'
 
 
 // edit the visualization pipeline of the active view
-export const Flow = ({ size, style }) => {
+export const Flow = ({ size, disabled = false, style }) => {
     // get the current location
     const location = useLocation().pathname
     // my url
@@ -30,7 +30,8 @@ export const Flow = ({ size, style }) => {
     const paint = styles.activity(style)
     // and render
     return (
-        <Activity size={size} url={url} current={current} style={paint} label="flow" >
+        <Activity size={size} url={url} current={current} disabled={disabled} style={paint}
+            label="flow" >
             <Icon />
         </Activity>
     )

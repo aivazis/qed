@@ -50,6 +50,8 @@ export const query = graphql`
             ...channelsGetJournalFragment
             # for the dataset the quality panel describes
             ...qualityGetDatasetInViewFragment
+            # for the activities that need a dataset in the active view
+            ...activityBarGetViewsFragment
         }
     }
 `
