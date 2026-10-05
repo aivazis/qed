@@ -208,6 +208,10 @@ class Slot(Node):
         """
         # for now, just merge the labels of {other} into my pile
         self._labels |= other.labels
+        # and claim them
+        for label in other.labels:
+            # so they follow me from now on
+            label.owner = self
 
         # N.B. this doesn't generate any deltas: labels are free-standing and the change of
         # ownership is transparent. this depends on how we manage the {relay} store on

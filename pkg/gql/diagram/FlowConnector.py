@@ -32,6 +32,9 @@ class FlowConnector(graphene.ObjectType):
     input = graphene.Boolean(required=True)
     slot = graphene.Field(Point, required=True)
     factory = graphene.Field(Point, required=True)
+    # the ids of the nodes it joins, so it can follow them when they are dragged
+    slot_id = graphene.ID(required=True)
+    factory_id = graphene.ID(required=True)
 
     # resolvers
     @staticmethod
@@ -41,6 +44,22 @@ class FlowConnector(graphene.ObjectType):
         """
         # splice together the {family} and {name} of the {connector}
         return connector.relay
+
+    @staticmethod
+    def resolve_slot_id(connector, info, **kwds):
+        """
+        Get the id of the slot at my end
+        """
+        # easy enough
+        return connector.slot.relay
+
+    @staticmethod
+    def resolve_factory_id(connector, info, **kwds):
+        """
+        Get the id of the factory at my end
+        """
+        # easy enough
+        return connector.factory.relay
 
     @staticmethod
     def resolve_input(connector, info, **kwds):

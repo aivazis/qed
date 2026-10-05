@@ -92,7 +92,9 @@ class Connector(Labeled, Entity, set):
         position = self.placeLabel()
 
         # make a label
-        label = Label(text=text, category=self.typename().lower(), delta=(0, 0, 0), position=position)
+        label = Label(
+            text=text, category=self.typename().lower(), delta=(0, 0, 0), position=position
+        )
         # save it as my trait label
         self.traitLabel = label
         # publish it

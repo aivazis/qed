@@ -15,6 +15,9 @@ class Label(Node):
     Representation of text at a specific location in the diagram
     """
 
+    # the entity i belong to, once it claims me
+    owner = None
+
     # interface
     def move(self, position):
         """
