@@ -52,6 +52,8 @@ export const query = graphql`
             ...qualityGetDatasetInViewFragment
             # for the activities that need a dataset in the active view
             ...activityBarGetViewsFragment
+            # for the description of the node picked on the pipeline diagram
+            ...nodesGetDiagramFragment
         }
     }
 `
