@@ -14,6 +14,8 @@ export { Controls } from './controls'
 export { Nodes } from './nodes'
 export { Readers } from './readers'
 
+// the provider of the viewport state, which the activity bar shares with the panels
+export { VizProvider } from './viz/context'
 // hooks
 export { useViewports, useCenterViewport, useLive } from './viz'
 

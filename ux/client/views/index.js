@@ -11,7 +11,7 @@ export { Main, useTopic, useActivityPanel } from './main'
 // data archives
 export { Explorer, Archives } from './explorer'
 // datasets
-export { Viz, Console, Controls, Nodes, Quality, Readers } from './viz'
+export { Viz, VizProvider, Console, Controls, Nodes, Quality, Readers } from './viz'
 // embedded documentation
 export { Guide, TOC } from './doc'
 
