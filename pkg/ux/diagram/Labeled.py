@@ -25,6 +25,10 @@ class Labeled:
             return labels
         # otherwise, initialize it
         labels = set(self.generateLabels())
+        # each one belongs to me
+        for label in labels:
+            # so it can tell which node it follows
+            label.owner = self
         # attach it it
         self._labels = labels
         # and return it
