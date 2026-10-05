@@ -181,11 +181,12 @@ def selection():
     move(store, red, slotOf(bmp, "red").position)
     # where everything is
     before = {node.eid: node.position for node in [*diagram.factories, *diagram.slots]}
-    # move the two factories and the shared slot down by ten, led by the encoder
+    # move the two factories down by ten, led by the encoder; the slot they share connects only
+    # to them, so it comes along without being picked
     qed.ux.store.diagramMoveGroup(
         store,
         diagram=store.relay,
-        nodes=[gray.relay, bmp.relay, red.relay],
+        nodes=[gray.relay, bmp.relay],
         anchor=bmp.relay,
         position=(15, 10, 0),
     )
