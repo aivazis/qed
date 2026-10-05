@@ -128,21 +128,13 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
 
     def moveGroup(self, nodes, anchor, position):
         """
-        Move {nodes}, along with the own unbound slots of the factories among them, so that
+        Move {nodes}, along with the slots that connect only to the factories among them, so that
         {anchor} lands at {position} and the rest keep their places around it; the move is all or
         nothing, and never merges: it is refused if any member would land on a node outside the
         group
         """
         # the group: the nodes, and the slots their factories take along
-        group = list(nodes)
-        # go through the nodes
-        for node in nodes:
-            # and add the followers of each, once
-            for slot in self.followers(node=node):
-                # if not already there
-                if slot not in group:
-                    # add it
-                    group.append(slot)
+        group = list(nodes) + [slot for slot in self.cohort(nodes=nodes) if slot not in nodes]
         # how far the group moves
         delta = tuple(p - q for p, q in zip(position, anchor.position))
         # where each member is headed
@@ -175,6 +167,27 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
             self.layout[target] = node
         # all done
         return True
+
+    def cohort(self, nodes):
+        """
+        The slots that a move of {nodes} takes along: the ones every connection of which leads to
+        a factory among them, which includes the own unbound slots of each factory and the
+        bindings among them
+        """
+        # the factories among the nodes, by identity
+        factories = {id(node) for node in nodes if node in self.factories}
+        # the slots
+        cohort = []
+        # go through my slots, in a stable order
+        for slot in sorted(self.slots, key=lambda slot: slot.position):
+            # the factories the slot connects to
+            owners = {id(connector.factory) for connector in slot.connections()}
+            # if it connects to some, and only to factories among the nodes
+            if owners and owners <= factories:
+                # it comes along
+                cohort.append(slot)
+        # hand them off
+        return cohort
 
     def followers(self, node):
         """
