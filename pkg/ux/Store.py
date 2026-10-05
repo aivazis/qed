@@ -1281,6 +1281,79 @@ class Store(qed.component, family="qed.ux.store"):
         # and hand off the diagram
         return diagram
 
+    def diagramAdd(self, viewport, family, position):
+        """
+        Place a new factory of the given {family} on the pipeline diagram of {viewport} at
+        {position}, unless it or one of its slots would land on a taken spot, and hand back the
+        diagram
+        """
+        # get the diagram of the view in {viewport}
+        diagram = self._viewports[viewport].view().diagram()
+        # a view without a pipeline has no diagram
+        if diagram is None:
+            # so there is nothing to add to
+            return None
+        # find the factory the family names
+        implementer = self.implementer(family=family)
+        # an unknown family
+        if implementer is None:
+            # leaves the diagram as it is
+            return diagram
+        # build one; the name is unique, since pyre hands back the old instance for a name it
+        # has seen before
+        factory = implementer(name=f"{family}.{uuid.uuid1()}")
+        # if it does not fit where it was dropped
+        if not diagram.fits(factory=factory, position=tuple(position)):
+            # leave the diagram as it is
+            return diagram
+        # otherwise, place it
+        diagram.addFactory(factory=factory, position=tuple(position))
+        # and hand off the diagram
+        return diagram
+
+    def diagramRemove(self, viewport, node):
+        """
+        Remove the factory with the relay id {node} from the pipeline diagram of {viewport}, and
+        hand back the diagram
+        """
+        # get the diagram of the view in {viewport}
+        diagram = self._viewports[viewport].view().diagram()
+        # a view without a pipeline has no diagram
+        if diagram is None:
+            # so there is nothing to remove from
+            return None
+        # find the node
+        entity = diagram.locate(relay=node)
+        # only factories can be removed, for now
+        if entity is not None and entity in diagram.factories:
+            # so remove it
+            diagram.removeFactory(entity=entity)
+        # hand off the diagram
+        return diagram
+
+    def implementer(self, family):
+        """
+        Find the class of the factory with the given {family} among the ones the palette offers
+        """
+        # the protocols the palette offers factories for
+        protocols = (
+            qed.viz.selector,
+            qed.viz.filter,
+            qed.viz.operator,
+            qed.viz.colormap,
+            qed.viz.codec,
+        )
+        # go through them
+        for protocol in protocols:
+            # and their implementers
+            for _, _, implementer in protocol.pyre_locateAllImplementers(namespace="pyre"):
+                # if this is the one
+                if implementer.pyre_family() == family:
+                    # a foundry hands out the class it stands for
+                    return implementer() if isinstance(implementer, qed.foundry) else implementer
+        # not found
+        return None
+
     def zoomSetLevel(self, viewport, horizontal, vertical):
         """
         Set the zoom levels
