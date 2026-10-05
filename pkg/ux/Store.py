@@ -1236,11 +1236,20 @@ class Store(qed.component, family="qed.ux.store"):
         """
         Set the source pixel at the center of {viewport}
         """
-        # get the viewport configuration; the look-at is per-viewport, so unlike scroll-sync
-        # across a user's own viewports (handled client side) nothing else is touched here
+        # get the viewport configuration
         port = self._viewports[viewport]
+        # and its offsets, as (x, y), in source pixels
+        mx, my = port.view().sync.offsets
         # set the center
         view = port.lookAt(row=row, col=col)
+        # the viewports that scroll in sync with it look at the same place, shifted by the
+        # difference of their offsets; moving them here, rather than in each client, keeps every
+        # client looking at the same centers, whatever the size of its windows
+        for peer in self._syncedWith(viewport=viewport, aspect="scroll", exclude=True):
+            # get the offsets of the peer
+            px, py = peer.view().sync.offsets
+            # and point it at the matching place
+            peer.lookAt(row=row + py - my, col=col + px - mx)
         # hand off the center
         return view.center
 
