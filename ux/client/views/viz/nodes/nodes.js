@@ -18,6 +18,9 @@ import { Header } from '~/widgets'
 // hooks
 import { useViewports } from '../viz/useViewports'
 import { useSelection } from '../flow'
+import { useEditDiagram } from '../flow/useEditDiagram'
+// the media type of a factory dragged from the palette
+import { factoryMediaType } from '../flow/drops'
 // styles
 import styles from './styles'
 
@@ -29,8 +32,8 @@ export const Nodes = ({ qed }) => {
     const { activeViewport } = useViewports()
     // the nodes picked on the diagram
     const { selection } = useSelection()
-    // unpack the views
-    const { views } = useFragment(nodesGetDiagramFragment, qed)
+    // unpack the views and the factories on offer
+    const { views, catalog } = useFragment(nodesGetDiagramFragment, qed)
     // the factories on the diagram of the active view
     const factories = views[activeViewport]?.diagram?.factories ?? []
     // the one to describe: the first pick that is a factory of this diagram
@@ -41,6 +44,10 @@ export const Nodes = ({ qed }) => {
         <Panel data-qed-panel="flow">
             {/* the title of the panel */}
             <Header title="visualization pipeline" style={styles.header} />
+            {/* the factories on offer, and the pipelines the user designed */}
+            <Palette catalog={catalog} />
+            {/* the description of the factory picked on the diagram */}
+            <Title>picked</Title>
             {/* without a pick, say how to make one */}
             {factory === null && <Note>pick a factory on the diagram to see what it does</Note>}
             {/* otherwise, describe it */}
@@ -50,10 +57,49 @@ export const Nodes = ({ qed }) => {
 }
 
 
+// the factories on offer, by the protocol they implement, and the pipelines the user designed
+const Palette = ({ catalog }) => {
+    // render
+    return (
+        <Section data-qed-palette>
+            {/* one group per protocol */}
+            {catalog.map(group => (
+                <React.Fragment key={group.family}>
+                    {/* its name */}
+                    <Title>{group.name}</Title>
+                    {/* and its factories, ready to be dragged onto the diagram */}
+                    <Entries>
+                        {group.entries.map(entry => (
+                            <Entry key={entry.family} draggable
+                                title={entry.doc}
+                                data-qed-catalog={entry.family}
+                                onDragStart={evt => {
+                                    // carry the family of the factory
+                                    evt.dataTransfer.setData(factoryMediaType, entry.family)
+                                    // as a copy
+                                    evt.dataTransfer.effectAllowed = "copy"
+                                }}
+                            >
+                                {entry.name}
+                            </Entry>
+                        ))}
+                    </Entries>
+                </React.Fragment>
+            ))}
+            {/* the pipelines the user designed */}
+            <Title>designs</Title>
+            <Empty>none yet</Empty>
+        </Section>
+    )
+}
+
+
 // the description of a factory: what it is, what it consumes, what it makes, and how it is set
 const Inspector = ({ factory }) => {
+    // the editor
+    const { remove } = useEditDiagram()
     // unpack
-    const { family, doc, traits } = factory
+    const { id, family, doc, traits } = factory
     // its short name is the last part of its family
     const name = family.split(".").pop()
     // sort its traits by what they are to it
@@ -63,6 +109,8 @@ const Inspector = ({ factory }) => {
         <Section data-qed-inspector={family}>
             {/* who it is */}
             <Name>{name}</Name>
+            {/* and a way to remove it */}
+            <Remove onClick={() => remove(id)} data-qed-action="remove">remove</Remove>
             <Family>{family}</Family>
             {/* what it does */}
             {doc && <Doc>{doc}</Doc>}
@@ -110,6 +158,35 @@ const Panel = styled.div`
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
+`
+
+// the factories of a group of the palette
+const Entries = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+`
+
+// a factory of the palette
+const Entry = styled.span`
+    font-family: inconsolata;
+    font-size: 85%;
+    color: ${styles.normal};
+    cursor: grab;
+    &:hover {
+        color: ${styles.factory};
+    }
+`
+
+// the button that removes the picked factory
+const Remove = styled.span`
+    font-family: inconsolata;
+    font-size: 80%;
+    color: ${styles.dim};
+    cursor: pointer;
+    &:hover {
+        color: ${styles.danger};
+    }
 `
 
 // the note shown when there is nothing to describe
@@ -212,6 +289,16 @@ const TraitDoc = styled.span`
 // my fragment
 const nodesGetDiagramFragment = graphql`
     fragment nodesGetDiagramFragment on QED {
+        # the factories on offer
+        catalog {
+            family
+            name
+            entries {
+                family
+                name
+                doc
+            }
+        }
         views {
             # the diagram of the pipeline of the view
             diagram {

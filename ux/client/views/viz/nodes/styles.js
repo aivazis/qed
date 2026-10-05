@@ -21,6 +21,7 @@ const header = {
 const dim = theme.page.dim
 const normal = theme.page.normal
 const value = theme.page.bright
+const danger = theme.page.danger
 // the color of the factory names, as the diagram paints them
 const factory = "hsl(28deg, 70%, 55%)"
 
@@ -31,6 +32,7 @@ export default {
     dim,
     normal,
     value,
+    danger,
     factory,
 }
 
