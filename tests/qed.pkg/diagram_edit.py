@@ -18,17 +18,16 @@ import uuid
 import qed
 
 
-# a store stand-in whose only viewport shows {diagram}
+# a store stand-in that knows only {diagram}
 def storeOf(diagram):
     """
-    Make a store with one viewport whose view draws {diagram}
+    Make a store whose only pipeline diagram is {diagram}
     """
-    # the view
-    view = types.SimpleNamespace(diagram=lambda: diagram)
-    # the viewport
-    port = types.SimpleNamespace(view=lambda: view)
-    # the store
-    store = types.SimpleNamespace(_viewports=[port])
+    # the store finds the diagram by its id, and remembers the id for the requests
+    store = types.SimpleNamespace(
+        findDiagram=lambda relay: diagram if relay == diagram.relay else None,
+        relay=diagram.relay,
+    )
     # with the store's own search for factories
     store.implementer = lambda **kwds: qed.ux.store.implementer(store, **kwds)
     # hand it off
@@ -50,7 +49,7 @@ def add(store, family, position):
     Ask {store} to place a factory of {family} at {position}
     """
     # easy enough
-    return qed.ux.store.diagramAdd(store, viewport=0, family=family, position=position)
+    return qed.ux.store.diagramAdd(store, diagram=store.relay, family=family, position=position)
 
 
 def remove(store, node):
@@ -58,7 +57,7 @@ def remove(store, node):
     Ask {store} to remove {node}
     """
     # easy enough
-    return qed.ux.store.diagramRemove(store, viewport=0, node=node.relay)
+    return qed.ux.store.diagramRemove(store, diagram=store.relay, node=node.relay)
 
 
 # the factory of {family} on {diagram}
@@ -118,7 +117,7 @@ def removing():
     red = next(slot for slot in gray.slots if slot.writers and slot.position[1] < 0)
     target = next(slot for slot in bmp.slots if slot.readers and slot.position[1] < 0)
     qed.ux.store.diagramMove(
-        store, viewport=0, node=red.relay, position=target.position, settled=True
+        store, diagram=store.relay, node=red.relay, position=target.position, settled=True
     )
     # one slot fewer
     assert len(diagram.slots) == 7
@@ -164,7 +163,7 @@ def move(store, node, position):
     Ask {store} to move {node} to {position}
     """
     # easy enough
-    return qed.ux.store.diagramMove(store, viewport=0, node=node.relay, position=position)
+    return qed.ux.store.diagramMove(store, diagram=store.relay, node=node.relay, position=position)
 
 
 # removing a slot undoes the binding it stands for

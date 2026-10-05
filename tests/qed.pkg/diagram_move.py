@@ -19,17 +19,16 @@ import uuid
 import qed
 
 
-# a store stand-in whose only viewport shows {diagram}
+# a store stand-in that knows only {diagram}
 def storeOf(diagram):
     """
-    Make a store with one viewport whose view draws {diagram}
+    Make a store whose only pipeline diagram is {diagram}
     """
-    # the view
-    view = types.SimpleNamespace(diagram=lambda: diagram)
-    # the viewport
-    port = types.SimpleNamespace(view=lambda: view)
-    # and the store
-    return types.SimpleNamespace(_viewports=[port])
+    # the store finds the diagram by its id, and remembers the id for the requests
+    return types.SimpleNamespace(
+        findDiagram=lambda relay: diagram if relay == diagram.relay else None,
+        relay=diagram.relay,
+    )
 
 
 # move a node through the store
@@ -39,7 +38,7 @@ def move(store, node, position, settled=True):
     """
     # borrow the method of the store class
     return qed.ux.store.diagramMove(
-        store, viewport=0, node=node.relay, position=position, settled=settled
+        store, diagram=store.relay, node=node.relay, position=position, settled=settled
     )
 
 
@@ -185,7 +184,7 @@ def selection():
     # move the two factories and the shared slot down by ten, led by the encoder
     qed.ux.store.diagramMoveGroup(
         store,
-        viewport=0,
+        diagram=store.relay,
         nodes=[gray.relay, bmp.relay, red.relay],
         anchor=bmp.relay,
         position=(15, 10, 0),
@@ -199,7 +198,11 @@ def selection():
     before = after
     # the move that would land the colormap on it
     qed.ux.store.diagramMoveGroup(
-        store, viewport=0, nodes=[gray.relay, bmp.relay], anchor=gray.relay, position=(0, 20, 0)
+        store,
+        diagram=store.relay,
+        nodes=[gray.relay, bmp.relay],
+        anchor=gray.relay,
+        position=(0, 20, 0),
     )
     # is refused: nothing in the group moved
     assert {node.eid: node.position for node in [gray, bmp, *gray.slots, *bmp.slots]} == {
@@ -321,14 +324,18 @@ def stale():
     store = storeOf(diagram)
     # ask with an id that parses but names nothing here
     result = qed.ux.store.diagramMove(
-        store, viewport=0, node="Factory:00000000-0000-0000-0000-000000000000", position=(1, 1, 0)
+        store,
+        diagram=store.relay,
+        node="Factory:00000000-0000-0000-0000-000000000000",
+        position=(1, 1, 0),
     )
     # the diagram comes back unchanged
     assert result is diagram
     assert factory.position == (0, 0, 0)
     # and so does one with an id that does not parse
     assert (
-        qed.ux.store.diagramMove(store, viewport=0, node="nonsense", position=(1, 1, 0)) is diagram
+        qed.ux.store.diagramMove(store, diagram=store.relay, node="nonsense", position=(1, 1, 0))
+        is diagram
     )
     # all done
     return
