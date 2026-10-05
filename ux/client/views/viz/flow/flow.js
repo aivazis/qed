@@ -17,6 +17,10 @@ import { Camera, Compass } from '~/widgets'
 import { useSelection } from './useSelection'
 // the drag in progress
 import { DragProvider } from './drag'
+// the drop target for factories from the palette
+import { Drops } from './drops'
+// the editor
+import { useEditDiagram } from './useEditDiagram'
 // components
 import { Grid } from './grid'
 // diagram nodes
@@ -40,7 +44,25 @@ export const Flow = ({ viewport, view }) => {
     const nodes = occupants(diagram)
 
     // access the selection
-    const { clear } = useSelection()
+    const { selection, clear } = useSelection()
+    // the editor
+    const { remove } = useEditDiagram()
+    // the delete keys remove the picked factories
+    const onKeyDown = evt => {
+        // if it is not one of them
+        if (evt.key !== "Delete" && evt.key !== "Backspace") {
+            // it is not for me
+            return
+        }
+        // the factories of this diagram
+        const factories = new Set(diagram?.factories.map(factory => factory.id) ?? [])
+        // remove the picked ones
+        selection.filter(id => factories.has(id)).forEach(remove)
+        // and forget the picks
+        clear()
+        // all done
+        return
+    }
     // a click on the canvas, away from any node, clears it
     const clearSelection = () => {
         // drop the selection
@@ -57,7 +79,7 @@ export const Flow = ({ viewport, view }) => {
 
     // render
     return (
-        <section ref={ref} tabIndex="-1" style={styles.panel}>
+        <section ref={ref} tabIndex="-1" style={styles.panel} onKeyDown={onKeyDown}>
             <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
                 {...styles.canvas} style={styles.surface} {...behaviors}
                 data-qed-diagram={diagram?.id ?? ""}
@@ -65,6 +87,8 @@ export const Flow = ({ viewport, view }) => {
                 {/* everything that is in ICS */}
                 <Camera ref={ref} viewport={viewport} scale={20} focus={focus} focusKey={diagram?.id}>
                     {/* the drag in progress, which the nodes publish and the rest follow */}
+                    {/* the drop target for factories from the palette */}
+                    <Drops canvas={ref} />
                     <DragProvider nodes={nodes}>
                         {/* the orientation marker at the origin */}
                         {/* <Compass /> */}
