@@ -39,7 +39,10 @@ class ViewDiagramMove(graphene.Mutation):
         store = info.context["store"]
         # ask it to make the move
         diagram = store.diagramMove(
-            viewport=input.viewport, node=input.node, position=(input.x, input.y, input.z)
+            viewport=input.viewport,
+            node=input.node,
+            position=(input.x, input.y, input.z),
+            settled=input.settled,
         )
         # and hand off the diagram
         return {"diagram": diagram}
