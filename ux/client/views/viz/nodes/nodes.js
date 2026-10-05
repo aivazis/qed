@@ -17,8 +17,7 @@ import { Header, Tray } from '~/widgets'
 // locals
 // hooks
 import { useViewports } from '../viz/useViewports'
-import { useSelection } from '../flow'
-import { useEditDiagram } from '../flow/useEditDiagram'
+import { useEditDiagram, useSelection } from '../flow'
 // the media type of a factory dragged from the palette
 import { factoryMediaType } from '../flow/drops'
 // the small picture of a factory
@@ -27,45 +26,67 @@ import { Miniature } from './miniature'
 import styles from './styles'
 
 
-// the panel with the nodes that a visualization pipeline can be built out of; while it is up,
-// the active view shows its pipeline below its data, and the panel describes the node picked there
+// the panel of the visualization pipeline activity; while it is up, the active view shows its
+// pipeline below its data, and the panel describes the factory picked there
 export const Nodes = ({ qed }) => {
     // the active viewport
     const { activeViewport } = useViewports()
-    // the nodes picked on the diagram
-    const { selection } = useSelection()
-    // unpack the views and the factories on offer
-    const { views, catalog } = useFragment(nodesGetDiagramFragment, qed)
-    // the factories on the diagram of the active view
-    const factories = views[activeViewport]?.diagram?.factories ?? []
-    // the one to describe: the first pick that is a factory of this diagram
-    const factory = factories.find(candidate => selection.includes(candidate.id)) ?? null
+    // unpack the views
+    const { views } = useFragment(nodesGetDiagramFragment, qed)
+    // the diagram of the active view
+    const diagram = views[activeViewport]?.diagram ?? null
 
     // render
     return (
         <Panel data-qed-panel="flow">
             {/* the title of the panel */}
             <Header title="visualization pipeline" style={styles.header} />
-            {/* the factories on offer, one tray per protocol */}
-            {catalog.map(group => <Group key={group.family} group={group} />)}
-            {/* the products, which will hold the datasets */}
-            <Tray title="products" scale={0.5} data-qed-palette="products">
-                <Note>the datasets of the readers will appear here</Note>
-            </Tray>
-            {/* the pipelines the user designed */}
-            <Tray title="designs" scale={0.5} data-qed-palette="designs">
-                <Note>the pipelines you design will appear here</Note>
-            </Tray>
             {/* the description of the factory picked on the diagram */}
-            <Tray title="picked" initially={true} scale={0.5} data-qed-palette="picked">
-                {/* without a pick, say how to make one */}
-                {factory === null && <Note>pick a factory on the diagram to see what it does</Note>}
-                {/* otherwise, describe it */}
-                {factory !== null && <Inspector factory={factory} />}
-            </Tray>
+            <Picked diagram={diagram} />
         </Panel>
     )
 }
+
+
+// the factories on offer, one tray per protocol
+export const Palette = ({ catalog }) => {
+    // render
+    return (
+        <>
+            {catalog.map(group => <Group key={group.family} group={group} />)}
+        </>
+    )
+}
+
+
+// the description of the factory picked on {diagram}, in a tray of its own
+export const Picked = ({ diagram }) => {
+    // the nodes picked on the diagram
+    const { selection } = useSelection()
+    // the factories on the diagram
+    const factories = diagram?.factories ?? []
+    // the one to describe: the first pick that is a factory of this diagram
+    const factory = factories.find(candidate => selection.includes(candidate.id)) ?? null
+    // render
+    return (
+        <Tray title="picked" initially={true} scale={0.5} data-qed-palette="picked">
+            {/* without a pick, say how to make one */}
+            {factory === null && <Note>pick a factory on the diagram to see what it does</Note>}
+            {/* otherwise, describe it */}
+            {factory !== null && <Inspector diagram={diagram.id} factory={factory} />}
+        </Tray>
+    )
+}
+
+
+// a note in place of contents that are not there yet
+export const Note = styled.div`
+    font-family: inconsolata;
+    font-size: 90%;
+    cursor: default;
+    padding: 0.5rem 1.0rem;
+    color: ${styles.dim};
+`
 
 
 // the factories that implement one protocol, in a tray of their own
@@ -121,10 +142,11 @@ const Entry = ({ entry }) => {
 }
 
 
-// the description of a factory: what it is, what it consumes, what it makes, and how it is set
-const Inspector = ({ factory }) => {
+// the description of a {factory} of {diagram}: what it is, what it consumes, what it makes, and how
+// it is set
+const Inspector = ({ diagram, factory }) => {
     // the editor
-    const { remove } = useEditDiagram()
+    const { remove } = useEditDiagram(diagram)
     // unpack
     const { id, family, doc, traits } = factory
     // its short name is the last part of its family
@@ -259,15 +281,6 @@ const Remove = styled.span`
     }
 `
 
-// the note shown when there is nothing to describe
-const Note = styled.div`
-    font-family: inconsolata;
-    font-size: 90%;
-    cursor: default;
-    padding: 0.5rem 1.0rem;
-    color: ${styles.dim};
-`
-
 // the description
 const Section = styled.div`
     padding: 0.5rem 1.0rem;
@@ -359,18 +372,6 @@ const TraitDoc = styled.span`
 // my fragment
 const nodesGetDiagramFragment = graphql`
     fragment nodesGetDiagramFragment on QED {
-        # the factories on offer
-        catalog {
-            family
-            name
-            entries {
-                family
-                name
-                doc
-                inputs
-                outputs
-            }
-        }
         views {
             # the diagram of the pipeline of the view
             diagram {

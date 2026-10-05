@@ -7,6 +7,10 @@
 
 // export the view
 export { Flow } from './flow'
+// the canvas that draws any pipeline diagram
+export { Canvas } from './canvas'
+// the editor of a diagram, which the panels share
+export { useEditDiagram } from './useEditDiagram'
 // and the access to the nodes picked on it
 export { useSelection } from './useSelection'
 

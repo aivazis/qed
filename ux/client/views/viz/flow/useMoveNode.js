@@ -9,15 +9,15 @@
 import React from 'react'
 import { graphql, useMutation } from 'react-relay/hooks'
 
-// project
-// the active viewport, whose pipeline the diagram shows
-import { useViewports } from '../viz/useViewports'
+// local
+// the diagram on the canvas
+import { useDiagram } from './diagram'
 
 
-// move a node of the pipeline diagram of the active view
+// move a node of the pipeline diagram on the canvas
 export const useMoveNode = () => {
-    // the active viewport
-    const { activeViewport } = useViewports()
+    // the diagram
+    const { id: diagram } = useDiagram()
     // moving a node mutates the server side diagram
     const [commit, pending] = useMutation(useMoveNodeMutation)
     // and so does moving the selection
@@ -35,8 +35,8 @@ export const useMoveNode = () => {
         // the selection moves as a whole, led by the dragged node, and leaves nothing behind to
         // settle; a node on its own moves by itself
         const [mutate, input] = group !== null
-            ? [commitGroup, { viewport: activeViewport, nodes: group, anchor: id, x, y, z }]
-            : [commit, { viewport: activeViewport, node: id, x, y, z, settled }]
+            ? [commitGroup, { diagram, nodes: group, anchor: id, x, y, z }]
+            : [commit, { diagram, node: id, x, y, z, settled }]
         // send it
         mutate({
             // the payload
@@ -122,29 +122,11 @@ export const useMoveNode = () => {
 // the mutation; the response carries the whole diagram, since dropping a slot on another merges
 // the two, which adds and removes nodes, labels, and connectors
 const useMoveNodeMutation = graphql`
-    mutation useMoveNodeMutation($input: ViewDiagramMoveInput!) {
-        viewDiagramMove(input: $input) {
+    mutation useMoveNodeMutation($input: DiagramMoveInput!) {
+        diagramMove(input: $input) {
             diagram {
                 id
-                ...labelsFlowDiagramFragment
-                ...connectorsFlowDiagramFragment
-                ...slotsFlowDiagramFragment
-                ...factoriesFlowDiagramFragment
-                # the positions the camera centers on
-                factories {
-                    at {
-                        x
-                        y
-                        z
-                    }
-                }
-                slots {
-                    at {
-                        x
-                        y
-                        z
-                    }
-                }
+                ...contentsFlowDiagramFragment
             }
         }
     }
@@ -152,29 +134,11 @@ const useMoveNodeMutation = graphql`
 
 // the mutation that moves the selection, which carries the whole diagram back as well
 const useMoveNodeGroupMutation = graphql`
-    mutation useMoveNodeGroupMutation($input: ViewDiagramMoveGroupInput!) {
-        viewDiagramMoveGroup(input: $input) {
+    mutation useMoveNodeGroupMutation($input: DiagramMoveGroupInput!) {
+        diagramMoveGroup(input: $input) {
             diagram {
                 id
-                ...labelsFlowDiagramFragment
-                ...connectorsFlowDiagramFragment
-                ...slotsFlowDiagramFragment
-                ...factoriesFlowDiagramFragment
-                # the positions the camera centers on
-                factories {
-                    at {
-                        x
-                        y
-                        z
-                    }
-                }
-                slots {
-                    at {
-                        x
-                        y
-                        z
-                    }
-                }
+                ...contentsFlowDiagramFragment
             }
         }
     }

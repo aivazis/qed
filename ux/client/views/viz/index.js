@@ -11,7 +11,9 @@ export { Viz } from './viz'
 export { Console } from './console'
 export { Quality } from './quality'
 export { Controls } from './controls'
-export { Nodes } from './nodes'
+export { Nodes, Palette, Picked, Note } from './nodes'
+// the canvas that draws any pipeline diagram
+export { Canvas } from './flow'
 export { Readers } from './readers'
 
 // the provider of the viewport state, which the activity bar shares with the panels

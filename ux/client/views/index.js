@@ -14,6 +14,8 @@ export { Explorer, Archives } from './explorer'
 export { Viz, VizProvider, Console, Controls, Nodes, Quality, Readers } from './viz'
 // embedded documentation
 export { Guide, TOC } from './doc'
+// the pipeline playground
+export { Playground } from './playground'
 
 // the status bar
 export { Status } from './status'

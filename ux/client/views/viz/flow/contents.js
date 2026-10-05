@@ -13,20 +13,11 @@ import { graphql } from 'react-relay/hooks'
 // for it, so their responses replace the whole picture
 export const contentsFlowDiagramFragment = graphql`
     fragment contentsFlowDiagramFragment on FlowDiagram {
-        # the parts
-        ...labelsFlowDiagramFragment
-        ...connectorsFlowDiagramFragment
-        ...slotsFlowDiagramFragment
-        ...factoriesFlowDiagramFragment
-        # where the nodes are, for the camera and the drop feedback
+        # what the canvas draws
+        ...canvasFlowDiagramFragment
+        # and what the inspector shows of the factories
         factories {
             id
-            at {
-                x
-                y
-                z
-            }
-            # what the inspector shows
             family
             doc
             traits {
@@ -37,15 +28,6 @@ export const contentsFlowDiagramFragment = graphql`
                 default
                 doc
             }
-        }
-        slots {
-            id
-            at {
-                x
-                y
-                z
-            }
-            bound
         }
     }
 `
