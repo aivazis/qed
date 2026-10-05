@@ -33,12 +33,14 @@ def storeOf(diagram):
 
 
 # move a node through the store
-def move(store, node, position):
+def move(store, node, position, settled=True):
     """
-    Ask {store} to move {node} to {position}
+    Ask {store} to move {node} to {position}; a move that is not {settled} is a step of a drag
     """
     # borrow the method of the store class
-    return qed.ux.store.diagramMove(store, viewport=0, node=node.relay, position=position)
+    return qed.ux.store.diagramMove(
+        store, viewport=0, node=node.relay, position=position, settled=settled
+    )
 
 
 # the gray colormap on a diagram of its own
@@ -152,6 +154,63 @@ def merge():
     return
 
 
+# a drag that reports its steps merges only where it lands
+def steps():
+    """
+    Drag the input slot across the output slot for red, in steps, and drop it on the one for blue
+    """
+    # draw
+    diagram, factory = gray()
+    store = storeOf(diagram)
+    # the slots
+    data = slotOf(factory, "data")
+    red = slotOf(factory, "red")
+    blue = slotOf(factory, "blue")
+    # a step onto the slot for red
+    move(store, data, red.position, settled=False)
+    # moves the node there, but merges nothing yet
+    assert data.position == red.position
+    assert len(diagram.slots) == 4
+    # the node is on the move, out of the layout, which still knows the slot for red
+    assert diagram.migrant is data
+    assert diagram.layout[red.position] is red
+    # the drop, onto the slot for blue
+    move(store, data, blue.position)
+    # merges with the slot for blue only
+    assert len(diagram.slots) == 3
+    assert blue not in diagram.slots and red in diagram.slots
+    # and the drag is over
+    assert diagram.migrant is None
+    # all done
+    return
+
+
+# a drag that was left in the middle lands where it was last seen
+def abandoned():
+    """
+    Start dragging the factory, and move a slot before the factory is dropped
+    """
+    # draw
+    diagram, factory = gray()
+    store = storeOf(diagram)
+    # a step of a drag of the factory that never ends
+    move(store, factory, (3, 3, 0), settled=False)
+    # the factory is on the move
+    assert diagram.migrant is factory
+    # move a slot
+    red = slotOf(factory, "red")
+    move(store, red, (11, 11, 0))
+    # the factory landed where it was last seen, and is back on the layout
+    assert factory.position == (3, 3, 0)
+    assert diagram.layout[(3, 3, 0)] is factory
+    # and the slot moved
+    assert diagram.layout[(11, 11, 0)] is red
+    # nothing is on the move any more
+    assert diagram.migrant is None
+    # all done
+    return
+
+
 # a node the diagram does not know is left alone
 def stale():
     """
@@ -185,6 +244,9 @@ def test():
     # into each other
     blocked()
     merge()
+    # in steps, and left half way
+    steps()
+    abandoned()
     # and ones that are not there
     stale()
     # all done
