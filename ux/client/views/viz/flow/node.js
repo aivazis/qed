@@ -69,6 +69,9 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
         evt.stopPropagation()
         // and keep the browser from starting a selection or a native drag
         evt.preventDefault()
+        // which also keeps the canvas from taking the focus, so hand it over explicitly: the delete
+        // keys and the camera keys listen there
+        evt.currentTarget.closest("section")?.focus()
         // follow the pointer wherever it goes until it lets go
         evt.currentTarget.setPointerCapture(evt.pointerId)
         // remember where the pointer grabbed me and where i was; i keep my distance from it
