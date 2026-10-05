@@ -50,6 +50,7 @@ from .ViewSyncReset import ViewSyncReset as viewSyncReset
 from .ViewLookAt import ViewLookAt as viewLookAt
 from .ViewDiagramAdd import ViewDiagramAdd as viewDiagramAdd
 from .ViewDiagramMove import ViewDiagramMove as viewDiagramMove
+from .ViewDiagramMoveGroup import ViewDiagramMoveGroup as viewDiagramMoveGroup
 from .ViewDiagramRemove import ViewDiagramRemove as viewDiagramRemove
 
 # zoom

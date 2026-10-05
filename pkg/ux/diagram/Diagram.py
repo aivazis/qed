@@ -115,6 +115,56 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         # and update the diagram
         return self.drawFactory(factory=factory, position=position)
 
+    def moveGroup(self, nodes, anchor, position):
+        """
+        Move {nodes}, along with the own unbound slots of the factories among them, so that
+        {anchor} lands at {position} and the rest keep their places around it; the move is all or
+        nothing, and never merges: it is refused if any member would land on a node outside the
+        group
+        """
+        # the group: the nodes, and the slots their factories take along
+        group = list(nodes)
+        # go through the nodes
+        for node in nodes:
+            # and add the followers of each, once
+            for slot in self.followers(node=node):
+                # if not already there
+                if slot not in group:
+                    # add it
+                    group.append(slot)
+        # how far the group moves
+        delta = tuple(p - q for p, q in zip(position, anchor.position))
+        # where each member is headed
+        targets = [(node, tuple(p + d for p, d in zip(node.position, delta))) for node in group]
+        # the members, by identity
+        members = {id(node) for node in group}
+        # if any of them would land on somebody else
+        for _, target in targets:
+            # find out who is there
+            other = self.layout.get(target)
+            # if it is not one of us
+            if other is not None and id(other) not in members:
+                # the move is refused
+                return False
+        # a member in the middle of a move of its own is no longer moving
+        if id(self.migrant) in members:
+            # so forget it
+            self.migrant = None
+        # the members leave their spots, all of them before any of them lands
+        for node, _ in targets:
+            # if the node holds its spot
+            if self.layout.get(node.position) is node:
+                # release it
+                del self.layout[node.position]
+        # then they move, and take their new spots
+        for node, target in targets:
+            # move the node, along with its labels
+            node.move(position=target)
+            # and take the spot
+            self.layout[target] = node
+        # all done
+        return True
+
     def followers(self, node):
         """
         The slots that go wherever {node} goes: a factory's own unbound slots, the ones no other
