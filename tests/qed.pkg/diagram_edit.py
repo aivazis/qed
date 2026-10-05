@@ -234,6 +234,57 @@ def packed():
     return
 
 
+# a diagram drawn read only
+def readonly():
+    """
+    Draw the covariance flow read only, and check that adding, removing, binding, and splitting
+    leave it as it is, while moving a node still works
+    """
+    # draw the flow, under a name of its own
+    diagram = qed.ux.diagram(
+        name=f"diagram_edit.{uuid.uuid1()}", flow=qed.channels.covariance(), editable=False
+    )
+    store = storeOf(diagram)
+
+    # what it looks like
+    def picture():
+        """
+        The families of the factories, and where every node is
+        """
+        # collect them
+        return (
+            sorted(factory.factory.pyre_family() for factory in diagram.factories),
+            sorted(node.position for node in [*diagram.factories, *diagram.slots]),
+        )
+
+    before = picture()
+    # adding a factory
+    add(store, "pyre.viz.filters.power", (0, 30, 0))
+    # removing one
+    remove(store, next(iter(diagram.factories)))
+    # and splitting a bound slot
+    remove(store, next(slot for slot in diagram.slots if slot.readers and slot.writers))
+    # change nothing
+    assert picture() == before
+    # dropping an unbound slot on another one
+    loose = [slot for slot in diagram.slots if not (slot.readers and slot.writers)]
+    first, second = loose[0], loose[1]
+    origin = first.position
+    qed.ux.store.diagramMove(
+        store, diagram=store.relay, node=first.relay, position=second.position, settled=True
+    )
+    # binds nothing: the slot stays where it was
+    assert first.position == origin
+    assert picture() == before
+    # but a move to an empty spot goes through
+    qed.ux.store.diagramMove(
+        store, diagram=store.relay, node=first.relay, position=(0, 40, 0), settled=True
+    )
+    assert first.position == (0, 40, 0)
+    # all done
+    return
+
+
 # the driver
 def test():
     """
@@ -246,6 +297,8 @@ def test():
     # undo bindings
     splitting()
     packed()
+    # a diagram that cannot be edited
+    readonly()
     # all done
     return
 
