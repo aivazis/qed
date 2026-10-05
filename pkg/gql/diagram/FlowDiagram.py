@@ -34,6 +34,8 @@ class FlowDiagram(graphene.ObjectType):
     id = graphene.ID(required=True)
     name = graphene.String(required=True)
     family = graphene.String(required=True)
+    # whether its structure can change
+    editable = graphene.Boolean(required=True)
     # diagram parts
     connectors = graphene.List(FlowConnector)
     factories = graphene.List(FlowFactory)

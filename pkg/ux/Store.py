@@ -1359,6 +1359,10 @@ class Store(qed.component, family="qed.ux.store"):
         if diagram is None:
             # so there is nothing to add to
             return None
+        # a diagram that cannot be edited
+        if not diagram.editable:
+            # stays as it is
+            return diagram
         # find the factory the family names
         implementer = self.implementer(family=family)
         # an unknown family
@@ -1389,6 +1393,10 @@ class Store(qed.component, family="qed.ux.store"):
         if diagram is None:
             # so there is nothing to remove from
             return None
+        # a diagram that cannot be edited
+        if not diagram.editable:
+            # stays as it is
+            return diagram
         # find the node
         entity = diagram.locate(relay=node)
         # a factory

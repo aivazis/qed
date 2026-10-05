@@ -169,23 +169,12 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             diagram = None
         # otherwise
         else:
-            # build the pipeline the flow describes
-            pipeline = flow()
-            # start with an empty diagram; the name is unique, since a component asked for by a
-            # name it was built with before comes back as the old instance
-            diagram = qed.ux.diagram(name=f"{channel.pyre_name}.{uuid.uuid1()}", flow=None)
-            # for now, while the editing is worked out, draw just the colormap and the encoder of
-            # the pipeline, with their slots unbound, so there is something to play with without
-            # the clutter
-            colormap = next(
-                factory
-                for factory in pipeline.pyre_factories()
-                if factory.pyre_family().startswith("pyre.viz.colormaps.")
+            # draw it, read only, since changes to it do not reach the pipeline yet; the name is
+            # unique, since a component asked for by a name it was built with before comes back
+            # as the old instance
+            diagram = qed.ux.diagram(
+                name=f"{channel.pyre_name}.{uuid.uuid1()}", flow=flow(), editable=False
             )
-            # place the colormap at the origin
-            diagram.addFactory(factory=colormap, position=(0, 0, 0))
-            # and the encoder to its right, far enough that their slots stay apart
-            diagram.addFactory(factory=pipeline.codec, position=(15, 0, 0))
         # remember it, along with the channel it belongs to
         self._diagram = channel, diagram
         # and return it
