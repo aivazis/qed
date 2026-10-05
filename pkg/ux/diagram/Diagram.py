@@ -115,6 +115,70 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         # and update the diagram
         return self.drawFactory(factory=factory, position=position)
 
+    def fits(self, factory, position):
+        """
+        Check whether {factory} placed at {position} would land on free spots, along with all
+        the slots it would bring
+        """
+        # build a throwaway entity, which places the slots of the factory around it
+        entity = Factory(factory=factory, position=position)
+        # the spots it would take
+        spots = [entity.position] + [slot.position for slot in entity.slots]
+        # it fits if none of them is taken
+        return not any(spot in self.layout for spot in spots)
+
+    def removeFactory(self, entity):
+        """
+        Remove the factory {entity} from the diagram and its flow, along with its connectors;
+        the slots it leaves without any connections go as well, the ones other factories still
+        use stay
+        """
+        # a factory in the middle of a move is no longer moving
+        if self.migrant is entity:
+            # so forget it
+            self.migrant = None
+        # go through its slots
+        for slot in list(entity.slots):
+            # and the connectors between it and the slot
+            for connector in list(slot.connections(factory=entity)):
+                # forget the labels of the connector
+                self.forget(nodes=connector.labels)
+            # detach the slot from the factory, on whichever side it was
+            slot.readers.pop(entity, None)
+            slot.writers.pop(entity, None)
+            # a slot that nobody uses any more
+            if not slot.readers and not slot.writers:
+                # goes, along with its labels
+                self.forget(nodes=slot.labels)
+                self.forget(nodes=[slot])
+        # forget the labels of the factory
+        self.forget(nodes=entity.labels)
+        # and the factory itself
+        self.forget(nodes=[entity])
+        # take it out of the flow
+        self.flow.factories.discard(entity.factory)
+        # all done
+        return
+
+    def forget(self, nodes):
+        """
+        Remove {nodes} from my indices, my layout, and my piles
+        """
+        # go through them
+        for node in list(nodes):
+            # out of the node index
+            self.nodes.pop(node.eid, None)
+            # out of the layout, if it holds a spot
+            if self.layout.get(node.position) is node:
+                # by removing it
+                del self.layout[node.position]
+            # and out of whichever pile it is on
+            self.factories.discard(node)
+            self.slots.discard(node)
+            self.labels.discard(node)
+        # all done
+        return
+
     def addProduct(self, product, position):
         """
         Add a product to the flow
