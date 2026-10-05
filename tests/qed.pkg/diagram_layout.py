@@ -64,6 +64,14 @@ def test():
     assert all(set(slot.readers) == {encoder} for slot in shared)
     # it sits on the side of the colormap
     assert all(slot.position[0] == colormap.position[0] + 5 for slot in shared)
+    # which, with the factories packed a spacing apart, is also where the encoder keeps the
+    # inputs it reads them through, so every shared slot is at home on both sides
+    assert all(
+        slot.position == colormap.home(trait) == encoder.home(other)
+        for slot in shared
+        for trait in slot.writers[colormap]
+        for other in slot.readers[encoder]
+    )
     # carries the product the two factories share
     assert all(slot.bound for slot in shared)
     # and names it in a label the diagram knows about
