@@ -10,7 +10,7 @@ import React from 'react'
 
 
 // the provider factory
-export const Provider = React.forwardRef(({ viewport, scale, focus, children }, clientRef) => {
+export const Provider = React.forwardRef(({ viewport, scale, focus, focusKey, children }, clientRef) => {
     // save the external length scale
     const els = scale
     // build a camera
@@ -28,20 +28,29 @@ export const Provider = React.forwardRef(({ viewport, scale, focus, children }, 
         // otherwise, solve for the pan that maps the focus onto the middle of my area
         return { x: width / (2 * els) - focus.x / z, y: height / (2 * els) - focus.y / z, z }
     }
-    // center on my focus when i first show up, and whenever the focus moves; this waits until
-    // the commit is over, since my area belongs to my client, whose ref is attached after my
-    // own layout effects run
+    // center on my focus when i first show up, and whenever what i look at changes, as told by
+    // {focusKey}; not when the focus merely shifts because something in view moved, which would
+    // pull the picture out from under the user. this waits until the commit is over, since my
+    // area belongs to my client, whose ref is attached after my own layout effects run
     React.useEffect(() => {
+        // without a focus there is nothing to aim at
+        if (!focus) {
+            // so leave the camera alone
+            return
+        }
         // aim the camera, keeping its zoom and orientation
         setCamera(camera => ({ ...camera, ...home(camera.z) }))
         // all done
         return
-    }, [focus?.x, focus?.y])
+    }, [focusKey, focus === null])
     // the cursor position in ICS
     const [cursor, setCursor] = React.useState(null)
 
     // the transform from viewport to the internal coordinate system
-    const toICS = point => {
+    // the diagram coordinates of a point on the screen, rounded onto the grid unless asked not
+    // to; a drag subtracts two of these, and rounding each one before the subtraction would make
+    // the difference flicker whenever the pointer sits half way between two grid points
+    const toICS = (point, round = true) => {
         // get the origin of my viewport
         const { left, top } = clientRef.current?.getBoundingClientRect() ?? { left: 0, top: 0 }
         // project the mouse coordinates to ICS
@@ -54,8 +63,12 @@ export const Provider = React.forwardRef(({ viewport, scale, focus, children }, 
         // from this, compute its angle with the rotated diagram x-axis
         const theta = phi - Math.PI / 180 * camera.phi
         // use the camera angle to project to the actual diagram coordinates
-        const x = Math.round(r * Math.cos(theta))
-        const y = Math.round(r * Math.sin(theta))
+        const [x, y] = [r * Math.cos(theta), r * Math.sin(theta)]
+        // if the caller wants grid points
+        if (round) {
+            // round
+            return { x: Math.round(x), y: Math.round(y) }
+        }
         // all done
         return { x, y }
     }
@@ -183,9 +196,9 @@ export const Provider = React.forwardRef(({ viewport, scale, focus, children }, 
     // install the event listeners
     React.useEffect(() => {
         // track the cursor when it moves in my area
-        clientRef.current?.addEventListener("mousemove", track)
+        clientRef.current?.addEventListener("pointermove", track)
         // stop tracking when it leaves my area
-        clientRef.current?.addEventListener("mouseleave", reset)
+        clientRef.current?.addEventListener("pointerleave", reset)
         // install the keypad
         clientRef.current?.addEventListener("keydown", keypad)
         // handle wheel events
@@ -193,8 +206,8 @@ export const Provider = React.forwardRef(({ viewport, scale, focus, children }, 
         // register a cleanup
         return () => {
             // disconnect the cursor trackers
-            clientRef.current?.removeEventListener("mousemove", track)
-            clientRef.current?.removeEventListener("mouseleave", reset)
+            clientRef.current?.removeEventListener("pointermove", track)
+            clientRef.current?.removeEventListener("pointerleave", reset)
             // disconnect the keypad
             clientRef.current?.removeEventListener("keydown", keypad)
             // disconnect the wheel listener
