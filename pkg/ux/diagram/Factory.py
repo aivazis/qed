@@ -87,29 +87,66 @@ class Factory(Node):
         # all done
         return
 
-    def generateSlots(self):
+    def home(self, trait):
         """
-        Generate the set of my initial slots
+        The spot where the slot for {trait} goes when nothing else decides, the way i place my
+        slots when i am first drawn
+        """
+        # get my location
+        x, y, z = self.position
+        # sort my traits the way i place them
+        insOnly, outsOnly, inouts = self.partition()
+        # go through the inputs
+        for idx, candidate in enumerate(insOnly):
+            # if this is the one
+            if candidate is trait:
+                # it goes on my left
+                return (x - 5, y + 2 * (2 * idx + 1 - len(insOnly)), z)
+        # go through the outputs
+        for idx, candidate in enumerate(outsOnly):
+            # if this is the one
+            if candidate is trait:
+                # it goes on my right
+                return (x + 5, y + 2 * (2 * idx + 1 - len(outsOnly)), z)
+        # go through the ones that are both
+        for idx, candidate in enumerate(inouts):
+            # if this is the one
+            if candidate is trait:
+                # it goes below me
+                return (x, y + 2 * (idx + 1), z)
+        # a trait that is not mine has no home here
+        return None
+
+    def partition(self):
+        """
+        Sort my traits into the ones that are just input, just output, and both, in the order the
+        factory declares them, so the slots line up the same way every time
         """
         # grab my factory node
         factory = self.factory
-
-        # put all input traits on a pile, in the order the factory declares them, so the slots
-        # line up the same way every time
+        # all the input traits
         ins = factory.pyre_inputTraits
-        # and all output traits on another
+        # and all the output traits
         outs = factory.pyre_outputTraits
         # traits overload the comparison operators to build expressions, so membership is
         # decided by identity
         inIds = {id(trait) for trait in ins}
         outIds = {id(trait) for trait in outs}
-
         # isolate the ones that are just input
         insOnly = [trait for trait in ins if id(trait) not in outIds]
         # the ones that are just output
         outsOnly = [trait for trait in outs if id(trait) not in inIds]
         # and the ones that are both
         inouts = [trait for trait in ins if id(trait) in outIds]
+        # hand them off
+        return insOnly, outsOnly, inouts
+
+    def generateSlots(self):
+        """
+        Generate the set of my initial slots
+        """
+        # sort my traits the way i place them
+        insOnly, outsOnly, inouts = self.partition()
 
         # make slots for my inputs
         yield from self._makeInputSlots(traits=insOnly)
