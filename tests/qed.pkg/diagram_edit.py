@@ -141,6 +141,100 @@ def removing():
     return
 
 
+# the slot of {factory} for its trait {name}
+def slotOf(factory, name):
+    """
+    Find the slot of {factory} that is connected to its trait {name}
+    """
+    # go through the slots of the factory
+    for slot in factory.slots:
+        # and their connections
+        for connector in slot.connections(factory=factory):
+            # look for the trait
+            if any(trait.name == name for trait in connector):
+                # found it
+                return slot
+    # not there
+    return None
+
+
+# move a node through the store
+def move(store, node, position):
+    """
+    Ask {store} to move {node} to {position}
+    """
+    # easy enough
+    return qed.ux.store.diagramMove(store, viewport=0, node=node.relay, position=position)
+
+
+# removing a slot undoes the binding it stands for
+def splitting():
+    """
+    Bind the red output of the colormap to the red input of the encoder, then remove the slot
+    """
+    # an empty diagram
+    diagram = empty()
+    store = storeOf(diagram)
+    # the colormap and the encoder
+    add(store, "pyre.viz.colormaps.gray", (0, 0, 0))
+    add(store, "pyre.viz.codecs.bmp", (15, 0, 0))
+    gray = factoryOf(diagram, "pyre.viz.colormaps.gray")
+    bmp = factoryOf(diagram, "pyre.viz.codecs.bmp")
+    # bind the reds by dropping the output on the input
+    red = slotOf(gray, "red")
+    move(store, red, slotOf(bmp, "red").position)
+    assert len(diagram.slots) == 7
+    # remove the slot of the binding
+    remove(store, red)
+    # the binding is undone: the slot is gone, and each red has a slot of its own again
+    assert red not in diagram.slots
+    assert len(diagram.slots) == 8
+    # each one at its home
+    assert slotOf(gray, "red").position == gray.home(trait=gray.factory.pyre_trait("red"))
+    assert slotOf(bmp, "red").position == bmp.home(trait=bmp.factory.pyre_trait("red"))
+    # connected the way it was, and to nobody else
+    assert set(slotOf(gray, "red").writers) == {gray} and not slotOf(gray, "red").readers
+    assert set(slotOf(bmp, "red").readers) == {bmp} and not slotOf(bmp, "red").writers
+    # a slot that is already one trait's own has nothing to undo
+    own = slotOf(gray, "green")
+    remove(store, own)
+    assert own in diagram.slots and len(diagram.slots) == 8
+    # all done
+    return
+
+
+# a binding in a packed diagram comes apart along its own line
+def packed():
+    """
+    Two filters ten units apart, so the output of one and the input of the other share a home,
+    bound right there, then split
+    """
+    # an empty diagram
+    diagram = empty()
+    store = storeOf(diagram)
+    # the first filter at the origin, and the second well to its right, for now
+    add(store, "pyre.viz.filters.parametric", (0, 0, 0))
+    add(store, "pyre.viz.filters.parametric", (20, 0, 0))
+    first, second = sorted(
+        (entity for entity in diagram.factories), key=lambda entity: entity.position
+    )
+    # bind the output of the first to the input of the second, and bring the binding back to
+    # the home of the output
+    output = slotOf(first, "parametric")
+    move(store, output, slotOf(second, "signal").position)
+    move(store, output, (5, 0, 0))
+    # bring the second filter close, so its input calls the same spot home
+    move(store, second, (10, 0, 0))
+    assert second.home(trait=second.factory.pyre_trait("signal")) == (5, 0, 0)
+    # split the binding
+    remove(store, output)
+    # each slot stepped half a cell toward its own factory, so the two do not pile up
+    assert slotOf(first, "parametric").position == (4, 0, 0)
+    assert slotOf(second, "signal").position == (6, 0, 0)
+    # all done
+    return
+
+
 # the driver
 def test():
     """
@@ -150,6 +244,9 @@ def test():
     adding()
     # and remove
     removing()
+    # undo bindings
+    splitting()
+    packed()
     # all done
     return
 
