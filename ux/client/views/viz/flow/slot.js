@@ -15,6 +15,8 @@ import { Slot as Unbound } from '~/shapes'
 import { Product as Bound } from '~/shapes'
 
 // local
+// hooks
+import { useSelection } from './useSelection'
 // components
 import { Node } from './node'
 
@@ -25,9 +27,7 @@ export const Slot = ({ slot }) => {
     const { id, at, bound } = useFragment(slotFlowDiagramFragment, slot)
 
     // get the current selection
-    // MGA - FIXME: enabled node selection
-    // const { selection } = useSelection()
-    const { selection } = { selection: [] }
+    const { selection } = useSelection()
     // am i selected
     const selected = selection.includes(id)
 
@@ -51,6 +51,7 @@ const slotFlowDiagramFragment = graphql`
         at {
             x
             y
+            z
         }
         # state
         bound
