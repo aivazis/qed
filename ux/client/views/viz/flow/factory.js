@@ -66,6 +66,7 @@ const factoryFlowDiagramFragment = graphql`
         at {
             x
             y
+            z
         }
         # number of inputs
         inputs
