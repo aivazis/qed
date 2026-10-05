@@ -12,6 +12,9 @@ import graphene
 # view management
 from . import views
 
+# the pipeline diagrams
+from . import diagram
+
 # explorer
 from .archives.ConnectArchive import ConnectArchive
 from .archives.ConnectEarthAccessArchive import ConnectEarthAccessArchive
@@ -82,11 +85,6 @@ class Mutation(graphene.ObjectType):
 
     # look-at center
     viewLookAt = views.viewLookAt.Field()
-    # the pipeline diagram
-    viewDiagramAdd = views.viewDiagramAdd.Field()
-    viewDiagramMove = views.viewDiagramMove.Field()
-    viewDiagramMoveGroup = views.viewDiagramMoveGroup.Field()
-    viewDiagramRemove = views.viewDiagramRemove.Field()
 
     # zoom
     viewZoomSetLevel = views.viewZoomSetLevel.Field()
@@ -96,6 +94,12 @@ class Mutation(graphene.ObjectType):
     # stack member participation
     viewMembersSet = views.viewMembersSet.Field()
     viewMembersReset = views.viewMembersReset.Field()
+
+    # pipeline diagrams
+    diagramAdd = diagram.diagramAdd.Field()
+    diagramMove = diagram.diagramMove.Field()
+    diagramMoveGroup = diagram.diagramMoveGroup.Field()
+    diagramRemove = diagram.diagramRemove.Field()
 
     # data archive connection management
     connectArchive = ConnectArchive.Field()

@@ -10,13 +10,13 @@ import graphene
 
 
 # the request payload to place a new factory on the pipeline diagram
-class ViewDiagramAddInput(graphene.InputObjectType):
+class DiagramAddInput(graphene.InputObjectType):
     """
     The payload to place a new factory on the pipeline diagram
     """
 
-    # the viewport
-    viewport = graphene.Int(required=True)
+    # the id of the diagram
+    diagram = graphene.ID(required=True)
     # the family of the factory
     family = graphene.String(required=True)
     # where it goes

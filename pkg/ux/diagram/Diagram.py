@@ -28,6 +28,14 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
 
     # public data
     @property
+    def relay(self):
+        """
+        My {relay} id, by which clients address me
+        """
+        # splice together my {family} and {name}
+        return f"{self.pyre_family()}:{self.pyre_name}.diagram"
+
+    @property
     def connectors(self):
         """
         Iterate over all known connectors

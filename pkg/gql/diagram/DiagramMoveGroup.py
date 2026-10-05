@@ -9,40 +9,40 @@
 import graphene
 
 # the payload
-from .ViewDiagramMoveInput import ViewDiagramMoveInput
+from .DiagramMoveGroupInput import DiagramMoveGroupInput
 
 # the diagram
-from ..diagram.FlowDiagram import FlowDiagram
+from .FlowDiagram import FlowDiagram
 
 
-# move a node of the pipeline diagram
-class ViewDiagramMove(graphene.Mutation):
+# move a group of nodes of the pipeline diagram
+class DiagramMoveGroup(graphene.Mutation):
     """
-    Move a factory or a slot of the pipeline diagram of a viewport
+    Move a group of nodes of a pipeline diagram, all or nothing
     """
 
     # inputs
     class Arguments:
         # the payload
-        input = ViewDiagramMoveInput(required=True)
+        input = DiagramMoveGroupInput(required=True)
 
-    # the result is the whole diagram, since dropping a slot on another merges the two
+    # the result is the whole diagram
     diagram = graphene.Field(FlowDiagram)
 
     # the range of possible mutations
     @staticmethod
     def mutate(root, info, input):
         """
-        Move {input.node} of the diagram of {input.viewport} to {input.x, input.y, input.z}
+        Move {input.nodes} so that {input.anchor} lands at {input.x, input.y, input.z}
         """
         # get the store
         store = info.context["store"]
         # ask it to make the move
-        diagram = store.diagramMove(
-            viewport=input.viewport,
-            node=input.node,
+        diagram = store.diagramMoveGroup(
+            diagram=input.diagram,
+            nodes=input.nodes,
+            anchor=input.anchor,
             position=(input.x, input.y, input.z),
-            settled=input.settled,
         )
         # and hand off the diagram
         return {"diagram": diagram}

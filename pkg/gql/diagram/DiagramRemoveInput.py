@@ -10,13 +10,13 @@ import graphene
 
 
 # the request payload to remove a factory from the pipeline diagram
-class ViewDiagramRemoveInput(graphene.InputObjectType):
+class DiagramRemoveInput(graphene.InputObjectType):
     """
     The payload to remove a factory from the pipeline diagram
     """
 
-    # the viewport
-    viewport = graphene.Int(required=True)
+    # the id of the diagram
+    diagram = graphene.ID(required=True)
     # the id of the factory
     node = graphene.ID(required=True)
 

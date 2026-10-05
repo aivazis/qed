@@ -10,13 +10,13 @@ import graphene
 
 
 # the request payload for moving a group of nodes of the pipeline diagram
-class ViewDiagramMoveGroupInput(graphene.InputObjectType):
+class DiagramMoveGroupInput(graphene.InputObjectType):
     """
-    The payload to move a group of nodes of the pipeline diagram of a viewport
+    The payload to move a group of nodes of a pipeline diagram
     """
 
-    # the viewport
-    viewport = graphene.Int(required=True)
+    # the id of the diagram
+    diagram = graphene.ID(required=True)
     # the ids of the nodes
     nodes = graphene.List(graphene.NonNull(graphene.ID), required=True)
     # the id of the node that leads the group

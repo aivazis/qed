@@ -10,13 +10,13 @@ import graphene
 
 
 # the request payload for moving a node of the pipeline diagram
-class ViewDiagramMoveInput(graphene.InputObjectType):
+class DiagramMoveInput(graphene.InputObjectType):
     """
-    The payload to move a node of the pipeline diagram of a viewport
+    The payload to move a node of a pipeline diagram
     """
 
-    # the viewport
-    viewport = graphene.Int(required=True)
+    # the id of the diagram
+    diagram = graphene.ID(required=True)
     # the id of the node
     node = graphene.ID(required=True)
     # where it goes

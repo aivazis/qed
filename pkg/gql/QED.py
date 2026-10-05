@@ -23,6 +23,7 @@ from .readers.Reader import Reader
 from .journal.JournalChannel import JournalChannel
 from .diagram.CatalogEntry import CatalogEntry
 from .diagram.CatalogGroup import CatalogGroup
+from .diagram.FlowDiagram import FlowDiagram
 from . import views
 
 
@@ -47,6 +48,8 @@ class QED(graphene.ObjectType):
     journal = graphene.List(JournalChannel)
     # the factories that can be placed on a pipeline diagram
     catalog = graphene.List(graphene.NonNull(CatalogGroup), required=True)
+    # the pipeline diagram that belongs to no view
+    playground = graphene.Field(FlowDiagram, required=True)
 
     # resolvers
     @staticmethod
@@ -78,6 +81,15 @@ class QED(graphene.ObjectType):
         yield from (viewport.view() for viewport in store.viewports)
         # all done
         return
+
+    # the playground
+    @staticmethod
+    def resolve_playground(store, info, **kwds):
+        """
+        Retrieve the pipeline diagram that belongs to no view
+        """
+        # the store keeps it
+        return store.playground()
 
     # journal channels
     @staticmethod

@@ -46,8 +46,8 @@ class FlowDiagram(graphene.ObjectType):
         """
         Make an id
         """
-        # splice together the {family} and {name} of the {diagram}
-        return f"{diagram.pyre_family()}:{diagram.pyre_name}.diagram"
+        # the {diagram} knows
+        return diagram.relay
 
     @staticmethod
     def resolve_name(diagram, info, **kwds):

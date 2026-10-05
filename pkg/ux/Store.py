@@ -1253,15 +1253,53 @@ class Store(qed.component, family="qed.ux.store"):
         # hand off the center
         return view.center
 
-    def diagramMove(self, viewport, node, position, settled=True):
+    def playground(self):
         """
-        Move the factory or slot with the relay id {node} of the pipeline diagram of {viewport}
-        to {position}, and hand back the diagram; a move that is not {settled} is a step of a drag
+        The pipeline diagram that is not attached to any view, where factories can be placed,
+        moved, and wired together freely
+        """
+        # if i have drawn it already
+        if self._playground is not None:
+            # it is the one
+            return self._playground
+        # otherwise, start with an empty diagram
+        diagram = qed.ux.diagram(name=f"{self.pyre_name}.playground", flow=None)
+        # place a colormap at the origin
+        diagram.addFactory(factory=qed.viz.colormaps.gray()(), position=(0, 0, 0))
+        # and an encoder to its right, far enough that their slots stay apart
+        diagram.addFactory(factory=qed.viz.codecs.bmp()(), position=(15, 0, 0))
+        # remember it
+        self._playground = diagram
+        # and hand it off
+        return diagram
+
+    def findDiagram(self, relay):
+        """
+        Find the pipeline diagram with the given {relay} id: the playground, or the diagram of one
+        of my views
+        """
+        # the diagrams: the playground
+        diagrams = [self.playground()]
+        # and the ones of my views
+        diagrams.extend(viewport.view().diagram() for viewport in self._viewports)
+        # go through them
+        for diagram in diagrams:
+            # if this is the one
+            if diagram is not None and diagram.relay == relay:
+                # hand it off
+                return diagram
+        # an id that is not one of them names nothing
+        return None
+
+    def diagramMove(self, diagram, node, position, settled=True):
+        """
+        Move the factory or slot with the relay id {node} of the pipeline diagram with the relay id
+        {diagram} to {position}, and hand back the diagram; a move that is not {settled} is a step of a drag
         in progress, which moves the node without resolving where it landed
         """
-        # get the diagram of the view in {viewport}
-        diagram = self._viewports[viewport].view().diagram()
-        # a view without a pipeline has no diagram
+        # find the diagram
+        diagram = self.findDiagram(relay=diagram)
+        # an id that names no diagram, e.g. one of a view that has moved on to another channel
         if diagram is None:
             # so there is nothing to move
             return None
@@ -1281,14 +1319,14 @@ class Store(qed.component, family="qed.ux.store"):
         # and hand off the diagram
         return diagram
 
-    def diagramMoveGroup(self, viewport, nodes, anchor, position):
+    def diagramMoveGroup(self, diagram, nodes, anchor, position):
         """
-        Move the nodes of the pipeline diagram of {viewport} with the relay ids in {nodes} so that
+        Move the nodes of the pipeline diagram {diagram} with the relay ids in {nodes} so that
         the one with the relay id {anchor} lands at {position}, and hand back the diagram
         """
-        # get the diagram of the view in {viewport}
-        diagram = self._viewports[viewport].view().diagram()
-        # a view without a pipeline has no diagram
+        # find the diagram
+        diagram = self.findDiagram(relay=diagram)
+        # an id that names no diagram, e.g. one of a view that has moved on to another channel
         if diagram is None:
             # so there is nothing to move
             return None
@@ -1309,15 +1347,15 @@ class Store(qed.component, family="qed.ux.store"):
         # and hand off the diagram
         return diagram
 
-    def diagramAdd(self, viewport, family, position):
+    def diagramAdd(self, diagram, family, position):
         """
-        Place a new factory of the given {family} on the pipeline diagram of {viewport} at
+        Place a new factory of the given {family} on the pipeline diagram {diagram} at
         {position}, unless it or one of its slots would land on a taken spot, and hand back the
         diagram
         """
-        # get the diagram of the view in {viewport}
-        diagram = self._viewports[viewport].view().diagram()
-        # a view without a pipeline has no diagram
+        # find the diagram
+        diagram = self.findDiagram(relay=diagram)
+        # an id that names no diagram, e.g. one of a view that has moved on to another channel
         if diagram is None:
             # so there is nothing to add to
             return None
@@ -1339,15 +1377,15 @@ class Store(qed.component, family="qed.ux.store"):
         # and hand off the diagram
         return diagram
 
-    def diagramRemove(self, viewport, node):
+    def diagramRemove(self, diagram, node):
         """
-        Remove the node with the relay id {node} from the pipeline diagram of {viewport}, and hand
+        Remove the node with the relay id {node} from the pipeline diagram {diagram}, and hand
         back the diagram: a factory goes, along with the slots only it used; a slot undoes the
         binding it stands for, giving every trait connected to it a slot of its own
         """
-        # get the diagram of the view in {viewport}
-        diagram = self._viewports[viewport].view().diagram()
-        # a view without a pipeline has no diagram
+        # find the diagram
+        diagram = self.findDiagram(relay=diagram)
+        # an id that names no diagram, e.g. one of a view that has moved on to another channel
         if diagram is None:
             # so there is nothing to remove from
             return None
@@ -1520,6 +1558,8 @@ class Store(qed.component, family="qed.ux.store"):
         self._builds = {}
         # when the progress of a build was last told to the clients
         self._told = 0.0
+        # the pipeline diagram that belongs to no view, drawn on first use
+        self._playground = None
 
         # all done
         return
