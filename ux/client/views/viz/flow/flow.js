@@ -15,6 +15,8 @@ import { Camera, Compass } from '~/widgets'
 // local
 // hooks
 import { useSelection } from './useSelection'
+// the drag in progress
+import { DragProvider } from './drag'
 // components
 import { Grid } from './grid'
 // diagram nodes
@@ -56,21 +58,25 @@ export const Flow = ({ viewport, view }) => {
         <section ref={ref} tabIndex="-1" style={styles.panel}>
             <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
                 {...styles.canvas} style={styles.surface} {...behaviors}
+                data-qed-diagram={diagram?.id ?? ""}
             >
                 {/* everything that is in ICS */}
-                <Camera ref={ref} viewport={viewport} scale={20} focus={focus}>
-                    {/* the orientation marker at the origin */}
-                    {/* <Compass /> */}
-                    {/* the current cell highlighter */}
-                    <Grid />
-                    {/* labels */}
-                    <Labels diagram={diagram} />
-                    {/* connector */}
-                    <Connectors diagram={diagram} />
-                    {/* slots */}
-                    <Slots diagram={diagram} />
-                    {/* factories */}
-                    <Factories diagram={diagram} />
+                <Camera ref={ref} viewport={viewport} scale={20} focus={focus} focusKey={diagram?.id}>
+                    {/* the drag in progress, which the nodes publish and the rest follow */}
+                    <DragProvider>
+                        {/* the orientation marker at the origin */}
+                        {/* <Compass /> */}
+                        {/* the current cell highlighter */}
+                        <Grid />
+                        {/* labels */}
+                        <Labels diagram={diagram} />
+                        {/* connector */}
+                        <Connectors diagram={diagram} />
+                        {/* slots */}
+                        <Slots diagram={diagram} />
+                        {/* factories */}
+                        <Factories diagram={diagram} />
+                    </DragProvider>
                 </Camera>
             </svg>
         </section>

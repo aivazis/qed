@@ -20,14 +20,22 @@ export const useMoveNode = () => {
     const { activeViewport } = useViewports()
     // moving a node mutates the server side diagram
     const [commit, pending] = useMutation(useMoveNodeMutation)
-    // send a node to a new place; {done} runs once the server has answered, either way
-    const move = ({ id, x, y, z }, done = () => { }) => {
-        // send the request
+    // the steps of a live drag fire far faster than the server round trip, so at most one is in
+    // flight and, while it is, only the LATEST is remembered; the drop ends the drag, so a step
+    // still waiting when it happens is dropped, lest it pick the node back up after it landed
+    const inflight = React.useRef(false)
+    const queued = React.useRef(null)
+    // the landing, when it arrives while a step is in flight; it waits for the step, since two
+    // requests in flight need not reach the server in the order they were sent
+    const landing = React.useRef(null)
+    // send one request
+    const send = ({ id, x, y, z }, settled, done) => {
+        // the payload
+        const input = { viewport: activeViewport, node: id, x, y, z, settled }
+        // send it
         commit({
             // the payload
-            variables: {
-                input: { viewport: activeViewport, node: id, x, y, z },
-            },
+            variables: { input },
             // when it lands, the diagram in the response replaces the one on screen
             onCompleted: () => done(),
             // on failure, report, and still let the caller settle
@@ -45,8 +53,64 @@ export const useMoveNode = () => {
         // all done
         return
     }
+    // a step of a drag in progress: send it now if the channel is free, otherwise hold only the
+    // latest one until it is
+    const step = target => {
+        // if a step is in flight
+        if (inflight.current) {
+            // remember only the most recent one
+            queued.current = target
+            // and let the one in flight send it
+            return
+        }
+        // otherwise, the channel is busy now
+        inflight.current = true
+        // send the step; when it settles, send whatever arrived in the meantime
+        send(target, false, () => {
+            // free again
+            inflight.current = false
+            // if the drag ended while the step was in flight
+            if (landing.current !== null) {
+                // unpack the landing
+                const { target, done } = landing.current
+                // it is no longer waiting
+                landing.current = null
+                // send it
+                send(target, true, done)
+                // and that is the end of the drag
+                return
+            }
+            // the latest step that arrived while busy, if any
+            const next = queued.current
+            // if there is one
+            if (next !== null) {
+                // consume it
+                queued.current = null
+                // and send it
+                step(next)
+            }
+        })
+        // all done
+        return
+    }
+    // where the node lands; {done} runs once the server has answered, either way
+    const move = (target, done = () => { }) => {
+        // the drag is over, so a step still waiting is moot
+        queued.current = null
+        // if a step is in flight
+        if (inflight.current) {
+            // the landing waits for it
+            landing.current = { target, done }
+            // all done
+            return
+        }
+        // otherwise, send the landing
+        send(target, true, done)
+        // all done
+        return
+    }
     // publish
-    return { move, pending }
+    return { move, step, pending }
 }
 
 
