@@ -19,7 +19,7 @@ import styles from './styles'
 
 
 // display the quality of the layout of a product
-export const Quality = ({ size, style }) => {
+export const Quality = ({ size, disabled = false, style }) => {
     // get the current location
     const location = useLocation().pathname
     // my url
@@ -30,7 +30,8 @@ export const Quality = ({ size, style }) => {
     const paint = styles.activity(style)
     // and render
     return (
-        <Activity size={size} url={url} current={current} style={paint} label="quality" >
+        <Activity size={size} url={url} current={current} disabled={disabled} style={paint}
+            label="quality" >
             <Icon />
         </Activity>
     )

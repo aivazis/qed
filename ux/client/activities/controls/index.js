@@ -19,7 +19,7 @@ import styles from './styles'
 
 
 // access to the configuration of the visualization pipeline
-export const Controls = ({ size, style }) => {
+export const Controls = ({ size, disabled = false, style }) => {
     // get the current location
     const location = useLocation().pathname
     // my url
@@ -30,7 +30,8 @@ export const Controls = ({ size, style }) => {
     const paint = styles.activity(style)
     // paint me
     return (
-        <Activity size={size} url={url} current={current} style={paint} label="view controls" >
+        <Activity size={size} url={url} current={current} disabled={disabled} style={paint}
+            label="view controls" >
             <Icon />
         </Activity>
     )
