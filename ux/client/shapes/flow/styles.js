@@ -13,7 +13,7 @@ import style from '~/shapes/styles'
 
 
 // the shape color
-const ink = theme.page.normal
+const ink = theme.page.bright
 const paint = theme.page.normal
 
 // publish
