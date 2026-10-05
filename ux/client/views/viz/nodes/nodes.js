@@ -12,7 +12,7 @@ import styled from 'styled-components'
 
 // project
 // widgets
-import { Header } from '~/widgets'
+import { Header, Tray } from '~/widgets'
 
 // locals
 // hooks
@@ -21,6 +21,8 @@ import { useSelection } from '../flow'
 import { useEditDiagram } from '../flow/useEditDiagram'
 // the media type of a factory dragged from the palette
 import { factoryMediaType } from '../flow/drops'
+// the small picture of a factory
+import { Miniature } from './miniature'
 // styles
 import styles from './styles'
 
@@ -44,52 +46,77 @@ export const Nodes = ({ qed }) => {
         <Panel data-qed-panel="flow">
             {/* the title of the panel */}
             <Header title="visualization pipeline" style={styles.header} />
-            {/* the factories on offer, and the pipelines the user designed */}
-            <Palette catalog={catalog} />
+            {/* the factories on offer, one tray per protocol */}
+            {catalog.map(group => <Group key={group.family} group={group} />)}
+            {/* the products, which will hold the datasets */}
+            <Tray title="products" scale={0.5} data-qed-palette="products">
+                <Note>the datasets of the readers will appear here</Note>
+            </Tray>
+            {/* the pipelines the user designed */}
+            <Tray title="designs" scale={0.5} data-qed-palette="designs">
+                <Note>the pipelines you design will appear here</Note>
+            </Tray>
             {/* the description of the factory picked on the diagram */}
-            <Title>picked</Title>
-            {/* without a pick, say how to make one */}
-            {factory === null && <Note>pick a factory on the diagram to see what it does</Note>}
-            {/* otherwise, describe it */}
-            {factory !== null && <Inspector factory={factory} />}
+            <Tray title="picked" initially={true} scale={0.5} data-qed-palette="picked">
+                {/* without a pick, say how to make one */}
+                {factory === null && <Note>pick a factory on the diagram to see what it does</Note>}
+                {/* otherwise, describe it */}
+                {factory !== null && <Inspector factory={factory} />}
+            </Tray>
         </Panel>
     )
 }
 
 
-// the factories on offer, by the protocol they implement, and the pipelines the user designed
-const Palette = ({ catalog }) => {
+// the factories that implement one protocol, in a tray of their own
+const Group = ({ group }) => {
+    // the filters are where most of the work happens, so their tray starts open
+    const initially = group.name === "filters"
+    // the count of the factories in the group, next to its title
+    const count = <Count>{group.entries.length}</Count>
     // render
     return (
-        <Section data-qed-palette>
-            {/* one group per protocol */}
-            {catalog.map(group => (
-                <React.Fragment key={group.family}>
-                    {/* its name */}
-                    <Title>{group.name}</Title>
-                    {/* and its factories, ready to be dragged onto the diagram */}
-                    <Entries>
-                        {group.entries.map(entry => (
-                            <Entry key={entry.family} draggable
-                                title={entry.doc}
-                                data-qed-catalog={entry.family}
-                                onDragStart={evt => {
-                                    // carry the family of the factory
-                                    evt.dataTransfer.setData(factoryMediaType, entry.family)
-                                    // as a copy
-                                    evt.dataTransfer.effectAllowed = "copy"
-                                }}
-                            >
-                                {entry.name}
-                            </Entry>
-                        ))}
-                    </Entries>
-                </React.Fragment>
-            ))}
-            {/* the pipelines the user designed */}
-            <Title>designs</Title>
-            <Empty>none yet</Empty>
-        </Section>
+        <Tray title={group.name} initially={initially} scale={0.5} controls={count}
+            data-qed-palette={group.family}>
+            <Entries>
+                {group.entries.map(entry => <Entry key={entry.family} entry={entry} />)}
+            </Entries>
+        </Tray>
+    )
+}
+
+
+// a factory on offer: its picture, its name, and its slots; it can be dragged onto the diagram
+const Entry = ({ entry }) => {
+    // unpack
+    const { family, name, doc, inputs, outputs } = entry
+    // the picture, which doubles as the image that follows the pointer during a drag
+    const picture = React.useRef(null)
+    // a drag carries the family of the factory, and shows its picture
+    const onDragStart = evt => {
+        // carry the family
+        evt.dataTransfer.setData(factoryMediaType, family)
+        // as a copy
+        evt.dataTransfer.effectAllowed = "copy"
+        // and show the picture, held by its hub
+        const box = picture.current?.getBoundingClientRect()
+        if (box) {
+            evt.dataTransfer.setDragImage(picture.current, box.width / 2, box.height / 2)
+        }
+        // all done
+        return
+    }
+    // what the slots are called, the way a signature reads
+    const slots = `${inputs.length ? inputs.join(", ") : "nothing"} \u2192 ${outputs.join(", ")}`
+    // render
+    return (
+        <Row draggable onDragStart={onDragStart} title={doc} data-qed-catalog={family}>
+            <Picture><Miniature ref={picture} inputs={inputs} outputs={outputs} scale={7} /></Picture>
+            <Words>
+                <EntryName>{name}</EntryName>
+                <Signature>{slots}</Signature>
+            </Words>
+        </Row>
     )
 }
 
@@ -163,19 +190,62 @@ const Panel = styled.div`
 // the factories of a group of the palette
 const Entries = styled.div`
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 0.75rem;
+    flex-direction: column;
+    padding: 0.25rem 0 0.5rem 0;
 `
 
 // a factory of the palette
-const Entry = styled.span`
-    font-family: inconsolata;
-    font-size: 85%;
-    color: ${styles.normal};
+const Row = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.25rem 1.0rem 0.25rem 1.0rem;
     cursor: grab;
     &:hover {
+        background-color: ${styles.hover};
+    }
+`
+
+// the room for its picture, wide enough that the names line up
+const Picture = styled.div`
+    flex: 0 0 5.5rem;
+    display: flex;
+    justify-content: center;
+`
+
+// its name and its signature
+const Words = styled.div`
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+`
+
+// its name
+const EntryName = styled.span`
+    font-family: inconsolata;
+    font-size: 100%;
+    color: ${styles.normal};
+    ${Row}:hover & {
         color: ${styles.factory};
     }
+`
+
+// the names of its slots
+const Signature = styled.span`
+    font-family: inconsolata;
+    font-size: 80%;
+    color: ${styles.dim};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+`
+
+// the count of the factories in a group
+const Count = styled.span`
+    font-family: inconsolata;
+    font-size: 80%;
+    color: ${styles.dim};
+    padding-right: 0.5rem;
 `
 
 // the button that removes the picked factory
@@ -297,6 +367,8 @@ const nodesGetDiagramFragment = graphql`
                 family
                 name
                 doc
+                inputs
+                outputs
             }
         }
         views {
