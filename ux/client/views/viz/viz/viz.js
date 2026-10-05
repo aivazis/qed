@@ -49,8 +49,6 @@ const VizPanel = ({ qed }) => {
     const { views } = useFragment(vizGetViewsFragment, qed)
     // extract an array with the scroll sync flag for each viewport
     const synced = views.map(view => view.sync)
-    // and one with the zoom levels, so synced scrolling can normalize across mismatched zoom
-    const zooms = views.map(view => view.zoom)
     // initialize my pile of viewports and get the ref registrar
     // viewport initialization happens on every render, but so does viewport registration
     const { viewportRegistrar } = useInitializeViewports(views)
@@ -59,7 +57,7 @@ const VizPanel = ({ qed }) => {
     // the flow editor is up while its activity is current
     const editing = useLocation().pathname === "/flow"
     // build the scroll handler dispatch for my viewports
-    const { dispatch } = useMakePanDispatcher({ viewports, synced, zooms })
+    const { dispatch } = useMakePanDispatcher({ viewports, synced })
     // get the state of the activity panel
     const { activityPanel } = useActivityPanel()
 
@@ -140,11 +138,6 @@ const vizGetViewsFragment = graphql`
                     x
                     y
                 }
-            }
-            # the zoom levels, so synced scrolling can map between viewports at different zoom
-            zoom {
-                horizontal
-                vertical
             }
             # what i need for synced scrolling
             ...vizGetScrollSyncedViewsFragment
