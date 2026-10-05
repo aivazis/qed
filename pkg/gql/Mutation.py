@@ -82,6 +82,8 @@ class Mutation(graphene.ObjectType):
 
     # look-at center
     viewLookAt = views.viewLookAt.Field()
+    # the pipeline diagram
+    viewDiagramMove = views.viewDiagramMove.Field()
 
     # zoom
     viewZoomSetLevel = views.viewZoomSetLevel.Field()

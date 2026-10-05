@@ -1253,6 +1253,31 @@ class Store(qed.component, family="qed.ux.store"):
         # hand off the center
         return view.center
 
+    def diagramMove(self, viewport, node, position):
+        """
+        Move the factory or slot with the relay id {node} of the pipeline diagram of {viewport}
+        to {position}, and hand back the diagram
+        """
+        # get the diagram of the view in {viewport}
+        diagram = self._viewports[viewport].view().diagram()
+        # a view without a pipeline has no diagram
+        if diagram is None:
+            # so there is nothing to move
+            return None
+        # find the node
+        entity = diagram.locate(relay=node)
+        # a node that is not on this diagram, e.g. because the client was a step behind, or one
+        # that cannot be moved on its own, such as a label or a connector
+        if entity is None or not diagram.movable(node=entity):
+            # leaves the diagram as it is
+            return diagram
+        # make the move; one that is not permitted leaves the node where it was
+        diagram.move(node=entity, position=tuple(position))
+        # either way, put the node back on the layout, merging it with whatever it landed on
+        diagram.resolve(node=entity)
+        # and hand off the diagram
+        return diagram
+
     def zoomSetLevel(self, viewport, horizontal, vertical):
         """
         Set the zoom levels
