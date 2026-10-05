@@ -39,6 +39,10 @@ export const VizProvider = ({ children }) => {
         return next
     })
 
+    // the nodes of the pipeline diagram the user has picked, by id; a client-only choice, like the
+    // active viewport, since each client looks at the diagram on its own
+    const [selection, setSelection] = React.useState([])
+
     // build the current value of the context
     const context = {
         // the active view and its mutator
@@ -47,6 +51,8 @@ export const VizProvider = ({ children }) => {
         viewports, viewportRegistrar,
         // the per-viewport live-sync opt-in and its toggle
         live, toggleLive,
+        // the nodes picked on the pipeline diagram
+        selection, setSelection,
     }
     // provide for my children
     return (
@@ -71,6 +77,9 @@ export const Context = React.createContext(
         // the per-viewport live-sync opt-in and its toggle
         live: new Set(),
         toggleLive: () => { throw new Error(complaint) },
+        // the nodes picked on the pipeline diagram
+        selection: [],
+        setSelection: () => { throw new Error(complaint) },
     }
 )
 

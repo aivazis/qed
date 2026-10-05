@@ -7,6 +7,8 @@
 
 // export the view
 export { Flow } from './flow'
+// and the access to the nodes picked on it
+export { useSelection } from './useSelection'
 
 
 // end of file
