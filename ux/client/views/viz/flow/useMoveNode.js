@@ -20,6 +20,8 @@ export const useMoveNode = () => {
     const { activeViewport } = useViewports()
     // moving a node mutates the server side diagram
     const [commit, pending] = useMutation(useMoveNodeMutation)
+    // and so does moving the selection
+    const [commitGroup, pendingGroup] = useMutation(useMoveNodeGroupMutation)
     // the steps of a live drag fire far faster than the server round trip, so at most one is in
     // flight and, while it is, only the LATEST is remembered; the drop ends the drag, so a step
     // still waiting when it happens is dropped, lest it pick the node back up after it landed
@@ -29,11 +31,14 @@ export const useMoveNode = () => {
     // requests in flight need not reach the server in the order they were sent
     const landing = React.useRef(null)
     // send one request
-    const send = ({ id, x, y, z }, settled, done) => {
-        // the payload
-        const input = { viewport: activeViewport, node: id, x, y, z, settled }
+    const send = ({ id, x, y, z, group = null }, settled, done) => {
+        // the selection moves as a whole, led by the dragged node, and leaves nothing behind to
+        // settle; a node on its own moves by itself
+        const [mutate, input] = group !== null
+            ? [commitGroup, { viewport: activeViewport, nodes: group, anchor: id, x, y, z }]
+            : [commit, { viewport: activeViewport, node: id, x, y, z, settled }]
         // send it
-        commit({
+        mutate({
             // the payload
             variables: { input },
             // when it lands, the diagram in the response replaces the one on screen
@@ -110,7 +115,7 @@ export const useMoveNode = () => {
         return
     }
     // publish
-    return { move, step, pending }
+    return { move, step, pending: pending || pendingGroup }
 }
 
 
@@ -119,6 +124,36 @@ export const useMoveNode = () => {
 const useMoveNodeMutation = graphql`
     mutation useMoveNodeMutation($input: ViewDiagramMoveInput!) {
         viewDiagramMove(input: $input) {
+            diagram {
+                id
+                ...labelsFlowDiagramFragment
+                ...connectorsFlowDiagramFragment
+                ...slotsFlowDiagramFragment
+                ...factoriesFlowDiagramFragment
+                # the positions the camera centers on
+                factories {
+                    at {
+                        x
+                        y
+                        z
+                    }
+                }
+                slots {
+                    at {
+                        x
+                        y
+                        z
+                    }
+                }
+            }
+        }
+    }
+`
+
+// the mutation that moves the selection, which carries the whole diagram back as well
+const useMoveNodeGroupMutation = graphql`
+    mutation useMoveNodeGroupMutation($input: ViewDiagramMoveGroupInput!) {
+        viewDiagramMoveGroup(input: $input) {
             diagram {
                 id
                 ...labelsFlowDiagramFragment

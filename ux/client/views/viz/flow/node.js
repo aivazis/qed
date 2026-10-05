@@ -31,16 +31,19 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
     // the map from the pointer to diagram coordinates, rounded onto the grid
     const { toICS } = useCamera()
     // access the selection
-    const { select } = useSelection()
+    const { selection, select } = useSelection()
     // the mover
     const { move, step } = useMoveNode()
     // whether my viewport syncs live, in which case the server hears every step of a drag
     const { activeViewport } = useViewports()
     const { enabled: live } = useLive(activeViewport)
     // the drag in progress, which the connectors and labels attached to me follow as well
-    const { drag, setDrag, shiftOf, verdictOf } = useDrag()
-    // where the pointer grabbed me and where i was then, in diagram coordinates, during a drag
+    const { drag, setDrag, shiftOf, verdictOf, groupOf } = useDrag()
+    // where the pointer grabbed me and where i was then, in diagram coordinates, during a drag,
+    // along with the picked nodes i take along, if any
     const grab = React.useRef(null)
+    // whether the last drag moved the selection, whose closing click must leave the picks alone
+    const moved = React.useRef(false)
     // whether i am the node being dragged
     const dragging = drag !== null && drag.id === id
 
@@ -75,7 +78,12 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
         // follow the pointer wherever it goes until it lets go
         evt.currentTarget.setPointerCapture(evt.pointerId)
         // remember where the pointer grabbed me and where i was; i keep my distance from it
-        grab.current = { pointer: toICS({ x: evt.clientX, y: evt.clientY }, false), x, y }
+        grab.current = {
+            pointer: toICS({ x: evt.clientX, y: evt.clientY }, false), x, y,
+            group: groupOf(id, selection),
+        }
+        // and nothing has moved yet
+        moved.current = false
         // all done
         return
     }
@@ -96,12 +104,16 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
             // there is nothing new to report
             return
         }
+        // the picked nodes i take along, if any
+        const group = grab.current.group
         // record it, along with where the server has me
-        setDrag({ id, tx, ty, ax: x, ay: y })
+        setDrag({ id, tx, ty, ax: x, ay: y, group })
+        // a drag of the selection keeps the picks when it ends
+        moved.current = group !== null
         // in a live viewport, the server hears every step
         if (live) {
             // so tell it
-            step({ id, x: tx, y: ty, z })
+            step({ id, x: tx, y: ty, z, group })
         }
         // all done
         return
@@ -128,7 +140,7 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
         }
         // otherwise, ask the server to land me there, and keep me there until its diagram
         // replaces the one on screen
-        move({ id, x: target.tx, y: target.ty, z }, () => setDrag(null))
+        move({ id, x: target.tx, y: target.ty, z, group: start.group }, () => setDrag(null))
         // all done
         return
     }
@@ -136,6 +148,13 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
     const onClick = evt => {
         // the canvas clears the selection on a click, so keep this one to myself
         evt.stopPropagation()
+        // the click that ends a drag of the selection
+        if (moved.current) {
+            // is spent
+            moved.current = false
+            // and leaves the picks alone
+            return
+        }
         // pick me
         select(id, evt.shiftKey)
         // all done
@@ -144,8 +163,6 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
 
     // how far i am from where i am headed
     const shift = shiftOf(id)
-    // whether i am picked
-    const { selection } = useSelection()
     // what the drop in progress would do to me, if anything
     const verdict = verdictOf(id)
     // the handles that let a script find me and read my state: who i am, what i am, where the
