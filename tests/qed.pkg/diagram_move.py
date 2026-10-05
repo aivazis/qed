@@ -166,6 +166,51 @@ def crowded():
     return
 
 
+# a selection moves as one, with the slots its factories take along
+def selection():
+    """
+    Pick the colormap and the encoder, which share a binding, and move them together; then try a
+    move that would land one of them on a node outside the selection
+    """
+    # draw the colormap at the origin
+    diagram, gray = gray_()
+    store = storeOf(diagram)
+    # and the encoder to its right
+    bmp, *_ = diagram.addFactory(factory=qed.viz.codecs.bmp()(), position=(15, 0, 0))
+    # bind the two reds
+    red = slotOf(gray, "red")
+    move(store, red, slotOf(bmp, "red").position)
+    # where everything is
+    before = {node.eid: node.position for node in [*diagram.factories, *diagram.slots]}
+    # move the two factories and the shared slot down by ten, led by the encoder
+    qed.ux.store.diagramMoveGroup(
+        store,
+        viewport=0,
+        nodes=[gray.relay, bmp.relay, red.relay],
+        anchor=bmp.relay,
+        position=(15, 10, 0),
+    )
+    # everything moved by the same amount, the shared slot included
+    after = {node.eid: node.position for node in [*diagram.factories, *diagram.slots]}
+    assert after == {eid: (x, y + 10, z) for eid, (x, y, z) in before.items()}
+    # a lone factory, placed where the group would land if it moved down by ten more
+    lone, *_ = diagram.addFactory(factory=qed.viz.filters.parametric()(), position=(0, 20, 0))
+    # where the group is now
+    before = after
+    # the move that would land the colormap on it
+    qed.ux.store.diagramMoveGroup(
+        store, viewport=0, nodes=[gray.relay, bmp.relay], anchor=gray.relay, position=(0, 20, 0)
+    )
+    # is refused: nothing in the group moved
+    assert {node.eid: node.position for node in [gray, bmp, *gray.slots, *bmp.slots]} == {
+        eid: position
+        for eid, position in before.items()
+        if eid in {node.eid for node in [gray, bmp, *gray.slots, *bmp.slots]}
+    }
+    # all done
+    return
+
+
 # a factory cannot land on another node
 def blocked():
     """
@@ -302,6 +347,7 @@ def test():
     # in groups
     group()
     crowded()
+    selection()
     # in steps, and left half way
     steps()
     abandoned()
