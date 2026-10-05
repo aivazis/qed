@@ -42,14 +42,14 @@ class Input(Connector):
         Compute the location of my trait label
         """
         # unpack the factory position
-        _, fy = self.factory.position
+        _, fy, _ = self.factory.position
         # and the slot position
-        sx, sy = self.slot.position
+        sx, sy, sz = self.slot.position
         # compute the label position
         lx = sx + 0.75
         ly = sy + (0.75 if sy > fy else -0.5)
-        # pack it and ship it
-        return lx, ly
+        # pack it and ship it; the label floats in the plane of its slot
+        return lx, ly, sz
 
 
 # end of file

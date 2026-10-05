@@ -56,9 +56,9 @@ class FlowConnector(graphene.ObjectType):
         Resolve the connector factory position
         """
         # get the location
-        x, y = connector.factory.position
+        x, y, z = connector.factory.position
         # turn it into a point and return it
-        return Point(x=x, y=y)
+        return Point(x=x, y=y, z=z)
 
     @staticmethod
     def resolve_slot(connector, info, **kwds):
@@ -66,9 +66,9 @@ class FlowConnector(graphene.ObjectType):
         Resolve the connector slot position
         """
         # get the location
-        x, y = connector.slot.position
+        x, y, z = connector.slot.position
         # turn it into a point and return it
-        return Point(x=x, y=y)
+        return Point(x=x, y=y, z=z)
 
 
 # end of file

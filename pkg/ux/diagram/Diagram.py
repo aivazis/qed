@@ -48,6 +48,29 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         # {entities} know how to do this
         return Entity.relayToEid(relay)
 
+    def locate(self, relay):
+        """
+        Look up a node given its {relay} id, or nothing when the id is not one of mine
+        """
+        # carefully, since the id comes from a client
+        try:
+            # parse it
+            _, eid = self.relayToEid(relay=relay)
+        # an id that does not parse
+        except ValueError:
+            # is not one of mine
+            return None
+        # look it up
+        return self.nodes.get(eid)
+
+    def movable(self, node):
+        """
+        Check whether {node} can be moved on its own: factories and slots can, the labels and
+        connectors that follow them cannot
+        """
+        # easy enough
+        return isinstance(node, (Factory, Slot))
+
     def findNode(self, relay):
         """
         Look up a node given its {relay} id
@@ -219,7 +242,7 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         # through them
         for index, factory in enumerate(self.order(flow=flow)):
             # and lay them out left to right, a {spacing} apart
-            self.drawFactory(factory=factory, position=(index * self.spacing, 0))
+            self.drawFactory(factory=factory, position=(index * self.spacing, 0, 0))
         # each factory drew a slot for every one of its traits; the products that factories
         # share become one slot each
         self.share()

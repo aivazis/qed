@@ -47,9 +47,9 @@ class FlowSlot(graphene.ObjectType):
         Resolve the slot position
         """
         # get the location
-        x, y = slot.position
+        x, y, z = slot.position
         # turn it into a point and return it
-        return Point(x=x, y=y)
+        return Point(x=x, y=y, z=z)
 
 
 # end of file

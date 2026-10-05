@@ -26,7 +26,7 @@ def describe(name, flow):
     # an empty diagram
     diagram = qed.ux.diagram(name=name, flow=None)
     # with just this factory on it
-    entity, *_ = diagram.addFactory(factory=flow, position=(0, 0))
+    entity, *_ = diagram.addFactory(factory=flow, position=(0, 0, 0))
     # describe it
     return (
         FlowFactory.resolve_family(entity, None),

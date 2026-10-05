@@ -156,7 +156,7 @@ class Slot(Node):
             # the value of the label
             text = [f"{name}:{family}"]
             # build the position of the label relative to me
-            delta = (0, -1)
+            delta = (0, -1, 0)
             # assemble and publish
             yield Label(text=text, category="product", delta=delta, position=self.position)
 
