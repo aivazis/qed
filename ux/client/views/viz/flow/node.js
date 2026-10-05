@@ -20,6 +20,8 @@ import { useLive } from '../viz/useLive'
 import { useSelection } from './useSelection'
 import { useMoveNode } from './useMoveNode'
 import { useDrag } from './drag'
+// styles
+import styles from './styles'
 
 
 // position a node on the diagram, and let the user pick it and drag it around
@@ -36,7 +38,7 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
     const { activeViewport } = useViewports()
     const { enabled: live } = useLive(activeViewport)
     // the drag in progress, which the connectors and labels attached to me follow as well
-    const { drag, setDrag, shiftOf } = useDrag()
+    const { drag, setDrag, shiftOf, verdictOf } = useDrag()
     // where the pointer grabbed me and where i was then, in diagram coordinates, during a drag
     const grab = React.useRef(null)
     // whether i am the node being dragged
@@ -141,6 +143,8 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
     const shift = shiftOf(id)
     // whether i am picked
     const { selection } = useSelection()
+    // what the drop in progress would do to me, if anything
+    const verdict = verdictOf(id)
     // the handles that let a script find me and read my state: who i am, what i am, where the
     // server has me, and whether i am picked, along with whatever my kind adds
     const markers = {
@@ -148,6 +152,7 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
         "data-qed-kind": kind,
         "data-qed-at": `${x},${y},${z}`,
         "data-qed-selected": selection.includes(id),
+        "data-qed-drop": verdict ?? undefined,
         ...handles,
     }
     // build the positioning transform, including the drag in progress
@@ -158,6 +163,8 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
     return (
         <g transform={xform} {...markers} {...nodeControls} >
             {children}
+            {/* what the drop in progress would do: merge with me, or be sent back */}
+            {verdict && <circle cx="0" cy="0" r="0.9" style={styles.drop[verdict]} />}
         </g>
     )
 }
