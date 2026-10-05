@@ -92,6 +92,8 @@ const playgroundGetDiagramFragment = graphql`
         # the diagram
         playground {
             id
+            # whether its structure can change
+            editable
             # what the canvas draws
             ...canvasFlowDiagramFragment
             # and what the inspector shows of its factories

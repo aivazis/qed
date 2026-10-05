@@ -23,23 +23,26 @@ const Context = React.createContext(
         landing: null,
         // nobody follows anybody
         followers: {},
+        // no slot connects to anything
+        owners: {},
         // and there are no nodes to move
         nodes: [],
     }
 )
 
 
-// the provider; {nodes} are the nodes a drag can land on, with what decides whether it may, and
-// {followers} are the slots each factory takes along when it moves
-export const DragProvider = ({ nodes = [], followers = {}, children }) => {
+// the provider; {nodes} are the nodes a drag can land on, with what decides whether it may,
+// {followers} are the slots each factory takes along when it moves, {owners} are the factories
+// each slot connects to, and a diagram that is not {editable} merges nothing
+export const DragProvider = ({ nodes = [], followers = {}, owners = {}, editable = true, children }) => {
     // the drag in progress, as { id, tx, ty, ax, ay }, or nothing; a drag that moves the selection
     // also carries the picked nodes as its {group}
     const [drag, setDrag] = React.useState(null)
     // what a drop where the dragged node is headed would do
-    const landing = judge(drag, nodes, followers)
+    const landing = judge(drag, nodes, followers, owners, editable)
     // provide for my children
     return (
-        <Context.Provider value={{ drag, setDrag, landing, followers, nodes }}>
+        <Context.Provider value={{ drag, setDrag, landing, followers, owners, nodes }}>
             {children}
         </Context.Provider>
     )
@@ -49,9 +52,9 @@ export const DragProvider = ({ nodes = [], followers = {}, children }) => {
 // access to the drag in progress
 export const useDrag = () => {
     // pull it from the context
-    const { drag, setDrag, landing, followers, nodes } = React.useContext(Context)
+    const { drag, setDrag, landing, followers, owners, nodes } = React.useContext(Context)
     // the nodes that move with the drag in progress
-    const crowd = members(drag, followers)
+    const crowd = members(drag, followers, owners)
     // how far the node with {id} is from where it is headed, which is nowhere unless it is one of
     // the nodes that move
     const shiftOf = id => crowd.has(id)
@@ -80,18 +83,28 @@ export const useDrag = () => {
 }
 
 
-// the nodes that move with a {drag}: the dragged node, or the picked nodes when it moves the
-// selection, along with the slots each factory among them takes along
-const members = (drag, followers) => {
+// the nodes that move with a {drag}: the dragged node, along with the slots it takes along, or,
+// when it moves the selection, the picked nodes along with every slot that connects only to
+// picked factories, by the rule the server applies
+const members = (drag, followers, owners) => {
     // without a drag
     if (drag === null) {
         // nothing moves
         return new Set()
     }
-    // the nodes that lead
-    const leaders = drag.group ?? [drag.id]
-    // the leaders and their followers
-    return new Set(leaders.flatMap(id => [id, ...(followers[id] ?? [])]))
+    // a drag of a single node
+    if (!drag.group) {
+        // moves the node and its followers
+        return new Set([drag.id, ...(followers[drag.id] ?? [])])
+    }
+    // otherwise, the picked nodes move
+    const picked = new Set(drag.group)
+    // along with the slots that connect to some factories, all of them picked
+    const cohort = Object.entries(owners)
+        .filter(([, factories]) => factories.size > 0 && [...factories].every(id => picked.has(id)))
+        .map(([slot]) => slot)
+    // all of them
+    return new Set([...picked, ...cohort])
 }
 
 
@@ -102,7 +115,7 @@ const members = (drag, followers) => {
 // never merges, and is sent back if any of its members would land on somebody else. the verdict
 // maps every node involved to what it would see: the obstacles, the members of the group that
 // would hit them, and the nodes those members move with, which are the ones to blame
-const judge = (drag, nodes, followers) => {
+const judge = (drag, nodes, followers, owners, editable) => {
     // without a drag, there is no landing
     if (drag === null) {
         // so say so
@@ -116,7 +129,7 @@ const judge = (drag, nodes, followers) => {
         return null
     }
     // the members of the group that moves
-    const group = members(drag, followers)
+    const group = members(drag, followers, owners)
     // the node each member moves with: a leader moves with itself, and a slot that follows a
     // factory moves with that factory
     const leaderOf = {}
@@ -129,6 +142,11 @@ const judge = (drag, nodes, followers) => {
             // follow it
             leaderOf[follower] = id
         }
+    }
+    // the other members are slots that connect only to picked factories
+    for (const id of group) {
+        // each moves with the first of its factories, or by itself if it has none
+        leaderOf[id] = leaderOf[id] ?? [...(owners[id] ?? [])][0] ?? id
     }
     // whoever, outside the group, sits at a spot
     const at = (x, y, z) => nodes.find(node => !group.has(node.id) && node.x === x && node.y === y && node.z === z)
@@ -163,8 +181,9 @@ const judge = (drag, nodes, followers) => {
     const occupant = plain ? null : at(drag.tx, drag.ty, mover.z)
     // if there is one
     if (occupant) {
-        // a factory on either side, or two slots that both carry products, cannot share a spot
-        const blocked = mover.kind === "factory" || occupant.kind === "factory"
+        // nothing merges on a diagram that cannot be edited; elsewhere, a factory on either side,
+        // or two slots that both carry products, cannot share a spot
+        const blocked = !editable || mover.kind === "factory" || occupant.kind === "factory"
             || (mover.bound && occupant.bound)
         // record what the occupant sees
         verdicts[occupant.id] = blocked ? "blocked" : "merge"

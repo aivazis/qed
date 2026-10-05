@@ -73,7 +73,8 @@ export const Picked = ({ diagram }) => {
             {/* without a pick, say how to make one */}
             {factory === null && <Note>pick a factory on the diagram to see what it does</Note>}
             {/* otherwise, describe it */}
-            {factory !== null && <Inspector diagram={diagram.id} factory={factory} />}
+            {factory !== null &&
+                <Inspector diagram={diagram.id} editable={diagram.editable} factory={factory} />}
         </Tray>
     )
 }
@@ -143,8 +144,8 @@ const Entry = ({ entry }) => {
 
 
 // the description of a {factory} of {diagram}: what it is, what it consumes, what it makes, and how
-// it is set
-const Inspector = ({ diagram, factory }) => {
+// it is set; on a diagram that is {editable}, it can also be removed
+const Inspector = ({ diagram, editable, factory }) => {
     // the editor
     const { remove } = useEditDiagram(diagram)
     // unpack
@@ -158,8 +159,8 @@ const Inspector = ({ diagram, factory }) => {
         <Section data-qed-inspector={family}>
             {/* who it is */}
             <Name>{name}</Name>
-            {/* and a way to remove it */}
-            <Remove onClick={() => remove(id)} data-qed-action="remove">remove</Remove>
+            {/* and, when the diagram can be edited, a way to remove it */}
+            {editable && <Remove onClick={() => remove(id)} data-qed-action="remove">remove</Remove>}
             <Family>{family}</Family>
             {/* what it does */}
             {doc && <Doc>{doc}</Doc>}
@@ -376,6 +377,8 @@ const nodesGetDiagramFragment = graphql`
             # the diagram of the pipeline of the view
             diagram {
                 id
+                # whether its structure can change
+                editable
                 # its factories, as the inspector describes them
                 factories {
                     id

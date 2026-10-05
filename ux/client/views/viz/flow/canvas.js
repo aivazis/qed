@@ -45,8 +45,12 @@ export const Canvas = ({ diagram: diagramRef, live = false }) => {
     const focus = center(diagram)
     // the nodes a drag can land on, with what decides whether it may
     const nodes = occupants(diagram)
+    // the factories each slot connects to
+    const owners = ownership(diagram)
     // the slots each factory takes along when it moves
-    const followers = entourage(diagram)
+    const followers = entourage(diagram, owners)
+    // whether the structure of the diagram can change
+    const editable = diagram?.editable ?? false
 
     // access the selection
     const { selection, clear } = useSelection()
@@ -54,8 +58,8 @@ export const Canvas = ({ diagram: diagramRef, live = false }) => {
     const { remove } = useEditDiagram(diagram?.id ?? null)
     // the delete keys remove the picked factories
     const onKeyDown = evt => {
-        // if it is not one of them
-        if (evt.key !== "Delete" && evt.key !== "Backspace") {
+        // if it is not one of them, or the diagram cannot be edited
+        if (!editable || (evt.key !== "Delete" && evt.key !== "Backspace")) {
             // it is not for me
             return
         }
@@ -96,10 +100,11 @@ export const Canvas = ({ diagram: diagramRef, live = false }) => {
                 <Camera ref={ref} scale={20} focus={focus} focusKey={diagram?.id}>
                     {/* the diagram, which the requests that change it name */}
                     <DiagramProvider id={diagram?.id ?? null} live={live}>
-                        {/* the drop target for factories from the palette */}
-                        <Drops canvas={ref} />
+                        {/* the drop target for factories from the palette, when it can be edited */}
+                        {editable && <Drops canvas={ref} />}
                         {/* the drag in progress, which the nodes publish and the rest follow */}
-                        <DragProvider nodes={nodes} followers={followers}>
+                        <DragProvider nodes={nodes} followers={followers} owners={owners}
+                            editable={editable}>
                             {/* the orientation marker at the origin */}
                             {/* <Compass /> */}
                             {/* the current cell highlighter */}
@@ -159,20 +164,28 @@ const occupants = (diagram) => {
 }
 
 
+// the factories each slot of a {diagram} connects to, by slot
+const ownership = (diagram) => {
+    // the factories, by slot
+    const owners = {}
+    // go through the connectors, if there is a diagram
+    for (const { factoryId, slotId } of diagram?.connectors ?? []) {
+        // and record each connection
+        owners[slotId] = (owners[slotId] ?? new Set()).add(factoryId)
+    }
+    // hand them off
+    return owners
+}
+
+
 // the slots each factory of a {diagram} takes along when it moves: its own, unbound slots, the
-// ones no other factory connects to, by the rule the server applies
-const entourage = (diagram) => {
+// ones no other factory connects to, by the rule the server applies; {owners} are the factories
+// each slot connects to
+const entourage = (diagram, owners) => {
     // a missing diagram has none
     if (!diagram) {
         // so say so
         return {}
-    }
-    // the factories each slot is connected to
-    const owners = {}
-    // go through the connectors
-    for (const { factoryId, slotId } of diagram.connectors) {
-        // and record each connection
-        owners[slotId] = (owners[slotId] ?? new Set()).add(factoryId)
     }
     // the slots that carry no product
     const unbound = new Set(diagram.slots.filter(slot => !slot.bound).map(slot => slot.id))
@@ -199,6 +212,8 @@ const canvasFlowDiagramFragment = graphql`
         id
         name
         family
+        # whether its structure can change
+        editable
         # where the nodes are, so the camera can look at the middle of the diagram, and a drag
         # can tell what it is about to land on
         factories {
