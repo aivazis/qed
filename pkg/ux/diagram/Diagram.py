@@ -23,8 +23,11 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
 
     # user configurable state
     spacing = qed.properties.float()
-    spacing.default = 15
-    spacing.doc = "the distance between neighboring factories, enough to keep their slots apart"
+    spacing.default = 10
+    spacing.doc = (
+        "the distance between neighboring factories; at 10, the outputs of a factory and the"
+        " inputs of its neighbor share their homes, so the slots that bind them stay put"
+    )
 
     # public data
     @property
