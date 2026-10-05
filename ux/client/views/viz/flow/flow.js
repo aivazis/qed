@@ -42,6 +42,8 @@ export const Flow = ({ viewport, view }) => {
     const focus = center(diagram)
     // the nodes a drag can land on, with what decides whether it may
     const nodes = occupants(diagram)
+    // the slots each factory takes along when it moves
+    const followers = entourage(diagram)
 
     // access the selection
     const { selection, clear } = useSelection()
@@ -54,10 +56,13 @@ export const Flow = ({ viewport, view }) => {
             // it is not for me
             return
         }
-        // the factories of this diagram
-        const factories = new Set(diagram?.factories.map(factory => factory.id) ?? [])
-        // remove the picked ones
-        selection.filter(id => factories.has(id)).forEach(remove)
+        // the nodes of this diagram
+        const known = new Set([
+            ...(diagram?.factories.map(factory => factory.id) ?? []),
+            ...(diagram?.slots.map(slot => slot.id) ?? []),
+        ])
+        // remove the picked ones: a factory goes, a slot undoes its binding
+        selection.filter(id => known.has(id)).forEach(remove)
         // and forget the picks
         clear()
         // all done
@@ -89,7 +94,7 @@ export const Flow = ({ viewport, view }) => {
                     {/* the drag in progress, which the nodes publish and the rest follow */}
                     {/* the drop target for factories from the palette */}
                     <Drops canvas={ref} />
-                    <DragProvider nodes={nodes}>
+                    <DragProvider nodes={nodes} followers={followers}>
                         {/* the orientation marker at the origin */}
                         {/* <Compass /> */}
                         {/* the current cell highlighter */}
@@ -148,6 +153,39 @@ const occupants = (diagram) => {
 }
 
 
+// the slots each factory of a {diagram} takes along when it moves: its own, unbound slots, the
+// ones no other factory connects to, by the rule the server applies
+const entourage = (diagram) => {
+    // a missing diagram has none
+    if (!diagram) {
+        // so say so
+        return {}
+    }
+    // the factories each slot is connected to
+    const owners = {}
+    // go through the connectors
+    for (const { factoryId, slotId } of diagram.connectors) {
+        // and record each connection
+        owners[slotId] = (owners[slotId] ?? new Set()).add(factoryId)
+    }
+    // the slots that carry no product
+    const unbound = new Set(diagram.slots.filter(slot => !slot.bound).map(slot => slot.id))
+    // the followers of each factory
+    const followers = {}
+    // go through the slots
+    for (const [slotId, factories] of Object.entries(owners)) {
+        // a slot that is unbound and connected to exactly one factory
+        if (unbound.has(slotId) && factories.size === 1) {
+            // follows it
+            const [factoryId] = factories
+            followers[factoryId] = [...(followers[factoryId] ?? []), slotId]
+        }
+    }
+    // hand them off
+    return followers
+}
+
+
 // my fragment
 const flowVizGetFlowDiagramFragment = graphql`
     fragment flowVizGetFlowDiagramFragment on View {
@@ -175,6 +213,11 @@ const flowVizGetFlowDiagramFragment = graphql`
                     z
                 }
                 bound
+            }
+            # which slot joins which factory, so a factory can take its own slots along
+            connectors {
+                factoryId
+                slotId
             }
             # labels
             ...labelsFlowDiagramFragment
