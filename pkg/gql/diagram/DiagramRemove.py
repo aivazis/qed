@@ -9,22 +9,22 @@
 import graphene
 
 # the payload
-from .ViewDiagramRemoveInput import ViewDiagramRemoveInput
+from .DiagramRemoveInput import DiagramRemoveInput
 
 # the diagram
-from ..diagram.FlowDiagram import FlowDiagram
+from .FlowDiagram import FlowDiagram
 
 
 # remove a factory from the pipeline diagram
-class ViewDiagramRemove(graphene.Mutation):
+class DiagramRemove(graphene.Mutation):
     """
-    Remove a factory from the pipeline diagram of a viewport
+    Remove a factory from a pipeline diagram
     """
 
     # inputs
     class Arguments:
         # the payload
-        input = ViewDiagramRemoveInput(required=True)
+        input = DiagramRemoveInput(required=True)
 
     # the result is the whole diagram
     diagram = graphene.Field(FlowDiagram)
@@ -33,12 +33,12 @@ class ViewDiagramRemove(graphene.Mutation):
     @staticmethod
     def mutate(root, info, input):
         """
-        Remove a factory from the pipeline diagram of a viewport
+        Remove a factory from a pipeline diagram
         """
         # get the store
         store = info.context["store"]
         # ask it to make the change
-        diagram = store.diagramRemove(viewport=input.viewport, node=input.node)
+        diagram = store.diagramRemove(diagram=input.diagram, node=input.node)
         # and hand off the diagram
         return {"diagram": diagram}
 
