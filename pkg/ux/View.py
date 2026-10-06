@@ -67,22 +67,6 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
     members.doc = "the per-member participation mask, or None until seeded from a stack reader"
     members.persistent = False
 
-    # public data
-    @property
-    def flows(self):
-        """
-        The flows that describe what the channels compute, by channel tag
-        """
-        # the channels with a description so far
-        return {
-            # the real valued terms of a covariance matrix, painted gray; the masked flavor
-            # draws the same way, since the mask is not part of the description yet
-            "covariance": qed.channels.covariance,
-            "covarianceMasked": qed.channels.covariance,
-            # phase, painted with a color wheel
-            "phase": qed.channels.phase,
-        }
-
     # interface
     def pipeline(self, channel):
         """
@@ -161,8 +145,10 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         if drawn is channel:
             # it is the one
             return diagram
-        # otherwise, find the flow that describes what my channel computes
-        flow = self.flows.get(channel.tag)
+        # otherwise, ask my channel for the flow that describes what it computes; channels from
+        # elsewhere may not know how to answer
+        describe = getattr(channel, "description", None)
+        flow = describe() if describe is not None else None
         # a channel that has no description yet
         if flow is None:
             # has no diagram either

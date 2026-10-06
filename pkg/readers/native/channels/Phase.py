@@ -118,5 +118,14 @@ class Phase(Channel, family="qed.channels.native.phase"):
     # constants
     tag = "phase"
 
+    # the description of the pipeline
+    @classmethod
+    def description(cls):
+        """
+        The flow that describes what i compute
+        """
+        # the phase, painted with a color wheel
+        return qed.channels.phase
+
 
 # end of file

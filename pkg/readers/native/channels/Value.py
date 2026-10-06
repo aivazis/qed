@@ -80,5 +80,14 @@ class Value(Channel, family="qed.channels.native.value"):
     # constants
     tag = "value"
 
+    # the description of the pipeline
+    @classmethod
+    def description(cls):
+        """
+        The flow that describes what i compute
+        """
+        # a value, painted gray
+        return qed.channels.value
+
 
 # end of file

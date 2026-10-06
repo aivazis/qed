@@ -75,6 +75,17 @@ class CovarianceMasked(Channel, family="qed.channels.nisar.covarianceMasked"):
     # declared and paint the two kinds of absence apart
     absence = True
     tag = "covarianceMasked"
+
+    # the description of the pipeline
+    @classmethod
+    def description(cls):
+        """
+        The flow that describes what i compute
+        """
+        # a term of the covariance, painted gray; the mask and fill gates are not part of the
+        # description yet
+        return qed.channels.covariance
+
     category = "real"
 
 

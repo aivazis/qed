@@ -75,6 +75,16 @@ class CoherenceMasked(Channel, family="qed.channels.nisar.coherenceMasked"):
     # declared and paint the two kinds of absence apart
     absence = True
     tag = "coherenceMasked"
+
+    # the description of the pipeline
+    @classmethod
+    def description(cls):
+        """
+        The flow that describes what i compute
+        """
+        # the coherence, painted gray; the mask and fill gates are not part of the description yet
+        return qed.channels.value
+
     category = "real"
 
 
