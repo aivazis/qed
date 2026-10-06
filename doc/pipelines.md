@@ -215,6 +215,76 @@ answer yet. They are to be taken one at a time.
    of the view hold, and a log range is converted in python before it reaches `parametric`. Both
    are needed for the inspector to describe the pipeline that renders the tiles.
 
+## the visual language: kinds and levels
+
+> **Speculative, 2026-10-06.** A line of thought recorded so that it is not lost, not a design.
+> Nothing in this section is decided or implemented; it is a set of candidates and questions to
+> weigh before the language is settled. Read it as such.
+
+### the idea
+
+pyre has three levels for anything configurable: a protocol, the component classes that
+implement it, and the instances of those classes. The thought is that the three levels apply to
+the data of a pipeline, its products, as well as they apply to its processing engines, its
+factories, and that all six combinations are useful in a diagram:
+
+- A flow drawn only with protocols would be a high level description of the shape of a pipeline.
+- Putting a component class in place of a protocol would be an instruction to whoever orchestrates
+  the execution: use this kind of implementer here.
+- Before anything runs, every abstract node would have to be replaced by a concrete instance.
+
+This lines up with how a pyre facility is bound today: a trait typed by a protocol, with a
+`pyre_default` that names a class, and an instance once the component is built. The descriptions
+in `pkg/channels` already mix the levels: `normalizer = qed.viz.filter()` is typed by a protocol,
+its default names the class `parametric`, and building the flow makes the instance.
+
+### a possible encoding
+
+If every entity is drawn as a puck, the kind and the level have to be told apart by paint. One
+candidate: the hue says the kind, as it does today, and the fill says the level.
+
+| | protocol | component class | instance |
+|---|---|---|---|
+| factory | orange outline, hollow | orange outline, tinted | solid orange |
+| product | blue outline, hollow | blue outline, tinted | solid blue |
+
+In this reading, today's gray slot is a product protocol, a specification in `pyre.flow`, and
+would become a hollow blue puck. The diagrams have no factory protocols yet, the producers of
+`pyre.flow`.
+
+Dark fills on a dark canvas are close in value, and fill alone is a weak cue for some viewers, so
+a second cue may be needed: perhaps a dashed outline for protocols and a solid one for classes
+and instances, in the flat icons and the isometric pucks alike.
+
+### realizing a pipeline
+
+A diagram drawn this way would also show how far a pipeline is from running: anything hollow or
+tinted is still to be resolved. Realizing it would mean walking the diagram, replacing every
+protocol by its default or chosen implementer and every class by an instance. Whether this is a
+step the user takes, the orchestrator takes, or both, is open.
+
+### open questions
+
+1. **Containers.** No factory has a slot that holds a container of products yet. The stack
+   reducers need one: their inputs grow with the stack. Whether a container is a product of its
+   own, a slot that admits many bindings, or an arity fixed at realization, is to be ironed out.
+   The pyre 2.0 proposal (`doc/design/lifecycle.md` on pyre's branch `p2`, 6.4.3) treats list,
+   set, and dictionary traits whose schema is a protocol as facilities, which the flow engine
+   cannot see today.
+2. **Settings.** Traits that are neither inputs nor outputs, e.g. the interval of `parametric`,
+   are settings. A change to a setting must dirty its factory, so that the consumers downstream
+   know their products are stale. Whether `pyre.flow` does this fully is not known. The pyre 2.0
+   proposal derives staleness from a revision number per instance that increases when any of its
+   traits, or any of its parts, changes (6.6.1).
+3. **Completeness of `pyre.flow`.** Before `pyre.flow` is taken apart and rebuilt around the
+   component lifecycle (the pyre 2.0 proposal, 8.1), it is worth auditing how much of the above it
+   already captures: the levels, the realization, containers, and the dirtying by settings.
+4. **Prior art.** pyre has a draft of a visual language for workflows from 2017, in
+   `doc/diagrams/packages/pyre.flow.graffle`, worth consulting before settling anything here.
+5. **Expressiveness.** The test of the language is whether every pipeline can be drawn with it:
+   the channels in this survey, with their gates, palettes, reducers, constants, and branches that
+   split and rejoin, and the pipelines users will design.
+
 ## defects found during the survey
 
 Recorded on the pile, not fixed here.
