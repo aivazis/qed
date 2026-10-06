@@ -15,6 +15,8 @@ import { useCamera } from '~/widgets/camera'
 // local
 // the diagram on the canvas
 import { useDiagram } from './diagram'
+// the projection, which maps the drop point back onto the floor
+import { useProjection } from './projection'
 // the editor
 import { useEditDiagram } from './useEditDiagram'
 
@@ -30,6 +32,8 @@ export const Drops = ({ canvas }) => {
     const { toICS } = useCamera()
     // the editor of the diagram on the canvas
     const { add } = useEditDiagram(useDiagram().id)
+    // the projection
+    const { ground } = useProjection()
     // install the listeners on the canvas
     React.useEffect(() => {
         // get the canvas
@@ -61,8 +65,11 @@ export const Drops = ({ canvas }) => {
             }
             // otherwise, it is mine
             evt.preventDefault()
-            // where it landed
-            const { x, y } = toICS({ x: evt.clientX, y: evt.clientY })
+            // where it landed on the screen
+            const spot = toICS({ x: evt.clientX, y: evt.clientY }, false)
+            // and on the floor, on the grid
+            const floor = ground({ dx: spot.x, dy: spot.y })
+            const [x, y] = [Math.round(floor.dx), Math.round(floor.dy)]
             // place it
             add({ family, x, y })
             // all done
