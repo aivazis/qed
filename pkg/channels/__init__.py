@@ -9,7 +9,11 @@
 from .Channel import Channel as channel
 
 # specific channels
+from .Amplitude import Amplitude as amplitude
 from .Covariance import Covariance as covariance
+from .Imaginary import Imaginary as imaginary
 from .Phase import Phase as phase
+from .Real import Real as real
+from .Value import Value as value
 
 # end of file
