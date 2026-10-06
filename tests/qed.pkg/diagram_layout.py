@@ -90,22 +90,31 @@ def persistent():
     """
     # the method, borrowed from the view class
     diagram = qed.ux.view.diagram
-    # a stand-in view with a covariance channel, its table of flows, and no diagram yet
+
+    # a channel that is described by the covariance flow
+    def described(name):
+        """
+        Make a stand-in channel named {name} that is described by the covariance flow
+        """
+        # with the flow as its description
+        return types.SimpleNamespace(pyre_name=name, description=lambda: qed.channels.covariance)
+
+    # a stand-in view with a covariance channel, and no diagram yet
     standin = types.SimpleNamespace(
-        channel=types.SimpleNamespace(pyre_name="diagram_layout.channel", tag="covariance"),
-        flows=qed.ux.view.flows.fget(None),
-        _diagram=(None, None),
+        channel=described("diagram_layout.channel"), _diagram=(None, None)
     )
     # the first request draws it
     first = diagram(standin)
     # the second one gets the same diagram
     assert diagram(standin) is first
     # a new channel
-    standin.channel = types.SimpleNamespace(pyre_name="diagram_layout.other", tag="covariance")
+    standin.channel = described("diagram_layout.other")
     # gets a diagram of its own
     assert diagram(standin) is not first
     # and a channel without a description
-    standin.channel = types.SimpleNamespace(pyre_name="diagram_layout.none", tag="mystery")
+    standin.channel = types.SimpleNamespace(
+        pyre_name="diagram_layout.none", description=lambda: None
+    )
     # gets none
     assert diagram(standin) is None
     # all done
