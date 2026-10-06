@@ -53,6 +53,69 @@ export default {
         fill: "url(#gridGlow)",
     },
 
+    // the isometric view
+    iso: {
+        // the lattice on the floor
+        floor: {
+            stroke: "hsl(0deg, 0%, 14%)",
+            strokeWidth: 1,
+            vectorEffect: "non-scaling-stroke",
+            fill: "none",
+        },
+        // the cell under the cursor
+        cell: {
+            stroke: "hsl(0deg, 0%, 30%)",
+            strokeWidth: 1,
+            vectorEffect: "non-scaling-stroke",
+            fill: "hsl(0deg, 0%, 10%)",
+        },
+        // the stalk from a node above the floor down to its footprint
+        stalk: {
+            stroke: "hsl(0deg, 0%, 40%)",
+            strokeWidth: 1,
+            strokeDasharray: "2 3",
+            vectorEffect: "non-scaling-stroke",
+            fill: "none",
+        },
+        // the leader from a factory up to its name: like a stalk, but dimmer, and in the color
+        // of the factory, so it ties the name to its solid without competing with the connectors
+        leader: {
+            stroke: "hsl(28deg, 45%, 40%)",
+            strokeWidth: 1,
+            strokeDasharray: "1 2",
+            vectorEffect: "non-scaling-stroke",
+            fill: "none",
+        },
+        // and the footprint
+        footprint: {
+            stroke: "hsl(0deg, 0%, 30%)",
+            strokeWidth: 1,
+            vectorEffect: "non-scaling-stroke",
+            fill: "hsla(0deg, 0%, 0%, 0.35)",
+        },
+        // factories, as pucks in the color of factories
+        factory: {
+            top: { fill: "hsl(28deg, 70%, 45%)", stroke: "hsl(28deg, 70%, 60%)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" },
+            side: { fill: "hsl(28deg, 70%, 26%)", stroke: "hsl(28deg, 70%, 40%)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" },
+            band: { fill: "hsl(28deg, 70%, 26%)", stroke: "none" },
+            highlight: { fill: "none", stroke: "hsl(28deg, 40%, 80%)", strokeWidth: 2, vectorEffect: "non-scaling-stroke" },
+        },
+        // slots without a product
+        slot: {
+            top: { fill: "hsl(0deg, 0%, 32%)", stroke: "hsl(0deg, 0%, 45%)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" },
+            side: { fill: "hsl(0deg, 0%, 17%)", stroke: "hsl(0deg, 0%, 35%)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" },
+            band: { fill: "hsl(0deg, 0%, 17%)", stroke: "none" },
+            highlight: { fill: "none", stroke: "hsl(0deg, 0%, 70%)", strokeWidth: 2, vectorEffect: "non-scaling-stroke" },
+        },
+        // and with one
+        product: {
+            top: { fill: "hsl(200deg, 80%, 38%)", stroke: "hsl(200deg, 80%, 55%)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" },
+            side: { fill: "hsl(200deg, 80%, 20%)", stroke: "hsl(200deg, 80%, 35%)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" },
+            band: { fill: "hsl(200deg, 80%, 20%)", stroke: "none" },
+            highlight: { fill: "none", stroke: "hsl(200deg, 40%, 75%)", strokeWidth: 2, vectorEffect: "non-scaling-stroke" },
+        },
+    },
+
     // the rings that tell what dropping a dragged node would do
     drop: {
         // merge with the node under it
