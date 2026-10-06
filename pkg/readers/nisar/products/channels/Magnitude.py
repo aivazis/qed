@@ -70,6 +70,16 @@ class Magnitude(Channel, family="qed.channels.nisar.abs"):
 
     # constants
     tag = "abs"
+
+    # the description of the pipeline
+    @classmethod
+    def description(cls):
+        """
+        The flow that describes what i compute
+        """
+        # the magnitude of each value, painted gray
+        return qed.channels.amplitude
+
     category = "real"
 
 

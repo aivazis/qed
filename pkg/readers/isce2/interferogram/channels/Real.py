@@ -71,5 +71,14 @@ class Real(Channel, family="qed.channels.isce2.int.real"):
     # constants
     tag = "real"
 
+    # the description of the pipeline
+    @classmethod
+    def description(cls):
+        """
+        The flow that describes what i compute
+        """
+        # the real part, painted gray
+        return qed.channels.real
+
 
 # end of file

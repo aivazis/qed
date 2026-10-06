@@ -70,6 +70,16 @@ class Imaginary(Channel, family="qed.channels.nisar.imaginary"):
 
     # constants
     tag = "imaginary"
+
+    # the description of the pipeline
+    @classmethod
+    def description(cls):
+        """
+        The flow that describes what i compute
+        """
+        # the imaginary part, painted gray
+        return qed.channels.imaginary
+
     category = "slc"
 
 

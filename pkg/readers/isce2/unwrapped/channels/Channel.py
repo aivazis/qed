@@ -19,6 +19,15 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
     tag = None
 
     # interface
+    @classmethod
+    def description(cls):
+        """
+        The flow that describes what i compute, for drawing my pipeline, or nothing when there is
+        no description yet
+        """
+        # by default, there is none
+        return None
+
     def autotune(self, **kwds):
         """
         Use the {stats} gathered on a data sample to adjust the range configuration

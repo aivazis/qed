@@ -75,5 +75,14 @@ class Amplitude(Channel, family="qed.channels.native.amplitude"):
     # constants
     tag = "amplitude"
 
+    # the description of the pipeline
+    @classmethod
+    def description(cls):
+        """
+        The flow that describes what i compute
+        """
+        # the amplitude, painted gray
+        return qed.channels.amplitude
+
 
 # end of file
