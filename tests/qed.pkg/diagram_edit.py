@@ -72,23 +72,23 @@ def factoryOf(diagram, family):
 # placing factories
 def adding():
     """
-    Place the rgb colormap on an empty diagram, then try to place another on top of it
+    Place the oklch colormap on an empty diagram, then try to place another on top of it
     """
     # an empty diagram
     diagram = empty()
     store = storeOf(diagram)
-    # place the rgb colormap
-    result = add(store, "pyre.viz.colormaps.rgb", (0, 0, 0))
+    # place the oklch colormap
+    result = add(store, "pyre.viz.colormaps.oklch", (0, 0, 0))
     # the store hands back the diagram
     assert result is diagram
     # which now holds the colormap, with its three inputs and three outputs
     assert len(diagram.factories) == 1
     assert len(diagram.slots) == 6
     # the factory is in the flow of the diagram as well
-    rgb = factoryOf(diagram, "pyre.viz.colormaps.rgb")
-    assert rgb.factory in diagram.flow.factories
+    oklch = factoryOf(diagram, "pyre.viz.colormaps.oklch")
+    assert oklch.factory in diagram.flow.factories
     # another one on top of it does not fit, so it is refused
-    add(store, "pyre.viz.colormaps.rgb", (0, 0, 0))
+    add(store, "pyre.viz.colormaps.oklch", (0, 0, 0))
     assert len(diagram.factories) == 1
     # and so is a factory nobody offers
     add(store, "pyre.viz.colormaps.nonsense", (40, 0, 0))
