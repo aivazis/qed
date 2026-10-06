@@ -10,7 +10,7 @@ import React from 'react'
 import { graphql, useFragment } from 'react-relay/hooks'
 
 // local
-import { Factory } from './factory'
+import { Factory } from '../factory'
 
 
 // render the factory nodes

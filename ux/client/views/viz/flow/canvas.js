@@ -17,32 +17,36 @@ import { Camera, Compass } from '~/widgets'
 import { useSelection } from './useSelection'
 // the diagram on the canvas
 import { DiagramProvider } from './diagram'
+// the projection
+import { ProjectionProvider, makeProjection } from './projection'
+// the scenes of the views
+import { FlatScene } from './flat/scene'
+import { IsoScene } from './iso/scene'
 // the drag in progress
 import { DragProvider } from './drag'
 // the drop target for factories from the palette
 import { Drops } from './drops'
 // the editor
 import { useEditDiagram } from './useEditDiagram'
-// components
-import { Grid } from './grid'
-// diagram nodes
-import { Connectors } from './connectors'
-import { Factories } from './factories'
-import { Labels } from './labels'
-import { Slots } from './slots'
 // paint
 import styles from './styles'
 
 
 // the canvas that draws a pipeline {diagram} and lets the user edit it; when {live}, every step of
 // a drag goes to the server
-export const Canvas = ({ diagram: diagramRef, live = false }) => {
+export const Canvas = ({ diagram: diagramRef, live = false, view = { kind: "flat" } }) => {
     // get the diagram
     const diagram = useFragment(canvasFlowDiagramFragment, diagramRef)
     // build a reference to my container so we can measure it and install listeners
     const ref = React.useRef(null)
-    // the camera looks at the middle of the diagram
-    const focus = center(diagram)
+    // the projection the {view} asks for
+    const projection = makeProjection(view)
+    // and whether it is flat
+    const flat = projection.name === "flat"
+    // where it puts points
+    const { project } = projection
+    // the camera looks at the middle of the diagram, as projected
+    const focus = center(diagram, project)
     // the nodes a drag can land on, with what decides whether it may
     const nodes = occupants(diagram)
     // the factories each slot connects to
@@ -97,28 +101,23 @@ export const Canvas = ({ diagram: diagramRef, live = false }) => {
                 data-qed-diagram={diagram?.id ?? ""}
             >
                 {/* everything that is in ICS */}
-                <Camera ref={ref} scale={20} focus={focus} focusKey={diagram?.id}>
-                    {/* the diagram, which the requests that change it name */}
-                    <DiagramProvider id={diagram?.id ?? null} live={live}>
-                        {/* the drop target for factories from the palette, when it can be edited */}
-                        {editable && <Drops canvas={ref} />}
-                        {/* the drag in progress, which the nodes publish and the rest follow */}
-                        <DragProvider nodes={nodes} followers={followers} owners={owners}
-                            editable={editable}>
-                            {/* the orientation marker at the origin */}
-                            {/* <Compass /> */}
-                            {/* the current cell highlighter */}
-                            <Grid />
-                            {/* labels */}
-                            <Labels diagram={diagram} />
-                            {/* connector */}
-                            <Connectors diagram={diagram} />
-                            {/* slots */}
-                            <Slots diagram={diagram} />
-                            {/* factories */}
-                            <Factories diagram={diagram} />
-                        </DragProvider>
-                    </DiagramProvider>
+                <Camera ref={ref} scale={20} focus={focus} focusKey={`${diagram?.id}:${projection.key}`}>
+                    {/* the way the diagram is drawn */}
+                    <ProjectionProvider projection={projection}>
+                        {/* the diagram, which the requests that change it name */}
+                        <DiagramProvider id={diagram?.id ?? null} live={live}>
+                            {/* the drop target for factories from the palette, when it can be edited */}
+                            {editable && <Drops canvas={ref} />}
+                            {/* the drag in progress, which the nodes publish and the rest follow */}
+                            <DragProvider nodes={nodes} followers={followers} owners={owners}
+                                editable={editable}>
+                                {/* the diagram, as the view in use draws it */}
+                                {flat
+                                    ? <FlatScene diagram={diagram} />
+                                    : <IsoScene diagram={diagram} nodes={nodes} />}
+                            </DragProvider>
+                        </DiagramProvider>
+                    </ProjectionProvider>
                 </Camera>
             </svg>
         </section>
@@ -126,11 +125,11 @@ export const Canvas = ({ diagram: diagramRef, live = false }) => {
     )
 }
 
-// the middle of the box that holds the factories and slots of a {diagram}, or nothing for a
-// diagram that is missing or empty
-const center = (diagram) => {
-    // the positions of the nodes
-    const points = diagram ? [...diagram.factories, ...diagram.slots].map(node => node.at) : []
+// the middle of the box that holds the factories and slots of a {diagram}, as {project}ed onto the
+// screen, or nothing for a diagram that is missing or empty
+const center = (diagram, project) => {
+    // the positions of the nodes, on the screen
+    const points = diagram ? [...diagram.factories, ...diagram.slots].map(node => project(node.at)) : []
     // an empty diagram
     if (points.length == 0) {
         // has no middle
@@ -246,6 +245,8 @@ const canvasFlowDiagramFragment = graphql`
         ...slotsFlowDiagramFragment
         # factories
         ...factoriesFlowDiagramFragment
+        # all the nodes, for the isometric view
+        ...sceneFlowDiagramFragment
     }
 `
 

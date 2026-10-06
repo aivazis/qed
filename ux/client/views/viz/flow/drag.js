@@ -35,8 +35,8 @@ const Context = React.createContext(
 // {followers} are the slots each factory takes along when it moves, {owners} are the factories
 // each slot connects to, and a diagram that is not {editable} merges nothing
 export const DragProvider = ({ nodes = [], followers = {}, owners = {}, editable = true, children }) => {
-    // the drag in progress, as { id, tx, ty, ax, ay }, or nothing; a drag that moves the selection
-    // also carries the picked nodes as its {group}
+    // the drag in progress, as { id, tx, ty, tz, ax, ay, az }, or nothing; a drag that moves the
+    // selection also carries the picked nodes as its {group}
     const [drag, setDrag] = React.useState(null)
     // what a drop where the dragged node is headed would do
     const landing = judge(drag, nodes, followers, owners, editable)
@@ -58,8 +58,8 @@ export const useDrag = () => {
     // how far the node with {id} is from where it is headed, which is nowhere unless it is one of
     // the nodes that move
     const shiftOf = id => crowd.has(id)
-        ? { dx: drag.tx - drag.ax, dy: drag.ty - drag.ay }
-        : { dx: 0, dy: 0 }
+        ? { dx: drag.tx - drag.ax, dy: drag.ty - drag.ay, dz: (drag.tz ?? drag.az) - drag.az }
+        : { dx: 0, dy: 0, dz: 0 }
     // the picked nodes that a drag of the node with {id} would move: all of them, if it is one of
     // several picked nodes on this diagram, and none otherwise, which makes it a drag of its own
     const groupOf = (id, selection) => {
@@ -151,7 +151,7 @@ const judge = (drag, nodes, followers, owners, editable) => {
     // whoever, outside the group, sits at a spot
     const at = (x, y, z) => nodes.find(node => !group.has(node.id) && node.x === x && node.y === y && node.z === z)
     // how far the group moves
-    const [dx, dy] = [drag.tx - mover.x, drag.ty - mover.y]
+    const [dx, dy, dz] = [drag.tx - mover.x, drag.ty - mover.y, (drag.tz ?? mover.z) - mover.z]
     // the verdicts, by node
     const verdicts = {}
     // a move of the selection never merges, so every member is judged the same way, the mover
@@ -167,7 +167,7 @@ const judge = (drag, nodes, followers, owners, editable) => {
         // the member
         const member = nodes.find(node => node.id === id)
         // whoever it would land on
-        const other = member ? at(member.x + dx, member.y + dy, member.z) : null
+        const other = member ? at(member.x + dx, member.y + dy, member.z + dz) : null
         // a member lands on somebody
         if (other) {
             // both of them see the collision
@@ -178,7 +178,7 @@ const judge = (drag, nodes, followers, owners, editable) => {
         }
     }
     // the node already where the mover is headed, if any, unless the mover was judged already
-    const occupant = plain ? null : at(drag.tx, drag.ty, mover.z)
+    const occupant = plain ? null : at(drag.tx, drag.ty, drag.tz ?? mover.z)
     // if there is one
     if (occupant) {
         // nothing merges on a diagram that cannot be edited; elsewhere, a factory on either side,

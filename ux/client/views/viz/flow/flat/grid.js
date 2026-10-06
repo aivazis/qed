@@ -12,7 +12,7 @@ import React from 'react'
 // hooks
 import { useCamera } from '~/widgets/camera'
 // local
-import styles from './styles'
+import styles from '../styles'
 
 
 // highlight the grid cell that's under the cursor

@@ -10,7 +10,7 @@ import React from 'react'
 import { graphql, useFragment } from 'react-relay/hooks'
 
 // local
-import { Slot } from './slot'
+import { Slot } from '../slot'
 
 
 // render the slots

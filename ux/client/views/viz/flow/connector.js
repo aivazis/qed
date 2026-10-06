@@ -12,6 +12,8 @@ import { graphql, useFragment } from 'react-relay/hooks'
 // local
 // the drag in progress
 import { useDrag } from './drag'
+// the projection
+import { useProjection } from './projection'
 // paint
 import styles from './styles'
 
@@ -25,18 +27,23 @@ export const Connector = ({ connector, style }) => {
     const { shiftOf } = useDrag()
     const fs = shiftOf(factoryId)
     const ss = shiftOf(slotId)
+    // the projection
+    const { project } = useProjection()
     // the two ends, where they are now
-    const [fx, fy] = [factory.x + fs.dx, factory.y + fs.dy]
-    const [sx, sy] = [slot.x + ss.dx, slot.y + ss.dy]
+    const [fx, fy, fz] = [factory.x + fs.dx, factory.y + fs.dy, factory.z + fs.dz]
+    const [sx, sy, sz] = [slot.x + ss.dx, slot.y + ss.dy, slot.z + ss.dz]
 
     // distinguish between input and output connectors
     const delta = 2 * (input ? -1 : 1)
+    // the corners of the connector: the terminal of the factory, the point level with the slot,
+    // and the slot itself
+    const corners = [
+        project({ x: fx + delta, y: fy, z: fz }),
+        project({ x: sx - delta, y: sy, z: sz }),
+        project({ x: sx, y: sy, z: sz }),
+    ]
     // compute the connector path
-    const path = `
-        M ${fx + delta} ${fy}
-        L ${sx - delta} ${sy}
-        L ${sx} ${sy}
-    `
+    const path = corners.map(({ x, y }, i) => `${i ? "L" : "M"} ${x} ${y}`).join(" ")
     // mix the paint
     const paint = { ...styles.connector, ...style }
     // render
@@ -58,10 +65,12 @@ const connectorFlowDiagramFragment = graphql`
         factory {
             x
             y
+            z
         }
         slot {
             x
             y
+            z
         }
         # the nodes at my ends, so i can follow them while they are dragged
         factoryId
