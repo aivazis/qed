@@ -12,7 +12,7 @@ qed.lib.tests.prerequisites := qed.lib
 # the drivers compile the way the library does, so they see the same language standard
 qed.lib.tests.c++.flags += $(qed.lib.c++.flags)
 # external dependencies
-qed.lib.tests.extern := $(qed.lib.extern)
+qed.lib.tests.extern := qed.lib $(qed.lib.extern)
 
 # each generator emits its fixture beside itself; record the outputs for the clean rules
 tests.qed.lib.nisar.masks.gcov.clean += gcov.bmp
