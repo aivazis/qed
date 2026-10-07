@@ -27,6 +27,8 @@
 #include "channels/MeanPower.h"
 #include "channels/Coherence.h"
 
+// pipelines
+#include "pipelines/public.h"
 // profile
 #include "profile.h"
 // statistics
