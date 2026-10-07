@@ -11,6 +11,73 @@
 #include "forward.h"
 
 
+// the bindings of the pipelines over one cell type
+namespace qed::py::native {
+    // bind the amplitude pipeline over complex cells of type {cellT} in their own submodule
+    template <class cellT>
+    inline void bindAmplitude(py::module & m, const char * name, const char * doc)
+    {
+        // the pipeline
+        using amplitude_t = qed::native::pipelines::Amplitude<cellT>;
+        // gather the pipelines of this cell type under its name, so a caller picks the one that
+        // matches its raster
+        auto cell = m.def_submodule(
+            // the name of the cell type
+            name,
+            // its docstring
+            doc);
+        // make the class
+        auto cls = py::class_<amplitude_t>(
+            // in this module
+            cell,
+            // the name
+            "Amplitude",
+            // the docstring
+            "the amplitude of a complex tile, painted gray, through flow factories");
+
+        // the constructor
+        cls.def(
+            // the implementation
+            py::init<>(),
+            // the docstring
+            "make a pipeline, whose graphs are built on first use");
+
+        // render a tile
+        cls.def(
+            // the name
+            "render",
+            // the handler
+            [](amplitude_t & self, const py::buffer & source, const py::iterable & origin,
+               const py::iterable & shape, const py::iterable & stride, double min,
+               double max) -> py::bytes {
+                // rebuild the tile geometry as rank-2 grid coordinates
+                auto o = asIndex<2>(origin);
+                auto t = asShape<2>(shape);
+                auto s = asIndex<2>(stride);
+                // dispatch on the buffer's cell type, which must be mine, and run the pipeline
+                // over the tile
+                return onTile<2, cellT>(
+                    source, o, t, s,
+                    [&](const auto & grid, const auto & o, const auto & t, const auto & s) {
+                        // render, and get a view of the encoded image
+                        auto image = self.render(grid, o, t, s, min, max);
+                        // copy its bytes, since the pipeline reuses the image for the next tile
+                        return py::bytes(
+                            reinterpret_cast<const char *>(image.data()), image.cells());
+                    });
+            },
+            // the signature
+            "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+            // the docstring
+            "render the tile of {source} at {origin}+{shape} with the given {stride}, mapping "
+            "the magnitudes in [{min}, {max}] onto [0,1]");
+
+        // all done
+        return;
+    }
+} // namespace qed::py::native
+
+
 // submodule with the bindings for the pipelines assembled out of flow factories
 void
 qed::py::native::pipelines(py::module & m)
@@ -71,6 +138,12 @@ qed::py::native::pipelines(py::module & m)
         // the docstring
         "render the tile of {source} at {origin}+{shape} with the given {stride}, mapping the "
         "values in [{min}, {max}] onto [0,1]");
+
+    // the amplitude of a complex tile, over each of the complex cell types
+    bindAmplitude<std::complex<float>>(
+        pipelines, "complex64", "the pipelines over single precision complex cells");
+    bindAmplitude<std::complex<double>>(
+        pipelines, "complex128", "the pipelines over double precision complex cells");
 
     // all done
     return;
