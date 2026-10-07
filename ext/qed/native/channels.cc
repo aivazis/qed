@@ -80,37 +80,6 @@ qed::py::native::channels(py::module & m)
         // the docstring
         "render the absolute value of a real tile");
 
-    // render the value of a numpy array directly, without going through a grid
-    channels.def(
-        // the name
-        "value",
-        // the handler
-        [](py::array_t<float, py::array::c_style | py::array::forcecast> source,
-           const py::iterable & shape, float low, float high) -> bmp_t {
-            // the normalizer maps a range of values to the unit interval
-            using norm_t = parametric_t<const float *>;
-            // and the color map turns that into gray
-            using colormap_t = gray_t<norm_t>;
-            // get the array's data buffer
-            auto buffer = static_cast<const float *>(source.request().ptr);
-            // map it to the unit interval
-            auto norm = norm_t(buffer, norm_t::interval_type(low, high));
-            // generate the color
-            auto colormap = colormap_t(norm);
-            // realize the requested shape as rank-2 grid extents
-            auto s = asShape<2>(shape);
-            // make a bitmap of that shape
-            bmp_t bmp(s[0], s[1]);
-            // render into it
-            bmp.encode(colormap);
-            // and hand it back
-            return bmp;
-        },
-        // the signature
-        "source"_a, "shape"_a, "low"_a, "high"_a,
-        // the docstring
-        "render the values of a numpy array");
-
     // render the value of a complex tile
     channels.def(
         // the name
