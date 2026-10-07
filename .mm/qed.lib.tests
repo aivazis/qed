@@ -17,6 +17,8 @@ qed.lib.tests.extern := $(qed.lib.extern)
 # each generator emits its fixture beside itself; record the outputs for the clean rules
 tests.qed.lib.nisar.masks.gcov.clean += gcov.bmp
 tests.qed.lib.nisar.masks.gunw.clean += gunw.bmp
+# the level driver writes its tiles and their occupancy record
+tests.qed.lib.pyramid.level.clean += level.tiles level.occupancy
 
 
 # end of file

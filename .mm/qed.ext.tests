@@ -12,5 +12,8 @@ qed.ext.tests.prerequisites := qed.pkg qed.ext
 # external dependencies
 qed.ext.tests.extern := $(qed.ext.extern)
 
+# the pyramid driver writes two levels and their occupancy records
+tests.qed.ext.pyramid.clean := pyramid.tiles pyramid.occupancy above.tiles above.occupancy
+
 
 # end of file
