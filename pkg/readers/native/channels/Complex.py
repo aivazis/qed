@@ -31,6 +31,11 @@ class Complex(Channel, family="qed.channels.native.complex"):
     saturation.doc = "the saturation"
     saturation.quantity = "saturation"
 
+    engine = qed.properties.str()
+    engine.default = "iterators"
+    engine.validators = qed.constraints.isMember("iterators", "flow")
+    engine.doc = "render with the fused iterators, or with a pipeline of flow factories"
+
     # interface
     def autotune(self, **kwds):
         """
@@ -85,7 +90,7 @@ class Complex(Channel, family="qed.channels.native.complex"):
         # all done
         return
 
-    def tile(self, **kwds):
+    def tile(self, source, zoom, origin, shape, **kwds):
         """
         Generate a tile of the given characteristics
         """
@@ -95,10 +100,55 @@ class Complex(Channel, family="qed.channels.native.complex"):
         lowPhase = self.phase.low
         highPhase = self.phase.high
         saturation = self.saturation.value
-        # add my configuration and chain up
-        return super().tile(
-            min=low, max=high, minPhase=lowPhase, maxPhase=highPhase, saturation=saturation, **kwds
+        # with the iterators
+        if self.engine == "iterators":
+            # add my configuration and chain up
+            return super().tile(
+                source=source,
+                zoom=zoom,
+                origin=origin,
+                shape=shape,
+                min=low,
+                max=high,
+                minPhase=lowPhase,
+                maxPhase=highPhase,
+                saturation=saturation,
+                **kwds,
+            )
+        # otherwise, with the flow pipeline for the cells of the source, which i make on first
+        # use and keep, along with the graphs it builds for each tile shape
+        cell = source.cell.cell
+        # look it up
+        pipeline = self._pipelines.get(cell)
+        # if this is the first tile of this cell type
+        if pipeline is None:
+            # make the pipeline
+            pipeline = getattr(qed.libqed.native.pipelines, cell).Complex()
+            # and remember it
+            self._pipelines[cell] = pipeline
+        # turn the zoom levels into per-axis strides
+        stride = tuple(2**level for level in zoom)
+        # and render
+        return pipeline.render(
+            source=source.data,
+            origin=origin,
+            shape=shape,
+            stride=stride,
+            min=low,
+            max=high,
+            minPhase=lowPhase,
+            maxPhase=highPhase,
+            saturation=saturation,
         )
+
+    # metamethods
+    def __init__(self, **kwds):
+        # chain up
+        super().__init__(**kwds)
+        # the flow pipelines, by the cell type of the source, made on first use
+        self._pipelines = {}
+        # all done
+        return
 
     # constants
     tag = "complex"
