@@ -148,9 +148,5 @@ assert list(archive.expanded) == [at()]
 doc = pyre.config.newYamlEditor(uri="qed.yaml")
 assert list(doc.get("restored", "expanded")) == [at()]
 
-# clean up
-os.chdir(here)
-shutil.rmtree(workspace)
-
 
 # end of file

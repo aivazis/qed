@@ -152,8 +152,5 @@ for raster in after["rasters"]:
 assert after["depth"] == min(raster["depth"] for raster in after["rasters"])
 assert after["reach"] == after["depth"]
 
-# clean up
-shutil.rmtree(str(scratch))
-
 
 # end of file

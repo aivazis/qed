@@ -17,7 +17,6 @@ arrive in order, and compares what lands on disk with a build that did all the w
 """
 
 # externals
-import os
 import shutil
 
 # support
@@ -215,9 +214,6 @@ assert kernels.sample(source=theirs.at(exponent=1), datatype=datatype, **window)
 # let go
 theirs.close()
 reference.close()
-# and clean up
-for area in (scratch, alone):
-    shutil.rmtree(str(area))
 
 
 # end of file

@@ -95,8 +95,5 @@ assert written == sum(
     os.stat(str(home / name)).st_blocks * 512 for name in ("level-01.tiles", "pyramid.json")
 )
 
-# clean up
-shutil.rmtree(str(scratch))
-
 
 # end of file

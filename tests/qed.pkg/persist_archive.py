@@ -151,9 +151,5 @@ assert final.get("first") is None
 assert list(final.get("archives")) == []
 assert "archives: []" in text()
 
-# clean up
-os.chdir(here)
-shutil.rmtree(workspace)
-
 
 # end of file
