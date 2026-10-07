@@ -15,7 +15,7 @@ folder that is missing or a digest that cannot be read only means there is less 
 # externals
 import json
 import os
-import tempfile
+import shutil
 import types
 
 # support
@@ -59,25 +59,30 @@ assert load(None) == {}
 assert load(pyre.primitives.path("/no/such/census/folder")) == {}
 
 # in a scratch folder
-with tempfile.TemporaryDirectory() as folder:
-    # two digests of the gcov of cycle 31, the one whose name sorts last written first
-    write(folder, "digest-census-gcov-31.json", "gcov", 31, stamp=1_000)
-    write(folder, "digest-census-31-gcov.json", "gcov", 31, stamp=2_000)
-    # an older cycle of the gslc, written last
-    write(folder, "digest-census-31-gslc.json", "gslc", 31, stamp=1_000)
-    write(folder, "digest-census-29-gslc.json", "gslc", 29, stamp=3_000)
-    # and a digest that cannot be read
-    with open(os.path.join(folder, "digest-census-broken.json"), "w") as stream:
-        # because it is not json
-        stream.write("not json")
-    # read them
-    references = load(pyre.primitives.path(folder))
-    # the newer digest of the same cycle wins, whatever the order of the names
-    assert references["gcov"]["census"] == "digest-census-31-gcov.json"
-    # the latest cycle wins, whenever it was written
-    assert references["gslc"]["cycle"] == 31
-    # and the broken digest is left out
-    assert set(references) == {"gcov", "gslc"}
+# the scratch folder, next to this driver, where the products stay for inspection
+folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "census_reference.scratch")
+# start clean, by removing whatever a previous run left behind
+shutil.rmtree(folder, ignore_errors=True)
+# and make it
+os.makedirs(folder)
+# two digests of the gcov of cycle 31, the one whose name sorts last written first
+write(folder, "digest-census-gcov-31.json", "gcov", 31, stamp=1_000)
+write(folder, "digest-census-31-gcov.json", "gcov", 31, stamp=2_000)
+# an older cycle of the gslc, written last
+write(folder, "digest-census-31-gslc.json", "gslc", 31, stamp=1_000)
+write(folder, "digest-census-29-gslc.json", "gslc", 29, stamp=3_000)
+# and a digest that cannot be read
+with open(os.path.join(folder, "digest-census-broken.json"), "w") as stream:
+    # because it is not json
+    stream.write("not json")
+# read them
+references = load(pyre.primitives.path(folder))
+# the newer digest of the same cycle wins, whatever the order of the names
+assert references["gcov"]["census"] == "digest-census-31-gcov.json"
+# the latest cycle wins, whenever it was written
+assert references["gslc"]["cycle"] == 31
+# and the broken digest is left out
+assert set(references) == {"gcov", "gslc"}
 
 
 # end of file

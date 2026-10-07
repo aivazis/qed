@@ -12,9 +12,6 @@ its controllers to a range that can render, instead of dividing by zero or colla
 picks onto each other; this is issue #81
 """
 
-# externals
-import tempfile
-
 # support
 import journal
 import pyre
@@ -53,9 +50,8 @@ assert linear.low < 3.0 < linear.high
 assert linear.min < linear.low and linear.high < linear.max
 
 # an all-zero raster, the way a user would meet one: a 65x65 complex file of nothing
-scratch = pyre.primitives.path(tempfile.mkdtemp(prefix="qed_constant_"))
-# the fixture
-fixture = scratch / "zeros.dat"
+# the fixture, next to this driver, where it stays for inspection
+fixture = pyre.primitives.path(__file__).parent / "constant_zeros.dat"
 # c16 cells are sixteen bytes each
 fixture.open(mode="wb").write(bytes(65 * 65 * 16))
 # open it
@@ -74,9 +70,6 @@ for name in dataset.channels:
     tile = dataset.render(channel=pipeline, zoom=(0, 0), origin=(0, 0), shape=(64, 64))
     # and check that a bitmap came back
     assert len(bytes(memoryview(tile))) > 0
-# clean up
-fixture.unlink()
-scratch.rmdir()
 
 
 # end of file
