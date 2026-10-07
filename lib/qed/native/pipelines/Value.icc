@@ -1,0 +1,50 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+// my declarations
+#include "Value.h"
+
+
+// interface
+template <typename sourceT>
+auto
+qed::native::pipelines::Value::render(
+    const sourceT & source, typename sourceT::index_type origin, typename sourceT::shape_type shape,
+    typename sourceT::index_type stride, double min, double max) -> image_view_type
+{
+    // the extent of the tile
+    const int rows = shape[0];
+    const int columns = shape[1];
+    // get the graph for tiles of this shape
+    auto & g = graph(rows, columns);
+
+    // the signal, which the source is decimated into
+    auto & signal = g.signal->write();
+    // go through the lines of the tile
+    for (int row = 0; row < rows; ++row) {
+        // and the cells of each line
+        for (int column = 0; column < columns; ++column) {
+            // the cell of the source that lands here: the origin and the position in the tile
+            // are both counted in decimated cells, so both are scaled by the stride
+            typename sourceT::index_type index { (origin[0] + row) * stride[0],
+                                                 (origin[1] + column) * stride[1] };
+            // copy its value, converted to double
+            signal[row * columns + column] = static_cast<double>(source[index]);
+        }
+    }
+    // the signal changed, so everything downstream of it is stale
+    g.signal->flush();
+    // set the interval, which makes the normalizer stale as well
+    g.normalizer->interval(interval_type(min, max));
+    // pull the image through the flow, and hand off a view of its bytes
+    return g.image->read();
+}
+
+
+// end of file

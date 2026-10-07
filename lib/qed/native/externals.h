@@ -12,7 +12,10 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <map>
+#include <memory>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 
