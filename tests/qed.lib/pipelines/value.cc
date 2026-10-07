@@ -32,7 +32,7 @@ using shape_t = grid_t::shape_type;
 // the pipeline under test
 using pipeline_t = qed::native::pipelines::Value;
 // the clocks
-using timer_t = pyre::timers::wall_timer_t;
+using walltimer_t = pyre::timers::wall_timer_t;
 
 
 // render the value of the same tiles with the iterators and with the flow pipeline, check that
@@ -92,7 +92,7 @@ main(int argc, char * argv[])
             auto step = index_t { stride, stride };
 
             // the clock of the iterators
-            auto iterators = timer_t("qed.native.pipelines.harness.iterators");
+            auto iterators = walltimer_t("qed.native.pipelines.harness.iterators");
             // reset it
             iterators.reset();
             // render the tile with the iterators, keeping the last image
@@ -108,7 +108,7 @@ main(int argc, char * argv[])
             }
 
             // the clock of the first render with the flow, which builds the graph for this shape
-            auto build = timer_t("qed.native.pipelines.harness.build");
+            auto build = walltimer_t("qed.native.pipelines.harness.build");
             // reset it
             build.reset();
             // render once, untimed by the stages
@@ -118,10 +118,10 @@ main(int argc, char * argv[])
             // reset the clocks of the stages, so they only count the timed renders
             for (const auto & stage : stages) {
                 // by name
-                timer_t("qed.native.pipelines.value." + stage).reset();
+                walltimer_t("qed.native.pipelines.value." + stage).reset();
             }
             // the clock of the flow
-            auto flow = timer_t("qed.native.pipelines.harness.flow");
+            auto flow = walltimer_t("qed.native.pipelines.harness.flow");
             // reset it
             flow.reset();
             // the image of the last render
@@ -129,7 +129,7 @@ main(int argc, char * argv[])
             // reset the stages once more, since that render was a warm one, not a timed one
             for (const auto & stage : stages) {
                 // by name
-                timer_t("qed.native.pipelines.value." + stage).reset();
+                walltimer_t("qed.native.pipelines.value." + stage).reset();
             }
             // time the renders
             for (auto trial = 0; trial < trials; ++trial) {
@@ -160,10 +160,10 @@ main(int argc, char * argv[])
                 << perTile(iterators.ms()) << " " << perTile(flow.ms()) << " " << build.ms()
                 << " | "
                 // the stages of the flow
-                << perTile(timer_t("qed.native.pipelines.value.copy").ms()) << " "
-                << perTile(timer_t("qed.native.pipelines.value.normalize").ms()) << " "
-                << perTile(timer_t("qed.native.pipelines.value.paint").ms()) << " "
-                << perTile(timer_t("qed.native.pipelines.value.encode").ms())
+                << perTile(walltimer_t("qed.native.pipelines.value.copy").ms()) << " "
+                << perTile(walltimer_t("qed.native.pipelines.value.normalize").ms()) << " "
+                << perTile(walltimer_t("qed.native.pipelines.value.paint").ms()) << " "
+                << perTile(walltimer_t("qed.native.pipelines.value.encode").ms())
                 << pyre::journal::newline;
         }
     }
