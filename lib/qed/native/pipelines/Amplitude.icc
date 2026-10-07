@@ -1,0 +1,218 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+// my declarations
+#include "Amplitude.h"
+
+
+// metamethods
+template <typename cellT>
+qed::native::pipelines::Amplitude<cellT>::Amplitude() : _graphs {}
+{}
+
+
+template <typename cellT>
+qed::native::pipelines::Amplitude<cellT>::~Amplitude()
+{
+    // go through my graphs
+    for (auto & [shape, g] : _graphs) {
+        // and take each one apart, so its parts can be released
+        dismantle(g);
+    }
+    // all done
+    return;
+}
+
+
+// interface
+template <typename cellT>
+template <typename sourceT>
+auto
+qed::native::pipelines::Amplitude<cellT>::render(
+    const sourceT & source, typename sourceT::index_type origin, typename sourceT::shape_type shape,
+    typename sourceT::index_type stride, double min, double max) -> image_view_type
+{
+    // the clocks of the stages, by name, so anybody can read what a tile cost and where: filling
+    // the signal from the source
+    auto copy = pyre::timers::wall_timer_t("qed.native.pipelines.amplitude.copy");
+    // computing the magnitudes
+    auto select = pyre::timers::wall_timer_t("qed.native.pipelines.amplitude.select");
+    // normalizing them
+    auto normalize = pyre::timers::wall_timer_t("qed.native.pipelines.amplitude.normalize");
+    // painting them
+    auto paint = pyre::timers::wall_timer_t("qed.native.pipelines.amplitude.paint");
+    // and encoding them
+    auto encode = pyre::timers::wall_timer_t("qed.native.pipelines.amplitude.encode");
+
+    // the extent of the tile
+    const int rows = shape[0];
+    const int columns = shape[1];
+    // get the graph for tiles of this shape
+    auto & g = graph(rows, columns);
+
+    // start filling the signal
+    copy.start();
+    // the signal, which the source is decimated into
+    auto & signal = g.signal->write();
+    // go through the lines of the tile
+    for (int row = 0; row < rows; ++row) {
+        // and the cells of each line
+        for (int column = 0; column < columns; ++column) {
+            // the cell of the source that lands here: the origin and the position in the tile
+            // are both counted in decimated cells, so both are scaled by the stride
+            typename sourceT::index_type index { (origin[0] + row) * stride[0],
+                                                 (origin[1] + column) * stride[1] };
+            // copy it as it is
+            signal[row * columns + column] = source[index];
+        }
+    }
+    // the signal changed, so everything downstream of it is stale
+    g.signal->flush();
+    // done filling the signal
+    copy.stop();
+    // set the interval, which makes the normalizer stale as well
+    g.normalizer->interval(interval_type(min, max));
+
+    // pull the products one stage at a time, so each stage can be timed on its own: the
+    // magnitudes
+    select.start();
+    g.amplitude->read();
+    select.stop();
+    // the normalized values
+    normalize.start();
+    g.normalized->read();
+    normalize.stop();
+    // the color channels, all three of which the colormap fills at once
+    paint.start();
+    g.red->read();
+    paint.stop();
+    // and the image
+    encode.start();
+    auto image = g.image->read();
+    encode.stop();
+
+    // hand off a view of its bytes
+    return image;
+}
+
+
+// implementation details
+template <typename cellT>
+auto
+qed::native::pipelines::Amplitude<cellT>::graph(int rows, int columns) -> graph_type &
+{
+    // the key of the graph
+    auto key = std::make_pair(rows, columns);
+    // look it up
+    auto found = _graphs.find(key);
+    // if it is there
+    if (found != _graphs.end()) {
+        // hand it off
+        return found->second;
+    }
+    // otherwise, build it, file it, and hand it off
+    return _graphs.emplace(key, build(rows, columns)).first->second;
+}
+
+
+template <typename cellT>
+auto
+qed::native::pipelines::Amplitude<cellT>::build(int rows, int columns) -> graph_type
+{
+    // the shape of the tiles
+    auto shape = shape_type(rows, columns);
+    // the graph
+    graph_type g;
+    // the signal, which receives the decimated source
+    g.signal = signal_type::create("signal", shape, cell_type {});
+    // the magnitudes
+    g.amplitude = amplitude_type::create("amplitude", shape, 0.0);
+    // the normalized values
+    g.normalized = channel_type::create("normalized", shape, 0.0);
+    // the color channels, one product each, so the colormap runs once per tile
+    g.red = channel_type::create("red", shape, 0.0);
+    g.green = channel_type::create("green", shape, 0.0);
+    g.blue = channel_type::create("blue", shape, 0.0);
+    // the encoded image
+    g.image = image_type::create("image", shape);
+
+    // make the selector
+    g.selector = selector_type::create("amplitude");
+    // it reads the signal
+    g.selector->signal(g.signal);
+    // and writes the magnitudes
+    g.selector->amplitude(g.amplitude);
+
+    // make the normalizer
+    g.normalizer = normalizer_type::create("normalizer");
+    // it reads the magnitudes
+    g.normalizer->signal(g.amplitude);
+    // and writes the normalized values
+    g.normalizer->parametric(g.normalized);
+
+    // make the colormap
+    g.colormap = colormap_type::create("gray");
+    // it reads the normalized values
+    g.colormap->data(g.normalized);
+    // and paints them into the red channel
+    g.colormap->red(g.red);
+    // the green one
+    g.colormap->green(g.green);
+    // and the blue one
+    g.colormap->blue(g.blue);
+
+    // make the codec
+    g.codec = codec_type::create("bmp");
+    // it reads the red channel
+    g.codec->red(g.red);
+    // the green one
+    g.codec->green(g.green);
+    // and the blue one
+    g.codec->blue(g.blue);
+    // and encodes them into the image
+    g.codec->image(g.image);
+
+    // hand off the graph
+    return g;
+}
+
+
+template <typename cellT>
+auto
+qed::native::pipelines::Amplitude<cellT>::dismantle(graph_type & g) -> void
+{
+    // the factories refer to their products and the products to their factories, so neither goes
+    // away on its own; unhook the codec from the red channel
+    g.codec->removeInput("red");
+    // the green one
+    g.codec->removeInput("green");
+    // the blue one
+    g.codec->removeInput("blue");
+    // and the image
+    g.codec->removeOutput("image");
+    // unhook the colormap from the normalized values
+    g.colormap->removeInput("data");
+    // and the three channels
+    g.colormap->removeOutput("red");
+    g.colormap->removeOutput("green");
+    g.colormap->removeOutput("blue");
+    // unhook the normalizer from the magnitudes
+    g.normalizer->removeInput("signal");
+    // and the normalized values
+    g.normalizer->removeOutput("parametric");
+    // unhook the selector from the signal
+    g.selector->removeInput("signal");
+    // and the magnitudes
+    g.selector->removeOutput("amplitude");
+    // all done
+    return;
+}
+
+
+// end of file
