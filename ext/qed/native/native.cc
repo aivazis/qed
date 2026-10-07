@@ -24,6 +24,8 @@ qed::py::native::native(py::module & m)
 
     // add the channel bindings
     channels(native);
+    // the pipelines assembled out of flow factories
+    pipelines(native);
     // profile
     profile(native);
     // statistics

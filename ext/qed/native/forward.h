@@ -18,6 +18,8 @@ namespace qed::py::native {
 
     // the channel bindings
     void channels(py::module &);
+    // the pipelines assembled out of flow factories
+    void pipelines(py::module &);
     // profile
     void profile(py::module &);
     // statistics
