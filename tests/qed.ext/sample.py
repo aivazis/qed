@@ -11,28 +11,41 @@ Exercise the strided mergeable sample kernel: the Welford moments, the stride ar
 the nan hygiene, and the magnitude reduction of complex sources
 """
 
-# externals
-import numpy as np
-
 # support
 import qed
+from pyre.extensions.pyre import grid
+
+
+def tile(cell, rows, columns, values):
+    """
+    Make a {rows}x{columns} grid of {cell} that holds {values} in row major order
+    """
+    # make the grid
+    g = grid.heap(shape=[rows, columns], cell=cell)
+    # go through the values
+    for at, value in enumerate(values):
+        # and place each one in its cell
+        g[divmod(at, columns)] = value
+    # all done
+    return g
+
 
 # a 4x4 ramp
-ramp = np.arange(16, dtype=np.float32).reshape(4, 4)
+ramp = tile(cell="float32", rows=4, columns=4, values=range(16))
 # sample every other cell in each direction: the values 0, 2, 8, 10
 record = qed.libqed.native.sample(source=ramp, origin=(0, 0), shape=(2, 2), stride=(2, 2))
 # four samples, from 0 to 10, with mean 5 and second moment 68
 assert record == (4.0, 0.0, 5.0, 68.0, 10.0)
 
 # an all-nan tile
-fog = np.full((4, 4), np.nan, dtype=np.float32)
+fog = tile(cell="float32", rows=4, columns=4, values=[float("nan")] * 16)
 # contributes an empty record
 record = qed.libqed.native.sample(source=fog, origin=(0, 0), shape=(2, 2), stride=(2, 2))
 # with nothing in it
 assert record == (0.0, 0.0, 0.0, 0.0, 0.0)
 
 # a complex tile with magnitudes 5, 0, 0, 10
-z = np.array([[3 + 4j, 0], [0, 6 + 8j]], dtype=np.complex64)
+z = tile(cell="complex64", rows=2, columns=2, values=[3 + 4j, 0, 0, 6 + 8j])
 # is sampled by magnitude
 record = qed.libqed.native.sample(source=z, origin=(0, 0), shape=(2, 2), stride=(1, 1))
 # unpack
