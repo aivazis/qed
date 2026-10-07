@@ -63,6 +63,14 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     channels.default = []
     channels.doc = "restrict the sweep to these channels; empty sweeps all"
 
+    engine = qed.properties.str()
+    engine.default = None
+    engine.doc = (
+        "render with this engine, 'iterators' or 'flow', which restricts the sweep to the channels "
+        "that offer a choice and labels each record's channel with it, e.g. 'value:flow'; unset "
+        "renders every channel the way it is configured"
+    )
+
     rasters = qed.properties.strings()
     rasters.default = []
     rasters.doc = "restrict the sweep to the datasets with these names; empty sweeps all"
@@ -2141,6 +2149,18 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         seen = set()
         # go through the targets
         for reader, dataset, name, pipeline in self._targets(plexus=plexus):
+            # the label of the channel in the records
+            label = name
+            # when an engine is requested
+            if self.engine is not None:
+                # a channel that does not offer a choice of engine
+                if "engine" not in pipeline.pyre_namemap:
+                    # has nothing to measure
+                    continue
+                # otherwise, render with the requested engine
+                pipeline.engine = self.engine
+                # and say so in the records
+                label = f"{name}:{self.engine}"
             # the first time a reader shows up
             if reader.pyre_name not in seen:
                 # mark it
@@ -2157,7 +2177,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # go through the measurement points
             for span, zoom in self._points(dataset=dataset):
                 # show me
-                channel.line(f"  {dataset.pyre_name}.{name}: {span}x{span} @ zoom {zoom}")
+                channel.line(f"  {dataset.pyre_name}.{label}: {span}x{span} @ zoom {zoom}")
                 # the clocks of the trials
                 wallclock = qed.timers.wall("qed.measure.tile.wall")
                 cpuclock = qed.timers.cpu("qed.measure.tile.cpu")
@@ -2190,7 +2210,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                             "tile",
                             host,
                             dataset.pyre_name,
-                            name,
+                            label,
                             cell,
                             zoom,
                             span,
@@ -2235,6 +2255,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                     f"--only={reader.pyre_name}",
                     f"--rasters={dataset.pyre_name}",
                     f"--channels={name}",
+                    # the engine, if one was requested
+                    *([f"--engine={self.engine}"] if self.engine is not None else []),
                     f"--shapes={exponent},{exponent + 1}",
                     f"--zooms={zoom},{zoom + 1}",
                     "--trials=1",
