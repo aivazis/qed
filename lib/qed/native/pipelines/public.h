@@ -13,6 +13,7 @@
 
 // the pipelines
 #include "Value.h"
+#include "Amplitude.h"
 
 
 // end of file

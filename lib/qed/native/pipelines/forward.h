@@ -17,6 +17,9 @@
 namespace qed::native::pipelines {
     // the value of a real tile, painted gray
     class Value;
+    // the amplitude of a complex tile, painted gray
+    template <typename cellT>
+    class Amplitude;
 } // namespace qed::native::pipelines
 
 
