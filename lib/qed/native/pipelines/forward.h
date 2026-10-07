@@ -20,6 +20,9 @@ namespace qed::native::pipelines {
     // the amplitude of a complex tile, painted gray
     template <typename cellT>
     class Amplitude;
+    // a complex tile, painted in color
+    template <typename cellT>
+    class Complex;
 } // namespace qed::native::pipelines
 
 

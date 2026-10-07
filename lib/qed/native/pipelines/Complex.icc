@@ -1,0 +1,258 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+// my declarations
+#include "Complex.h"
+
+
+// metamethods
+template <typename cellT>
+qed::native::pipelines::Complex<cellT>::Complex() : _graphs {}
+{}
+
+
+template <typename cellT>
+qed::native::pipelines::Complex<cellT>::~Complex()
+{
+    // go through my graphs
+    for (auto & [shape, g] : _graphs) {
+        // and take each one apart, so its parts can be released
+        dismantle(g);
+    }
+    // all done
+    return;
+}
+
+
+// interface
+template <typename cellT>
+template <typename sourceT>
+auto
+qed::native::pipelines::Complex<cellT>::render(
+    const sourceT & source, typename sourceT::index_type origin, typename sourceT::shape_type shape,
+    typename sourceT::index_type stride, double min, double max, double minPhase, double maxPhase,
+    double saturation) -> image_view_type
+{
+    // the clocks of the stages, by name, so anybody can read what a tile cost and where: filling
+    // the signal from the source
+    auto copy = pyre::timers::wall_timer_t("qed.native.pipelines.complex.copy");
+    // the phase branch, which makes the hue
+    auto phase = pyre::timers::wall_timer_t("qed.native.pipelines.complex.phase");
+    // the amplitude branch, which makes the brightness
+    auto amplitude = pyre::timers::wall_timer_t("qed.native.pipelines.complex.amplitude");
+    // painting
+    auto paint = pyre::timers::wall_timer_t("qed.native.pipelines.complex.paint");
+    // and encoding
+    auto encode = pyre::timers::wall_timer_t("qed.native.pipelines.complex.encode");
+
+    // the extent of the tile
+    const int rows = shape[0];
+    const int columns = shape[1];
+    // get the graph for tiles of this shape
+    auto & g = graph(rows, columns);
+
+    // start filling the signal
+    copy.start();
+    // the signal, which the source is decimated into
+    auto & signal = g.signal->write();
+    // go through the lines of the tile
+    for (int row = 0; row < rows; ++row) {
+        // and the cells of each line
+        for (int column = 0; column < columns; ++column) {
+            // the cell of the source that lands here: the origin and the position in the tile
+            // are both counted in decimated cells, so both are scaled by the stride
+            typename sourceT::index_type index { (origin[0] + row) * stride[0],
+                                                 (origin[1] + column) * stride[1] };
+            // copy it as it is
+            signal[row * columns + column] = source[index];
+        }
+    }
+    // the signal changed, so everything downstream of it is stale
+    g.signal->flush();
+    // done filling the signal
+    copy.stop();
+    // set the interval of the phases, which makes the phase branch stale as well
+    g.cycler->interval(interval_type(minPhase, maxPhase));
+    // and the interval of the magnitudes, which does the same to the amplitude branch
+    g.normalizer->interval(interval_type(min, max));
+    // the saturation fills a whole tile, so refill it only when it changes
+    if (g.constant->value() != saturation) {
+        // by setting it, which makes the constant stale
+        g.constant->value(saturation);
+    }
+
+    // pull the products one stage at a time, so each stage can be timed on its own: the hue
+    phase.start();
+    g.hue->read();
+    phase.stop();
+    // the brightness
+    amplitude.start();
+    g.brightness->read();
+    amplitude.stop();
+    // the color channels, all three of which the colormap fills at once
+    paint.start();
+    g.red->read();
+    paint.stop();
+    // and the image
+    encode.start();
+    auto image = g.image->read();
+    encode.stop();
+
+    // hand off a view of its bytes
+    return image;
+}
+
+
+// implementation details
+template <typename cellT>
+auto
+qed::native::pipelines::Complex<cellT>::graph(int rows, int columns) -> graph_type &
+{
+    // the key of the graph
+    auto key = std::make_pair(rows, columns);
+    // look it up
+    auto found = _graphs.find(key);
+    // if it is there
+    if (found != _graphs.end()) {
+        // hand it off
+        return found->second;
+    }
+    // otherwise, build it, file it, and hand it off
+    return _graphs.emplace(key, build(rows, columns)).first->second;
+}
+
+
+template <typename cellT>
+auto
+qed::native::pipelines::Complex<cellT>::build(int rows, int columns) -> graph_type
+{
+    // the shape of the tiles
+    auto shape = shape_type(rows, columns);
+    // the graph
+    graph_type g;
+    // the signal, which receives the decimated source
+    g.signal = signal_type::create("signal", shape, cell_type {});
+    // the phases, placed in their interval
+    g.cycle = real_type::create("cycle", shape, 0.0);
+    // the hue
+    g.hue = real_type::create("hue", shape, 0.0);
+    // the saturation
+    g.saturation = real_type::create("saturation", shape, 0.0);
+    // the magnitudes
+    g.amplitude = real_type::create("amplitude", shape, 0.0);
+    // the brightness
+    g.brightness = channel_type::create("brightness", shape, 0.0);
+    // the color channels, one product each, so the colormap runs once per tile
+    g.red = real_type::create("red", shape, 0.0);
+    g.green = real_type::create("green", shape, 0.0);
+    g.blue = real_type::create("blue", shape, 0.0);
+    // the encoded image
+    g.image = image_type::create("image", shape);
+
+    // the phase branch: make the cycler
+    g.cycler = cycle_type::create("cycle");
+    // it reads the signal
+    g.cycler->signal(g.signal);
+    // and writes the phases
+    g.cycler->cycle(g.cycle);
+    // make the scaler, which maps the phases onto a full turn
+    g.scaler = affine_type::create("hue", interval_type(0, 2 * M_PI));
+    // it reads the phases
+    g.scaler->signal(g.cycle);
+    // and writes the hue
+    g.scaler->affine(g.hue);
+
+    // the amplitude branch: make the selector
+    g.selector = selector_type::create("amplitude");
+    // it reads the signal
+    g.selector->signal(g.signal);
+    // and writes the magnitudes
+    g.selector->amplitude(g.amplitude);
+    // make the normalizer
+    g.normalizer = normalizer_type::create("brightness");
+    // it reads the magnitudes
+    g.normalizer->signal(g.amplitude);
+    // and writes the brightness
+    g.normalizer->parametric(g.brightness);
+
+    // make the constant that supplies the saturation
+    g.constant = constant_type::create("saturation", 1.0);
+    // it fills the saturation tile
+    g.constant->tile(g.saturation);
+
+    // make the colormap, where the branches meet
+    g.colormap = colormap_type::create("hsb");
+    // it reads the hue
+    g.colormap->hue(g.hue);
+    // the saturation
+    g.colormap->saturation(g.saturation);
+    // and the brightness
+    g.colormap->brightness(g.brightness);
+    // and paints the red channel
+    g.colormap->red(g.red);
+    // the green one
+    g.colormap->green(g.green);
+    // and the blue one
+    g.colormap->blue(g.blue);
+
+    // make the codec
+    g.codec = codec_type::create("bmp");
+    // it reads the red channel
+    g.codec->red(g.red);
+    // the green one
+    g.codec->green(g.green);
+    // and the blue one
+    g.codec->blue(g.blue);
+    // and encodes them into the image
+    g.codec->image(g.image);
+
+    // hand off the graph
+    return g;
+}
+
+
+template <typename cellT>
+auto
+qed::native::pipelines::Complex<cellT>::dismantle(graph_type & g) -> void
+{
+    // the factories refer to their products and the products to their factories, so neither goes
+    // away on its own; unhook the codec from the three channels
+    g.codec->removeInput("red");
+    g.codec->removeInput("green");
+    g.codec->removeInput("blue");
+    // and the image
+    g.codec->removeOutput("image");
+    // unhook the colormap from the hue, the saturation, and the brightness
+    g.colormap->removeInput("hue");
+    g.colormap->removeInput("saturation");
+    g.colormap->removeInput("brightness");
+    // and the three channels
+    g.colormap->removeOutput("red");
+    g.colormap->removeOutput("green");
+    g.colormap->removeOutput("blue");
+    // unhook the constant from the saturation
+    g.constant->removeOutput("tile");
+    // unhook the normalizer from the magnitudes and the brightness
+    g.normalizer->removeInput("signal");
+    g.normalizer->removeOutput("parametric");
+    // unhook the selector from the signal and the magnitudes
+    g.selector->removeInput("signal");
+    g.selector->removeOutput("amplitude");
+    // unhook the scaler from the phases and the hue
+    g.scaler->removeInput("signal");
+    g.scaler->removeOutput("affine");
+    // and the cycler from the signal and the phases
+    g.cycler->removeInput("signal");
+    g.cycler->removeOutput("cycle");
+    // all done
+    return;
+}
+
+
+// end of file

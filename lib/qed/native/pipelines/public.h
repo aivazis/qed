@@ -14,6 +14,7 @@
 // the pipelines
 #include "Value.h"
 #include "Amplitude.h"
+#include "Complex.h"
 
 
 // end of file
