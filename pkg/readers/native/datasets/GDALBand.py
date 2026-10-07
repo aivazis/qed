@@ -10,6 +10,22 @@ import qed
 import journal
 from osgeo import gdal
 
+# the buffer format of each gdal cell type the native kernels read as stored, by the name gdal
+# gives the type; a band of any other type is read as double precision reals, which gdal
+# converts it to on request
+formats = {
+    "byte": "B",
+    "int8": "b",
+    "uint16": "H",
+    "int16": "h",
+    "uint32": "I",
+    "int32": "i",
+    "uint64": "Q",
+    "int64": "q",
+    "float32": "f",
+    "float64": "d",
+}
+
 
 # a dataset in a binary file with no metadata
 class GDALBand(
@@ -70,7 +86,7 @@ class GDALBand(
         # my channels
         channels = self.channels
         # and the value of the {pixel}
-        value = self.data.ReadAsArray(pixel[1], pixel[0], 1, 1)[0, 0]
+        value = self._read(origin=pixel, shape=(1, 1))[0, 0]
 
         # build the cursor rep
         yield "cursor", [(f"{pixel}", "pixel")]
@@ -107,19 +123,20 @@ class GDALBand(
         scaledOrigin = [s * value for s, value in zip(scale, origin)]
         # and the shape
         scaledShape = [s * value for s, value in zip(scale, shape)]
-        # get the data
-        tile = self.data.ReadAsArray(
-            scaledOrigin[1], scaledOrigin[0], scaledShape[1], scaledShape[0]
-        )
+        # read every cell under the tile, at full resolution
+        footprint = self._read(origin=scaledOrigin, shape=scaledShape)
         # the range to stretch across comes from the controller the client manipulates,
         # not from my own sample: a worker renders with the client's settings, and reading
         # my statistics here would silently ignore them
         low = channel.range.low
         high = channel.range.high
-        # zoom: the rows of the tile stride by the vertical scale, its columns by the horizontal
-        zoomedTile = tile[:: scale[0], :: scale[1]]
-        # render a tile and return it
-        return channel.gdal(source=zoomedTile, shape=shape, low=low, high=high)
+        # look for the tile maker of the channel in {libqed}
+        pipeline = getattr(qed.libqed.native.channels, channel.tag)
+        # render the footprint, its rows strided by the vertical scale and its columns by the
+        # horizontal one, and return the tile
+        return pipeline(
+            source=footprint, origin=(0, 0), shape=shape, stride=scale, min=low, max=high
+        )
 
     @qed.export
     def sample(self, zoom: tuple, origin: tuple, shape: tuple) -> tuple:
@@ -130,11 +147,12 @@ class GDALBand(
         # interpret the zoom level as a scale
         scale = tuple(1 << level for level in zoom)
         # read the footprint the render reads: every cell under the tile, at full resolution
-        tile = self.data.ReadAsArray(
-            scale[1] * origin[1], scale[0] * origin[0], scale[1] * shape[1], scale[0] * shape[0]
+        footprint = self._read(
+            origin=(scale[0] * origin[0], scale[1] * origin[1]),
+            shape=(scale[0] * shape[0], scale[1] * shape[1]),
         )
         # sample the strided footprint and return the mergeable record
-        return qed.libqed.native.sample(source=tile, origin=(0, 0), shape=shape, stride=scale)
+        return qed.libqed.native.sample(source=footprint, origin=(0, 0), shape=shape, stride=scale)
 
     def summary(self):
         """
@@ -252,6 +270,30 @@ class GDALBand(
         return
 
     # implementation details
+    def _read(self, origin, shape):
+        """
+        Read the cells of the window at {origin}+{shape} at full resolution, as a buffer of
+        {shape} whose cells keep my type whenever the native kernels can read it
+        """
+        # the name gdal gives my cell type
+        name = gdal.GetDataTypeName(self.data.DataType).lower()
+        # the buffer format of the cells i read as stored
+        code = formats.get(name)
+        # if there is one
+        if code is not None:
+            # my cells come as they are
+            kind = self.data.DataType
+        # otherwise
+        else:
+            # gdal converts them to double precision reals
+            code, kind = "d", gdal.GDT_Float64
+        # read the window; gdal counts columns first
+        raw = self.data.ReadRaster(
+            xoff=origin[1], yoff=origin[0], xsize=shape[1], ysize=shape[0], buf_type=kind
+        )
+        # and lay the bytes out as a grid of cells
+        return memoryview(raw).cast("B").cast(code, tuple(shape))
+
     def _tuneChannels(self):
         """
         Let my channel pipelines adjust themselves to my statistics

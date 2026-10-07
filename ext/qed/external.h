@@ -30,7 +30,6 @@
 #include <pybind11/complex.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
-#include <pybind11/numpy.h>
 
 
 // type aliases
@@ -93,12 +92,6 @@ namespace qed::py {
     // from {pyre::viz::iterators}
     // encodings
     using bmp_t = pyre::viz::iterators::codecs::bmp_t;
-    // grayscale
-    template <typename sourceT>
-    using gray_t = pyre::viz::iterators::colormaps::gray_t<sourceT>;
-    // map a range of values to the unit interval
-    template <typename sourceT>
-    using parametric_t = pyre::viz::iterators::filters::parametric_t<sourceT>;
 } // namespace qed::py
 
 

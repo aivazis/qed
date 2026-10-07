@@ -68,15 +68,6 @@ class Magnitude(Channel, family="qed.channels.native.abs"):
         # add my configuration and chain up
         return super().tile(min=self.range.low, max=self.range.high, **kwds)
 
-    def gdal(self, source, shape, low, high):
-        """
-        Render a tile in a numpy array
-        """
-        # look for the tile maker in {libqed}
-        pipeline = qed.libqed.native.channels.abs
-        # and invoke it
-        return pipeline(source=source, shape=shape, low=low, high=high)
-
     # constants
     tag = "abs"
 
