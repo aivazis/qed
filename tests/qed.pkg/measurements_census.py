@@ -16,7 +16,7 @@ of the same scene in two censuses, and their comparison
 import csv
 import gzip
 import os
-import tempfile
+import shutil
 
 # support
 import journal
@@ -133,59 +133,64 @@ assert [census.agrees(row=r) for r in (liar, honest, full)] == ["no", "yes", ""]
 assert census.settings(rows=[liar, honest, full])["fill_agrees"] == {"no": 1, "yes": 1, "": 1}
 
 # the chunks that hold nothing but the fill, in a census laid out the way it is on disk
-with tempfile.TemporaryDirectory() as folder:
-    # a granule of the GSLC
-    home = os.path.join(folder, "gslc", gslc)
-    # has a folder of its own
-    os.makedirs(home)
-    # its chunk records: three fill chunks of 10 bytes, one nearly empty chunk of 12 that holds a
-    # sliver of data, and two of data in HH; and two chunks of data in HV, the smallest of which is
-    # too large to be the fill
-    records = [("L.A.HH", size) for size in (10, 500, 10, 12, 10, 600)] + [
-        ("L.A.HV", size) for size in (400, 450)
-    ]
-    # write them the way a census does
-    with gzip.open(os.path.join(home, "layout-pages.csv.gz"), mode="wt", newline="") as stream:
-        # a writer
-        writer = csv.writer(stream)
-        # the header
-        writer.writerow(("host", "dataset", "row", "col", "address", "bytes", "raw"))
-        # and the records
-        for index, (raster, size) in enumerate(records):
-            # one per chunk
-            writer.writerow(("ods", f"product.{raster}", 0, index, 100 * index, size, 2000))
-    # count them, with the summaries saying the smallest chunk of HH holds a nan
-    tally = census.waste(
-        source=folder,
-        rows=[{"granule": gslc, "dataset": "product.L.A.HH", "smallest_holds": "nan"}],
-    )
-    # HH has three fill chunks, checked by the census
-    assert tally["L.A.HH"] == {
-        "rasters": 1,
-        "written": 6,
-        "stored": 1142,
-        "fill": 3,
-        "fillBytes": 30,
-        "checked": 1,
-    }
-    # and HV has none
-    assert tally["L.A.HV"]["fill"] == 0
+# the scratch folder, next to this driver, where the products stay for inspection
+folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "measurements_census.scratch")
+# start clean, by removing whatever a previous run left behind
+shutil.rmtree(folder, ignore_errors=True)
+# and make it
+os.makedirs(folder)
+# a granule of the GSLC
+home = os.path.join(folder, "gslc", gslc)
+# has a folder of its own
+os.makedirs(home)
+# its chunk records: three fill chunks of 10 bytes, one nearly empty chunk of 12 that holds a
+# sliver of data, and two of data in HH; and two chunks of data in HV, the smallest of which is
+# too large to be the fill
+records = [("L.A.HH", size) for size in (10, 500, 10, 12, 10, 600)] + [
+    ("L.A.HV", size) for size in (400, 450)
+]
+# write them the way a census does
+with gzip.open(os.path.join(home, "layout-pages.csv.gz"), mode="wt", newline="") as stream:
+    # a writer
+    writer = csv.writer(stream)
+    # the header
+    writer.writerow(("host", "dataset", "row", "col", "address", "bytes", "raw"))
+    # and the records
+    for index, (raster, size) in enumerate(records):
+        # one per chunk
+        writer.writerow(("ods", f"product.{raster}", 0, index, 100 * index, size, 2000))
+# count them, with the summaries saying the smallest chunk of HH holds a nan
+tally = census.waste(
+    source=folder,
+    rows=[{"granule": gslc, "dataset": "product.L.A.HH", "smallest_holds": "nan"}],
+)
+# HH has three fill chunks, checked by the census
+assert tally["L.A.HH"] == {
+    "rasters": 1,
+    "written": 6,
+    "stored": 1142,
+    "fill": 3,
+    "fillBytes": 30,
+    "checked": 1,
+}
+# and HV has none
+assert tally["L.A.HV"]["fill"] == 0
 
-    # a second granule whose chunk records were cut short while they were being written
-    home = os.path.join(folder, "gslc", gslc.replace("_001", "_002"))
-    # has a folder of its own
-    os.makedirs(home)
-    # with the first half of a compressed file
-    whole = gzip.compress(
-        b"host,dataset,row,col,address,bytes,raw\n" + b"ods,product.L.A.HH,0,0,0,10,2000\n" * 100
-    )
-    with open(os.path.join(home, "layout-pages.csv.gz"), "wb") as stream:
-        # cut in the middle
-        stream.write(whole[: len(whole) // 2])
-    # the warning is expected, so it goes to the trash
-    journal.warning("qed.measurements.census").device = journal.trash()
-    # it is left out, and the first granule is counted as before
-    assert census.waste(source=folder, rows=[])["L.A.HH"]["rasters"] == 1
+# a second granule whose chunk records were cut short while they were being written
+home = os.path.join(folder, "gslc", gslc.replace("_001", "_002"))
+# has a folder of its own
+os.makedirs(home)
+# with the first half of a compressed file
+whole = gzip.compress(
+    b"host,dataset,row,col,address,bytes,raw\n" + b"ods,product.L.A.HH,0,0,0,10,2000\n" * 100
+)
+with open(os.path.join(home, "layout-pages.csv.gz"), "wb") as stream:
+    # cut in the middle
+    stream.write(whole[: len(whole) // 2])
+# the warning is expected, so it goes to the trash
+journal.warning("qed.measurements.census").device = journal.trash()
+# it is left out, and the first granule is counted as before
+assert census.waste(source=folder, rows=[])["L.A.HH"]["rasters"] == 1
 
 # the reference data of the second census: its product, its cycle, and its measures
 reference = census.reference(name="census-31-gslc", rows=[{**r, "kind": "gslc"} for r in second])
