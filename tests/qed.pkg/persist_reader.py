@@ -198,9 +198,5 @@ final = doc()
 assert final.get("booted") is None
 assert list(final.get("datasets")) == []
 
-# clean up
-os.chdir(here)
-shutil.rmtree(workspace)
-
 
 # end of file

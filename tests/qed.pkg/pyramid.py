@@ -423,9 +423,8 @@ assert (
 assert str(workspace.path) == "."
 assert str(workspace.cache(name="pyramids")) == "./.qed/pyramids"
 assert str(pyramid.home).startswith("./.qed/pyramids/")
-# nothing was built there, so the directories are empty
-os.rmdir("./.qed/pyramids")
-os.rmdir("./.qed")
+# nothing was built there, so the cache is empty
+assert os.listdir("./.qed/pyramids") == []
 
 # a workspace that cannot make its cache says so, and makes nothing
 stray = qed.workspaces.local(name="pyramid.stray")
@@ -438,9 +437,6 @@ assert not os.path.exists("no")
 # the app owns a workspace
 app = qed.shells.qed(name="pyramid.app")
 assert isinstance(app.workspace, qed.workspaces.local)
-
-# clean up the scratch area
-shutil.rmtree(str(scratch))
 
 
 # end of file

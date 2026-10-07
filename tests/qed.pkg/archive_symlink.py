@@ -54,8 +54,5 @@ assert [name for name, _, _ in archive.contents(uri=qed.primitives.uri.parse(nes
     "inner.dat"
 ]
 
-# the link is not needed any more
-os.remove(link)
-
 
 # end of file

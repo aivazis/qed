@@ -155,9 +155,5 @@ for mine, theirs in zip(alone, joint):
     assert mine.statistics.min == theirs.statistics.min
     assert mine.statistics.max == theirs.statistics.max
 
-# clean up
-shutil.rmtree(str(aloneArea))
-shutil.rmtree(str(jointArea))
-
 
 # end of file

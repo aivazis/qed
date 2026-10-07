@@ -33,8 +33,7 @@ tests.qed.pkg.persist.clean := persist_ws
 tests.qed.pkg.browse.clean := browse_ws
 tests.qed.pkg.archive_symlink.clean := archive_symlink_ws archive_symlink_link
 tests.qed.pkg.browse_fleet.clean := browse_fleet_ws
-# the drivers below take their workspace down on the way out, so these declarations are
-# what recovers the directory when one of them dies partway and leaves its scratch behind
+# the drivers below clear their workspace when they start and leave it behind for inspection
 tests.qed.pkg.archive_restore.clean := archive_restore_ws
 tests.qed.pkg.persist_archive.clean := persist_archive_ws
 tests.qed.pkg.persist_empty.clean := persist_empty_ws
@@ -46,6 +45,13 @@ tests.qed.pkg.sample_isce2.clean := sample.unw sample.int
 # the coupling driver writes a small wrapped interferogram
 tests.qed.pkg.coupled.clean := coupled.int
 tests.qed.pkg.persist_reboot.pre := tests.qed.pkg.persist
+# the pyramid builders leave their scratch areas behind for inspection
+tests.qed.pkg.build.clean := build.scratch build.alone
+tests.qed.pkg.build_joint.clean := build_joint.alone build_joint.joint
+tests.qed.pkg.build_levels.clean := build_levels.scratch
+tests.qed.pkg.graphql_workspace.clean := graphql_workspace.scratch
+# the pyramid driver also asks the default workspace for its cache, in the current directory
+tests.qed.pkg.pyramid.clean := pyramid.scratch .qed
 
 
 # end of file

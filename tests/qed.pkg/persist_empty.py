@@ -108,9 +108,5 @@ assert "expanded" not in text()
 # and the file is back to where it was, to the character
 assert text() == baseline, text()
 
-# clean up
-os.chdir(here)
-shutil.rmtree(workspace)
-
 
 # end of file
