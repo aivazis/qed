@@ -11,9 +11,6 @@ fill for everything else, and the nisar kernels read a level exactly the way the
 kernels read the same cells in memory
 """
 
-# support
-import os
-
 # externals
 import numpy as np
 
@@ -159,10 +156,6 @@ assert np.array_equal(
     expected[::2, ::2][:3, :4],
     equal_nan=True,
 )
-
-# clean up
-for name in (tiles, occupancy, above, aboveOccupancy):
-    os.remove(name)
 
 
 # end of file

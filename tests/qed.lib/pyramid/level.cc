@@ -206,9 +206,6 @@ main(int argc, char * argv[])
     // (9, 6) is past the last row
     assert(std::isnan((overhang[{ 2, 0 }])));
 
-    // clean up
-    std::remove(tiles.c_str());
-    std::remove(occupancy.c_str());
     // all done
     return 0;
 }
