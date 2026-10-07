@@ -124,24 +124,47 @@ namespace qed::py::pyramid {
             // the name
             "read",
             // the implementation
-            [](const level_type & self, const py::iterable & origin, const py::iterable & shape,
-               const py::iterable & stride) -> py::array_t<cellT> {
+            [](const level_type & self, const py::buffer & destination, const py::iterable & origin,
+               const py::iterable & shape, const py::iterable & stride) {
+                // get the layout of the destination, which must be writable
+                auto info = destination.request(true);
+                // a buffer of the wrong rank cannot hold a tile
+                if (info.ndim != 2) {
+                    // so complain
+                    throw py::value_error("the destination must be a two dimensional buffer");
+                }
+                // and neither can one of the wrong cell type
+                if (info.format != py::format_descriptor<cellT>::format()) {
+                    // so complain
+                    throw py::value_error(
+                        "the cell type of the destination, '" + info.format + "', is not mine");
+                }
+                // the cells are handed over row by row
+                if (info.strides[1] != info.itemsize
+                    || info.strides[0] != info.itemsize * info.shape[1]) {
+                    // so anything else is refused rather than scrambled
+                    throw py::value_error("the destination must be contiguous, row-major");
+                }
                 // the extent of the tile
                 auto extent = asShape<2>(shape);
-                // gather it
+                // must be the extent of the destination
+                if (info.shape[0] != extent[0] || info.shape[1] != extent[1]) {
+                    // so complain
+                    throw py::value_error("the destination does not have the shape of the tile");
+                }
+                // gather the tile
                 auto data =
                     self.template read<grid_type>(asIndex<2>(origin), extent, asIndex<2>(stride));
-                // make an array of the same extent
-                auto array = py::array_t<cellT>(std::vector<py::ssize_t> { extent[0], extent[1] });
-                // and hand the cells over
-                std::copy(data.data(), data.data() + extent.cells(), array.mutable_data());
+                // and hand its cells over
+                std::copy(
+                    data.data(), data.data() + extent.cells(), static_cast<cellT *>(info.ptr));
                 // all done
-                return array;
+                return;
             },
             // the signature
-            "origin"_a, "shape"_a, "stride"_a,
+            "destination"_a, "origin"_a, "shape"_a, "stride"_a,
             // the docstring
-            "gather into an array the cells at {origin} and every {stride}-th cell after it "
+            "fill {destination} with the cells at {origin} and every {stride}-th cell after it "
             "along each axis, {shape} of them per axis; the origin is in the level's own "
             "coordinates");
 
