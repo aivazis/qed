@@ -13,11 +13,24 @@ that are square and tiles that are not, whose lines need padding, decimated or n
 interval changes from one tile to the next
 """
 
-# externals
-import array
-
 # support
 import qed
+from pyre.extensions.pyre import grid
+
+
+def tile(cell, rows, columns, values):
+    """
+    Make a {rows}x{columns} grid of {cell} that holds {values} in row major order
+    """
+    # make the grid
+    g = grid.heap(shape=[rows, columns], cell=cell)
+    # go through the values
+    for at, value in enumerate(values):
+        # and place each one in its cell
+        g[divmod(at, columns)] = value
+    # all done
+    return g
+
 
 # the kernels
 native = qed.libqed.native
@@ -25,18 +38,18 @@ native = qed.libqed.native
 # the extent of the raster
 rows, columns = 37, 53
 
-# the cell types, as the array module spells them, and the values each one can hold
+# the cell types, as pyre names them, and the values each one can hold
 types = {
-    "b": lambda i: i % 120 - 60,
-    "B": lambda i: i % 250,
-    "h": lambda i: i % 3000 - 1500,
-    "H": lambda i: i % 6000,
-    "i": lambda i: 7 * i - 5000,
-    "I": lambda i: 7 * i,
-    "q": lambda i: 11 * i - 9000,
-    "Q": lambda i: 11 * i,
-    "f": lambda i: 0.25 * i - 100.0,
-    "d": lambda i: 0.125 * i - 50.0,
+    "int8": lambda i: i % 120 - 60,
+    "uint8": lambda i: i % 250,
+    "int16": lambda i: i % 3000 - 1500,
+    "uint16": lambda i: i % 6000,
+    "int32": lambda i: 7 * i - 5000,
+    "uint32": lambda i: 7 * i,
+    "int64": lambda i: 11 * i - 9000,
+    "uint64": lambda i: 11 * i,
+    "float32": lambda i: 0.25 * i - 100.0,
+    "float64": lambda i: 0.125 * i - 50.0,
 }
 
 # the tiles: origin, shape, and stride, in decimated cells
@@ -58,11 +71,11 @@ intervals = [(-50.0, 150.0), (0.0, 1000.0), (-3000.0, 3000.0)]
 pipeline = native.pipelines.Value()
 
 # go through the cell types
-for code, value in types.items():
+for cell, value in types.items():
     # a raster of this type
-    cells = array.array(code, (value(i) for i in range(rows * columns)))
-    # viewed as a grid of the right shape
-    source = memoryview(cells).cast("B").cast(code, shape=[rows, columns])
+    source = tile(
+        cell=cell, rows=rows, columns=columns, values=(value(i) for i in range(rows * columns))
+    )
     # go through the tiles
     for origin, shape, stride in tiles:
         # and the intervals
@@ -80,7 +93,7 @@ for code, value in types.items():
                 source=source, origin=origin, shape=shape, stride=stride, min=low, max=high
             )
             # must be the same, byte for byte
-            assert rendered == expected, (code, origin, shape, stride, low, high)
+            assert rendered == expected, (cell, origin, shape, stride, low, high)
 
 
 # end of file
