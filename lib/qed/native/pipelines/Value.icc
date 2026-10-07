@@ -18,12 +18,24 @@ qed::native::pipelines::Value::render(
     const sourceT & source, typename sourceT::index_type origin, typename sourceT::shape_type shape,
     typename sourceT::index_type stride, double min, double max) -> image_view_type
 {
+    // the clocks of the stages, by name, so anybody can read what a tile cost and where: filling
+    // the signal from the source
+    auto copy = pyre::timers::wall_timer_t("qed.native.pipelines.value.copy");
+    // normalizing it
+    auto normalize = pyre::timers::wall_timer_t("qed.native.pipelines.value.normalize");
+    // painting it
+    auto paint = pyre::timers::wall_timer_t("qed.native.pipelines.value.paint");
+    // and encoding it
+    auto encode = pyre::timers::wall_timer_t("qed.native.pipelines.value.encode");
+
     // the extent of the tile
     const int rows = shape[0];
     const int columns = shape[1];
     // get the graph for tiles of this shape
     auto & g = graph(rows, columns);
 
+    // start filling the signal
+    copy.start();
     // the signal, which the source is decimated into
     auto & signal = g.signal->write();
     // go through the lines of the tile
@@ -40,10 +52,27 @@ qed::native::pipelines::Value::render(
     }
     // the signal changed, so everything downstream of it is stale
     g.signal->flush();
+    // done filling the signal
+    copy.stop();
     // set the interval, which makes the normalizer stale as well
     g.normalizer->interval(interval_type(min, max));
-    // pull the image through the flow, and hand off a view of its bytes
-    return g.image->read();
+
+    // pull the products one stage at a time, so each stage can be timed on its own: the
+    // normalized values
+    normalize.start();
+    g.normalized->read();
+    normalize.stop();
+    // the color channels, all three of which the colormap fills at once
+    paint.start();
+    g.red->read();
+    paint.stop();
+    // and the image
+    encode.start();
+    auto image = g.image->read();
+    encode.stop();
+
+    // hand off a view of its bytes
+    return image;
 }
 
 
