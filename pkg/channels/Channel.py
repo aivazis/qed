@@ -26,8 +26,8 @@ class Channel(qed.flow.workflow, family="qed.channels.channel"):
     bmp.doc = "the final rendered image of the channel"
 
     # factories
-    codec = qed.viz.codec()
-    codec.doc = "the encoder of the data tile as an image to be rendered by the client"
+    encoder = qed.viz.encoder()
+    encoder.doc = "the encoder of the data tile as an image to be rendered by the client"
 
     # framework hooks
     def pyre_configured(self, **kwds):
@@ -35,7 +35,7 @@ class Channel(qed.flow.workflow, family="qed.channels.channel"):
         Hook invoked after configuration is finished
         """
         # wire my output into the flow
-        self.codec.image = self.bmp
+        self.encoder.image = self.bmp
         # all done
         return super().pyre_configured(**kwds)
 

@@ -53,8 +53,13 @@ def gray():
         ("green", "output"),
         ("blue", "output"),
     ]
-    # its slots hold tiles
-    assert all(trait.type == "pyre.viz.tiles" for trait in traits)
+    # its slots hold tiles, each named by its specification: unit values in, color channels out
+    assert [trait.type for trait in traits] == [
+        "pyre.viz.tiles.unit",
+        "pyre.viz.tiles.channel",
+        "pyre.viz.tiles.channel",
+        "pyre.viz.tiles.channel",
+    ]
     # and each slot names the kind of product bound to it
     assert all(trait.value == "pyre.viz.tiles.heap" for trait in traits)
     # all done

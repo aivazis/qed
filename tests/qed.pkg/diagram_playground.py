@@ -51,8 +51,8 @@ def test():
     playground = store.playground()
     # it starts with a colormap and an encoder
     assert sorted(factory.factory.pyre_family() for factory in playground.factories) == [
-        "pyre.viz.codecs.bmp",
         "pyre.viz.colormaps.gray",
+        "pyre.viz.encoders.bmp",
     ]
     # and lasts
     assert store.playground() is playground
