@@ -41,8 +41,10 @@ def gray():
     tail = ["pyre.viz.filters.parametric", "pyre.viz.colormaps.gray", "pyre.viz.codecs.bmp"]
     # a value goes straight to the normalizer
     assert factories(qed.channels.value) == tail
+    # the amplitude computes the magnitude of a complex signal first
+    assert factories(qed.channels.amplitude) == ["pyre.viz.operators.amplitude"] + tail
     # the others pick a part of a complex signal first
-    for name in ["amplitude", "real", "imaginary"]:
+    for name in ["real", "imaginary"]:
         # draw it
         assert factories(getattr(qed.channels, name)) == [f"pyre.viz.selectors.{name}"] + tail
     # all done
