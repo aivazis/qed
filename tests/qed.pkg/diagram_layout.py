@@ -31,7 +31,7 @@ def test():
     # are the colormap and then the encoder
     assert [entity.factory.pyre_family() for entity in factories] == [
         "pyre.viz.colormaps.hsb",
-        "pyre.viz.codecs.bmp",
+        "pyre.viz.encoders.bmp",
     ]
     # a {spacing} apart along the horizontal axis
     assert [entity.position for entity in factories] == [(0, 0, 0), (diagram.spacing, 0, 0)]
@@ -132,9 +132,9 @@ def covariance():
     factories = sorted(diagram.factories, key=lambda entity: entity.position)
     # are the normalizer, the colormap, and the encoder
     assert [entity.factory.pyre_family() for entity in factories] == [
-        "pyre.viz.filters.parametric",
+        "pyre.viz.normalizers.parametric",
         "pyre.viz.colormaps.gray",
-        "pyre.viz.codecs.bmp",
+        "pyre.viz.encoders.bmp",
     ]
     # unpack them
     normalizer, gray, encoder = factories

@@ -38,7 +38,7 @@ def gray():
     Check the order of the factories of the flows that paint a signal gray
     """
     # the stages after the selector
-    tail = ["pyre.viz.filters.parametric", "pyre.viz.colormaps.gray", "pyre.viz.codecs.bmp"]
+    tail = ["pyre.viz.normalizers.parametric", "pyre.viz.colormaps.gray", "pyre.viz.encoders.bmp"]
     # a value goes straight to the normalizer
     assert factories(qed.channels.value) == tail
     # the amplitude computes the magnitude of a complex signal first

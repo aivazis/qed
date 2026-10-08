@@ -1267,7 +1267,7 @@ class Store(qed.component, family="qed.ux.store"):
         # place a colormap at the origin
         diagram.addFactory(factory=qed.viz.colormaps.gray()(), position=(0, 0, 0))
         # and an encoder to its right, far enough that their slots stay apart
-        diagram.addFactory(factory=qed.viz.codecs.bmp()(), position=(15, 0, 0))
+        diagram.addFactory(factory=qed.viz.encoders.bmp()(), position=(15, 0, 0))
         # remember it
         self._playground = diagram
         # and hand it off
@@ -1417,10 +1417,11 @@ class Store(qed.component, family="qed.ux.store"):
         # the protocols the palette offers factories for
         protocols = (
             qed.viz.selector,
-            qed.viz.filter,
             qed.viz.operator,
+            qed.viz.normalizer,
+            qed.viz.filter,
             qed.viz.colormap,
-            qed.viz.codec,
+            qed.viz.encoder,
         )
         # go through them
         for protocol in protocols:

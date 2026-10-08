@@ -23,8 +23,8 @@ class Covariance(Channel, family="qed.channels.covariance"):
     """
 
     # the filter that maps the interval of interest onto [0,1]
-    normalizer = qed.viz.filter()
-    normalizer.default = qed.viz.filters.parametric
+    normalizer = qed.viz.normalizer()
+    normalizer.default = qed.viz.normalizers.parametric
     normalizer.doc = "the filter that maps the brightness interval onto [0,1]"
 
     # the colormap
@@ -40,11 +40,11 @@ class Covariance(Channel, family="qed.channels.covariance"):
         # the colormap paints the normalized signal
         self.gray.data = self.normalizer.parametric
         # the encoder paints the red channel of its image with the red of the colormap
-        self.codec.red = self.gray.red
+        self.encoder.red = self.gray.red
         # the green with its green
-        self.codec.green = self.gray.green
+        self.encoder.green = self.gray.green
         # and the blue with its blue
-        self.codec.blue = self.gray.blue
+        self.encoder.blue = self.gray.blue
         # all done
         return super().pyre_configured(**kwds)
 

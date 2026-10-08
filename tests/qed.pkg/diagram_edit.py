@@ -107,9 +107,9 @@ def removing():
     store = storeOf(diagram)
     # place the colormap and the encoder, apart
     add(store, "pyre.viz.colormaps.gray", (0, 0, 0))
-    add(store, "pyre.viz.codecs.bmp", (15, 0, 0))
+    add(store, "pyre.viz.encoders.bmp", (15, 0, 0))
     gray = factoryOf(diagram, "pyre.viz.colormaps.gray")
-    bmp = factoryOf(diagram, "pyre.viz.codecs.bmp")
+    bmp = factoryOf(diagram, "pyre.viz.encoders.bmp")
     # four slots each
     assert len(diagram.slots) == 8
     # bind the red output of the colormap to the red input of the encoder, by dropping the one on
@@ -176,9 +176,9 @@ def splitting():
     store = storeOf(diagram)
     # the colormap and the encoder
     add(store, "pyre.viz.colormaps.gray", (0, 0, 0))
-    add(store, "pyre.viz.codecs.bmp", (15, 0, 0))
+    add(store, "pyre.viz.encoders.bmp", (15, 0, 0))
     gray = factoryOf(diagram, "pyre.viz.colormaps.gray")
-    bmp = factoryOf(diagram, "pyre.viz.codecs.bmp")
+    bmp = factoryOf(diagram, "pyre.viz.encoders.bmp")
     # bind the reds by dropping the output on the input
     red = slotOf(gray, "red")
     move(store, red, slotOf(bmp, "red").position)
@@ -212,8 +212,8 @@ def packed():
     diagram = empty()
     store = storeOf(diagram)
     # the first filter at the origin, and the second well to its right, for now
-    add(store, "pyre.viz.filters.parametric", (0, 0, 0))
-    add(store, "pyre.viz.filters.parametric", (20, 0, 0))
+    add(store, "pyre.viz.normalizers.parametric", (0, 0, 0))
+    add(store, "pyre.viz.normalizers.parametric", (20, 0, 0))
     first, second = sorted(
         (entity for entity in diagram.factories), key=lambda entity: entity.position
     )
