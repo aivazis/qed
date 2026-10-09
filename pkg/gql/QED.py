@@ -100,7 +100,9 @@ class QED(graphene.ObjectType):
         """
         # the protocols, in pipeline order
         protocols = (
+            qed.viz.reader,
             qed.viz.selector,
+            qed.viz.slicer,
             qed.viz.operator,
             qed.viz.normalizer,
             qed.viz.filter,
