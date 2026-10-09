@@ -19,10 +19,13 @@ import { Node } from '../node'
 import styles from '../styles'
 
 
-// a factory seen from above: its shape, with a terminal a cell away on either side
-export const FlatFactory = ({ id, at, family, inputs, outputs, selected }) => {
+// a factory seen from above: its shape, painted by how far down it is pinned, with a terminal a
+// cell away on either side
+export const FlatFactory = ({ id, at, family, level, inputs, outputs, selected }) => {
     // make a wide factory
     const cell = 2
+    // paint it by how far down it is pinned
+    const paint = { ...styles, icon: { ...styles.icon, ...styles.levels.factory[level]?.icon } }
     // prerender the input terminal
     const inplex = (
         <g transform={`translate(${-cell} 0)`}>
@@ -37,8 +40,11 @@ export const FlatFactory = ({ id, at, family, inputs, outputs, selected }) => {
     )
     // assemble the graphic and render it
     return (
-        <Node id={id} kind="factory" position={at} handles={{ "data-qed-family": family }}>
-            <Shape highlight={selected} cell={cell} style={styles} />
+        <Node
+            id={id} kind="factory" position={at}
+            handles={{ "data-qed-family": family, "data-qed-level": level }}
+        >
+            <Shape highlight={selected} cell={cell} style={paint} />
             {inplex}
             {outplex}
         </Node>

@@ -20,7 +20,9 @@ import { glyphs } from './glyphs'
 // render a factory: read its state, and hand it to the drawing of the view in use
 export const Factory = ({ factory }) => {
     // unpack
-    const { id, at, inputs, outputs, family } = useFragment(factoryFlowDiagramFragment, factory)
+    const { id, at, inputs, outputs, family, level } = useFragment(
+        factoryFlowDiagramFragment, factory
+    )
     // get the current selection
     const { selection } = useSelection()
     // am i selected
@@ -29,7 +31,10 @@ export const Factory = ({ factory }) => {
     const { Factory: Glyph } = glyphs[useProjection().name]
     // render
     return (
-        <Glyph id={id} at={at} family={family} inputs={inputs} outputs={outputs} selected={selected} />
+        <Glyph
+            id={id} at={at} family={family} level={level}
+            inputs={inputs} outputs={outputs} selected={selected}
+        />
     )
 }
 
@@ -47,6 +52,8 @@ const factoryFlowDiagramFragment = graphql`
         }
         # what it is
         family
+        # how far down it is pinned
+        level
         # number of inputs
         inputs
         # number of outputs
