@@ -24,12 +24,14 @@ def factories(flow):
     """
     Draw {flow} and list the families of its factories in the order they are laid out
     """
+    # describe it as a recipe pinned to its instances
+    recipe = qed.flow.recipe.harvest(flow=flow())
     # draw it, under a name of its own
-    diagram = qed.ux.diagram(name=f"channel_descriptions.{uuid.uuid1()}", flow=flow())
+    diagram = qed.ux.diagram(name=f"channel_descriptions.{uuid.uuid1()}", recipe=recipe)
     # sort the factories by where they are
     ordered = sorted(diagram.factories, key=lambda factory: factory.position)
     # and name them
-    return [factory.factory.pyre_family() for factory in ordered]
+    return [factory.node.pin.pyre_family() for factory in ordered]
 
 
 # the flows painted gray

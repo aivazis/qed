@@ -97,7 +97,7 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
             channel = journal.firewall("qed.ux.diagram.nodes")
             # so complain
             channel.line(f"while looking up '{relay}'")
-            channel.line(f"in the diagram for {self.flow}")
+            channel.line(f"in the diagram {self.relay}")
             channel.log(f"node '{eid}' not found")
             # in case firewalls aren't fatal, return the found node
             return node
@@ -108,7 +108,7 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
             channel = journal.firewall("qed.ux.diagram.nodes")
             # so complain
             channel.line(f"while looking up '{relay}'")
-            channel.line(f"in the diagram for {self.flow}")
+            channel.line(f"in the diagram {self.relay}")
             channel.log(f"type mismatch: retrieved node is '{typename}'")
             # in case firewalls aren't fatal, return the found node
             return node
@@ -117,14 +117,19 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         return node
 
     # new nodes
-    def addFactory(self, factory, position):
+    def addFactory(self, position, protocol=None, pin=None):
         """
-        Add a factory to the flow
+        Add a factory that satisfies {protocol} to the recipe, optionally pinned to a class or an
+        instance, and draw it at {position}
         """
-        # place the factory in the flow
-        self.flow.factories.add(factory)
-        # and update the diagram
-        return self.drawFactory(factory=factory, position=position)
+        # add the factory to the recipe, named after what it is
+        node = self.recipe.factory(
+            name=self.recipe.vacant(name=Factory.describe(protocol=protocol, pin=pin)),
+            protocol=protocol,
+            pin=pin,
+        )
+        # and draw it
+        return self.drawFactory(node=node, position=position)
 
     def moveGroup(self, nodes, anchor, position):
         """
@@ -228,6 +233,14 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         if self.migrant is slot:
             # so forget it
             self.migrant = None
+        # the traits are no longer bound to anything
+        for factory, trait, _ in traits:
+            # so undo their bindings in the recipe
+            self.recipe.unbind(factory=factory.node.name, slot=trait.name)
+        # and the product they shared goes, since no slot stands for it any more
+        if slot.product is not None:
+            # out of the recipe
+            self.recipe.remove(name=slot.product.name)
         # forget the labels of its connectors
         for _, connector, _ in connections:
             # one connector at a time
@@ -323,13 +336,15 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         # if nothing is free nearby, settle for the spot itself
         return spot
 
-    def fits(self, factory, position):
+    def fits(self, position, protocol=None, pin=None):
         """
-        Check whether {factory} placed at {position} would land on free spots, along with all
-        the slots it would bring
+        Check whether a factory that satisfies {protocol}, optionally pinned, placed at
+        {position} would land on free spots, along with all the slots it would bring
         """
-        # build a throwaway entity, which places the slots of the factory around it
-        entity = Factory(factory=factory, position=position)
+        # a throwaway node, which no recipe knows about
+        node = qed.flow.recipes.factory(name="", protocol=protocol, pin=pin)
+        # and a throwaway entity, which places the slots of the factory around it
+        entity = Factory(node=node, position=position)
         # the spots it would take
         spots = [entity.position] + [slot.position for slot in entity.slots]
         # it fits if none of them is taken
@@ -337,9 +352,9 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
 
     def removeFactory(self, entity):
         """
-        Remove the factory {entity} from the diagram and its flow, along with its connectors;
-        the slots it leaves without any connections go as well, the ones other factories still
-        use stay
+        Remove the factory {entity} from the diagram and its recipe, along with its connectors
+        and its bindings; the slots it leaves without any connections go as well, along with
+        their products, the ones other factories still use stay
         """
         # a factory in the middle of a move is no longer moving
         if self.migrant is entity:
@@ -359,12 +374,16 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
                 # goes, along with its labels
                 self.forget(nodes=slot.labels)
                 self.forget(nodes=[slot])
+                # and its product, which the factory's removal leaves with no bindings
+                if slot.product is not None:
+                    # so the recipe forgets it too
+                    self.recipe.remove(name=slot.product.name)
         # forget the labels of the factory
         self.forget(nodes=entity.labels)
         # and the factory itself
         self.forget(nodes=[entity])
-        # take it out of the flow
-        self.flow.factories.discard(entity.factory)
+        # take it out of the recipe, along with its bindings
+        self.recipe.remove(name=entity.node.name)
         # all done
         return
 
@@ -387,12 +406,17 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         # all done
         return
 
-    def addProduct(self, product, position):
+    def addProduct(self, position, specification=None, pin=None):
         """
-        Add a product to the flow
+        Add a product that satisfies {specification} to the recipe, optionally pinned to a class
+        or an instance, and draw it at {position}
         """
-        # place the product in the flow
-        self.flow.products.add(product)
+        # the name of the product: its specification, as far as it has one
+        kind = "product" if specification is None else specification.__name__.lower()
+        # add the product to the recipe
+        product = self.recipe.product(
+            name=self.recipe.vacant(name=kind), specification=specification, pin=pin
+        )
         # build an entity
         entity = Slot(product=product, position=position)
         # and generate its labels
@@ -512,10 +536,87 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         del self.nodes[dead.eid]
 
         # now, ask {node} to subsume the {dead} node's info
-        return node.merge(other=dead)
+        delta = node.merge(other=dead)
+        # and make the recipe agree with the slot that stays
+        self.bind(slot=node)
+        # hand off the changes
+        return delta
+
+    def bind(self, slot):
+        """
+        Make the recipe agree with {slot}: every trait connected to it is bound to its product,
+        which is made when the slot stands for none yet; a slot that is one trait's own, unbound
+        slot binds nothing
+        """
+        # the traits connected to the slot, with the recipe names of their factories
+        traits = [
+            (connector.factory.node.name, trait)
+            for connector in slot.connections()
+            for trait in connector
+        ]
+        # a slot that is one trait's own and stands for no product
+        if len(traits) < 2 and slot.product is None:
+            # binds nothing
+            return
+        # a slot that stands for no product yet
+        if slot.product is None:
+            # what the most demanding of its traits expects
+            spec = self.refined(specs=[trait.protocol for _, trait in traits])
+            # becomes the specification of a new product, named after it
+            product = self.recipe.product(
+                name=self.recipe.vacant(name=spec.__name__.lower()), specification=spec
+            )
+            # which the slot stands for from now on
+            self.attach(slot=slot, product=product)
+        # the name of the product
+        name = slot.product.name
+        # go through the traits
+        for factory, trait in traits:
+            # a trait that is bound to the product already
+            if self.recipe.binding(factory=factory, slot=trait.name) == (factory, trait.name, name):
+                # is left alone, so a live factory is not disturbed
+                continue
+            # the rest get bound to it
+            self.recipe.bind(factory=factory, slot=trait.name, product=name)
+        # all done
+        return
+
+    def attach(self, slot, product):
+        """
+        Make {slot}, which stands for no product and has no labels, stand for {product}, and
+        give it the label that names it
+        """
+        # attach the product
+        slot.product = product
+        # the slot's labels are made the first time they are asked for; forget the ones made
+        # before it had a product, which are none
+        slot._labels = None
+        # make the new ones
+        labels = slot.labels
+        # add them to my pile of labels
+        self.labels |= labels
+        # and my index
+        self.nodes.update((label.eid, label) for label in labels)
+        # all done
+        return
+
+    def refined(self, specs):
+        """
+        The most refined of the specifications in {specs}
+        """
+        # the most refined so far
+        refined = None
+        # go through them
+        for spec in specs:
+            # one that refines the best so far
+            if refined is None or issubclass(spec, refined):
+                # takes over
+                refined = spec
+        # hand it off
+        return refined
 
     # metamethods
-    def __init__(self, flow=None, editable=True, **kwds):
+    def __init__(self, recipe=None, editable=True, **kwds):
         # chain up
         super().__init__(**kwds)
         # whether my structure can change: factories added or removed, slots bound or split
@@ -534,87 +635,75 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         self.migrant = None
         # marker that a collision among nodes was detected during a move
         self.collision = None
-        # set up my flow
-        self.flow = self.draw(flow=flow)
+        # set up my recipe
+        self.recipe = self.draw(recipe=recipe)
         # all done
         return
 
     # implementation details
-    def draw(self, flow):
+    def draw(self, recipe):
         """
-        Traverse the {flow} graph and categorize its contents
+        Lay out the factories of {recipe} and the products they share
         """
-        # if it's a trivial {flow}
-        if flow is None:
+        # if there is no {recipe}
+        if recipe is None:
             # make an empty one and return it
-            return qed.flow.dynamic()
+            return qed.flow.recipe()
 
-        # otherwise, harvest its nodes; go through the factories in the order the data flows
-        # through them
-        for index, factory in enumerate(self.order(flow=flow)):
+        # otherwise, go through its factories in the order the data flows through them
+        for index, node in enumerate(self.order(recipe=recipe)):
             # and lay them out left to right, a {spacing} apart
-            self.drawFactory(factory=factory, position=(index * self.spacing, 0, 0))
-        # each factory drew a slot for every one of its traits; the products that factories
-        # share become one slot each
-        self.share()
+            self.drawFactory(node=node, position=(index * self.spacing, 0, 0))
+        # each factory drew a slot for every one of its traits; the traits bound to the same
+        # product share one slot
+        self.share(recipe=recipe)
 
-        # initialize the set of products
-        inputs = [product for product, _ in flow.pyre_inputs()]
-        outputs = [product for product, _ in flow.pyre_outputs()]
-        # show me the products the flow connects, when someone is listening
+        # show me the products of the recipe, when someone is listening
         channel = journal.debug("qed.ux.diagram")
-        # the ones that come in
+        # the ones that come in: nobody makes them
         channel.line(f"input:")
         # go through them
-        for product in inputs:
-            # and name each one
-            channel.line(f"  {product}")
-        # the ones that go out
+        for product in recipe.products():
+            # the ones with no writers
+            if not recipe.writers(product=product.name):
+                # are named
+                channel.line(f"  {product}")
+        # the ones that go out: nobody uses them
         channel.line(f"output:")
         # go through them
-        for product in outputs:
-            # and name each one
-            channel.line(f"  {product}")
+        for product in recipe.products():
+            # the ones with no readers
+            if not recipe.readers(product=product.name):
+                # are named
+                channel.line(f"  {product}")
         # flush
         channel.log()
 
         # all done
-        return flow
+        return recipe
 
-    def share(self):
+    def share(self, recipe):
         """
-        Merge the slots whose traits are bound to the same product into one slot that carries
-        the product, on the side of the factory that makes it, so the diagram shows the data
+        Give each product of {recipe} one slot, merging the slots whose traits are bound to it
+        into the one on the side of the factory that makes it, so the diagram shows the data
         moving from its maker to its users
         """
-        # the slots of each product, by product identity, since flow nodes need not be hashable
+        # the slots of each product, by name
         groups = {}
         # go through my slots, in a stable order
         for slot in sorted(self.slots, key=lambda slot: slot.position):
             # find the product its traits are bound to
-            product = self.product(slot=slot)
+            product = self.product(recipe=recipe, slot=slot)
             # a slot whose traits are bound to nothing
             if product is None:
                 # has nothing to share
                 continue
             # otherwise, file it with the other slots of its product
-            groups.setdefault(id(product), (product, []))[1].append(slot)
+            groups.setdefault(product.name, (product, []))[1].append(slot)
         # go through the products
         for product, slots in groups.values():
-            # a product that only one slot knows about is not shared
-            if len(slots) < 2:
-                # so leave it alone
-                continue
             # the slot that stays is the one its maker writes, if there is one
             keeper = next((slot for slot in slots if slot.writers), slots[0])
-            # it carries the product
-            keeper.product = product
-            # and its label, which names the product
-            labels = keeper.labels
-            # add them to my pile of labels
-            self.labels |= labels
-            # and my index
-            self.nodes.update((label.eid, label) for label in labels)
             # go through the other slots
             for dead in slots:
                 # skipping the one that stays
@@ -639,6 +728,9 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
                     self.labels.discard(label)
                     # in both places
                     self.nodes.pop(label.eid, None)
+            # the slot that stays now has all the connections, so it can stand for the product
+            # and get the label that names it
+            self.attach(slot=keeper, product=product)
             # the connectors that now reach the slot that stays
             for connector in keeper.connections():
                 # place their labels next to it
@@ -646,89 +738,77 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         # all done
         return
 
-    def product(self, slot):
+    def product(self, recipe, slot):
         """
-        Find the product that the traits connected to {slot} are bound to, or nothing when they
-        disagree or there are none
+        Find the product of {recipe} that the traits connected to {slot} are bound to, or
+        nothing when they disagree or there are none
         """
-        # the products, by identity
-        products = {}
+        # the names of the products
+        names = set()
         # go through the connections of the slot
         for connector in slot.connections():
-            # get the flow factory behind the diagram entity
-            factory = connector.factory.factory
+            # get the name of the factory behind the diagram entity
+            factory = connector.factory.node.name
             # go through the traits of the connection
             for trait in connector:
-                # look up the product bound to it
-                product = factory.pyre_inventory[trait].value
+                # look up the binding of the trait
+                binding = recipe.binding(factory=factory, slot=trait.name)
                 # and if there is one
-                if product is not None:
-                    # remember it
-                    products[id(product)] = product
-        # a slot whose traits agree on one product carries it
-        if len(products) == 1:
+                if binding is not None:
+                    # remember its product
+                    names.add(binding.product)
+        # a slot whose traits agree on one product stands for it
+        if len(names) == 1:
             # so hand it off
-            return next(iter(products.values()))
+            return recipe.node(name=names.pop())
         # otherwise, there is nothing to say
         return None
 
-    def order(self, flow):
+    def order(self, recipe):
         """
-        Sort the factories of {flow} so that each one comes after the factories that make its
-        inputs, keeping the order the flow lists them in wherever the data does not decide
+        Sort the factories of {recipe} so that each one comes after the factories that make its
+        inputs, keeping the order the recipe lists them in wherever the data does not decide
         """
-        # the factories, in the order the flow lists them
-        pending = list(flow.pyre_factories())
-        # the factories that make each product, by product identity, since flow nodes need not
-        # be hashable
-        makers = {}
-        # go through the factories
-        for factory in pending:
-            # and their outputs
-            for product, _ in factory.pyre_outputs():
-                # an unbound output makes nothing
-                if product is not None:
-                    # otherwise, record its maker
-                    makers.setdefault(id(product), []).append(factory)
-        # the factories each one waits for, by identity: the makers of its inputs, other than
-        # itself
+        # the factories, in the order the recipe lists them
+        pending = list(recipe.factories())
+        # the factories each one waits for, by name: the makers of its inputs, other than itself
         upstream = {
-            id(factory): {
-                id(maker)
-                for product, _ in factory.pyre_inputs()
-                if product is not None
-                for maker in makers.get(id(product), [])
-                if maker is not factory
+            node.name: {
+                writer.factory
+                for reader in recipe.bindings
+                if reader.factory == node.name and recipe.reads(binding=reader)
+                for writer in recipe.writers(product=reader.product)
+                if writer.factory != node.name
             }
-            for factory in pending
+            for node in pending
         }
         # the factories in flow order
         ordered = []
-        # and the identities of the ones that have their places
+        # and the names of the ones that have their places
         placed = set()
         # until every factory has a place
         while pending:
             # the first one whose upstream factories all have their places goes next; a cycle
             # leaves none, and then the first one in line breaks it
             ready = next(
-                (factory for factory in pending if upstream[id(factory)] <= placed),
+                (node for node in pending if upstream[node.name] <= placed),
                 pending[0],
             )
             # place it
             ordered.append(ready)
             # remember that it has its place
-            placed.add(id(ready))
+            placed.add(ready.name)
             # and take it out of line
             pending.remove(ready)
         # hand off the order
         return ordered
 
-    def drawFactory(self, factory, position):
+    def drawFactory(self, node, position):
         """
-        Add {factory} to the diagram
+        Draw the factory {node} of my recipe at {position}
         """
         # build an entity
-        entity = Factory(factory=factory, position=position)
+        entity = Factory(node=node, position=position)
         # grab its slots
         slots = entity.slots
         # and its connectors
@@ -780,6 +860,23 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
             # the binding is not supported
             return False
 
+        # what the two slots must satisfy: what their traits expect
+        specs = [trait.protocol for slot in (n1, n2) for c in slot.connections() for trait in c]
+        # and what their products were declared with
+        specs += [
+            slot.product.specification
+            for slot in (n1, n2)
+            if slot.product is not None and slot.product.specification is not None
+        ]
+        # any two of them that are no refinement of each other, either way
+        for index, one in enumerate(specs):
+            # against the rest
+            for other in specs[index + 1 :]:
+                # cannot share a product
+                if not (issubclass(one, other) or issubclass(other, one)):
+                    # so the binding is not supported
+                    return False
+
         # anything else is ok
         return True
 
@@ -788,8 +885,8 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         """
         Generate a report with my slots and factories
         """
-        # first the flow name
-        yield f"flow: {self.flow}"
+        # first my name
+        yield f"diagram: {self.relay}"
         # go through my slots
         yield f"  slots:"
         for slot in self.slots:
