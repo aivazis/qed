@@ -35,7 +35,9 @@ def storeOf(diagram):
     )
     # with the store's own playground
     store.playground = lambda: qed.ux.store.playground(store)
-    # and the recipe it draws
+    # the recipe it draws
+    store.pipeline = lambda: qed.ux.store.pipeline(store)
+    # and the one that recipe starts from
     store.amplitude = lambda: qed.ux.store.amplitude(store)
     # hand it off
     return store
@@ -44,8 +46,8 @@ def storeOf(diagram):
 # the driver
 def test():
     """
-    Draw the playground, check that it draws the amplitude recipe, and find it and the diagram
-    of a view by their ids
+    Draw the playground, check that it draws the amplitude recipe with its source in front of it,
+    and find it and the diagram of a view by their ids
     """
     # the diagram of the view
     drawn = qed.ux.diagram(name=f"diagram_playground.{uuid.uuid1()}", recipe=None)
@@ -55,8 +57,12 @@ def test():
     playground = store.playground()
     # its factories, left to right in the order the data flows through them
     factories = sorted(playground.factories, key=lambda factory: factory.position)
-    # are the steps of the amplitude recipe, each one as far down as it is pinned
+    # are the reader, the selector of the dataset, the slicer, and the steps of the amplitude
+    # recipe, each one as far down as it is pinned
     assert [(factory.kind(), factory.node.level) for factory in factories] == [
+        ("reader", "protocol"),
+        ("dataset", "class"),
+        ("slicer", "protocol"),
         ("amplitude", "class"),
         ("normalizer", "protocol"),
         ("gray", "class"),
@@ -65,10 +71,12 @@ def test():
     # every product has a slot of its own, which stands for it
     assert sorted(slot.product.name for slot in playground.slots) == [
         "blue",
+        "datasets",
         "green",
         "image",
         "magnitude",
         "normalized",
+        "raster",
         "red",
         "signal",
     ]

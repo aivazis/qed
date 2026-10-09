@@ -1262,8 +1262,8 @@ class Store(qed.component, family="qed.ux.store"):
         if self._playground is not None:
             # it is the one
             return self._playground
-        # otherwise, draw the amplitude recipe
-        diagram = qed.ux.diagram(name=f"{self.pyre_name}.playground", recipe=self.amplitude())
+        # otherwise, draw the whole pipeline, from the file to the image
+        diagram = qed.ux.diagram(name=f"{self.pyre_name}.playground", recipe=self.pipeline())
         # remember it
         self._playground = diagram
         # and hand it off
@@ -1304,6 +1304,38 @@ class Store(qed.component, family="qed.ux.store"):
             ("encoder", "green", "green"),
             ("encoder", "blue", "blue"),
             ("encoder", "image", "image"),
+        ]
+        # make them
+        for factory, slot, product in bindings:
+            # one at a time
+            recipe.bind(factory=factory, slot=slot, product=product)
+        # hand off the recipe
+        return recipe
+
+    def pipeline(self):
+        """
+        The amplitude recipe with its source in front of it: a reader opens a file, a selector
+        picks the dataset to look at, and a slice cuts tiles out of its raster; the reader is a
+        protocol nobody implements yet, so the recipe can be drawn but not staged
+        """
+        # start with the amplitude recipe
+        recipe = self.amplitude()
+        # a reader
+        recipe.factory(name="reader", protocol=qed.viz.reader)
+        # a selector, pinned to the one that picks a dataset
+        recipe.factory(name="dataset", protocol=qed.viz.selector, pin=qed.readers.selectors.dataset)
+        # and a slicer
+        recipe.factory(name="slice", protocol=qed.viz.slicer)
+        # the datasets the reader finds, and the raster the selector picks
+        recipe.product(name="datasets")
+        recipe.product(name="raster")
+        # the bindings
+        bindings = [
+            ("reader", "datasets", "datasets"),
+            ("dataset", "datasets", "datasets"),
+            ("dataset", "raster", "raster"),
+            ("slice", "source", "raster"),
+            ("slice", "slice", "signal"),
         ]
         # make them
         for factory, slot, product in bindings:
@@ -1453,7 +1485,9 @@ class Store(qed.component, family="qed.ux.store"):
         """
         # the protocols the palette offers factories for
         protocols = (
+            qed.viz.reader,
             qed.viz.selector,
+            qed.viz.slicer,
             qed.viz.operator,
             qed.viz.normalizer,
             qed.viz.filter,
