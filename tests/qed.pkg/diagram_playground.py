@@ -72,16 +72,8 @@ def test():
         "red",
         "signal",
     ]
-    # and is labeled by its name and the most refined of what its slots expect of it
-    assert {label.text[0] for label in playground.labels if label.category == "product"} == {
-        "signal:complex",
-        "magnitude:magnitude",
-        "normalized:unit",
-        "red:channel",
-        "green:channel",
-        "blue:channel",
-        "image:raster",
-    }
+    # none of which is pinned, so none of them has a label yet
+    assert not [label for label in playground.labels if label.category == "product"]
     # and lasts
     assert store.playground() is playground
     # its id finds it
