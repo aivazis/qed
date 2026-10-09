@@ -38,7 +38,7 @@ class Value(Channel, family="qed.channels.value"):
         Hook invoked after configuration is finished
         """
         # the colormap paints the normalized signal
-        self.gray.data = self.normalizer.parametric
+        self.gray.data = self.normalizer.normalized
         # the encoder paints the red channel of its image with the red of the colormap
         self.encoder.red = self.gray.red
         # the green with its green

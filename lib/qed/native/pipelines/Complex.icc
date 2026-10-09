@@ -179,7 +179,7 @@ qed::native::pipelines::Complex<cellT>::build(int rows, int columns) -> graph_ty
     // it reads the magnitudes
     g.normalizer->signal(g.amplitude);
     // and writes the brightness
-    g.normalizer->parametric(g.brightness);
+    g.normalizer->normalized(g.brightness);
 
     // make the constant that supplies the saturation
     g.constant = constant_type::create("saturation", 1.0);
@@ -240,7 +240,7 @@ qed::native::pipelines::Complex<cellT>::dismantle(graph_type & g) -> void
     g.constant->removeOutput("tile");
     // unhook the normalizer from the magnitudes and the brightness
     g.normalizer->removeInput("signal");
-    g.normalizer->removeOutput("parametric");
+    g.normalizer->removeOutput("normalized");
     // unhook the selector from the signal and the magnitudes
     g.selector->removeInput("signal");
     g.selector->removeOutput("amplitude");

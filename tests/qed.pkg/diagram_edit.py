@@ -219,7 +219,7 @@ def packed():
     )
     # bind the output of the first to the input of the second, and bring the binding back to
     # the home of the output
-    output = slotOf(first, "parametric")
+    output = slotOf(first, "normalized")
     move(store, output, slotOf(second, "signal").position)
     move(store, output, (5, 0, 0))
     # bring the second filter close, so its input calls the same spot home
@@ -228,7 +228,7 @@ def packed():
     # split the binding
     remove(store, output)
     # each slot stepped half a cell toward its own factory, so the two do not pile up
-    assert slotOf(first, "parametric").position == (4, 0, 0)
+    assert slotOf(first, "normalized").position == (4, 0, 0)
     assert slotOf(second, "signal").position == (6, 0, 0)
     # all done
     return

@@ -154,7 +154,7 @@ qed::native::pipelines::Amplitude<cellT>::build(int rows, int columns) -> graph_
     // it reads the magnitudes
     g.normalizer->signal(g.amplitude);
     // and writes the normalized values
-    g.normalizer->parametric(g.normalized);
+    g.normalizer->normalized(g.normalized);
 
     // make the colormap
     g.colormap = colormap_type::create("gray");
@@ -205,7 +205,7 @@ qed::native::pipelines::Amplitude<cellT>::dismantle(graph_type & g) -> void
     // unhook the normalizer from the magnitudes
     g.normalizer->removeInput("signal");
     // and the normalized values
-    g.normalizer->removeOutput("parametric");
+    g.normalizer->removeOutput("normalized");
     // unhook the selector from the signal
     g.selector->removeInput("signal");
     // and the magnitudes
