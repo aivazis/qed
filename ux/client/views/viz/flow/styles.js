@@ -116,6 +116,25 @@ export default {
         },
     },
 
+    // the paint of the flat glyphs, by how far down their node is pinned: a protocol is an
+    // outline, a class is tinted, and an instance is solid; an outline is filled with the paint
+    // of the page, rather than with nothing, so it hides what runs behind it and can still be
+    // picked up anywhere inside it
+    levels: {
+        // factories, in the color of factories
+        factory: {
+            protocol: { icon: { fill: theme.page.background, strokeDasharray: "3 2" } },
+            class: { icon: { fill: "hsl(28deg, 70%, 25%)" } },
+            instance: { icon: { fill: "hsl(28deg, 70%, 45%)" } },
+        },
+        // products, in the color of products
+        product: {
+            protocol: { icon: { fill: theme.page.background, strokeDasharray: "3 2" } },
+            class: { icon: { fill: "hsl(200deg, 80%, 15%)" } },
+            instance: { icon: { fill: "hsl(200deg, 80%, 35%)" } },
+        },
+    },
+
     // the rings that tell what dropping a dragged node would do
     drop: {
         // merge with the node under it
