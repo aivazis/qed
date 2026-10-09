@@ -24,9 +24,9 @@ def describe(name, flow):
     Draw {flow} on a diagram of its own, and describe its only factory
     """
     # an empty diagram
-    diagram = qed.ux.diagram(name=name, flow=None)
-    # with just this factory on it
-    entity, *_ = diagram.addFactory(factory=flow, position=(0, 0, 0))
+    diagram = qed.ux.diagram(name=name, recipe=None)
+    # with just this factory on it, pinned to the instance
+    entity, *_ = diagram.addFactory(pin=flow, position=(0, 0, 0))
     # describe it
     return (
         FlowFactory.resolve_family(entity, None),

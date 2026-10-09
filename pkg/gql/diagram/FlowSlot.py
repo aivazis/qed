@@ -31,6 +31,8 @@ class FlowSlot(graphene.ObjectType):
     # fields
     at = graphene.Field(Point, required=True)
     bound = graphene.Boolean(required=True)
+    # how far down its product is pinned: "protocol", "class", or "instance"; none when unbound
+    level = graphene.String()
 
     # resolvers
     @staticmethod
@@ -40,6 +42,16 @@ class FlowSlot(graphene.ObjectType):
         """
         # splice together the {family} and {name} of the {slot}
         return slot.relay
+
+    @staticmethod
+    def resolve_level(slot, info, **kwds):
+        """
+        Get how far down the product of the slot is pinned, if it has one
+        """
+        # get the product
+        product = slot.product
+        # and ask it
+        return None if product is None else product.level
 
     @staticmethod
     def resolve_at(slot, info, **kwds):

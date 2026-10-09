@@ -51,15 +51,15 @@ class Factory(Node):
         return
 
     # metamethods
-    def __init__(self, factory, **kwds):
+    def __init__(self, node, **kwds):
         # chain up
         super().__init__(**kwds)
 
-        # save the factory
-        self.factory = factory
+        # save the recipe node i stand for
+        self.node = node
         # and the arity
-        self.inputs = len(factory.pyre_inputTraits)
-        self.outputs = len(factory.pyre_outputTraits)
+        self.inputs = len(node.inputs)
+        self.outputs = len(node.outputs)
 
         # initialize my slot cache
         self._slots = None
@@ -72,10 +72,8 @@ class Factory(Node):
         """
         Generate the set of my labels
         """
-        # get my type
-        family = self.factory.pyre_family().split(".")[-1]
-        # the value of the label
-        text = [f"{family}"]
+        # the value of the label is what i am, as far as i am pinned
+        text = [self.kind()]
         # build the position of the label relative to me
         delta = (0, -2.5, 0)
         # assemble and publish
@@ -86,6 +84,26 @@ class Factory(Node):
 
         # all done
         return
+
+    @staticmethod
+    def describe(protocol=None, pin=None):
+        """
+        Name a factory that satisfies {protocol} and is pinned to {pin}: by the component it is
+        pinned to, or the protocol it must satisfy
+        """
+        # a factory that is pinned
+        if pin is not None:
+            # is named by the family of its pin
+            return pin.pyre_family().split(".")[-1]
+        # otherwise, by its protocol, whose family names the whole category
+        return protocol.__name__.lower()
+
+    def kind(self):
+        """
+        Name what i am: the component i am pinned to, or the protocol i must satisfy
+        """
+        # ask my recipe node
+        return self.describe(protocol=self.node.protocol, pin=self.node.pin)
 
     def home(self, trait):
         """
@@ -122,12 +140,12 @@ class Factory(Node):
         Sort my traits into the ones that are just input, just output, and both, in the order the
         factory declares them, so the slots line up the same way every time
         """
-        # grab my factory node
-        factory = self.factory
+        # grab my recipe node
+        node = self.node
         # all the input traits
-        ins = factory.pyre_inputTraits
+        ins = node.inputs
         # and all the output traits
-        outs = factory.pyre_outputTraits
+        outs = node.outputs
         # traits overload the comparison operators to build expressions, so membership is
         # decided by identity
         inIds = {id(trait) for trait in ins}
