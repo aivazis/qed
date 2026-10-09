@@ -66,7 +66,7 @@ qed::native::pipelines::Value::build(int rows, int columns) -> graph_type
     // it reads the signal
     g.normalizer->signal(g.signal);
     // and writes the normalized values
-    g.normalizer->parametric(g.normalized);
+    g.normalizer->normalized(g.normalized);
 
     // make the colormap
     g.colormap = colormap_type::create("gray");
@@ -116,7 +116,7 @@ qed::native::pipelines::Value::dismantle(graph_type & g) -> void
     // unhook the normalizer from the signal
     g.normalizer->removeInput("signal");
     // and the normalized values
-    g.normalizer->removeOutput("parametric");
+    g.normalizer->removeOutput("normalized");
     // all done
     return;
 }
