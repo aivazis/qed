@@ -16,12 +16,19 @@ import { Puck } from './solids'
 import styles from '../styles'
 
 
-// a slot seen from the side: a puck, painted by whether it carries a product
-export const IsoSlot = ({ id, at, bound, selected }) => {
+// a slot seen from the side: a puck, painted by whether it carries a product, and by how far down
+// its product is pinned
+export const IsoSlot = ({ id, at, bound, level, selected }) => {
     // render
     return (
-        <Node id={id} kind="slot" position={at} handles={{ "data-qed-bound": bound }}>
-            <Puck highlight={selected} paint={bound ? styles.iso.product : styles.iso.slot} />
+        <Node
+            id={id} kind="slot" position={at}
+            handles={{ "data-qed-bound": bound, "data-qed-level": level }}
+        >
+            <Puck
+                highlight={selected}
+                paint={bound ? styles.isoLevels.product[level] ?? styles.iso.product : styles.iso.slot}
+            />
         </Node>
     )
 }
