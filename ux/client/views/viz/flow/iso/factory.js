@@ -23,8 +23,9 @@ import { FloorPlex, FloorTerminal, PUCK_HEIGHT, Puck } from './solids'
 import styles from '../styles'
 
 
-// a factory seen from the side: its plexes on the floor along its x axis, and a puck
-export const IsoFactory = ({ id, at, family, inputs, outputs, selected }) => {
+// a factory seen from the side: its plexes on the floor along its x axis, and a puck painted by
+// how far down it is pinned
+export const IsoFactory = ({ id, at, family, level, inputs, outputs, selected }) => {
     // the projection
     const { project, view, labelLift } = useProjection()
     // the leader rises from the top of my puck to just under my name, which floats above me
@@ -38,15 +39,18 @@ export const IsoFactory = ({ id, at, family, inputs, outputs, selected }) => {
         : <FloorTerminal paint={terminalPaint} />
     // render
     return (
-        <Node id={id} kind="factory" position={at} handles={{ "data-qed-family": family }}>
+        <Node
+            id={id} kind="factory" position={at}
+            handles={{ "data-qed-family": family, "data-qed-level": level }}
+        >
             {/* the axis that joins the plexes */}
             <line x1={west.x} y1={west.y} x2={east.x} y2={east.y} style={styles.connector} />
             {/* the plexes where the slots connect, or terminals at an end without slots, lying
                 on the floor */}
             <g transform={`translate(${west.x} ${west.y})`}>{end(inputs)}</g>
             <g transform={`translate(${east.x} ${east.y})`}>{end(outputs)}</g>
-            {/* the puck, in the color of factories */}
-            <Puck highlight={selected} paint={styles.iso.factory} />
+            {/* the puck, in the color of factories, painted by how far down i am pinned */}
+            <Puck highlight={selected} paint={styles.isoLevels.factory[level] ?? styles.iso.factory} />
             {/* the leader up to my name */}
             <line x1={rise.x} y1={rise.y} x2={name.x} y2={name.y} style={styles.iso.leader} />
         </Node>

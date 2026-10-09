@@ -11,6 +11,45 @@ import { wheel, theme } from '~/palette'
 import base from '~/views/styles'
 
 
+// the solid pucks of factories, in the color of factories
+const isoFactory = {
+    top: { fill: "hsl(28deg, 70%, 45%)", stroke: "hsl(28deg, 70%, 60%)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" },
+    side: { fill: "hsl(28deg, 70%, 26%)", stroke: "hsl(28deg, 70%, 40%)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" },
+    band: { fill: "hsl(28deg, 70%, 26%)", stroke: "none" },
+    highlight: { fill: "none", stroke: "hsl(28deg, 40%, 80%)", strokeWidth: 2, vectorEffect: "non-scaling-stroke" },
+}
+
+// and of products, in the color of products
+const isoProduct = {
+    top: { fill: "hsl(200deg, 80%, 38%)", stroke: "hsl(200deg, 80%, 55%)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" },
+    side: { fill: "hsl(200deg, 80%, 20%)", stroke: "hsl(200deg, 80%, 35%)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" },
+    band: { fill: "hsl(200deg, 80%, 20%)", stroke: "none" },
+    highlight: { fill: "none", stroke: "hsl(200deg, 40%, 75%)", strokeWidth: 2, vectorEffect: "non-scaling-stroke" },
+}
+
+// the paint of a puck by how far down its node is pinned, made from the {solid} paint of an
+// instance: a protocol is a dashed outline filled with the paint of the page, so it hides what is
+// behind it and can be picked up anywhere, and a class is tinted, its {top} and {side} darker
+const isoLevels = ({ solid, top, side }) => ({
+    // an outline
+    protocol: {
+        top: { ...solid.top, fill: theme.page.background, strokeDasharray: "3 2" },
+        side: { ...solid.side, fill: theme.page.background, strokeDasharray: "3 2" },
+        band: { ...solid.band, fill: theme.page.background },
+        highlight: solid.highlight,
+    },
+    // a tint
+    class: {
+        top: { ...solid.top, fill: top },
+        side: { ...solid.side, fill: side },
+        band: { ...solid.band, fill: side },
+        highlight: solid.highlight,
+    },
+    // solid
+    instance: solid,
+})
+
+
 // publish
 export default {
     // the container
@@ -94,12 +133,7 @@ export default {
             fill: "hsla(0deg, 0%, 0%, 0.35)",
         },
         // factories, as pucks in the color of factories
-        factory: {
-            top: { fill: "hsl(28deg, 70%, 45%)", stroke: "hsl(28deg, 70%, 60%)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" },
-            side: { fill: "hsl(28deg, 70%, 26%)", stroke: "hsl(28deg, 70%, 40%)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" },
-            band: { fill: "hsl(28deg, 70%, 26%)", stroke: "none" },
-            highlight: { fill: "none", stroke: "hsl(28deg, 40%, 80%)", strokeWidth: 2, vectorEffect: "non-scaling-stroke" },
-        },
+        factory: isoFactory,
         // slots without a product
         slot: {
             top: { fill: "hsl(0deg, 0%, 32%)", stroke: "hsl(0deg, 0%, 45%)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" },
@@ -108,12 +142,15 @@ export default {
             highlight: { fill: "none", stroke: "hsl(0deg, 0%, 70%)", strokeWidth: 2, vectorEffect: "non-scaling-stroke" },
         },
         // and with one
-        product: {
-            top: { fill: "hsl(200deg, 80%, 38%)", stroke: "hsl(200deg, 80%, 55%)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" },
-            side: { fill: "hsl(200deg, 80%, 20%)", stroke: "hsl(200deg, 80%, 35%)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" },
-            band: { fill: "hsl(200deg, 80%, 20%)", stroke: "none" },
-            highlight: { fill: "none", stroke: "hsl(200deg, 40%, 75%)", strokeWidth: 2, vectorEffect: "non-scaling-stroke" },
-        },
+        product: isoProduct,
+    },
+
+    // the paint of the pucks, by how far down their node is pinned
+    isoLevels: {
+        // factories
+        factory: isoLevels({ solid: isoFactory, top: "hsl(28deg, 70%, 25%)", side: "hsl(28deg, 70%, 15%)" }),
+        // products
+        product: isoLevels({ solid: isoProduct, top: "hsl(200deg, 80%, 15%)", side: "hsl(200deg, 80%, 10%)" }),
     },
 
     // the paint of the flat glyphs, by how far down their node is pinned: a protocol is an
