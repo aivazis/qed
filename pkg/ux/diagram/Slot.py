@@ -150,11 +150,12 @@ class Slot(Node):
         """
         # grab my product
         product = self.product
-        # i only get a label if i'm bound
-        if product is not None:
-            # the value of the label: the name of the product, and what it is, as far as it is
-            # pinned
-            text = [f"{product.name}:{self.kind()}"]
+        # i only get a label if i'm bound to a product the user specialized by pinning it; until
+        # then i only join the slots of factories, and their connectors say all there is to say
+        if product is not None and product.pin is not None:
+            # the value of the label: the name of the instance, which is also how separately drawn
+            # graphs join, and what it is
+            text = [f"{product.name}@{self.kind()}"]
             # build the position of the label relative to me
             delta = (0, -1, 0)
             # assemble and publish
@@ -168,31 +169,10 @@ class Slot(Node):
 
     def kind(self):
         """
-        Name what my product is: the component it is pinned to, or else the most refined of the
-        specification it was declared with and the ones the traits connected to me expect
+        Name what my product is: the component it is pinned to
         """
-        # grab my product
-        product = self.product
-        # a product that is pinned
-        if product.pin is not None:
-            # is named by the family of its pin
-            return product.pin.pyre_family().split(".")[-1]
-        # otherwise, what it must satisfy: what the traits connected to me expect
-        specs = [trait.protocol for connector in self.connections() for trait in connector]
-        # and the specification it was declared with, if any
-        if product.specification is not None:
-            # goes first
-            specs.insert(0, product.specification)
-        # the most refined so far
-        refined = None
-        # go through them
-        for spec in specs:
-            # one that refines the best so far
-            if refined is None or issubclass(spec, refined):
-                # takes over
-                refined = spec
-        # name it, if there is one
-        return "" if refined is None else refined.__name__.lower()
+        # the family of the pin of my product names it
+        return self.product.pin.pyre_family().split(".")[-1]
 
     def rebind(self, other):
         """
