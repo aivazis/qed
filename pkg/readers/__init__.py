@@ -14,9 +14,6 @@ from . import alos
 from . import nisar
 from . import asar
 
-# the selectors that pick a dataset among the ones a reader found
-from . import selectors
-
 # reader metadata
 from .Metadata import Metadata as metadata
 
