@@ -45,6 +45,8 @@ export const Provider = React.forwardRef(({ viewport, scale, focus, focusKey, ch
     }, [focusKey, focus === null])
     // the cursor position in ICS
     const [cursor, setCursor] = React.useState(null)
+    // and the same position before it is rounded onto the grid, for clients that map it further
+    const [pointer, setPointer] = React.useState(null)
 
     // the transform from viewport to the internal coordinate system
     // the diagram coordinates of a point on the screen, rounded onto the grid unless asked not
@@ -108,6 +110,8 @@ export const Provider = React.forwardRef(({ viewport, scale, focus, focusKey, ch
         const { clientX: x, clientY: y } = evt
         // record the location
         setCursor(toICS({ x, y }))
+        // and the location before rounding
+        setPointer(toICS({ x, y }, false))
         // all done
         return
     }
@@ -115,6 +119,8 @@ export const Provider = React.forwardRef(({ viewport, scale, focus, focusKey, ch
     const reset = () => {
         // clear the cursor location
         setCursor(null)
+        // in both forms
+        setPointer(null)
         // all done
         return
     }
@@ -225,6 +231,8 @@ export const Provider = React.forwardRef(({ viewport, scale, focus, focusKey, ch
         camera, setCamera,
         // the current cursor position in ICS
         cursor, setCursor,
+        // and before rounding
+        pointer,
         // the transform to diagram coordinates
         toICS,
     }
@@ -251,6 +259,8 @@ export const Context = React.createContext(
         // the cursor position
         cursor: null,
         setCursor: () => { throw new Error(complaint) },
+        // before rounding
+        pointer: null,
         // the transform to diagram coordinates
         toICS: () => { throw new Error(complaint) },
     }

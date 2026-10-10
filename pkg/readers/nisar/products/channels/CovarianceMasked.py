@@ -12,6 +12,9 @@ import qed
 # superclass
 from .Channel import Channel
 
+# recolors the cells my mask flags
+from ...GCOVScreen import GCOVScreen
+
 
 # a channel for displaying covariance values
 class CovarianceMasked(Channel, family="qed.channels.nisar.covarianceMasked"):
@@ -60,6 +63,28 @@ class CovarianceMasked(Channel, family="qed.channels.nisar.covarianceMasked"):
         # all done
         return
 
+    def recipe(self):
+        """
+        The pipeline that renders my tiles: the window of the raster, normalized and painted
+        gray, with the cells the mask flags and the cells with no data
+        recolored
+        """
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # cut the signal out of the raster
+        self.head(recipe=recipe)
+        # and paint it gray
+        self.gray(recipe=recipe, signal="signal")
+        # hand it off
+        return recipe
+
+    def settings(self) -> dict:
+        """
+        The settings my controllers impose on the factories of my recipe
+        """
+        # my range
+        return {"normalizer": {"interval": (10**self.amplitude.low, 10**self.amplitude.high)}}
+
     def tile(self, **kwds):
         """
         Generate a tile of the given characteristics
@@ -74,6 +99,8 @@ class CovarianceMasked(Channel, family="qed.channels.nisar.covarianceMasked"):
     # my kernel builds its own pipeline, so it can be told what the product
     # declared and paint the two kinds of absence apart
     absence = True
+    # recolors the cells my mask flags
+    screenClass = GCOVScreen
     tag = "covarianceMasked"
 
     # the description of the pipeline

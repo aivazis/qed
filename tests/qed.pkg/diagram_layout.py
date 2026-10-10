@@ -24,14 +24,16 @@ def test():
     """
     Build the diagram of the phase channel and check where its entities landed
     """
-    # draw the flow of the phase channel
-    diagram = qed.ux.diagram(name="diagram_layout.diagram", flow=qed.channels.phase())
+    # draw the flow of the phase channel, as a recipe pinned to its instances
+    diagram = qed.ux.diagram(
+        name="diagram_layout.diagram", recipe=qed.flow.recipe.harvest(flow=qed.channels.phase())
+    )
     # the factories, left to right
     factories = sorted(diagram.factories, key=lambda entity: entity.position)
     # are the colormap and then the encoder
-    assert [entity.factory.pyre_family() for entity in factories] == [
+    assert [entity.node.pin.pyre_family() for entity in factories] == [
         "pyre.viz.colormaps.hsb",
-        "pyre.viz.codecs.bmp",
+        "pyre.viz.encoders.bmp",
     ]
     # a {spacing} apart along the horizontal axis
     assert [entity.position for entity in factories] == [(0, 0, 0), (diagram.spacing, 0, 0)]
@@ -126,15 +128,18 @@ def covariance():
     """
     Build the diagram of the covariance channel: normalizer, colormap, and encoder in a row
     """
-    # draw the flow of the covariance channel
-    diagram = qed.ux.diagram(name="diagram_layout.covariance", flow=qed.channels.covariance())
+    # draw the flow of the covariance channel, as a recipe pinned to its instances
+    diagram = qed.ux.diagram(
+        name="diagram_layout.covariance",
+        recipe=qed.flow.recipe.harvest(flow=qed.channels.covariance()),
+    )
     # the factories, left to right
     factories = sorted(diagram.factories, key=lambda entity: entity.position)
     # are the normalizer, the colormap, and the encoder
-    assert [entity.factory.pyre_family() for entity in factories] == [
-        "pyre.viz.filters.parametric",
+    assert [entity.node.pin.pyre_family() for entity in factories] == [
+        "pyre.viz.normalizers.parametric",
         "pyre.viz.colormaps.gray",
-        "pyre.viz.codecs.bmp",
+        "pyre.viz.encoders.bmp",
     ]
     # unpack them
     normalizer, gray, encoder = factories

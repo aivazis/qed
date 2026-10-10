@@ -24,9 +24,9 @@ def describe(name, flow):
     Draw {flow} on a diagram of its own, and describe its only factory
     """
     # an empty diagram
-    diagram = qed.ux.diagram(name=name, flow=None)
-    # with just this factory on it
-    entity, *_ = diagram.addFactory(factory=flow, position=(0, 0, 0))
+    diagram = qed.ux.diagram(name=name, recipe=None)
+    # with just this factory on it, pinned to the instance
+    entity, *_ = diagram.addFactory(pin=flow, position=(0, 0, 0))
     # describe it
     return (
         FlowFactory.resolve_family(entity, None),
@@ -53,8 +53,13 @@ def gray():
         ("green", "output"),
         ("blue", "output"),
     ]
-    # its slots hold tiles
-    assert all(trait.type == "pyre.viz.tiles" for trait in traits)
+    # its slots hold tiles, each named by its specification: unit values in, color channels out
+    assert [trait.type for trait in traits] == [
+        "pyre.viz.tiles.unit",
+        "pyre.viz.tiles.channel",
+        "pyre.viz.tiles.channel",
+        "pyre.viz.tiles.channel",
+    ]
     # and each slot names the kind of product bound to it
     assert all(trait.value == "pyre.viz.tiles.heap" for trait in traits)
     # all done

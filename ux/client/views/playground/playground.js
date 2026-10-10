@@ -20,6 +20,10 @@ import { Canvas, Note, Palette, Picked } from '~/views/viz'
 // paint
 import styles from '~/views/viz/viz/styles'
 
+// local
+// the tab over the canvas
+import { Tab } from './tab'
+
 
 // a pipeline diagram that belongs to no view, where factories can be placed, moved, and wired
 // together freely, next to a panel with the factories on offer
@@ -28,6 +32,11 @@ export const Playground = ({ qed }) => {
     const { activityPanel } = useActivityPanel()
     // unpack the diagram and the factories on offer
     const { playground, catalog } = useFragment(playgroundGetDiagramFragment, qed)
+    // the way the diagram is drawn: flat, or isometric, turned by quarter turns, seen from above
+    // or below
+    const [view, setView] = React.useState({ kind: "flat", azimuth: 0, below: false })
+    // change some of it
+    const adjust = change => setView(old => ({ ...old, ...change }))
     // the panel paint, hidden along with the activity panel
     const panelPaint = {
         ...styles.activityPanels,
@@ -55,13 +64,26 @@ export const Playground = ({ qed }) => {
                     <Picked diagram={playground} />
                 </Panel>
             </Flex.Panel>
-            {/* the diagram */}
+            {/* the diagram, under a tab with the choices of how to look at it */}
             <Flex.Panel auto={true} style={styles.flex}>
-                <Canvas diagram={playground} />
+                <Viewport>
+                    <Tab view={view} adjust={adjust} />
+                    <Canvas diagram={playground} view={view} />
+                </Viewport>
             </Flex.Panel>
         </Flex.Box>
     )
 }
+
+
+// the viewport: the tab over the canvas
+const Viewport = styled.div`
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+`
 
 
 // the container of the panel

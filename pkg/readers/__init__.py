@@ -5,6 +5,9 @@
 # (c) 1998-2026 all rights reserved
 
 
+# the base of the channels of the readers
+from .Channel import Channel as channel
+
 # the base reader support
 from . import native
 

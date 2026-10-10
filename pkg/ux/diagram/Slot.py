@@ -24,8 +24,9 @@ class Slot(Node):
     @property
     def bound(self):
         """
-        Indicate whether this slot is associated with an actual product
+        Indicate whether this slot stands for a product of the recipe
         """
+        # easy enough
         return self.product is not None
 
     # interface
@@ -109,7 +110,9 @@ class Slot(Node):
         # pack them in a pile
         deltaConnectors = newConnectors, delConnectors, updatedConnectors
 
-        # take care of the flow
+        # make my labels, if i haven't yet, so they reflect me before i take anything over
+        self.labels
+        # take over the product of {other}, if it has one
         self.rebind(other=other)
         # take ownership of all the labels attached to {other}
         self.relabel(other=other, delta=deltaLabels)
@@ -123,7 +126,7 @@ class Slot(Node):
     def __init__(self, product=None, **kwds):
         # chain up
         super().__init__(**kwds)
-        # save the product
+        # save the product of the recipe i stand for, if any
         self.product = product
 
         # a map from readers to the associated connectors
@@ -147,14 +150,12 @@ class Slot(Node):
         """
         # grab my product
         product = self.product
-        # i only get a label if i'm bound
-        if product is not None:
-            # get my name
-            name = self.name or ""
-            # get my type
-            family = product.pyre_family().split(".")[-1]
-            # the value of the label
-            text = [f"{name}:{family}"]
+        # i only get a label if i'm bound to a product the user specialized by pinning it; until
+        # then i only join the slots of factories, and their connectors say all there is to say
+        if product is not None and product.pin is not None:
+            # the value of the label: the name of the instance, which is also how separately drawn
+            # graphs join, and what it is
+            text = [f"{product.name}@{self.kind()}"]
             # build the position of the label relative to me
             delta = (0, -1, 0)
             # assemble and publish
@@ -166,39 +167,22 @@ class Slot(Node):
         # all done
         return
 
+    def kind(self):
+        """
+        Name what my product is: the component it is pinned to
+        """
+        # the family of the pin of my product names it
+        return self.product.pin.pyre_family().split(".")[-1]
+
     def rebind(self, other):
         """
-        Examine {other} and me, and rebind the flow so that {other} can be released
-        after {merge}
+        Take over the product of {other}, if i do not have one of my own; the recipe is the
+        diagram's to update
         """
-        # get my product
-        product = self.product
-        # if i'm the one that's bound
-        if product is not None:
-            # go through all the connections in {other}
-            for connector in other.connections():
-                # get the flow factory behind the diagram entity at the other end
-                factory = connector.factory.factory
-                # go through all the traits
-                for trait in connector:
-                    # and bind them to my product
-                    setattr(factory, trait.name, product)
-
-        # ask {other} for its binding
-        product = other.product
-        # if it is bound
-        if product is not None:
-            # bind me
-            self.product = product
-            # go through my connections
-            for connector in self.connections():
-                # get the flow factory behind the diagram entity at the other end
-                factory = connector.factory.factory
-                # go through all the traits
-                for trait in connector:
-                    # and bind them to my new product
-                    setattr(factory, trait.name, product)
-
+        # if i have no product and {other} does
+        if self.product is None and other.product is not None:
+            # it is mine now
+            self.product = other.product
         # all done
         return
 

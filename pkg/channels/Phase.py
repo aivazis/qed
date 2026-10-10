@@ -33,11 +33,11 @@ class Phase(Channel, family="qed.channels.phase"):
         Hook invoked after configuration is finished
         """
         # the encoder paints the red channel of its image with the red of the colormap
-        self.codec.red = self.hsb.red
+        self.encoder.red = self.hsb.red
         # the green with its green
-        self.codec.green = self.hsb.green
+        self.encoder.green = self.hsb.green
         # and the blue with its blue
-        self.codec.blue = self.hsb.blue
+        self.encoder.blue = self.hsb.blue
         # all done
         return super().pyre_configured(**kwds)
 

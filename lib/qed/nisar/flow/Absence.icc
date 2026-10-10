@@ -1,0 +1,265 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// my declarations
+#include "Absence.h"
+
+
+// simulate my c++ declaration
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::declSelf() -> string_type
+{
+    // the type alias, with the declarations of my slots
+    return "qed::nisar::flow::absence_t<" + data_type::declSelf() + ", " + color_type::declSelf()
+         + ">";
+}
+
+
+// the human readable form of my class name
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::className() -> string_type
+{
+    // my kind
+    return "Absence";
+}
+
+
+// the descriptions of my slots
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::declSlots() -> const slots_type &
+{
+    // my slots, in the order i declare them
+    static const slots_type table {
+        slot_type::input<data_type>("data"),          slot_type::input<color_type>("red"),
+        slot_type::input<color_type>("green"),        slot_type::input<color_type>("blue"),
+        slot_type::output<color_type>("paintedRed"),  slot_type::output<color_type>("paintedGreen"),
+        slot_type::output<color_type>("paintedBlue"),
+    };
+    // hand them off
+    return table;
+}
+
+
+// the descriptions of my settings
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::declSettings() -> const settings_type &
+{
+    // my settings
+    static const settings_type table {
+        setting_type::of<self_type>("fill", &self_type::fill, &self_type::fill),
+    };
+    // hand them off
+    return table;
+}
+
+
+// the descriptions of my slots
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::slots() const -> const slots_type &
+{
+    // the ones of my type
+    return declSlots();
+}
+
+
+// the descriptions of my settings
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::settings() const -> const settings_type &
+{
+    // the ones of my type
+    return declSettings();
+}
+
+
+// factory
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::create(const name_type & name, fill_type fill)
+    -> factory_ref_type
+{
+    // build an instance and wrap it in a shared pointer
+    auto ref = std::make_shared<Absence>(sentinel_type(), name, fill);
+    // hand it off
+    return ref;
+}
+
+
+// destructor
+template <class dataT, class colorT>
+qed::nisar::flow::Absence<dataT, colorT>::~Absence()
+{}
+
+
+// constructor
+template <class dataT, class colorT>
+qed::nisar::flow::Absence<dataT, colorT>::Absence(
+    sentinel_type sentinel, const name_type & name, fill_type fill) :
+    // superclass
+    super_type(sentinel, name),
+    // members
+    _fill { fill }
+{}
+
+
+// the magnitude of the value the product declared as its fill
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::fill() const -> fill_type
+{
+    // easy enough
+    return _fill;
+}
+
+
+// the product bound to my {data} slot
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::data() -> data_ref_type
+{
+    // look it up and cast it to its type
+    return std::dynamic_pointer_cast<data_type>(input("data"));
+}
+
+
+// the product bound to my {red} slot
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::red() -> color_ref_type
+{
+    // look it up and cast it to its type
+    return std::dynamic_pointer_cast<color_type>(input("red"));
+}
+
+
+// the product bound to my {green} slot
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::green() -> color_ref_type
+{
+    // look it up and cast it to its type
+    return std::dynamic_pointer_cast<color_type>(input("green"));
+}
+
+
+// the product bound to my {blue} slot
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::blue() -> color_ref_type
+{
+    // look it up and cast it to its type
+    return std::dynamic_pointer_cast<color_type>(input("blue"));
+}
+
+
+// the product bound to my {paintedRed} slot
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::paintedRed() -> color_ref_type
+{
+    // look it up and cast it to its type
+    return std::dynamic_pointer_cast<color_type>(output("paintedRed"));
+}
+
+
+// the product bound to my {paintedGreen} slot
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::paintedGreen() -> color_ref_type
+{
+    // look it up and cast it to its type
+    return std::dynamic_pointer_cast<color_type>(output("paintedGreen"));
+}
+
+
+// the product bound to my {paintedBlue} slot
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::paintedBlue() -> color_ref_type
+{
+    // look it up and cast it to its type
+    return std::dynamic_pointer_cast<color_type>(output("paintedBlue"));
+}
+
+
+// change the fill
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::fill(fill_type fill) -> factory_ref_type
+{
+    // record the new fill
+    _fill = fill;
+    // what i make is out of date
+    flush();
+    // hand off a reference to me
+    return std::dynamic_pointer_cast<Absence>(ref());
+}
+
+
+// paint the cells of the raster that hold no measurement
+template <class dataT, class colorT>
+auto
+qed::nisar::flow::Absence<dataT, colorT>::make(
+    const name_type & slot, super_type::product_ref_type product) -> super_type::factory_ref_type
+{
+    // chain up
+    auto self = super_type::make(slot, product);
+    // the raster
+    auto raster = data();
+    // its cells
+    const auto & cells = raster->read();
+    // the colors the pipeline gave them
+    const auto & r = red()->read();
+    const auto & g = green()->read();
+    const auto & b = blue()->read();
+    // the products i paint
+    auto painted = std::array { paintedRed(), paintedGreen(), paintedBlue() };
+    // the colors i paint them
+    auto & pr = painted[0]->write();
+    auto & pg = painted[1]->write();
+    auto & pb = painted[2]->write();
+    // the number of cells
+    const auto pixels = raster->shape().cells();
+    // go through them
+    for (auto pixel = 0; pixel < pixels; ++pixel) {
+        // reduce the cell the way everything else in qed does, so a complex pair and a real
+        // number are judged by the same measure
+        const auto value = qed::native::magnitude(cells[pixel]);
+        // a cell is absent if it holds what the product declared, a nan matching a nan, or a nan
+        // the product never declared
+        const auto declaredAbsence = (std::isnan(_fill) && std::isnan(value)) || (value == _fill);
+        // pick the color of the cell: the declared absence first, then the undeclared kind, then
+        // whatever the pipeline said
+        const auto color = declaredAbsence   ? declared :
+                           std::isnan(value) ? undeclared :
+                                               rgb_type { static_cast<float>(r[pixel]),
+                                                          static_cast<float>(g[pixel]),
+                                                          static_cast<float>(b[pixel]) };
+        // paint it
+        pr[pixel] = color.red;
+        pg[pixel] = color.green;
+        pb[pixel] = color.blue;
+    }
+    // the colors are fresh
+    for (auto & channel : painted) {
+        // one at a time
+        channel->clean();
+    }
+    // all done
+    return self;
+}
+
+
+// end of file

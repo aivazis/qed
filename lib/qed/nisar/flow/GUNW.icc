@@ -1,0 +1,106 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// my declarations
+#include "GUNW.h"
+
+
+// the spelling of the template of the screens that read masks my way
+auto
+qed::nisar::flow::GUNW::screen() -> string_type
+{
+    // easy enough
+    return "qed::nisar::flow::gunw_screen_t";
+}
+
+
+// the color of a cell with the given {mask}
+auto
+qed::nisar::flow::GUNW::paint(mask_type mask) -> paint_type
+{
+    // keep only the subswath and water byte; the upper bytes carry independent flags
+    mask &= 0xff;
+    // isolate the subswath digits
+    mask %= 100;
+    // a cell not covered by both acquisitions
+    if (mask % 10 == 0 || mask / 10 == 0) {
+        // is painted black
+        return rgb_type { 0, 0, 0 };
+    }
+    // any other cell keeps the color of its measurement
+    return std::nullopt;
+}
+
+
+// the spelling of the template of the colormaps that show masks my way
+auto
+qed::nisar::flow::GUNW::colormap() -> string_type
+{
+    // easy enough
+    return "qed::nisar::flow::gunw_palette_t";
+}
+
+
+// the colors of the codes, the same ones the mask kernels use
+auto
+qed::nisar::flow::GUNW::palette() -> const palette_type &
+{
+    // the table, built once
+    static const palette_type table = [] {
+        // start with every code black
+        auto colors = palette_type {};
+        // go through them
+        for (auto & color : colors) {
+            // and paint each one black
+            color = { 0.f, 0.f, 0.f };
+        }
+        // the fill value is faint red
+        colors[255] = { 0.150, 0.050, 0.050 };
+        // five evenly spaced hues, one per reference subswath
+        constexpr float step = 360.f / 5.f;
+        // land: {10*ref + sec}; go through the reference subswaths
+        for (int ref = 1; ref <= 5; ++ref) {
+            // and the secondary ones
+            for (int sec = 1; sec <= 5; ++sec) {
+                // the hue of the reference subswath
+                float h = (ref - 1) * step;
+                // brighter to darker across the secondary subswaths
+                float L = 0.82f - 0.10f * float(sec - 1);
+                // at a moderate chroma
+                float C = 0.16f;
+                // encode and store
+                colors[10 * ref + sec] = pyre::chroma::rgb::oklch(L, C, h);
+            }
+        }
+        // generic water
+        colors[100] = pyre::chroma::rgb::oklch(0.78f, 0.08f, 240.f);
+        // water: {100 + 10*ref + sec}; go through the reference subswaths
+        for (int ref = 1; ref <= 5; ++ref) {
+            // and the secondary ones
+            for (int sec = 1; sec <= 5; ++sec) {
+                // the hue of the reference subswath, blended 35% toward blue
+                float h = 0.65f * ((ref - 1) * step) + 0.35f * 240.f;
+                // lighter, and darker across the secondary subswaths
+                float L = 0.88f - 0.08f * float(sec - 1);
+                // at a lower chroma
+                float C = 0.10f;
+                // encode and store
+                colors[100 + 10 * ref + sec] = pyre::chroma::rgb::oklch(L, C, h);
+            }
+        }
+        // hand it off
+        return colors;
+    }();
+    // all done
+    return table;
+}
+
+
+// end of file

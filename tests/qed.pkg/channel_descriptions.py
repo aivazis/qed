@@ -24,12 +24,14 @@ def factories(flow):
     """
     Draw {flow} and list the families of its factories in the order they are laid out
     """
+    # describe it as a recipe pinned to its instances
+    recipe = qed.flow.recipe.harvest(flow=flow())
     # draw it, under a name of its own
-    diagram = qed.ux.diagram(name=f"channel_descriptions.{uuid.uuid1()}", flow=flow())
+    diagram = qed.ux.diagram(name=f"channel_descriptions.{uuid.uuid1()}", recipe=recipe)
     # sort the factories by where they are
     ordered = sorted(diagram.factories, key=lambda factory: factory.position)
     # and name them
-    return [factory.factory.pyre_family() for factory in ordered]
+    return [factory.node.pin.pyre_family() for factory in ordered]
 
 
 # the flows painted gray
@@ -38,11 +40,13 @@ def gray():
     Check the order of the factories of the flows that paint a signal gray
     """
     # the stages after the selector
-    tail = ["pyre.viz.filters.parametric", "pyre.viz.colormaps.gray", "pyre.viz.codecs.bmp"]
+    tail = ["pyre.viz.normalizers.parametric", "pyre.viz.colormaps.gray", "pyre.viz.encoders.bmp"]
     # a value goes straight to the normalizer
     assert factories(qed.channels.value) == tail
+    # the amplitude computes the magnitude of a complex signal first
+    assert factories(qed.channels.amplitude) == ["pyre.viz.operators.amplitude"] + tail
     # the others pick a part of a complex signal first
-    for name in ["amplitude", "real", "imaginary"]:
+    for name in ["real", "imaginary"]:
         # draw it
         assert factories(getattr(qed.channels, name)) == [f"pyre.viz.selectors.{name}"] + tail
     # all done

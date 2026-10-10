@@ -9,35 +9,27 @@
 import React from 'react'
 import { graphql, useFragment } from 'react-relay/hooks'
 
-// project
-// shape
-import { Slot as Unbound } from '~/shapes'
-import { Product as Bound } from '~/shapes'
-
 // local
 // hooks
+import { useProjection } from './projection'
 import { useSelection } from './useSelection'
-// components
-import { Node } from './node'
+// the drawings of each view
+import { glyphs } from './glyphs'
 
 
-// render a slot
+// render a slot: read its state, and hand it to the drawing of the view in use
 export const Slot = ({ slot }) => {
     // unpack
-    const { id, at, bound } = useFragment(slotFlowDiagramFragment, slot)
-
+    const { id, at, bound, level } = useFragment(slotFlowDiagramFragment, slot)
     // get the current selection
     const { selection } = useSelection()
     // am i selected
     const selected = selection.includes(id)
-
-    // decide what kind of slot to render
-    const Slot = bound ? Bound : Unbound
-    // assemble the graphic and render it
+    // the drawing of the view in use
+    const { Slot: Glyph } = glyphs[useProjection().name]
+    // render
     return (
-        <Node id={id} kind="slot" position={at} handles={{ "data-qed-bound": bound }}>
-            <Slot highlight={selected} />
-        </Node>
+        <Glyph id={id} at={at} bound={bound} level={level} selected={selected} />
     )
 }
 
@@ -55,6 +47,8 @@ const slotFlowDiagramFragment = graphql`
         }
         # state
         bound
+        # how far down its product is pinned
+        level
     }
 `
 

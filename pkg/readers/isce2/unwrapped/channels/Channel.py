@@ -5,70 +5,41 @@
 # (c) 1998-2026 all rights reserved
 
 
-# support
-import qed
+# superclass
+from ....Channel import Channel as Base
 
 
-# a channel is visualization workflow
-class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
+# the base of the channels of unwrapped interferograms
+class Channel(Base):
     """
-    The base class for all channels
+    The base class for the channels of isce2 unwrapped interferograms, whose datasets hold the
+    amplitude and the phase as two bands of a line interleaved layout
     """
 
     # constants
-    tag = None
+    # the bands my recipe reads, by the name of the raster that stands for each one
+    bands = {}
 
     # interface
-    @classmethod
-    def description(cls):
+    def cells(self, source) -> dict:
         """
-        The flow that describes what i compute, for drawing my pipeline, or nothing when there is
-        no description yet
+        The bands of {source} my recipe reads, by the name of the raster that stands for each
         """
-        # by default, there is none
-        return None
+        # the plane of each band is a sub-grid that shares the mapping of the whole product
+        return {name: source.data[:, band, :] for name, band in self.bands.items()}
 
-    def autotune(self, **kwds):
+    @staticmethod
+    def layout(origin, shape, stride, band):
         """
-        Use the {stats} gathered on a data sample to adjust the range configuration
+        Lift the {origin}, {shape} and {stride} of a tile into the line interleaved layout of my
+        datasets, anchored at {band}
         """
-        # nothing to do
-        return
-
-    def controllers(self):
-        """
-        Generate the set of controllers that can manipulate my state
-        """
-        # by default, nothing
-        return []
-
-    def eval(self, pixel):
-        """
-        Extract the channel value from a {pixel}
-        """
-        # don't kow what to do
-        raise NotImplementedError(f"class {type(self).__name__} must implement 'eval'")
-
-    def project(self, pixel):
-        """
-        Compute the channel representation of a {pixel}
-        """
-        # don't kow what to do
-        raise NotImplementedError(f"class {type(self).__name__} must implement 'project'")
-
-    def tile(self, source, zoom, origin, shape, **kwds):
-        """
-        Generate a tile of the given characteristics
-        """
-        # don't kow what to do
-        raise NotImplementedError(f"class {type(self).__name__} must implement 'tile'")
-
-    def update(self, **kwds):
-        """
-        Update the state of one of my controllers
-        """
-        # nothing for me to do
-        return {}
+        # unpack the {tile} origin
+        line, sample = origin
+        # and its shape
+        lines, samples = shape
+        # the tile spans a single band, decimated by the stride, leaving the band axis untouched
+        return (line, band, sample), (lines, 1, samples), (stride[0], 1, stride[1])
 
 
 # end of file

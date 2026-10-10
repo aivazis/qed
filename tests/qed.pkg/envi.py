@@ -189,6 +189,15 @@ def readonly(expected):
     import os
     import stat
 
+    # the product an earlier run left behind is read-only, so give back the permission to write
+    # to it before writing it again
+    try:
+        # by restoring the permission its owner had
+        os.chmod("envi_readonly.dat", stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+    # unless there is no such product yet
+    except FileNotFoundError:
+        # in which case there is nothing to restore
+        pass
     # write the product in the host's order
     with open("envi_readonly.dat", "wb") as product:
         product.write(struct.pack(f"={LINES * SAMPLES}f", *VALUES))

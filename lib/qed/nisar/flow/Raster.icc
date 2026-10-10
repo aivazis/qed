@@ -1,0 +1,100 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// my declarations
+#include "Raster.h"
+
+
+// simulate my c++ declaration
+template <class sourceT, class cellT>
+auto
+qed::nisar::flow::Raster<sourceT, cellT>::declSelf() -> string_type
+{
+    // the spelling of my cells
+    auto cell = pyre::memory::cellname_t<cell_type>::decl();
+    // an hdf5 dataset says nothing about its cells, which it converts on the way out
+    if constexpr (std::is_same_v<source_type, dataset_t>) {
+        // so its spelling is fixed
+        return "qed::nisar::flow::raster_t<pyre::h5::dataset_t, " + cell + ">";
+    }
+    // a level of a pyramid holds cells of one type, which may be narrower than the cells a
+    // window of it is read into, the way the masks are stored in bytes and read wide
+    else {
+        // the spelling of the cells of the level
+        auto stored = pyre::memory::cellname_t<typename source_type::cell_type>::decl();
+        // which its spelling carries
+        return "qed::nisar::flow::raster_t<qed::pyramid::level_t<" + stored + ">, " + cell + ">";
+    }
+}
+
+
+// the human readable form of my class name
+template <class sourceT, class cellT>
+auto
+qed::nisar::flow::Raster<sourceT, cellT>::className() -> string_type
+{
+    // my kind
+    return "Raster";
+}
+
+
+// factory
+template <class sourceT, class cellT>
+auto
+qed::nisar::flow::Raster<sourceT, cellT>::create(
+    const name_type & name, source_type source, datatype_type datatype) -> ref_type
+{
+    // build an instance and wrap it in a shared pointer
+    auto ref =
+        std::make_shared<Raster>(sentinel_type(), name, std::move(source), std::move(datatype));
+    // hand it off
+    return ref;
+}
+
+
+// destructor
+template <class sourceT, class cellT>
+qed::nisar::flow::Raster<sourceT, cellT>::~Raster()
+{}
+
+
+// constructor
+template <class sourceT, class cellT>
+qed::nisar::flow::Raster<sourceT, cellT>::Raster(
+    sentinel_type sentinel, const name_type & name, source_type source, datatype_type datatype) :
+    // base class: start out fresh, since my cells are whatever my source holds
+    super_type(sentinel, name, false),
+    // members
+    _source { std::move(source) },
+    _datatype { std::move(datatype) }
+{}
+
+
+// what i read
+template <class sourceT, class cellT>
+auto
+qed::nisar::flow::Raster<sourceT, cellT>::source() const -> const source_type &
+{
+    // easy enough
+    return _source;
+}
+
+
+// the memory type of the cells
+template <class sourceT, class cellT>
+auto
+qed::nisar::flow::Raster<sourceT, cellT>::datatype() const -> const datatype_type &
+{
+    // easy enough
+    return _datatype;
+}
+
+
+// end of file

@@ -16,17 +16,17 @@ from .Value import Value
 class Amplitude(Value, family="qed.channels.amplitude"):
     """
     A visualization pipeline fragment that renders the amplitude of a complex signal in gray
-    scale: the amplitude is extracted, the values in a chosen interval are mapped onto [0,1], and
+    scale: the amplitude is computed, the values in a chosen interval are mapped onto [0,1], and
     painted gray
 
     The base channel contributes the encoder that generates the image tile that is sent to the
     client
     """
 
-    # the selector that extracts the amplitude
-    selector = qed.viz.selector()
-    selector.default = qed.viz.selectors.amplitude
-    selector.doc = "the selector that extracts the amplitude of each sample"
+    # the operator that computes the amplitude
+    operator = qed.viz.operator()
+    operator.default = qed.viz.operators.amplitude
+    operator.doc = "the operator that computes the amplitude of each sample"
 
     # framework hooks
     def pyre_configured(self, **kwds):
@@ -34,7 +34,7 @@ class Amplitude(Value, family="qed.channels.amplitude"):
         Hook invoked after configuration is finished
         """
         # the normalizer reads the amplitude
-        self.normalizer.signal = self.selector.amplitude
+        self.normalizer.signal = self.operator.amplitude
         # all done
         return super().pyre_configured(**kwds)
 

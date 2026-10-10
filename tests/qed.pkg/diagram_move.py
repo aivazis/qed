@@ -49,9 +49,9 @@ def gray_():
     """
     # an empty diagram, under a name of its own: pyre hands back the old instance for a name it
     # has seen before
-    diagram = qed.ux.diagram(name=f"diagram_move.{uuid.uuid1()}", flow=None)
+    diagram = qed.ux.diagram(name=f"diagram_move.{uuid.uuid1()}", recipe=None)
     # with the colormap on it
-    factory, *_ = diagram.addFactory(factory=qed.viz.colormaps.gray()(), position=(0, 0, 0))
+    factory, *_ = diagram.addFactory(pin=qed.viz.colormaps.gray(), position=(0, 0, 0))
     # hand them off
     return diagram, factory
 
@@ -121,7 +121,7 @@ def group():
     diagram, gray = gray_()
     store = storeOf(diagram)
     # and the encoder to its right
-    bmp, *_ = diagram.addFactory(factory=qed.viz.codecs.bmp()(), position=(15, 0, 0))
+    bmp, *_ = diagram.addFactory(pin=qed.viz.encoders.bmp(), position=(15, 0, 0))
     # bind the two reds
     red = slotOf(gray, "red")
     move(store, red, slotOf(bmp, "red").position)
@@ -150,7 +150,7 @@ def crowded():
     diagram, gray = gray_()
     store = storeOf(diagram)
     # and the encoder to its right
-    bmp, *_ = diagram.addFactory(factory=qed.viz.codecs.bmp()(), position=(15, 0, 0))
+    bmp, *_ = diagram.addFactory(pin=qed.viz.encoders.bmp(), position=(15, 0, 0))
     # the output of the colormap for green, and the input of the encoder for green
     green = slotOf(gray, "green")
     target = slotOf(bmp, "green")
@@ -175,7 +175,7 @@ def selection():
     diagram, gray = gray_()
     store = storeOf(diagram)
     # and the encoder to its right
-    bmp, *_ = diagram.addFactory(factory=qed.viz.codecs.bmp()(), position=(15, 0, 0))
+    bmp, *_ = diagram.addFactory(pin=qed.viz.encoders.bmp(), position=(15, 0, 0))
     # bind the two reds
     red = slotOf(gray, "red")
     move(store, red, slotOf(bmp, "red").position)
@@ -194,7 +194,7 @@ def selection():
     after = {node.eid: node.position for node in [*diagram.factories, *diagram.slots]}
     assert after == {eid: (x, y + 10, z) for eid, (x, y, z) in before.items()}
     # a lone factory, placed where the group would land if it moved down by ten more
-    lone, *_ = diagram.addFactory(factory=qed.viz.filters.parametric()(), position=(0, 20, 0))
+    lone, *_ = diagram.addFactory(pin=qed.viz.normalizers.parametric(), position=(0, 20, 0))
     # where the group is now
     before = after
     # the move that would land the colormap on it

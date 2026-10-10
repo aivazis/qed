@@ -62,15 +62,47 @@ class Amplitude(Channel, family="qed.channels.native.amplitude"):
         # and done
         return
 
-    def tile(self, **kwds):
+    def recipe(self):
+        """
+        The pipeline that renders my tiles: the window of the raster, its amplitude normalized
+        and painted gray
+        """
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # cut the signal out of the raster
+        self.head(recipe=recipe)
+        # compute its amplitude
+        recipe.factory(
+            name="amplitude", protocol=qed.viz.operator, pin=qed.viz.operators.amplitude()
+        )
+        recipe.product(name="magnitude")
+        recipe.bind(factory="amplitude", slot="signal", product="signal")
+        recipe.bind(factory="amplitude", slot="amplitude", product="magnitude")
+        # and paint it gray
+        self.gray(recipe=recipe, signal="magnitude")
+        # hand it off
+        return recipe
+
+    def settings(self) -> dict:
+        """
+        The settings my controllers impose on the factories of my recipe
+        """
+        # my range, which my controller keeps in decades
+        interval = (10**self.amplitude.low, 10**self.amplitude.high)
+        # goes to the normalizer
+        return {"normalizer": {"interval": interval}}
+
+    def tile(self, source, zoom, origin, shape, **kwds):
         """
         Generate a tile of the given characteristics
         """
         # get my configuration
         low = 10**self.amplitude.low
         high = 10**self.amplitude.high
-        # add my configuration and chain up
-        return super().tile(min=low, max=high, **kwds)
+        # add it and chain up
+        return super().tile(
+            source=source, zoom=zoom, origin=origin, shape=shape, min=low, max=high, **kwds
+        )
 
     # constants
     tag = "amplitude"

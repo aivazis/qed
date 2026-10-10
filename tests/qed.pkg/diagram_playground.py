@@ -7,7 +7,8 @@
 
 
 """
-Exercise the pipeline diagram that belongs to no view, and the search for a diagram by its id
+Exercise the pipeline diagram that belongs to no view, which draws the amplitude recipe, and the
+search for a diagram by its id
 """
 
 # externals
@@ -34,6 +35,10 @@ def storeOf(diagram):
     )
     # with the store's own playground
     store.playground = lambda: qed.ux.store.playground(store)
+    # the recipe it draws
+    store.pipeline = lambda: qed.ux.store.pipeline(store)
+    # and the one that recipe starts from
+    store.amplitude = lambda: qed.ux.store.amplitude(store)
     # hand it off
     return store
 
@@ -41,19 +46,40 @@ def storeOf(diagram):
 # the driver
 def test():
     """
-    Draw the playground, and find it and the diagram of a view by their ids
+    Draw the playground, check that it draws the amplitude recipe with its source in front of it,
+    and find it and the diagram of a view by their ids
     """
     # the diagram of the view
-    drawn = qed.ux.diagram(name=f"diagram_playground.{uuid.uuid1()}", flow=None)
+    drawn = qed.ux.diagram(name=f"diagram_playground.{uuid.uuid1()}", recipe=None)
     # and the store
     store = storeOf(drawn)
     # draw the playground
     playground = store.playground()
-    # it starts with a colormap and an encoder
-    assert sorted(factory.factory.pyre_family() for factory in playground.factories) == [
-        "pyre.viz.codecs.bmp",
-        "pyre.viz.colormaps.gray",
+    # its factories, left to right in the order the data flows through them
+    factories = sorted(playground.factories, key=lambda factory: factory.position)
+    # are the reader, the slicer, and the steps of the amplitude recipe, each one as far down as
+    # it is pinned
+    assert [(factory.kind(), factory.node.level) for factory in factories] == [
+        ("reader", "protocol"),
+        ("slicer", "protocol"),
+        ("amplitude", "class"),
+        ("normalizer", "protocol"),
+        ("gray", "class"),
+        ("encoder", "protocol"),
     ]
+    # every product has a slot of its own, which stands for it
+    assert sorted(slot.product.name for slot in playground.slots) == [
+        "blue",
+        "green",
+        "image",
+        "magnitude",
+        "normalized",
+        "raster",
+        "red",
+        "signal",
+    ]
+    # none of which is pinned, so none of them has a label yet
+    assert not [label for label in playground.labels if label.category == "product"]
     # and lasts
     assert store.playground() is playground
     # its id finds it

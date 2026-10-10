@@ -14,6 +14,7 @@ import { useCamera } from '~/widgets/camera'
 // local
 // hooks
 import { useDiagram } from './diagram'
+import { useProjection } from './projection'
 import { useSelection } from './useSelection'
 import { useMoveNode } from './useMoveNode'
 import { useDrag } from './drag'
@@ -33,6 +34,8 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
     const { move, step } = useMoveNode()
     // whether the server hears every step of a drag
     const { live } = useDiagram()
+    // the projection, which places me on the screen and maps the pointer back onto the floor
+    const { name: view, project, ground, lift } = useProjection()
     // the drag in progress, which the connectors and labels attached to me follow as well
     const { drag, setDrag, shiftOf, verdictOf, groupOf } = useDrag()
     // where the pointer grabbed me and where i was then, in diagram coordinates, during a drag,
@@ -52,10 +55,10 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
             return
         }
         // otherwise, record where the server has me now
-        setDrag(old => (old !== null && old.id === id) ? { ...old, ax: x, ay: y } : old)
+        setDrag(old => (old !== null && old.id === id) ? { ...old, ax: x, ay: y, az: z } : old)
         // all done
         return
-    }, [x, y])
+    }, [x, y, z])
 
     // a press with the main button starts a drag
     const onPointerDown = evt => {
@@ -75,7 +78,7 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
         evt.currentTarget.setPointerCapture(evt.pointerId)
         // remember where the pointer grabbed me and where i was; i keep my distance from it
         grab.current = {
-            pointer: toICS({ x: evt.clientX, y: evt.clientY }, false), x, y,
+            pointer: toICS({ x: evt.clientX, y: evt.clientY }, false), x, y, z,
             group: groupOf(id, selection),
         }
         // and nothing has moved yet
@@ -92,24 +95,32 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
         }
         // where the pointer is now
         const here = toICS({ x: evt.clientX, y: evt.clientY }, false)
+        // how far the pointer moved on the screen
+        const travel = { dx: here.x - grab.current.pointer.x, dy: here.y - grab.current.pointer.y }
+        // with <alt>, in a view that shows heights, the pointer lifts me up or lowers me down
+        const raising = evt.altKey && view !== "flat"
+        // the displacement on the floor that the pointer asks for
+        const shove = raising ? { dx: 0, dy: 0 } : ground(travel)
         // where i am headed: where i was, shifted by as much as the pointer moved, on the grid
-        const tx = Math.round(grab.current.x + here.x - grab.current.pointer.x)
-        const ty = Math.round(grab.current.y + here.y - grab.current.pointer.y)
+        const tx = Math.round(grab.current.x + shove.dx)
+        const ty = Math.round(grab.current.y + shove.dy)
+        // and how high
+        const tz = raising ? Math.round(grab.current.z + lift(travel.dy)) : grab.current.z
         // if that is where i was already headed
-        if (dragging && drag.tx === tx && drag.ty === ty) {
+        if (dragging && drag.tx === tx && drag.ty === ty && drag.tz === tz) {
             // there is nothing new to report
             return
         }
         // the picked nodes i take along, if any
         const group = grab.current.group
         // record it, along with where the server has me
-        setDrag({ id, tx, ty, ax: x, ay: y, group })
+        setDrag({ id, tx, ty, tz, ax: x, ay: y, az: z, group })
         // a drag of the selection keeps the picks when it ends
         moved.current = group !== null
         // on a live canvas, the server hears every step
         if (live) {
             // so tell it
-            step({ id, x: tx, y: ty, z, group })
+            step({ id, x: tx, y: ty, z: tz, group })
         }
         // all done
         return
@@ -126,9 +137,11 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
         grab.current = null
         evt.currentTarget.releasePointerCapture(evt.pointerId)
         // where i was headed
-        const target = dragging ? { tx: drag.tx, ty: drag.ty } : { tx: start.x, ty: start.y }
+        const target = dragging
+            ? { tx: drag.tx, ty: drag.ty, tz: drag.tz }
+            : { tx: start.x, ty: start.y, tz: start.z }
         // if i ended up where i started
-        if (target.tx === start.x && target.ty === start.y && !live) {
+        if (target.tx === start.x && target.ty === start.y && target.tz === start.z && !live) {
             // there is nothing to report, and nothing being dragged
             setDrag(null)
             // all done
@@ -136,7 +149,7 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
         }
         // otherwise, ask the server to land me there, and keep me there until its diagram
         // replaces the one on screen
-        move({ id, x: target.tx, y: target.ty, z, group: start.group }, () => setDrag(null))
+        move({ id, x: target.tx, y: target.ty, z: target.tz, group: start.group }, () => setDrag(null))
         // all done
         return
     }
@@ -171,18 +184,29 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
         "data-qed-drop": verdict ?? undefined,
         ...handles,
     }
-    // build the positioning transform, including the drag in progress
-    const xform = `translate(${x + shift.dx} ${y + shift.dy})`
+    // where i am, including the drag in progress
+    const [px, py, pz] = [x + shift.dx, y + shift.dy, z + shift.dz]
+    // where that lands on the screen
+    const spot = project({ x: px, y: py, z: pz })
+    // build the positioning transform
+    const xform = `translate(${spot.x} ${spot.y})`
+    // when i am off the floor in a view that shows it, a stalk drops from me to my footprint
+    const floor = project({ x: px, y: py, z: 0 })
+    const stalk = view !== "flat" && pz !== 0 ? { x: floor.x - spot.x, y: floor.y - spot.y } : null
     // node controls
     const nodeControls = { onClick, onPointerDown, onPointerMove, onPointerUp }
     // render
     return (
         <g transform={xform} {...markers} {...nodeControls} >
+            {/* the stalk and the footprint of a node off the floor */}
+            {stalk && <line x1="0" y1="0" x2={stalk.x} y2={stalk.y} style={styles.iso.stalk} />}
+            {stalk && <ellipse cx={stalk.x} cy={stalk.y} rx="0.6" ry="0.35" style={styles.iso.footprint} />}
             {children}
             {/* what the drop in progress would do: merge with me, or be sent back */}
             {verdict && <circle cx="0" cy="0" r="0.9" style={styles.drop[verdict]} />}
         </g>
     )
 }
+
 
 // end of file

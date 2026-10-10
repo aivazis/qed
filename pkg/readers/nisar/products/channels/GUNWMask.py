@@ -11,6 +11,9 @@ import qed
 # superclass
 from .Channel import Channel
 
+# the colormap that shows my codes
+from ...GUNWPalette import GUNWPalette
+
 
 # a channel for GUNW product masks
 class GUNWMask(Channel, family="qed.channels.nisar.gunwmask"):
@@ -25,6 +28,21 @@ class GUNWMask(Channel, family="qed.channels.nisar.gunwmask"):
         """
         # i don't have any controllers
         return []
+
+    def recipe(self):
+        """
+        The pipeline that renders my tiles: the window of the mask, each code in its color
+        """
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # cut the codes out of the mask
+        self.head(recipe=recipe)
+        # the colormap that knows them
+        recipe.factory(name="palette", protocol=qed.viz.colormap, pin=GUNWPalette)
+        # reads them
+        recipe.bind(factory="palette", slot="mask", product="signal")
+        # and its colors are encoded
+        return self.encode(recipe=recipe, colormap="palette")
 
     def eval(self, pixel):
         """

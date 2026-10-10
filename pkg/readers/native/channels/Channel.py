@@ -8,74 +8,26 @@
 # support
 import qed
 
+# superclass
+from ...Channel import Channel as Base
 
-# a channel is visualization workflow
-class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
-    """
-    The base class for all channels
-    """
 
-    # constants
-    tag = None
+# the base of the channels of the native readers
+class Channel(Base):
+    """
+    The base class for the channels of the native readers
+    """
 
     # interface
-    @classmethod
-    def description(cls):
+    def iterators(self, source, origin, shape, stride, **kwds):
         """
-        The flow that describes what i compute, for drawing my pipeline, or nothing when there is
-        no description yet
+        Render the tile of {source} at {origin}+{shape}, at the given {stride}, with the fused
+        iterators of the native channels
         """
-        # by default, there is none
-        return None
-
-    def autotune(self, **kwds):
-        """
-        Use the {stats} gathered on a data sample to adjust the range configuration
-        """
-        # nothing to do
-        return
-
-    def controllers(self):
-        """
-        Generate the set of controllers that can manipulate my state
-        """
-        # by default, nothing
-        return []
-
-    def eval(self, pixel):
-        """
-        Extract the channel value from a {pixel}
-        """
-        # don't kow what to do
-        raise NotImplementedError(f"class {type(self).__name__} must implement 'rep'")
-
-    def project(self, pixel):
-        """
-        Compute the channel representation of a {pixel}
-        """
-        # don't kow what to do
-        raise NotImplementedError(f"class {type(self).__name__} must implement 'rep'")
-
-    def tile(self, source, zoom, origin, shape, **kwds):
-        """
-        Generate a tile of the given characteristics
-        """
-        # get my name
-        name = self.tag
         # look for the tile maker in {libqed}
-        pipeline = getattr(qed.libqed.native.channels, name)
-
-        # turn the zoom levels into per-axis strides
-        stride = tuple(2**level for level in zoom)
+        pipeline = getattr(qed.libqed.native.channels, self.tag)
         # build the visualization pipeline and return it
         return pipeline(source=source.data, origin=origin, shape=shape, stride=stride, **kwds)
-
-    def update(self, **kwds):
-        """
-        Update the state of one of my controllers
-        """
-        # nothing for me to do
-        return {}
 
 
 # end of file

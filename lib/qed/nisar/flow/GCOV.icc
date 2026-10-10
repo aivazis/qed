@@ -1,0 +1,88 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// my declarations
+#include "GCOV.h"
+
+
+// the spelling of the template of the screens that read masks my way
+auto
+qed::nisar::flow::GCOV::screen() -> string_type
+{
+    // easy enough
+    return "qed::nisar::flow::gcov_screen_t";
+}
+
+
+// the color of a cell with the given {mask}
+auto
+qed::nisar::flow::GCOV::paint(mask_type mask) -> paint_type
+{
+    // a cell outside the acquisition
+    if (mask == 0xff) {
+        // is painted the faint brick red of absence
+        return rgb_type { 0.10, 0.05, 0.05 };
+    }
+    // an invalid sample
+    if (mask == 0) {
+        // is painted black
+        return rgb_type { 0, 0, 0 };
+    }
+    // any other cell keeps the color of its measurement
+    return std::nullopt;
+}
+
+
+// the spelling of the template of the colormaps that show masks my way
+auto
+qed::nisar::flow::GCOV::colormap() -> string_type
+{
+    // easy enough
+    return "qed::nisar::flow::gcov_palette_t";
+}
+
+
+// the colors of the codes, the same ones the mask kernels use
+auto
+qed::nisar::flow::GCOV::palette() -> const palette_type &
+{
+    // the table, built once
+    static const palette_type table = [] {
+        // start with every code black, which also covers the invalid samples
+        auto colors = palette_type {};
+        // go through them
+        for (auto & color : colors) {
+            // and paint each one black
+            color = { 0.f, 0.f, 0.f };
+        }
+        // the fill value is faint red, matching the GUNW mask
+        colors[255] = { 0.150, 0.050, 0.050 };
+        // five evenly spaced hues, one per subswath
+        constexpr float step = 360.f / 5.f;
+        // each subswath {d} gets the color the GUNW mask gives its diagonal code {11 d}
+        for (int d = 1; d <= 5; ++d) {
+            // the hue of the subswath
+            float h = (d - 1) * step;
+            // the diagonal lightness, darkening with the subswath number
+            float L = 0.82f - 0.10f * float(d - 1);
+            // at a moderate chroma
+            float C = 0.16f;
+            // encode and store
+            colors[d] = pyre::chroma::rgb::oklch(L, C, h);
+        }
+        // hand it off
+        return colors;
+    }();
+    // all done
+    return table;
+}
+
+
+// end of file

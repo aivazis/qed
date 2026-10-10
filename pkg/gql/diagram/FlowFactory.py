@@ -32,6 +32,8 @@ class FlowFactory(graphene.ObjectType):
     id = graphene.ID(required=True)
     # the family of the factory, which says what it does
     family = graphene.String(required=True)
+    # how far down it is pinned: "protocol", "class", or "instance"
+    level = graphene.String(required=True)
     # its documentation
     doc = graphene.String()
     # its slots and settings
@@ -54,44 +56,73 @@ class FlowFactory(graphene.ObjectType):
     @staticmethod
     def resolve_family(factory, info, **kwds):
         """
-        Get the family of the factory
+        Get the family of the factory: the one of its pin, or else the one of its protocol
         """
-        # the flow factory behind the diagram entity knows
-        return factory.factory.pyre_family()
+        # get the recipe node behind the diagram entity
+        node = factory.node
+        # the family of whatever is most specific about it
+        family = (node.protocol if node.pin is None else node.pin).pyre_family()
+        # a protocol that is a building block has none
+        return family or ""
+
+    @staticmethod
+    def resolve_level(factory, info, **kwds):
+        """
+        Get how far down the factory is pinned
+        """
+        # the recipe node behind the diagram entity knows
+        return factory.node.level
 
     @staticmethod
     def resolve_doc(factory, info, **kwds):
         """
         Get the documentation of the factory
         """
-        # it is the docstring of its class, with the indentation of the source removed
-        return inspect.cleandoc(type(factory.factory).__doc__ or "")
+        # get the recipe node behind the diagram entity
+        node = factory.node
+        # the class that documents it: its protocol, the class it is pinned to, or the class of
+        # the instance it is pinned to
+        source = (
+            node.protocol
+            if node.pin is None
+            else node.pin if isinstance(node.pin, type) else type(node.pin)
+        )
+        # it is the docstring of that class, with the indentation of the source removed
+        return inspect.cleandoc(source.__doc__ or "")
 
     @staticmethod
     def resolve_traits(factory, info, **kwds):
         """
         Describe the slots and settings of the factory, in the order it declares them
         """
-        # get the flow factory behind the diagram entity
-        flow = factory.factory
+        # get the recipe node behind the diagram entity
+        node = factory.node
+        # the traits are declared by its pin, or else by its protocol
+        source = node.protocol if node.pin is None else node.pin
         # the identities of its slots, by direction; traits overload their comparison operators,
         # so membership is decided by identity
-        inputs = {id(trait) for trait in flow.pyre_inputTraits}
-        outputs = {id(trait) for trait in flow.pyre_outputTraits}
+        inputs = {id(trait) for trait in node.inputs}
+        outputs = {id(trait) for trait in node.outputs}
         # the descriptions
         traits = []
         # go through its configurable traits
-        for trait in flow.pyre_configurables():
+        for trait in source.pyre_configurables():
             # decide what the trait is to the factory
             kind = (
                 "input" if id(trait) in inputs else "output" if id(trait) in outputs else "setting"
             )
-            # get its current value
-            value = flow.pyre_inventory[trait].value
-            # a slot holds a product, which is best described by its family
-            if kind != "setting":
-                # so describe it that way, if there is one
-                value = None if value is None else value.pyre_family()
+            # get its current value: an instance has one for every trait
+            if node.level == "instance":
+                # in its inventory
+                value = node.pin.pyre_inventory[trait].value
+                # a slot holds a product, which is best described by its family
+                if kind != "setting":
+                    # so describe it that way, if there is one
+                    value = None if value is None else value.pyre_family()
+            # otherwise, the settings it will be made with
+            else:
+                # are kept by the node
+                value = node.settings.get(trait.name)
             # describe the trait
             traits.append(
                 FlowTrait(

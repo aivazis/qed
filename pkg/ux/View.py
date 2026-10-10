@@ -155,11 +155,13 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
             diagram = None
         # otherwise
         else:
-            # draw it, read only, since changes to it do not reach the pipeline yet; the name is
-            # unique, since a component asked for by a name it was built with before comes back
-            # as the old instance
+            # draw it as a recipe with every node pinned to its instance, read only, since
+            # changes to it do not reach the pipeline yet; the name is unique, since a component
+            # asked for by a name it was built with before comes back as the old instance
             diagram = qed.ux.diagram(
-                name=f"{channel.pyre_name}.{uuid.uuid1()}", flow=flow(), editable=False
+                name=f"{channel.pyre_name}.{uuid.uuid1()}",
+                recipe=qed.flow.recipe.harvest(flow=flow()),
+                editable=False,
             )
         # remember it, along with the channel it belongs to
         self._diagram = channel, diagram

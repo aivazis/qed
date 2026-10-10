@@ -12,7 +12,10 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <map>
+#include <memory>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 
@@ -20,6 +23,7 @@
 #include <pyre/journal.h>
 // pyre
 #include <pyre/grid.h>
+#include <pyre/timers.h>
 #include <pyre/viz.h>
 
 // type aliases

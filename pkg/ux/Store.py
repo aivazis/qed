@@ -1262,16 +1262,83 @@ class Store(qed.component, family="qed.ux.store"):
         if self._playground is not None:
             # it is the one
             return self._playground
-        # otherwise, start with an empty diagram
-        diagram = qed.ux.diagram(name=f"{self.pyre_name}.playground", flow=None)
-        # place a colormap at the origin
-        diagram.addFactory(factory=qed.viz.colormaps.gray()(), position=(0, 0, 0))
-        # and an encoder to its right, far enough that their slots stay apart
-        diagram.addFactory(factory=qed.viz.codecs.bmp()(), position=(15, 0, 0))
+        # otherwise, draw the whole pipeline, from the file to the image
+        diagram = qed.ux.diagram(name=f"{self.pyre_name}.playground", recipe=self.pipeline())
         # remember it
         self._playground = diagram
         # and hand it off
         return diagram
+
+    def amplitude(self):
+        """
+        The amplitude pipeline as a recipe: what each step must be, with the operator and the
+        colormap pinned to the classes that compute the amplitude and paint it gray
+        """
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # an operator, pinned to the amplitude
+        recipe.factory(
+            name="amplitude", protocol=qed.viz.operator, pin=qed.viz.operators.amplitude()
+        )
+        # a normalizer
+        recipe.factory(name="normalizer", protocol=qed.viz.normalizer)
+        # a colormap, pinned to gray
+        recipe.factory(name="gray", protocol=qed.viz.colormap, pin=qed.viz.colormaps.gray())
+        # and an encoder
+        recipe.factory(name="encoder", protocol=qed.viz.encoder)
+        # the products, which take what they hold from the slots they are bound to
+        for name in ("signal", "magnitude", "normalized", "red", "green", "blue", "image"):
+            # one at a time
+            recipe.product(name=name)
+        # the bindings, slot names and all the same as the c++ factories
+        bindings = [
+            ("amplitude", "signal", "signal"),
+            ("amplitude", "amplitude", "magnitude"),
+            ("normalizer", "signal", "magnitude"),
+            ("normalizer", "normalized", "normalized"),
+            ("gray", "data", "normalized"),
+            ("gray", "red", "red"),
+            ("gray", "green", "green"),
+            ("gray", "blue", "blue"),
+            ("encoder", "red", "red"),
+            ("encoder", "green", "green"),
+            ("encoder", "blue", "blue"),
+            ("encoder", "image", "image"),
+        ]
+        # make them
+        for factory, slot, product in bindings:
+            # one at a time
+            recipe.bind(factory=factory, slot=slot, product=product)
+        # hand off the recipe
+        return recipe
+
+    def pipeline(self, reader=None):
+        """
+        The amplitude recipe with its source in front of it: a reader opens a file and exposes
+        the cells of a dataset in it as a raster, and a slicer cuts tiles out of the raster; the
+        reader is pinned to {reader} when there is one, and left a protocol otherwise, which can
+        be drawn but not staged
+        """
+        # start with the amplitude recipe
+        recipe = self.amplitude()
+        # a reader
+        recipe.factory(name="reader", protocol=qed.viz.reader, pin=reader)
+        # and a slicer
+        recipe.factory(name="slice", protocol=qed.viz.slicer)
+        # the raster the reader exposes
+        recipe.product(name="raster")
+        # the bindings
+        bindings = [
+            ("reader", "raster", "raster"),
+            ("slice", "source", "raster"),
+            ("slice", "slice", "signal"),
+        ]
+        # make them
+        for factory, slot, product in bindings:
+            # one at a time
+            recipe.bind(factory=factory, slot=slot, product=product)
+        # hand off the recipe
+        return recipe
 
     def findDiagram(self, relay):
         """
@@ -1363,21 +1430,18 @@ class Store(qed.component, family="qed.ux.store"):
         if not diagram.editable:
             # stays as it is
             return diagram
-        # find the factory the family names
-        implementer = self.implementer(family=family)
+        # find the factory the family names, and the protocol it satisfies
+        protocol, implementer = self.implementer(family=family)
         # an unknown family
         if implementer is None:
             # leaves the diagram as it is
             return diagram
-        # build one; the name is unique, since pyre hands back the old instance for a name it
-        # has seen before
-        factory = implementer(name=f"{family}.{uuid.uuid1()}")
         # if it does not fit where it was dropped
-        if not diagram.fits(factory=factory, position=tuple(position)):
+        if not diagram.fits(protocol=protocol, pin=implementer, position=tuple(position)):
             # leave the diagram as it is
             return diagram
-        # otherwise, place it
-        diagram.addFactory(factory=factory, position=tuple(position))
+        # otherwise, place it, pinned to its class
+        diagram.addFactory(protocol=protocol, pin=implementer, position=tuple(position))
         # and hand off the diagram
         return diagram
 
@@ -1412,15 +1476,19 @@ class Store(qed.component, family="qed.ux.store"):
 
     def implementer(self, family):
         """
-        Find the class of the factory with the given {family} among the ones the palette offers
+        Find the class of the factory with the given {family} among the ones the palette offers,
+        along with the protocol it is offered under
         """
         # the protocols the palette offers factories for
         protocols = (
+            qed.viz.reader,
             qed.viz.selector,
-            qed.viz.filter,
+            qed.viz.slicer,
             qed.viz.operator,
+            qed.viz.normalizer,
+            qed.viz.filter,
             qed.viz.colormap,
-            qed.viz.codec,
+            qed.viz.encoder,
         )
         # go through them
         for protocol in protocols:
@@ -1429,9 +1497,11 @@ class Store(qed.component, family="qed.ux.store"):
                 # if this is the one
                 if implementer.pyre_family() == family:
                     # a foundry hands out the class it stands for
-                    return implementer() if isinstance(implementer, qed.foundry) else implementer
+                    cls = implementer() if isinstance(implementer, qed.foundry) else implementer
+                    # hand it off, along with its protocol
+                    return protocol, cls
         # not found
-        return None
+        return None, None
 
     def zoomSetLevel(self, viewport, horizontal, vertical):
         """

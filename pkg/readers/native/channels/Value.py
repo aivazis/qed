@@ -61,12 +61,40 @@ class Value(Channel, family="qed.channels.native.value"):
         # all done
         return
 
-    def tile(self, **kwds):
+    def recipe(self):
+        """
+        The pipeline that renders my tiles: the window of the raster, normalized and painted gray
+        """
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # cut the signal out of the raster
+        self.head(recipe=recipe)
+        # and paint it gray
+        self.gray(recipe=recipe, signal="signal")
+        # hand it off
+        return recipe
+
+    def settings(self) -> dict:
+        """
+        The settings my controllers impose on the factories of my recipe
+        """
+        # my range
+        return {"normalizer": {"interval": (self.range.low, self.range.high)}}
+
+    def tile(self, source, zoom, origin, shape, **kwds):
         """
         Generate a tile of the given characteristics
         """
         # add my configuration and chain up
-        return super().tile(min=self.range.low, max=self.range.high, **kwds)
+        return super().tile(
+            source=source,
+            zoom=zoom,
+            origin=origin,
+            shape=shape,
+            min=self.range.low,
+            max=self.range.high,
+            **kwds,
+        )
 
     # constants
     tag = "value"
