@@ -51,10 +51,15 @@ qed.app:
     # place the tile and stats diagnostics under user control
     journal:
         channels:
+          - debug, pyre.viz
           - debug, qed.ux.tiles
           - debug, qed.ux.stats
 
-# and turn them on: one line per tile request, with outcome and timings
+# and turn them on: tile pipelines
+qed.journal.debug.pyre.viz:
+    active: yes
+
+# one line per tile request, with outcome and timings
 qed.journal.debug.qed.ux.tiles:
     active: yes
 
