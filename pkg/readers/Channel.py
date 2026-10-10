@@ -28,6 +28,8 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
 
     # constants
     tag = None
+    # the slicer that reads my rasters, or nothing for the one the slicer protocol prefers
+    slicerClass = None
 
     # interface
     @classmethod
@@ -244,13 +246,13 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         return
 
     # recipe pieces
-    @staticmethod
-    def head(recipe, raster="raster", signal="signal", slicer="slice"):
+    @classmethod
+    def head(cls, recipe, raster="raster", signal="signal", slicer="slice"):
         """
         Put the {slicer} at the head of {recipe}, cutting the {signal} out of the {raster}
         """
-        # the slicer
-        recipe.factory(name=slicer, protocol=qed.viz.slicer)
+        # the slicer, pinned to the one that reads my rasters, if they need one of their own
+        recipe.factory(name=slicer, protocol=qed.viz.slicer, pin=cls.slicerClass)
         # the raster it reads, and the signal it writes
         recipe.product(name=raster)
         recipe.product(name=signal)
