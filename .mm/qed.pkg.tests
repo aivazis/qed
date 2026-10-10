@@ -55,6 +55,7 @@ tests.qed.pkg.build_levels.clean := build_levels.scratch
 tests.qed.pkg.graphql_workspace.clean := graphql_workspace.scratch
 # the pyramid driver also asks the default workspace for its cache, in the current directory
 tests.qed.pkg.pyramid.clean := pyramid.scratch .qed
+tests.qed.pkg.flow_nisar.clean := flow_nisar.scratch
 # the drivers below keep their fixtures and products in a folder of their own
 tests.qed.pkg.census_reference.clean := census_reference.scratch
 tests.qed.pkg.measurements_census.clean := measurements_census.scratch
