@@ -24,10 +24,13 @@ qed::nisar::flow::Raster<sourceT, cellT>::declSelf() -> string_type
         // so its spelling is fixed
         return "qed::nisar::flow::raster_t<pyre::h5::dataset_t, " + cell + ">";
     }
-    // a level of a pyramid holds cells of one type
+    // a level of a pyramid holds cells of one type, which may be narrower than the cells a
+    // window of it is read into, the way the masks are stored in bytes and read wide
     else {
+        // the spelling of the cells of the level
+        auto stored = pyre::memory::cellname_t<typename source_type::cell_type>::decl();
         // which its spelling carries
-        return "qed::nisar::flow::raster_t<qed::pyramid::level_t<" + cell + ">, " + cell + ">";
+        return "qed::nisar::flow::raster_t<qed::pyramid::level_t<" + stored + ">, " + cell + ">";
     }
 }
 
