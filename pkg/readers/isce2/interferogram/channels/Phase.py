@@ -90,6 +90,39 @@ class Phase(Channel, family="qed.channels.isce2.int.phase"):
         # all done
         return
 
+    def recipe(self):
+        """
+        The pipeline that renders my tiles: the window of the raster, its phase as the hue, at a
+        constant luminosity
+        """
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # cut the signal out of the raster
+        self.head(recipe=recipe)
+        # a constant luminosity
+        recipe.factory(name="brightness", protocol=qed.viz.filter, pin=qed.viz.filters.constant())
+        recipe.product(name="luminosities")
+        recipe.bind(factory="brightness", slot="tile", product="luminosities")
+        # turn the phase into hues that span a full turn
+        self.turn(recipe=recipe, signal="signal")
+        recipe.node(name="hue").settings["interval"] = (0, 2 * cmath.pi)
+        # and paint them
+        self.light(recipe=recipe, hues="hues", luminosity="luminosities")
+        # hand it off
+        return recipe
+
+    def settings(self) -> dict:
+        """
+        The settings my controllers impose on the factories of my recipe
+        """
+        # assemble
+        return {
+            # the range of the phase
+            "cycle": {"interval": (self.phase.low, self.phase.high)},
+            # and the brightness
+            "brightness": {"value": self.brightness.value},
+        }
+
     def tile(self, **kwds):
         """
         Generate a tile of the given characteristics
