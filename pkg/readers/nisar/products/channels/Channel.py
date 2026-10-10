@@ -56,14 +56,8 @@ class Channel(Base):
         # the companions my recipe reads: the mask, if i recolor the cells it flags; the
         # others travel with every render of the dataset, and my recipe has no use for them
         needed = ("mask",) if self.screenClass is not None else ()
-        # with the pipeline of my recipe, if i have one, was asked to use it, and the companions
-        # it reads came along
-        if (
-            self.engine == "flow"
-            and cell is not None
-            and all(name in companions for name in needed)
-            and self.pipeline() is not None
-        ):
+        # with the pipeline of my recipe, if i was asked to use it and it can draw this dataset
+        if self.engine == "flow" and self.flows(source=source):
             # wrap whichever source answered in a raster; it holds no cells, only what the
             # slicer needs to read a window of them, so it is made for every tile
             rasters = {
@@ -100,6 +94,27 @@ class Channel(Base):
             stride=stride,
             **kwds,
         )
+
+    def flows(self, source) -> bool:
+        """
+        Whether the pipeline of my recipe can draw the tiles of {source}: i need a recipe, my
+        family must read cells the nisar rasters know, and the companions my recipe reads must
+        come with the dataset
+        """
+        # without a recipe there is no pipeline
+        if self.pipeline() is None:
+            # so the kernels draw everything
+            return False
+        # a family whose cells the rasters do not know, e.g. the encoded ones of bfpq products
+        if self.cellTypes.get(self.category) is None:
+            # is drawn by the kernels
+            return False
+        # the companions my recipe reads: the mask, if i recolor the cells it flags
+        needed = ("mask",) if self.screenClass is not None else ()
+        # the ones the dataset brings along
+        companions = source.companions()
+        # the pipeline can draw the tiles if all of them are there
+        return all(name in companions for name in needed)
 
     @classmethod
     def overlay(cls, recipe, colors):

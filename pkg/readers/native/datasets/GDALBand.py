@@ -237,6 +237,11 @@ class GDALBand(
             stats=self.stats,
         )
 
+    # constants
+    # my tiles are drawn by the kernels of my channels, called directly over the arrays gdal
+    # reads, so the pipelines of their recipes never see me
+    flow = False
+
     # metamethods
     def __init__(self, rid=None, dataset=None, hydrated=False, seed=None, **kwds):
         # chain up
