@@ -61,6 +61,32 @@ class Real(Channel, family="qed.channels.nisar.real"):
         # all done
         return
 
+    def recipe(self):
+        """
+        The pipeline that renders my tiles: the window of the raster, its real part normalized
+        and painted gray
+        """
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # cut the signal out of the raster
+        self.head(recipe=recipe)
+        # pick its real part
+        recipe.factory(name="real", protocol=qed.viz.selector, pin=qed.viz.selectors.real())
+        recipe.product(name="part")
+        recipe.bind(factory="real", slot="signal", product="signal")
+        recipe.bind(factory="real", slot="real", product="part")
+        # and paint it gray
+        self.gray(recipe=recipe, signal="part")
+        # hand it off
+        return recipe
+
+    def settings(self) -> dict:
+        """
+        The settings my controllers impose on the factories of my recipe
+        """
+        # my range
+        return {"normalizer": {"interval": (self.range.low, self.range.high)}}
+
     def tile(self, **kwds):
         """
         Generate a tile of the given characteristics
