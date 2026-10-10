@@ -1312,16 +1312,17 @@ class Store(qed.component, family="qed.ux.store"):
         # hand off the recipe
         return recipe
 
-    def pipeline(self):
+    def pipeline(self, reader=None):
         """
         The amplitude recipe with its source in front of it: a reader opens a file and exposes
-        the cells of a dataset in it as a raster, and a slicer cuts tiles out of the raster; no
-        reader implements the protocol yet, so the recipe can be drawn but not staged
+        the cells of a dataset in it as a raster, and a slicer cuts tiles out of the raster; the
+        reader is pinned to {reader} when there is one, and left a protocol otherwise, which can
+        be drawn but not staged
         """
         # start with the amplitude recipe
         recipe = self.amplitude()
         # a reader
-        recipe.factory(name="reader", protocol=qed.viz.reader)
+        recipe.factory(name="reader", protocol=qed.viz.reader, pin=reader)
         # and a slicer
         recipe.factory(name="slice", protocol=qed.viz.slicer)
         # the raster the reader exposes
