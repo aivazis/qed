@@ -406,6 +406,33 @@ def test():
             configurations=configurations,
         )
 
+    # the mask channels show the codes by themselves, with no controllers to configure; the GUNW
+    # palette reads the codes of the GCOV mask just as well
+    asis = [lambda channel: None]
+    # go through them
+    for kind in ("gcov", "gunw"):
+        # read off the mask dataset, at the windows of the covariance
+        compare(
+            channel=channel(kind),
+            source=served(source=mask.data.dataset),
+            datatype=mask.datatype.htype,
+            tiles=[
+                ((12288, 3584), (64, 64), (0, 0)),
+                ((7168, 5632), (37, 53), (1, 1)),
+                ((1216, 1984), (64, 64), (3, 3)),
+                ((1216, 3968), (29, 31), (3, 2)),
+            ],
+            configurations=asis,
+        )
+        # and off its level
+        compare(
+            channel=channel(kind),
+            source=served(source=codes, depth=1),
+            datatype=mask.datatype.htype,
+            tiles=tiles,
+            configurations=asis,
+        )
+
     # all done
     return
 
