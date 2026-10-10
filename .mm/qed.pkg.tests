@@ -28,6 +28,9 @@ tests.qed.pkg.envi.clean := \
     envi_band0_5.dat envi_band1_5.dat envi_band2_5.dat envi_bsq_5.dat envi_bsq_5.hdr \
     envi_bil_5.dat envi_bil_5.hdr envi_bip_5.dat envi_bip_5.hdr
 
+# the flow driver writes the flat file its pipeline reads
+tests.qed.pkg.flow_flat_amplitude.clean := flow_flat_amplitude.c8
+
 # the persistence drivers share a scratch workspace: the reboot reads what the first wrote
 tests.qed.pkg.persist.clean := persist_ws
 tests.qed.pkg.browse.clean := browse_ws
