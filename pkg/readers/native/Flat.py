@@ -115,6 +115,34 @@ class Flat(
         # all done
         return self
 
+    # flow hooks
+    def pyre_stage(self, **inputs) -> dict:
+        """
+        Make first contact with my file, if i haven't yet, and expose the cells of my dataset as
+        a raster, when a pipeline recipe i head is staged
+        """
+        # make first contact
+        self.open()
+        # get my datasets
+        datasets = self.datasets
+        # a file that holds more than one
+        if len(datasets) != 1:
+            # make a channel
+            channel = journal.warning("qed.readers.native.flat")
+            # explain
+            channel.line(f"'{self.uri.address}' holds {len(datasets)} datasets")
+            channel.line(f"picking the one a pipeline reads needs a selector")
+            # flush
+            channel.log()
+            # and make nothing
+            return {}
+        # unpack the one
+        (dataset,) = datasets
+        # make a raster over its cells, which shares them rather than copies them
+        raster = qed.libpyre.flow.raster(source=dataset.data, name=f"{self.pyre_name}.raster")
+        # and hand it off
+        return {"raster": raster}
+
     # metamethods
     def __init__(self, name, archive=None, **kwds):
         # chain up; construction is passive, so nothing touches the file until {open}
