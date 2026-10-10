@@ -30,6 +30,9 @@ namespace qed::py::nisar {
 
     // the kernels that read a raster of a given cell type
     void cells(py::module &);
+
+    // the flow nodes that bring the rasters of products into pipelines
+    void flow(py::module &);
 } // namespace qed::py::nisar
 
 
