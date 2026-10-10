@@ -12,6 +12,9 @@ import qed
 # superclass
 from .Channel import Channel
 
+# recolors the cells my mask flags
+from ...GUNWScreen import GUNWScreen
+
 
 # a channel for displaying the phase of complex values
 class UnwrappedPhaseMasked(Channel, family="qed.channels.nisar.unwrappedPhaseMasked"):
@@ -83,6 +86,54 @@ class UnwrappedPhaseMasked(Channel, family="qed.channels.nisar.unwrappedPhaseMas
         # all done
         return
 
+    def recipe(self):
+        """
+        The pipeline that renders my tiles: the window of the raster, mapped onto the hues, at a
+        constant luminosity, with the cells the mask flags and the cells with no data
+        recolored
+        """
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # cut the signal out of the raster
+        self.head(recipe=recipe)
+        # place the phase in its interval
+        recipe.factory(name="normalizer", protocol=qed.viz.normalizer)
+        # map it onto hues that span a full turn
+        recipe.factory(
+            name="hue",
+            protocol=qed.viz.filter,
+            pin=qed.viz.filters.affine(),
+            settings={"interval": (0, 2 * math.pi)},
+        )
+        # a constant luminosity
+        recipe.factory(name="brightness", protocol=qed.viz.filter, pin=qed.viz.filters.constant())
+        # the products
+        for name in ("phases", "hues", "luminosities"):
+            # one at a time
+            recipe.product(name=name)
+        # the bindings
+        recipe.bind(factory="normalizer", slot="signal", product="signal")
+        recipe.bind(factory="normalizer", slot="normalized", product="phases")
+        recipe.bind(factory="hue", slot="signal", product="phases")
+        recipe.bind(factory="hue", slot="affine", product="hues")
+        recipe.bind(factory="brightness", slot="tile", product="luminosities")
+        # and paint
+        self.light(recipe=recipe, hues="hues", luminosity="luminosities")
+        # hand it off
+        return recipe
+
+    def settings(self) -> dict:
+        """
+        The settings my controllers impose on the factories of my recipe
+        """
+        # assemble
+        return {
+            # the range of the phase
+            "normalizer": {"interval": (self.phase.low, self.phase.high)},
+            # and the brightness
+            "brightness": {"value": self.brightness.value},
+        }
+
     def tile(self, **kwds):
         """
         Generate a tile of the given characteristics
@@ -98,6 +149,8 @@ class UnwrappedPhaseMasked(Channel, family="qed.channels.nisar.unwrappedPhaseMas
     # my kernel builds its own pipeline, so it can be told what the product
     # declared and paint the two kinds of absence apart
     absence = True
+    # recolors the cells my mask flags
+    screenClass = GUNWScreen
     tag = "unwrappedMasked"
     category = "real"
 

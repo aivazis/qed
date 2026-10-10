@@ -14,6 +14,9 @@ from ....Channel import Channel as Base
 # the slicer that reads the rasters of products
 from ...Fetch import Fetch
 
+# recolors the cells with no data
+from ...Absence import Absence
+
 
 # the base of the channels of nisar products
 class Channel(Base):
@@ -33,6 +36,8 @@ class Channel(Base):
     cellTypes = {"slc": "complex64", "real": "float32"}
     # the slicer at the head of my recipe, which reads windows of datasets and pyramid levels
     slicerClass = Fetch
+    # recolors the cells my mask flags, for the channels that read one
+    screenClass = None
 
     # interface
     def tile(self, source, zoom, origin, shape, datatype, **kwds):
@@ -48,21 +53,36 @@ class Channel(Base):
         stride = tuple(2**level for level in residual)
         # the cells my pipeline reads, if there is one
         cell = self.cellTypes.get(self.category)
-        # with the pipeline of my recipe, if i have one, was asked to use it, and read no
-        # companions, which no recipe knows about yet
+        # the companions my recipe reads: the mask, if i recolor the cells it flags; the
+        # others travel with every render of the dataset, and my recipe has no use for them
+        needed = ("mask",) if self.screenClass is not None else ()
+        # with the pipeline of my recipe, if i have one, was asked to use it, and the companions
+        # it reads came along
         if (
             self.engine == "flow"
             and cell is not None
-            and not companions
+            and all(name in companions for name in needed)
             and self.pipeline() is not None
         ):
             # wrap whichever source answered in a raster; it holds no cells, only what the
             # slicer needs to read a window of them, so it is made for every tile
-            raster = qed.libqed.nisar.flow.raster(
-                source=data, datatype=datatype, cell=cell, name=f"{self.pyre_name}.raster"
-            )
+            rasters = {
+                "raster": qed.libqed.nisar.flow.raster(
+                    source=data, datatype=datatype, cell=cell, name=f"{self.pyre_name}.raster"
+                )
+            }
+            # and the companions my recipe reads, which are masks
+            for name in needed:
+                # read wide, whatever the width of their codes
+                rasters[name] = qed.libqed.nisar.flow.mask(
+                    source=companions[name], name=f"{self.pyre_name}.{name}"
+                )
+            # the cells i tell apart from measurements, if i paint them
+            marking = {"absence": {"fill": source.fill}} if self.absence else {}
             # and render through my pipeline, reading the window at what is left of the zoom
-            return self.flow(rasters={"raster": raster}, origin=origin, shape=shape, stride=stride)
+            return self.flow(
+                rasters=rasters, origin=origin, shape=shape, stride=stride, settings=marking
+            )
         # otherwise, render with the kernel
         return self.iterators(
             source=source,
@@ -74,6 +94,42 @@ class Channel(Base):
             stride=stride,
             **kwds,
         )
+
+    @classmethod
+    def overlay(cls, recipe, colors):
+        """
+        Recolor in the {colors} of {recipe} the cells my mask flags, if i read one, and then the
+        cells with no data, if i tell them apart
+        """
+        # chain up
+        colors = super().overlay(recipe=recipe, colors=colors)
+        # if i read a mask
+        if cls.screenClass is not None:
+            # cut its codes out of it, at the same window and stride as the raster
+            cls.head(recipe=recipe, raster="mask", signal="codes", slicer="maskSlice")
+            # and recolor the cells it flags
+            colors = cls.paintOver(
+                recipe=recipe,
+                name="screen",
+                pin=cls.screenClass,
+                slot="mask",
+                product="codes",
+                colors=colors,
+            )
+        # if i tell absence from measurement
+        if cls.absence:
+            # recolor the cells with no data, which wins over the
+            # mask, the way the kernels do
+            colors = cls.paintOver(
+                recipe=recipe,
+                name="absence",
+                pin=Absence,
+                slot="data",
+                product="signal",
+                colors=colors,
+            )
+        # hand off the colors to encode
+        return colors
 
     def iterators(self, source, data, companions, datatype, origin, shape, stride, **kwds):
         """

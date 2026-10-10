@@ -35,6 +35,11 @@ from .GCOV import GCOV as gcov
 # the slicer that reads windows of the rasters of products
 from .Fetch import Fetch as fetch
 
+# the factories that recolor the cells with no data, and the cells the masks flag
+from .Absence import Absence as absence
+from .GUNWScreen import GUNWScreen as gunwScreen
+from .GCOVScreen import GCOVScreen as gcovScreen
+
 # contribute the flow nodes of products to the catalogs recipes are staged against, when the
 # extension that holds them was built
 if qed.libqed is not None:

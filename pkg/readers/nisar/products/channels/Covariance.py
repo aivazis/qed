@@ -60,6 +60,27 @@ class Covariance(Channel, family="qed.channels.nisar.covariance"):
         # all done
         return
 
+    def recipe(self):
+        """
+        The pipeline that renders my tiles: the window of the raster, normalized and painted
+        gray, with the cells with no data recolored
+        """
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # cut the signal out of the raster
+        self.head(recipe=recipe)
+        # and paint it gray
+        self.gray(recipe=recipe, signal="signal")
+        # hand it off
+        return recipe
+
+    def settings(self) -> dict:
+        """
+        The settings my controllers impose on the factories of my recipe
+        """
+        # my range
+        return {"normalizer": {"interval": (10**self.amplitude.low, 10**self.amplitude.high)}}
+
     def tile(self, **kwds):
         """
         Generate a tile of the given characteristics
