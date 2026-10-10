@@ -21,6 +21,9 @@ namespace qed::nisar::flow {
     // recolors the cells a mask flags
     template <class ruleT, class maskT, class colorT>
     class Screen;
+    // the colormap that shows a mask by itself
+    template <class ruleT, class maskT, class colorT>
+    class Palette;
     // the readings of the masks of the products
     class GUNW;
     class GCOV;
