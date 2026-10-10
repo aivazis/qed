@@ -27,6 +27,8 @@
 #include "stack/stack.h"
 #include "bfpq/bfpq.h"
 #include "masks/masks.h"
+// the flow nodes that bring the rasters of products into pipelines
+#include "flow/flow.h"
 // profile
 #include "profile.h"
 // statistics

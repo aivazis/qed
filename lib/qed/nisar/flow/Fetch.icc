@@ -1,0 +1,242 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// my declarations
+#include "Fetch.h"
+
+
+// simulate my c++ declaration
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::declSelf() -> string_type
+{
+    // the type alias, with the declarations of my slots
+    return "qed::nisar::flow::fetch_t<" + source_type::declSelf() + ", " + slice_type::declSelf()
+         + ">";
+}
+
+
+// the human readable form of my class name
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::className() -> string_type
+{
+    // my kind
+    return "Fetch";
+}
+
+
+// the descriptions of my slots
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::declSlots() -> const slots_type &
+{
+    // my slots, in the order i declare them
+    static const slots_type table {
+        slot_type::input<source_type>("source"),
+        slot_type::output<slice_type>("slice"),
+    };
+    // hand them off
+    return table;
+}
+
+
+// the descriptions of my settings
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::declSettings() -> const settings_type &
+{
+    // my settings
+    static const settings_type table {
+        setting_type::of<self_type>("origin", &self_type::origin, &self_type::origin),
+        setting_type::of<self_type>("stride", &self_type::stride, &self_type::stride),
+    };
+    // hand them off
+    return table;
+}
+
+
+// the descriptions of my slots
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::slots() const -> const slots_type &
+{
+    // the ones of my type
+    return declSlots();
+}
+
+
+// the descriptions of my settings
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::settings() const -> const settings_type &
+{
+    // the ones of my type
+    return declSettings();
+}
+
+
+// factory
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::create(
+    const name_type & name, pair_type origin, pair_type stride) -> factory_ref_type
+{
+    // build an instance and wrap it in a shared pointer
+    auto ref = std::make_shared<Fetch>(sentinel_type(), name, origin, stride);
+    // hand it off
+    return ref;
+}
+
+
+// destructor
+template <class rasterT, class tileT>
+qed::nisar::flow::Fetch<rasterT, tileT>::~Fetch()
+{}
+
+
+// constructor
+template <class rasterT, class tileT>
+qed::nisar::flow::Fetch<rasterT, tileT>::Fetch(
+    sentinel_type sentinel, const name_type & name, pair_type origin, pair_type stride) :
+    // superclass
+    super_type(sentinel, name),
+    // members
+    _origin { origin },
+    _stride { stride }
+{}
+
+
+// the location of the window
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::origin() const -> pair_type
+{
+    // easy enough
+    return _origin;
+}
+
+
+// the distance between the cells it samples
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::stride() const -> pair_type
+{
+    // easy enough
+    return _stride;
+}
+
+
+// the product bound to my {source} slot
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::source() -> source_ref_type
+{
+    // look it up and cast it to its type
+    return std::dynamic_pointer_cast<source_type>(input("source"));
+}
+
+
+// the product bound to my {slice} slot
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::slice() -> slice_ref_type
+{
+    // look it up and cast it to its type
+    return std::dynamic_pointer_cast<slice_type>(output("slice"));
+}
+
+
+// move the window
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::origin(pair_type origin) -> factory_ref_type
+{
+    // record the new origin
+    _origin = origin;
+    // what i make is out of date
+    flush();
+    // hand off a reference to me
+    return std::dynamic_pointer_cast<Fetch>(ref());
+}
+
+
+// change the distance between the cells it samples
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::stride(pair_type stride) -> factory_ref_type
+{
+    // record the new stride
+    _stride = stride;
+    // what i make is out of date
+    flush();
+    // hand off a reference to me
+    return std::dynamic_pointer_cast<Fetch>(ref());
+}
+
+
+// bind my {source} slot
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::source(source_ref_type source) -> factory_ref_type
+{
+    // bind it, which flushes me
+    addInput("source", std::static_pointer_cast<pyre::flow::protocols::Product>(source));
+    // hand off a reference to me
+    return std::dynamic_pointer_cast<Fetch>(ref());
+}
+
+
+// bind my {slice} slot
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::slice(slice_ref_type slice) -> factory_ref_type
+{
+    // bind it, which makes it stale
+    addOutput("slice", std::static_pointer_cast<pyre::flow::protocols::Product>(slice));
+    // hand off a reference to me
+    return std::dynamic_pointer_cast<Fetch>(ref());
+}
+
+
+// read the window into my tile
+template <class rasterT, class tileT>
+auto
+qed::nisar::flow::Fetch<rasterT, tileT>::make(
+    const name_type & slot, super_type::product_ref_type product) -> super_type::factory_ref_type
+{
+    // chain up
+    auto self = super_type::make(slot, product);
+    // the raster
+    auto raster = this->source();
+    // and the tile
+    auto & tile = this->slice()->write();
+    // unpack the window
+    const auto [line, sample] = _origin;
+    const auto [lineStride, sampleStride] = _stride;
+    // the shape of the tile, which is the shape of the window
+    const auto shape = tile.packing().shape();
+    // the first cell the window samples, in the cells of the raster
+    auto from = typename grid_type::index_type { line * lineStride, sample * sampleStride };
+    // the extent of the window, in samples
+    auto extent = typename grid_type::shape_type { shape[0], shape[1] };
+    // and the distance between them
+    auto stride = typename grid_type::index_type { lineStride, sampleStride };
+    // read the cells the window samples into a dense grid, the way the kernels do
+    auto cells =
+        qed::nisar::fetch<grid_type>(raster->source(), raster->datatype(), from, extent, stride);
+    // and copy them into the tile, converting them to its cells on the way
+    std::copy(cells.begin(), cells.end(), tile.begin());
+    // all done
+    return self;
+}
+
+
+// end of file
