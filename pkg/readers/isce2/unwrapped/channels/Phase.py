@@ -90,44 +90,78 @@ class Phase(Channel, family="qed.channels.isce2.unw.phase"):
         # all done
         return
 
-    def tile(self, source, zoom, origin, shape, **kwds):
+    def recipe(self):
         """
-        Generate a tile of the given characteristics
+        The pipeline that renders my tiles: the window of the phase band, mapped onto the hues,
+        at a constant luminosity
         """
-        # unpack my configuration
-        low = self.phase.low
-        high = self.phase.high
-        brightness = self.brightness.value
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # cut the signal out of the phase band
+        self.head(recipe=recipe)
+        # place the phase in its interval
+        recipe.factory(name="normalizer", protocol=qed.viz.normalizer)
+        # map it onto hues that span a full turn
+        recipe.factory(
+            name="hue",
+            protocol=qed.viz.filter,
+            pin=qed.viz.filters.affine(),
+            settings={"interval": (0, 2 * cmath.pi)},
+        )
+        # a constant luminosity
+        recipe.factory(name="brightness", protocol=qed.viz.filter, pin=qed.viz.filters.constant())
+        # the products
+        for name in ("phases", "hues", "luminosities"):
+            # one at a time
+            recipe.product(name=name)
+        # the bindings
+        recipe.bind(factory="normalizer", slot="signal", product="signal")
+        recipe.bind(factory="normalizer", slot="normalized", product="phases")
+        recipe.bind(factory="hue", slot="signal", product="phases")
+        recipe.bind(factory="hue", slot="affine", product="hues")
+        recipe.bind(factory="brightness", slot="tile", product="luminosities")
+        # and paint
+        self.light(recipe=recipe, hues="hues", luminosity="luminosities")
+        # hand it off
+        return recipe
 
-        # unpack the {tile} origin
-        line, sample = origin
-        # and its shape
-        lines, samples = shape
+    def settings(self) -> dict:
+        """
+        The settings my controllers impose on the factories of my recipe
+        """
+        # assemble
+        return {
+            # the range of the phase
+            "normalizer": {"interval": (self.phase.low, self.phase.high)},
+            # and the brightness
+            "brightness": {"value": self.brightness.value},
+        }
 
-        # the tile spans a single band of the line-interleaved layout
-        shape = (lines, 1, samples)
-        # anchored at the phase band
-        origin = (line, 1, sample)
-        # decimated by the zoom, leaving the band axis untouched
-        stride = (2 ** zoom[0], 1, 2 ** zoom[1])
+    def iterators(self, source, origin, shape, stride, **kwds):
+        """
+        Render the tile of {source} at {origin}+{shape}, at the given {stride}, with the fused
+        iterators
+        """
+        # lift the tile into the layout, anchored at the phase band
+        origin, shape, stride = self.layout(origin=origin, shape=shape, stride=stride, band=1)
         # look for the tile maker in {libqed}
         tileMaker = qed.libqed.isce2.unwrapped.channels.phase
-        # and ask it to make a tile
-        tile = tileMaker(
+        # ask it to make a tile and return it
+        return tileMaker(
             source=source.data,
             origin=origin,
             shape=shape,
             stride=stride,
-            low=low,
-            high=high,
-            brightness=brightness,
+            low=self.phase.low,
+            high=self.phase.high,
+            brightness=self.brightness.value,
             **kwds,
         )
-        # and return it
-        return tile
 
     # constants
     tag = "phase"
+    # the phase band
+    bands = {"raster": 1}
 
 
 # end of file

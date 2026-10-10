@@ -95,46 +95,82 @@ class Complex(Channel, family="qed.channels.isce2.unw.complex"):
         # and done
         return
 
-    def tile(self, source, zoom, origin, shape, **kwds):
+    def recipe(self):
         """
-        Generate a tile of the given characteristics
+        The pipeline that renders my tiles: the window of the phase band mapped onto the hues,
+        with the window of the amplitude band through a power law as the luminosity
         """
-        # get my configuration
-        scale = self.scale.value
-        exponent = self.exponent.value
-        minPhase = self.phase.low
-        maxPhase = self.phase.high
-        # and the mean amplitude
-        mean = self.mean
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # cut the amplitudes out of their band
+        self.head(
+            recipe=recipe, raster="amplitude.raster", signal="amplitudes", slicer="amplitude.slice"
+        )
+        # and the phases out of theirs
+        self.head(recipe=recipe, raster="phase.raster", signal="phase", slicer="phase.slice")
+        # the power law
+        recipe.factory(name="power", protocol=qed.viz.filter, pin=qed.viz.filters.power())
+        # place the phase in its interval
+        recipe.factory(name="normalizer", protocol=qed.viz.normalizer)
+        # map it onto hues that span a full turn
+        recipe.factory(
+            name="hue",
+            protocol=qed.viz.filter,
+            pin=qed.viz.filters.affine(),
+            settings={"interval": (0, 2 * cmath.pi)},
+        )
+        # the products
+        for name in ("luminosities", "phases", "hues"):
+            # one at a time
+            recipe.product(name=name)
+        # the bindings
+        recipe.bind(factory="power", slot="signal", product="amplitudes")
+        recipe.bind(factory="power", slot="power", product="luminosities")
+        recipe.bind(factory="normalizer", slot="signal", product="phase")
+        recipe.bind(factory="normalizer", slot="normalized", product="phases")
+        recipe.bind(factory="hue", slot="signal", product="phases")
+        recipe.bind(factory="hue", slot="affine", product="hues")
+        # and paint
+        self.light(recipe=recipe, hues="hues", luminosity="luminosities")
+        # hand it off
+        return recipe
 
-        # unpack the {tile} origin
-        line, sample = origin
-        # and its shape
-        lines, samples = shape
+    def settings(self) -> dict:
+        """
+        The settings my controllers impose on the factories of my recipe
+        """
+        # the power law, measured against my mean amplitude
+        power = {"mean": self.mean, "scale": self.scale.value, "exponent": self.exponent.value}
+        # assemble
+        return {
+            # the power law
+            "power": power,
+            # and the range of the phase
+            "normalizer": {"interval": (self.phase.low, self.phase.high)},
+        }
 
-        # the tile spans a single band of the line-interleaved layout
-        shape = (lines, 1, samples)
-        # anchored at the leading band
-        origin = (line, 0, sample)
-        # decimated by the zoom, leaving the band axis untouched
-        stride = (2 ** zoom[0], 1, 2 ** zoom[1])
+    def iterators(self, source, origin, shape, stride, **kwds):
+        """
+        Render the tile of {source} at {origin}+{shape}, at the given {stride}, with the fused
+        iterators
+        """
+        # lift the tile into the layout, anchored at the leading band
+        origin, shape, stride = self.layout(origin=origin, shape=shape, stride=stride, band=0)
         # look for the tile maker in {libqed}
         tileMaker = qed.libqed.isce2.unwrapped.channels.complex
-        # and ask it to make a tile
-        tile = tileMaker(
+        # ask it to make a tile and return it
+        return tileMaker(
             source=source.data,
             origin=origin,
             shape=shape,
             stride=stride,
-            mean=mean,
-            scale=scale,
-            exponent=exponent,
-            minPhase=minPhase,
-            maxPhase=maxPhase,
+            mean=self.mean,
+            scale=self.scale.value,
+            exponent=self.exponent.value,
+            minPhase=self.phase.low,
+            maxPhase=self.phase.high,
             **kwds,
         )
-        # and return it
-        return tile
 
     # metamethods
     def __init__(self, **kwds):
@@ -148,6 +184,8 @@ class Complex(Channel, family="qed.channels.isce2.unw.complex"):
 
     # constants
     tag = "complex"
+    # the amplitude and phase bands
+    bands = {"amplitude.raster": 0, "phase.raster": 1}
 
 
 # end of file
