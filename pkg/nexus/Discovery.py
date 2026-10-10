@@ -135,9 +135,10 @@ class Discovery:
             reader.granule = self.granule
         # install the availability map
         reader.available = {axis: set(values) for axis, values in self.available.items()}
-        # adopt the selections as the survey left them: the worker rebuilt the reader from
-        # its recipe, so they are the user's configuration plus the open-time auto-picks
-        reader.selections = dict(self.selections)
+        # merge the selections: the survey's auto-picks fill the axes this reader has no
+        # opinion on, and the selections it already holds win, so a recipe that failed to
+        # carry them cannot erase them
+        reader.selections = {**dict(self.selections), **dict(reader.selections)}
         # leave the first-contact mark: the reader's knowledge is now complete, even though
         # this process never touched the file
         reader._opened = True
