@@ -15,6 +15,7 @@
 #include "GUNW.h"
 #include "GCOV.h"
 #include "Screen.h"
+#include "Palette.h"
 
 
 // end of file

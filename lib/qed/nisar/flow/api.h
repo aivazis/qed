@@ -27,6 +27,11 @@ namespace qed::nisar::flow {
     using gunw_screen_t = Screen<GUNW, maskT, colorT>;
     template <class maskT, class colorT>
     using gcov_screen_t = Screen<GCOV, maskT, colorT>;
+    // the colormaps that show the masks of GUNW and GCOV products by themselves
+    template <class maskT, class colorT>
+    using gunw_palette_t = Palette<GUNW, maskT, colorT>;
+    template <class maskT, class colorT>
+    using gcov_palette_t = Palette<GCOV, maskT, colorT>;
 } // namespace qed::nisar::flow
 
 
