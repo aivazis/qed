@@ -34,6 +34,8 @@ qed::py::nisar::nisar(py::module & m)
     stats(nisar);
     // the kernels that read a raster of a given cell type
     cells(nisar);
+    // the flow nodes
+    flow(nisar);
 
     // all done
     return;
