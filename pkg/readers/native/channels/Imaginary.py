@@ -61,6 +61,34 @@ class Imaginary(Channel, family="qed.channels.native.imaginary"):
         # all done
         return
 
+    def recipe(self):
+        """
+        The pipeline that renders my tiles: the window of the raster, its imaginary part normalized
+        and painted gray
+        """
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # cut the signal out of the raster
+        self.head(recipe=recipe)
+        # pick its imaginary part
+        recipe.factory(
+            name="imaginary", protocol=qed.viz.selector, pin=qed.viz.selectors.imaginary()
+        )
+        recipe.product(name="part")
+        recipe.bind(factory="imaginary", slot="signal", product="signal")
+        recipe.bind(factory="imaginary", slot="imaginary", product="part")
+        # and paint it gray
+        self.gray(recipe=recipe, signal="part")
+        # hand it off
+        return recipe
+
+    def settings(self) -> dict:
+        """
+        The settings my controllers impose on the factories of my recipe
+        """
+        # my range
+        return {"normalizer": {"interval": (self.range.low, self.range.high)}}
+
     def tile(self, **kwds):
         """
         Generate a tile of the given characteristics
