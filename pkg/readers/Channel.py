@@ -158,11 +158,12 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         # hand them off
         return rasters
 
-    def flow(self, rasters, origin, shape, stride):
+    def flow(self, rasters, origin, shape, stride, settings: dict | None = None):
         """
         Render the tile of {rasters} at {origin}+{shape}, at the given {stride}, through the
         pipeline of my recipe: staged once per combination of raster types, and realized once
-        per combination and tile shape
+        per combination and tile shape; the {settings} are the ones the dataset imposes on the
+        factories of my recipe, on top of the ones of my controllers
         """
         # the types of the rasters, by product name
         decls = {name: raster.decl for name, raster in rasters.items()}
@@ -209,8 +210,8 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
             self.apply(graph=graph, factory=factory, setting="origin", value=tuple(origin))
             # and the stride
             self.apply(graph=graph, factory=factory, setting="stride", value=stride)
-        # the settings my controllers impose
-        for factory, values in self.settings().items():
+        # the settings my controllers impose, and the ones of the dataset
+        for factory, values in {**self.settings(), **(settings or {})}.items():
             # one factory at a time
             for setting, value in values.items():
                 # one setting at a time
@@ -311,31 +312,68 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         # all done
         return recipe
 
-    @staticmethod
-    def encode(recipe, colormap):
+    @classmethod
+    def encode(cls, recipe, colormap):
         """
-        Encode the color channels the {colormap} of {recipe} makes into the {image}
+        Encode the color channels the {colormap} of {recipe} makes into the {image}, after my
+        family paints over the ones it has its own colors for
         """
+        # the colors the colormap makes
+        colors = ("red", "green", "blue")
+        # go through them
+        for name in colors:
+            # make the product
+            recipe.product(name=name)
+            # and have the colormap write it
+            recipe.bind(factory=colormap, slot=name, product=name)
+        # let my family recolor some of the cells
+        red, green, blue = cls.overlay(recipe=recipe, colors=colors)
         # the encoder
         recipe.factory(name="encoder", protocol=qed.viz.encoder)
-        # the products
-        for name in ("red", "green", "blue", "image"):
-            # one at a time
-            recipe.product(name=name)
+        # and the image it makes
+        recipe.product(name="image")
         # the bindings
-        for factory, slot, product in [
-            (colormap, "red", "red"),
-            (colormap, "green", "green"),
-            (colormap, "blue", "blue"),
-            ("encoder", "red", "red"),
-            ("encoder", "green", "green"),
-            ("encoder", "blue", "blue"),
-            ("encoder", "image", "image"),
+        for slot, product in [
+            ("red", red),
+            ("green", green),
+            ("blue", blue),
+            ("image", "image"),
         ]:
             # one at a time
-            recipe.bind(factory=factory, slot=slot, product=product)
+            recipe.bind(factory="encoder", slot=slot, product=product)
         # all done
         return recipe
+
+    @classmethod
+    def overlay(cls, recipe, colors):
+        """
+        Recolor some of the cells in the {colors} of {recipe}, the names of its red, green and blue
+        products, and hand back the names of the ones to encode
+        """
+        # by default, the colors are encoded as the colormap made them
+        return colors
+
+    @staticmethod
+    def paintOver(recipe, name, pin, slot, product, colors):
+        """
+        Add the factory {name} to {recipe}, pinned to {pin}, that reads the {product} through its
+        {slot} and paints over the {colors}; hand back the names of the colors it paints
+        """
+        # the factory
+        recipe.factory(name=name, protocol=qed.viz.filter, pin=pin)
+        # what it reads
+        recipe.bind(factory=name, slot=slot, product=product)
+        # the colors it paints, named after it
+        painted = tuple(f"{name}{primary}" for primary in ("Red", "Green", "Blue"))
+        # go through the primaries
+        for primary, color, paint in zip(("Red", "Green", "Blue"), colors, painted):
+            # it reads the color it is handed
+            recipe.bind(factory=name, slot=primary.lower(), product=color)
+            # and writes its own
+            recipe.product(name=paint)
+            recipe.bind(factory=name, slot=f"painted{primary}", product=paint)
+        # hand off the names of the colors it paints
+        return painted
 
     @classmethod
     def wheel(cls, recipe, signal, brightness):
