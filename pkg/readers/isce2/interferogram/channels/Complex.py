@@ -5,6 +5,9 @@
 # (c) 1998-2026 all rights reserved
 
 
+# externals
+import math
+
 # support
 import qed
 
@@ -74,6 +77,51 @@ class Complex(Channel, family="qed.channels.isce2.int.complex"):
         yield pixel, ""
         # all done
         return
+
+    def recipe(self):
+        """
+        The pipeline that renders my tiles: the window of the raster, its phase as the hue and its
+        normalized amplitude as the luminosity
+        """
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # cut the signal out of the raster
+        self.head(recipe=recipe)
+        # compute its amplitude
+        recipe.factory(
+            name="amplitude", protocol=qed.viz.operator, pin=qed.viz.operators.amplitude()
+        )
+        # and normalize it
+        recipe.factory(name="normalizer", protocol=qed.viz.normalizer)
+        # the products
+        recipe.product(name="magnitude")
+        recipe.product(name="luminosities")
+        # the bindings
+        recipe.bind(factory="amplitude", slot="signal", product="signal")
+        recipe.bind(factory="amplitude", slot="amplitude", product="magnitude")
+        recipe.bind(factory="normalizer", slot="signal", product="magnitude")
+        recipe.bind(factory="normalizer", slot="normalized", product="luminosities")
+        # turn the phase into hues that span a full turn
+        self.turn(recipe=recipe, signal="signal")
+        recipe.node(name="hue").settings["interval"] = (0, 2 * math.pi)
+        # and paint them, with the normalized amplitude as the luminosity
+        self.light(recipe=recipe, hues="hues", luminosity="luminosities")
+        # hand it off
+        return recipe
+
+    def settings(self) -> dict:
+        """
+        The settings my controllers impose on the factories of my recipe
+        """
+        # my amplitude, which my controller keeps in decades
+        interval = (10**self.amplitude.low, 10**self.amplitude.high)
+        # assemble
+        return {
+            # the range of the phase
+            "cycle": {"interval": (self.phase.low, self.phase.high)},
+            # and the range of the amplitude
+            "normalizer": {"interval": interval},
+        }
 
     def tile(self, **kwds):
         """
