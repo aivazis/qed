@@ -22,11 +22,6 @@ class Value(Channel, family="qed.channels.native.value"):
     range = qed.protocols.controller(default=qed.controllers.linearRange)
     range.doc = "the manager of the range of values to render"
 
-    engine = qed.properties.str()
-    engine.default = "iterators"
-    engine.validators = qed.constraints.isMember("iterators", "flow")
-    engine.doc = "render with the fused iterators, or with a pipeline of flow factories"
-
     # interface
     def autotune(self, **kwds):
         """
@@ -66,47 +61,40 @@ class Value(Channel, family="qed.channels.native.value"):
         # all done
         return
 
+    def recipe(self):
+        """
+        The pipeline that renders my tiles: the window of the raster, normalized and painted gray
+        """
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # cut the signal out of the raster
+        self.head(recipe=recipe)
+        # and paint it gray
+        self.gray(recipe=recipe, signal="signal")
+        # hand it off
+        return recipe
+
+    def settings(self) -> dict:
+        """
+        The settings my controllers impose on the factories of my recipe
+        """
+        # my range
+        return {"normalizer": {"interval": (self.range.low, self.range.high)}}
+
     def tile(self, source, zoom, origin, shape, **kwds):
         """
         Generate a tile of the given characteristics
         """
-        # with the iterators
-        if self.engine == "iterators":
-            # add my configuration and chain up
-            return super().tile(
-                source=source,
-                zoom=zoom,
-                origin=origin,
-                shape=shape,
-                min=self.range.low,
-                max=self.range.high,
-                **kwds,
-            )
-        # otherwise, with the flow pipeline, which i make on first use and keep, along with the
-        # graphs it builds for each tile shape
-        if self._pipeline is None:
-            # make it
-            self._pipeline = qed.libqed.native.pipelines.Value()
-        # turn the zoom levels into per-axis strides
-        stride = tuple(2**level for level in zoom)
-        # and render
-        return self._pipeline.render(
-            source=source.data,
+        # add my configuration and chain up
+        return super().tile(
+            source=source,
+            zoom=zoom,
             origin=origin,
             shape=shape,
-            stride=stride,
             min=self.range.low,
             max=self.range.high,
+            **kwds,
         )
-
-    # metamethods
-    def __init__(self, **kwds):
-        # chain up
-        super().__init__(**kwds)
-        # the flow pipeline, made on first use
-        self._pipeline = None
-        # all done
-        return
 
     # constants
     tag = "value"

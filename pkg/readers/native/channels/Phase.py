@@ -101,6 +101,40 @@ class Phase(Channel, family="qed.channels.native.phase"):
         # all done
         return
 
+    def recipe(self):
+        """
+        The pipeline that renders my tiles: the window of the raster, its phase as the hue of a
+        color wheel, at a constant saturation and brightness
+        """
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # cut the signal out of the raster
+        self.head(recipe=recipe)
+        # a constant brightness
+        recipe.factory(name="brightness", protocol=qed.viz.filter, pin=qed.viz.filters.constant())
+        recipe.product(name="brightnesses")
+        recipe.bind(factory="brightness", slot="tile", product="brightnesses")
+        # paint the phase on a color wheel
+        self.wheel(recipe=recipe, signal="signal", brightness="brightnesses")
+        # the hue spans a full turn
+        recipe.node(name="hue").settings["interval"] = (0, 2 * cmath.pi)
+        # hand it off
+        return recipe
+
+    def settings(self) -> dict:
+        """
+        The settings my controllers impose on the factories of my recipe
+        """
+        # assemble
+        return {
+            # the range of the phase
+            "cycle": {"interval": (self.phase.low, self.phase.high)},
+            # the saturation
+            "saturation": {"value": self.saturation.value},
+            # and the brightness
+            "brightness": {"value": self.brightness.value},
+        }
+
     def tile(self, **kwds):
         """
         Generate a tile of the given characteristics

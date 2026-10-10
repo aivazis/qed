@@ -23,11 +23,6 @@ class Amplitude(Channel, family="qed.channels.native.amplitude"):
     amplitude.doc = "the manager of the range of values to render"
     amplitude.quantity = "amplitude"
 
-    engine = qed.properties.str()
-    engine.default = "iterators"
-    engine.validators = qed.constraints.isMember("iterators", "flow")
-    engine.doc = "render with the fused iterators, or with a pipeline of flow factories"
-
     # interface
     def autotune(self, **kwds):
         """
@@ -67,6 +62,36 @@ class Amplitude(Channel, family="qed.channels.native.amplitude"):
         # and done
         return
 
+    def recipe(self):
+        """
+        The pipeline that renders my tiles: the window of the raster, its amplitude normalized
+        and painted gray
+        """
+        # make a recipe
+        recipe = qed.flow.recipe()
+        # cut the signal out of the raster
+        self.head(recipe=recipe)
+        # compute its amplitude
+        recipe.factory(
+            name="amplitude", protocol=qed.viz.operator, pin=qed.viz.operators.amplitude()
+        )
+        recipe.product(name="magnitude")
+        recipe.bind(factory="amplitude", slot="signal", product="signal")
+        recipe.bind(factory="amplitude", slot="amplitude", product="magnitude")
+        # and paint it gray
+        self.gray(recipe=recipe, signal="magnitude")
+        # hand it off
+        return recipe
+
+    def settings(self) -> dict:
+        """
+        The settings my controllers impose on the factories of my recipe
+        """
+        # my range, which my controller keeps in decades
+        interval = (10**self.amplitude.low, 10**self.amplitude.high)
+        # goes to the normalizer
+        return {"normalizer": {"interval": interval}}
+
     def tile(self, source, zoom, origin, shape, **kwds):
         """
         Generate a tile of the given characteristics
@@ -74,38 +99,10 @@ class Amplitude(Channel, family="qed.channels.native.amplitude"):
         # get my configuration
         low = 10**self.amplitude.low
         high = 10**self.amplitude.high
-        # with the iterators
-        if self.engine == "iterators":
-            # add my configuration and chain up
-            return super().tile(
-                source=source, zoom=zoom, origin=origin, shape=shape, min=low, max=high, **kwds
-            )
-        # otherwise, with the flow pipeline for the cells of the source, which i make on first
-        # use and keep, along with the graphs it builds for each tile shape
-        cell = source.cell.cell
-        # look it up
-        pipeline = self._pipelines.get(cell)
-        # if this is the first tile of this cell type
-        if pipeline is None:
-            # make the pipeline
-            pipeline = getattr(qed.libqed.native.pipelines, cell).Amplitude()
-            # and remember it
-            self._pipelines[cell] = pipeline
-        # turn the zoom levels into per-axis strides
-        stride = tuple(2**level for level in zoom)
-        # and render
-        return pipeline.render(
-            source=source.data, origin=origin, shape=shape, stride=stride, min=low, max=high
+        # add it and chain up
+        return super().tile(
+            source=source, zoom=zoom, origin=origin, shape=shape, min=low, max=high, **kwds
         )
-
-    # metamethods
-    def __init__(self, **kwds):
-        # chain up
-        super().__init__(**kwds)
-        # the flow pipelines, by the cell type of the source, made on first use
-        self._pipelines = {}
-        # all done
-        return
 
     # constants
     tag = "amplitude"
