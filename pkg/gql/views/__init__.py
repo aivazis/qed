@@ -15,6 +15,7 @@ from .ViewPersist import ViewPersist as viewPersist
 from .ViewReaderSelect import ViewReaderSelect as viewReaderSelect
 from .ViewSplit import ViewSplit as viewSplit
 from .ViewChannelSet import ViewChannelSet as viewChannelSet
+from .ViewEngineSet import ViewEngineSet as viewEngineSet
 from .ViewCoordinateToggle import ViewCoordinateToggle as viewCoordinateToggle
 
 # flow
