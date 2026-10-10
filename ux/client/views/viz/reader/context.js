@@ -52,6 +52,10 @@ export const Provider = props => {
     // whether the dataset in the view is still being made worth looking at; only the active
     // reader can be waiting on anything
     const preparing = active ? view.preparing : false
+    // the engine that draws the tiles of the view, and whether its channel's pipeline can draw
+    // them; only the active reader has tiles on display
+    const engine = active ? view.engine : null
+    const flowable = active ? view.flowable : false
 
     // assemble the context value
     const context = {
@@ -73,6 +77,10 @@ export const Provider = props => {
         members,
         // whether my dataset is still being prepared
         preparing,
+        // the engine that draws my tiles
+        engine,
+        // and whether the pipeline of my channel's recipe can draw them
+        flowable,
     }
 
     // provide for my children
@@ -102,6 +110,10 @@ export const Context = React.createContext(
         candidates: null,
         // whether the dataset is still being prepared
         preparing: false,
+        // the engine that draws the tiles
+        engine: null,
+        // and whether the pipeline of the channel's recipe can draw them
+        flowable: false,
     }
 )
 
@@ -145,6 +157,9 @@ export const contextReaderGetViewFragment = graphql`
         }
         # whether the dataset is still being made worth looking at
         preparing
+        # the engine that draws the tiles, and whether the channel's pipeline can draw them
+        engine
+        flowable
     }
 `
 

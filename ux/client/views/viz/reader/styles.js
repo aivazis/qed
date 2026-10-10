@@ -75,6 +75,14 @@ const channels = () => ({
 
 // {channel} entries; {state} x structure from {~/widgets/meta}
 // valid {channel} states: {enabled}, {available}, {selected}
+// {engine} options; {state} x structure from {~/widgets/meta}
+// valid {engine} states: {disabled}, {enabled}, {selected}
+const engine = (state, polish) => ({
+    ...channelPaint.base,
+    ...(state === "disabled" ? { ...coordinatePaint.disabled, cursor: "default" } : channelPaint[state]),
+    ...(polish ? channelPaint.available : null),
+})
+
 const channel = (state, polish) => ({
     ...channelPaint.base,
     ...channelPaint[state],
@@ -134,6 +142,7 @@ export default {
     axis,
     channel,
     channels,
+    engine,
     coordinate,
     mark,
     reader,
