@@ -33,7 +33,7 @@ class Channel(Base):
     # {native} kernels do not yet, and asking them would be an argument they cannot take
     absence = False
     # the cells my pipeline reads windows of the rasters into, by the family of my kernel
-    cellTypes = {"slc": "complex64", "real": "float32"}
+    cellTypes = {"slc": "complex64", "real": "float32", "masks": "uint32"}
     # the slicer at the head of my recipe, which reads windows of datasets and pyramid levels
     slicerClass = Fetch
     # recolors the cells my mask flags, for the channels that read one
@@ -67,8 +67,14 @@ class Channel(Base):
             # wrap whichever source answered in a raster; it holds no cells, only what the
             # slicer needs to read a window of them, so it is made for every tile
             rasters = {
-                "raster": qed.libqed.nisar.flow.raster(
-                    source=data, datatype=datatype, cell=cell, name=f"{self.pyre_name}.raster"
+                "raster": (
+                    # a mask, whose codes are read wide whatever their width on disk
+                    qed.libqed.nisar.flow.mask(source=data, name=f"{self.pyre_name}.raster")
+                    if cell == "uint32"
+                    # or the cells of a measurement
+                    else qed.libqed.nisar.flow.raster(
+                        source=data, datatype=datatype, cell=cell, name=f"{self.pyre_name}.raster"
+                    )
                 )
             }
             # and the companions my recipe reads, which are masks

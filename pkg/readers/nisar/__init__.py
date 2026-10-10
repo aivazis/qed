@@ -40,6 +40,10 @@ from .Absence import Absence as absence
 from .GUNWScreen import GUNWScreen as gunwScreen
 from .GCOVScreen import GCOVScreen as gcovScreen
 
+# the colormaps that show the masks by themselves
+from .GUNWPalette import GUNWPalette as gunwPalette
+from .GCOVPalette import GCOVPalette as gcovPalette
+
 # contribute the flow nodes of products to the catalogs recipes are staged against, when the
 # extension that holds them was built
 if qed.libqed is not None:
