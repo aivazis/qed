@@ -73,6 +73,9 @@ class View(graphene.ObjectType):
     diagram = graphene.Field(diagram.diagram)
     # the longest side of a region whose spectrum can be computed, if the dataset has one
     spectrum = graphene.Int()
+    # the engine that draws the tiles, flow or iterators, and whether flow can draw them
+    engine = graphene.String()
+    flowable = graphene.Boolean(required=True)
 
     # resolvers
     # metadata
@@ -85,6 +88,22 @@ class View(graphene.ObjectType):
         # the render have all been bound; the client used to infer this from three
         # nullable joins, which made readiness its business rather than the server's
         return view.reader is not None and view.dataset is not None and view.channel is not None
+
+    @staticmethod
+    def resolve_engine(view, info, **kwds):
+        """
+        Report the engine that draws the tiles of this view
+        """
+        # ask the view
+        return view.engine()
+
+    @staticmethod
+    def resolve_flowable(view, info, **kwds):
+        """
+        Report whether the pipeline of the channel's recipe can draw the tiles of this view
+        """
+        # ask the view
+        return view.flowable()
 
     @staticmethod
     def resolve_preparing(view, info, **kwds):
