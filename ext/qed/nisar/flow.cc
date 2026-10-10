@@ -19,6 +19,10 @@ namespace qed::py::nisar {
     // the cells the kernels read windows of nisar rasters into
     using c64_t = std::complex<float>;
     using f32_t = float;
+    // the cells of masks: stored in bytes in a pyramid level, and read wide, whatever the width
+    // of the codes on disk
+    using u8_t = std::uint8_t;
+    using u32_t = std::uint32_t;
     // the tiles a window lands in: the cells of complex rasters as they are, and the cells of
     // real ones in double precision, the way the pipelines over reals take them
     template <class cellT>
@@ -85,6 +89,20 @@ qed::py::nisar::flow(py::module & m)
     // and over the levels of pyramids, which hold cells of one type
     bindRaster<level_t<c64_t>, c64_t, c64_t>(flow, "LevelRasterC64");
     bindRaster<level_t<f32_t>, f32_t, double>(flow, "LevelRasterF32");
+    // the masks, over datasets and over the levels of their pyramids, read into wide cells
+    bindRaster<dataset_t, u32_t, u32_t>(flow, "DatasetRasterU32");
+    bindRaster<level_t<u8_t>, u32_t, u32_t>(flow, "LevelRasterU8");
+
+    // the tiles the masks are read into, which pyre has no use for
+    registry().registerProduct<flowtile_t<u32_t>>();
+    // recolor the cells of rasters of reals with no data
+    registry()
+        .registerFactory<qed::nisar::flow::absence_t<flowtile_t<double>, flowtile_t<f32_t>>>();
+    // and the cells the masks of the products flag
+    registry()
+        .registerFactory<qed::nisar::flow::gunw_screen_t<flowtile_t<u32_t>, flowtile_t<f32_t>>>();
+    registry()
+        .registerFactory<qed::nisar::flow::gcov_screen_t<flowtile_t<u32_t>, flowtile_t<f32_t>>>();
 
     // the catalog
     flow.def(
@@ -154,6 +172,36 @@ qed::py::nisar::flow(py::module & m)
         "source"_a, "datatype"_a, "cell"_a, "name"_a,
         // the docstring
         "make a raster over the pyramid level {source}");
+
+    // make a raster over the mask of a product
+    flow.def(
+        // the name
+        "mask",
+        // the implementation
+        [](const dataset_t & source, const std::string & name) -> std::shared_ptr<product_t> {
+            // make the raster, reading the codes wide, and hand it off
+            return qed::nisar::flow::raster_t<dataset_t, u32_t>::create(
+                name, source, pyre::h5::datatype<u32_t>());
+        },
+        // the signature
+        "source"_a, "name"_a,
+        // the docstring
+        "make a raster over the mask {source}, whose windows are read as unsigned 32 bit codes");
+
+    // and over a level of its pyramid
+    flow.def(
+        // the name
+        "mask",
+        // the implementation
+        [](const level_t<u8_t> & source, const std::string & name) -> std::shared_ptr<product_t> {
+            // make the raster and hand it off; a level has no use for the memory type
+            return qed::nisar::flow::raster_t<level_t<u8_t>, u32_t>::create(
+                name, source, pyre::h5::datatype<u32_t>());
+        },
+        // the signature
+        "source"_a, "name"_a,
+        // the docstring
+        "make a raster over the pyramid level {source} of a mask");
 
     // all done
     return;
