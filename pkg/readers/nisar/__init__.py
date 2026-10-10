@@ -32,6 +32,15 @@ from .GOFF import GOFF as goff
 from .GUNW import GUNW as gunw
 from .GCOV import GCOV as gcov
 
+# the slicer that reads windows of the rasters of products
+from .Fetch import Fetch as fetch
+
+# contribute the flow nodes of products to the catalogs recipes are staged against, when the
+# extension that holds them was built
+if qed.libqed is not None:
+    # register its catalog
+    qed.flow.recipes.register(catalog=qed.libqed.nisar.flow.catalog())
+
 
 # the name of a reader
 def nickname(uri: str, **kwds) -> str:
