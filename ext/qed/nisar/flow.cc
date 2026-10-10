@@ -103,6 +103,11 @@ qed::py::nisar::flow(py::module & m)
         .registerFactory<qed::nisar::flow::gunw_screen_t<flowtile_t<u32_t>, flowtile_t<f32_t>>>();
     registry()
         .registerFactory<qed::nisar::flow::gcov_screen_t<flowtile_t<u32_t>, flowtile_t<f32_t>>>();
+    // and the colormaps that show the masks by themselves
+    registry()
+        .registerFactory<qed::nisar::flow::gunw_palette_t<flowtile_t<u32_t>, flowtile_t<f32_t>>>();
+    registry()
+        .registerFactory<qed::nisar::flow::gcov_palette_t<flowtile_t<u32_t>, flowtile_t<f32_t>>>();
 
     // the catalog
     flow.def(
