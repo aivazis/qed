@@ -11,8 +11,12 @@ import qed
 import journal
 
 
-# a reader of flat binary files
-class Flat(qed.flow.factory, family="qed.readers.native.flat", implements=qed.protocols.reader):
+# a reader of flat binary files, which also joins the readers of pipeline recipes
+class Flat(
+    qed.flow.factory,
+    family="qed.readers.native.flat",
+    implements=(qed.protocols.reader, qed.viz.reader),
+):
     """
     A reader of flat binary files
     """
@@ -43,6 +47,10 @@ class Flat(qed.flow.factory, family="qed.readers.native.flat", implements=qed.pr
     datasets = qed.properties.list(schema=qed.protocols.dataset.output())
     datasets.doc = "the list of data sets provided by the reader"
     datasets.persistent = False
+
+    raster = qed.viz.raster.output()
+    raster.doc = "the cells of my dataset, as a pipeline recipe reads them"
+    raster.persistent = False
 
     # constants
     # my dataset can describe itself in a discovery record and materialize as a
