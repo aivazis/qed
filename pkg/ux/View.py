@@ -236,6 +236,65 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
+    def engine(self):
+        """
+        The engine that draws my tiles: the pipeline of my channel's recipe, when it was asked
+        for and can draw my dataset, or the fused iterators; nothing when no channel is showing
+        """
+        # without a channel and a dataset there are no tiles
+        if not self.channel or not self.dataset:
+            # so there is no engine
+            return None
+        # the pipeline draws them when it was asked to and can
+        if self.channel.engine == "flow" and self.flowable():
+            # so say so
+            return "flow"
+        # otherwise, the iterators do
+        return "iterators"
+
+    def flowable(self):
+        """
+        Whether the pipeline of my channel's recipe can draw the tiles of my dataset
+        """
+        # without a channel and a dataset there are no tiles
+        if not self.channel or not self.dataset:
+            # so no pipeline draws them
+            return False
+        # ask the channel
+        return self.channel.flows(source=self.dataset)
+
+    def setEngine(self, engine):
+        """
+        Draw my tiles with {engine}: the pipeline of my channel's recipe, or the fused iterators
+        """
+        # without a channel there is nothing to draw
+        if not self.channel:
+            # so there is nothing to do
+            return self
+        # an engine nobody knows
+        if engine not in ("flow", "iterators"):
+            # make a channel
+            channel = journal.warning("qed.ux.engines")
+            # say why the request is ignored
+            channel.log(f"unknown engine '{engine}'; the tiles are drawn by 'flow' or 'iterators'")
+            # and bail
+            return self
+        # a pipeline that cannot draw my dataset cannot be picked
+        if engine == "flow" and not self.flowable():
+            # make a channel
+            channel = journal.warning("qed.ux.engines")
+            # say why the request is ignored
+            channel.line(f"'{self.channel.pyre_name}' has no pipeline that can draw its tiles")
+            channel.log("its tiles stay with the iterators")
+            # and bail
+            return self
+        # set the engine of my channel
+        self.channel.engine = engine
+        # the tiles must be drawn again, so grab a new session token
+        self.session = uuid.uuid1()
+        # all done
+        return self
+
     def toggleFlow(self):
         """
         Toggle the flow layer state

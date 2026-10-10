@@ -843,6 +843,18 @@ class Store(qed.component, family="qed.ux.store"):
         # all done
         return
 
+    def engineSet(self, viewport, engine):
+        """
+        Draw the tiles of {viewport} with {engine}: the pipeline of its channel's recipe, or the
+        fused iterators
+        """
+        # get the view of the {viewport}
+        view = self._viewports[viewport].view()
+        # set its engine
+        view.setEngine(engine=engine)
+        # and hand it off
+        return [view]
+
     def toggleCoordinate(self, viewport, source, axis, coordinate):
         """
         Toggle the value of {coordinate}
