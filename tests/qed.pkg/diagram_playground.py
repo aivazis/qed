@@ -57,11 +57,10 @@ def test():
     playground = store.playground()
     # its factories, left to right in the order the data flows through them
     factories = sorted(playground.factories, key=lambda factory: factory.position)
-    # are the reader, the selector of the dataset, the slicer, and the steps of the amplitude
-    # recipe, each one as far down as it is pinned
+    # are the reader, the slicer, and the steps of the amplitude recipe, each one as far down as
+    # it is pinned
     assert [(factory.kind(), factory.node.level) for factory in factories] == [
         ("reader", "protocol"),
-        ("dataset", "class"),
         ("slicer", "protocol"),
         ("amplitude", "class"),
         ("normalizer", "protocol"),
@@ -71,7 +70,6 @@ def test():
     # every product has a slot of its own, which stands for it
     assert sorted(slot.product.name for slot in playground.slots) == [
         "blue",
-        "datasets",
         "green",
         "image",
         "magnitude",

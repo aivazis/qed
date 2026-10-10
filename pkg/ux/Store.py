@@ -1314,26 +1314,21 @@ class Store(qed.component, family="qed.ux.store"):
 
     def pipeline(self):
         """
-        The amplitude recipe with its source in front of it: a reader opens a file, a selector
-        picks the dataset to look at, and a slice cuts tiles out of its raster; the reader is a
-        protocol nobody implements yet, so the recipe can be drawn but not staged
+        The amplitude recipe with its source in front of it: a reader opens a file and exposes
+        the cells of a dataset in it as a raster, and a slicer cuts tiles out of the raster; no
+        reader implements the protocol yet, so the recipe can be drawn but not staged
         """
         # start with the amplitude recipe
         recipe = self.amplitude()
         # a reader
         recipe.factory(name="reader", protocol=qed.viz.reader)
-        # a selector, pinned to the one that picks a dataset
-        recipe.factory(name="dataset", protocol=qed.viz.selector, pin=qed.readers.selectors.dataset)
         # and a slicer
         recipe.factory(name="slice", protocol=qed.viz.slicer)
-        # the datasets the reader finds, and the raster the selector picks
-        recipe.product(name="datasets")
+        # the raster the reader exposes
         recipe.product(name="raster")
         # the bindings
         bindings = [
-            ("reader", "datasets", "datasets"),
-            ("dataset", "datasets", "datasets"),
-            ("dataset", "raster", "raster"),
+            ("reader", "raster", "raster"),
             ("slice", "source", "raster"),
             ("slice", "slice", "signal"),
         ]
