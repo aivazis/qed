@@ -22,7 +22,7 @@ class Channel(qed.flow.workflow, family="qed.channels.channel"):
     # products
     # expose the output node; everything else is internal, as far as clients are concerned
     # lean on the protocols for sensible defaults
-    bmp = qed.viz.raster.output()
+    bmp = qed.viz.image.output()
     bmp.doc = "the final rendered image of the channel"
 
     # factories
