@@ -11,6 +11,10 @@
 #include "api.h"
 #include "Raster.h"
 #include "Fetch.h"
+#include "Absence.h"
+#include "GUNW.h"
+#include "GCOV.h"
+#include "Screen.h"
 
 
 // end of file

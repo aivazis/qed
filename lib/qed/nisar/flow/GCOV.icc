@@ -1,0 +1,43 @@
+// -*- c++ -*-
+// -*- coding: utf-8 -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 1998-2026 all rights reserved
+
+// code guard
+#pragma once
+
+
+// my declarations
+#include "GCOV.h"
+
+
+// the spelling of the template of the screens that read masks my way
+auto
+qed::nisar::flow::GCOV::screen() -> string_type
+{
+    // easy enough
+    return "qed::nisar::flow::gcov_screen_t";
+}
+
+
+// the color of a cell with the given {mask}
+auto
+qed::nisar::flow::GCOV::paint(mask_type mask) -> paint_type
+{
+    // a cell outside the acquisition
+    if (mask == 0xff) {
+        // is painted the faint brick red of absence
+        return rgb_type { 0.10, 0.05, 0.05 };
+    }
+    // an invalid sample
+    if (mask == 0) {
+        // is painted black
+        return rgb_type { 0, 0, 0 };
+    }
+    // any other cell keeps the color of its measurement
+    return std::nullopt;
+}
+
+
+// end of file

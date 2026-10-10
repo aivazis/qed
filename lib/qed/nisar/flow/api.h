@@ -19,6 +19,14 @@ namespace qed::nisar::flow {
     // the slicer that reads a window of a raster into a tile
     template <class rasterT, class tileT>
     using fetch_t = Fetch<rasterT, tileT>;
+    // recolors the cells with no data
+    template <class dataT, class colorT>
+    using absence_t = Absence<dataT, colorT>;
+    // recolor the cells the masks of GUNW and GCOV products flag
+    template <class maskT, class colorT>
+    using gunw_screen_t = Screen<GUNW, maskT, colorT>;
+    template <class maskT, class colorT>
+    using gcov_screen_t = Screen<GCOV, maskT, colorT>;
 } // namespace qed::nisar::flow
 
 
