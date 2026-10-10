@@ -9,7 +9,8 @@
 """
 Render tiles through the channels of nisar products that have recipes, once with their kernels
 and once with the pipelines of their recipes, and check that they match byte for byte, reading
-both a dataset of the product and a level of a pyramid built over it, at several zoom levels
+both a dataset of the product and a level of a pyramid built over it, at several zoom levels,
+with and without the mask of the product
 """
 
 # externals
@@ -77,22 +78,23 @@ def channel(kind):
 
 
 # a stand-in for a dataset whose every zoom is served by {source}, owing {depth} fewer halvings
-def served(source, depth=0):
+def served(source, depth=0, companions=None, fill=float("nan")):
     """
     Make a dataset stand-in whose renders read {source}, a dataset or a pyramid level that
-    holds the cells already decimated {depth} times
+    holds the cells already decimated {depth} times, along with its {companions}, and that
+    declares {fill} as what it writes where it has no data
     """
-    # the answer to a resolution: the source, no companions, and what is left of the zoom
-    resolve = lambda zoom: (source, {}, tuple(level - depth for level in zoom))
+    # the answer to a resolution: the source, its companions, and what is left of the zoom
+    resolve = lambda zoom: (source, dict(companions or {}), tuple(level - depth for level in zoom))
     # wrap it
-    return types.SimpleNamespace(resolve=resolve)
+    return types.SimpleNamespace(resolve=resolve, fill=fill)
 
 
 # build the first level of a pyramid over {dataset}, filled in only at {origins}
-def level(dataset, origins):
+def level(dataset, origins, name="level1"):
     """
-    Build the level of {dataset} decimated once, writing the tiles at {origins}, and return a
-    reader of it
+    Build the level of {dataset} decimated once, writing the tiles at {origins}, in files named
+    after {name}, and return a reader of it
     """
     # the storage of the cells of the dataset
     storage = getattr(qed.libqed.pyramid, dataset.datatype.cell)
@@ -100,8 +102,8 @@ def level(dataset, origins):
     extent = tuple(axis // 2 for axis in dataset.shape)
     tile = tuple(dataset.tile)
     # the files of the level
-    tiles = str(scratch / "level1.tiles")
-    record = scratch / "level1.occupancy"
+    tiles = str(scratch / f"{name}.tiles")
+    record = scratch / f"{name}.occupancy"
     # make the level
     storage.Draft.create(tiles=tiles, shape=extent, tile=tile)
     # the number of tiles along each axis
@@ -132,10 +134,35 @@ def level(dataset, origins):
         )
     # let the draft go, so the cells reach the file
     del draft
+    # the value of the cells no tile covers: the blank of the cell type, or zero for the masks,
+    # whose cells have none
+    blank = dataset.cell.blank if dataset.cell.blank is not None else 0
     # and read the level back
-    return storage.Level(
-        tiles=tiles, occupancy=str(record), shape=extent, tile=tile, fill=dataset.cell.blank
-    )
+    return storage.Level(tiles=tiles, occupancy=str(record), shape=extent, tile=tile, fill=blank)
+
+
+# the tiles of a level {depth} halvings deep that cover the windows of {tiles}
+def cover(tiles, depth, tile):
+    """
+    The origins of the tiles of shape {tile} of the level {depth} halvings deep that hold the
+    cells the windows of {tiles} read
+    """
+    # the pile
+    origins = set()
+    # go through the windows
+    for origin, shape, zoom in tiles:
+        # what is left of the zoom past the level
+        stride = tuple(2 ** (level - depth) for level in zoom)
+        # the first and last cells of the level the window reads, along each axis
+        first = tuple(o * s for o, s in zip(origin, stride))
+        last = tuple((o + n - 1) * s for o, n, s in zip(origin, shape, stride))
+        # the tiles they span
+        rows = range(first[0] // tile[0], last[0] // tile[0] + 1)
+        columns = range(first[1] // tile[1], last[1] // tile[1] + 1)
+        # add them to the pile
+        origins.update((r * tile[0], c * tile[1]) for r in rows for c in columns)
+    # hand them off, in order
+    return sorted(origins)
 
 
 # the driver
@@ -199,6 +226,25 @@ def test():
             if brightness is not None:
                 # set it
                 channel.brightness.value = brightness
+            # all done
+            return
+
+        # hand it off
+        return configure
+
+    # the range of the phase, and the brightness
+    def lit(low, high, brightness):
+        """
+        Set the range of the phase of a channel, and its brightness
+        """
+
+        # the configuration
+        def configure(channel):
+            # set the range of the phase
+            channel.phase.low = low
+            channel.phase.high = high
+            # and the brightness
+            channel.brightness.value = brightness
             # all done
             return
 
@@ -294,6 +340,71 @@ def test():
         tiles=tiles,
         configurations=[ranged(0, 0.5), ranged(0.01, 0.2)],
     )
+
+    # the channels that recolor the cells with no data, and the ones the mask flags; the masks of
+    # GUNW products follow a different rule, which reads the codes of a GCOV mask just as well
+    masked = {
+        "covariance": [decades(-3, 0), decades(-2, -1)],
+        "covarianceMasked": [decades(-3, 0), decades(-2, -1)],
+        "coherence": [ranged(0, 0.5), ranged(0.01, 0.2)],
+        "coherenceMasked": [ranged(0, 0.5), ranged(0.01, 0.2)],
+        "unwrapped": [lit(0, 0.5, 0.5), lit(0.01, 0.2, 0.8)],
+        "unwrappedMasked": [lit(0, 0.5, 0.5), lit(0.01, 0.2, 0.8)],
+    }
+    # the first dataset of the larger frequency, whose margins hold nans and masked cells
+    (covariance,) = [d for d in reader.datasets if d.datatype.cell == "float32"][:1]
+    # its mask
+    mask = covariance.mask
+    # the tiles that hold data, nans, and masked cells together, at full resolution and zoomed
+    # out, evenly and not
+    tiles = [
+        ((12288, 3584), (64, 64), (0, 0)),
+        ((7168, 5632), (37, 53), (1, 1)),
+        ((1216, 1984), (64, 64), (3, 3)),
+        ((1216, 3968), (29, 31), (3, 2)),
+    ]
+    # the fill the product declares, which none of its cells hold, and a nan, which tells the
+    # nans in the margins apart as declared
+    fills = [covariance.fill, float("nan")]
+    # go through the channels
+    for kind, configurations in masked.items():
+        # and the fills
+        for fill in fills:
+            # read off the dataset and its mask
+            compare(
+                channel=channel(kind),
+                source=served(
+                    source=covariance.data.dataset,
+                    companions={"mask": mask.data.dataset},
+                    fill=fill,
+                ),
+                datatype=covariance.datatype.htype,
+                tiles=tiles,
+                configurations=configurations,
+            )
+
+    # the windows that read the first level of a pyramid over the dataset and its mask
+    tiles = [
+        ((7168, 5632), (37, 53), (1, 1)),
+        ((1216, 1984), (64, 64), (3, 3)),
+        ((1216, 3968), (29, 31), (3, 2)),
+    ]
+    # the tiles of the level they read
+    origins = cover(tiles=tiles, depth=1, tile=tuple(covariance.tile))
+    # build the level of the data
+    data = level(dataset=covariance, origins=origins, name="covariance1")
+    # and of the mask
+    codes = level(dataset=mask, origins=origins, name="mask1")
+    # go through the channels
+    for kind, configurations in masked.items():
+        # read off the levels
+        compare(
+            channel=channel(kind),
+            source=served(source=data, depth=1, companions={"mask": codes}, fill=float("nan")),
+            datatype=covariance.datatype.htype,
+            tiles=tiles,
+            configurations=configurations,
+        )
 
     # all done
     return
