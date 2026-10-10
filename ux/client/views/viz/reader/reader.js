@@ -24,6 +24,7 @@ import { usePreparing } from './usePreparing'
 // components
 import { Axis } from './axis'
 import { Channels } from './channels'
+import { Engine } from './engine'
 import { Stack } from './stack'
 import { Standing } from './standing'
 import { Disconnect } from './disconnect'
@@ -126,6 +127,8 @@ const Panel = ({ qed }) => {
                 {/* the channels appear when the dataset is worth looking at; offering them while
                     the viewport is still waiting would promise something the view cannot show */}
                 {ready && channels.length > 0 && !preparing && <Channels>{channels}</Channels>}
+                {/* the engine that draws the tiles, once there are tiles on display */}
+                {ready && active && !preparing && <Engine />}
             </Meta.Table>
         </Tray>
     )
