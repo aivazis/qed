@@ -90,6 +90,14 @@ class Chore(pyre.nexus.task):
             # they know a richer specification that resolves back into them, the way a datatype
             # carries its byte order
             config[name] = value.spec if hasattr(value, "spec") else value.pyre_family()
+        # the selections of the reader pick the datasets the worker opens, and they are a
+        # {kv}, which the walks above never visit; they are whatever the team side holds now,
+        # what the user configured or what a survey reported and the team side adopted
+        selections = getattr(reader, "selections", None)
+        # if there are any
+        if selections:
+            # they travel by hand, in wire-friendly form
+            config["selections"] = self._scrub(value=dict(selections))
         # a worker cannot reach the archive that manages a reader, but it can present what the
         # archive hands out; so ask the reader for its grant now, while the archive is within
         # reach. this must not depend on the reader having made first contact in this
@@ -98,22 +106,19 @@ class Chore(pyre.nexus.task):
         # one that opens the product. an archive itself generates credentials on demand and
         # mounts on the worker from its traits alone
         grant = reader.grant(resolve=False) if hasattr(reader, "grant") else None
-        # if there is anything in it
+        # if there is anything in it; an empty one is not worth shipping, and since
+        # {credentials} is a {kv} the walks never put the reader's own in the recipe
         if grant:
-            # it travels as the credentials of the reader the worker builds, replacing the
-            # reader's own, which it already includes
+            # it travels as the credentials of the reader the worker builds; it already
+            # includes the reader's own, which win over what the archive hands out
             config["credentials"] = dict(grant)
-        # otherwise
-        else:
-            # there is nothing to say, and an empty table is not worth shipping
-            config.pop("credentials", None)
         # say what got left behind; {datasets} and {selectors} are named as deliberate, so
         # the report distinguishes them from state that went missing
         self._report(
             component=reader, dropped=[], harvested=config, skipped=("datasets", "selectors")
         )
-        # and account for the grant separately, since it is the one thing here that a trait
-        # walk cannot find: {credentials} is a {kv}, and no {kv} is a pyre property
+        # and account for the grant separately, since it is assembled rather than read off a
+        # trait, and what it carries is worth a line of its own
         self._reportGrant(reader=reader, grant=config.get("credentials"))
         # hand off the recipe
         return config
@@ -200,7 +205,8 @@ class Chore(pyre.nexus.task):
         {dropped}. A trait that is neither a property nor a facility is never looked at:
         that is every {dict} flavor, which is what {kv} is built from, so {credentials} and
         {selections} are invisible to the walk and have to be carried by hand or not at
-        all. And {skipped} names what the harvest leaves behind on purpose, e.g. the flow
+        all; {_harvestReader} carries both by hand, whenever they are not empty. And
+        {skipped} names what the harvest leaves behind on purpose, e.g. the flow
         bookkeeping, which belongs to this process and nothing else
 
         What is left over is a worker that will render against state the client never sent,
@@ -220,7 +226,7 @@ class Chore(pyre.nexus.task):
         seen = {trait.name for trait in component.pyre_properties()}
         seen |= {trait.name for trait in component.pyre_facilities()}
         # the rest it never looks at, less whatever was carried by hand anyway, the way the
-        # reader grant lands in the recipe without ever being walked
+        # reader grant and selections land in the recipe without ever being walked
         invisible = sorted(declared - seen - set(harvested) - skipped)
         # the values that could not be reduced, less the ones nobody meant to send
         dropped = sorted(set(dropped) - skipped)
