@@ -90,6 +90,30 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         # hand it off
         return self._recipe
 
+    def flows(self, source) -> bool:
+        """
+        Whether the pipeline of my recipe can draw the tiles of {source}: i need a recipe, the
+        dataset must hand its tiles to me rather than to a kernel of its own, and its cells must
+        be in the host's byte order, the only one pyre::flow reads; decided from the description
+        of the dataset alone, since the server's copy of a dataset holds no cells
+        """
+        # without a recipe there is no pipeline
+        if self.pipeline() is None:
+            # so the iterators draw everything
+            return False
+        # a dataset that renders its tiles with a kernel of its own never reaches my pipeline
+        if not getattr(source, "flow", True):
+            # so the iterators draw everything
+            return False
+        # the type of the cells of the dataset, if it says
+        cell = getattr(source, "cell", None)
+        # cells in the order the host lacks have no rasters
+        if cell is not None and getattr(cell, "byteswap", False):
+            # so the iterators draw them
+            return False
+        # otherwise, the pipeline draws the tiles
+        return True
+
     def settings(self) -> dict:
         """
         The settings my controllers impose on the factories of my recipe, by factory

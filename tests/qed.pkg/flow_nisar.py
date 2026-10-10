@@ -86,8 +86,10 @@ def served(source, depth=0, companions=None, fill=float("nan")):
     """
     # the answer to a resolution: the source, its companions, and what is left of the zoom
     resolve = lambda zoom: (source, dict(companions or {}), tuple(level - depth for level in zoom))
+    # the companions it declares, by name
+    declared = lambda: dict(companions or {})
     # wrap it
-    return types.SimpleNamespace(resolve=resolve, fill=fill)
+    return types.SimpleNamespace(resolve=resolve, companions=declared, fill=fill)
 
 
 # build the first level of a pyramid over {dataset}, filled in only at {origins}
