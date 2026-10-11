@@ -1790,9 +1790,9 @@ class Store(qed.component, family="qed.ux.store"):
         self._playground = None
         # how every client looks at it: flat or isometric, the quarter turns, and from which side
         self._playgroundProjection = {"kind": "flat", "azimuth": 0, "below": False}
-        # the trays of the playground's panel that are open, by name; the one that describes the
-        # picked factory starts open
-        self._playgroundTrays = {"picked"}
+        # the trays of the playground's panel that are open, by name; the inspector, which
+        # describes the picked factory, starts open
+        self._playgroundTrays = {"inspector"}
         # where every client's camera looks on it: the diagram point at the middle of the view and
         # the zoom, once some client has moved its camera
         self._playgroundCamera = None
