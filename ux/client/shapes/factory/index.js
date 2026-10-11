@@ -18,7 +18,7 @@ export const Factory = ({ highlight, cell = 1, style }) => {
     const conn = { ...styles.connector, ...style?.connector }
     // the hub where my connectors meet has paint of its own, so that a paint of my body, e.g.
     // the dashed outline of a protocol, leaves it solid
-    const hub = { ...styles.icon, ...style?.hub }
+    const hub = { ...styles.hub, ...style?.hub }
 
     // paint me; don't forget we are using a quarter cell grid,
     // i.e.a diagram cell is four grid cells
