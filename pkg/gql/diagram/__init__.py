@@ -13,6 +13,7 @@ from .PlaygroundView import PlaygroundView as playgroundView
 from .DiagramAdd import DiagramAdd as diagramAdd
 from .DiagramMove import DiagramMove as diagramMove
 from .DiagramMoveGroup import DiagramMoveGroup as diagramMoveGroup
+from .DiagramPin import DiagramPin as diagramPin
 from .DiagramRemove import DiagramRemove as diagramRemove
 from .PlaygroundCameraSet import PlaygroundCameraSet as playgroundCameraSet
 from .PlaygroundProjectionSet import PlaygroundProjectionSet as playgroundProjectionSet

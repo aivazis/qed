@@ -101,6 +101,7 @@ class Mutation(graphene.ObjectType):
     diagramAdd = diagram.diagramAdd.Field()
     diagramMove = diagram.diagramMove.Field()
     diagramMoveGroup = diagram.diagramMoveGroup.Field()
+    diagramPin = diagram.diagramPin.Field()
     diagramRemove = diagram.diagramRemove.Field()
     # how the playground is looked at
     playgroundCameraSet = diagram.playgroundCameraSet.Field()
