@@ -90,15 +90,34 @@ export const Provider = React.forwardRef(({ viewport, scale, focus, focusKey, ch
         // all done
         return
     }
-    // movement along the z-axis
-    const zoom = dz => {
+    // movement along the z-axis that keeps the point under {anchor} where it is on the screen;
+    // {z} is the distance of the camera from the diagram, so a positive {dz} moves away and makes
+    // the picture smaller; {anchor} is in screen coordinates, and the center of my area stands in
+    // when there is none
+    const zoom = (dz, anchor = null) => {
+        // get the extent of my area
+        const { left = 0, top = 0, width = 0, height = 0 } = clientRef.current?.getBoundingClientRect() ?? {}
+        // the anchor relative to my area, in units of the external length scale
+        const ax = ((anchor?.x ?? left + width / 2) - left) / els
+        const ay = ((anchor?.y ?? top + height / 2) - top) / els
         // adjust the camera
-        setCamera(camera => ({
-            // the current state
-            ...camera,
-            // adjust the z-axis
-            z: Math.max(camera.z + dz, 0.1),
-        }))
+        setCamera(camera => {
+            // the new zoom
+            const z = Math.max(camera.z + dz, 0.1)
+            // how much the scale of the picture changes
+            const ratio = camera.z / z
+            // pan so the diagram point under the anchor stays under it
+            return {
+                // the current state
+                ...camera,
+                // the pan along the x-axis that pins the anchor
+                x: ax - (ax - camera.x) * ratio,
+                // and along the y-axis
+                y: ay - (ay - camera.y) * ratio,
+                // and the zoom
+                z,
+            }
+        })
         // all done
         return
     }
@@ -158,17 +177,17 @@ export const Provider = React.forwardRef(({ viewport, scale, focus, focusKey, ch
             // all done
             return
         }
-        // zoom in
+        // zoom in, making the picture bigger
         if (key == "z") {
-            // zoom
-            zoom(0.1)
+            // by moving closer, about the center of my area
+            zoom(-0.1)
             // all done
             return
         }
-        // zoom out
+        // zoom out, making the picture smaller
         if (key == "c") {
-            // zoom
-            zoom(-0.1)
+            // by moving away, about the center of my area
+            zoom(0.1)
             // all done
             return
         }
@@ -185,11 +204,12 @@ export const Provider = React.forwardRef(({ viewport, scale, focus, focusKey, ch
         // prevent the default behavior
         evt.preventDefault()
         // unpack the event
-        const { deltaX, deltaY, ctrlKey, shiftKey } = evt
+        const { deltaX, deltaY, ctrlKey, shiftKey, clientX, clientY } = evt
         // scrolling with the <ctrl> or <shift> key pressed
         if (ctrlKey || shiftKey) {
-            // is a zoom
-            zoom((deltaY > 0 ? -1 : 1) * 0.01)
+            // is a zoom about the pointer: spreading the fingers or scrolling up zooms in, pinching
+            // or scrolling down zooms out
+            zoom((deltaY > 0 ? 1 : -1) * 0.01, { x: clientX, y: clientY })
             // all done
             return
         }
