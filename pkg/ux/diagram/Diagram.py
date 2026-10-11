@@ -131,6 +131,91 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         # and draw it
         return self.drawFactory(node=node, position=position)
 
+    def pin(self, entity, pin=None):
+        """
+        Pin the factory {entity} to {pin}, a class that satisfies its protocol, or to nothing,
+        in place: its slots follow the traits of the new pin, the ones it keeps stay where they
+        are, the ones it loses go along with whatever only they used, and the new ones get slots
+        of their own nearby; a pin the recipe refuses raises, and leaves everything as it was
+        """
+        # pin the recipe node, which refuses pins that do not fit
+        self.recipe.pin(name=entity.node.name, pin=pin)
+        # the slots of the factory now, by name
+        traits = entity.node.slots
+        # the arity follows them
+        entity.inputs = len(entity.node.inputs)
+        entity.outputs = len(entity.node.outputs)
+        # the names of the traits that still have a slot
+        kept = set()
+        # go through the slots the factory was using
+        for slot in list(entity.slots):
+            # and the connectors between them, on either side
+            for side in (slot.readers, slot.writers):
+                # the connector on this side, if any
+                connector = side.get(entity)
+                # if there is none
+                if connector is None:
+                    # move on
+                    continue
+                # go through its traits
+                for trait in list(connector):
+                    # each one goes
+                    connector.discard(trait)
+                    # and the trait of the same name, if the new pin has one, takes its place
+                    if trait.name in traits:
+                        # so the connector carries it from now on
+                        connector.add(traits[trait.name])
+                        # and it has its slot
+                        kept.add(trait.name)
+                # a connector that carries nothing any more
+                if not connector:
+                    # goes, along with its labels
+                    self.forget(nodes=connector.labels)
+                    # off its side of the slot
+                    del side[entity]
+            # a slot the factory no longer connects to
+            if entity not in slot.readers and entity not in slot.writers:
+                # is no longer one of its slots
+                entity.slots.discard(slot)
+            # a slot that nobody uses any more
+            if not slot.readers and not slot.writers:
+                # goes, along with its labels
+                self.forget(nodes=slot.labels)
+                self.forget(nodes=[slot])
+                # and so does its product, which no binding names any more
+                if slot.product is not None:
+                    # out of the recipe
+                    self.recipe.remove(name=slot.product.name)
+        # the traits of the new pin that have no slot yet
+        for name, trait in traits.items():
+            # skip the ones that do
+            if name in kept:
+                # on to the next
+                continue
+            # make one, at the spot the factory would give it, or the nearest free one
+            fresh = Slot(product=None, position=self.vacancy(spot=entity.home(trait)))
+            # connected the way the trait says; a trait that is both connects both ways
+            if trait.input:
+                # as an input
+                fresh.connectReader(factory=entity, trait=trait)
+            # and
+            if trait.output:
+                # as an output
+                fresh.connectWriter(factory=entity, trait=trait)
+            # which the factory uses from now on
+            entity.slots.add(fresh)
+            # and the diagram knows about
+            self.adopt(slot=fresh)
+        # the label of the factory says what it is, which has changed
+        self.forget(nodes=entity.labels)
+        # so make a new one
+        entity.refreshLabels()
+        # and file it
+        self.labels |= entity.labels
+        self.nodes.update((label.eid, label) for label in entity.labels)
+        # all done
+        return entity
+
     def moveGroup(self, nodes, anchor, position):
         """
         Move {nodes}, along with the slots that connect only to the factories among them, so that
