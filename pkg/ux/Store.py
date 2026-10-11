@@ -1294,6 +1294,51 @@ class Store(qed.component, family="qed.ux.store"):
         # and hand it off
         return diagram
 
+    def playgroundView(self):
+        """
+        How the playground is looked at, the same way by every client: the projection of its
+        diagram, and the trays of its panel that are open
+        """
+        # assemble it
+        return {**self._playgroundProjection, "trays": sorted(self._playgroundTrays)}
+
+    def playgroundProjectionSet(self, kind, azimuth, below):
+        """
+        Look at the playground {kind}, either "flat" or "iso", turned by {azimuth} quarter turns,
+        from {below} the floor or from above it, and hand back how it is looked at
+        """
+        # a projection i do not know
+        if kind not in ("flat", "iso"):
+            # make a channel
+            channel = journal.warning("qed.ux.playground")
+            # complain
+            channel.line(f"unknown projection '{kind}'")
+            channel.line(f"the playground is drawn either 'flat' or 'iso'")
+            # flush
+            channel.log()
+            # and leave the view as it is
+            return self.playgroundView()
+        # otherwise, record it, with the turns folded into a full turn
+        self._playgroundProjection = {"kind": kind, "azimuth": azimuth % 4, "below": below}
+        # and hand off the view
+        return self.playgroundView()
+
+    def playgroundTraySet(self, tray, expanded):
+        """
+        Open the tray named {tray} of the playground's panel when {expanded}, close it otherwise,
+        and hand back how the playground is looked at
+        """
+        # when it should be open
+        if expanded:
+            # add it to the open ones
+            self._playgroundTrays.add(tray)
+        # otherwise
+        else:
+            # take it out, if it was there
+            self._playgroundTrays.discard(tray)
+        # and hand off the view
+        return self.playgroundView()
+
     def amplitude(self):
         """
         The amplitude pipeline as a recipe: what each step must be, with the operator and the
@@ -1674,6 +1719,11 @@ class Store(qed.component, family="qed.ux.store"):
         self._told = 0.0
         # the pipeline diagram that belongs to no view, drawn on first use
         self._playground = None
+        # how every client looks at it: flat or isometric, the quarter turns, and from which side
+        self._playgroundProjection = {"kind": "flat", "azimuth": 0, "below": False}
+        # the trays of the playground's panel that are open, by name; the one that describes the
+        # picked factory starts open
+        self._playgroundTrays = {"picked"}
 
         # all done
         return
