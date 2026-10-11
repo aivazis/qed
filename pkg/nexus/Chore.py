@@ -86,10 +86,13 @@ class Chore(pyre.nexus.task):
             if value is None:
                 # so skip them
                 continue
-            # bound ones, e.g. the cell type of flat readers, travel as their family name, unless
-            # they know a richer specification that resolves back into them, the way a datatype
-            # carries its byte order
-            config[name] = value.spec if hasattr(value, "spec") else value.pyre_family()
+            # bound ones travel as their family name, except datatypes, e.g. the cell type of
+            # flat readers, whose specification resolves back into them byte order and all
+            config[name] = (
+                value.spec
+                if qed.protocols.datatype.pyre_isImplementedBy(value=value)
+                else value.pyre_family()
+            )
         # the selections of the reader pick the datasets the worker opens, and they are a
         # {kv}, which the walks above never visit; they are whatever the team side holds now,
         # what the user configured or what a survey reported and the team side adopted
