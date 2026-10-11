@@ -127,6 +127,8 @@ class Mutation(graphene.ObjectType):
     diagramMove = diagram.diagramMove.Field()
     # move a group of nodes, all or nothing
     diagramMoveGroup = diagram.diagramMoveGroup.Field()
+    # pin a factory to a class, or back to its protocol
+    diagramPin = diagram.diagramPin.Field()
     # remove a factory
     diagramRemove = diagram.diagramRemove.Field()
     # how the playground is looked at
