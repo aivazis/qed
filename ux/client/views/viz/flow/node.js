@@ -14,6 +14,7 @@ import { useCamera } from '~/widgets/camera'
 // local
 // hooks
 import { useDiagram } from './diagram'
+import { useFan } from './fan'
 import { useProjection } from './projection'
 import { useSelection } from './useSelection'
 import { useMoveNode } from './useMoveNode'
@@ -30,6 +31,8 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
     const { toICS } = useCamera()
     // access the selection
     const { selection, select } = useSelection()
+    // the fan, on a canvas that has one
+    const fan = useFan()
     // the mover
     const { move, step } = useMoveNode()
     // whether the server hears every step of a drag
@@ -166,6 +169,11 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
         }
         // pick me
         select(id, evt.shiftKey)
+        // the second click of a double click, or a click with <alt>, fans a factory out
+        if (fan && kind === "factory" && (evt.detail >= 2 || evt.altKey)) {
+            // so open it
+            fan.open(id)
+        }
         // all done
         return
     }
