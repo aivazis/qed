@@ -84,10 +84,13 @@ class Chore(pyre.nexus.task):
             if value is None:
                 # so skip them
                 continue
-            # bound ones, e.g. the cell type of flat readers, travel as their family name, unless
-            # they know a richer specification that resolves back into them, the way a datatype
-            # carries its byte order
-            config[name] = value.spec if hasattr(value, "spec") else value.pyre_family()
+            # bound ones travel as their family name, except datatypes, e.g. the cell type of
+            # flat readers, whose specification resolves back into them byte order and all
+            config[name] = (
+                value.spec
+                if qed.protocols.datatype.pyre_isImplementedBy(value=value)
+                else value.pyre_family()
+            )
         # a worker cannot reach the archive that manages a reader, but it can present what the
         # archive hands out; so ask the reader for its grant now, while the archive is within
         # reach. this must not depend on the reader having made first contact in this
