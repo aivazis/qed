@@ -12,8 +12,8 @@ import sys
 import qed
 
 
-# a complex number implemented as a pair of floats
-class Datatype(qed.flow.product, implements=qed.protocols.datatype):
+# the layout of the cells of a dataset; a setting, not a product, so a plain component
+class Datatype(qed.component, implements=qed.protocols.datatype):
     """
     The base class for all datatypes
     """
