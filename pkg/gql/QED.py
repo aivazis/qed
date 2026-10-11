@@ -24,6 +24,7 @@ from .journal.JournalChannel import JournalChannel
 from .diagram.CatalogEntry import CatalogEntry
 from .diagram.CatalogGroup import CatalogGroup
 from .diagram.FlowDiagram import FlowDiagram
+from .diagram.PlaygroundView import PlaygroundView
 from . import views
 
 
@@ -50,6 +51,8 @@ class QED(graphene.ObjectType):
     catalog = graphene.List(graphene.NonNull(CatalogGroup), required=True)
     # the pipeline diagram that belongs to no view
     playground = graphene.Field(FlowDiagram, required=True)
+    # and how every client looks at it
+    playgroundView = graphene.Field(PlaygroundView, required=True)
 
     # resolvers
     @staticmethod
@@ -90,6 +93,14 @@ class QED(graphene.ObjectType):
         """
         # the store keeps it
         return store.playground()
+
+    @staticmethod
+    def resolve_playgroundView(store, info, **kwds):
+        """
+        Retrieve how every client looks at the playground
+        """
+        # the store keeps it
+        return store.playgroundView()
 
     @staticmethod
     def resolve_catalog(store, info, **kwds):

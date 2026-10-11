@@ -102,6 +102,9 @@ class Mutation(graphene.ObjectType):
     diagramMove = diagram.diagramMove.Field()
     diagramMoveGroup = diagram.diagramMoveGroup.Field()
     diagramRemove = diagram.diagramRemove.Field()
+    # how the playground is looked at
+    playgroundProjectionSet = diagram.playgroundProjectionSet.Field()
+    playgroundTraySet = diagram.playgroundTraySet.Field()
 
     # data archive connection management
     connectArchive = ConnectArchive.Field()
