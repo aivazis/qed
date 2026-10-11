@@ -1300,7 +1300,11 @@ class Store(qed.component, family="qed.ux.store"):
         diagram, and the trays of its panel that are open
         """
         # assemble it
-        return {**self._playgroundProjection, "trays": sorted(self._playgroundTrays)}
+        return {
+            **self._playgroundProjection,
+            "trays": sorted(self._playgroundTrays),
+            "camera": self._playgroundCamera,
+        }
 
     def playgroundProjectionSet(self, kind, azimuth, below):
         """
@@ -1320,6 +1324,19 @@ class Store(qed.component, family="qed.ux.store"):
             return self.playgroundView()
         # otherwise, record it, with the turns folded into a full turn
         self._playgroundProjection = {"kind": kind, "azimuth": azimuth % 4, "below": below}
+        # the point the cameras looked at belongs to the old projection, so forget it; every
+        # client centers its camera on the diagram again, as it does when the projection changes
+        self._playgroundCamera = None
+        # and hand off the view
+        return self.playgroundView()
+
+    def playgroundCameraSet(self, x, y, z):
+        """
+        Point every client's camera at the diagram point {x}, {y} at the middle of its view, at
+        zoom {z}, and hand back how the playground is looked at
+        """
+        # record it
+        self._playgroundCamera = {"x": x, "y": y, "z": z}
         # and hand off the view
         return self.playgroundView()
 
@@ -1724,6 +1741,9 @@ class Store(qed.component, family="qed.ux.store"):
         # the trays of the playground's panel that are open, by name; the one that describes the
         # picked factory starts open
         self._playgroundTrays = {"picked"}
+        # where every client's camera looks on it: the diagram point at the middle of the view and
+        # the zoom, once some client has moved its camera
+        self._playgroundCamera = None
 
         # all done
         return
