@@ -14,6 +14,7 @@ from .DiagramAdd import DiagramAdd as diagramAdd
 from .DiagramMove import DiagramMove as diagramMove
 from .DiagramMoveGroup import DiagramMoveGroup as diagramMoveGroup
 from .DiagramRemove import DiagramRemove as diagramRemove
+from .PlaygroundCameraSet import PlaygroundCameraSet as playgroundCameraSet
 from .PlaygroundProjectionSet import PlaygroundProjectionSet as playgroundProjectionSet
 from .PlaygroundTraySet import PlaygroundTraySet as playgroundTraySet
 

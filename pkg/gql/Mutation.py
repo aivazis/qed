@@ -130,6 +130,7 @@ class Mutation(graphene.ObjectType):
     # remove a factory
     diagramRemove = diagram.diagramRemove.Field()
     # how the playground is looked at
+    playgroundCameraSet = diagram.playgroundCameraSet.Field()
     playgroundProjectionSet = diagram.playgroundProjectionSet.Field()
     playgroundTraySet = diagram.playgroundTraySet.Field()
 
