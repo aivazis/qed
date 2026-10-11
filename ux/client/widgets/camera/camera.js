@@ -46,13 +46,14 @@ const Lens = ({ style, children }) => {
 }
 
 
-// assemble the camera
+// assemble the camera; with {onSettle}, it is shared: see the provider
 export const Camera = React.forwardRef((
-    { viewport, scale = 25, focus, focusKey, style, children }, viewRef
+    { viewport, scale = 25, focus, focusKey, shared, onSettle, style, children }, viewRef
 ) => {
     // set up the context provider and install the lens
     return (
-        <Provider ref={viewRef} viewport={viewport} scale={scale} focus={focus} focusKey={focusKey}>
+        <Provider ref={viewRef} viewport={viewport} scale={scale} focus={focus} focusKey={focusKey}
+            shared={shared} onSettle={onSettle}>
             <Lens style={style}>
                 {children}
             </Lens>

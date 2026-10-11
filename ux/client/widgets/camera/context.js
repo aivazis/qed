@@ -9,12 +9,134 @@
 import React from 'react'
 
 
-// the provider factory
-export const Provider = React.forwardRef(({ viewport, scale, focus, focusKey, children }, clientRef) => {
+// how long the camera must sit still before a move is over and is told to the server
+const SETTLE = 150
+// how long to wait for the server to say back what it was told before believing it again
+const PATIENCE = 2000
+// how close two places must be to be the same one, in diagram units and in zoom
+const NEAR = 1e-6
+
+
+// the provider factory; with {onSettle}, the camera is shared: every move of the user is told to
+// {onSettle}, once it is over, as the diagram point at the middle of my area and the zoom, and
+// the place in {shared}, where every client's camera looks, is adopted whenever the user is not
+// moving the camera
+export const Provider = React.forwardRef((
+    { viewport, scale, focus, focusKey, shared, onSettle, children }, clientRef
+) => {
     // save the external length scale
     const els = scale
     // build a camera
     const [camera, setCamera] = React.useState({ x: 0, y: 0, z: 1, phi: 0 })
+    // the camera as of the latest drawing, for the timers that outlive it
+    const latest = React.useRef(camera)
+    // keep it current
+    latest.current = camera
+    // whether the user is moving the camera
+    const moving = React.useRef(false)
+    // the timer that ends a move once the camera sits still
+    const settler = React.useRef(null)
+    // the place i last told the server about, until it says it back
+    const told = React.useRef(null)
+    // the timer that stops waiting for it
+    const waiting = React.useRef(null)
+    // the middle of my area, in units of the external length scale
+    const middle = () => {
+        // get the extent of my area
+        const { width = 0, height = 0 } = clientRef.current?.getBoundingClientRect() ?? {}
+        // and halve it
+        return { mx: width / (2 * els), my: height / (2 * els) }
+    }
+    // the diagram point at the middle of my area under {camera}, and its zoom
+    const placeOf = camera => {
+        // the middle of my area
+        const { mx, my } = middle()
+        // undo the pan and the zoom
+        return { x: (mx - camera.x) * camera.z, y: (my - camera.y) * camera.z, z: camera.z }
+    }
+    // the pan and zoom that put the diagram point {x, y} at the middle of my area, at zoom {z}
+    const aim = ({ x, y, z }) => {
+        // the middle of my area
+        const { mx, my } = middle()
+        // solve for the pan
+        return { x: mx - x / z, y: my - y / z, z }
+    }
+    // whether two places are the same one
+    const same = (a, b) =>
+        Math.abs(a.x - b.x) < NEAR && Math.abs(a.y - b.y) < NEAR && Math.abs(a.z - b.z) < NEAR
+    // the user moved the camera: once it sits still, tell my owner where it looks
+    const moved = () => {
+        // unless the camera is not shared
+        if (!onSettle) {
+            // in which case there is nobody to tell
+            return
+        }
+        // a move is under way
+        moving.current = true
+        // and it is not over until the camera sits still
+        clearTimeout(settler.current)
+        // so wait for that
+        settler.current = setTimeout(() => {
+            // the move is over
+            moving.current = false
+            // where the camera looks now
+            const place = placeOf(latest.current)
+            // is what the server will be told, and what it should say back
+            told.current = place
+            // unless it never does, in which case i stop waiting for it
+            clearTimeout(waiting.current)
+            // after a while
+            waiting.current = setTimeout(() => { told.current = null }, PATIENCE)
+            // tell my owner
+            onSettle(place)
+            // all done
+            return
+        }, SETTLE)
+        // all done
+        return
+    }
+    // adopt where every client's camera looks, unless the user is moving mine
+    React.useEffect(() => {
+        // if the camera is not shared, or nobody has moved a camera yet
+        if (!shared) {
+            // there is nothing to adopt
+            return
+        }
+        // if the user is moving mine
+        if (moving.current) {
+            // what the user does wins
+            return
+        }
+        // if i am waiting for the server to say back where i told it my camera looks
+        if (told.current) {
+            // and this is it
+            if (same(shared, told.current)) {
+                // the wait is over
+                told.current = null
+                // and the timer that would have ended it is not needed
+                clearTimeout(waiting.current)
+            }
+            // either way, this is either what i have, or older news, e.g. a refetch that left
+            // before the server heard from me
+            return
+        }
+        // if i am already looking there
+        if (same(shared, placeOf(latest.current))) {
+            // there is nothing to do
+            return
+        }
+        // otherwise, look there, keeping the orientation
+        setCamera(camera => ({ ...camera, ...aim(shared) }))
+        // all done
+        return
+    }, [shared?.x, shared?.y, shared?.z])
+    // let go of the timers when i go away
+    React.useEffect(() => () => {
+        // the end of a move
+        clearTimeout(settler.current)
+        // and the wait for the server
+        clearTimeout(waiting.current)
+    }, [])
     // the camera that puts the {focus} at the center of my area, at the given zoom; without a
     // focus, or before my area has a size, the origin goes to the top left corner
     const home = (z = 1) => {
@@ -78,6 +200,8 @@ export const Provider = React.forwardRef(({ viewport, scale, focus, focusKey, ch
     // camera control
     // movement along the x-y plane
     const pan = ({ dx = 0, dy = 0 }) => {
+        // it is a move of the user
+        moved()
         // adjust the camera
         setCamera(camera => ({
             // the current state
@@ -95,6 +219,8 @@ export const Provider = React.forwardRef(({ viewport, scale, focus, focusKey, ch
     // the picture smaller; {anchor} is in screen coordinates, and the center of my area stands in
     // when there is none
     const zoom = (dz, anchor = null) => {
+        // it is a move of the user
+        moved()
         // get the extent of my area
         const { left = 0, top = 0, width = 0, height = 0 } = clientRef.current?.getBoundingClientRect() ?? {}
         // the anchor relative to my area, in units of the external length scale
@@ -193,6 +319,8 @@ export const Provider = React.forwardRef(({ viewport, scale, focus, focusKey, ch
         }
         // reset the camera
         if (key == "s") {
+            // it is a move of the user
+            moved()
             // go back to the focus at the original zoom, keeping the orientation
             setCamera(camera => ({ ...camera, ...home() }))
         }
