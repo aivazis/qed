@@ -48,19 +48,21 @@ export const Nodes = ({ qed }) => {
 }
 
 
-// the factories on offer, one tray per protocol
-export const Palette = ({ catalog }) => {
+// the factories on offer, one tray per protocol; with {trays}, whoever owns them decides which
+// are open, and hears about every toggle
+export const Palette = ({ catalog, trays }) => {
     // render
     return (
         <>
-            {catalog.map(group => <Group key={group.family} group={group} />)}
+            {catalog.map(group => <Group key={group.family} group={group} trays={trays} />)}
         </>
     )
 }
 
 
-// the description of the factory picked on {diagram}, in a tray of its own
-export const Picked = ({ diagram }) => {
+// the description of the factory picked on {diagram}, in a tray of its own, which starts open;
+// with {trays}, whoever owns them decides whether it is open, and hears about every toggle
+export const Picked = ({ diagram, trays }) => {
     // the nodes picked on the diagram
     const { selection } = useSelection()
     // the factories on the diagram
@@ -69,7 +71,8 @@ export const Picked = ({ diagram }) => {
     const factory = factories.find(candidate => selection.includes(candidate.id)) ?? null
     // render
     return (
-        <Tray title="picked" initially={true} scale={0.5} data-qed-palette="picked">
+        <Tray title="picked" initially={true} scale={0.5} data-qed-palette="picked"
+            expanded={trays?.isOpen("picked")} onToggle={trays?.toggle("picked")}>
             {/* without a pick, say how to make one */}
             {factory === null && <Note>pick a factory on the diagram to see what it does</Note>}
             {/* otherwise, describe it */}
@@ -90,14 +93,15 @@ export const Note = styled.div`
 `
 
 
-// a protocol and the factories that implement it, in a tray of their own
-const Group = ({ group }) => {
+// a protocol and the factories that implement it, in a tray of their own; with {trays}, whoever
+// owns them decides whether it is open
+const Group = ({ group, trays }) => {
     // the count of the entries in the group, next to its title
     const count = <Count>{group.entries.length}</Count>
     // render
     return (
-        <Tray title={group.name} scale={0.5} controls={count}
-            data-qed-palette={group.family}>
+        <Tray title={group.name} scale={0.5} controls={count} data-qed-palette={group.family}
+            expanded={trays?.isOpen(group.family)} onToggle={trays?.toggle(group.family)}>
             <Entries>
                 {group.entries.map(entry => <Entry key={entry.family} entry={entry} />)}
             </Entries>
