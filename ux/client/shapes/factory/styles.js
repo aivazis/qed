@@ -30,6 +30,17 @@ export default {
         fill: paint,
     },
 
+    // the hub where the connectors meet, as thin as the plexes where they attach
+    hub: {
+        // inherit
+        ...style.icon,
+        // stroke
+        stroke: ink,
+        strokeWidth: 1,
+        // fill
+        fill: paint,
+    },
+
     // decorative touches
     decoration: {
         // inherit
