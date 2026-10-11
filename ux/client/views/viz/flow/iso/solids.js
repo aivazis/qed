@@ -40,19 +40,20 @@ export const FloorPlex = ({ size = 0.125, paint }) => {
 }
 
 
-// a terminal, the end of a factory that has no slots, as a circle with a cross lying on the floor
-export const FloorTerminal = ({ radius = 0.5, arm = 0.2, paint }) => {
+// a terminal, the end of a factory that has no slots, as a puck with a cross on the cap that faces
+// the viewer; {paint} has the cap and the side of the puck, and the ink of the cross
+export const TerminalPuck = ({ radius = 0.5, arm = 0.2, height = PUCK_HEIGHT, paint }) => {
     // the projection
-    const { view } = useProjection()
-    // the circle projects onto an ellipse with these semi axes, whichever way the view is turned
-    const [rx, ry] = [radius * Math.cos(Math.PI / 6) * Math.SQRT2, radius * 0.5 * Math.SQRT2]
+    const { view, below } = useProjection()
+    // the cross lies on the cap that faces the viewer: the top from above, the bottom from below
+    const z = below ? 0 : height
     // the arms of the cross
-    const [a, b, c, d] = [{ x: -arm, y: -arm }, { x: arm, y: arm }, { x: -arm, y: arm }, { x: arm, y: -arm }].map(view)
+    const [a, b, c, d] = [{ x: -arm, y: -arm, z }, { x: arm, y: arm, z }, { x: -arm, y: arm, z }, { x: arm, y: -arm, z }].map(view)
     // render
     return (
         <>
-            <ellipse cx="0" cy="0" rx={rx} ry={ry} style={paint.decoration} />
-            <path d={`M ${a.x} ${a.y} L ${b.x} ${b.y} M ${c.x} ${c.y} L ${d.x} ${d.y}`} style={paint.icon} />
+            <Puck radius={radius} height={height} paint={paint} />
+            <path d={`M ${a.x} ${a.y} L ${b.x} ${b.y} M ${c.x} ${c.y} L ${d.x} ${d.y}`} style={paint.cross} />
         </>
     )
 }
