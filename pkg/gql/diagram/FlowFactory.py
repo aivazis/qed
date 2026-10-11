@@ -32,6 +32,8 @@ class FlowFactory(graphene.ObjectType):
     id = graphene.ID(required=True)
     # the family of the factory, which says what it does
     family = graphene.String(required=True)
+    # the family of the protocol it satisfies, which names the classes it can be pinned to
+    protocol = graphene.String(required=True)
     # how far down it is pinned: "protocol", "class", or "instance"
     level = graphene.String(required=True)
     # its documentation
@@ -64,6 +66,14 @@ class FlowFactory(graphene.ObjectType):
         family = (node.protocol if node.pin is None else node.pin).pyre_family()
         # a protocol that is a building block has none
         return family or ""
+
+    @staticmethod
+    def resolve_protocol(factory, info, **kwds):
+        """
+        Get the family of the protocol the factory satisfies
+        """
+        # a protocol that is a building block has none
+        return factory.node.protocol.pyre_family() or ""
 
     @staticmethod
     def resolve_level(factory, info, **kwds):
