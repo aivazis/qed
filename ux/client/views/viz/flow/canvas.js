@@ -47,6 +47,23 @@ export const Canvas = ({ diagram: diagramRef, live = false, view = { kind: "flat
     const { project } = projection
     // the camera looks at the middle of the diagram, as projected
     const focus = center(diagram, project)
+    // whether i have drawn before, so that the first drawing does not take the focus
+    const drawn = React.useRef(false)
+    // a change of the projection comes from a click on the controls of the view, which takes the
+    // focus away from me; take it back, so the keys of the camera keep working in the new view
+    React.useEffect(() => {
+        // the first drawing leaves the focus where it is
+        if (!drawn.current) {
+            // but remembers that it happened
+            drawn.current = true
+            // and stops
+            return
+        }
+        // otherwise, take the focus, without scrolling me into view
+        ref.current?.focus({ preventScroll: true })
+        // all done
+        return
+    }, [projection.key])
     // the nodes a drag can land on, with what decides whether it may
     const nodes = occupants(diagram)
     // the factories each slot connects to
