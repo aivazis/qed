@@ -35,12 +35,13 @@ export const Playground = ({ qed }) => {
     // unpack the diagram, the factories on offer, and how every client looks at them
     const { playground, catalog, playgroundView } = useFragment(playgroundGetDiagramFragment, qed)
     // the way the diagram is drawn: flat, or isometric, turned by quarter turns, seen from above
-    // or below; the server keeps it, so every client draws it the same way
-    const { kind, azimuth, below, trays: open } = playgroundView
+    // or below, and where the cameras look; the server keeps it, so every client draws it the
+    // same way
+    const { kind, azimuth, below, trays: open, camera } = playgroundView
     // assemble it
     const view = { kind, azimuth, below }
     // the requests that change it
-    const { project, tray } = usePlaygroundView()
+    const { project, point, tray } = usePlaygroundView()
     // every change made here hands the keys back to the canvas, since the click that made it took
     // them away; a change made by another client leaves the focus where it is
     const [focus, setFocus] = React.useState(0)
@@ -93,7 +94,8 @@ export const Playground = ({ qed }) => {
             <Flex.Panel auto={true} style={styles.flex}>
                 <Viewport>
                     <Tab view={view} adjust={adjust} />
-                    <Canvas diagram={playground} view={view} focusOn={focus} />
+                    <Canvas diagram={playground} view={view} focusOn={focus}
+                        camera={camera} onCamera={point} />
                 </Viewport>
             </Flex.Panel>
         </Flex.Box>
@@ -144,6 +146,7 @@ const playgroundGetDiagramFragment = graphql`
             azimuth
             below
             trays
+            camera { x y z }
         }
         # the diagram
         playground {
