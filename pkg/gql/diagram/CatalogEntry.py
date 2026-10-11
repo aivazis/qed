@@ -12,7 +12,7 @@ import graphene
 # a factory the palette offers
 class CatalogEntry(graphene.ObjectType):
     """
-    A factory that can be placed on a pipeline diagram
+    A factory that can be placed on a pipeline diagram: a protocol, or a class that implements it
     """
 
     # the fields
@@ -20,6 +20,9 @@ class CatalogEntry(graphene.ObjectType):
     family = graphene.String(required=True)
     # its short name
     name = graphene.String(required=True)
+    # how far down it is pinned when placed: "protocol" for the protocol itself, "class" for one
+    # of its implementers
+    level = graphene.String(required=True)
     # its documentation
     doc = graphene.String()
     # the names of its input and output slots, in the order it declares them

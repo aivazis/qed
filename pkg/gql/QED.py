@@ -95,35 +95,26 @@ class QED(graphene.ObjectType):
         # the store keeps it
         return store.playground()
 
-    # journal channels
     @staticmethod
     def resolve_catalog(store, info, **kwds):
         """
         Describe the factories that can be placed on a pipeline diagram, grouped by the protocol
-        they implement, in the order data meets them along a pipeline
+        they implement, in the order data meets them along a pipeline; each group starts with the
+        protocol itself
         """
-        # the protocols, in pipeline order
-        protocols = (
-            qed.viz.reader,
-            qed.viz.accessor,
-            qed.viz.slicer,
-            qed.viz.operator,
-            qed.viz.normalizer,
-            qed.viz.filter,
-            qed.viz.colormap,
-            qed.viz.encoder,
-        )
         # the groups
         groups = []
-        # go through the protocols
-        for protocol in protocols:
+        # go through the protocols, in pipeline order
+        for protocol in store.palette():
             # find the factories that implement it; some are reachable more than one way
             found = {
                 implementer.pyre_family(): implementer
                 for _, _, implementer in protocol.pyre_locateAllImplementers(namespace="pyre")
             }
-            # describe them, sorted by family
-            entries = [QED.describe(implementer=found[family]) for family in sorted(found)]
+            # describe the protocol first, followed by its implementers, sorted by family
+            entries = [QED.describe(source=protocol)] + [
+                QED.describe(source=found[family]) for family in sorted(found)
+            ]
             # and add the group
             groups.append(
                 CatalogGroup(
@@ -136,21 +127,32 @@ class QED(graphene.ObjectType):
         return groups
 
     @staticmethod
-    def describe(implementer):
+    def describe(source):
         """
-        Describe a factory the palette offers
+        Describe an entry of the palette: a protocol, or a factory that implements one
         """
         # a foundry hands out the class it stands for
-        factory = implementer() if isinstance(implementer, qed.foundry) else implementer
+        factory = source() if isinstance(source, qed.foundry) else source
+        # a protocol is placed unpinned; anything else is placed pinned to its class
+        protocol = issubclass(factory, qed.protocol)
+        # its slots are its facilities typed by a specification, in the order it declares them
+        slots = [
+            trait
+            for trait in factory.pyre_facilities()
+            if issubclass(trait.protocol, qed.flow.specification)
+        ]
         # describe it
         return CatalogEntry(
             family=factory.pyre_family(),
-            name=factory.pyre_family().split(".")[-1],
+            # a protocol is named the way the diagram names a factory pinned to nothing
+            name=factory.__name__.lower() if protocol else factory.pyre_family().split(".")[-1],
+            level="protocol" if protocol else "class",
             doc=inspect.cleandoc(factory.__doc__ or ""),
-            inputs=[trait.name for trait in factory.pyre_inputTraits],
-            outputs=[trait.name for trait in factory.pyre_outputTraits],
+            inputs=[trait.name for trait in slots if trait.input],
+            outputs=[trait.name for trait in slots if trait.output],
         )
 
+    # journal channels
     def resolve_journal(store, info, **kwds):
         """
         Generate the journal channels the server knows about, as (severity, name) pairs
