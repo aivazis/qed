@@ -9,16 +9,15 @@
 import React from 'react'
 
 // project
-// the paint of the plexes and the terminals
+// the paint of the plexes
 import plexPaint from '~/shapes/plex/styles'
-import terminalPaint from '~/shapes/terminal/styles'
 
 // local
 // the projection
 import { useProjection } from '../projection'
 // components
 import { Node } from '../node'
-import { FloorPlex, FloorTerminal, PUCK_HEIGHT, Puck } from './solids'
+import { FloorPlex, PUCK_HEIGHT, Puck, TerminalPuck } from './solids'
 // paint
 import styles from '../styles'
 
@@ -33,10 +32,10 @@ export const IsoFactory = ({ id, at, family, level, inputs, outputs, selected })
     // the plexes sit a cell away along the x axis of the factory, on the floor
     const cell = 2
     const [west, east] = [project({ x: -cell, y: 0, z: 0 }), project({ x: cell, y: 0, z: 0 })]
-    // an end with slots gets a plex, one without gets a terminal
+    // an end with slots gets a plex on the floor, one without gets a terminal puck
     const end = slots => slots
         ? <FloorPlex paint={plexPaint} />
-        : <FloorTerminal paint={terminalPaint} />
+        : <TerminalPuck paint={styles.iso.terminal} />
     // render
     return (
         <Node
@@ -45,8 +44,8 @@ export const IsoFactory = ({ id, at, family, level, inputs, outputs, selected })
         >
             {/* the axis that joins the plexes */}
             <line x1={west.x} y1={west.y} x2={east.x} y2={east.y} style={styles.connector} />
-            {/* the plexes where the slots connect, or terminals at an end without slots, lying
-                on the floor */}
+            {/* the plexes where the slots connect, lying on the floor, or terminal pucks at an
+                end without slots */}
             <g transform={`translate(${west.x} ${west.y})`}>{end(inputs)}</g>
             <g transform={`translate(${east.x} ${east.y})`}>{end(outputs)}</g>
             {/* the puck, in the color of factories, painted by how far down i am pinned */}
