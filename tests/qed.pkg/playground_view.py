@@ -7,8 +7,8 @@
 
 
 """
-Exercise how every client looks at the playground: its projection and the trays of its panel
-that are open, read and changed through the schema
+Exercise how every client looks at the playground: its projection, the trays of its panel that
+are open, and where the cameras look, read and changed through the schema
 """
 
 # externals
@@ -29,6 +29,7 @@ def storeOf():
     store = types.SimpleNamespace(
         _playgroundProjection={"kind": "flat", "azimuth": 0, "below": False},
         _playgroundTrays={"picked"},
+        _playgroundCamera=None,
     )
     # how the playground is looked at
     store.playgroundView = lambda: qed.ux.store.playgroundView(store)
@@ -36,6 +37,8 @@ def storeOf():
     store.playgroundProjectionSet = lambda **kwds: qed.ux.store.playgroundProjectionSet(
         store, **kwds
     )
+    # pointing the cameras
+    store.playgroundCameraSet = lambda **kwds: qed.ux.store.playgroundCameraSet(store, **kwds)
     # and opening or closing a tray
     store.playgroundTraySet = lambda **kwds: qed.ux.store.playgroundTraySet(store, **kwds)
     # hand it off
@@ -46,7 +49,7 @@ def storeOf():
 reading = """
     query {
         qed {
-            playgroundView { id kind azimuth below trays }
+            playgroundView { id kind azimuth below trays camera { x y z } }
         }
     }
 """
@@ -54,7 +57,15 @@ reading = """
 projecting = """
     mutation ($payload: PlaygroundProjectionSetInput!) {
         playgroundProjectionSet(input: $payload) {
-            view { id kind azimuth below trays }
+            view { id kind azimuth below trays camera { x y z } }
+        }
+    }
+"""
+# the move of the cameras
+pointing = """
+    mutation ($payload: PlaygroundCameraSetInput!) {
+        playgroundCameraSet(input: $payload) {
+            view { id kind azimuth below trays camera { x y z } }
         }
     }
 """
@@ -62,7 +73,7 @@ projecting = """
 toggling = """
     mutation ($payload: PlaygroundTraySetInput!) {
         playgroundTraySet(input: $payload) {
-            view { id kind azimuth below trays }
+            view { id kind azimuth below trays camera { x y z } }
         }
     }
 """
@@ -71,8 +82,9 @@ toggling = """
 # the driver
 def test():
     """
-    Read the view of a fresh playground, turn it isometric and around, open and close trays, and
-    check that a projection it does not know leaves it as it is
+    Read the view of a fresh playground, turn it isometric and around, open and close trays, point
+    the cameras and forget where they looked when the projection changes, and check that a
+    projection it does not know leaves the view as it is
     """
     # make a store
     store = storeOf()
@@ -98,6 +110,7 @@ def test():
         "azimuth": 0,
         "below": False,
         "trays": ["picked"],
+        "camera": None,
     }
     # turn it isometric, five quarter turns to the left, seen from below
     payload = {"kind": "iso", "azimuth": -5, "below": True}
@@ -116,6 +129,20 @@ def test():
         run(toggling, {"payload": {"tray": tray, "expanded": False}})
     # the one left open is the only one
     assert run(reading)["qed"]["playgroundView"]["trays"] == ["pyre.viz.colormaps"]
+
+    # point the cameras
+    payload = {"x": 12.5, "y": -3.0, "z": 0.75}
+    # and every reader sees where they look
+    view = run(pointing, {"payload": payload})["playgroundCameraSet"]["view"]
+    assert view["camera"] == payload
+    assert run(reading)["qed"]["playgroundView"]["camera"] == payload
+    # a change of projection forgets it, since the point belongs to the old projection
+    payload = {"kind": "flat", "azimuth": 0, "below": False}
+    view = run(projecting, {"payload": payload})["playgroundProjectionSet"]["view"]
+    assert view["camera"] is None
+    # put the projection back where the rest of the test expects it
+    payload = {"kind": "iso", "azimuth": 3, "below": True}
+    run(projecting, {"payload": payload})
 
     # a projection it does not know is reported, so quiet the report
     journal.warning("qed.ux.playground").deactivate()
