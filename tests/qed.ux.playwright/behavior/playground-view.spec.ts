@@ -10,9 +10,9 @@ import { test, expect } from "@playwright/test"
 import type { Page } from "@playwright/test"
 
 
-// how the playground is looked at is server state: the projection of its diagram and the trays
-// of its panel that are open. a change made in one window shows in every other one, and only the
-// window that made it takes the keys back onto its canvas. this lives in the behavior project
+// how the playground is looked at is server state: the projection of its diagram, the trays of
+// its panel that are open, and where the cameras look. a change made in one window shows in
+// every other one, and only the window that made it takes the keys back onto its canvas. this lives in the behavior project
 // (serial, after the gate) and puts the view back when it is done
 
 // set the view the way a fresh store has it: flat, unturned, from above, only the picked tray open
@@ -40,6 +40,26 @@ const reset = async (page: Page) => {
             },
         })
     }
+}
+
+// the playground diagram: its id and its factories
+const playground = async (page: Page) => {
+    // ask
+    const response = await page.request.post("graphql", {
+        data: { query: "{ qed { playground { id factories { id } } } }" },
+    })
+    // unpack
+    const { data } = await response.json()
+    // and hand it back
+    return data.qed.playground
+}
+
+// where the grip of the first factory sits on the screen
+const grip = async (page: Page) => {
+    // find it
+    const box = await page.locator("[data-qed-kind=factory] [data-qed-grip]").first().boundingBox()
+    // and its middle
+    return { x: box!.x + box!.width / 2, y: box!.y + box!.height / 2 }
 }
 
 // the header of the tray of a palette group, by the family of its protocol
@@ -101,6 +121,62 @@ test.describe.serial("every window looks at the playground the same way", () => 
         await header(two, "pyre.viz.readers").click()
         await expect(header(one, "pyre.viz.readers")).toHaveAttribute("aria-expanded", "false")
 
+        // all done
+        await one.close()
+        await two.close()
+    })
+
+    test("a move of the camera in one window shows in another", async ({ browser }) => {
+        // two windows of the same size on the playground
+        const one = await browser.newPage({ viewport: { width: 1200, height: 800 } })
+        const two = await browser.newPage({ viewport: { width: 1200, height: 800 } })
+        await one.goto("/about", { waitUntil: "load" })
+        // start from a known view, flat, which also forgets where the cameras looked
+        await reset(one)
+        // put a reader on the playground, so there is something to look at
+        const { id: diagram } = await playground(one)
+        await one.request.post("graphql", {
+            data: {
+                query: "mutation ($input: DiagramAddInput!) { diagramAdd(input: $input) { diagram { id } } }",
+                variables: { input: { diagram, family: "pyre.viz.readers", x: 0, y: 0, z: 0 } },
+            },
+        })
+        await one.reload({ waitUntil: "load" })
+        await two.goto("/about", { waitUntil: "load" })
+        // both show it
+        for (const page of [one, two]) {
+            await page.locator("[data-qed-kind=factory]").first().waitFor({ timeout: 10_000 })
+        }
+
+        // the first window zooms in with its keys, after taking them onto its canvas
+        await one.locator("[data-qed-diagram]").click({ position: { x: 20, y: 20 } })
+        for (let i = 0; i < 3; i++) await one.keyboard.press("z")
+        // once the move is over, the second window looks at the same place, at the same zoom
+        const there = async () => {
+            const [a, b] = [await grip(one), await grip(two)]
+            return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y))
+        }
+        await expect.poll(there, { timeout: 5_000 }).toBeLessThan(1)
+
+        // the second window pans with its wheel
+        const before = await grip(one)
+        const box = (await two.locator("[data-qed-diagram]").boundingBox())!
+        await two.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+        await two.mouse.wheel(120, 80)
+        // and the first one follows
+        await expect.poll(async () => (await grip(one)).x, { timeout: 5_000 }).not.toBeCloseTo(before.x, 0)
+        await expect.poll(there, { timeout: 5_000 }).toBeLessThan(1)
+
+        // take the reader off the playground
+        const { factories } = await playground(one)
+        for (const { id } of factories) {
+            await one.request.post("graphql", {
+                data: {
+                    query: "mutation ($input: DiagramRemoveInput!) { diagramRemove(input: $input) { diagram { id } } }",
+                    variables: { input: { diagram, node: id } },
+                },
+            })
+        }
         // all done
         await one.close()
         await two.close()
