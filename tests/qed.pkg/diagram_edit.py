@@ -28,7 +28,9 @@ def storeOf(diagram):
         findDiagram=lambda relay: diagram if relay == diagram.relay else None,
         relay=diagram.relay,
     )
-    # with the store's own search for factories
+    # with the protocols the store offers
+    store.palette = lambda: qed.ux.store.palette(store)
+    # and its own search for factories
     store.implementer = lambda **kwds: qed.ux.store.implementer(store, **kwds)
     # hand it off
     return store
