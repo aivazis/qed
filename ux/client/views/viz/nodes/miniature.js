@@ -17,8 +17,11 @@ import diagram from '../flow/styles'
 
 // a factory drawn the way the diagram draws it, small: its body, its hub, and its slots fanned out
 // on either side, connected the way the diagram connects them; {inputs} and {outputs} are the names
-// of its slots, and {scale} is the size of a diagram unit in pixels
-export const Miniature = React.forwardRef(({ inputs, outputs, scale = 5 }, ref) => {
+// of its slots, {level} says how far down it is pinned, and {scale} is the size of a diagram unit
+// in pixels
+export const Miniature = React.forwardRef(({ inputs, outputs, level, scale = 5 }, ref) => {
+    // the body is painted the way the diagram paints a factory pinned that far down
+    const paint = { ...diagram, icon: { ...diagram.icon, ...diagram.levels.factory[level]?.icon } }
     // the vertical places of {count} slots, the way the diagram spreads them around the hub
     const places = count => Array.from({ length: count }, (_, idx) => 2 * (2 * idx + 1 - count))
     // the slots on either side
@@ -44,7 +47,7 @@ export const Miniature = React.forwardRef(({ inputs, outputs, scale = 5 }, ref) 
             {left.map(y => <g key={`slot:in:${y}`} transform={`translate(-5 ${y})`}><Slot /></g>)}
             {right.map(y => <g key={`slot:out:${y}`} transform={`translate(5 ${y})`}><Slot /></g>)}
             {/* the body and the hub */}
-            <Factory cell={2} style={diagram} />
+            <Factory cell={2} style={paint} />
             {/* the plexes, or a terminal on a side without slots */}
             <g transform="translate(-2 0)">{left.length ? <Plex /> : <Terminal />}</g>
             <g transform="translate(2 0)">{right.length ? <Plex /> : <Terminal />}</g>
