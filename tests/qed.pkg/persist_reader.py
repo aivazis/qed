@@ -158,6 +158,32 @@ assert saved.get("second") is None
 before = text()
 store.persistSource(name="first")
 assert text() == before
+# and its cell, which its entry spells completely, got no section of its own
+assert doc().find("first.cell", section=True) is None
+
+# a reader whose cells are in big-endian order, the way the session makes one
+swapped = qed.readers.native.flat(name="swapped", uri=f"file:{raster}", shape=(65, 65), cell=">c16")
+# connect it
+store.connectSource(source=swapped)
+# and save it
+store.persistSource(name="swapped")
+saved = doc()
+# its cell is spelled by its specification, which keeps the byte order along with the family
+assert saved.get("swapped", "cell") == swapped.cell.spec
+# and has no section of its own
+assert saved.find("swapped.cell", section=True) is None
+# which is enough to build the same datatype again
+rebuilt = qed.readers.native.flat(
+    name="swapped_again",
+    uri=saved.get("swapped", "uri"),
+    shape=[int(extent) for extent in saved.get("swapped", "shape")],
+    cell=saved.get("swapped", "cell"),
+)
+assert rebuilt.cell.pyre_family() == swapped.cell.pyre_family()
+assert rebuilt.cell.byteswap == swapped.cell.byteswap
+# let go of it, so the rest of the driver is about the readers it had
+store.disconnectSource(name="swapped")
+assert doc().get("swapped") is None
 
 # a reader that came through an archive: the archive hands out keys, and says how to get in
 archive = types.SimpleNamespace(

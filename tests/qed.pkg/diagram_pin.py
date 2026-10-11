@@ -55,6 +55,7 @@ reading = """
             playground {
                 factories { id family protocol level inputs outputs }
                 slots { id }
+                labels { value category }
             }
         }
     }
@@ -120,8 +121,8 @@ def test():
     assert (factory["family"], factory["level"]) == ("pyre.viz.operators.amplitude", "class")
     assert (factory["inputs"], factory["outputs"]) == (1, 1)
     assert len(view["slots"]) == 2
-    # and its label says so
-    assert [f.kind() for f in playground.factories] == ["amplitude"]
+    # and its label, as the schema serves it, says so
+    assert [l["value"] for l in view["labels"] if l["category"] == "factory"] == [["amplitude"]]
 
     # pin it to add, which takes two inputs and makes one output
     run(pinning, {"payload": {**payload, "family": "pyre.viz.operators.add"}})
