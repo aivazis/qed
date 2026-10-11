@@ -15,8 +15,8 @@ import styled from 'styled-components'
 import { useActivityPanel } from '~/views/main'
 // widgets
 import { Flex, Header, Tray } from '~/widgets'
-// the canvas, the palette, and the description of the picked factory
-import { Canvas, Note, Palette, Picked } from '~/views/viz'
+// the canvas, the palette, and the inspector of the picked factory
+import { Canvas, Inspector, Note, Palette } from '~/views/viz'
 // paint
 import styles from '~/views/viz/viz/styles'
 
@@ -86,8 +86,8 @@ export const Playground = ({ qed }) => {
                         expanded={trays.isOpen("designs")} onToggle={trays.toggle("designs")}>
                         <Note>the pipelines you design will appear here</Note>
                     </Tray>
-                    {/* the description of the factory picked on the diagram */}
-                    <Picked diagram={playground} trays={trays} />
+                    {/* the inspector of the factory picked on the diagram */}
+                    <Inspector diagram={playground} trays={trays} />
                 </Panel>
             </Flex.Panel>
             {/* the diagram, under a tab with the choices of how to look at it */}
