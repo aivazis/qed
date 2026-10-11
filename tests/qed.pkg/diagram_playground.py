@@ -7,8 +7,8 @@
 
 
 """
-Exercise the pipeline diagram that belongs to no view, which draws the amplitude recipe, and the
-search for a diagram by its id
+Exercise the pipeline diagram that belongs to no view: it starts out empty, takes a protocol
+dropped from the palette, and is found, along with the diagram of a view, by its id
 """
 
 # externals
@@ -35,10 +35,14 @@ def storeOf(diagram):
     )
     # with the store's own playground
     store.playground = lambda: qed.ux.store.playground(store)
-    # the recipe it draws
-    store.pipeline = lambda: qed.ux.store.pipeline(store)
-    # and the one that recipe starts from
-    store.amplitude = lambda: qed.ux.store.amplitude(store)
+    # the search for a diagram by its id
+    store.findDiagram = lambda relay: qed.ux.store.findDiagram(store, relay=relay)
+    # the protocols on offer
+    store.palette = lambda: qed.ux.store.palette(store)
+    # the search for what a family names
+    store.implementer = lambda family: qed.ux.store.implementer(store, family=family)
+    # and the drop of a factory from the palette
+    store.diagramAdd = lambda **kwds: qed.ux.store.diagramAdd(store, **kwds)
     # hand it off
     return store
 
@@ -46,8 +50,8 @@ def storeOf(diagram):
 # the driver
 def test():
     """
-    Draw the playground, check that it draws the amplitude recipe with its source in front of it,
-    and find it and the diagram of a view by their ids
+    Draw the playground, check that it is empty, drop the reader protocol on it, and find it and
+    the diagram of a view by their ids
     """
     # the diagram of the view
     drawn = qed.ux.diagram(name=f"diagram_playground.{uuid.uuid1()}", recipe=None)
@@ -55,33 +59,29 @@ def test():
     store = storeOf(drawn)
     # draw the playground
     playground = store.playground()
-    # its factories, left to right in the order the data flows through them
-    factories = sorted(playground.factories, key=lambda factory: factory.position)
-    # are the reader, the slicer, and the steps of the amplitude recipe, each one as far down as
-    # it is pinned
-    assert [(factory.kind(), factory.node.level) for factory in factories] == [
-        ("reader", "protocol"),
-        ("slicer", "protocol"),
-        ("amplitude", "class"),
-        ("normalizer", "protocol"),
-        ("gray", "class"),
-        ("encoder", "protocol"),
-    ]
-    # every product has a slot of its own, which stands for it
-    assert sorted(slot.product.name for slot in playground.slots) == [
-        "blue",
-        "green",
-        "image",
-        "magnitude",
-        "normalized",
-        "raster",
-        "red",
-        "signal",
-    ]
-    # none of which is pinned, so none of them has a label yet
-    assert not [label for label in playground.labels if label.category == "product"]
+    # which has nothing on it
+    assert not playground.factories
+    assert not playground.slots
+    # and can be edited
+    assert playground.editable
     # and lasts
     assert store.playground() is playground
+
+    # drop the reader protocol on it
+    store.diagramAdd(
+        diagram=playground.relay, family=qed.viz.reader.pyre_family(), position=(0, 0, 0)
+    )
+    # which lands as one factory pinned to nothing
+    assert [(factory.kind(), factory.node.level) for factory in playground.factories] == [
+        ("reader", "protocol")
+    ]
+    # with a slot for the raster it exposes, and nothing else
+    assert len(playground.slots) == 1
+    # a family that names nothing on offer
+    store.diagramAdd(diagram=playground.relay, family="nonsense", position=(20, 0, 0))
+    # leaves the playground as it is
+    assert len(playground.factories) == 1
+
     # its id finds it
     assert qed.ux.store.findDiagram(store, relay=playground.relay) is playground
     # the id of the view's diagram finds that one
