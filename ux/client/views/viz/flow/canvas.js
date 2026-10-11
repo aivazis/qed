@@ -33,8 +33,11 @@ import styles from './styles'
 
 
 // the canvas that draws a pipeline {diagram} and lets the user edit it; when {live}, every step of
-// a drag goes to the server; whenever {focusOn} changes, i take the focus
-export const Canvas = ({ diagram: diagramRef, live = false, view = { kind: "flat" }, focusOn }) => {
+// a drag goes to the server; whenever {focusOn} changes, i take the focus; with {onCamera}, my
+// camera is shared: every move of it is told to {onCamera}, and it looks where {camera} says
+export const Canvas = ({
+    diagram: diagramRef, live = false, view = { kind: "flat" }, focusOn, camera, onCamera,
+}) => {
     // get the diagram
     const diagram = useFragment(canvasFlowDiagramFragment, diagramRef)
     // build a reference to my container so we can measure it and install listeners
@@ -118,7 +121,8 @@ export const Canvas = ({ diagram: diagramRef, live = false, view = { kind: "flat
                 data-qed-diagram={diagram?.id ?? ""}
             >
                 {/* everything that is in ICS */}
-                <Camera ref={ref} scale={20} focus={focus} focusKey={`${diagram?.id}:${projection.key}`}>
+                <Camera ref={ref} scale={20} focus={focus} focusKey={`${diagram?.id}:${projection.key}`}
+                    shared={camera} onSettle={onCamera}>
                     {/* the way the diagram is drawn */}
                     <ProjectionProvider projection={projection}>
                         {/* the diagram, which the requests that change it name */}
