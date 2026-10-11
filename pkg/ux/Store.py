@@ -1281,14 +1281,14 @@ class Store(qed.component, family="qed.ux.store"):
     def playground(self):
         """
         The pipeline diagram that is not attached to any view, where factories can be placed,
-        moved, and wired together freely
+        moved, and wired together freely; it starts out empty
         """
         # if i have drawn it already
         if self._playground is not None:
             # it is the one
             return self._playground
-        # otherwise, draw the whole pipeline, from the file to the image
-        diagram = qed.ux.diagram(name=f"{self.pyre_name}.playground", recipe=self.pipeline())
+        # otherwise, start with an empty one, to be filled from the palette
+        diagram = qed.ux.diagram(name=f"{self.pyre_name}.playground", recipe=None)
         # remember it
         self._playground = diagram
         # and hand it off
@@ -1458,14 +1458,14 @@ class Store(qed.component, family="qed.ux.store"):
         # find the factory the family names, and the protocol it satisfies
         protocol, implementer = self.implementer(family=family)
         # an unknown family
-        if implementer is None:
+        if protocol is None:
             # leaves the diagram as it is
             return diagram
         # if it does not fit where it was dropped
         if not diagram.fits(protocol=protocol, pin=implementer, position=tuple(position)):
             # leave the diagram as it is
             return diagram
-        # otherwise, place it, pinned to its class
+        # otherwise, place it, pinned to its class, or to nothing when the family is the protocol's
         diagram.addFactory(protocol=protocol, pin=implementer, position=tuple(position))
         # and hand off the diagram
         return diagram
@@ -1499,13 +1499,13 @@ class Store(qed.component, family="qed.ux.store"):
         # hand off the diagram
         return diagram
 
-    def implementer(self, family):
+    def palette(self):
         """
-        Find the class of the factory with the given {family} among the ones the palette offers,
-        along with the protocol it is offered under
+        The protocols the palette offers factories for, in the order data meets them along a
+        pipeline
         """
-        # the protocols the palette offers factories for
-        protocols = (
+        # hand them off
+        return (
             qed.viz.reader,
             qed.viz.selector,
             qed.viz.slicer,
@@ -1515,9 +1515,20 @@ class Store(qed.component, family="qed.ux.store"):
             qed.viz.colormap,
             qed.viz.encoder,
         )
-        # go through them
-        for protocol in protocols:
-            # and their implementers
+
+    def implementer(self, family):
+        """
+        Find the class of the factory with the given {family} among the ones the palette offers,
+        along with the protocol it is offered under; the family of a protocol names the protocol
+        itself, which comes with no class
+        """
+        # go through the protocols the palette offers
+        for protocol in self.palette():
+            # if the family names the protocol
+            if protocol.pyre_family() == family:
+                # hand it off, with nothing to pin it to
+                return protocol, None
+            # otherwise, go through its implementers
             for _, _, implementer in protocol.pyre_locateAllImplementers(namespace="pyre"):
                 # if this is the one
                 if implementer.pyre_family() == family:
