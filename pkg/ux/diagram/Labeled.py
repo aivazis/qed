@@ -34,6 +34,16 @@ class Labeled:
         # and return it
         return labels
 
+    # interface
+    def refreshLabels(self):
+        """
+        Forget my labels, so the next request for them makes them anew from what i am now
+        """
+        # invalidate the cache
+        self._labels = None
+        # all done
+        return
+
     # metamethods
     def __init__(self, **kwds):
         # chain up

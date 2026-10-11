@@ -1532,6 +1532,58 @@ class Store(qed.component, family="qed.ux.store"):
         # and hand off the diagram
         return diagram
 
+    def diagramPin(self, diagram, node, family=None):
+        """
+        Pin the factory with the relay id {node} on the pipeline diagram {diagram} to the class
+        with the given {family}, or back to its protocol when there is none, and hand back the
+        diagram; a family that names no class of the factory's protocol, or a pin the recipe
+        refuses, leaves the diagram as it is
+        """
+        # find the diagram
+        diagram = self.findDiagram(relay=diagram)
+        # an id that names no diagram, e.g. one of a view that has moved on to another channel
+        if diagram is None:
+            # so there is nothing to pin
+            return None
+        # a diagram that cannot be edited
+        if not diagram.editable:
+            # stays as it is
+            return diagram
+        # find the node
+        entity = diagram.locate(relay=node)
+        # only factories are pinned this way
+        if entity is None or entity not in diagram.factories:
+            # so anything else stays as it is
+            return diagram
+        # back to the protocol
+        if family is None:
+            # needs no class
+            pin = None
+        # otherwise
+        else:
+            # find the class the family names, and the protocol it is offered under
+            protocol, pin = self.implementer(family=family)
+            # a family that names no class, or one of another protocol
+            if pin is None or protocol is not entity.node.protocol:
+                # is reported
+                channel = journal.warning("qed.ux.diagram")
+                # with what was asked
+                channel.log(f"'{family}' is not a class of {entity.node.protocol.__name__}")
+                # and leaves the diagram as it is
+                return diagram
+        # pin it
+        try:
+            # in place
+            diagram.pin(entity=entity, pin=pin)
+        # if the recipe refuses
+        except qed.flow.exceptions.RecipeError as error:
+            # say why
+            channel = journal.warning("qed.ux.diagram")
+            # in the words of the recipe
+            channel.log(str(error))
+        # hand off the diagram
+        return diagram
+
     def diagramRemove(self, diagram, node):
         """
         Remove the node with the relay id {node} from the pipeline diagram {diagram}, and hand
