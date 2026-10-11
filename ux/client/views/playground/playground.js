@@ -23,6 +23,8 @@ import styles from '~/views/viz/viz/styles'
 // local
 // the tab over the canvas
 import { Tab } from './tab'
+// how every client looks at the playground
+import { usePlaygroundView } from './usePlaygroundView'
 
 
 // a pipeline diagram that belongs to no view, where factories can be placed, moved, and wired
@@ -30,13 +32,34 @@ import { Tab } from './tab'
 export const Playground = ({ qed }) => {
     // the state of the activity panel
     const { activityPanel } = useActivityPanel()
-    // unpack the diagram and the factories on offer
-    const { playground, catalog } = useFragment(playgroundGetDiagramFragment, qed)
+    // unpack the diagram, the factories on offer, and how every client looks at them
+    const { playground, catalog, playgroundView } = useFragment(playgroundGetDiagramFragment, qed)
     // the way the diagram is drawn: flat, or isometric, turned by quarter turns, seen from above
-    // or below
-    const [view, setView] = React.useState({ kind: "flat", azimuth: 0, below: false })
-    // change some of it
-    const adjust = change => setView(old => ({ ...old, ...change }))
+    // or below; the server keeps it, so every client draws it the same way
+    const { kind, azimuth, below, trays: open } = playgroundView
+    // assemble it
+    const view = { kind, azimuth, below }
+    // the requests that change it
+    const { project, tray } = usePlaygroundView()
+    // every change made here hands the keys back to the canvas, since the click that made it took
+    // them away; a change made by another client leaves the focus where it is
+    const [focus, setFocus] = React.useState(0)
+    // change some of the view
+    const adjust = change => {
+        // ask the server
+        project({ ...view, ...change })
+        // and give the canvas the keys back
+        setFocus(old => old + 1)
+        // all done
+        return
+    }
+    // the trays of my panel are open and closed for every client
+    const trays = {
+        // whether the tray called {name} is open
+        isOpen: name => open.includes(name),
+        // the handler that opens or closes it
+        toggle: name => expanded => tray(name, expanded),
+    }
     // the panel paint, hidden along with the activity panel
     const panelPaint = {
         ...styles.activityPanels,
@@ -51,24 +74,26 @@ export const Playground = ({ qed }) => {
                     {/* the title of the panel */}
                     <Header title="pipeline playground" />
                     {/* the factories on offer, one tray per protocol */}
-                    <Palette catalog={catalog} />
+                    <Palette catalog={catalog} trays={trays} />
                     {/* the products, which will hold the datasets */}
-                    <Tray title="products" scale={0.5} data-qed-palette="products">
+                    <Tray title="products" scale={0.5} data-qed-palette="products"
+                        expanded={trays.isOpen("products")} onToggle={trays.toggle("products")}>
                         <Note>the datasets of the readers will appear here</Note>
                     </Tray>
                     {/* the pipelines the user designed */}
-                    <Tray title="designs" scale={0.5} data-qed-palette="designs">
+                    <Tray title="designs" scale={0.5} data-qed-palette="designs"
+                        expanded={trays.isOpen("designs")} onToggle={trays.toggle("designs")}>
                         <Note>the pipelines you design will appear here</Note>
                     </Tray>
                     {/* the description of the factory picked on the diagram */}
-                    <Picked diagram={playground} />
+                    <Picked diagram={playground} trays={trays} />
                 </Panel>
             </Flex.Panel>
             {/* the diagram, under a tab with the choices of how to look at it */}
             <Flex.Panel auto={true} style={styles.flex}>
                 <Viewport>
                     <Tab view={view} adjust={adjust} />
-                    <Canvas diagram={playground} view={view} />
+                    <Canvas diagram={playground} view={view} focusOn={focus} />
                 </Viewport>
             </Flex.Panel>
         </Flex.Box>
@@ -111,6 +136,14 @@ const playgroundGetDiagramFragment = graphql`
                 inputs
                 outputs
             }
+        }
+        # how every client looks at it
+        playgroundView {
+            id
+            kind
+            azimuth
+            below
+            trays
         }
         # the diagram
         playground {
