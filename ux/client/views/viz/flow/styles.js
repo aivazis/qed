@@ -28,25 +28,32 @@ const isoProduct = {
 }
 
 // the paint of a puck by how far down its node is pinned, made from the {solid} paint of an
-// instance: a protocol is a dashed outline filled with the paint of the page, so it hides what is
-// behind it and can be picked up anywhere, and a class is tinted, its {top} and {side} darker
+// instance: a protocol is a dashed outline, a class is a solid one, and an instance is a solid
+// outline around a darker {top} and {side}, so its border stays visible; an outline is filled with
+// the paint of the page, rather than with nothing, so it hides what is behind it and can be picked
+// up anywhere
 const isoLevels = ({ solid, top, side }) => ({
-    // an outline
+    // a dashed outline
     protocol: {
         top: { ...solid.top, fill: theme.page.background, strokeDasharray: "3 2" },
         side: { ...solid.side, fill: theme.page.background, strokeDasharray: "3 2" },
         band: { ...solid.band, fill: theme.page.background },
         highlight: solid.highlight,
     },
-    // a tint
+    // a solid outline
     class: {
+        top: { ...solid.top, fill: theme.page.background },
+        side: { ...solid.side, fill: theme.page.background },
+        band: { ...solid.band, fill: theme.page.background },
+        highlight: solid.highlight,
+    },
+    // a solid outline around a darker fill
+    instance: {
         top: { ...solid.top, fill: top },
         side: { ...solid.side, fill: side },
         band: { ...solid.band, fill: side },
         highlight: solid.highlight,
     },
-    // solid
-    instance: solid,
 })
 
 
@@ -153,22 +160,23 @@ export default {
         product: isoLevels({ solid: isoProduct, top: "hsl(200deg, 80%, 15%)", side: "hsl(200deg, 80%, 10%)" }),
     },
 
-    // the paint of the flat glyphs, by how far down their node is pinned: a protocol is an
-    // outline, a class is tinted, and an instance is solid; an outline is filled with the paint
-    // of the page, rather than with nothing, so it hides what runs behind it and can still be
-    // picked up anywhere inside it
+    // the paint of the flat glyphs, by how far down their node is pinned: a protocol is a dashed
+    // outline, a class is a solid one, and an instance is a solid outline around a darker fill, the
+    // way the shapes are drawn on their own; an outline is filled with the paint of the page,
+    // rather than with nothing, so it hides what runs behind it and can still be picked up
+    // anywhere inside it
     levels: {
         // factories, in the color of factories
         factory: {
             protocol: { icon: { fill: theme.page.background, strokeDasharray: "3 2" } },
-            class: { icon: { fill: "hsl(28deg, 70%, 25%)" } },
-            instance: { icon: { fill: "hsl(28deg, 70%, 45%)" } },
+            class: { icon: { fill: theme.page.background } },
+            instance: { icon: { fill: "hsl(28deg, 70%, 25%)" } },
         },
         // products, in the color of products
         product: {
             protocol: { icon: { fill: theme.page.background, strokeDasharray: "3 2" } },
-            class: { icon: { fill: "hsl(200deg, 80%, 15%)" } },
-            instance: { icon: { fill: "hsl(200deg, 80%, 35%)" } },
+            class: { icon: { fill: theme.page.background } },
+            instance: { icon: { fill: "hsl(200deg, 80%, 15%)" } },
         },
     },
 
