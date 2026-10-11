@@ -9,6 +9,8 @@
 import { wheel, theme } from '~/palette'
 // get the base styles
 import base from '~/views/styles'
+// the paint of the terminals
+import terminalPaint from '~/shapes/terminal/styles'
 
 
 // the solid pucks of factories, in the color of factories
@@ -150,6 +152,14 @@ export default {
         },
         // and with one
         product: isoProduct,
+        // the end of a factory that has no slots: a dark red puck with no outline, the way the
+        // flat terminal is a disc, and the cross of the terminal on its cap
+        terminal: {
+            top: { fill: terminalPaint.decoration.fill, stroke: "none" },
+            side: { fill: "hsl(0deg, 40%, 12%)", stroke: "none" },
+            band: { fill: "hsl(0deg, 40%, 12%)", stroke: "none" },
+            cross: terminalPaint.icon,
+        },
     },
 
     // the paint of the pucks, by how far down their node is pinned
