@@ -17,6 +17,18 @@ const PATIENCE = 2000
 const NEAR = 1e-6
 
 
+// zooming changes the size of the picture by a factor, so that equal steps look equal at any
+// zoom; a press of a zoom key changes it by this much
+const KEY_FACTOR = 1.25
+// a scroll changes it by two to the power of its length times this rate, the rule of d3-zoom,
+// so that a notch of a mouse wheel, about a hundred pixels, changes it by about 15%
+const WHEEL_RATE = 0.002
+// a pinch arrives as a scroll with <ctrl> held and in small amounts, so it goes this much faster
+const PINCH_BOOST = 10
+// the closest the camera gets
+const NEAREST = 0.1
+
+
 // the provider factory; with {onSettle}, the camera is shared: every move of the user is told to
 // {onSettle}, once it is over, as the diagram point at the middle of my area and the zoom, and
 // the place in {shared}, where every client's camera looks, is adopted whenever the user is not
@@ -215,10 +227,10 @@ export const Provider = React.forwardRef((
         return
     }
     // movement along the z-axis that keeps the point under {anchor} where it is on the screen;
-    // {z} is the distance of the camera from the diagram, so a positive {dz} moves away and makes
-    // the picture smaller; {anchor} is in screen coordinates, and the center of my area stands in
-    // when there is none
-    const zoom = (dz, anchor = null) => {
+    // {z} is the distance of the camera from the diagram, and {next} maps the current distance to
+    // the new one, so a larger one moves away and makes the picture smaller; {anchor} is in
+    // screen coordinates, and the center of my area stands in when there is none
+    const zoom = (next, anchor = null) => {
         // it is a move of the user
         moved()
         // get the extent of my area
@@ -228,8 +240,8 @@ export const Provider = React.forwardRef((
         const ay = ((anchor?.y ?? top + height / 2) - top) / els
         // adjust the camera
         setCamera(camera => {
-            // the new zoom
-            const z = Math.max(camera.z + dz, 0.1)
+            // the new zoom, no closer than the nearest the camera gets
+            const z = Math.max(next(camera.z), NEAREST)
             // how much the scale of the picture changes
             const ratio = camera.z / z
             // pan so the diagram point under the anchor stays under it
@@ -246,6 +258,16 @@ export const Provider = React.forwardRef((
         })
         // all done
         return
+    }
+    // a press of a zoom key: away from the diagram when {direction} is positive, closer otherwise
+    const keyStep = direction => z => z * KEY_FACTOR ** direction
+    // a scroll by {delta}, in the units of {mode}, the way the wheel event reports them; a positive
+    // one moves away; a {pinch} goes faster
+    const wheelStep = (delta, mode, pinch) => z => {
+        // the length of the scroll in pixels: a line is about 25 of them, a page about 500
+        const pixels = delta * (mode === 1 ? 25 : mode === 2 ? 500 : 1)
+        // the factor of the move, faster for a pinch
+        return z * 2 ** (pixels * WHEEL_RATE * (pinch ? PINCH_BOOST : 1))
     }
 
     // event handlers
@@ -306,14 +328,14 @@ export const Provider = React.forwardRef((
         // zoom in, making the picture bigger
         if (key == "z") {
             // by moving closer, about the center of my area
-            zoom(-0.1)
+            zoom(keyStep(-1))
             // all done
             return
         }
         // zoom out, making the picture smaller
         if (key == "c") {
             // by moving away, about the center of my area
-            zoom(0.1)
+            zoom(keyStep(1))
             // all done
             return
         }
@@ -332,12 +354,15 @@ export const Provider = React.forwardRef((
         // prevent the default behavior
         evt.preventDefault()
         // unpack the event
-        const { deltaX, deltaY, ctrlKey, shiftKey, clientX, clientY } = evt
+        const { deltaX, deltaY, deltaMode, ctrlKey, shiftKey, clientX, clientY } = evt
         // scrolling with the <ctrl> or <shift> key pressed
         if (ctrlKey || shiftKey) {
             // is a zoom about the pointer: spreading the fingers or scrolling up zooms in, pinching
             // or scrolling down zooms out
-            zoom((deltaY > 0 ? 1 : -1) * 0.01, { x: clientX, y: clientY })
+            // with <shift>, some systems turn a vertical scroll into a horizontal one
+            const delta = deltaY || deltaX
+            // a scroll with <ctrl> is how a pinch arrives
+            zoom(wheelStep(delta, deltaMode, ctrlKey), { x: clientX, y: clientY })
             // all done
             return
         }
