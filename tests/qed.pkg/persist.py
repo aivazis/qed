@@ -96,6 +96,9 @@ assert "qed.archives.local#local:workspace" in archives
 # the reader keeps its section exactly as written, macro and all
 assert doc.get("d16", "uri") == "{qed.native}/c16.dat"
 assert doc.get("d16", "shape") == "65, 65"
+assert doc.get("d16", "cell") == "c16"
+# and its cell, which that entry spells completely, gets no section of its own
+assert doc.find("d16.cell", section=True) is None
 # and is named in the datasets list
 assert list(doc.get("datasets")) == ["qed.readers.native.flat#d16"]
 # the single view was written under a session name
