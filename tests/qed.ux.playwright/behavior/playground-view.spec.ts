@@ -15,7 +15,7 @@ import type { Page } from "@playwright/test"
 // every other one, and only the window that made it takes the keys back onto its canvas. this lives in the behavior project
 // (serial, after the gate) and puts the view back when it is done
 
-// set the view the way a fresh store has it: flat, unturned, from above, only the picked tray open
+// set the view the way a fresh store has it: flat, unturned, from above, only the inspector open
 const reset = async (page: Page) => {
     // the projection
     await page.request.post("graphql", {
@@ -30,8 +30,8 @@ const reset = async (page: Page) => {
     })
     // unpack
     const { data } = await response.json()
-    // close every one of them but the picked one
-    for (const tray of data.qed.playgroundView.trays.filter((name: string) => name !== "picked")) {
+    // close every one of them but the inspector
+    for (const tray of data.qed.playgroundView.trays.filter((name: string) => name !== "inspector")) {
         // one at a time
         await page.request.post("graphql", {
             data: {

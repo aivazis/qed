@@ -41,8 +41,8 @@ export const Nodes = ({ qed }) => {
         <Panel data-qed-panel="flow">
             {/* the title of the panel */}
             <Header title="visualization pipeline" style={styles.header} />
-            {/* the description of the factory picked on the diagram */}
-            <Picked diagram={diagram} />
+            {/* the inspector of the factory picked on the diagram */}
+            <Inspector diagram={diagram} />
         </Panel>
     )
 }
@@ -60,9 +60,10 @@ export const Palette = ({ catalog, trays }) => {
 }
 
 
-// the description of the factory picked on {diagram}, in a tray of its own, which starts open;
-// with {trays}, whoever owns them decides whether it is open, and hears about every toggle
-export const Picked = ({ diagram, trays }) => {
+// the inspector: the description of the factory picked on {diagram}, in a tray of its own, which
+// starts open; with {trays}, whoever owns them decides whether it is open, and hears about every
+// toggle
+export const Inspector = ({ diagram, trays }) => {
     // the nodes picked on the diagram
     const { selection } = useSelection()
     // the factories on the diagram
@@ -71,13 +72,13 @@ export const Picked = ({ diagram, trays }) => {
     const factory = factories.find(candidate => selection.includes(candidate.id)) ?? null
     // render
     return (
-        <Tray title="picked" initially={true} scale={0.5} data-qed-palette="picked"
-            expanded={trays?.isOpen("picked")} onToggle={trays?.toggle("picked")}>
+        <Tray title="inspector" initially={true} scale={0.5} data-qed-palette="inspector"
+            expanded={trays?.isOpen("inspector")} onToggle={trays?.toggle("inspector")}>
             {/* without a pick, say how to make one */}
             {factory === null && <Note>pick a factory on the diagram to see what it does</Note>}
             {/* otherwise, describe it */}
             {factory !== null &&
-                <Inspector diagram={diagram.id} editable={diagram.editable} factory={factory} />}
+                <Description diagram={diagram.id} editable={diagram.editable} factory={factory} />}
         </Tray>
     )
 }
@@ -150,7 +151,7 @@ const Entry = ({ entry }) => {
 
 // the description of a {factory} of {diagram}: what it is, what it consumes, what it makes, and how
 // it is set; on a diagram that is {editable}, it can also be removed
-const Inspector = ({ diagram, editable, factory }) => {
+const Description = ({ diagram, editable, factory }) => {
     // the editor
     const { remove } = useEditDiagram(diagram)
     // unpack

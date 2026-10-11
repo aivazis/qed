@@ -6,7 +6,7 @@
 
 
 // publish
-export { Nodes, Palette, Picked, Note } from './nodes'
+export { Nodes, Palette, Inspector, Note } from './nodes'
 
 
 // end of file

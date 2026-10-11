@@ -22,13 +22,13 @@ import qed
 # a store stand-in that keeps how the playground is looked at, the way a fresh store does
 def storeOf():
     """
-    Make a store whose playground is flat, unturned, seen from above, with only the tray of the
-    picked factory open
+    Make a store whose playground is flat, unturned, seen from above, with only the inspector
+    open
     """
     # the store, with the state of a fresh one
     store = types.SimpleNamespace(
         _playgroundProjection={"kind": "flat", "azimuth": 0, "below": False},
-        _playgroundTrays={"picked"},
+        _playgroundTrays={"inspector"},
         _playgroundCamera=None,
     )
     # how the playground is looked at
@@ -103,13 +103,13 @@ def test():
         # hand back the data
         return result.data
 
-    # a fresh playground is flat, unturned, seen from above, with only the picked tray open
+    # a fresh playground is flat, unturned, seen from above, with only the inspector open
     assert run(reading)["qed"]["playgroundView"] == {
         "id": "playground.view",
         "kind": "flat",
         "azimuth": 0,
         "below": False,
-        "trays": ["picked"],
+        "trays": ["inspector"],
         "camera": None,
     }
     # turn it isometric, five quarter turns to the left, seen from below
@@ -123,8 +123,8 @@ def test():
     for tray in ("readers", "pyre.viz.colormaps"):
         # one at a time
         run(toggling, {"payload": {"tray": tray, "expanded": True}})
-    # close one of them, the picked one, and one that is already closed
-    for tray in ("readers", "picked", "designs"):
+    # close one of them, the inspector, and one that is already closed
+    for tray in ("readers", "inspector", "designs"):
         # one at a time
         run(toggling, {"payload": {"tray": tray, "expanded": False}})
     # the one left open is the only one
