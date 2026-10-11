@@ -33,8 +33,8 @@ import styles from './styles'
 
 
 // the canvas that draws a pipeline {diagram} and lets the user edit it; when {live}, every step of
-// a drag goes to the server
-export const Canvas = ({ diagram: diagramRef, live = false, view = { kind: "flat" } }) => {
+// a drag goes to the server; whenever {focusOn} changes, i take the focus
+export const Canvas = ({ diagram: diagramRef, live = false, view = { kind: "flat" }, focusOn }) => {
     // get the diagram
     const diagram = useFragment(canvasFlowDiagramFragment, diagramRef)
     // build a reference to my container so we can measure it and install listeners
@@ -49,8 +49,8 @@ export const Canvas = ({ diagram: diagramRef, live = false, view = { kind: "flat
     const focus = center(diagram, project)
     // whether i have drawn before, so that the first drawing does not take the focus
     const drawn = React.useRef(false)
-    // a change of the projection comes from a click on the controls of the view, which takes the
-    // focus away from me; take it back, so the keys of the camera keep working in the new view
+    // my owner says when to take the focus: after a click on the controls of the view, which took
+    // it away from me, so the keys of the camera keep working in the new view
     React.useEffect(() => {
         // the first drawing leaves the focus where it is
         if (!drawn.current) {
@@ -63,7 +63,7 @@ export const Canvas = ({ diagram: diagramRef, live = false, view = { kind: "flat
         ref.current?.focus({ preventScroll: true })
         // all done
         return
-    }, [projection.key])
+    }, [focusOn])
     // the nodes a drag can land on, with what decides whether it may
     const nodes = occupants(diagram)
     // the factories each slot connects to
