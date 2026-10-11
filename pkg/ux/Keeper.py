@@ -67,8 +67,15 @@ class Keeper:
                 continue
             # get the component
             component = recipe.components[name]
+            # a datatype is spelled out completely by the entry that binds it in its owner's
+            # section, so it needs no section of its own
+            if qed.protocols.datatype.pyre_isImplementedBy(value=component):
+                # skip it
+                continue
             # keep only what the session assigned
             section = self._assigned(component=component, section=section)
+            # spell the datatypes it binds by their specification, which carries their byte order
+            section = self._specified(component=component, section=section)
             # leaving out the controllers a channel shares with the other channels of its
             # dataset, which are bound again at boot and write their own sections
             section = {
@@ -332,6 +339,27 @@ class Keeper:
         # hand off the pile
         return kept
 
+    def _specified(self, component, section):
+        """
+        Respell the entries of {section} that bind a datatype to a trait of {component} by the
+        specification of the datatype, which carries its byte order along with its family, so
+        the protocol rebuilds the same datatype at boot
+        """
+        # make a pile
+        specified = {}
+        # go through the settings
+        for name, value in section.items():
+            # get the value of the trait
+            bound = getattr(component, component.pyre_trait(alias=name).name)
+            # a datatype
+            if qed.protocols.datatype.pyre_isImplementedBy(value=bound):
+                # is spelled by its specification
+                value = bound.spec
+            # record
+            specified[name] = value
+        # hand off the pile
+        return specified
+
     @staticmethod
     def _spelled(section, owner):
         """
@@ -484,8 +512,9 @@ class Keeper:
                 return written
             # go through the sections
             for name, section, vacuous, create in sections:
-                # look for the entry that configures the component
-                found = editor.find(name)
+                # look for the section with the traits of the component, rather than the entry in
+                # its owner's section that binds it, which may hold no more than a family
+                found = editor.find(name, section=True)
                 # if it is there, and this section is only for components that have none
                 if create and found is not None:
                     # the user's spelling stands
@@ -576,8 +605,15 @@ class Keeper:
                 continue
             # get the component
             component = recipe.components[key]
+            # a datatype is spelled out completely by the entry that binds it in its owner's
+            # section, so it needs no section of its own
+            if qed.protocols.datatype.pyre_isImplementedBy(value=component):
+                # skip it
+                continue
             # keep only what the session assigned
             section = self._assigned(component=component, section=section)
+            # spell the datatypes it binds by their specification, which carries their byte order
+            section = self._specified(component=component, section=section)
             # spell the components it refers to the way a person would
             section = self._spelled(section=section, owner=name)
             # the entity itself gets the extras
