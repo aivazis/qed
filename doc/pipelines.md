@@ -256,6 +256,17 @@ Dark fills on a dark canvas are close in value, and fill alone is a weak cue for
 a second cue may be needed: perhaps a dashed outline for protocols and a solid one for classes
 and instances, in the flat icons and the isometric pucks alike.
 
+As drawn since 2026-10-11, in the flat icons, the isometric pucks, and the miniatures of the
+palette, the outline carries the level and the fill tells instances apart:
+
+| | protocol | component class | instance |
+|---|---|---|---|
+| factory | dashed orange outline, unfilled | solid orange outline, unfilled | solid orange outline, dark orange fill |
+| product | dashed blue outline, unfilled | solid blue outline, unfilled | solid blue outline, dark blue fill |
+
+"Unfilled" is the paint of the page, so a puck hides what runs behind it and can be picked up
+anywhere inside it. Unbound slots are still drawn gray.
+
 ### realizing a pipeline
 
 A diagram drawn this way would also show how far a pipeline is from running: anything hollow or
@@ -284,6 +295,24 @@ step the user takes, the orchestrator takes, or both, is open.
 5. **Expressiveness.** The test of the language is whether every pipeline can be drawn with it:
    the channels in this survey, with their gates, palettes, reducers, constants, and branches that
    split and rejoin, and the pipelines users will design.
+6. **Composite readers.** Speculative, 2026-10-11. What is settled lives in the design document
+   "Flow Layers: Data, Control, Staging, Execution" (2026-10-10): readers are a category of
+   `pyre.viz`, a factory from `uri` to `raster`; each NISAR product gets a reader of its own, a
+   composite of an opener and the dataset selector of that product, drawn in a frame around its
+   insides, expanded by default; a composite answers its clients the way any factory does, from
+   the slots and settings declared on its class, with its settings forwarded to the inner
+   factories that hold them, and its insides inlined before it is staged. Still to be worked out:
+   - what else belongs inside: the NISAR read resolves the zoom into a pyramid level and the
+     stride that remains, reads the mask at the same depth, and hands the fill value to the
+     channels that mark absence (`Product.resolve`, `lib/qed/nisar/fetch.icc`); whether these
+     are inner factories, settings of the selector, or the business of the slice;
+   - how the zoom reaches the read, since the reader and its selectors run at the source rate
+     and the zoom changes with each request;
+   - whether pyre's recipes nest, so that a composite is a recipe placed as a node, or a
+     composite is a factory class that builds its insides when it is staged;
+   - the two questions the design document leaves open: whether rewiring the insides of a
+     composite keeps it the same kind of factory, and how the settings of a selector narrow once
+     its product is open.
 
 ## defects found during the survey
 
