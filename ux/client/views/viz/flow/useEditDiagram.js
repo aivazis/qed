@@ -9,10 +9,11 @@
 import React from 'react'
 import { graphql, useMutation } from 'react-relay/hooks'
 
-// add factories to the pipeline {diagram} with the given id, and remove them
+// add factories to the pipeline {diagram} with the given id, pin them in place, and remove them
 export const useEditDiagram = diagram => {
-    // the two mutations
+    // the mutations
     const [commitAdd] = useMutation(useEditDiagramAddMutation)
+    const [commitPin] = useMutation(useEditDiagramPinMutation)
     const [commitRemove] = useMutation(useEditDiagramRemoveMutation)
     // report a failure
     const complain = (what, errors) => {
@@ -37,6 +38,18 @@ export const useEditDiagram = diagram => {
         // all done
         return
     }
+    // pin the factory with {id} to the class of {family}, or back to its protocol without one
+    const pin = ({ id, family = null }) => {
+        // send the request
+        commitPin({
+            // the payload
+            variables: { input: { diagram, node: id, family } },
+            // on failure, report
+            onError: errors => complain(`pinning ${id} to ${family ?? "its protocol"}`, errors),
+        })
+        // all done
+        return
+    }
     // remove the factory with {id}
     const remove = id => {
         // send the request
@@ -50,7 +63,7 @@ export const useEditDiagram = diagram => {
         return
     }
     // publish
-    return { add, remove }
+    return { add, pin, remove }
 }
 
 
@@ -58,6 +71,17 @@ export const useEditDiagram = diagram => {
 const useEditDiagramAddMutation = graphql`
     mutation useEditDiagramAddMutation($input: DiagramAddInput!) {
         diagramAdd(input: $input) {
+            diagram {
+                id
+                ...contentsFlowDiagramFragment
+            }
+        }
+    }
+`
+
+const useEditDiagramPinMutation = graphql`
+    mutation useEditDiagramPinMutation($input: DiagramPinInput!) {
+        diagramPin(input: $input) {
             diagram {
                 id
                 ...contentsFlowDiagramFragment

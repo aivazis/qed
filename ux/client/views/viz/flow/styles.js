@@ -190,6 +190,55 @@ export default {
         },
     },
 
+    // the fan that offers the next level down of a factory around it
+    fan: {
+        // a satellite, which is picked anywhere inside its ring
+        satellite: {
+            cursor: "pointer",
+        },
+        // the line from the factory to a satellite
+        spoke: {
+            stroke: "hsl(0deg, 0%, 40%)",
+            strokeWidth: 1,
+            vectorEffect: "non-scaling-stroke",
+            opacity: 0.5,
+        },
+        // the invisible ring that catches the pointer
+        ring: {
+            fill: "transparent",
+            stroke: "none",
+        },
+        // the name of a satellite
+        label: {
+            fontFamily: "inconsolata",
+            fontSize: 0.6,
+            stroke: "none",
+            fill: "hsl(0deg, 0%, 85%)",
+        },
+        // the puck of the way back
+        back: {
+            fill: theme.page.background,
+            stroke: "hsl(0deg, 0%, 55%)",
+            strokeWidth: 1.5,
+            vectorEffect: "non-scaling-stroke",
+        },
+        // its arrow
+        arrow: {
+            fill: "none",
+            stroke: "hsl(0deg, 0%, 85%)",
+            strokeWidth: 1.5,
+            vectorEffect: "non-scaling-stroke",
+        },
+        // and its words, which are quieter than the choices
+        backLabel: {
+            fontFamily: "rubik-light",
+            fill: "hsl(0deg, 0%, 60%)",
+            textAnchor: "start",
+        },
+        // how much the rest of the diagram fades while the fan is out
+        dim: 0.22,
+    },
+
     // the rings that tell what dropping a dragged node would do
     drop: {
         // merge with the node under it

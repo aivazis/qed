@@ -95,7 +95,7 @@ export const Playground = ({ qed }) => {
                 <Viewport>
                     <Tab view={view} adjust={adjust} />
                     <Canvas diagram={playground} view={view} focusOn={focus}
-                        camera={camera} onCamera={point} />
+                        camera={camera} onCamera={point} catalog={catalog} />
                 </Viewport>
             </Flex.Panel>
         </Flex.Box>

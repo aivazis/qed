@@ -28,15 +28,19 @@ import { DragProvider } from './drag'
 import { Drops } from './drops'
 // the editor
 import { useEditDiagram } from './useEditDiagram'
+// the fan that refines a factory in place
+import { Fan, FanProvider, useFanState } from './fan'
 // paint
 import styles from './styles'
 
 
 // the canvas that draws a pipeline {diagram} and lets the user edit it; when {live}, every step of
 // a drag goes to the server; whenever {focusOn} changes, i take the focus; with {onCamera}, my
-// camera is shared: every move of it is told to {onCamera}, and it looks where {camera} says
+// camera is shared: every move of it is told to {onCamera}, and it looks where {camera} says; with
+// a {catalog} of what each protocol can be pinned to, a factory of an editable diagram fans out
+// the choices that refine it
 export const Canvas = ({
-    diagram: diagramRef, live = false, view = { kind: "flat" }, focusOn, camera, onCamera,
+    diagram: diagramRef, live = false, view = { kind: "flat" }, focusOn, camera, onCamera, catalog,
 }) => {
     // get the diagram
     const diagram = useFragment(canvasFlowDiagramFragment, diagramRef)
@@ -75,14 +79,37 @@ export const Canvas = ({
     const followers = entourage(diagram, owners)
     // whether the structure of the diagram can change
     const editable = diagram?.editable ?? false
+    // the fan, which only an editable diagram with a catalog has
+    const fan = useFanState({
+        factories: diagram?.factories ?? [], catalog: editable ? catalog : null,
+    })
 
     // access the selection
     const { selection, clear } = useSelection()
     // the editor
     const { remove } = useEditDiagram(diagram?.id ?? null)
-    // the delete keys remove the picked factories
+    // <enter> fans out the picked factory, <escape> folds the fan, and the delete keys remove the
+    // picked factories
     const onKeyDown = evt => {
-        // if it is not one of them, or the diagram cannot be edited
+        // a fan that is out
+        if (fan.factory && evt.key === "Escape") {
+            // folds
+            fan.close()
+            // all done
+            return
+        }
+        // the factory that is picked on its own
+        const picked = selection.length === 1
+            ? diagram?.factories.find(factory => factory.id === selection[0])
+            : null
+        // fans out on <enter>
+        if (picked && evt.key === "Enter") {
+            // so fan it out, or fold it if it is out already
+            fan.factory?.id === picked.id ? fan.close() : fan.open(picked.id)
+            // all done
+            return
+        }
+        // if it is not one of the delete keys, or the diagram cannot be edited
         if (!editable || (evt.key !== "Delete" && evt.key !== "Backspace")) {
             // it is not for me
             return
@@ -99,8 +126,15 @@ export const Canvas = ({
         // all done
         return
     }
-    // a click on the canvas, away from any node, clears it
+    // a click on the canvas, away from any node, folds the fan, or else clears the selection
     const clearSelection = () => {
+        // a fan that is out
+        if (fan.factory) {
+            // folds, and leaves the selection alone
+            fan.close()
+            // all done
+            return
+        }
         // drop the selection
         clear()
         // all done
@@ -132,10 +166,17 @@ export const Canvas = ({
                             {/* the drag in progress, which the nodes publish and the rest follow */}
                             <DragProvider nodes={nodes} followers={followers} owners={owners}
                                 editable={editable}>
-                                {/* the diagram, as the view in use draws it */}
-                                {flat
-                                    ? <FlatScene diagram={diagram} />
-                                    : <IsoScene diagram={diagram} nodes={nodes} />}
+                                {/* the fan, which the nodes open */}
+                                <FanProvider fan={fan}>
+                                    {/* the diagram, as the view in use draws it, faded while a fan is out */}
+                                    <g opacity={fan.factory ? styles.fan.dim : 1}>
+                                        {flat
+                                            ? <FlatScene diagram={diagram} />
+                                            : <IsoScene diagram={diagram} nodes={nodes} />}
+                                    </g>
+                                    {/* and the fan itself, over it */}
+                                    <Fan />
+                                </FanProvider>
                             </DragProvider>
                         </DiagramProvider>
                     </ProjectionProvider>
@@ -235,9 +276,13 @@ const canvasFlowDiagramFragment = graphql`
         # whether its structure can change
         editable
         # where the nodes are, so the camera can look at the middle of the diagram, and a drag
-        # can tell what it is about to land on
+        # can tell what it is about to land on; and what the factories are, so the fan can offer
+        # what refines them
         factories {
             id
+            family
+            protocol
+            level
             at {
                 x
                 y
