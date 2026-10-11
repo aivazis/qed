@@ -90,15 +90,13 @@ export const Note = styled.div`
 `
 
 
-// the factories that implement one protocol, in a tray of their own
+// a protocol and the factories that implement it, in a tray of their own
 const Group = ({ group }) => {
-    // the filters are where most of the work happens, so their tray starts open
-    const initially = group.name === "filters"
-    // the count of the factories in the group, next to its title
+    // the count of the entries in the group, next to its title
     const count = <Count>{group.entries.length}</Count>
     // render
     return (
-        <Tray title={group.name} initially={initially} scale={0.5} controls={count}
+        <Tray title={group.name} scale={0.5} controls={count}
             data-qed-palette={group.family}>
             <Entries>
                 {group.entries.map(entry => <Entry key={entry.family} entry={entry} />)}
@@ -108,10 +106,11 @@ const Group = ({ group }) => {
 }
 
 
-// a factory on offer: its picture, its name, and its slots; it can be dragged onto the diagram
+// a factory on offer, either a protocol or a class that implements it: its picture, its name, and
+// its slots; it can be dragged onto the diagram
 const Entry = ({ entry }) => {
     // unpack
-    const { family, name, doc, inputs, outputs } = entry
+    const { family, name, level, doc, inputs, outputs } = entry
     // the picture, which doubles as the image that follows the pointer during a drag
     const picture = React.useRef(null)
     // a drag carries the family of the factory, and shows its picture
@@ -132,8 +131,10 @@ const Entry = ({ entry }) => {
     const slots = `${inputs.length ? inputs.join(", ") : "nothing"} \u2192 ${outputs.join(", ")}`
     // render
     return (
-        <Row draggable onDragStart={onDragStart} title={doc} data-qed-catalog={family}>
-            <Picture><Miniature ref={picture} inputs={inputs} outputs={outputs} scale={7} /></Picture>
+        <Row draggable onDragStart={onDragStart} title={doc} data-qed-catalog={family}
+            data-qed-level={level}>
+            <Picture><Miniature ref={picture} inputs={inputs} outputs={outputs} level={level}
+                scale={7} /></Picture>
             <Words>
                 <EntryName>{name}</EntryName>
                 <Signature>{slots}</Signature>

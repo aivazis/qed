@@ -106,6 +106,7 @@ const playgroundGetDiagramFragment = graphql`
             entries {
                 family
                 name
+                level
                 doc
                 inputs
                 outputs
