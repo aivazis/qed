@@ -8,12 +8,15 @@
 # externals
 import graphene
 
+# where the cameras look
+from .PlaygroundCamera import PlaygroundCamera
+
 
 # how the playground is looked at
 class PlaygroundView(graphene.ObjectType):
     """
-    How every client looks at the playground: the projection of its diagram, and the trays of its
-    panel that are open
+    How every client looks at the playground: the projection of its diagram, the trays of its
+    panel that are open, and where the cameras look
     """
 
     # the fields
@@ -27,6 +30,8 @@ class PlaygroundView(graphene.ObjectType):
     below = graphene.Boolean(required=True)
     # the names of the trays that are open
     trays = graphene.List(graphene.NonNull(graphene.String), required=True)
+    # where every client's camera looks, once some client has moved its camera
+    camera = graphene.Field(PlaygroundCamera)
 
     # resolvers
     @staticmethod
