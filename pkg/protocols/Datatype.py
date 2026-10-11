@@ -11,12 +11,10 @@ import sys
 # support
 import qed
 
-# my superclass
-from .Specification import Specification
 
-
-# the dataset layout
-class Datatype(Specification, family="qed.datatypes"):
+# the dataset layout; a setting of the readers and datasets that hold one, not a product that
+# flows between factories, so it is a plain protocol rather than a specification
+class Datatype(qed.protocol, family="qed.datatypes"):
     """
     The datatype metadata
     """
