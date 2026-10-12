@@ -79,15 +79,42 @@ export const Canvas = ({
     const followers = entourage(diagram, owners)
     // whether the structure of the diagram can change
     const editable = diagram?.editable ?? false
-    // the fan, which only an editable diagram with a catalog has
-    const fan = useFanState({
-        factories: diagram?.factories ?? [], catalog: editable ? catalog : null,
-    })
-
     // access the selection
     const { selection, clear } = useSelection()
     // the editor
-    const { remove } = useEditDiagram(diagram?.id ?? null)
+    const { remove, pin } = useEditDiagram(diagram?.id ?? null)
+    // the fan, which only an editable diagram with a catalog has
+    const fan = useFanState({
+        diagram: diagram?.id ?? null, factories: diagram?.factories ?? [], slots: diagram?.slots ?? [],
+        catalog: editable ? catalog : null, pin,
+    })
+    // the keys of the fan go to it before anybody else sees them, the camera included, which
+    // leaves alone the keys that were handled; the listener is installed afresh whenever the fan
+    // changes, so it always sees the fan as it is now
+    React.useEffect(() => {
+        // the container
+        const section = ref.current
+        // if there is none yet
+        if (!section) {
+            // there is nothing to listen to
+            return
+        }
+        // the listener
+        const keys = evt => {
+            // offer the key to the fan
+            if (fan.onKey(evt)) {
+                // and if it took it, nobody else acts on it
+                evt.preventDefault()
+                evt.stopPropagation()
+            }
+            // all done
+            return
+        }
+        // listen ahead of everybody else
+        section.addEventListener("keydown", keys, { capture: true })
+        // and stop when the fan changes or the canvas goes
+        return () => section.removeEventListener("keydown", keys, { capture: true })
+    }, [fan])
     // <enter> fans out the picked factory, <escape> folds the fan, and the delete keys remove the
     // picked factories
     const onKeyDown = evt => {
@@ -96,6 +123,11 @@ export const Canvas = ({
             // folds
             fan.close()
             // all done
+            return
+        }
+        // while a fan is out, the keys that edit the diagram are not for me
+        if (fan.factory && (evt.key === "Delete" || evt.key === "Backspace")) {
+            // so leave the diagram alone
             return
         }
         // the factory that is picked on its own
