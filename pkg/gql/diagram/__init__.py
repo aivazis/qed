@@ -11,6 +11,8 @@ from .PlaygroundView import PlaygroundView as playgroundView
 
 # the mutations
 from .DiagramAdd import DiagramAdd as diagramAdd
+from .DiagramConfigure import DiagramConfigure as diagramConfigure
+from .DiagramInstantiate import DiagramInstantiate as diagramInstantiate
 from .DiagramMove import DiagramMove as diagramMove
 from .DiagramMoveGroup import DiagramMoveGroup as diagramMoveGroup
 from .DiagramPin import DiagramPin as diagramPin

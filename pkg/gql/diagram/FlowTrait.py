@@ -28,6 +28,8 @@ class FlowTrait(graphene.ObjectType):
     default = graphene.String()
     # its documentation
     doc = graphene.String()
+    # whether it can be changed from the diagram
+    editable = graphene.Boolean(required=True)
 
 
 # end of file

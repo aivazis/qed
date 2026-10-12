@@ -123,6 +123,10 @@ class Mutation(graphene.ObjectType):
 
     # pipeline diagrams: place a new factory
     diagramAdd = diagram.diagramAdd.Field()
+    # change a setting of a factory, making an instance of its class if it has none yet
+    diagramConfigure = diagram.diagramConfigure.Field()
+    # pin a factory to a new instance of a class
+    diagramInstantiate = diagram.diagramInstantiate.Field()
     # move a factory or a slot
     diagramMove = diagram.diagramMove.Field()
     # move a group of nodes, all or nothing

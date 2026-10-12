@@ -131,7 +131,7 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         # and draw it
         return self.drawFactory(node=node, position=position)
 
-    def pin(self, entity, pin=None):
+    def pin(self, entity, pin=None, alias=None):
         """
         Pin the factory {entity} to {pin}, a class that satisfies its protocol, or to nothing,
         in place: its slots follow the traits of the new pin, the ones it keeps stay where they
@@ -140,12 +140,15 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
 
         The edit is all or nothing: everything that can fail is worked out before anything
         changes, so a pin the recipe refuses, or one that brings a slot with nowhere to go,
-        raises and leaves the diagram and its recipe as they were
+        raises and leaves the diagram and its recipe as they were; a pin to an instance may
+        carry the {alias} a person gave it, possibly empty, which its label shows
         """
         # work out what the pin does to the diagram, without changing anything
         plan = self._planPin(entity=entity, pin=pin)
         # pin the recipe node, which refuses pins that do not fit and leaves the node as it was
         self.recipe.pin(name=entity.node.name, pin=pin)
+        # remember what the instance was called, if anything, for its label
+        entity.alias = alias
         # and carry the plan out, which only moves things between my indices
         self._applyPin(entity=entity, plan=plan)
         # all done
