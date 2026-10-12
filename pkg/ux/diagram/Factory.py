@@ -23,6 +23,12 @@ class Factory(Node):
     The representation of a factory
     """
 
+    # constants
+    # how far each end of a factory is from it, along its axis: the end where its inputs meet on
+    # one side, and the one where its outputs meet on the other, either of which is a terminal
+    # when it has no slots on that side
+    reach = 2
+
     # public data
     @property
     def slots(self):
@@ -112,6 +118,16 @@ class Factory(Node):
             return pin.pyre_family().split(".")[-1]
         # otherwise, by its protocol, whose family names the whole category
         return protocol.__name__.lower()
+
+    def ends(self, position=None):
+        """
+        The spots of my two ends, where my connectors meet, when i am at {position}, or where i
+        am, when it is not given
+        """
+        # where i am, or would be
+        x, y, z = self.position if position is None else position
+        # my ends are on either side of me, along my axis
+        return [(x - self.reach, y, z), (x + self.reach, y, z)]
 
     @staticmethod
     def editable(node, trait):
