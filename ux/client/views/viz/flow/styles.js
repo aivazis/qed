@@ -65,6 +65,10 @@ export default {
     panel: {
         // inherit
         ...base.panel,
+        // the panel takes the focus only so its keys reach it; it is not in the tab order, and
+        // the fan shows what the keys are doing, so the ring webkit draws around it once a key
+        // is pressed is noise
+        outline: "none",
     },
 
     // the attributes of the canvas
@@ -208,6 +212,67 @@ export default {
             fill: "transparent",
             stroke: "none",
         },
+        // the ring around the choice that has the focus
+        focus: {
+            fill: "transparent",
+            stroke: "hsl(28deg, 70%, 55%)",
+            strokeWidth: 1.5,
+            vectorEffect: "non-scaling-stroke",
+        },
+        // the look of the factory pinned to the class that has the focus, drawn as a ghost
+        preview: {
+            // the name the factory would have
+            title: {
+                fontFamily: "noto-italic",
+                fontSize: 0.65,
+                textAnchor: "middle",
+                stroke: "none",
+                fill: "hsl(28deg, 70%, 60%)",
+                opacity: 0.8,
+            },
+            // the connectors to its slots
+            connector: {
+                fill: "none",
+                stroke: "hsl(28deg, 70%, 55%)",
+                strokeWidth: 1,
+                strokeDasharray: "3 3",
+                vectorEffect: "non-scaling-stroke",
+                opacity: 0.7,
+            },
+            // the slots it would let go of
+            dropped: {
+                fill: "none",
+                stroke: "hsl(0deg, 60%, 55%)",
+                strokeWidth: 1,
+                strokeDasharray: "3 3",
+                vectorEffect: "non-scaling-stroke",
+                opacity: 0.8,
+            },
+            // the terminals that would gain connectors
+            plex: {
+                fill: "none",
+                stroke: "hsl(28deg, 70%, 55%)",
+                strokeWidth: 1,
+                vectorEffect: "non-scaling-stroke",
+                opacity: 0.7,
+            },
+            // its slots
+            slot: {
+                fill: "none",
+                stroke: "hsl(0deg, 0%, 70%)",
+                strokeWidth: 1,
+                strokeDasharray: "3 3",
+                vectorEffect: "non-scaling-stroke",
+            },
+            // their names
+            name: {
+                fontFamily: "inconsolata",
+                fontSize: 0.5,
+                textAnchor: "middle",
+                stroke: "none",
+                fill: "hsl(0deg, 0%, 75%)",
+            },
+        },
         // the name of a satellite
         label: {
             fontFamily: "inconsolata",
@@ -215,25 +280,24 @@ export default {
             stroke: "none",
             fill: "hsl(0deg, 0%, 85%)",
         },
-        // the puck of the way back
-        back: {
-            fill: theme.page.background,
-            stroke: "hsl(0deg, 0%, 55%)",
-            strokeWidth: 1.5,
-            vectorEffect: "non-scaling-stroke",
-        },
-        // its arrow
-        arrow: {
-            fill: "none",
-            stroke: "hsl(0deg, 0%, 85%)",
-            strokeWidth: 1.5,
-            vectorEffect: "non-scaling-stroke",
-        },
-        // and its words, which are quieter than the choices
-        backLabel: {
-            fontFamily: "rubik-light",
-            fill: "hsl(0deg, 0%, 60%)",
-            textAnchor: "start",
+        // the way back: a small, quiet word, a little brighter under the pointer
+        undo: {
+            // at rest
+            rest: {
+                fontFamily: "rubik-light",
+                fontSize: 0.38,
+                textAnchor: "middle",
+                stroke: "none",
+                fill: "hsl(0deg, 0%, 50%)",
+            },
+            // under the pointer
+            hover: {
+                fontFamily: "rubik-light",
+                fontSize: 0.38,
+                textAnchor: "middle",
+                stroke: "none",
+                fill: "hsl(0deg, 0%, 80%)",
+            },
         },
         // how much the rest of the diagram fades while the fan is out
         dim: 0.22,

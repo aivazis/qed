@@ -293,6 +293,11 @@ export const Provider = React.forwardRef((
     }
     // keypad
     const keypad = evt => {
+        // a key that somebody else handled already
+        if (evt.defaultPrevented) {
+            // is not for me
+            return
+        }
         // unpack the key
         const { key } = evt
         // the base displacement
