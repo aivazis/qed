@@ -320,7 +320,9 @@ class Keeper:
     def _assigned(self, component, section):
         """
         Keep the entries of {section} that the session assigned to {component}, leaving out
-        what came from a file and was not touched, so the file keeps the user's spelling
+        what came from a file and was not touched, so the file keeps the user's spelling; a
+        value a person set interactively is the session's too, whatever its priority, and
+        comes back from the file at boot with the priority of the file, below the command line
         """
         # get the inventory
         inventory = component.pyre_inventory
@@ -336,8 +338,37 @@ class Keeper:
             if priority is not None and priority.name in self.assigned:
                 # is kept
                 kept[name] = value
+                # and that is all
+                continue
+            # so is a value set interactively
+            if self._interactive(locator=inventory.getTraitLocator(trait=trait)):
+                # by a person, during the session
+                kept[name] = value
         # hand off the pile
         return kept
+
+    @staticmethod
+    def _interactive(locator):
+        """
+        Decide whether {locator} says its value was set interactively, by a person, through a
+        user interface; locators can be chained, so the whole chain is searched
+        """
+        # nothing
+        if locator is None:
+            # says nothing
+            return False
+        # a locator that says so
+        if isinstance(locator, pyre.tracking.interactive):
+            # settles it
+            return True
+        # a chain ties two of them together, either of which may say so
+        if isinstance(locator, pyre.tracking.chain):
+            # so ask both
+            return Keeper._interactive(locator=locator.this) or Keeper._interactive(
+                locator=locator.next
+            )
+        # anything else does not
+        return False
 
     def _specified(self, component, section):
         """
