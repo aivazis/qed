@@ -30,6 +30,20 @@ class CEOS(Flat, family="qed.readers.native.ceos"):
     length, are refused
     """
 
+    # framework hooks
+    def pyre_suggest(self, trait):
+        """
+        My file descriptor has the last word on my shape, so i have no guesses for it
+        """
+        # for my shape
+        if trait.name == "shape":
+            # there is nothing to guess
+            return
+        # for the rest, defer to my superclass
+        yield from super().pyre_suggest(trait=trait)
+        # all done
+        return
+
     # interface
     def _resolveShape(self):
         """
