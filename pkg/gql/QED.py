@@ -25,6 +25,7 @@ from .diagram.CatalogEntry import CatalogEntry
 from .diagram.CatalogGroup import CatalogGroup
 from .diagram.FlowDiagram import FlowDiagram
 from .diagram.FlowPinPreview import FlowPinPreview
+from .diagram.FlowSuggestions import FlowSuggestions
 from .diagram.PlaygroundView import PlaygroundView
 from . import views
 
@@ -60,6 +61,13 @@ class QED(graphene.ObjectType):
         diagram=graphene.ID(required=True),
         node=graphene.ID(required=True),
         family=graphene.String(required=True),
+    )
+    # the values suggested for a setting of a factory of a pipeline diagram
+    suggestions = graphene.Field(
+        FlowSuggestions,
+        diagram=graphene.ID(required=True),
+        node=graphene.ID(required=True),
+        trait=graphene.String(required=True),
     )
 
     # resolvers
@@ -118,6 +126,14 @@ class QED(graphene.ObjectType):
         """
         # the store knows
         return store.diagramPinPreview(diagram=diagram, node=node, family=family)
+
+    @staticmethod
+    def resolve_suggestions(store, info, diagram, node, trait, **kwds):
+        """
+        Suggest values for the setting {trait} of the factory {node} of the pipeline {diagram}
+        """
+        # the store knows
+        return store.diagramSuggest(diagram=diagram, node=node, trait=trait)
 
     @staticmethod
     def resolve_catalog(store, info, **kwds):

@@ -16,6 +16,7 @@ import qed
 from ..Node import Node
 
 # field types
+from .FlowMethod import FlowMethod
 from .FlowTrait import FlowTrait
 from .Point import Point
 
@@ -43,6 +44,8 @@ class FlowFactory(graphene.ObjectType):
     doc = graphene.String()
     # its slots and settings
     traits = graphene.List(graphene.NonNull(FlowTrait), required=True)
+    # the methods the diagram can invoke
+    methods = graphene.List(graphene.NonNull(FlowMethod), required=True)
     # product counts
     inputs = graphene.Int(required=True)
     outputs = graphene.Int(required=True)
@@ -154,6 +157,25 @@ class FlowFactory(graphene.ObjectType):
             )
         # hand off the descriptions
         return traits
+
+    @staticmethod
+    def resolve_methods(factory, info, **kwds):
+        """
+        Describe the methods of the factory that the diagram can invoke
+        """
+        # get the recipe node behind the diagram entity
+        node = factory.node
+        # only an instance has methods to invoke
+        invocable = node.level == "instance"
+        # describe each one, by its name and the first line of its documentation
+        return [
+            FlowMethod(
+                name=behavior.name,
+                doc=(inspect.getdoc(behavior.pyre_method) or "").split("\n")[0] or None,
+                invocable=invocable,
+            )
+            for behavior in factory.methods(node=node)
+        ]
 
     @staticmethod
     def render(value):
