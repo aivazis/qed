@@ -45,6 +45,24 @@ const clear = async (page: Page) => {
     }
 }
 
+// wait until the first factory stays put on the screen: the camera frames the diagram once it
+// arrives, and a click aimed at the hub before then lands wherever the hub used to be
+const settled = async (page: Page) => {
+    // where it was at the last look
+    let last: { x: number, y: number } | null = null
+    // look until two looks in a row agree
+    await expect.poll(async () => {
+        // where it is now
+        const box = await page.locator("[data-qed-kind=factory]").first().boundingBox()
+        // whether it has stayed put since the last look
+        const still = box !== null && last !== null && Math.abs(box.x - last.x) < 0.5 && Math.abs(box.y - last.y) < 0.5
+        // remember this look
+        last = box
+        // and report
+        return still
+    }, { timeout: 5_000 }).toBe(true)
+}
+
 // the column below the factory, and the field that edits a setting
 const column = (page: Page) => page.locator("[data-qed-settings]")
 const editor = (page: Page) => page.locator("[data-qed-setting-editor]")
@@ -74,6 +92,8 @@ test.describe.serial("a factory of the playground hangs its traits and methods b
         })
         await page.reload({ waitUntil: "load" })
         await page.locator("[data-qed-kind=factory]").first().waitFor({ timeout: 10_000 })
+        // and the camera done framing it
+        await settled(page)
         // with nothing hanging below it
         await expect(column(page)).toHaveCount(0)
 
