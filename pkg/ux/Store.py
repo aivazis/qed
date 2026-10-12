@@ -7,12 +7,12 @@
 
 # support
 import functools
+import inspect
 import itertools
 import json
 import os
 import re
 import pyre
-import pyre.traits.Property
 import time
 import qed
 import journal
@@ -1809,27 +1809,178 @@ class Store(qed.component, family="qed.ux.store"):
         # hand off the diagram, and the reason for a refusal, if any
         return found, error
 
+    def diagramSuggest(self, diagram, node, trait):
+        """
+        Suggest values for the setting {trait} of the factory with the relay id {node} on the
+        pipeline diagram {diagram}: a component is one of the classes that implement the protocol
+        of its trait, a closed set, and the rest are whatever the instance the factory is pinned to
+        suggests, given its current state; hand back whether the set is closed and the values, or
+        nothing when the diagram, the factory, or the setting cannot be found or changed
+        """
+        # find the diagram
+        found = self.findDiagram(relay=diagram)
+        # an id that names no diagram
+        if found is None:
+            # has nothing to suggest
+            return None
+        # find the node
+        entity = found.locate(relay=node)
+        # only factories have settings
+        if entity is None or entity not in found.factories:
+            # so anything else has nothing to suggest
+            return None
+        # the recipe node behind it
+        recipe = entity.node
+        # a factory pinned only to its protocol has no settings yet
+        if recipe.level == "protocol":
+            # so it has nothing to suggest
+            return None
+        # the class that declares the settings
+        cls = recipe.pin if recipe.level == "class" else type(recipe.pin)
+        # find the setting among its traits
+        try:
+            # by any of its names
+            descriptor = cls.pyre_trait(alias=trait)
+        # if there is none
+        except pyre.components.exceptions.TraitNotFoundError:
+            # there is nothing to suggest
+            return None
+        # a setting that cannot be changed from the diagram
+        if not entity.editable(node=recipe, trait=descriptor):
+            # needs no suggestions
+            return None
+        # a component
+        if isinstance(descriptor, pyre.traits.Facility.Facility):
+            # is one of the classes that implement its protocol
+            return True, list(self._implementers(protocol=descriptor.protocol))
+        # the rest come from an instance, which knows its own state
+        if recipe.level != "instance":
+            # so a class has none
+            return False, []
+        # ask it
+        try:
+            # for all of them
+            values = list(recipe.pin.pyre_suggest(trait=descriptor))
+        # if the framework, or the file system under it, says no
+        except (pyre.PyreError, OSError):
+            # there are none
+            values = []
+        # hand them off
+        return False, values
+
+    def _implementers(self, protocol):
+        """
+        Generate the classes that implement {protocol}, each once, in the order their package
+        publishes them, followed by the ones found elsewhere
+        """
+        # the classes found, by family, and their rank: a class that a package publishes ranks by
+        # where it does, and the rest after all of those
+        found = {}
+        # the namespace of the protocol, where the framework looks for its implementers
+        namespace = protocol.pyre_family().split(".")[0]
+        # go through what it finds there
+        for index, (uri, _, implementer) in enumerate(
+            protocol.pyre_locateAllImplementers(namespace=namespace)
+        ):
+            # a foundry hands out the class it stands for
+            cls = implementer() if isinstance(implementer, qed.foundry) else implementer
+            # rank it by where its package publishes it, or after all of those
+            rank = (0 if str(uri).startswith("import:") else 1, index)
+            # the family of the class, which tells the names of a class apart
+            family = cls.pyre_family()
+            # a class seen already keeps its best rank
+            if family not in found or rank < found[family][0]:
+                # this one is better
+                found[family] = (rank, cls)
+        # hand them off in order of rank
+        yield from (cls for _, cls in sorted(found.values(), key=lambda entry: entry[0]))
+        # all done
+        return
+
+    def diagramInvoke(self, diagram, node, method):
+        """
+        Invoke {method} of the instance the factory with the relay id {node} on the pipeline
+        diagram {diagram} is pinned to, with no arguments; hand back the diagram, what the method
+        returned, with the products of a generator gathered in a list, and the reason the call
+        was refused or failed, if it was, in which case there is no result
+        """
+        # find the diagram
+        found = self.findDiagram(relay=diagram)
+        # an id that names no diagram
+        if found is None:
+            # has nothing to invoke
+            return None, None, f"there is no diagram '{diagram}'"
+        # a diagram that cannot be edited
+        if not found.editable:
+            # stays as it is
+            return found, None, "this diagram cannot be edited"
+        # find the node
+        entity = found.locate(relay=node)
+        # only factories have methods
+        if entity is None or entity not in found.factories:
+            # so anything else stays as it is
+            return found, None, f"there is no factory '{node}' on this diagram"
+        # the recipe node behind it
+        recipe = entity.node
+        # only an instance has methods that can be invoked
+        if recipe.level != "instance":
+            # so ask for one first
+            return found, None, f"make an instance of '{recipe.name}' before invoking its methods"
+        # find the method among the ones the diagram can invoke
+        behavior = next((b for b in entity.methods(node=recipe) if b.name == method), None)
+        # a name that is not among them
+        if behavior is None:
+            # is refused
+            return found, None, f"'{method}' cannot be invoked from the diagram"
+        # invoke it
+        try:
+            # on the instance, with no arguments
+            result = getattr(recipe.pin, behavior.name)()
+            # a generator does its work as it is drained
+            if inspect.isgenerator(result):
+                # so drain it, keeping what it made
+                result = list(result)
+        # if the framework, or the file system under it, says no
+        except (pyre.PyreError, OSError) as error:
+            # say why
+            return found, None, str(error)
+        # hand off the diagram and the result
+        return found, result, None
+
     def _instantiate(self, diagram, entity, cls, name=None, setup=None):
         """
         Pin the factory {entity} of {diagram} to a new instance of {cls}, called {name} if it
-        was given one; {setup}, when given, prepares the instance before the pin, and hands back
+        was given one, or to the instance of {cls} that goes by that name already; {setup}, when given, prepares the instance before the pin, and hands back
         the reason it could not, if it could not; hand back the reason the change was refused,
         if it was, in which case the factory is as it was
         """
         # the name a person gave it, if any
         name = (name or "").strip()
-        # a name that is in use already would hand back that component, not a new one
-        if name and any(name in names for names in cls.pyre_registrar.names.values()):
-            # so it is refused
-            return f"the name '{name}' is in use already"
-        # make the instance
-        try:
-            # under its name, or under one the framework makes up
-            instance = cls(name=name or None)
-        # if it cannot be made
-        except pyre.components.exceptions.ComponentError as error:
-            # say why
-            return str(error)
+        # the component that goes by that name already, if any: the framework hands it back for
+        # the name rather than make a new one, e.g. a reader the configuration attached at boot
+        existing = next(
+            (names[name] for names in cls.pyre_registrar.names.values() if name and name in names),
+            None,
+        )
+        # one of another class
+        if existing is not None and not isinstance(existing, cls):
+            # cannot stand for this factory, so the name is refused
+            return f"'{name}' is a {type(existing).pyre_family()} already"
+        # one of this class
+        if existing is not None:
+            # is the instance the factory gets pinned to
+            instance = existing
+        # otherwise
+        else:
+            # make the instance
+            try:
+                # under its name, or under one the framework makes up; a name the configuration
+                # mentions brings its settings along
+                instance = cls(name=name or None)
+            # if it cannot be made
+            except pyre.components.exceptions.ComponentError as error:
+                # say why
+                return str(error)
         # prepare it
         error = None if setup is None else setup(instance)
         # if it could not be
