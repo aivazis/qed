@@ -16,7 +16,7 @@ import { Plex, Slot as SlotShape } from '~/shapes'
 
 // local
 // the fields over the canvas
-import { InlineField } from './inlineField'
+import { InlineField, spotOf } from './inlineField'
 // the projection, which places the fan around its node
 import { useProjection } from './projection'
 // the route of a connector
@@ -408,11 +408,12 @@ export const FanNamer = () => {
             // all done
             return
         }
-        // where they are on the screen
-        const box = choice.getBoundingClientRect()
-        const frame = panel.getBoundingClientRect()
-        // the field goes to the right of the choice
-        setSpot({ x: box.right - frame.left + 8, y: box.top - frame.top })
+        // the field goes on the right of the ring of the choice, in the size of its label, which
+        // is its last text
+        setSpot(spotOf({
+            label: [...choice.querySelectorAll("text")].pop(), panel,
+            after: choice.querySelector(`circle[r="${ring}"]`),
+        }))
         // all done
         return
     }, [naming !== null])
@@ -621,7 +622,7 @@ const Satellite = ({
             {/* what it is */}
             {icon}
             {/* a ring that makes the whole satellite easy to pick, and shows when it has the focus */}
-            <circle cx={x} cy={y} r={0.95} style={styles.fan.ring} />
+            <circle cx={x} cy={y} r={ring} style={styles.fan.ring} />
             {/* the focus, drawn the way a picked factory is */}
             {focused && <circle cx={x} cy={y} r={focusRing} style={styles.fan.focus} />}
             {/* the label */}
@@ -685,6 +686,9 @@ const ink = { advance: 0.5, ascent: 0.67, descent: 0.17 }
 const clearance = 0.2
 // the radius of the ring that shows the focus, the one a picked factory has
 const focusRing = 0.75
+// the radius of the invisible ring that makes a satellite easy to pick, past which the field that
+// names a new instance goes
+const ring = 0.95
 
 
 // where the label {text} of a satellite at {x}, {y}, whose spoke points along {a}, starts and
