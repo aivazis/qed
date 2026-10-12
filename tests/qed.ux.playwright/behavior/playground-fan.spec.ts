@@ -11,12 +11,13 @@ import type { Page } from "@playwright/test"
 
 
 // a factory of the playground fans out the next level down around it: a reader, the families of
-// its classes, which open onto their members fanned out from the family itself. left and right
-// move the focus among the choices on an arc, up opens the family that has the focus, down undoes
-// the last step, and none of the arrows reach the camera; a class with the focus previews the
-// factory pinned to it, as the server plans the pin; <enter> takes the choice with the focus, and
-// pinning relabels the factory. this lives in the behavior project (serial, after the gate) and
-// takes its reader away when done
+// its classes, which open onto their members fanned out from the family itself, and a class rises
+// to a new instance of it. left and right move the focus among the choices on an arc, up opens the
+// family or the class that has the focus, down undoes the last step, and none of the arrows reach
+// the camera; a class with the focus previews the factory pinned to it, as the server plans the
+// pin; <enter> takes the choice with the focus, a new instance asks for a name it may do without,
+// and every pin relabels the factory. this lives in the behavior project (serial, after the gate)
+// and takes its reader away when done
 
 // the playground diagram: its id and its factories
 const playground = async (page: Page) => {
@@ -141,6 +142,15 @@ test.describe.serial("a factory of the playground fans out its choices", () => {
         await expect(preview.locator("[data-qed-preview-slot]")).toHaveCount(0)
         await expect(preview.locator("[data-qed-preview-dropped]")).toHaveCount(0)
 
+        // up rises above the class, to a new instance of it, which takes the focus
+        await page.keyboard.press("ArrowUp")
+        await expect(page.locator('[data-qed-fan] [data-qed-opened="qed.readers.native.flat"]')).toHaveCount(1)
+        await expect(focused(page)).toHaveAttribute("data-qed-satellite", "new")
+        // and down steps back down, onto the class
+        await page.keyboard.press("ArrowDown")
+        await expect(page.locator('[data-qed-fan] [data-qed-opened="qed.readers.native.flat"]')).toHaveCount(0)
+        await expect(focused(page)).toHaveAttribute("data-qed-satellite", "qed.readers.native.flat")
+
         // while the fan is out, the delete keys leave the diagram alone
         await page.keyboard.press("Delete")
         expect((await playground(page)).factories).toHaveLength(1)
@@ -153,11 +163,35 @@ test.describe.serial("a factory of the playground fans out its choices", () => {
         // and the label on the canvas names the class
         await expect(label(page)).toHaveText("flat")
 
-        // fanned out again, a class offers only the way back
+        // fanned out again, a class offers a new instance of it, and the way back
         await page.locator("[data-qed-kind=factory] circle").first().dblclick()
-        await expect(page.locator("[data-qed-fan] [data-qed-satellite]")).toHaveCount(1)
+        await expect(page.locator("[data-qed-fan] [data-qed-satellite]")).toHaveCount(2)
+        await expect(page.locator('[data-qed-satellite="new"]')).toHaveCount(1)
         await expect(page.locator('[data-qed-satellite="back"]')).toHaveCount(1)
-        // and down takes it, back to the protocol
+        // choosing the new instance asks for a name
+        await page.keyboard.press("ArrowRight")
+        await expect(focused(page)).toHaveAttribute("data-qed-satellite", "new")
+        await page.keyboard.press("Enter")
+        await expect(page.locator("[data-qed-fan-namer]")).toHaveCount(1)
+        // which keeps its keys: typing it moves nothing
+        const name = `fan${Date.now()}`
+        await page.keyboard.type(name)
+        expect(await where(page)).toEqual(before)
+        // <enter> makes the instance and pins the reader to it, and the fan folds
+        await page.keyboard.press("Enter")
+        await expect(page.locator("[data-qed-fan]")).toHaveCount(0)
+        await expect.poll(async () => (await playground(page)).factories[0].level, { timeout: 5_000 })
+            .toBe("instance")
+        // the label says what it is, and what it is an instance of
+        await expect(label(page)).toHaveText(`${name}:flat`)
+
+        // fanned out again, the way back leads to the class
+        await page.locator("[data-qed-kind=factory] circle").first().dblclick()
+        await page.keyboard.press("ArrowDown")
+        await expect.poll(async () => (await playground(page)).factories[0].level, { timeout: 5_000 })
+            .toBe("class")
+        await expect(label(page)).toHaveText("flat")
+        // and from there, back to the protocol
         await page.keyboard.press("ArrowDown")
         await expect.poll(async () => (await playground(page)).factories[0].level, { timeout: 5_000 })
             .toBe("protocol")
