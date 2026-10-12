@@ -110,7 +110,8 @@ const members = (drag, followers, owners) => {
 
 // decide what dropping the dragged node where it is headed would do, by the rule the server
 // applies: nothing to say on an empty spot; a factory takes no company, and neither do two slots
-// that both carry products; anything else merges. a factory moves along with its own slots, so
+// that both carry products; nothing lands on the end of a factory, and no factory lands with an
+// end on somebody; anything else merges. a factory moves along with its own slots, so
 // it is sent back if any of them would land on somebody else; the selection moves as a whole,
 // never merges, and is sent back if any of its members would land on somebody else. the verdict
 // maps every node involved to what it would see: the obstacles, the members of the group that
@@ -177,6 +178,55 @@ const judge = (drag, nodes, followers, owners, editable) => {
             verdicts[leaderOf[member.id]] = "blocked"
         }
     }
+    // the ends of the factories that stay put, where their connectors meet: a node there would
+    // look connected to something it is not
+    const ends = new Map()
+    // go through the factories
+    for (const node of nodes) {
+        // that stay put
+        if (node.kind === "factory" && !group.has(node.id)) {
+            // and note their ends
+            for (const end of endsOf(node.x, node.y, node.z)) {
+                // along with whose they are
+                ends.set(spot(end), node)
+            }
+        }
+    }
+    // go through the members, the mover among them
+    for (const id of group) {
+        // the member
+        const member = nodes.find(node => node.id === id)
+        // if it is not on the diagram
+        if (!member) {
+            // there is nothing to judge
+            continue
+        }
+        // where it is headed
+        const target = [member.x + dx, member.y + dy, member.z + dz]
+        // the factory whose end is there, if any
+        const owner = ends.get(spot(target))
+        // a member that would land on the end of a factory
+        if (owner) {
+            // is sent back, and both of them see it, along with the node it moves with
+            verdicts[owner.id] = "blocked"
+            verdicts[member.id] = "blocked"
+            verdicts[leaderOf[member.id]] = "blocked"
+        }
+        // a factory
+        if (member.kind === "factory") {
+            // whose ends would land on somebody that stays put
+            for (const end of endsOf(...target)) {
+                // whoever is there
+                const other = at(...end)
+                // is in the way
+                if (other) {
+                    // so both of them see it
+                    verdicts[other.id] = "blocked"
+                    verdicts[member.id] = "blocked"
+                }
+            }
+        }
+    }
     // the node already where the mover is headed, if any, unless the mover was judged already
     const occupant = plain ? null : at(drag.tx, drag.ty, drag.tz ?? mover.z)
     // if there is one
@@ -206,6 +256,15 @@ const judge = (drag, nodes, followers, owners, editable) => {
     // an empty verdict means a plain move
     return Object.keys(verdicts).length ? verdicts : null
 }
+
+
+// the spots of the ends of a factory at {x}, {y}, {z}: a cell away on either side, along its axis,
+// where its connectors meet; the server places them the same way
+const endsOf = (x, y, z) => [[x - reach, y, z], [x + reach, y, z]]
+// how far the ends of a factory are from it
+const reach = 2
+// a spot, as a key
+const spot = ([x, y, z]) => `${x},${y},${z}`
 
 
 // end of file
