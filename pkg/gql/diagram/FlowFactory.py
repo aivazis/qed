@@ -180,13 +180,19 @@ class FlowFactory(graphene.ObjectType):
     @staticmethod
     def render(value):
         """
-        Render the {value} of a trait as text: a datatype by its spec, which is how it is
-        configured, any other component by its family, and the rest the way they print
+        Render the {value} of a trait as text: a class of components by its family, e.g. the
+        default of a trait of a class, a datatype by its spec, which is how it is configured, any
+        other component by its family, and the rest the way they print
         """
         # a trait with no value
         if value is None:
             # has nothing to show
             return None
+        # a class of components, whose instance properties, e.g. the spec of a datatype, mean
+        # nothing yet
+        if isinstance(value, type) and issubclass(value, qed.component):
+            # reads as its family, the way it is configured
+            return value.pyre_family()
         # a datatype
         if qed.protocols.datatype.pyre_isImplementedBy(value=value):
             # reads as its spec
