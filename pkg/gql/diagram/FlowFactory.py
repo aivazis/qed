@@ -9,6 +9,9 @@
 import graphene
 import inspect
 
+# support
+import qed
+
 # my interface
 from ..Node import Node
 
@@ -129,6 +132,10 @@ class FlowFactory(graphene.ObjectType):
                 if kind != "setting":
                     # so describe it that way, if there is one
                     value = None if value is None else value.pyre_family()
+            # a class has the settings it will be made with
+            elif node.level == "class" and kind == "setting":
+                # which the node keeps when they are given, or else the class has as configured
+                value = node.settings.get(trait.name, getattr(node.pin, trait.name, None))
             # otherwise, the settings it will be made with
             else:
                 # are kept by the node
@@ -139,13 +146,35 @@ class FlowFactory(graphene.ObjectType):
                     name=trait.name,
                     kind=kind,
                     type=trait.typename,
-                    value=None if value is None else str(value),
+                    value=FlowFactory.render(value=value),
                     default=FlowFactory.default(trait=trait),
                     doc=trait.doc,
+                    editable=factory.editable(node=node, trait=trait),
                 )
             )
         # hand off the descriptions
         return traits
+
+    @staticmethod
+    def render(value):
+        """
+        Render the {value} of a trait as text: a datatype by its spec, which is how it is
+        configured, any other component by its family, and the rest the way they print
+        """
+        # a trait with no value
+        if value is None:
+            # has nothing to show
+            return None
+        # a datatype
+        if qed.protocols.datatype.pyre_isImplementedBy(value=value):
+            # reads as its spec
+            return value.spec
+        # any other component
+        if isinstance(value, qed.component):
+            # reads as its family, or its name when it has none
+            return value.pyre_family() or value.pyre_name
+        # the rest print the way they are
+        return str(value)
 
     @staticmethod
     def default(trait):

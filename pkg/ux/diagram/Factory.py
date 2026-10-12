@@ -5,6 +5,10 @@
 # (c) 1998-2026 all rights reserved
 
 
+# externals
+import pyre
+import pyre.traits.Dict
+
 # superclass
 from .Node import Node
 
@@ -57,6 +61,9 @@ class Factory(Node):
 
         # save the recipe node i stand for
         self.node = node
+        # the name a person gave the instance i am pinned to, which may be empty; none when i am
+        # not pinned to an instance, or when nobody named it, in which case its own name is used
+        self.alias = None
         # and the arity
         self.inputs = len(node.inputs)
         self.outputs = len(node.outputs)
@@ -86,24 +93,51 @@ class Factory(Node):
         return
 
     @staticmethod
-    def describe(protocol=None, pin=None):
+    def describe(protocol=None, pin=None, alias=None):
         """
         Name a factory that satisfies {protocol} and is pinned to {pin}: by the component it is
-        pinned to, or the protocol it must satisfy
+        pinned to, or the protocol it must satisfy; an instance reads as its name and its class,
+        "name:class", where the name is the {alias} a person gave it, possibly empty, or else
+        the instance's own
         """
-        # a factory that is pinned
+        # a factory that is pinned to an instance
+        if pin is not None and not isinstance(pin, type):
+            # its name: the one a person gave it, or else its own
+            name = pin.pyre_name if alias is None else alias
+            # is named by it, and the class it is an instance of
+            return f"{name}:{type(pin).pyre_family().split('.')[-1]}"
+        # a factory that is pinned to a class
         if pin is not None:
             # is named by the family of its pin
             return pin.pyre_family().split(".")[-1]
         # otherwise, by its protocol, whose family names the whole category
         return protocol.__name__.lower()
 
+    @staticmethod
+    def editable(node, trait):
+        """
+        Decide whether {trait} of the factory behind the recipe {node} can be changed from the
+        diagram: only the settings of a factory pinned to a class or an instance, and only the
+        ones whose value is a single piece of text, which components are too, since the
+        framework makes them from their names; maps wait for an editor of their own
+        """
+        # a factory pinned only to its protocol has no settings to change
+        if node.level == "protocol":
+            # so none are
+            return False
+        # neither are its slots
+        if trait.input or trait.output:
+            # which hold products
+            return False
+        # the rest are, unless they are maps
+        return not isinstance(trait, pyre.traits.Dict.Dict)
+
     def kind(self):
         """
         Name what i am: the component i am pinned to, or the protocol i must satisfy
         """
-        # ask my recipe node
-        return self.describe(protocol=self.node.protocol, pin=self.node.pin)
+        # ask my recipe node, along with the name a person gave my instance, if any
+        return self.describe(protocol=self.node.protocol, pin=self.node.pin, alias=self.alias)
 
     def home(self, trait):
         """

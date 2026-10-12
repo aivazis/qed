@@ -12,6 +12,7 @@ import json
 import os
 import re
 import pyre
+import pyre.traits.Property
 import time
 import qed
 import journal
@@ -1688,6 +1689,186 @@ class Store(qed.component, family="qed.ux.store"):
             channel.log(str(error))
         # hand off the diagram, which is as it was if the pin was refused
         return diagram
+
+    def diagramConfigure(self, diagram, node, trait, value, name=None):
+        """
+        Set the setting {trait} of the factory with the relay id {node} on the pipeline diagram
+        {diagram} to {value}, given as text: a factory pinned to an instance has its setting
+        changed; one pinned to a class is pinned to a new instance of it, called {name} if it
+        was given one, that carries the value; hand back the diagram, and the reason the change
+        was refused, if it was, in which case the diagram is as it was
+        """
+        # find the diagram
+        found = self.findDiagram(relay=diagram)
+        # an id that names no diagram
+        if found is None:
+            # has nothing to change
+            return None, f"there is no diagram '{diagram}'"
+        # a diagram that cannot be edited
+        if not found.editable:
+            # stays as it is
+            return found, "this diagram cannot be edited"
+        # find the node
+        entity = found.locate(relay=node)
+        # only factories have settings
+        if entity is None or entity not in found.factories:
+            # so anything else stays as it is
+            return found, f"there is no factory '{node}' on this diagram"
+        # the recipe node behind it
+        recipe = entity.node
+        # a factory pinned only to its protocol has no settings yet
+        if recipe.level == "protocol":
+            # so ask for a class first
+            return found, f"pin '{recipe.name}' to a class before changing its settings"
+        # the class that declares the settings
+        cls = recipe.pin if recipe.level == "class" else type(recipe.pin)
+        # find the setting among its traits
+        try:
+            # by any of its names
+            descriptor = cls.pyre_trait(alias=trait)
+        # if there is none
+        except pyre.components.exceptions.TraitNotFoundError:
+            # say so
+            return found, f"{cls.pyre_family()} has no setting '{trait}'"
+        # one that cannot be changed from the diagram
+        if not entity.editable(node=recipe, trait=descriptor):
+            # is refused
+            return found, f"'{trait}' cannot be changed from the diagram"
+        # a plain property can be checked without storing the value anywhere; a component is
+        # resolved, and so made, by its conversion, so it is checked when it is set
+        if isinstance(descriptor, pyre.traits.Property.Property):
+            # check it
+            try:
+                # by running it through the conversion of the trait
+                descriptor.coerce(value=value)
+            # if it does not make sense
+            except pyre.schemata.exceptions.SchemaError as error:
+                # say why, in the words of the trait
+                return found, str(error)
+        # a factory pinned to an instance
+        if recipe.level == "instance":
+            # has its setting changed
+            return found, self._configure(component=recipe.pin, trait=descriptor, value=value)
+        # a factory pinned to a class is pinned to a new instance of it, called {name} if it
+        # was given one, that carries the new value
+        error = self._instantiate(
+            diagram=found,
+            entity=entity,
+            cls=cls,
+            name=name,
+            setup=lambda instance: self._configure(
+                component=instance, trait=descriptor, value=value
+            ),
+        )
+        # hand off the diagram, and the reason for a refusal, if any
+        return found, error
+
+    def diagramInstantiate(self, diagram, node, family=None, name=None):
+        """
+        Pin the factory with the relay id {node} on the pipeline diagram {diagram} to a new
+        instance of the class with the given {family}, or of the class it is pinned to when
+        there is none, called {name} if one is given; hand back the diagram, and the reason the
+        change was refused, if it was, in which case the diagram is as it was
+        """
+        # find the diagram
+        found = self.findDiagram(relay=diagram)
+        # an id that names no diagram
+        if found is None:
+            # has nothing to change
+            return None, f"there is no diagram '{diagram}'"
+        # a diagram that cannot be edited
+        if not found.editable:
+            # stays as it is
+            return found, "this diagram cannot be edited"
+        # find the node
+        entity = found.locate(relay=node)
+        # only factories have instances
+        if entity is None or entity not in found.factories:
+            # so anything else stays as it is
+            return found, f"there is no factory '{node}' on this diagram"
+        # the recipe node behind it
+        recipe = entity.node
+        # without a family
+        if family is None:
+            # the factory must be pinned to a class
+            if recipe.level != "class":
+                # so complain
+                return found, f"'{recipe.name}' is not pinned to a class"
+            # which is the one to make an instance of
+            cls = recipe.pin
+        # otherwise
+        else:
+            # find the class the family names, and the protocol it is offered under
+            protocol, cls = self.implementer(family=family)
+            # a family that names no class, or one of another protocol
+            if cls is None or protocol is not recipe.protocol:
+                # is refused
+                return found, f"'{family}' is not a class of {recipe.protocol.__name__}"
+        # make the instance and pin the factory to it
+        error = self._instantiate(diagram=found, entity=entity, cls=cls, name=name)
+        # hand off the diagram, and the reason for a refusal, if any
+        return found, error
+
+    def _instantiate(self, diagram, entity, cls, name=None, setup=None):
+        """
+        Pin the factory {entity} of {diagram} to a new instance of {cls}, called {name} if it
+        was given one; {setup}, when given, prepares the instance before the pin, and hands back
+        the reason it could not, if it could not; hand back the reason the change was refused,
+        if it was, in which case the factory is as it was
+        """
+        # the name a person gave it, if any
+        name = (name or "").strip()
+        # a name that is in use already would hand back that component, not a new one
+        if name and any(name in names for names in cls.pyre_registrar.names.values()):
+            # so it is refused
+            return f"the name '{name}' is in use already"
+        # make the instance
+        try:
+            # under its name, or under one the framework makes up
+            instance = cls(name=name or None)
+        # if it cannot be made
+        except pyre.components.exceptions.ComponentError as error:
+            # say why
+            return str(error)
+        # prepare it
+        error = None if setup is None else setup(instance)
+        # if it could not be
+        if error is not None:
+            # say why, and leave the factory as it was
+            return error
+        # pin the factory to it, with the name a person gave it, possibly none
+        try:
+            # in place
+            diagram.pin(entity=entity, pin=instance, alias=name)
+        # if the recipe refuses, or the diagram has no room for the result
+        except (qed.flow.exceptions.RecipeError, qed.exceptions.DiagramError) as error:
+            # say why, in the words of whoever refused
+            return str(error)
+        # all done
+        return None
+
+    def _configure(self, component, trait, value):
+        """
+        Set {trait} of {component} to {value}, as text, the way the command line would, but
+        noted as set interactively in the flow editor: a later setting of the same rank wins, so
+        an edit overrides the command line it follows; hand back the reason it was refused, if
+        it was
+        """
+        # make the assignment
+        try:
+            # at the priority of the command line, which the edit follows
+            component.pyre_setTrait(
+                alias=trait.name,
+                value=value,
+                priority=self.pyre_executive.priority.command(),
+                locator=pyre.tracking.interactive(interface="the flow editor"),
+            )
+        # if the framework refuses it
+        except pyre.framework.exceptions.FrameworkError as error:
+            # say why
+            return str(error)
+        # all done
+        return None
 
     def diagramPinPreview(self, diagram, node, family):
         """
