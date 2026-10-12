@@ -13,6 +13,8 @@ import { graphql, useMutation } from 'react-relay/hooks'
 export const useEditDiagram = diagram => {
     // the mutations
     const [commitAdd] = useMutation(useEditDiagramAddMutation)
+    const [commitConfigure] = useMutation(useEditDiagramConfigureMutation)
+    const [commitInstantiate] = useMutation(useEditDiagramInstantiateMutation)
     const [commitPin] = useMutation(useEditDiagramPinMutation)
     const [commitRemove] = useMutation(useEditDiagramRemoveMutation)
     // report a failure
@@ -50,6 +52,48 @@ export const useEditDiagram = diagram => {
         // all done
         return
     }
+    // set the setting {trait} of the factory with {id} to {value}, given as text; a factory pinned
+    // to a class becomes an instance of it called {name}; {done} hears the reason the server
+    // refused, or nothing when the change was made
+    const configure = ({ id, trait, value, name = null }, done) => {
+        // send the request
+        commitConfigure({
+            // the payload
+            variables: { input: { diagram, node: id, trait, value, name } },
+            // when the answer arrives, pass on the verdict
+            onCompleted: response => done?.(response?.diagramConfigure?.error ?? null),
+            // on failure, report, and say so
+            onError: errors => {
+                // report
+                complain(`setting ${trait} of ${id} to ${value}`, errors)
+                // and say so
+                done?.("the server could not be reached")
+            },
+        })
+        // all done
+        return
+    }
+    // pin the factory with {id} to a new instance of the class of {family}, or of the class it is
+    // pinned to without one, called {name} if it is not empty; {done} hears the reason the server
+    // refused, or nothing when the pin was made
+    const instantiate = ({ id, family = null, name = null }, done) => {
+        // send the request
+        commitInstantiate({
+            // the payload
+            variables: { input: { diagram, node: id, family, name } },
+            // when the answer arrives, pass on the verdict
+            onCompleted: response => done?.(response?.diagramInstantiate?.error ?? null),
+            // on failure, report, and say so
+            onError: errors => {
+                // report
+                complain(`making a new ${family ?? "instance"} for ${id}`, errors)
+                // and say so
+                done?.("the server could not be reached")
+            },
+        })
+        // all done
+        return
+    }
     // remove the factory with {id}
     const remove = id => {
         // send the request
@@ -63,7 +107,7 @@ export const useEditDiagram = diagram => {
         return
     }
     // publish
-    return { add, pin, remove }
+    return { add, configure, instantiate, pin, remove }
 }
 
 
@@ -71,6 +115,30 @@ export const useEditDiagram = diagram => {
 const useEditDiagramAddMutation = graphql`
     mutation useEditDiagramAddMutation($input: DiagramAddInput!) {
         diagramAdd(input: $input) {
+            diagram {
+                id
+                ...contentsFlowDiagramFragment
+            }
+        }
+    }
+`
+
+const useEditDiagramConfigureMutation = graphql`
+    mutation useEditDiagramConfigureMutation($input: DiagramConfigureInput!) {
+        diagramConfigure(input: $input) {
+            error
+            diagram {
+                id
+                ...contentsFlowDiagramFragment
+            }
+        }
+    }
+`
+
+const useEditDiagramInstantiateMutation = graphql`
+    mutation useEditDiagramInstantiateMutation($input: DiagramInstantiateInput!) {
+        diagramInstantiate(input: $input) {
+            error
             diagram {
                 id
                 ...contentsFlowDiagramFragment

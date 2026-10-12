@@ -15,6 +15,8 @@ import factoryPaint from '~/shapes/factory/styles'
 import { Plex, Slot as SlotShape } from '~/shapes'
 
 // local
+// the fields over the canvas
+import { InlineField } from './inlineField'
 // the projection, which places the fan around its node
 import { useProjection } from './projection'
 // the route of a connector
@@ -33,15 +35,20 @@ const FanContext = React.createContext(null)
 // the state of the fan, which the canvas holds so its keys can drive it: the factory that is
 // fanned out, among the {factories} of the {diagram}, the families it has been opened onto, the
 // choices it offers, and the one that has the focus; choosing a class asks {pin} to pin the
-// factory to it; the {slots} of the diagram show where the ones a pin lets go of are; without a
-// {catalog} of what each protocol can be pinned to, nothing fans out
-export const useFanState = ({ diagram, factories, slots, catalog, pin }) => {
+// factory to it, and choosing "new" above a class asks {instantiate} to pin it to a new instance
+// of that class, under a name a person may give it; the {slots} of the diagram show where the
+// ones a pin lets go of are; without a {catalog} of what each protocol can be pinned to,
+// nothing fans out
+export const useFanState = ({ diagram, factories, slots, catalog, pin, instantiate }) => {
     // the id of the factory that is fanned out, if any
     const [id, setId] = React.useState(null)
     // the families the fan has been opened onto, outermost first
     const [browse, setBrowse] = React.useState([])
     // the choice that has the focus: the index of a satellite, "back" for the way back, or nothing
     const [focus, setFocus] = React.useState(null)
+    // the new instance being named, if any: the family of its class, the name so far, and the
+    // reason the last try was refused
+    const [naming, setNaming] = React.useState(null)
     // where the pointer was last seen moving, so a satellite that slides under a pointer at rest
     // does not take the focus
     const pointer = React.useRef(null)
@@ -63,10 +70,16 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin }) => {
     const candidates = factory?.level === "protocol"
         ? (group?.entries ?? []).filter(entry => entry.level === "class")
         : []
-    // the family being browsed, if any, which remembers where it sits
+    // the family or the class being browsed, if any, which remembers where it sits
     const opened = browse.length ? browse[browse.length - 1] : null
-    // the satellites: the members of the family being browsed, or the families of the candidates
-    const satellites = factory ? tree(opened ? opened.members : candidates) : []
+    // the satellites: above a class, a new instance of it, whether the class is being browsed or
+    // is what the factory is pinned to, directly or through an instance of it; otherwise, the
+    // members of the family being browsed, or the families of the candidates
+    const satellites = !factory ? []
+        : opened && isClass(opened) ? [fresh(opened.family)]
+            : opened ? tree(opened.members)
+                : factory.level !== "protocol" ? [fresh(factory.family)]
+                    : tree(candidates)
     // where they go: around the family being browsed, along the spoke that led to it, or around the
     // factory, straight up
     const spots = satellites.map((_, k) => place({
@@ -75,9 +88,15 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin }) => {
     // the way back, in words, if there is one
     const back = !factory ? null : browse.length
         ? (browse.length > 1 ? `back to ${browse[browse.length - 2].name}` : "back to all families")
-        : factory.level === "class" ? `back to any ${protocolName(group)}` : null
-    // the class whose look is previewed on the factory: the one that has the focus, if any
-    const preview = typeof focus === "number" && !satellites[focus]?.members ? satellites[focus] : null
+        : factory.level === "class" ? `back to any ${protocolName(group)}`
+            : factory.level === "instance" ? `back to any ${factory.family.split(".").pop()}` : null
+    // the choice that has the focus, if it is on the arc
+    const pick = typeof focus === "number" ? satellites[focus] ?? null : null
+    // the class whose look is previewed on the factory: the one that has the focus, or, for a new
+    // instance of a class the factory is not pinned to yet, that class
+    const preview = !pick || pick.members ? null
+        : pick.create ? (factory.level === "protocol" ? opened : null)
+            : pick
     // fan out the factory with {id}
     const open = id => {
         // only when there is something to offer
@@ -85,10 +104,11 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin }) => {
             // so there is nothing to do
             return
         }
-        // fan it out, from the top, with nothing in focus
+        // fan it out, from the top, with nothing in focus and nothing being named
         setId(id)
         setBrowse([])
         setFocus(null)
+        setNaming(null)
         // all done
         return
     }
@@ -98,10 +118,11 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin }) => {
         setId(null)
         setBrowse([])
         setFocus(null)
+        setNaming(null)
         // all done
         return
     }
-    // go back: out of the family being browsed, or up to the protocol
+    // go back: out of the family being browsed, or down to the class or the protocol
     const goBack = () => {
         // out of a family
         if (browse.length) {
@@ -110,14 +131,14 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin }) => {
             const above = tree(browse.length > 1 ? browse[browse.length - 2].members : candidates)
             // leaves the factory as it is
             setBrowse(browse.slice(0, -1))
-            // and hands the focus to the family we came out of, so <up> goes right back in
-            const k = above.findIndex(satellite => satellite.members && satellite.name === opened.name)
+            // and hands the focus to the family or class we came out of, so <up> goes right back in
+            const k = above.findIndex(satellite => key(satellite) === key(opened))
             setFocus(k < 0 ? null : k)
             // all done
             return
         }
-        // up to the protocol
-        pin({ id: factory.id, family: null })
+        // an instance goes back to its class, and a class to its protocol
+        pin({ id: factory.id, family: factory.level === "instance" ? factory.family : null })
         // which leaves nothing in focus
         setFocus(null)
         // all done
@@ -127,6 +148,13 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin }) => {
     const choose = k => {
         // the satellite
         const satellite = satellites[k]
+        // a new instance asks for its name first
+        if (satellite.create) {
+            // which may be left empty
+            setNaming({ family: satellite.create, name: "", error: null })
+            // all done
+            return
+        }
         // a family opens onto its members, which fan out from where it sits
         if (satellite.members) {
             // and leaves the factory as it is
@@ -143,12 +171,59 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin }) => {
         // all done
         return
     }
+    // open the class {k} onto what is above it: a new instance of it
+    const rise = k => {
+        // the class, which fans out its instances from where it sits
+        setBrowse([...browse, { ...satellites[k], spot: spots[k] }])
+        // with the new instance in focus, so <enter> names it
+        setFocus(0)
+        // all done
+        return
+    }
+    // record what was typed as the name of the new instance
+    const rename = text => {
+        // in the name being made
+        setNaming(old => old && { ...old, name: text, error: null })
+        // all done
+        return
+    }
+    // stop naming, and go back to the fan
+    const unname = () => {
+        // forget the name
+        setNaming(null)
+        // all done
+        return
+    }
+    // make the new instance, under the name typed, if any, and pin the factory to it
+    const commitName = () => {
+        // with nothing being named
+        if (!naming) {
+            // there is nothing to do
+            return
+        }
+        // ask the server
+        instantiate({ id: factory.id, family: naming.family, name: naming.name.trim() }, error => {
+            // a pin that was made folds the fan
+            if (error === null) {
+                // so fold it
+                close()
+                // all done
+                return
+            }
+            // a refusal leaves the name open, with the reason
+            setNaming(old => old && { ...old, error })
+            // all done
+            return
+        })
+        // all done
+        return
+    }
     // the keys of the fan: left and right move the focus among the choices on the arc, up opens
-    // the family that has the focus, down undoes the last step, and <enter> takes the choice that
-    // has the focus; reports whether the key was for the fan
+    // the family or the class that has the focus, down undoes the last step, and <enter> takes the
+    // choice that has the focus; reports whether the key was for the fan
     const onKey = evt => {
-        // with nothing fanned out
-        if (!factory) {
+        // with nothing fanned out, or a name being typed, which keeps its keys
+        if (!factory || naming) {
             // no key is for the fan
             return false
         }
@@ -176,9 +251,16 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin }) => {
             return true
         }
         // up goes into the family that has the focus
-        if (evt.key === "ArrowUp" && typeof focus === "number" && satellites[focus]?.members) {
+        if (evt.key === "ArrowUp" && pick?.members) {
             // by opening it
             choose(focus)
+            // handled
+            return true
+        }
+        // or rises above the class that has the focus, to its instances
+        if (evt.key === "ArrowUp" && pick && isClass(pick)) {
+            // by opening it
+            rise(focus)
             // handled
             return true
         }
@@ -231,8 +313,8 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin }) => {
     }
     // publish
     return {
-        diagram, slots, factory, browse, satellites, spots, back, focus, preview,
-        open, close, goBack, choose, setFocus, hover, onKey,
+        diagram, slots, factory, browse, satellites, spots, back, focus, preview, naming,
+        open, close, goBack, choose, rise, setFocus, hover, onKey, rename, unname, commitName,
     }
 }
 
@@ -260,7 +342,10 @@ export const Fan = () => {
         return null
     }
     // unpack
-    const { diagram, slots, factory, browse, satellites, spots, back, focus, preview, goBack, choose, hover } = fan
+    const {
+        diagram, slots, factory, browse, satellites, spots, back, focus, preview, goBack, choose, rise,
+        hover,
+    } = fan
     // where the grip of the factory is on the screen: the middle of its circle, above its hub
     const at = project(factory.at)
     const center = { x: at.x, y: at.y - 1.5 }
@@ -269,22 +354,116 @@ export const Fan = () => {
         <g data-qed-fan={factory.id}>
             {/* the look of the factory pinned to the class that has the focus */}
             {preview && <Preview diagram={diagram} slots={slots} factory={factory} entry={preview} />}
-            {/* the families opened so far, where they were, as the trail back to the factory */}
+            {/* the families and classes opened so far, where they were, as the trail back */}
             {browse.map(family => (
-                <Satellite key={`opened-${family.name}`} opened
+                <Satellite key={`opened-${key(family)}`} opened
                     satellite={family} spot={family.spot} center={center} />
             ))}
-            {/* the satellites, on an arc above the factory, or past the family they belong to */}
+            {/* the satellites, on an arc above the factory, or past what they belong to */}
             {satellites.map((satellite, k) => (
-                <Satellite key={satellite.family ?? satellite.name}
+                <Satellite key={key(satellite)}
                     satellite={satellite} spot={spots[k]} center={center}
                     focused={focus === k} onFocus={evt => hover(k, evt)}
-                    onChoose={() => choose(k)} />
+                    onChoose={() => choose(k)} onRise={() => rise(k)} />
             ))}
             {/* the way back, right below the factory, out of line with the choices */}
             {back && <Back label={back} center={center} focused={focus === "back"}
                 onFocus={evt => hover("back", evt)} onChoose={goBack} />}
         </g>
+    )
+}
+
+
+// the field that names a new instance, over the canvas, next to the choice that asked for it; the
+// name may be left empty, which makes an instance nobody named
+export const FanNamer = () => {
+    // the fan
+    const fan = useFan()
+    // the field, so it can take the focus and keep its keys to itself
+    const field = React.useRef(null)
+    // where the field goes, on the panel
+    const [spot, setSpot] = React.useState(null)
+    // the name being made, if any
+    const naming = fan?.naming ?? null
+    // the state as it is now, for the keys of the field, whose listener outlives a render
+    const latest = React.useRef(fan)
+    latest.current = fan
+    // when a name is asked for, find the choice that asked, and put the field next to it
+    React.useLayoutEffect(() => {
+        // with nothing being named
+        if (!naming) {
+            // there is no field
+            setSpot(null)
+            // all done
+            return
+        }
+        // the choice that asked
+        const choice = document.querySelector('[data-qed-fan] [data-qed-satellite="new"]')
+        // the panel the field goes on
+        const panel = choice?.closest("section")
+        // if either is missing
+        if (!choice || !panel) {
+            // the field goes in the corner
+            setSpot({ x: 16, y: 16 })
+            // all done
+            return
+        }
+        // where they are on the screen
+        const box = choice.getBoundingClientRect()
+        const frame = panel.getBoundingClientRect()
+        // the field goes to the right of the choice
+        setSpot({ x: box.right - frame.left + 8, y: box.top - frame.top })
+        // all done
+        return
+    }, [naming !== null])
+    // once the field is up, it takes the focus and handles its own keys
+    React.useEffect(() => {
+        // the field
+        const input = field.current
+        // if there is none
+        if (!input) {
+            // there is nothing to do
+            return
+        }
+        // take the focus
+        input.focus()
+        // the keys typed here are for the field only; react hears them only once they reach
+        // the root, so the field handles its own: <enter> makes the instance, <escape> goes
+        // back to the fan
+        const keep = evt => {
+            // none of them go any further
+            evt.stopPropagation()
+            // make it
+            if (evt.key === "Enter") {
+                // under the name typed, if any
+                latest.current.commitName()
+                // all done
+                return
+            }
+            // go back
+            if (evt.key === "Escape") {
+                // to the fan
+                latest.current.unname()
+                // all done
+                return
+            }
+            // all done
+            return
+        }
+        // install
+        input.addEventListener("keydown", keep)
+        // and remove when done
+        return () => input.removeEventListener("keydown", keep)
+    }, [spot !== null])
+    // with nothing being named, or nowhere to put the field yet
+    if (!naming || !spot) {
+        // there is nothing to show
+        return null
+    }
+    // render
+    return (
+        <InlineField spot={spot} prompt="name" value={naming.name} placeholder="unnamed"
+            error={naming.error} field={field} onChange={fan.rename} data-qed-fan-namer />
     )
 }
 
@@ -357,9 +536,13 @@ const Preview = ({ diagram, slots, factory, entry }) => {
 }
 
 
-// a satellite of the fan: a class, or a family of them; a family that is {opened} stays where it
-// was, as a stop on the way from the factory to its members, and takes no choices
-const Satellite = ({ satellite, spot, center, opened = false, focused = false, onFocus, onChoose }) => {
+// a satellite of the fan: a class, a family of them, or a new instance of a class; a family or
+// a class that is {opened} stays where it was, as a stop on the way from the factory to what is
+// past it, and takes no choices; a click chooses it, and a click with <alt> on a class rises
+// above it, to its instances
+const Satellite = ({
+    satellite, spot, center, opened = false, focused = false, onFocus, onChoose, onRise,
+}) => {
     // the direction of its spoke
     const a = spot.angle * Math.PI / 180
     // where the spoke starts, just outside whatever it hangs from
@@ -379,29 +562,49 @@ const Satellite = ({ satellite, spot, center, opened = false, focused = false, o
         ? `${satellite.name} (${satellite.members.length})` : satellite.name
     // where it goes: the box of its ink is kept the same {clearance} away from what is drawn at
     // the satellite, whichever way it faces, so the gap between the two looks the same all around
-    const { lx, ly } = labelAt({ x, y, a, side, opened, family: !!satellite.members, text })
+    // an opened family or class, and a satellite alone on its arc, have their labels level with
+    // them, on the side away from where their arc leans, like the stops of the trail behind them;
+    // the one alone may have the focus, so its label clears the ring that shows it
+    const { lx, ly } = labelAt({
+        x, y, a, side, level: opened || spot.lone, ring: !opened && spot.lone,
+        family: !!satellite.members, text,
+    })
     // the paint of a class
     const paint = { ...factoryPaint.icon, ...styles.levels.factory.class.icon }
     // a click chooses it, and stays with me
     const onClick = evt => {
         // the canvas clears the selection on a click
         evt.stopPropagation()
-        // choose
+        // a click with <alt> on a class
+        if (evt.altKey && isClass(satellite)) {
+            // rises above it
+            onRise()
+            // all done
+            return
+        }
+        // otherwise, choose
         onChoose()
         // all done
         return
     }
-    // an opened family is part of the trail, not a choice
+    // the icon: a family is a cluster of three small pucks, a class is one, and a new instance is
+    // a plus sign, as big as the labels
+    const icon = satellite.members
+        ? [[-0.32, 0.18], [0.32, 0.18], [0, -0.32]].map(([dx, dy], i) => (
+            <circle key={i} cx={x + dx} cy={y + dy} r={0.32} style={paint} />
+        ))
+        : satellite.create
+            ? <text x={x} y={y} style={styles.fan.fresh}>+</text>
+            : <circle cx={x} cy={y} r={0.6} style={paint} />
+    // an opened family or class is part of the trail, not a choice
     if (opened) {
         // so it is drawn quietly, and takes no pointer
         return (
-            <g pointerEvents="none" data-qed-opened={satellite.name}>
+            <g pointerEvents="none" data-qed-opened={key(satellite)}>
                 {/* the spoke */}
                 <line x1={x0} y1={y0} x2={x1} y2={y1} style={styles.fan.spoke} />
-                {/* the cluster of the family */}
-                {[[-0.32, 0.18], [0.32, 0.18], [0, -0.32]].map(([dx, dy], i) => (
-                    <circle key={i} cx={x + dx} cy={y + dy} r={0.32} style={paint} />
-                ))}
+                {/* what it is */}
+                {icon}
                 {/* the label */}
                 <text x={lx} y={ly} style={{ ...styles.fan.label, textAnchor: "start" }}>{text}</text>
             </g>
@@ -410,19 +613,17 @@ const Satellite = ({ satellite, spot, center, opened = false, focused = false, o
     // render
     return (
         <g style={styles.fan.satellite} onClick={onClick} onPointerEnter={onFocus}
-            data-qed-satellite={satellite.family ?? satellite.name}
+            data-qed-satellite={key(satellite)}
             data-qed-family-group={satellite.members ? satellite.name : undefined}
             data-qed-focused={focused}>
             {/* the spoke */}
             <line x1={x0} y1={y0} x2={x1} y2={y1} style={styles.fan.spoke} />
-            {/* a family is a cluster of three small pucks; a class is one */}
-            {satellite.members
-                ? [[-0.32, 0.18], [0.32, 0.18], [0, -0.32]].map(([dx, dy], i) => (
-                    <circle key={i} cx={x + dx} cy={y + dy} r={0.32} style={paint} />
-                ))
-                : <circle cx={x} cy={y} r={0.6} style={paint} />}
+            {/* what it is */}
+            {icon}
             {/* a ring that makes the whole satellite easy to pick, and shows when it has the focus */}
-            <circle cx={x} cy={y} r={0.95} style={focused ? styles.fan.focus : styles.fan.ring} />
+            <circle cx={x} cy={y} r={0.95} style={styles.fan.ring} />
+            {/* the focus, drawn the way a picked factory is */}
+            {focused && <circle cx={x} cy={y} r={focusRing} style={styles.fan.focus} />}
             {/* the label */}
             <text x={lx} y={ly} style={{ ...styles.fan.label, textAnchor: "start" }}>{text}</text>
         </g>
@@ -460,6 +661,18 @@ const Back = ({ label, center, focused, onFocus, onChoose }) => {
 }
 
 
+// the choice of a new instance of the class with {family}
+const fresh = family => ({ name: "new…", create: family })
+
+
+// whether a {satellite} is a class: neither a family of them nor a new instance
+const isClass = satellite => !satellite.members && !satellite.create
+
+
+// what tells a {satellite} apart from the others on its arc
+const key = satellite => satellite.create ? "new" : satellite.family ?? satellite.name
+
+
 // the name of the protocol of a catalog {group}, the way its own entry spells it
 const protocolName = group => group?.entries.find(entry => entry.level === "protocol")?.name ?? "protocol"
 
@@ -470,6 +683,8 @@ const protocolName = group => group?.entries.find(entry => entry.level === "prot
 const ink = { advance: 0.5, ascent: 0.67, descent: 0.17 }
 // how far the ink of a label stays from what is drawn at its satellite
 const clearance = 0.2
+// the radius of the ring that shows the focus, the one a picked factory has
+const focusRing = 0.75
 
 
 // where the label {text} of a satellite at {x}, {y}, whose spoke points along {a}, starts and
@@ -478,30 +693,33 @@ const clearance = 0.2
 // on the side of the axis the satellite is on and the way the spoke points vertically, so that the
 // corner of the box nearest the satellite is what keeps the distance; labels counterclockwise of
 // the axis end at their satellite, the ones clockwise of it start there, and the one on the axis
-// is centered on its spoke; an {opened} family has its members fanning out along its spoke, so
-// its label goes level with it, on the side its members lean away from
-const labelAt = ({ x, y, a, side, opened, family, text }) => {
+// is centered on its spoke; a {level} label goes level with its satellite instead, on the side
+// away from where its arc leans, which suits an opened family or class, whose members fan out
+// along its spoke, and a satellite alone on its arc; with {ring}, the distance is kept from the
+// ring that shows the focus, rather than from what is drawn at the satellite
+const labelAt = ({ x, y, a, side, level, ring, family, text }) => {
     // the size of the font
     const size = styles.fan.label.fontSize
     // the box of the ink of the label
     const w = text.length * ink.advance * size
     const h = (ink.ascent + ink.descent) * size
-    // what is drawn at the satellite: the cluster of a family, or the puck of a class
-    const r = family ? 0.64 : 0.6
-    // the direction the box is pushed out along: down the spoke, or, for an opened family, level
-    // with it, away from where its members lean
+    // what the label keeps its distance from: the ring that shows the focus, or what is drawn at
+    // the satellite, the cluster of a family or the puck of a class
+    const r = ring ? focusRing : family ? 0.64 : 0.6
+    // the direction the box is pushed out along: down the spoke, or, for a label that is level
+    // with its satellite, sideways, away from where its arc leans
     const lean = Math.cos(a) < 0 ? 1 : -1
-    const nx = opened ? lean : Math.cos(a)
-    const ny = opened ? 0 : Math.sin(a)
+    const nx = level ? lean : Math.cos(a)
+    const ny = level ? 0 : Math.sin(a)
     // which way the box hangs off that point: sideways with the side of the axis, or with the
-    // direction it was pushed for an opened family; vertically the way the spoke points
-    const sx = opened ? lean : side
-    const sy = opened ? 0 : Math.sign(ny)
+    // direction it was pushed for a level label; vertically the way the spoke points
+    const sx = level ? lean : side
+    const sy = level ? 0 : Math.sign(ny)
     // the center of the box
     const cx = x + (r + clearance) * nx + sx * w / 2
     // the box of a label on the axis is centered on its spoke and straddles it, so its edge, not
     // a corner, is what is nearest, and the whole distance goes vertically
-    const cy = !opened && side === 0
+    const cy = !level && side === 0
         ? y + sy * (r + clearance + h / 2)
         : y + (r + clearance) * ny + sy * h / 2
     // and where the text starts, on its baseline
@@ -536,7 +754,7 @@ const place = ({ k, n, origin = null, axis = null, span, closest, gap }) => {
     const from = { x: origin?.x ?? 0, y: origin?.y ?? 0 }
     // assemble
     return {
-        angle, axis: center, from, gap,
+        angle, axis: center, from, gap, lone: n === 1,
         x: from.x + reach * Math.cos(angle * Math.PI / 180),
         y: from.y + reach * Math.sin(angle * Math.PI / 180),
     }

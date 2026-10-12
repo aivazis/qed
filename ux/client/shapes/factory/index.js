@@ -26,7 +26,9 @@ export const Factory = ({ highlight, cell = 1, style }) => {
         <>
             <line style={conn} x1={-cell} y1="0" x2={cell} y2="0" />
             <line style={conn} x1="0" y1="0" x2="0" y2="-2" />
-            <path style={hub} d="M -0.125 0 L 0 0.125 L 0.125 0 L 0 -0.125 Z" />
+            <path style={hub} d="M -0.125 0 L 0 0.125 L 0.125 0 L 0 -0.125 Z" data-qed-hub />
+            {/* an invisible patch around the hub, which is too small to hit on its own */}
+            <circle cx="0" cy="0" r="0.4" style={{ fill: "transparent", stroke: "none" }} data-qed-hub />
             <circle style={ico} cx="0" cy="-1.5" r=".5" data-qed-grip />
             {highlight ? <circle cx="0" cy="-1.5" r=".75" style={deco} /> : null}
         </>

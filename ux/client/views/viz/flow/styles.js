@@ -11,6 +11,8 @@ import { wheel, theme } from '~/palette'
 import base from '~/views/styles'
 // the paint of the terminals
 import terminalPaint from '~/shapes/terminal/styles'
+// and of the factories, whose highlight the fan borrows for its focus
+import factoryPaint from '~/shapes/factory/styles'
 
 
 // the solid pucks of factories, in the color of factories
@@ -195,6 +197,79 @@ export default {
     },
 
     // the fan that offers the next level down of a factory around it
+    // the fields over the canvas that change a setting or name an instance, styled the way the
+    // forms of the app are
+    inline: {
+        // the holder, over the canvas, with just enough of a backing to read over the diagram
+        box: {
+            position: "absolute",
+            zIndex: 10,
+            padding: "0.1em 0.3em",
+            backgroundColor: "hsl(0deg, 0%, 7%, 0.85)",
+            fontSize: "13px",
+        },
+        // the prompt and the input, on one line
+        row: {
+            display: "flex",
+            alignItems: "baseline",
+            gap: "0.4em",
+        },
+        // what is asked for
+        prompt: {
+            fontFamily: "rubik-light",
+            textTransform: "uppercase",
+            color: "hsl(0deg, 0%, 55%)",
+        },
+        // the input, narrower than the forms'
+        input: {
+            width: "14rem",
+        },
+        // the reason the last try was refused
+        error: {
+            maxWidth: "22em",
+            paddingTop: "0.2em",
+            fontFamily: "inconsolata",
+            color: "hsl(0deg, 70%, 65%)",
+        },
+    },
+
+    settings: {
+        // the stem that hangs from the hub of the factory
+        stem: {
+            stroke: "hsl(28deg, 60%, 45%)",
+            strokeWidth: 1,
+            vectorEffect: "non-scaling-stroke",
+            opacity: 0.6,
+        },
+        // a bead for each setting, in the orange of the hub
+        bead: {
+            fill: "hsl(0deg, 0%, 7%)",
+            stroke: "hsl(28deg, 70%, 55%)",
+            strokeWidth: 1,
+            vectorEffect: "non-scaling-stroke",
+        },
+        // the name of the setting
+        name: {
+            fontFamily: "inconsolata",
+            fontSize: 0.45,
+            stroke: "none",
+            fill: "hsl(0deg, 0%, 60%)",
+        },
+        // its value
+        value: {
+            fill: "hsl(0deg, 0%, 90%)",
+        },
+        // or that it has none
+        unset: {
+            fill: "hsl(0deg, 0%, 50%)",
+            fontStyle: "italic",
+        },
+        // a setting that can be changed from the diagram
+        editable: {
+            cursor: "pointer",
+        },
+    },
+
     fan: {
         // a satellite, which is picked anywhere inside its ring
         satellite: {
@@ -212,12 +287,18 @@ export default {
             fill: "transparent",
             stroke: "none",
         },
+        // a new instance: a plus sign, in the font and size of the labels
+        fresh: {
+            fontFamily: "inconsolata",
+            fontSize: 0.6,
+            textAnchor: "middle",
+            dominantBaseline: "central",
+            stroke: "none",
+            fill: "hsl(28deg, 70%, 55%)",
+        },
         // the ring around the choice that has the focus
         focus: {
-            fill: "transparent",
-            stroke: "hsl(28deg, 70%, 55%)",
-            strokeWidth: 1.5,
-            vectorEffect: "non-scaling-stroke",
+            ...factoryPaint.decoration,
         },
         // the look of the factory pinned to the class that has the focus, drawn as a ghost
         preview: {

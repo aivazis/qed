@@ -12,6 +12,8 @@ import { graphql, useFragment } from 'react-relay/hooks'
 // local
 // the drag in progress
 import { useDrag } from './drag'
+// the fan, whose preview stands in for the label of the factory it is out for
+import { useFan } from './fan'
 // the projection
 import { useProjection } from './projection'
 // paint
@@ -31,6 +33,13 @@ export const Label = ({ label, style }) => {
     const lift = labelLift(category)
     // where the label goes
     const { x, y } = project({ x: at.x + dx, y: at.y + dy + lift, z: (at.z ?? 0) + dz + lift })
+    // the fan, on a canvas that has one
+    const fan = useFan()
+    // while it previews its factory pinned to a class, the preview shows the label it would have
+    if (fan?.preview && category === "factory" && fan.factory?.id === owner) {
+        // so this one steps aside
+        return null
+    }
     // mix the paint
     const paint = { ...styles.labels[category], ...style?.labels[category] }
     // render
