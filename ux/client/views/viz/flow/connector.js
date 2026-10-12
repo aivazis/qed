@@ -33,17 +33,8 @@ export const Connector = ({ connector, style }) => {
     const [fx, fy, fz] = [factory.x + fs.dx, factory.y + fs.dy, factory.z + fs.dz]
     const [sx, sy, sz] = [slot.x + ss.dx, slot.y + ss.dy, slot.z + ss.dz]
 
-    // distinguish between input and output connectors
-    const delta = 2 * (input ? -1 : 1)
-    // the corners of the connector: the terminal of the factory, the point level with the slot,
-    // and the slot itself
-    const corners = [
-        project({ x: fx + delta, y: fy, z: fz }),
-        project({ x: sx - delta, y: sy, z: sz }),
-        project({ x: sx, y: sy, z: sz }),
-    ]
-    // compute the connector path
-    const path = corners.map(({ x, y }, i) => `${i ? "L" : "M"} ${x} ${y}`).join(" ")
+    // the path through its corners, as the screen has them
+    const path = route({ factory: { x: fx, y: fy, z: fz }, slot: { x: sx, y: sy, z: sz }, input, project })
     // mix the paint
     const paint = { ...styles.connector, ...style }
     // render
@@ -52,6 +43,23 @@ export const Connector = ({ connector, style }) => {
             data-qed-connector={id} data-qed-factory={factoryId}
             data-qed-slot={slotId} data-qed-input={input} />
     )
+}
+
+
+// the path of a connector between a {factory} and a {slot} on the diagram, an {input} or an
+// output, through the corners the {project}ion puts on the screen: the terminal of the factory on
+// that side, the point a cell short of the slot and level with it, and the slot itself
+export const route = ({ factory, slot, input, project }) => {
+    // the terminal is a cell away from the factory, on the side of the slot
+    const delta = 2 * (input ? -1 : 1)
+    // the corners
+    const corners = [
+        project({ x: factory.x + delta, y: factory.y, z: factory.z }),
+        project({ x: slot.x - delta, y: slot.y, z: slot.z }),
+        project({ x: slot.x, y: slot.y, z: slot.z }),
+    ]
+    // strung together
+    return corners.map(({ x, y }, i) => `${i ? "L" : "M"} ${x} ${y}`).join(" ")
 }
 
 
