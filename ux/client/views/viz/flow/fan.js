@@ -565,10 +565,11 @@ const Satellite = ({
     // the satellite, whichever way it faces, so the gap between the two looks the same all around
     // an opened family or class, and a satellite alone on its arc, have their labels level with
     // them, on the side away from where their arc leans, like the stops of the trail behind them;
-    // the one alone may have the focus, so its label clears the ring that shows it
+    // the one alone may have the focus, so its label clears the ring that shows it; the label of
+    // a new instance stays on the left, since its right is where the field that names it goes
     const { lx, ly } = labelAt({
         x, y, a, side, level: opened || spot.lone, ring: !opened && spot.lone,
-        family: !!satellite.members, text,
+        family: !!satellite.members, text, left: !!satellite.create,
     })
     // the paint of a class
     const paint = { ...factoryPaint.icon, ...styles.levels.factory.class.icon }
@@ -699,9 +700,10 @@ const ring = 0.95
 // the axis end at their satellite, the ones clockwise of it start there, and the one on the axis
 // is centered on its spoke; a {level} label goes level with its satellite instead, on the side
 // away from where its arc leans, which suits an opened family or class, whose members fan out
-// along its spoke, and a satellite alone on its arc; with {ring}, the distance is kept from the
-// ring that shows the focus, rather than from what is drawn at the satellite
-const labelAt = ({ x, y, a, side, level, ring, family, text }) => {
+// along its spoke, and a satellite alone on its arc, unless it is held to the {left}; with
+// {ring}, the distance is kept from the ring that shows the focus, rather than from what is drawn
+// at the satellite
+const labelAt = ({ x, y, a, side, level, ring, family, text, left = false }) => {
     // the size of the font
     const size = styles.fan.label.fontSize
     // the box of the ink of the label
@@ -711,8 +713,8 @@ const labelAt = ({ x, y, a, side, level, ring, family, text }) => {
     // the satellite, the cluster of a family or the puck of a class
     const r = ring ? focusRing : family ? 0.64 : 0.6
     // the direction the box is pushed out along: down the spoke, or, for a label that is level
-    // with its satellite, sideways, away from where its arc leans
-    const lean = Math.cos(a) < 0 ? 1 : -1
+    // with its satellite, sideways, away from where its arc leans, unless it is held to the {left}
+    const lean = left ? -1 : Math.cos(a) < 0 ? 1 : -1
     const nx = level ? lean : Math.cos(a)
     const ny = level ? 0 : Math.sin(a)
     // which way the box hangs off that point: sideways with the side of the axis, or with the
