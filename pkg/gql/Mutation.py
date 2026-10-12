@@ -99,6 +99,8 @@ class Mutation(graphene.ObjectType):
 
     # pipeline diagrams
     diagramAdd = diagram.diagramAdd.Field()
+    diagramConfigure = diagram.diagramConfigure.Field()
+    diagramInstantiate = diagram.diagramInstantiate.Field()
     diagramMove = diagram.diagramMove.Field()
     diagramMoveGroup = diagram.diagramMoveGroup.Field()
     diagramPin = diagram.diagramPin.Field()
