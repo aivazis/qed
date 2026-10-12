@@ -15,6 +15,7 @@ import { useCamera } from '~/widgets/camera'
 // hooks
 import { useDiagram } from './diagram'
 import { useFan } from './fan'
+import { useSettings } from './settings'
 import { useProjection } from './projection'
 import { useSelection } from './useSelection'
 import { useMoveNode } from './useMoveNode'
@@ -33,6 +34,8 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
     const { selection, select } = useSelection()
     // the fan, on a canvas that has one
     const fan = useFan()
+    // the settings of the factories, on a canvas that has them
+    const settings = useSettings()
     // the mover
     const { move, step } = useMoveNode()
     // whether the server hears every step of a drag
@@ -46,6 +49,9 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
     const grab = React.useRef(null)
     // whether the last drag moved the selection, whose closing click must leave the picks alone
     const moved = React.useRef(false)
+    // whether the last press landed on the hub of a factory; the click that follows it goes to
+    // whoever holds the pointer, which is me, so it cannot tell on its own
+    const hub = React.useRef(false)
     // whether i am the node being dragged
     const dragging = drag !== null && drag.id === id
 
@@ -72,6 +78,8 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
         }
         // the canvas has behaviors of its own, so keep this to myself
         evt.stopPropagation()
+        // note whether the press landed on my hub, before i take hold of the pointer
+        hub.current = evt.target.closest("[data-qed-hub]") !== null
         // and keep the browser from starting a selection or a native drag
         evt.preventDefault()
         // which also keeps the canvas from taking the focus, so hand it over explicitly: the delete
@@ -169,6 +177,11 @@ export const Node = ({ id, kind, position, handles = {}, children }) => {
         }
         // pick me
         select(id, evt.shiftKey)
+        // a click on the hub of a factory spreads its settings out below it, or folds them
+        if (settings && kind === "factory" && hub.current) {
+            // so flip them
+            settings.toggle(id)
+        }
         // the second click of a double click, or a click with <alt>, fans a factory out
         if (fan && kind === "factory" && (evt.detail >= 2 || evt.altKey)) {
             // so open it
