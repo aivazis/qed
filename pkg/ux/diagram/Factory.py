@@ -6,8 +6,8 @@
 
 
 # externals
+import inspect
 import pyre
-import pyre.traits.Dict
 
 # superclass
 from .Node import Node
@@ -131,6 +131,34 @@ class Factory(Node):
             return False
         # the rest are, unless they are maps
         return not isinstance(trait, pyre.traits.Dict.Dict)
+
+    @staticmethod
+    def methods(node):
+        """
+        Generate the behaviors of the factory behind the recipe {node} that can be invoked with
+        no arguments, the only way the diagram can invoke them for now: the ones of its pin, or
+        else the obligations of its protocol
+        """
+        # the behaviors are declared by its pin, or else by its protocol
+        source = node.protocol if node.pin is None else node.pin
+        # the kinds of parameters that a call has to supply when they have no default
+        required = (
+            inspect.Parameter.POSITIONAL_ONLY,
+            inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            inspect.Parameter.KEYWORD_ONLY,
+        )
+        # go through them
+        for behavior in source.pyre_behaviors():
+            # the parameters of the method, past the instance it is invoked on
+            parameters = list(inspect.signature(behavior.pyre_method).parameters.values())[1:]
+            # a method that needs an argument waits for a way to supply one
+            if any(p.kind in required and p.default is p.empty for p in parameters):
+                # so skip it
+                continue
+            # the rest can be invoked as they are
+            yield behavior
+        # all done
+        return
 
     def kind(self):
         """

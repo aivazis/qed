@@ -10,10 +10,11 @@
 Changing a setting of a factory of a diagram: a factory pinned to a class is pinned to a new
 instance of its class, under the name it was given, if any, carrying the new value; a factory
 can also be pinned to a new instance directly, even from its protocol; an instance reads as
-"name:class", with an empty name when nobody gave it one; one pinned to an
-instance has the value changed, components included, which are given by name; every change is
-noted as made interactively; values the trait cannot take, settings that cannot be changed from
-the diagram, and names in use already are refused, leaving everything as it was
+"name:class", with an empty name when nobody gave it one; a name that an instance of the class
+goes by already pins the factory to that instance; one pinned to an instance has the value
+changed, components included, which are given by name; every change is noted as made
+interactively; values the trait cannot take, settings that cannot be changed from the diagram, and
+names of components of other classes are refused, leaving everything as it was
 """
 
 # externals
@@ -22,6 +23,13 @@ import uuid
 
 # support
 import qed
+
+
+# a component that is no reader, whose name no reader can take
+class Stranger(qed.component, family="qed.tests.diagram.stranger"):
+    """
+    A component of a class that has nothing to do with readers
+    """
 
 
 # a store stand-in with an empty playground
@@ -139,11 +147,17 @@ def test() -> None:
     store.diagramAdd(diagram=playground.relay, family="qed.readers.native.flat", position=(0, 8, 0))
     # find it
     (other,) = [entity for entity in playground.factories if entity is not factory]
-    # asking for an instance under the name in use
+    # a component of another class
+    stranger = Stranger(name=f"stranger_{uuid.uuid1().hex[:8]}")
+    # lends its name to no reader
     _, error = store.diagramConfigure(
-        diagram=playground.relay, node=other.relay, trait="offset", value="1", name=name
+        diagram=playground.relay,
+        node=other.relay,
+        trait="offset",
+        value="1",
+        name=stranger.pyre_name,
     )
-    # is refused, and leaves it pinned to its class
+    # so it is refused, and leaves the factory pinned to its class
     assert error and other.node.level == "class", error
     # a change with no name at all
     _, error = store.diagramConfigure(
@@ -168,12 +182,18 @@ def test() -> None:
     # and reads as its name and its class
     (label,) = third.labels
     assert list(label.text) == ["hdr:envi"], label.text
-    # a name in use
+    # the instance it is pinned to
+    hdr = third.node.pin
+    # another reader, pinned only to its protocol
+    store.diagramAdd(diagram=playground.relay, family="pyre.viz.readers", position=(0, 24, 0))
+    # find it
+    (fourth,) = [e for e in playground.factories if e not in (factory, other, third)]
+    # asking for an envi reader by the name of the one there is
     _, error = store.diagramInstantiate(
-        diagram=playground.relay, node=third.relay, family="qed.readers.native.envi", name="hdr"
+        diagram=playground.relay, node=fourth.relay, family="qed.readers.native.envi", name="hdr"
     )
-    # is refused
-    assert error, error
+    # pins it to that very instance, the way a reader the configuration attached is reached
+    assert error is None and fourth.node.pin is hdr, error
     # all done
     return
 

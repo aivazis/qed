@@ -127,6 +127,8 @@ class Mutation(graphene.ObjectType):
     diagramConfigure = diagram.diagramConfigure.Field()
     # pin a factory to a new instance of a class
     diagramInstantiate = diagram.diagramInstantiate.Field()
+    # invoke a method of the instance a factory is pinned to
+    diagramInvoke = diagram.diagramInvoke.Field()
     # move a factory or a slot
     diagramMove = diagram.diagramMove.Field()
     # move a group of nodes, all or nothing
