@@ -136,85 +136,39 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         Pin the factory {entity} to {pin}, a class that satisfies its protocol, or to nothing,
         in place: its slots follow the traits of the new pin, the ones it keeps stay where they
         are, the ones it loses go along with whatever only they used, and the new ones get slots
-        of their own nearby; a pin the recipe refuses raises, and leaves everything as it was
+        of their own nearby
+
+        The edit is all or nothing: everything that can fail is worked out before anything
+        changes, so a pin the recipe refuses, or one that brings a slot with nowhere to go,
+        raises and leaves the diagram and its recipe as they were
         """
-        # pin the recipe node, which refuses pins that do not fit
+        # work out what the pin does to the diagram, without changing anything
+        plan = self._planPin(entity=entity, pin=pin)
+        # pin the recipe node, which refuses pins that do not fit and leaves the node as it was
         self.recipe.pin(name=entity.node.name, pin=pin)
-        # the slots of the factory now, by name
-        traits = entity.node.slots
-        # the arity follows them
-        entity.inputs = len(entity.node.inputs)
-        entity.outputs = len(entity.node.outputs)
-        # the names of the traits that still have a slot
-        kept = set()
-        # go through the slots the factory was using
-        for slot in list(entity.slots):
-            # and the connectors between them, on either side
-            for side in (slot.readers, slot.writers):
-                # the connector on this side, if any
-                connector = side.get(entity)
-                # if there is none
-                if connector is None:
-                    # move on
-                    continue
-                # go through its traits
-                for trait in list(connector):
-                    # each one goes
-                    connector.discard(trait)
-                    # and the trait of the same name, if the new pin has one, takes its place
-                    if trait.name in traits:
-                        # so the connector carries it from now on
-                        connector.add(traits[trait.name])
-                        # and it has its slot
-                        kept.add(trait.name)
-                # a connector that carries nothing any more
-                if not connector:
-                    # goes, along with its labels
-                    self.forget(nodes=connector.labels)
-                    # off its side of the slot
-                    del side[entity]
-            # a slot the factory no longer connects to
-            if entity not in slot.readers and entity not in slot.writers:
-                # is no longer one of its slots
-                entity.slots.discard(slot)
-            # a slot that nobody uses any more
-            if not slot.readers and not slot.writers:
-                # goes, along with its labels
-                self.forget(nodes=slot.labels)
-                self.forget(nodes=[slot])
-                # and so does its product, which no binding names any more
-                if slot.product is not None:
-                    # out of the recipe
-                    self.recipe.remove(name=slot.product.name)
-        # the traits of the new pin that have no slot yet
-        for name, trait in traits.items():
-            # skip the ones that do
-            if name in kept:
-                # on to the next
-                continue
-            # make one, at the spot the factory would give it, or the nearest free one
-            fresh = Slot(product=None, position=self.vacancy(spot=entity.home(trait)))
-            # connected the way the trait says; a trait that is both connects both ways
-            if trait.input:
-                # as an input
-                fresh.connectReader(factory=entity, trait=trait)
-            # and
-            if trait.output:
-                # as an output
-                fresh.connectWriter(factory=entity, trait=trait)
-            # which the factory uses from now on
-            entity.slots.add(fresh)
-            # and the diagram knows about
-            self.adopt(slot=fresh)
-        # the label of the factory says what it is, which has changed
-        self.forget(nodes=entity.labels)
-        # so make a new one
-        entity.refreshLabels()
-        # and file it
-        self.labels |= entity.labels
-        self.nodes.update((label.eid, label) for label in entity.labels)
+        # and carry the plan out, which only moves things between my indices
+        self._applyPin(entity=entity, plan=plan)
         # all done
         return entity
+
+    def preview(self, entity, pin=None):
+        """
+        Describe what pinning the factory {entity} to {pin} would do, without doing it: the label
+        it would have, the slots it would gain, each with its trait and its spot, and the slots
+        it would let go of; the plan is the one {pin} carries out, so the two cannot disagree,
+        and a pin that cannot be made raises the way {pin} does
+        """
+        # work out the plan
+        plan = self._planPin(entity=entity, pin=pin)
+        # and describe it
+        return {
+            # what the factory would be called
+            "label": Factory.describe(protocol=entity.node.protocol, pin=pin),
+            # the slots it would gain
+            "fresh": plan["fresh"],
+            # and the ones it would no longer use
+            "left": plan["left"],
+        }
 
     def moveGroup(self, nodes, anchor, position):
         """
@@ -402,9 +356,11 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         # all done
         return
 
-    def vacancy(self, spot):
+    def vacancy(self, spot, freed=frozenset(), taken=frozenset()):
         """
-        The free spot nearest {spot} along its column, trying {spot} first
+        The free spot nearest {spot} along its column, trying {spot} first; the spots in {freed}
+        count as free even if something holds them now, and the ones in {taken} as taken even if
+        nothing does yet, so an edit can place things before it makes its other changes
         """
         # unpack
         x, y, z = spot
@@ -414,8 +370,10 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
             offset = 2 * ((step + 1) // 2) * (1 if step % 2 else -1)
             # the candidate
             candidate = (x, y + offset, z)
+            # it is held if something holds it now and is not about to let go, or it was promised
+            held = (candidate in self.layout and candidate not in freed) or candidate in taken
             # if it is free
-            if candidate not in self.layout:
+            if not held:
                 # it will do
                 return candidate
         # if nothing is free nearby, settle for the spot itself
@@ -726,6 +684,162 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         return
 
     # implementation details
+    def _planPin(self, entity, pin):
+        """
+        Work out what pinning the factory {entity} to {pin} does to the diagram, without changing
+        anything: the traits each of its connectors keeps, the connectors, slots and products
+        that go, and a spot for the slot of every trait of the new pin that has none yet
+        """
+        # a throwaway node pinned the new way, which no recipe knows about, has the slots of the
+        # new pin; they are the traits of its class, so the node of the recipe will have the same
+        # ones once it is pinned
+        node = qed.flow.recipes.factory(name="", protocol=entity.node.protocol, pin=pin)
+        # the traits of the new pin that are slots, by name
+        traits = node.slots
+        # and a throwaway entity in the same spot, which places them the way the factory will
+        shadow = Factory(node=node, position=entity.position)
+        # what happens to each connector between the factory and its slots: the slot, the side,
+        # the connector, and the traits of the new pin it carries from now on
+        connectors = []
+        # the names of the traits that still have a slot
+        kept = set()
+        # the slots that nobody uses once the factory lets go of them
+        dead = []
+        # the slots the factory no longer connects to
+        left = []
+        # go through the slots the factory uses
+        for slot in entity.slots:
+            # whether the factory is still connected to it
+            connected = False
+            # whether anybody is
+            used = False
+            # go through its sides
+            for side in (slot.readers, slot.writers):
+                # and the factories on each one
+                for factory, connector in side.items():
+                    # the other factories stay as they are
+                    if factory is not entity:
+                        # so they still use the slot
+                        used = True
+                        # and that is all
+                        continue
+                    # the traits of the new pin that take the place of the ones it carries
+                    carried = [traits[trait.name] for trait in connector if trait.name in traits]
+                    # note the edit
+                    connectors.append((slot, side, connector, carried))
+                    # a connector that still carries something
+                    if carried:
+                        # keeps the factory connected
+                        connected = used = True
+                        # and its traits have their slot
+                        kept.update(trait.name for trait in carried)
+            # a slot the factory lets go of
+            if not connected:
+                # is no longer one of its slots
+                left.append(slot)
+            # a slot that nobody uses any more
+            if not used:
+                # goes
+                dead.append(slot)
+        # the spots the departing slots free up
+        freed = frozenset(slot.position for slot in dead)
+        # the spots promised to the new slots so far
+        taken = set()
+        # the new slots: their trait and their spot
+        fresh = []
+        # go through the traits of the new pin, in the order the factory declares them
+        for name, trait in traits.items():
+            # the ones that have a slot already
+            if name in kept:
+                # keep it
+                continue
+            # the ones that are on neither side are settings, not slots
+            if not trait.input and not trait.output:
+                # so they get none
+                continue
+            # where the factory would put it
+            home = shadow.home(trait)
+            # a factory with no place for one of its slots
+            if home is None:
+                # cannot be pinned this way
+                raise qed.exceptions.UnplaceableSlotError(factory=entity.node.name, trait=name)
+            # the free spot nearest to it
+            spot = self.vacancy(spot=home, freed=freed, taken=frozenset(taken))
+            # is promised to it
+            taken.add(spot)
+            # record
+            fresh.append((trait, spot))
+        # hand off the plan
+        return {
+            "connectors": connectors,
+            "left": left,
+            "dead": dead,
+            "fresh": fresh,
+        }
+
+    def _applyPin(self, entity, plan):
+        """
+        Carry out the {plan} of a pin on the factory {entity}, once its recipe node is pinned;
+        none of this can fail, since the plan has worked out everything that could
+        """
+        # the arity follows the slots of the new pin
+        entity.inputs = len(entity.node.inputs)
+        entity.outputs = len(entity.node.outputs)
+        # go through the connectors
+        for slot, side, connector, carried in plan["connectors"]:
+            # the traits it carried
+            for trait in list(connector):
+                # all go
+                connector.discard(trait)
+            # and the ones of the new pin take their place
+            for trait in carried:
+                # one at a time
+                connector.add(trait)
+            # a connector that carries nothing
+            if not carried:
+                # goes, along with its labels
+                self.forget(nodes=connector.labels)
+                # off its side of the slot
+                del side[entity]
+        # the slots the factory let go of
+        for slot in plan["left"]:
+            # are no longer among its slots
+            entity.slots.discard(slot)
+        # the slots that nobody uses any more
+        for slot in plan["dead"]:
+            # go, along with their labels
+            self.forget(nodes=slot.labels)
+            self.forget(nodes=[slot])
+            # and so do their products, which no binding names any more
+            if slot.product is not None:
+                # out of the recipe
+                self.recipe.remove(name=slot.product.name)
+        # go through the new slots
+        for trait, spot in plan["fresh"]:
+            # make each one in its spot
+            slot = Slot(product=None, position=spot)
+            # connected the way the trait says; a trait that is both connects both ways
+            if trait.input:
+                # as an input
+                slot.connectReader(factory=entity, trait=trait)
+            # and
+            if trait.output:
+                # as an output
+                slot.connectWriter(factory=entity, trait=trait)
+            # which the factory uses from now on
+            entity.slots.add(slot)
+            # and the diagram knows about
+            self.adopt(slot=slot)
+        # the label of the factory says what it is, which has changed
+        self.forget(nodes=entity.labels)
+        # so make a new one
+        entity.refreshLabels()
+        # and file it
+        self.labels |= entity.labels
+        self.nodes.update((label.eid, label) for label in entity.labels)
+        # all done
+        return
+
     def draw(self, recipe):
         """
         Lay out the factories of {recipe} and the products they share

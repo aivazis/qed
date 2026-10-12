@@ -24,6 +24,7 @@ from .journal.JournalChannel import JournalChannel
 from .diagram.CatalogEntry import CatalogEntry
 from .diagram.CatalogGroup import CatalogGroup
 from .diagram.FlowDiagram import FlowDiagram
+from .diagram.FlowPinPreview import FlowPinPreview
 from .diagram.PlaygroundView import PlaygroundView
 from . import views
 
@@ -53,6 +54,13 @@ class QED(graphene.ObjectType):
     playground = graphene.Field(FlowDiagram, required=True)
     # and how every client looks at it
     playgroundView = graphene.Field(PlaygroundView, required=True)
+    # what pinning a factory of a pipeline diagram to a class would do, without doing it
+    pinPreview = graphene.Field(
+        FlowPinPreview,
+        diagram=graphene.ID(required=True),
+        node=graphene.ID(required=True),
+        family=graphene.String(required=True),
+    )
 
     # resolvers
     @staticmethod
@@ -101,6 +109,15 @@ class QED(graphene.ObjectType):
         """
         # the store keeps it
         return store.playgroundView()
+
+    @staticmethod
+    def resolve_pinPreview(store, info, diagram, node, family, **kwds):
+        """
+        Describe what pinning the factory {node} of the pipeline {diagram} to the class {family}
+        would do, without doing it
+        """
+        # the store knows
+        return store.diagramPinPreview(diagram=diagram, node=node, family=family)
 
     @staticmethod
     def resolve_catalog(store, info, **kwds):
