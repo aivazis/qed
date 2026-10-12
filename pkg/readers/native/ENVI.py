@@ -33,6 +33,20 @@ class ENVI(Flat, family="qed.readers.native.envi"):
     header.default = None
     header.doc = "the location of the ENVI header; left unset, it is looked for next to the product"
 
+    # framework hooks
+    def pyre_suggest(self, trait):
+        """
+        My header has the last word on my shape, so i have no guesses for it
+        """
+        # for my shape
+        if trait.name == "shape":
+            # there is nothing to guess
+            return
+        # for the rest, defer to my superclass
+        yield from super().pyre_suggest(trait=trait)
+        # all done
+        return
+
     # implementation details
     def _loadDatasets(self, cell, shape):
         """

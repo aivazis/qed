@@ -56,6 +56,9 @@ class Flat(
     # my dataset can describe itself in a discovery record and materialize as a
     # metadata-only twin, so my first contact can happen on a crew member
     surveyable = True
+    # the most elongated shape worth guessing for my dataset, as the ratio of its longer side
+    # to its shorter one
+    elongation = 10
 
     # interface
     @qed.export
@@ -114,6 +117,42 @@ class Flat(
         self._opened = True
         # all done
         return self
+
+    # framework hooks
+    def pyre_suggest(self, trait):
+        """
+        Suggest the shapes that fit my file exactly, given my cell and the bytes in front of it, as
+        (lines, samples) pairs; i have no suggestions for my other traits
+        """
+        # for anything other than my shape
+        if trait.name != "shape":
+            # defer to the framework
+            yield from super().pyre_suggest(trait=trait)
+            # and stop
+            return
+        # get my cell and my uri
+        cell = self.cell
+        uri = self.uri
+        # without both
+        if not cell or uri is None:
+            # there is nothing to go on
+            return
+        # the bytes past the ones in front of the first cell
+        try:
+            # are what the file holds past my offset
+            size = qed.primitives.path(uri.address).stat().st_size - self._skip()
+        # a file that cannot be reached
+        except OSError:
+            # has no shapes to suggest
+            return
+        # a file that holds no cells, or a number of bytes that is not a whole number of cells
+        if size <= 0 or size % cell.bytes:
+            # fits no shape, which says the cell or the offset is off
+            return
+        # otherwise, suggest the ways its cells can be arranged
+        yield from qed.libqed.factor(product=size // cell.bytes, aspect=self.elongation)
+        # all done
+        return
 
     # flow hooks
     def pyre_stage(self, **inputs) -> dict:
@@ -233,7 +272,9 @@ class Flat(
             channel.line(f"as lines x samples")
             channel.indent()
             # generate some options
-            for lines, samples in qed.libqed.factor(product=filesize // cell.bytes, aspect=10):
+            for lines, samples in qed.libqed.factor(
+                product=filesize // cell.bytes, aspect=self.elongation
+            ):
                 # and show them
                 channel.line(f"{lines} x {samples}")
             channel.outdent()
