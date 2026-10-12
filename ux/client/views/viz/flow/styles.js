@@ -105,6 +105,8 @@ export default {
         vectorEffect: "non-scaling-stroke",
         // fill
         fill: "none",
+        // it marks where the pointer is, and never stands in its way
+        pointerEvents: "none",
     },
 
     spot: {
@@ -130,6 +132,8 @@ export default {
             strokeWidth: 1,
             vectorEffect: "non-scaling-stroke",
             fill: "hsl(0deg, 0%, 10%)",
+            // it marks where the pointer is, and never stands in its way
+            pointerEvents: "none",
         },
         // the stalk from a node above the floor down to its footprint
         stalk: {
@@ -336,6 +340,11 @@ export default {
         // why a method failed
         failure: {
             fill: "hsl(0deg, 70%, 65%)",
+        },
+        // what the pointer hits in a row: everything in it, and nothing to see
+        row: {
+            fill: "transparent",
+            stroke: "none",
         },
         // a bead that does something when clicked
         clickable: {

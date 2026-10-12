@@ -518,14 +518,18 @@ const Expander = ({ group, spot, open, onClick }) => {
         <g data-qed-expander={group} data-qed-open={open} style={styles.settings.clickable}
             onClick={onClick}>
             <title>{open ? `fold the ${group}` : `show the ${group}`}</title>
+            {/* what the pointer hits */}
+            <Row spot={spot} chars={group.length} />
             {/* no ring, just a patch of the page that hides the stem behind the glyph, so a "-"
-                does not read as a "+", and gives the pointer something to hit */}
+                does not read as a "+" */}
             <circle cx={spot.x} cy={spot.y} r={0.25} style={styles.settings.expander.patch} />
             <line x1={spot.x - arm} y1={spot.y} x2={spot.x + arm} y2={spot.y} style={paint.glyph} />
             {!open && (
                 <line x1={spot.x} y1={spot.y - arm} x2={spot.x} y2={spot.y + arm} style={paint.glyph} />
             )}
-            <text x={spot.x + 0.5} y={spot.y + 0.15} style={paint.label}>{group}</text>
+            <text x={spot.x + 0.5} y={spot.y + 0.15} style={paint.label} pointerEvents="none">
+                {group}
+            </text>
         </g>
     )
 }
@@ -542,9 +546,12 @@ const Trait = ({ trait, spot, instance, shift, onClick }) => {
         <g data-qed-setting={trait.name} data-qed-editable={trait.editable}
             style={trait.editable ? styles.settings.clickable : undefined} onClick={onClick}>
             <title>{trait.doc ?? trait.name}</title>
+            {/* what the pointer hits: the name, its colon, the room after it, and the value */}
+            <Row spot={spot} chars={trait.name.length + 2 + show(trait.value).length} />
             <circle cx={spot.x} cy={spot.y} r={0.25}
                 style={instance ? styles.settings.trait.instance : styles.settings.trait.blank} />
-            <text x={spot.x + 0.5} y={spot.y + 0.15 + shift} style={styles.settings.name}>
+            <text x={spot.x + 0.5} y={spot.y + 0.15 + shift} style={styles.settings.name}
+                pointerEvents="none">
                 {trait.name}:
                 <tspan dx={separation} style={unset ? styles.settings.unset : styles.settings.value}>
                     {show(trait.value)}
@@ -563,9 +570,12 @@ const Method = ({ method, spot, outcome, onClick }) => {
         <g data-qed-method={method.name} data-qed-invocable={method.invocable}
             style={method.invocable ? styles.settings.clickable : undefined} onClick={onClick}>
             <title>{method.doc ?? method.name}</title>
+            {/* what the pointer hits: the name of the method, and what its last call handed back */}
+            <Row spot={spot} chars={method.name.length + told(outcome)} />
             <circle cx={spot.x} cy={spot.y} r={0.25}
                 style={method.invocable ? styles.settings.method.instance : styles.settings.method.blank} />
-            <text x={spot.x + 0.5} y={spot.y + 0.15} style={styles.settings.method.name}>
+            <text x={spot.x + 0.5} y={spot.y + 0.15} style={styles.settings.method.name}
+                pointerEvents="none">
                 {method.name}
                 {outcome && <Outcome outcome={outcome} />}
             </text>
@@ -595,15 +605,49 @@ const Outcome = ({ outcome }) => {
 }
 
 
+// what the pointer hits in a row of the column at {spot}: its bead, and a label of {chars}
+// characters after it, one row tall, so neighboring rows never overlap; the text of the labels
+// stays out of the pointer's way, since webkit hit-tests text drawn this small, scaled up by the
+// camera, well beyond what it covers, and would hand a click on one row to the label of the next
+const Row = ({ spot, chars }) => {
+    // render
+    return (
+        <rect x={spot.x - 0.35} y={spot.y - step / 2} width={0.85 + chars * advance} height={step}
+            style={styles.settings.row} />
+    )
+}
+
+
+// how many characters the {outcome} of the last call of a method takes after its name, counting
+// the room in front of it: none without a call, the ellipsis of one under way, the reason it
+// failed, or the arrow and what it handed back
+const told = outcome => {
+    // without a call
+    if (!outcome) {
+        // there is nothing after the name
+        return 0
+    }
+    // what follows the name, the way {Outcome} shows it
+    const text = outcome.busy ? "…" : outcome.error !== null ? outcome.error : `→ ${show(outcome.result)}`
+    // and the room in front of it
+    return 1 + text.length
+}
+
+
 // how a {value} reads: a setting that was never set says so, and an empty string shows its quotes
 const show = value => value === null ? "none" : value === "" ? '""' : value
 
 
-// how far below the hub the first bead goes, and how far apart they are, in diagram units
-const first = 1.25
+// how far below the hub the first bead goes, and how far apart they are, in diagram units: whole
+// steps, so every bead sits on a point of the grid, where the nodes of the diagram sit, and the
+// beads can be bound to some day the way slots are
+const first = 1
 const step = 1
-// the room between the colon after a name and its value: two characters of the label font
-const separation = 0.45
+// how far a character of the label font advances, in diagram units: inconsolata gives every
+// character half of its size, and the labels are 0.45 units tall
+const advance = 0.225
+// the room between the colon after a name and its value: one character of the label font
+const separation = advance
 
 
 // end of file
