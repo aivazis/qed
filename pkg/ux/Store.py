@@ -1680,14 +1680,47 @@ class Store(qed.component, family="qed.ux.store"):
         try:
             # in place
             diagram.pin(entity=entity, pin=pin)
-        # if the recipe refuses
-        except qed.flow.exceptions.RecipeError as error:
+        # if the recipe refuses, or the diagram has no room for the result
+        except (qed.flow.exceptions.RecipeError, qed.exceptions.DiagramError) as error:
             # say why
             channel = journal.warning("qed.ux.diagram")
-            # in the words of the recipe
+            # in the words of whoever refused
             channel.log(str(error))
-        # hand off the diagram
+        # hand off the diagram, which is as it was if the pin was refused
         return diagram
+
+    def diagramPinPreview(self, diagram, node, family):
+        """
+        Describe what pinning the factory with the relay id {node} on the pipeline diagram
+        {diagram} to the class with the given {family} would do, without doing it; nothing, when
+        the diagram, the factory or the class cannot be found, or the pin cannot be made
+        """
+        # find the diagram
+        diagram = self.findDiagram(relay=diagram)
+        # an id that names no diagram
+        if diagram is None:
+            # has nothing to preview
+            return None
+        # find the node
+        entity = diagram.locate(relay=node)
+        # only factories are pinned
+        if entity is None or entity not in diagram.factories:
+            # so anything else has nothing to preview
+            return None
+        # find the class the family names, and the protocol it is offered under
+        protocol, pin = self.implementer(family=family)
+        # a family that names no class, or one of another protocol
+        if pin is None or protocol is not entity.node.protocol:
+            # has nothing to preview
+            return None
+        # work out what the pin would do
+        try:
+            # without doing it
+            return diagram.preview(entity=entity, pin=pin)
+        # a pin that cannot be made
+        except (qed.flow.exceptions.RecipeError, qed.exceptions.DiagramError):
+            # has nothing to preview; the pin itself says why, if it is ever asked for
+            return None
 
     def diagramRemove(self, diagram, node):
         """

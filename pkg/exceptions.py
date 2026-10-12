@@ -38,4 +38,34 @@ class ExtensionError(QEDError):
         return
 
 
+# the base class for the edits of a pipeline diagram that cannot be made
+class DiagramError(QEDError):
+    """
+    Base class for the edits of a pipeline diagram that cannot be made; an edit that raises one
+    leaves the diagram and its recipe as they were
+    """
+
+
+# raised when a factory has no place for the slot of one of its traits
+class UnplaceableSlotError(DiagramError):
+    """
+    Exception raised when a factory of a pipeline diagram has no spot for the slot of one of
+    its traits
+    """
+
+    # public data
+    description = "the factory '{0.factory}' has no place for the slot of its trait '{0.trait}'"
+
+    # metamethods
+    def __init__(self, factory, trait, **kwds):
+        # chain up
+        super().__init__(**kwds)
+        # save the name of the factory
+        self.factory = factory
+        # and the name of the trait
+        self.trait = trait
+        # all done
+        return
+
+
 # end of file
