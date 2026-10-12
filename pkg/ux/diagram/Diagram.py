@@ -196,6 +196,10 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
             if other is not None and id(other) not in members:
                 # the move is refused
                 return False
+        # nothing lands on the end of a factory, and no factory lands with an end on somebody
+        if self.onEnds(targets=targets):
+            # so the move is refused
+            return False
         # a member in the middle of a move of its own is no longer moving
         if id(self.migrant) in members:
             # so forget it
@@ -214,6 +218,40 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
             self.layout[target] = node
         # all done
         return True
+
+    def onEnds(self, targets):
+        """
+        Decide whether moving the nodes of a group to their {targets}, (node, position) pairs,
+        would put one of them on the end of a factory that stays put, or an end of a factory that
+        moves on a node that stays put; the ends of a factory are where its connectors meet, so
+        a node there would look connected to something it is not
+        """
+        # the members of the group, by identity
+        members = {id(node) for node, _ in targets}
+        # the ends of the factories that stay put
+        ends = {
+            end
+            for factory in self.factories
+            if id(factory) not in members
+            for end in factory.ends()
+        }
+        # go through the members
+        for node, target in targets:
+            # one that would land on one of those ends
+            if target in ends:
+                # is refused
+                return True
+            # a factory
+            if isinstance(node, Factory):
+                # with an end that would land on a node that stays put
+                if any(
+                    (other := self.layout.get(end)) is not None and id(other) not in members
+                    for end in node.ends(position=target)
+                ):
+                    # is refused
+                    return True
+        # otherwise, the ends are clear
+        return False
 
     def cohort(self, nodes):
         """
@@ -361,12 +399,15 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
 
     def vacancy(self, spot, freed=frozenset(), taken=frozenset()):
         """
-        The free spot nearest {spot} along its column, trying {spot} first; the spots in {freed}
-        count as free even if something holds them now, and the ones in {taken} as taken even if
-        nothing does yet, so an edit can place things before it makes its other changes
+        The free spot nearest {spot} along its column, trying {spot} first, but never the end of a
+        factory; the spots in {freed} count as free even if something holds them now, and the ones
+        in {taken} as taken even if nothing does yet, so an edit can place things before it makes
+        its other changes
         """
         # unpack
         x, y, z = spot
+        # the ends of the factories, where nothing goes, since a node there would look connected
+        ends = {end for factory in self.factories for end in factory.ends()}
         # walk away from it, a cell at a time, alternating sides
         for step in range(64):
             # the offset of this attempt: 0, +2, -2, +4, -4, ...
@@ -374,7 +415,11 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
             # the candidate
             candidate = (x, y + offset, z)
             # it is held if something holds it now and is not about to let go, or it was promised
-            held = (candidate in self.layout and candidate not in freed) or candidate in taken
+            held = (
+                (candidate in self.layout and candidate not in freed)
+                or candidate in taken
+                or candidate in ends
+            )
             # if it is free
             if not held:
                 # it will do
@@ -393,8 +438,14 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         entity = Factory(node=node, position=position)
         # the spots it would take
         spots = [entity.position] + [slot.position for slot in entity.slots]
-        # it fits if none of them is taken
-        return not any(spot in self.layout for spot in spots)
+        # if any of them is taken
+        if any(spot in self.layout for spot in spots):
+            # it does not fit
+            return False
+        # it fits if it neither lands on the end of a factory nor puts its ends on somebody
+        return not self.onEnds(
+            targets=[(entity, entity.position), *((slot, slot.position) for slot in entity.slots)]
+        )
 
     def removeFactory(self, entity):
         """
@@ -533,6 +584,11 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
             if other is not None and id(other) not in group:
                 # the move is illegal
                 return False
+
+        # nothing lands on the end of a factory, and no factory lands with an end on somebody
+        if self.onEnds(targets=[(node, position), *targets]):
+            # so the move is illegal
+            return False
 
         # mark whether this move caused a collision
         self.collision = occupant
