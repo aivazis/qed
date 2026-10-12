@@ -15,6 +15,7 @@ export const useEditDiagram = diagram => {
     const [commitAdd] = useMutation(useEditDiagramAddMutation)
     const [commitConfigure] = useMutation(useEditDiagramConfigureMutation)
     const [commitInstantiate] = useMutation(useEditDiagramInstantiateMutation)
+    const [commitInvoke] = useMutation(useEditDiagramInvokeMutation)
     const [commitPin] = useMutation(useEditDiagramPinMutation)
     const [commitRemove] = useMutation(useEditDiagramRemoveMutation)
     // report a failure
@@ -94,6 +95,29 @@ export const useEditDiagram = diagram => {
         // all done
         return
     }
+    // invoke {method} of the instance the factory with {id} is pinned to; {done} hears what it
+    // returned and the reason the server refused, or the call failed
+    const invoke = ({ id, method }, done) => {
+        // send the request
+        commitInvoke({
+            // the payload
+            variables: { input: { diagram, node: id, method } },
+            // when the answer arrives, pass on the outcome
+            onCompleted: response => done?.({
+                result: response?.diagramInvoke?.result ?? null,
+                error: response?.diagramInvoke?.error ?? null,
+            }),
+            // on failure, report, and say so
+            onError: errors => {
+                // report
+                complain(`invoking ${method} of ${id}`, errors)
+                // and say so
+                done?.({ result: null, error: "the server could not be reached" })
+            },
+        })
+        // all done
+        return
+    }
     // remove the factory with {id}
     const remove = id => {
         // send the request
@@ -107,7 +131,7 @@ export const useEditDiagram = diagram => {
         return
     }
     // publish
-    return { add, configure, instantiate, pin, remove }
+    return { add, configure, instantiate, invoke, pin, remove }
 }
 
 
@@ -126,6 +150,19 @@ const useEditDiagramAddMutation = graphql`
 const useEditDiagramConfigureMutation = graphql`
     mutation useEditDiagramConfigureMutation($input: DiagramConfigureInput!) {
         diagramConfigure(input: $input) {
+            error
+            diagram {
+                id
+                ...contentsFlowDiagramFragment
+            }
+        }
+    }
+`
+
+const useEditDiagramInvokeMutation = graphql`
+    mutation useEditDiagramInvokeMutation($input: DiagramInvokeInput!) {
+        diagramInvoke(input: $input) {
+            result
             error
             diagram {
                 id

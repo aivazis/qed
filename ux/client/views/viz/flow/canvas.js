@@ -30,7 +30,7 @@ import { Drops } from './drops'
 import { useEditDiagram } from './useEditDiagram'
 // the fan that refines a factory in place
 import { Fan, FanNamer, FanProvider, useFanState } from './fan'
-// the settings of the factories, spread out below them
+// the traits and methods of the factories, hanging below them
 import { SettingEditor, Settings, SettingsProvider, useSettingsState } from './settings'
 // paint
 import styles from './styles'
@@ -84,14 +84,16 @@ export const Canvas = ({
     // access the selection
     const { selection, clear } = useSelection()
     // the editor
-    const { remove, pin, configure, instantiate } = useEditDiagram(diagram?.id ?? null)
+    const { remove, pin, configure, instantiate, invoke } = useEditDiagram(diagram?.id ?? null)
     // the fan, which only an editable diagram with a catalog has
     const fan = useFanState({
         diagram: diagram?.id ?? null, factories: diagram?.factories ?? [], slots: diagram?.slots ?? [],
         catalog: editable ? catalog : null, pin, instantiate,
     })
-    // the settings of the factories whose hub was clicked
-    const settings = useSettingsState({ factories: diagram?.factories ?? [], configure })
+    // what hangs below the factories: their traits and their methods
+    const settings = useSettingsState({
+        diagram: diagram?.id ?? null, factories: diagram?.factories ?? [], configure, invoke,
+    })
     // the keys of the fan go to it before anybody else sees them, the camera included, which
     // leaves alone the keys that were handled; the listener is installed afresh whenever the fan
     // changes, so it always sees the fan as it is now
@@ -204,14 +206,14 @@ export const Canvas = ({
                                 editable={editable}>
                                 {/* the fan, which the nodes open */}
                                 <FanProvider fan={fan}>
-                                    {/* the settings, which the hubs of the factories spread out */}
+                                    {/* what hangs below the factories */}
                                     <SettingsProvider settings={settings}>
                                         {/* the diagram, as the view in use draws it, faded while a fan is out */}
                                         <g opacity={fan.factory ? styles.fan.dim : 1}>
                                             {flat
                                                 ? <FlatScene diagram={diagram} />
                                                 : <IsoScene diagram={diagram} nodes={nodes} />}
-                                            {/* the settings that are out, in the flat view */}
+                                            {/* their traits and methods, in the flat view */}
                                             {flat && <Settings />}
                                         </g>
                                         {/* and the fan itself, over it */}
@@ -332,13 +334,18 @@ const canvasFlowDiagramFragment = graphql`
             family
             protocol
             level
-            # its settings, which its hub spreads out
+            # its settings and its methods, which hang below it
             traits {
                 name
                 kind
                 value
                 doc
                 editable
+            }
+            methods {
+                name
+                doc
+                invocable
             }
             at {
                 x

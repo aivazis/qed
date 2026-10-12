@@ -31,6 +31,14 @@ const isoProduct = {
     highlight: { fill: "none", stroke: "hsl(200deg, 40%, 75%)", strokeWidth: 2, vectorEffect: "non-scaling-stroke" },
 }
 
+// forest green, for the methods of factories
+const forest = {
+    ink: "hsl(120deg, 45%, 32%)",
+    paint: "hsl(120deg, 45%, 13%)",
+    glyph: "hsl(120deg, 45%, 50%)",
+    name: "hsl(120deg, 30%, 40%)",
+}
+
 // the paint of a puck by how far down its node is pinned, made from the {solid} paint of an
 // instance: a protocol is a dashed outline, a class is a solid one, and an instance is a solid
 // outline around a darker {top} and {side}, so its border stays visible; an outline is filled with
@@ -200,12 +208,12 @@ export default {
     // the fields over the canvas that change a setting or name an instance, styled the way the
     // forms of the app are
     inline: {
-        // the holder, over the canvas, with just enough of a backing to read over the diagram
+        // the holder, over the canvas, backed by the page so it hides what it covers
         box: {
             position: "absolute",
             zIndex: 10,
             padding: "0.1em 0.3em",
-            backgroundColor: "hsl(0deg, 0%, 7%, 0.85)",
+            backgroundColor: theme.page.background,
             fontSize: "13px",
         },
         // the prompt and the input, on one line
@@ -220,9 +228,51 @@ export default {
             textTransform: "uppercase",
             color: "hsl(0deg, 0%, 55%)",
         },
-        // the input, narrower than the forms'
+        // the input, narrower than the forms', in the size of the text so it scales with it, and
+        // so does its padding, which the placement of the field takes into account
         input: {
-            width: "14rem",
+            width: "17em",
+            padding: "0 0.3em",
+        },
+        // the values a setting might take, in a list below the field that scrolls past a handful
+        suggestions: {
+            // the holder
+            box: {
+                marginTop: "0.3em",
+                borderTop: "1px solid hsl(0deg, 0%, 20%)",
+                paddingTop: "0.2em",
+            },
+            // how many there are
+            count: {
+                fontFamily: "rubik-light",
+                fontSize: "75%",
+                textTransform: "uppercase",
+                color: "hsl(0deg, 0%, 40%)",
+                padding: "0 0.3em 0.2em 0.3em",
+            },
+            // the list, about nine rows tall before it scrolls
+            list: {
+                maxHeight: "12.6em",
+                overflowY: "auto",
+                // reaching either end of the list does not carry the scroll on to what is behind it
+                overscrollBehavior: "contain",
+                lineHeight: "1.4em",
+                fontFamily: "inconsolata",
+                color: "hsl(0deg, 0%, 70%)",
+            },
+            // a row
+            row: {
+                padding: "0 0.3em",
+                whiteSpace: "nowrap",
+                cursor: "pointer",
+            },
+            // the row the arrows or the pointer picked
+            picked: {
+                padding: "0 0.3em",
+                whiteSpace: "nowrap",
+                cursor: "pointer",
+                backgroundColor: "hsl(0deg, 0%, 15%)",
+            },
         },
         // the reason the last try was refused
         error: {
@@ -233,39 +283,62 @@ export default {
         },
     },
 
+    // what hangs below a factory: its traits, which are data, in the blue of products, and its
+    // methods, in forest green
     settings: {
         // the stem that hangs from the hub of the factory
         stem: {
-            stroke: "hsl(28deg, 60%, 45%)",
-            strokeWidth: 1,
-            vectorEffect: "non-scaling-stroke",
-            opacity: 0.6,
-        },
-        // a bead for each setting, in the orange of the hub
-        bead: {
-            fill: "hsl(0deg, 0%, 7%)",
-            stroke: "hsl(28deg, 70%, 55%)",
+            stroke: "hsl(0deg, 0%, 40%)",
             strokeWidth: 1,
             vectorEffect: "non-scaling-stroke",
         },
-        // the name of the setting
+        // the beads that fold the strings, by group
+        expander: {
+            // the patch of the page under the glyph
+            patch: { fill: theme.page.background, stroke: "none" },
+            traits: {
+                glyph: { stroke: "hsl(200deg, 80%, 60%)", strokeWidth: 1.5, vectorEffect: "non-scaling-stroke" },
+                label: { fontFamily: "inconsolata", fontSize: 0.45, stroke: "none", fill: "hsl(200deg, 50%, 45%)" },
+            },
+            methods: {
+                glyph: { stroke: forest.glyph, strokeWidth: 1.5, vectorEffect: "non-scaling-stroke" },
+                label: { fontFamily: "inconsolata", fontSize: 0.45, stroke: "none", fill: forest.name },
+            },
+        },
+        // the bead of a trait: blank while the factory is a protocol or a class, whose traits are
+        // a specification, and filled once it is an instance, whose traits hold values
+        trait: {
+            blank: { fill: theme.page.background, stroke: "hsl(200deg, 80%, 35%)", strokeWidth: 2, vectorEffect: "non-scaling-stroke" },
+            instance: { fill: "hsl(200deg, 80%, 15%)", stroke: "hsl(200deg, 80%, 35%)", strokeWidth: 2, vectorEffect: "non-scaling-stroke" },
+        },
+        // the bead of a method, filled the same way, and its name
+        method: {
+            blank: { fill: theme.page.background, stroke: forest.ink, strokeWidth: 2, vectorEffect: "non-scaling-stroke" },
+            instance: { fill: forest.paint, stroke: forest.ink, strokeWidth: 2, vectorEffect: "non-scaling-stroke" },
+            name: { fontFamily: "inconsolata", fontSize: 0.45, stroke: "none", fill: forest.name },
+        },
+        // the name of a trait
         name: {
             fontFamily: "inconsolata",
             fontSize: 0.45,
             stroke: "none",
-            fill: "hsl(0deg, 0%, 60%)",
+            fill: "hsl(200deg, 80%, 55%)",
         },
         // its value
         value: {
-            fill: "hsl(0deg, 0%, 90%)",
+            fill: "hsl(0deg, 0%, 85%)",
         },
         // or that it has none
         unset: {
             fill: "hsl(0deg, 0%, 50%)",
             fontStyle: "italic",
         },
-        // a setting that can be changed from the diagram
-        editable: {
+        // why a method failed
+        failure: {
+            fill: "hsl(0deg, 70%, 65%)",
+        },
+        // a bead that does something when clicked
+        clickable: {
             cursor: "pointer",
         },
     },
