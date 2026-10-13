@@ -86,14 +86,15 @@ class Connector(Labeled, Entity, set):
         """
         Compute the location of my trait label
         """
-        # build the value of the label
-        text = [trait.name for trait in self]
         # compute its location
         position = self.placeLabel()
 
-        # make a label
+        # make a label with the names of my traits
         label = Label(
-            text=text, category=self.typename().lower(), delta=(0, 0, 0), position=position
+            category=self.typename().lower(),
+            delta=(0, 0, 0),
+            position=position,
+            traits=[trait.name for trait in self],
         )
         # save it as my trait label
         self.traitLabel = label
@@ -108,8 +109,8 @@ class Connector(Labeled, Entity, set):
         """
         # transfer the traits in {other} to me
         self |= other
-        # rebuild the {text} of my traits label and attach it
-        self.traitLabel.text = [trait.name for trait in self]
+        # rebuild the trait names of my label
+        self.traitLabel.traits = [trait.name for trait in self]
 
         # remove its trait label from its pile
         other._labels.discard(other.traitLabel)

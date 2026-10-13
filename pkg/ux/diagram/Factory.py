@@ -60,6 +60,42 @@ class Factory(Node):
         # all done
         return
 
+    def given(self):
+        """
+        The name of the instance i am pinned to: the one a person gave it, possibly empty, or else
+        its own; nothing when i am not pinned to an instance
+        """
+        # get my pin
+        pin = self.node.pin
+        # if it is not an instance
+        if pin is None or isinstance(pin, type):
+            # there is no name to give
+            return None
+        # otherwise, the one a person gave it, or else its own
+        return pin.pyre_name if self.alias is None else self.alias
+
+    def family(self):
+        """
+        The family of the component i am pinned to, if any
+        """
+        # get my pin
+        pin = self.node.pin
+        # if there is none
+        if pin is None:
+            # there is no family
+            return None
+        # a class has its family, an instance has the one of its class
+        return (pin if isinstance(pin, type) else type(pin)).pyre_family()
+
+    def role(self):
+        """
+        The role of the protocol i satisfy, if it is known
+        """
+        # get my protocol
+        protocol = self.node.protocol
+        # and ask it, if there is one
+        return None if protocol is None else protocol.pyre_role()
+
     # metamethods
     def __init__(self, node, **kwds):
         # chain up
@@ -85,39 +121,23 @@ class Factory(Node):
         """
         Generate the set of my labels
         """
-        # the value of the label is what i am, as far as i am pinned
-        text = [self.kind()]
         # build the position of the label relative to me
         delta = (0, -2.5, 0)
-        # assemble and publish
-        yield Label(text=text, category="factory", delta=delta, position=self.position)
+        # assemble the parts of what i am, as far as i am pinned, and publish
+        yield Label(
+            category="factory",
+            delta=delta,
+            position=self.position,
+            given=self.given(),
+            family=self.family(),
+            role=self.role(),
+        )
 
         # chain up
         yield from super().generateLabels()
 
         # all done
         return
-
-    @staticmethod
-    def describe(protocol=None, pin=None, alias=None):
-        """
-        Name a factory that satisfies {protocol} and is pinned to {pin}: by the component it is
-        pinned to, or the protocol it must satisfy; an instance reads as its name and its class,
-        "name:class", where the name is the {alias} a person gave it, possibly empty, or else
-        the instance's own
-        """
-        # a factory that is pinned to an instance
-        if pin is not None and not isinstance(pin, type):
-            # its name: the one a person gave it, or else its own
-            name = pin.pyre_name if alias is None else alias
-            # is named by it, and the class it is an instance of
-            return f"{name}:{type(pin).pyre_family().split('.')[-1]}"
-        # a factory that is pinned to a class
-        if pin is not None:
-            # is named by the family of its pin
-            return pin.pyre_family().split(".")[-1]
-        # otherwise, by its protocol, whose family names the whole category
-        return protocol.__name__.lower()
 
     def ends(self, position=None):
         """
@@ -129,16 +149,15 @@ class Factory(Node):
         # my ends are on either side of me, along my axis
         return [(x - self.reach, y, z), (x + self.reach, y, z)]
 
-    @staticmethod
-    def editable(node, trait):
+    def editable(self, trait):
         """
-        Decide whether {trait} of the factory behind the recipe {node} can be changed from the
-        diagram: only the settings of a factory pinned to a class or an instance, and only the
-        ones whose value is a single piece of text, which components are too, since the
-        framework makes them from their names; maps wait for an editor of their own
+        Decide whether my {trait} can be changed from the diagram: only the settings of a factory
+        pinned to a class or an instance, and only the ones whose value is a single piece of
+        text, which components are too, since the framework makes them from their names; maps
+        wait for an editor of their own
         """
         # a factory pinned only to its protocol has no settings to change
-        if node.level == "protocol":
+        if self.node.level == "protocol":
             # so none are
             return False
         # neither are its slots
@@ -148,13 +167,13 @@ class Factory(Node):
         # the rest are, unless they are maps
         return not isinstance(trait, pyre.traits.Dict.Dict)
 
-    @staticmethod
-    def methods(node):
+    def methods(self):
         """
-        Generate the behaviors of the factory behind the recipe {node} that can be invoked with
-        no arguments, the only way the diagram can invoke them for now: the ones of its pin, or
-        else the obligations of its protocol
+        Generate my behaviors that can be invoked with no arguments, the only way the diagram can
+        invoke them for now: the ones of my pin, or else the obligations of my protocol
         """
+        # get my recipe node
+        node = self.node
         # the behaviors are declared by its pin, or else by its protocol
         source = node.protocol if node.pin is None else node.pin
         # the kinds of parameters that a call has to supply when they have no default
@@ -175,13 +194,6 @@ class Factory(Node):
             yield behavior
         # all done
         return
-
-    def kind(self):
-        """
-        Name what i am: the component i am pinned to, or the protocol i must satisfy
-        """
-        # ask my recipe node, along with the name a person gave my instance, if any
-        return self.describe(protocol=self.node.protocol, pin=self.node.pin, alias=self.alias)
 
     def home(self, trait):
         """

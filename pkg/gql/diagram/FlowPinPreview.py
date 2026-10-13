@@ -19,8 +19,10 @@ class FlowPinPreview(graphene.ObjectType):
     pin itself carries out, without changing anything
     """
 
-    # the label the factory would have
-    label = graphene.String(required=True)
+    # the parts of the label the factory would have: the family of the class, and the role of
+    # the protocol it satisfies, if it is known
+    family = graphene.String(required=True)
+    role = graphene.String()
     # the slots it would gain
     slots = graphene.List(graphene.NonNull(FlowPinPreviewSlot), required=True)
     # the ids of the slots it would let go of
@@ -28,12 +30,20 @@ class FlowPinPreview(graphene.ObjectType):
 
     # resolvers
     @staticmethod
-    def resolve_label(preview, info, **kwds):
+    def resolve_family(preview, info, **kwds):
         """
-        Get the label the factory would have
+        Get the family of the class the factory would be pinned to
         """
         # the preview knows
-        return preview["label"]
+        return preview["family"]
+
+    @staticmethod
+    def resolve_role(preview, info, **kwds):
+        """
+        Get the role of the protocol the factory satisfies
+        """
+        # the preview knows
+        return preview["role"]
 
     @staticmethod
     def resolve_slots(preview, info, **kwds):

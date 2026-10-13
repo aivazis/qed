@@ -153,13 +153,16 @@ class Slot(Node):
         # i only get a label if i'm bound to a product the user specialized by pinning it; until
         # then i only join the slots of factories, and their connectors say all there is to say
         if product is not None and product.pin is not None:
-            # the value of the label: the name of the instance, which is also how separately drawn
-            # graphs join, and what it is
-            text = [f"{product.name}@{self.kind()}"]
             # build the position of the label relative to me
             delta = (0, -1, 0)
-            # assemble and publish
-            yield Label(text=text, category="product", delta=delta, position=self.position)
+            # assemble the parts of what my product is, and publish
+            yield Label(
+                category="product",
+                delta=delta,
+                position=self.position,
+                given=self.given(),
+                family=self.family(),
+            )
 
         # chain up
         yield from super().generateLabels()
@@ -167,12 +170,28 @@ class Slot(Node):
         # all done
         return
 
-    def kind(self):
+    def given(self):
         """
-        Name what my product is: the component it is pinned to
+        The name of the instance my product is pinned to, which is also how separately drawn
+        graphs join; nothing when it is not pinned to an instance
         """
-        # the family of the pin of my product names it
-        return self.product.pin.pyre_family().split(".")[-1]
+        # get the pin of my product
+        pin = self.product.pin
+        # if it is not an instance
+        if pin is None or isinstance(pin, type):
+            # there is no name to give
+            return None
+        # otherwise, its own
+        return pin.pyre_name
+
+    def family(self):
+        """
+        The family of the component my product is pinned to
+        """
+        # get the pin of my product
+        pin = self.product.pin
+        # a class has its family, an instance has the one of its class
+        return (pin if isinstance(pin, type) else type(pin)).pyre_family()
 
     def rebind(self, other):
         """

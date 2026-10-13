@@ -30,19 +30,6 @@ class Entity:
         # build a {relay} node id
         return f"{self.typename()}:{self.eid}"
 
-    # interface
-    @staticmethod
-    def relayToEid(relay):
-        """
-        Extract my {typename} and {eid} from my {relay} id
-        """
-        # parse
-        typename, hex = relay.split(":")
-        # convert the {hex} key into a {uuid}
-        eid = uuid.UUID(hex=hex)
-        # pack and ship
-        return typename, eid
-
     # metamethods
     def __init__(self, name=None, **kwds):
         # chain up
