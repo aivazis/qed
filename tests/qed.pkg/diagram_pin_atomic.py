@@ -60,8 +60,14 @@ def snapshot(diagram) -> tuple:
         frozenset(diagram.nodes),
         # where its slots are
         frozenset(slot.position for slot in diagram.slots),
-        # what its labels say
-        sorted(tuple(label.text) for label in diagram.labels),
+        # what its labels say, part by part
+        sorted(
+            (
+                (label.category, label.given, label.family, label.role, tuple(label.traits))
+                for label in diagram.labels
+            ),
+            key=repr,
+        ),
         # the slots of the factory
         frozenset(id(slot) for slot in factory.slots),
         # its arity
