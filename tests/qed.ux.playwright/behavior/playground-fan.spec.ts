@@ -60,6 +60,25 @@ const label = (page: Page) => page.locator('[data-qed-label="factory"]').first()
 
 // the choice of the fan that has the focus
 const focused = (page: Page) => page.locator('[data-qed-fan] [data-qed-focused="true"]')
+// the choices on the arc, from left to right, without the way back
+const arc = async (page: Page) => (await page.locator("[data-qed-fan] [data-qed-satellite]")
+    .evaluateAll(nodes => nodes.map(node => node.getAttribute("data-qed-satellite"))))
+    .filter(name => name !== "back")
+// the choice a level starts on: the middle of the arc, where <up> would land
+const middle = (choices: (string | null)[]) => choices[Math.floor((choices.length - 1) / 2)]
+// move the focus to the choice {target} with the right arrow, from wherever it is
+const steer = async (page: Page, target: string) => {
+    // the choices, and where the focus and the target are among them
+    const choices = await arc(page)
+    const from = choices.indexOf(await focused(page).getAttribute("data-qed-satellite"))
+    const to = choices.indexOf(target)
+    // step to it, wrapping around
+    for (let step = 0; step < (to - from + choices.length) % choices.length; step++) {
+        await page.keyboard.press("ArrowRight")
+    }
+    // and make sure it got there
+    await expect(focused(page)).toHaveAttribute("data-qed-satellite", target)
+}
 
 
 test.describe.serial("a factory of the playground fans out its choices", () => {
@@ -92,19 +111,25 @@ test.describe.serial("a factory of the playground fans out its choices", () => {
         // a double click on its hub fans it out
         await page.locator("[data-qed-kind=factory] circle").first().dblclick()
         await expect(page.locator("[data-qed-fan]")).toHaveCount(1)
-        // with its families on the arc, nothing in focus, and no way back from a protocol
+        // with its families on the arc, the one in the middle in focus, and no way back from a
+        // protocol
         await expect(page.locator('[data-qed-fan] [data-qed-satellite="isce2"]')).toHaveCount(1)
         await expect(page.locator('[data-qed-fan] [data-qed-satellite="native"]')).toHaveCount(1)
-        await expect(focused(page)).toHaveCount(0)
+        const families = await arc(page)
+        await expect(focused(page)).toHaveAttribute("data-qed-satellite", middle(families)!)
         await expect(page.locator('[data-qed-satellite="back"]')).toHaveCount(0)
 
         // where the camera has the diagram
         const before = await where(page)
-        // the arrows move the focus along the arc
+        // the arrows move the focus along the arc, one step at a time, wrapping around
+        const start = families.indexOf(middle(families))
         await page.keyboard.press("ArrowRight")
-        await expect(focused(page)).toHaveAttribute("data-qed-satellite", "isce2")
-        await page.keyboard.press("ArrowRight")
-        await expect(focused(page)).toHaveAttribute("data-qed-satellite", "native")
+        await expect(focused(page))
+            .toHaveAttribute("data-qed-satellite", families[(start + 1) % families.length]!)
+        await page.keyboard.press("ArrowLeft")
+        await expect(focused(page)).toHaveAttribute("data-qed-satellite", middle(families)!)
+        // all the way to the native family
+        await steer(page, "native")
         // a family previews nothing
         await expect(page.locator("[data-qed-preview]")).toHaveCount(0)
         // down has nothing to undo here, and is swallowed anyway
@@ -118,7 +143,8 @@ test.describe.serial("a factory of the playground fans out its choices", () => {
         await expect(page.locator('[data-qed-fan] [data-qed-satellite="qed.readers.native.flat"]')).toHaveCount(1)
         await expect(page.locator('[data-qed-fan] [data-qed-opened="native"]')).toHaveCount(1)
         await expect(page.locator('[data-qed-satellite="back"]')).toHaveCount(1)
-        await expect(focused(page)).toHaveCount(0)
+        // and the member in the middle in focus
+        await expect(focused(page)).toHaveAttribute("data-qed-satellite", middle(await arc(page))!)
         // down steps back out, onto the family it came from
         await page.keyboard.press("ArrowDown")
         await expect(page.locator('[data-qed-fan] [data-qed-opened]')).toHaveCount(0)
@@ -127,13 +153,8 @@ test.describe.serial("a factory of the playground fans out its choices", () => {
         await page.keyboard.press("ArrowUp")
         await expect(page.locator('[data-qed-fan] [data-qed-opened="native"]')).toHaveCount(1)
 
-        // where the flat reader is among the members, counting from the left
-        const members = await page.locator("[data-qed-fan] [data-qed-satellite]")
-            .evaluateAll(nodes => nodes.map(node => node.getAttribute("data-qed-satellite")))
-        const position = members.indexOf("qed.readers.native.flat")
-        // the first step lands on the left end, and each one after it moves one to the right
-        for (let step = 0; step <= position; step++) await page.keyboard.press("ArrowRight")
-        await expect(focused(page)).toHaveAttribute("data-qed-satellite", "qed.readers.native.flat")
+        // the arrows reach the flat reader among the members
+        await steer(page, "qed.readers.native.flat")
         // which previews the factory pinned to it, as the server plans the pin: its name; the
         // reader keeps the slot of its raster, so it gains none and lets none go
         const preview = page.locator('[data-qed-preview="qed.readers.native.flat"]')
@@ -168,8 +189,7 @@ test.describe.serial("a factory of the playground fans out its choices", () => {
         await expect(page.locator("[data-qed-fan] [data-qed-satellite]")).toHaveCount(2)
         await expect(page.locator('[data-qed-satellite="new"]')).toHaveCount(1)
         await expect(page.locator('[data-qed-satellite="back"]')).toHaveCount(1)
-        // choosing the new instance asks for a name
-        await page.keyboard.press("ArrowRight")
+        // the new instance, alone on the arc, has the focus, and choosing it asks for a name
         await expect(focused(page)).toHaveAttribute("data-qed-satellite", "new")
         await page.keyboard.press("Enter")
         await expect(page.locator("[data-qed-fan-namer]")).toHaveCount(1)
