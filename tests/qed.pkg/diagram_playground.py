@@ -72,9 +72,9 @@ def test():
         diagram=playground.relay, family=qed.viz.reader.pyre_family(), position=(0, 0, 0)
     )
     # which lands as one factory pinned to nothing
-    assert [(factory.kind(), factory.node.level) for factory in playground.factories] == [
-        ("reader", "protocol")
-    ]
+    assert [
+        (factory.role(), factory.family(), factory.node.level) for factory in playground.factories
+    ] == [("reader", None, "protocol")]
     # with a slot for the raster it exposes, and nothing else
     assert len(playground.slots) == 1
     # a family that names nothing on offer

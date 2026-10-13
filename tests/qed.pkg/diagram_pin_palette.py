@@ -53,7 +53,7 @@ reading = """
             playground {
                 factories { id family level inputs outputs }
                 slots { id }
-                labels { value category }
+                labels { given family role category }
             }
         }
     }
@@ -90,8 +90,12 @@ def summary(store: types.SimpleNamespace) -> tuple:
     view = run(store, reading)["qed"]["playground"]
     # there is exactly one factory
     (factory,) = view["factories"]
-    # and its label
-    (label,) = [label["value"] for label in view["labels"] if label["category"] == "factory"]
+    # and the parts of its label
+    (label,) = [
+        (label["given"], label["family"], label["role"])
+        for label in view["labels"]
+        if label["category"] == "factory"
+    ]
     # what it is, what it says it is, and how many slots it has
     return (
         factory["family"],
@@ -158,8 +162,9 @@ def test() -> None:
                 summary(pinned),
                 summary(dropped),
             )
-            # and the pinned one is the class
-            assert summary(pinned)[:3] == (family, "class", [family.split(".")[-1]]), family
+            # and the pinned one is the class, labeled by its family and the role of its protocol
+            label = (None, family, protocol.pyre_role())
+            assert summary(pinned)[:3] == (family, "class", label), family
     # there must have been some
     assert classes > 0
     # all done
