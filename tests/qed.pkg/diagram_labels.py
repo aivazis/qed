@@ -33,8 +33,8 @@ def test() -> None:
         (label,) = [label for label in factory.labels if label.category == "factory"]
         # get the instance
         pin = factory.node.pin
-        # check
-        assert (label.given, label.family) == (pin.pyre_name, type(pin).pyre_family())
+        # check; an instance with no name of its own has an empty one
+        assert (label.given, label.family) == (pin.pyre_name or "", type(pin).pyre_family())
         # and it says nothing a connector would
         assert label.traits == [], label.traits
 
@@ -48,8 +48,9 @@ def test() -> None:
         (label,) = [label for label in slot.labels if label.category == "product"]
         # get the instance
         pin = slot.product.pin
-        # its parts are the name of the instance and the family of its class
-        assert (label.given, label.family) == (pin.pyre_name, type(pin).pyre_family())
+        # its parts are the name of the instance, empty when it has none, and the family of its
+        # class
+        assert (label.given, label.family) == (pin.pyre_name or "", type(pin).pyre_family())
         # it has no protocol role
         assert label.role is None, label.role
 
