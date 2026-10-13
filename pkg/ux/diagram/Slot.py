@@ -181,8 +181,8 @@ class Slot(Node):
         if pin is None or isinstance(pin, type):
             # there is no name to give
             return None
-        # otherwise, its own
-        return pin.pyre_name
+        # otherwise, its own, which is empty when it has none
+        return pin.pyre_name or ""
 
     def family(self):
         """
