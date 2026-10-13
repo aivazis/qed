@@ -23,6 +23,8 @@ import { useProjection } from './projection'
 import { route } from './connector'
 // what a pin would do, as the server works it out
 import { usePinPreview } from './usePinPreview'
+// what a label says
+import { Words } from './words'
 // paint
 import styles from './styles'
 
@@ -500,7 +502,9 @@ const Preview = ({ diagram, slots, factory, entry }) => {
     return (
         <g data-qed-preview={entry.family} pointerEvents="none">
             {/* the name the factory would have */}
-            <text x={label.x} y={label.y} style={styles.fan.preview.title}>{preview.label}</text>
+            <text x={label.x} y={label.y} style={styles.fan.preview.title}>
+                <Words category="factory" family={preview.family} role={preview.role} />
+            </text>
             {/* the terminals that would have connectors */}
             {plexes.map((spot, idx) => (
                 <g key={`plex-${idx}`} transform={`translate(${spot.x} ${spot.y})`}>

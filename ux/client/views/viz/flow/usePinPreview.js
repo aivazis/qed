@@ -66,8 +66,9 @@ const query = graphql`
     query usePinPreviewQuery($diagram: ID!, $node: ID!, $family: String!) {
         qed {
             pinPreview(diagram: $diagram, node: $node, family: $family) {
-                # the label the factory would have
-                label
+                # the parts of the label the factory would have
+                family
+                role
                 # the slots it would gain
                 slots {
                     trait

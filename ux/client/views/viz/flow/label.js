@@ -16,6 +16,8 @@ import { useDrag } from './drag'
 import { useFan } from './fan'
 // the projection
 import { useProjection } from './projection'
+// what a label says
+import { Words } from './words'
 // paint
 import styles from './styles'
 
@@ -23,7 +25,7 @@ import styles from './styles'
 // render a label
 export const Label = ({ label, style }) => {
     // unpack
-    const { id, at, value, category, owner } = useFragment(labelFlowDiagramFragment, label)
+    const { at, category, owner, ...parts } = useFragment(labelFlowDiagramFragment, label)
     // a label follows its node while it is dragged
     const { dx, dy, dz } = useDrag().shiftOf(owner)
     // the projection
@@ -46,7 +48,7 @@ export const Label = ({ label, style }) => {
     return (
         <text x={x} y={y} style={paint}
             data-qed-label={category} data-qed-owner={owner ?? undefined}>
-            {value.join(", ")}
+            <Words category={category} {...parts} />
         </text>
     )
 }
@@ -63,8 +65,11 @@ const labelFlowDiagramFragment = graphql`
             y
             z
         }
-        # state
-        value
+        # what it says, in parts
+        given
+        family
+        role
+        traits
         category
         # the node i follow while it is dragged
         owner
