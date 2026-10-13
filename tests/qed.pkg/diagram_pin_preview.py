@@ -7,9 +7,9 @@
 
 
 """
-The preview of a pin describes what the pin does without doing it: the label the factory gets,
-the slots it gains and where they go, and the slots it lets go of all match the pin made right
-after, and the preview leaves the diagram as it was
+The preview of a pin describes what the pin does without doing it: the parts of the label the
+factory gets, the slots it gains and where they go, and the slots it lets go of all match the pin
+made right after, and the preview leaves the diagram as it was
 """
 
 # externals
@@ -88,9 +88,11 @@ def test() -> None:
         old = set(factory.slots)
         # now pin
         store.diagramPin(diagram=playground.relay, node=factory.relay, family=family)
-        # the label is the one promised
+        # the label has the parts promised: no given name, the family of the class, and the
+        # role of the protocol
         (label,) = factory.labels
-        assert list(label.text) == [preview["label"]], (label.text, preview["label"])
+        promised = (None, preview["family"], preview["role"])
+        assert (label.given, label.family, label.role) == promised, (label.family, promised)
         # the slots that went are the ones promised
         assert {id(slot) for slot in old - set(factory.slots)} == dropped, family
         # the slots that came are where they were promised

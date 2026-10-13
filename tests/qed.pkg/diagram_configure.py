@@ -9,10 +9,10 @@
 """
 Changing a setting of a factory of a diagram: a factory pinned to a class is pinned to a new
 instance of its class, under the name it was given, if any, carrying the new value; a factory
-can also be pinned to a new instance directly, even from its protocol; an instance reads as
-"name:class", with an empty name when nobody gave it one; a name that an instance of the class
-goes by already pins the factory to that instance; one pinned to an instance has the value
-changed, components included, which are given by name; every change is noted as made
+can also be pinned to a new instance directly, even from its protocol; the label of an instance
+carries its given name, empty when nobody gave it one, and its class; a name that an instance of
+the class goes by already pins the factory to that instance; one pinned to an instance has the
+value changed, components included, which are given by name; every change is noted as made
 interactively; values the trait cannot take, settings that cannot be changed from the diagram, and
 names of components of other classes are refused, leaving everything as it was
 """
@@ -119,7 +119,7 @@ def test() -> None:
     assert instance.offset == 12
     # and the label says so
     (label,) = factory.labels
-    assert list(label.text) == [f"{name}:flat"], label.text
+    assert (label.given, label.family) == (name, "qed.readers.native.flat"), label.given
 
     # the value was set the way an edit is: noted as interactive
     _, locator = instance.pyre_getTrait(alias="offset")
@@ -167,7 +167,7 @@ def test() -> None:
     assert error is None and other.node.level == "instance", error
     # which reads as an instance of its class with an empty name
     (label,) = other.labels
-    assert list(label.text) == [":flat"], label.text
+    assert (label.given, label.family) == ("", "qed.readers.native.flat"), label.given
 
     # a reader pinned only to its protocol
     store.diagramAdd(diagram=playground.relay, family="pyre.viz.readers", position=(0, 16, 0))
@@ -181,7 +181,7 @@ def test() -> None:
     assert error is None and third.node.level == "instance", error
     # and reads as its name and its class
     (label,) = third.labels
-    assert list(label.text) == ["hdr:envi"], label.text
+    assert (label.given, label.family) == ("hdr", "qed.readers.native.envi"), label.given
     # the instance it is pinned to
     hdr = third.node.pin
     # another reader, pinned only to its protocol
