@@ -152,7 +152,7 @@ class FlowFactory(graphene.ObjectType):
                     value=FlowFactory.render(value=value),
                     default=FlowFactory.default(trait=trait),
                     doc=trait.doc,
-                    editable=factory.editable(node=node, trait=trait),
+                    editable=factory.editable(trait=trait),
                 )
             )
         # hand off the descriptions
@@ -174,7 +174,7 @@ class FlowFactory(graphene.ObjectType):
                 doc=(inspect.getdoc(behavior.pyre_method) or "").split("\n")[0] or None,
                 invocable=invocable,
             )
-            for behavior in factory.methods(node=node)
+            for behavior in factory.methods()
         ]
 
     @staticmethod

@@ -5,12 +5,14 @@
 # (c) 1998-2026 all rights reserved
 
 
+# externals
+import uuid
+
 # support
 import qed
 import journal
 
 # the nodes
-from .Entity import Entity
 from .Factory import Factory
 from .Slot import Slot
 
@@ -51,13 +53,16 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         return
 
     # interface
-    @staticmethod
-    def relayToEid(relay):
+    def relayToEid(self, relay):
         """
-        Extract the {typename} and {eid} from a {relay} id
+        Extract the {typename} and {eid} from the {relay} id of one of my nodes
         """
-        # {entities} know how to do this
-        return Entity.relayToEid(relay)
+        # split it
+        typename, hex = relay.split(":")
+        # convert the {hex} key into a {uuid}
+        eid = uuid.UUID(hex=hex)
+        # pack and ship
+        return typename, eid
 
     def locate(self, relay):
         """
@@ -122,12 +127,12 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         Add a factory that satisfies {protocol} to the recipe, optionally pinned to a class or an
         instance, and draw it at {position}
         """
-        # add the factory to the recipe, named after what it is
-        node = self.recipe.factory(
-            name=self.recipe.vacant(name=Factory.describe(protocol=protocol, pin=pin)),
-            protocol=protocol,
-            pin=pin,
-        )
+        # the component class it is pinned to, if any: the pin itself, or the class of an instance
+        cls = None if pin is None else pin if isinstance(pin, type) else type(pin)
+        # it is named after the family of that class, or else after the role of its protocol
+        name = protocol.pyre_role() if cls is None else cls.pyre_family().split(".")[-1]
+        # add the factory to the recipe, under a name no other node has
+        node = self.recipe.factory(name=self.recipe.vacant(name=name), protocol=protocol, pin=pin)
         # and draw it
         return self.drawFactory(node=node, position=position)
 
@@ -156,17 +161,21 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
 
     def preview(self, entity, pin=None):
         """
-        Describe what pinning the factory {entity} to {pin} would do, without doing it: the label
-        it would have, the slots it would gain, each with its trait and its spot, and the slots
-        it would let go of; the plan is the one {pin} carries out, so the two cannot disagree,
-        and a pin that cannot be made raises the way {pin} does
+        Describe what pinning the factory {entity} to the class {pin} would do, without doing
+        it: the parts of the label it would have, the slots it would gain, each with its trait
+        and its spot, and the slots it would let go of; the plan is the one {pin} carries out, so
+        the two cannot disagree, and a pin that cannot be made raises the way {pin} does
         """
         # work out the plan
         plan = self._planPin(entity=entity, pin=pin)
+        # get the protocol the factory satisfies
+        protocol = entity.node.protocol
         # and describe it
         return {
-            # what the factory would be called
-            "label": Factory.describe(protocol=entity.node.protocol, pin=pin),
+            # the family of the class it would be pinned to
+            "family": pin.pyre_family(),
+            # and the role of its protocol, if it is known
+            "role": None if protocol is None else protocol.pyre_role(),
             # the slots it would gain
             "fresh": plan["fresh"],
             # and the ones it would no longer use
