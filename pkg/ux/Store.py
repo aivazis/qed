@@ -1626,7 +1626,7 @@ class Store(qed.component, family="qed.ux.store"):
             # say so
             return found, f"{cls.pyre_family()} has no setting '{trait}'"
         # one that cannot be changed from the diagram
-        if not entity.editable(node=recipe, trait=descriptor):
+        if not entity.editable(trait=descriptor):
             # is refused
             return found, f"'{trait}' cannot be changed from the diagram"
         # a plain property can be checked without storing the value anywhere; a component is
@@ -1741,7 +1741,7 @@ class Store(qed.component, family="qed.ux.store"):
             # there is nothing to suggest
             return None
         # a setting that cannot be changed from the diagram
-        if not entity.editable(node=recipe, trait=descriptor):
+        if not entity.editable(trait=descriptor):
             # needs no suggestions
             return None
         # a component
@@ -1822,7 +1822,7 @@ class Store(qed.component, family="qed.ux.store"):
             # so ask for one first
             return found, None, f"make an instance of '{recipe.name}' before invoking its methods"
         # find the method among the ones the diagram can invoke
-        behavior = next((b for b in entity.methods(node=recipe) if b.name == method), None)
+        behavior = next((b for b in entity.methods() if b.name == method), None)
         # a name that is not among them
         if behavior is None:
             # is refused

@@ -33,8 +33,14 @@ class FlowLabel(graphene.ObjectType):
     id = graphene.ID(required=True)
     # fields
     at = graphene.Field(Point, required=True)
-    value = graphene.List(graphene.String, required=True)
     category = graphene.String(required=True)
+    # the parts of what it says, each one missing when it does not apply: the given name of an
+    # instance, possibly empty, the family of a component, the role of a protocol, and the names
+    # of the traits of a connector
+    given = graphene.String()
+    family = graphene.String()
+    role = graphene.String()
+    traits = graphene.List(graphene.NonNull(graphene.String), required=True)
     # the id of the node it follows when that node is dragged
     owner = graphene.ID()
 
@@ -48,12 +54,36 @@ class FlowLabel(graphene.ObjectType):
         return label.relay
 
     @staticmethod
-    def resolve_value(label, info, **kwds):
+    def resolve_given(label, info, **kwds):
         """
-        Get the label text
+        Get the given name of the instance the label names, if it names one
         """
         # easy enough
-        return label.text
+        return label.given
+
+    @staticmethod
+    def resolve_family(label, info, **kwds):
+        """
+        Get the family of the component the label names, if it names one
+        """
+        # easy enough
+        return label.family
+
+    @staticmethod
+    def resolve_role(label, info, **kwds):
+        """
+        Get the role of the protocol the label names, if it is known
+        """
+        # easy enough
+        return label.role
+
+    @staticmethod
+    def resolve_traits(label, info, **kwds):
+        """
+        Get the names of the traits of a connector
+        """
+        # easy enough
+        return label.traits
 
     @staticmethod
     def resolve_owner(label, info, **kwds):
