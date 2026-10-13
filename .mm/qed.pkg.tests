@@ -47,6 +47,7 @@ tests.qed.pkg.persist_archive.clean := persist_archive_ws
 tests.qed.pkg.persist_empty.clean := persist_empty_ws
 tests.qed.pkg.persist_reader.clean := persist_reader_ws
 tests.qed.pkg.persist_coupled.clean := persist_coupled_ws
+tests.qed.pkg.persist_interactive.clean := persist_interactive_ws
 # the seed driver writes the unwrapped product it measures
 tests.qed.pkg.measured.clean := measured.unw
 tests.qed.pkg.sample_isce2.clean := sample.unw sample.int
