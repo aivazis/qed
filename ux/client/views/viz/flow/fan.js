@@ -46,8 +46,9 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin, instantia
     const [id, setId] = React.useState(null)
     // the families the fan has been opened onto, outermost first
     const [browse, setBrowse] = React.useState([])
-    // the choice that has the focus: the index of a satellite, "back" for the way back, or nothing
-    const [focus, setFocus] = React.useState(null)
+    // the choice the keys or the pointer gave the focus to: the index of a satellite, "back" for
+    // the way back, or nothing, on a level just entered
+    const [held, setFocus] = React.useState(null)
     // the new instance being named, if any: the family of its class, the name so far, and the
     // reason the last try was refused
     const [naming, setNaming] = React.useState(null)
@@ -87,6 +88,9 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin, instantia
     const spots = satellites.map((_, k) => place({
         k, n: satellites.length, ...(opened ? { origin: opened.spot, ...members } : families),
     }))
+    // the choice that has the focus: the one given it, or else the middle of the arc, which is
+    // where <up> lands, so that on a level just entered the arrows start from something lit
+    const focus = held ?? (satellites.length ? Math.floor((satellites.length - 1) / 2) : null)
     // the way back, in words, if there is one
     const back = !factory ? null : browse.length
         ? (browse.length > 1 ? `back to ${browse[browse.length - 2].name}` : "back to all families")
@@ -106,7 +110,7 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin, instantia
             // so there is nothing to do
             return
         }
-        // fan it out, from the top, with nothing in focus and nothing being named
+        // fan it out, from the top, with the focus on the middle of the arc and nothing being named
         setId(id)
         setBrowse([])
         setFocus(null)
@@ -141,7 +145,7 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin, instantia
         }
         // an instance goes back to its class, and a class to its protocol
         pin({ id: factory.id, family: factory.level === "instance" ? factory.family : null })
-        // which leaves nothing in focus
+        // which puts the focus back on the middle of the arc
         setFocus(null)
         // all done
         return
@@ -161,7 +165,7 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin, instantia
         if (satellite.members) {
             // and leaves the factory as it is
             setBrowse([...browse, { ...satellite, spot: spots[k] }])
-            // and the focus starts over
+            // and the focus starts over, on the middle of the arc
             setFocus(null)
             // all done
             return
@@ -266,7 +270,7 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin, instantia
             // handled
             return true
         }
-        // and, with nothing on the arc in focus, lands on its middle
+        // and, from the way back, lands on the middle of the arc
         if (evt.key === "ArrowUp" && n && typeof focus !== "number") {
             // so the next <up> can go in
             setFocus(Math.floor((n - 1) / 2))
