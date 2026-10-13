@@ -71,8 +71,8 @@ class Factory(Node):
         if pin is None or isinstance(pin, type):
             # there is no name to give
             return None
-        # otherwise, the one a person gave it, or else its own
-        return pin.pyre_name if self.alias is None else self.alias
+        # otherwise, the one a person gave it, or else its own, which is empty when it has none
+        return (pin.pyre_name or "") if self.alias is None else self.alias
 
     def family(self):
         """
