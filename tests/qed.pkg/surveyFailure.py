@@ -60,5 +60,26 @@ for attempt in range(3):
     # a reader that could not be opened is not among the open readers of the worker
     assert readers == {}
 
+# the reason of a failure is text the survey did not write, so it may hold braces, e.g. when
+# the configuration quotes a value with an unmatched one; describe such a product
+task = qed.nexus.survey(reader=reader)
+# point the recipe at it
+task.config["uri"] = "file:///nowhere/{c16.dat"
+# under a name of its own, since the worker would otherwise hand back the reader the attempts
+# above built, which still points at their product
+task.reader = f"{task.reader}.braces"
+# carefully, since first contact is expected to fail
+try:
+    # execute it the way a worker does
+    task.execute(readers={})
+# the failure must still be the kind that leaves the crew member healthy
+except task.RecoverableError as error:
+    # and its reason must render, braces and all
+    assert "{c16.dat" in str(error), str(error)
+# if the survey went through
+else:
+    # it made contact with a product that does not exist
+    assert False, "the survey of a missing product succeeded"
+
 
 # end of file
