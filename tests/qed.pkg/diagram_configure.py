@@ -23,6 +23,7 @@ import types
 import uuid
 
 # support
+import pyre
 import qed
 
 
@@ -141,7 +142,16 @@ def test() -> None:
     _, error = store.diagramConfigure(**request, trait="cell", value="c16")
     # and the framework makes it
     assert error is None and instance.cell.spec == "qed.datatypes.complex128", error
-    # a map is given by its entries, the way it is typed
+    # a key of a map given on the command line
+    executive = pyre.executive
+    executive.nameserver.insert(
+        name=f"{name}.selections.band",
+        value="0",
+        priority=executive.priority.command(),
+        locator=pyre.tracking.command(arg=f"--{name}.selections.band=0"),
+    )
+    # gives way to an edit of the whole map that follows it, given by its entries, the way it is
+    # typed
     _, error = store.diagramConfigure(**request, trait="selections", value="band=1, layer=x")
     # and becomes a map
     assert error is None and dict(instance.selections) == {"band": "1", "layer": "x"}, error
