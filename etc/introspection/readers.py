@@ -25,13 +25,18 @@ class Readers(pyre.application, family="qed.etc.introspection.readers"):
     Survey the reader classes of the installed qed: for every class that implements one of the
     reader protocols, the traits, methods and class-level attributes it has, and the class in its
     hierarchy that declares each one; the result is a list of rows, one per reader, written as
-    json for the tables of the pyre::flow ledger
+    json for the tables of the pyre::flow ledger, or as those tables in markdown
     """
 
     # user configurable state
+    format = pyre.properties.str()
+    format.default = "json"
+    format.validators = pyre.constraints.isMember("json", "markdown")
+    format.doc = "how to write the survey: the rows as json, or the tables in markdown"
+
     output = pyre.properties.path()
-    output.default = "readers.json"
-    output.doc = "the file that receives the survey"
+    output.default = None
+    output.doc = "the file that receives the survey; by default, 'readers' with the format's suffix"
 
     # the application entry point
     @pyre.export
@@ -60,16 +65,143 @@ class Readers(pyre.application, family="qed.etc.introspection.readers"):
             )
             # which makes it a base for them
             row["base"] = bool(row["derived"])
+        # the writer of the format asked for, and the suffix of its files
+        write, suffix = {"json": (self.json, "json"), "markdown": (self.markdown, "md")}[
+            self.format
+        ]
+        # the file to write, named after the format unless one was given
+        output = self.output if self.output is not None else f"readers.{suffix}"
         # write the survey
-        with open(self.output, mode="w", encoding="utf-8") as stream:
-            # as json
-            json.dump(rows, stream, indent=1)
+        with open(output, mode="w", encoding="utf-8") as stream:
+            # in that format
+            write(rows=rows, stream=stream)
         # make a channel
         channel = journal.info("qed.introspection.readers")
         # and say what was done
-        channel.log(f"surveyed {len(rows)} readers into '{self.output}'")
+        channel.log(f"surveyed {len(rows)} readers into '{output}'")
         # all done
         return 0
+
+    # the formats
+    def json(self, rows: list, stream) -> None:
+        """
+        Write the {rows} of the survey to {stream} as json
+        """
+        # all at once
+        json.dump(rows, stream, indent=1)
+        # all done
+        return
+
+    def markdown(self, rows: list, stream) -> None:
+        """
+        Write the survey to {stream} as three markdown tables, one each for the traits, the
+        methods and the class-level attributes, with the readers as rows
+        """
+        # what the tables are, and how each one groups its columns
+        tables = (
+            (
+                "Traits",
+                "traits",
+                "Settings, the components a reader is configured with, and its flow inputs and"
+                " outputs.",
+                lambda name, entry: {
+                    "property": "settings",
+                    "component": "components",
+                    "input": "inputs",
+                    "output": "outputs",
+                }[entry["kind"]],
+            ),
+            (
+                "Methods",
+                "methods",
+                "Exported behaviors (`@export`, the protocol obligations, from wherever they come),"
+                " then the methods of the qed classes, public before private.",
+                lambda name, entry: (
+                    "exported"
+                    if entry["export"]
+                    else "private" if name.startswith("_") else "public"
+                ),
+            ),
+            (
+                "Class-level attributes",
+                "attributes",
+                "Plain attributes set on a qed class body, leaving out the bookkeeping pyre puts on"
+                " every component and flow factory.",
+                lambda name, entry: "private" if name.startswith("_") else "public",
+            ),
+        )
+        # say where the tables came from
+        print("<!-- written by etc/introspection/readers.py; do not edit -->\n", file=stream)
+        # a title
+        print("# The readers, side by side\n", file=stream)
+        # and how to read the marks
+        print(
+            "● declared or overridden by the reader itself; ✓ inherited; blank: absent."
+            " A *base* reader is one others derive from; a reader *not in the editor* implements"
+            " qed's reader protocol but not pyre's.\n",
+            file=stream,
+        )
+        # go through the tables
+        for title, key, note, group in tables:
+            # write each one
+            self.table(rows=rows, title=title, key=key, note=note, group=group, stream=stream)
+        # all done
+        return
+
+    def table(self, rows: list, title: str, key: str, note: str, group, stream) -> None:
+        """
+        Write to {stream} the markdown table of the {key} of the readers in {rows}, under {title},
+        with its columns ordered by the {group} each one falls in
+        """
+        # the order of the groups
+        order = ("settings", "components", "inputs", "outputs", "exported", "public", "private")
+        # the columns: every name any reader has, with the group it falls in
+        columns = {}
+        # go through the readers
+        for row in rows:
+            # and what each one has
+            for name, entry in row[key].items():
+                # the first one to have it says which group it falls in
+                columns.setdefault(name, group(name, entry))
+        # order them by group, then by name
+        names = sorted(columns, key=lambda name: (order.index(columns[name]), name))
+        # the heading of the table
+        print(f"## {title}\n", file=stream)
+        # what it holds
+        print(f"{note}\n", file=stream)
+        # which columns fall in each group, since a markdown table has no spanning headers
+        for band in order:
+            # the members of this group
+            members = [f"`{name}`" for name in names if columns[name] == band]
+            # if there are any
+            if members:
+                # list them
+                print(f"- {band}: {', '.join(members)}", file=stream)
+        # leave room before the table
+        print("", file=stream)
+        # the header row
+        print("| reader | " + " | ".join(f"`{name}`" for name in names) + " |", file=stream)
+        # the alignment row: names to the left, marks in the middle
+        print("|:--|" + "|".join(":-:" for _ in names) + "|", file=stream)
+        # a row per reader
+        for row in rows:
+            # the short name of the reader
+            label = row["family"].removeprefix("qed.readers.").removeprefix("qed.")
+            # with what sets it apart
+            tags = (["*base*"] if row["base"] else []) + (
+                [] if "pyre.viz.readers" in row["implements"] else ["*not in the editor*"]
+            )
+            # the marks, one per column
+            marks = [
+                "" if name not in row[key] else "●" if row[key][name]["own"] else "✓"
+                for name in names
+            ]
+            # write it
+            print(f"| {' '.join([f'`{label}`', *tags])} | " + " | ".join(marks) + " |", file=stream)
+        # leave room after the table
+        print("", file=stream)
+        # all done
+        return
 
     # implementation details
     def load(self) -> None:
