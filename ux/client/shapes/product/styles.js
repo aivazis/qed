@@ -30,6 +30,19 @@ export default {
         fill: paint,
     },
 
+    // the stroke through a product that is not there, which never stands in the way of the grip
+    strike: {
+        // inherit
+        ...style.icon,
+        // stroke
+        stroke: ink,
+        strokeWidth: 2,
+        // fill
+        fill: "none",
+        // events
+        pointerEvents: "none",
+    },
+
     // decorative touches
     decoration: {
         // inherit

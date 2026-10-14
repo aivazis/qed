@@ -61,7 +61,7 @@ export const TerminalPuck = ({ radius = 0.5, arm = 0.2, height = PUCK_HEIGHT, pa
 
 // a short cylinder that stands on the floor: its side, and its top, or its bottom when seen from
 // below; slots and factories are both drawn as pucks
-export const Puck = ({ highlight, radius = 0.5, height = PUCK_HEIGHT, paint }) => {
+export const Puck = ({ highlight, empty, radius = 0.5, height = PUCK_HEIGHT, paint }) => {
     // the projection
     const { view, below } = useProjection()
     // a circle on the floor projects onto an ellipse with these semi axes, whichever way the
@@ -77,6 +77,12 @@ export const Puck = ({ highlight, radius = 0.5, height = PUCK_HEIGHT, paint }) =
             <ellipse cx="0" cy={far} rx={rx} ry={ry} style={paint.side} />
             <rect x={-rx} y={top} width={2 * rx} height={-top} style={paint.band} />
             <ellipse cx="0" cy={near} rx={rx} ry={ry} style={paint.top} data-qed-grip />
+            {empty && (
+                <line
+                    x1={-0.7 * rx} y1={near + 0.7 * ry} x2={0.7 * rx} y2={near - 0.7 * ry}
+                    style={{ ...paint.top, fill: "none", pointerEvents: "none" }}
+                />
+            )}
             {highlight && <ellipse cx="0" cy={near} rx={rx * 1.5} ry={ry * 1.5} style={paint.highlight} />}
         </>
     )

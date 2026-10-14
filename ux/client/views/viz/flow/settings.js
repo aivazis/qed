@@ -113,7 +113,11 @@ export const useSettingsState = ({ diagram, factories, configure, invoke }) => {
         }, error => {
             // a change that was made
             if (error === null) {
-                // ends the edit
+                // forgets what the methods of the factory handed back before it, which the new
+                // value may have made untrue
+                setCalls(old => Object.fromEntries(
+                    Object.entries(old).filter(([key]) => !key.startsWith(`${editing.factory}/`))))
+                // and ends the edit
                 setEditing(null)
                 // all done
                 return
@@ -131,11 +135,11 @@ export const useSettingsState = ({ diagram, factories, configure, invoke }) => {
         // the key of the call
         const key = `${factory.id}/${method.name}`
         // note that it is under way
-        setCalls(old => ({ ...old, [key]: { busy: true, result: null, error: null } }))
+        setCalls(old => ({ ...old, [key]: { busy: true, result: null, error: null, refusal: null } }))
         // send it, and record what comes back
-        invoke({ id: factory.id, method: method.name }, ({ result, error }) => {
+        invoke({ id: factory.id, method: method.name }, ({ result, error, refusal }) => {
             // as the outcome of the call
-            setCalls(old => ({ ...old, [key]: { busy: false, result, error } }))
+            setCalls(old => ({ ...old, [key]: { busy: false, result, error, refusal } }))
             // all done
             return
         })
@@ -393,8 +397,18 @@ const Column = ({ factory }) => {
     ]
     // where the factory is on the diagram, and where it is headed during a drag
     const [x, y, z] = [factory.at.x + dx, factory.at.y + dy, (factory.at.z ?? 0) + dz]
-    // where each bead goes: down the column, a step apart, starting a little below the hub
-    const spots = rows.map((_, k) => project({ x, y: y + first + k * step, z }))
+    // how many lines each row takes: a method whose last call said a lot wraps it, and the rows
+    // below it move down by whole steps, so every bead stays on a point of the grid
+    const heights = rows.map(row =>
+        row.kind === "methods" ? lines(settings.outcome(factory, row.item)).length || 1 : 1)
+    // where each bead goes: down the column, a step per line above it, starting a little below
+    // the hub
+    const spots = rows.map((_, k) => {
+        // the lines above this row
+        const above = heights.slice(0, k).reduce((total, height) => total + height, 0)
+        // place it
+        return project({ x, y: y + first + above * step, z })
+    })
     // where the stem starts, just below the hub, and where it ends
     const top = project({ x, y: y + 0.4, z })
     const bottom = spots.length ? spots[spots.length - 1] : top
@@ -565,43 +579,102 @@ const Trait = ({ trait, spot, instance, shift, onClick }) => {
 // the bead of a {method} at {spot}, filled when it can be invoked, labeled with its name and the
 // {outcome} of its last call, if any
 const Method = ({ method, spot, outcome, onClick }) => {
+    // what its last call said, on as many lines as it takes
+    const said = lines(outcome)
     // render
     return (
         <g data-qed-method={method.name} data-qed-invocable={method.invocable}
             style={method.invocable ? styles.settings.clickable : undefined} onClick={onClick}>
             <title>{method.doc ?? method.name}</title>
             {/* what the pointer hits: the name of the method, and what its last call handed back */}
-            <Row spot={spot} chars={method.name.length + told(outcome)} />
+            <Row spot={spot} chars={method.name.length + told(outcome)} lines={said.length || 1} />
             <circle cx={spot.x} cy={spot.y} r={0.25}
                 style={method.invocable ? styles.settings.method.instance : styles.settings.method.blank} />
             <text x={spot.x + 0.5} y={spot.y + 0.15} style={styles.settings.method.name}
                 pointerEvents="none">
                 {method.name}
-                {outcome && <Outcome outcome={outcome} />}
+                {said.length > 0 &&
+                    <tspan dx={separation} style={tone(outcome)}>{said[0]}</tspan>}
             </text>
+            {/* the rest of what the last call said, in the font of the name and the paint of the
+                first line, each line a step below the one above it, lined up under the first */}
+            {said.slice(1).map((line, k) => (
+                <text key={k} x={spot.x + 0.5 + (method.name.length + 1) * advance}
+                    y={spot.y + 0.15 + (k + 1) * step}
+                    style={{ ...styles.settings.method.name, ...tone(outcome) }} pointerEvents="none">
+                    {line}
+                </text>
+            ))}
         </g>
     )
 }
 
 
-// what the last call of a method handed back: that it is under way, why it failed, or its result
-const Outcome = ({ outcome }) => {
+// what the last call of a method handed back, in words: that it is under way, that the factory
+// would not make one of its products and why, why the call failed, or its result
+const phrase = outcome => {
+    // without a call
+    if (!outcome) {
+        // there is nothing to say
+        return ""
+    }
     // a call that is under way
     if (outcome.busy) {
         // says so
-        return <tspan dx={separation} style={styles.settings.unset}>…</tspan>
+        return "…"
+    }
+    // a factory that would not make one of its products
+    if (outcome.refusal) {
+        // says which, and why
+        return `can't make '${outcome.refusal.product}': ${outcome.refusal.reason}`
     }
     // a call that failed
     if (outcome.error !== null) {
         // says why
-        return <tspan dx={separation} style={styles.settings.failure}>{outcome.error}</tspan>
+        return outcome.error
     }
     // otherwise, show what it handed back
-    return (
-        <tspan dx={separation} style={outcome.result === null ? styles.settings.unset : styles.settings.value}>
-            → {show(outcome.result)}
-        </tspan>
-    )
+    return `→ ${show(outcome.result)}`
+}
+
+
+// the paint of what the last call said: a refusal or a failure stands out, nothing is dim, and
+// a result reads like a value
+const tone = outcome =>
+    outcome.refusal || outcome.error !== null ? styles.settings.failure
+        : outcome.busy || outcome.result === null ? styles.settings.unset
+            : styles.settings.value
+
+
+// what the last call of a method said, broken into lines of at most {width} characters at the
+// spaces between words, so a long reason stays next to its method instead of running off
+const lines = outcome => {
+    // the words
+    const words = phrase(outcome).split(" ").filter(word => word.length)
+    // the lines, and the one being filled
+    const out = []
+    let line = ""
+    // go through the words
+    for (const word of words) {
+        // a word that fits on the line
+        if (!line.length || line.length + 1 + word.length <= width) {
+            // joins it
+            line = line.length ? `${line} ${word}` : word
+            // on to the next
+            continue
+        }
+        // otherwise, the line is done
+        out.push(line)
+        // and the word starts the next one
+        line = word
+    }
+    // the last line, if there is one
+    if (line.length) {
+        // is done too
+        out.push(line)
+    }
+    // hand them off
+    return out
 }
 
 
@@ -609,28 +682,23 @@ const Outcome = ({ outcome }) => {
 // characters after it, one row tall, so neighboring rows never overlap; the text of the labels
 // stays out of the pointer's way, since webkit hit-tests text drawn this small, scaled up by the
 // camera, well beyond what it covers, and would hand a click on one row to the label of the next
-const Row = ({ spot, chars }) => {
+const Row = ({ spot, chars, lines = 1 }) => {
     // render
     return (
-        <rect x={spot.x - 0.35} y={spot.y - step / 2} width={0.85 + chars * advance} height={step}
-            style={styles.settings.row} />
+        <rect x={spot.x - 0.35} y={spot.y - step / 2} width={0.85 + chars * advance}
+            height={lines * step} style={styles.settings.row} />
     )
 }
 
 
 // how many characters the {outcome} of the last call of a method takes after its name, counting
-// the room in front of it: none without a call, the ellipsis of one under way, the reason it
-// failed, or the arrow and what it handed back
+// the room in front of it: none without a call, or else its longest line
 const told = outcome => {
-    // without a call
-    if (!outcome) {
-        // there is nothing after the name
-        return 0
-    }
-    // what follows the name, the way {Outcome} shows it
-    const text = outcome.busy ? "…" : outcome.error !== null ? outcome.error : `→ ${show(outcome.result)}`
-    // and the room in front of it
-    return 1 + text.length
+    // the lines of what it said
+    const said = lines(outcome)
+    // without any, there is nothing after the name; otherwise, the longest line and the room
+    // in front of it
+    return said.length ? 1 + Math.max(...said.map(line => line.length)) : 0
 }
 
 
@@ -648,6 +716,8 @@ const step = 1
 const advance = 0.225
 // the room between the colon after a name and its value: one character of the label font
 const separation = advance
+// the most characters on a line of what the last call of a method said
+const width = 48
 
 
 // end of file

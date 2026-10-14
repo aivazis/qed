@@ -26,6 +26,8 @@ const danger = theme.page.danger
 const hover = "hsl(0deg, 0%, 12%)"
 // the color of the factory names, as the diagram paints them
 const factory = "hsl(28deg, 70%, 55%)"
+// and of the product names
+const product = "hsl(200deg, 80%, 55%)"
 
 
 // publish
@@ -37,6 +39,7 @@ export default {
     danger,
     hover,
     factory,
+    product,
 }
 
 

@@ -15,6 +15,23 @@ export const contentsFlowDiagramFragment = graphql`
     fragment contentsFlowDiagramFragment on FlowDiagram {
         # what the canvas draws
         ...canvasFlowDiagramFragment
+        # and what the inspector shows of what its slots hold
+        slots {
+            id
+            product {
+                specification
+                doc
+                level
+                family
+                given
+                empty
+                stale
+                facts {
+                    name
+                    value
+                }
+            }
+        }
         # and what the inspector shows of the factories
         factories {
             id

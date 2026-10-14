@@ -128,8 +128,16 @@ export const useFanState = ({ diagram, factories, slots, catalog, pin, instantia
         // all done
         return
     }
-    // go back: out of the family being browsed, or down to the class or the protocol
+    // go back: out of the name being typed, out of the family being browsed, or down to the class
+    // or the protocol
     const goBack = () => {
+        // a name being typed is the last step
+        if (naming) {
+            // so it is the one undone, and the fan stays where it was
+            setNaming(null)
+            // all done
+            return
+        }
         // out of a family
         if (browse.length) {
             // the choices one level up: the members of the family that holds this one, or the
@@ -796,11 +804,12 @@ const tree = entries => {
         // file the entry under it
         by.set(key, [...(by.get(key) ?? []), i])
     })
-    // a family of one shows its member; a bigger one is named by what its members share past the cut
+    // every family is named by what its members share past the cut, even a family of one, whose
+    // name is the context that tells its member apart from others of the same name elsewhere
     const out = []
     for (const [key, members] of by) {
-        // the ones with no segment there, or alone in theirs
-        if (key === "" || members.length === 1) {
+        // the ones with no segment there
+        if (key === "") {
             // stand for themselves
             members.forEach(i => out.push(entries[i]))
             // on to the next
