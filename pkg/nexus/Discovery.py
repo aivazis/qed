@@ -138,7 +138,7 @@ class Discovery:
         # merge the selections: the survey's auto-picks fill the axes this reader has no
         # opinion on, and the selections it already holds win, so a recipe that failed to
         # carry them cannot erase them
-        reader.selections = {**dict(self.selections), **dict(reader.selections)}
+        reader.selections = {**self.selections, **reader.selections}
         # leave the first-contact mark: the reader's knowledge is now complete, even though
         # this process never touched the file
         reader._opened = True
