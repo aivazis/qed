@@ -2749,7 +2749,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         )
         # a product whose axes are not all single valued does not resolve from the reader
         # selection alone, so pin each axis to the coordinate that identifies my target
-        for axis, value in dict(dataset.selector).items():
+        for axis, value in dataset.selector.items():
             # read back what the view currently holds for this axis
             reply = self._graphql(query="{ qed { views { selections { name value } } } }")
             # unpack the selections of viewport 0
@@ -3395,7 +3395,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         store.view(viewport=0).refresh()
         # a product whose axes are not all single valued does not resolve from the reader
         # selection alone, so pin each axis to the coordinate that identifies the dataset
-        for axis, value in dict(dataset.selector).items():
+        for axis, value in dataset.selector.items():
             # an axis already sitting on the value i want needs no help; toggling it would
             # clear the selection rather than confirm it
             if store.view(viewport=0).selections.get(axis) == value:

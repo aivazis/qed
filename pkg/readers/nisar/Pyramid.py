@@ -324,7 +324,7 @@ class Pyramid:
         """
         # its selector says which dataset of the product this is, in terms the product
         # itself supplies, so every process that opens the file agrees on the answer
-        selector = dict(dataset.selector)
+        selector = dataset.selector
         # a product with no selector has one dataset, and needs no path to tell it apart
         if not selector:
             # so anything stable will do

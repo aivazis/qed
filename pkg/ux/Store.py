@@ -205,7 +205,7 @@ class Store(qed.component, family="qed.ux.store"):
         # find the live counterpart of the twin, which is the one with the same identity
         for peer in live.datasets:
             # if this is not it
-            if dict(peer.selector) != dict(dataset.selector):
+            if peer.selector != dataset.selector:
                 # keep looking
                 continue
             # otherwise, lend the twin the payload and whatever companions it renders with
@@ -271,11 +271,7 @@ class Store(qed.component, family="qed.ux.store"):
             self._storages[source.pyre_name] = tables
         # the dataset of the live reader with the same identity
         peer = next(
-            (
-                candidate
-                for candidate in live.datasets
-                if dict(candidate.selector) == dict(dataset.selector)
-            ),
+            (candidate for candidate in live.datasets if candidate.selector == dataset.selector),
             None,
         )
         # not finding one means the product changed under us

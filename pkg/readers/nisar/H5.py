@@ -147,7 +147,7 @@ class H5(
             # start with what it hands out
             grant.update(archive.credentials())
         # my own settings win
-        grant.update(dict(self.credentials))
+        grant.update(self.credentials)
         # if my caller is the one who opens the product
         if resolve:
             # fill in what is still missing
@@ -170,7 +170,7 @@ class H5(
             # start with what it says
             access.update(archive.access())
         # my own settings win
-        access.update(dict(self.credentials))
+        access.update(self.credentials)
         # hand it off
         return access
 
