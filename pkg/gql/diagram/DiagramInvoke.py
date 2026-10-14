@@ -17,6 +17,9 @@ from .FlowDiagram import FlowDiagram
 # the rendering of values
 from .FlowFactory import FlowFactory
 
+# the refusal to make a product
+from .FlowRefusal import FlowRefusal
+
 
 # invoke a method of a factory of the pipeline diagram
 class DiagramInvoke(graphene.Mutation):
@@ -35,6 +38,8 @@ class DiagramInvoke(graphene.Mutation):
     result = graphene.String()
     # and why the call was refused or failed, if it was
     error = graphene.String()
+    # or, when the factory would not make one of its products, which one and why
+    refusal = graphene.Field(FlowRefusal)
 
     # the range of possible mutations
     @staticmethod
@@ -45,7 +50,7 @@ class DiagramInvoke(graphene.Mutation):
         # get the store
         store = info.context["store"]
         # ask it to make the call
-        diagram, result, error = store.diagramInvoke(
+        diagram, result, error, refusal = store.diagramInvoke(
             diagram=input.diagram, node=input.node, method=input.method
         )
         # a list, e.g. the products of a generator, reads as its items
@@ -56,8 +61,13 @@ class DiagramInvoke(graphene.Mutation):
         else:
             # is rendered the way a setting is
             text = FlowFactory.render(value=result)
-        # hand off the diagram, the result, and the reason for a failure
-        return {"diagram": diagram, "result": text, "error": error}
+        # hand off the diagram, the result, the reason for a failure, and the refusal, if any
+        return {
+            "diagram": diagram,
+            "result": text,
+            "error": error,
+            "refusal": None if refusal is None else FlowRefusal(**refusal),
+        }
 
 
 # end of file

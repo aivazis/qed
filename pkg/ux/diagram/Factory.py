@@ -152,9 +152,9 @@ class Factory(Node):
     def editable(self, trait):
         """
         Decide whether my {trait} can be changed from the diagram: only the settings of a factory
-        pinned to a class or an instance, and only the ones whose value is a single piece of
-        text, which components are too, since the framework makes them from their names; maps
-        wait for an editor of their own
+        pinned to a class or an instance, whose value can be written as a single piece of text,
+        which components can too, since the framework makes them from their names, and maps can,
+        as a list of entries; a secret map, e.g. credentials, is never typed on a canvas
         """
         # a factory pinned only to its protocol has no settings to change
         if self.node.level == "protocol":
@@ -164,8 +164,8 @@ class Factory(Node):
         if trait.input or trait.output:
             # which hold products
             return False
-        # the rest are, unless they are maps
-        return not isinstance(trait, pyre.traits.Dict.Dict)
+        # the rest are, unless they are secret maps
+        return not (isinstance(trait, pyre.traits.Dict.Dict) and getattr(trait, "secret", False))
 
     def methods(self):
         """
