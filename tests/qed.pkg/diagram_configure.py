@@ -13,8 +13,9 @@ can also be pinned to a new instance directly, even from its protocol; the label
 carries its given name, empty when nobody gave it one, and its class; a name that an instance of
 the class goes by already pins the factory to that instance; one pinned to an instance has the
 value changed, components included, which are given by name; every change is noted as made
-interactively; values the trait cannot take, settings that cannot be changed from the diagram, and
-names of components of other classes are refused, leaving everything as it was
+interactively; a map is given by its entries; values the trait cannot take, maps whose entries
+cannot be read, settings the class does not have, and names of components of other classes are
+refused, leaving everything as it was
 """
 
 # externals
@@ -58,6 +59,8 @@ def storeOf() -> types.SimpleNamespace:
     store.diagramConfigure = lambda **kwds: qed.ux.store.diagramConfigure(store, **kwds)
     # which assigns the value through the store's helper
     store._configure = lambda **kwds: qed.ux.store._configure(store, **kwds)
+    # and reads maps through another
+    store._mapping = lambda **kwds: qed.ux.store._mapping(store, **kwds)
     # with the priorities of the executive
     store.pyre_executive = qed.ux.store.pyre_executive
     # the pin to a new instance
@@ -97,8 +100,8 @@ def test() -> None:
     _, error = store.diagramConfigure(**request, trait="offset", value="twelve", name="x")
     # is refused, and the factory stays pinned to its class
     assert error and factory.node.pin is flat, error
-    # a setting that cannot be changed from the diagram
-    _, error = store.diagramConfigure(**request, trait="selections", value="{}", name="x")
+    # a map whose entries cannot be read
+    _, error = store.diagramConfigure(**request, trait="selections", value="band", name="x")
     # is refused
     assert error and factory.node.pin is flat, error
     # a setting the class does not have
@@ -138,10 +141,14 @@ def test() -> None:
     _, error = store.diagramConfigure(**request, trait="cell", value="c16")
     # and the framework makes it
     assert error is None and instance.cell.spec == "qed.datatypes.complex128", error
-    # a map cannot be changed from the diagram yet
-    _, error = store.diagramConfigure(**request, trait="selectors", value="{}")
-    # so it is refused
-    assert error, error
+    # a map is given by its entries, the way it is typed
+    _, error = store.diagramConfigure(**request, trait="selections", value="band=1, layer=x")
+    # and becomes a map
+    assert error is None and dict(instance.selections) == {"band": "1", "layer": "x"}, error
+    # or the way the diagram shows it
+    _, error = store.diagramConfigure(**request, trait="selections", value="{band: 2}")
+    # just the same
+    assert error is None and dict(instance.selections) == {"band": "2"}, error
 
     # another reader, pinned to the same class
     store.diagramAdd(diagram=playground.relay, family="qed.readers.native.flat", position=(0, 8, 0))

@@ -85,8 +85,8 @@ def test() -> None:
     closed, shapes = store.diagramSuggest(**request, trait="shape")
     # has no guesses, since a class has no file
     assert closed is False and shapes == [], shapes
-    # and a setting the diagram cannot change
-    assert store.diagramSuggest(**request, trait="selections") is None
+    # and a slot, which holds a product the diagram does not set
+    assert store.diagramSuggest(**request, trait="contents") is None
 
     # pin it to an instance that knows its file and its cell
     playground.pin(

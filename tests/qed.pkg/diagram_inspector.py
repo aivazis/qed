@@ -60,8 +60,10 @@ def gray():
         "pyre.viz.tiles.channel",
         "pyre.viz.tiles.channel",
     ]
-    # and each slot names the kind of product bound to it
-    assert all(trait.value == "pyre.viz.tiles.heap" for trait in traits)
+    # its input is bound to nothing, so it holds nothing
+    assert traits[0].value is None
+    # and each output names the kind of product it holds
+    assert all(trait.value == "pyre.viz.tiles.heap" for trait in traits[1:])
     # all done
     return
 
