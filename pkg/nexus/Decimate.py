@@ -78,8 +78,9 @@ class Decimate(Chore):
             fetched = after - before if after is not None and before is not None else 0
         # any failure at all
         except Exception as error:
-            # is reported as a task failure that leaves the crew member healthy
-            raise self.RecoverableError(description=str(error)) from None
+            # is reported as a task failure that leaves the crew member healthy; its text travels as
+            # the error, since the description is a template and the text may hold braces
+            raise self.RecoverableError(description="{0.error}", error=str(error)) from None
         # hand back the records of each raster, and the pages fetched to make them
         return records, fetched
 

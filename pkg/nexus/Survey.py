@@ -45,8 +45,9 @@ class Survey(Chore):
             # meaningless without it, e.g. a missing key whose entire message is its name
             reason = f"{type(error).__name__}: {error}"
             # and report it as a task failure that leaves the crew member healthy; the team
-            # side turns it into the {failed} lifecycle state, error retained
-            raise self.RecoverableError(description=reason) from None
+            # side turns it into the {failed} lifecycle state, error retained; the reason travels as
+            # the error, since the description is a template and the reason may hold braces
+            raise self.RecoverableError(description="{0.error}", error=reason) from None
         # hand off the report
         return discovery
 

@@ -63,8 +63,9 @@ class Tile(Chore):
             )
         # any failure at all
         except Exception as error:
-            # is reported as a task failure that leaves the crew member healthy
-            raise self.RecoverableError(description=str(error)) from None
+            # is reported as a task failure that leaves the crew member healthy; its text travels as
+            # the error, since the description is a template and the text may hold braces
+            raise self.RecoverableError(description="{0.error}", error=str(error)) from None
         # on success, park the encoded tile in a spool; its descriptor travels as ancillary
         # data on the crew channel, so the payload itself never crosses the wire
         spool = Spool.stash(data=memoryview(tile))
