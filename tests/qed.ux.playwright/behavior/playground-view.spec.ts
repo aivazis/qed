@@ -62,9 +62,9 @@ const grip = async (page: Page) => {
     return { x: box!.x + box!.width / 2, y: box!.y + box!.height / 2 }
 }
 
-// the header of the tray of a palette group, by the family of its protocol
-const header = (page: Page, family: string) =>
-    page.locator(`[data-qed-palette="${family}"] [data-qed-control="tray"]`)
+// the header of a tray of the panel, by its name
+const header = (page: Page, tray: string) =>
+    page.locator(`[data-qed-palette="${tray}"] [data-qed-control="tray"]`)
 
 
 test.describe.serial("every window looks at the playground the same way", () => {
@@ -106,20 +106,20 @@ test.describe.serial("every window looks at the playground the same way", () => 
         // and the first one follows
         await expect(one.locator("[data-qed-below]")).toHaveAttribute("data-qed-below", "true")
 
-        // the readers tray starts closed in both
+        // the producers tray starts closed in both
         for (const page of [one, two]) {
-            await expect(header(page, "pyre.viz.readers")).toHaveAttribute("aria-expanded", "false")
+            await expect(header(page, "producers")).toHaveAttribute("aria-expanded", "false")
         }
         // the first one opens it
-        await header(one, "pyre.viz.readers").click()
+        await header(one, "producers").click()
         // and it is open in both, with the reader protocol on offer
         for (const page of [one, two]) {
-            await expect(header(page, "pyre.viz.readers")).toHaveAttribute("aria-expanded", "true")
+            await expect(header(page, "producers")).toHaveAttribute("aria-expanded", "true")
             await expect(page.locator('[data-qed-catalog="pyre.viz.readers"]')).toBeVisible()
         }
         // the second one closes it, and the first one follows
-        await header(two, "pyre.viz.readers").click()
-        await expect(header(one, "pyre.viz.readers")).toHaveAttribute("aria-expanded", "false")
+        await header(two, "producers").click()
+        await expect(header(one, "producers")).toHaveAttribute("aria-expanded", "false")
 
         // all done
         await one.close()

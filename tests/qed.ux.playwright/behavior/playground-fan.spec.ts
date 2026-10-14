@@ -193,6 +193,16 @@ test.describe.serial("a factory of the playground fans out its choices", () => {
         await expect(focused(page)).toHaveAttribute("data-qed-satellite", "new")
         await page.keyboard.press("Enter")
         await expect(page.locator("[data-qed-fan-namer]")).toHaveCount(1)
+        // the way back undoes that step first: the name goes, and the fan stays where it was
+        await page.locator('[data-qed-fan] [data-qed-satellite="back"]').click()
+        await expect(page.locator("[data-qed-fan-namer]")).toHaveCount(0)
+        await expect(page.locator('[data-qed-fan] [data-qed-satellite="new"]')).toHaveCount(1)
+        expect((await playground(page)).factories[0].level).toBe("class")
+        // so choosing the new instance again asks for its name again; the click goes to the ring
+        // around the plus sign, where a person clicks, since the middle of the whole satellite,
+        // label included, is empty canvas that firefox does not hand to it
+        await page.locator('[data-qed-fan] [data-qed-satellite="new"] circle').first().click()
+        await expect(page.locator("[data-qed-fan-namer]")).toHaveCount(1)
         // which keeps its keys: typing it moves nothing
         const name = `fan${Date.now()}`
         await page.keyboard.type(name)
