@@ -32,6 +32,8 @@ tests.qed.pkg.view_restore.clean := view_restore.dat view_restore.hdr
 
 # the flow driver writes the flat file its pipeline reads
 tests.qed.pkg.flow_flat_amplitude.clean := flow_flat_amplitude.c8
+# the contents driver writes the flat file its reader describes
+tests.qed.pkg.flow_contents.clean := flow_contents.c8
 
 # the persistence drivers share a scratch workspace: the reboot reads what the first wrote
 tests.qed.pkg.persist.clean := persist_ws

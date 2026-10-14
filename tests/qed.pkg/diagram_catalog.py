@@ -48,10 +48,10 @@ def test():
         assert all(entry.level == "class" for entry in rest)
         # sorted by family
         assert [entry.family for entry in rest] == sorted(entry.family for entry in rest)
-    # the reader protocol exposes a raster, and reads nothing
+    # the reader protocol describes its file as its contents, and reads nothing
     reader = groups[0].entries[0]
     assert reader.inputs == []
-    assert reader.outputs == ["raster"]
+    assert reader.outputs == ["contents"], reader.outputs
     # all done
     return
 

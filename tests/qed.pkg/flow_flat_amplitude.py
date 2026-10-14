@@ -7,9 +7,10 @@
 
 
 """
-Render tiles of a flat file of complex values through the playground's pipeline, its reader
-pinned to the flat reader of the file, and check that they match, byte for byte, the tiles the
-iterators of the native amplitude channel render
+Render tiles of a flat file of complex values through the amplitude recipe behind a slicer: a flat
+reader describes the file as its contents, a picker picks its dataset, and the cells of the dataset
+reach the slicer as a raster, handed in by hand the way channels do; the tiles match, byte for
+byte, the ones the iterators of the native amplitude channel render
 """
 
 # externals
@@ -44,15 +45,28 @@ def test():
         cell="complex64",
         shape=(lines, samples),
     )
-    # a store stand-in, with the recipe the pipeline starts from
+    # a picker of its contents, which picks the only dataset of a flat file
+    picker = qed.viz.pickers.match()(name="flow_flat_amplitude.picker")
+    picker.contents = reader.contents
+    picker.selection = {}
+    # making the dataset pulls the contents, which opens the file
+    picker.dataset.pyre_make()
+    # the dataset the reader found, which is also the data the iterators read
+    dataset = picker.dataset.source
+    assert dataset is reader.datasets[0]
+    # its cells, as the raster the slicer reads
+    raster = qed.libpyre.flow.raster(source=dataset.data, name="flow_flat_amplitude.raster")
+
+    # a store stand-in, with the amplitude recipe
     store = types.SimpleNamespace()
-    store.amplitude = lambda: qed.ux.store.amplitude(store)
-    # the pipeline the playground draws, with its reader pinned to this one
-    recipe = qed.ux.store.pipeline(store, reader=reader)
-    # stage it, which opens the file
-    plan = recipe.stage()
-    # the data the iterators read
-    (dataset,) = reader.datasets
+    recipe = qed.ux.store.amplitude(store)
+    # behind a slicer of the raster
+    recipe.factory(name="slice", protocol=qed.viz.slicer)
+    recipe.product(name="raster")
+    recipe.bind(factory="slice", slot="source", product="raster")
+    recipe.bind(factory="slice", slot="slice", product="signal")
+    # stage it for a raster of these cells
+    plan = recipe.stage(products={"raster": raster.decl})
     # the range of magnitudes that maps onto [0,1]
     low, high = 0.0, 16.0
 
@@ -61,7 +75,7 @@ def test():
     # go through them
     for shape, origin, stride in tiles:
         # realize the plan for the shape
-        with plan.realize(shape=shape) as graph:
+        with plan.realize(shape=shape, nodes={"raster": raster}) as graph:
             # move the window
             graph["slice"].set(setting="origin", value=origin)
             graph["slice"].set(setting="stride", value=stride)
