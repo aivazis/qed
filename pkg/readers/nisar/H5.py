@@ -16,18 +16,19 @@ from .. import access
 
 
 # the basic reader for products in HDF5 format
-class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protocols.reader):
+class H5(
+    qed.flow.factory,
+    family="qed.readers.nisar.h5",
+    implements=qed.protocols.reader,
+):
     """
-    The base class for readers of HDF5 files
+    The base class for readers of HDF5 files; it is no reader of the pipelines itself, but it
+    describes the contents of its file for the readers of the products that derive from it
     """
 
     # user configurable state
     uri = qed.properties.uri(scheme="file")
     uri.doc = "the uri of the data source"
-
-    datasets = qed.properties.list(schema=qed.protocols.dataset.output())
-    datasets.doc = "the list of data sets provided by the reader"
-    datasets.persistent = False
 
     selectors = qed.protocols.selectors()
     selectors.doc = "a map of selector names to their allowed values"
@@ -38,6 +39,10 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
     # the session adds only the picks of first contact, which are made again every time; what
     # the user prefers comes from the files, which keep it as written
     selections.persistent = False
+
+    contents = qed.viz.protocols.contents.output()
+    contents.doc = "the datasets in my file, and the axes that tell them apart"
+    contents.persistent = False
 
     pages = qed.properties.int()
     pages.default = 1024**2
@@ -276,10 +281,26 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
         # all done
         return self
 
+    # flow hooks
+    def pyre_run(self, **kwds):
+        """
+        Make first contact with my file, if i haven't yet, and describe what is in it as my
+        contents
+        """
+        # make first contact
+        self.open()
+        # and fill my contents with what i found
+        self.contents.fill(**qed.readers.contents(reader=self))
+        # and chain up
+        return super().pyre_run(**kwds)
+
     # metamethods
     def __init__(self, archive=None, fapl=None, **kwds):
         # chain up; construction is passive, so nothing touches the file until {open}
         super().__init__(**kwds)
+        # the datasets i find in my file, which i discover rather than anyone configures; none
+        # until first contact
+        self.datasets = []
         # first contact has not been made; this is the state of an instance, so it is set
         # here rather than shared through the class
         self._opened = False

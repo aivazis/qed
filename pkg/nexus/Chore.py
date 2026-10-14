@@ -51,10 +51,9 @@ class Chore(pyre.nexus.task):
         for trait in reader.pyre_properties():
             # get the name
             name = trait.name
-            # the dataset pile and the selector table are derived state; workers rebuild them
-            # from the file
-            if name in ("datasets", "selectors"):
-                # so leave them behind
+            # the selector table is derived state; workers rebuild it from the file
+            if name == "selectors":
+                # so leave it behind
                 continue
             # get the value
             value = getattr(reader, name)
@@ -105,11 +104,9 @@ class Chore(pyre.nexus.task):
             # it travels as the credentials of the reader the worker builds, in place of the
             # reader's own; it already includes them, and they win over what the archive hands out
             config["credentials"] = dict(grant)
-        # say what got left behind; {datasets} and {selectors} are named as deliberate, so
-        # the report distinguishes them from state that went missing
-        self._report(
-            component=reader, dropped=[], harvested=config, skipped=("datasets", "selectors")
-        )
+        # say what got left behind; {selectors} is named as deliberate, so the report
+        # distinguishes it from state that went missing
+        self._report(component=reader, dropped=[], harvested=config, skipped=("selectors",))
         # and account for the grant separately, since it is assembled rather than read off a
         # trait, and what it carries is worth a line of its own
         self._reportGrant(reader=reader, grant=grant)

@@ -19,10 +19,6 @@ class L0A(qed.flow.factory, family="qed.readers.nisar.l0a", implements=qed.proto
     uri = qed.properties.uri(scheme="file")
     uri.doc = "the uri of the data source"
 
-    datasets = qed.properties.list(schema=qed.protocols.dataset.output())
-    datasets.doc = "the list of data sets provided by the reader"
-    datasets.persistent = False
-
     selectors = qed.protocols.selectors()
     selectors.doc = "a map of selector names to their allowed values"
     selectors.persistent = False
@@ -43,6 +39,9 @@ class L0A(qed.flow.factory, family="qed.readers.nisar.l0a", implements=qed.proto
     def __init__(self, **kwds):
         # chain up
         super().__init__(**kwds)
+        # the datasets i find in my file, which i discover rather than anyone configures; none
+        # until first contact
+        self.datasets = []
         # first contact has not been made; this is the state of an instance, so it is set
         # here rather than shared through the class
         self._opened = False

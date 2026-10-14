@@ -13,7 +13,9 @@ import qed
 
 
 # a stack of readers, presented to the rest of {qed} as an aggregate reader
-class Stack(qed.flow.factory, family="qed.readers.stack", implements=qed.protocols.reader):
+class Stack(
+    qed.flow.factory, family="qed.readers.stack", implements=(qed.protocols.reader, qed.viz.reader)
+):
     """
     A stack of readers whose datasets are rendered through aggregate channels
     """
@@ -38,11 +40,9 @@ class Stack(qed.flow.factory, family="qed.readers.stack", implements=qed.protoco
     # the user prefers comes from the files, which keep it as written
     selections.persistent = False
 
-    # the aggregate datasets i expose, one per selector assignment my members share
-    datasets = qed.properties.list(schema=qed.protocols.dataset.output())
-    datasets.doc = "the aggregate datasets i expose"
-    # i assemble them from my members at first contact, so there is nothing to save
-    datasets.persistent = False
+    contents = qed.viz.protocols.contents.output()
+    contents.doc = "the datasets in my file, and the axes that tell them apart"
+    contents.persistent = False
 
     # my member readers
     readers = qed.properties.list(schema=qed.protocols.reader())
@@ -141,10 +141,26 @@ class Stack(qed.flow.factory, family="qed.readers.stack", implements=qed.protoco
         # all done
         return self
 
+    # flow hooks
+    def pyre_run(self, **kwds):
+        """
+        Make first contact with my file, if i haven't yet, and describe what is in it as my
+        contents
+        """
+        # make first contact
+        self.open()
+        # and fill my contents with what i found
+        self.contents.fill(**qed.readers.contents(reader=self))
+        # and chain up
+        return super().pyre_run(**kwds)
+
     # metamethods
     def __init__(self, **kwds):
         # chain up; construction is passive: my members don't touch their files until {open}
         super().__init__(**kwds)
+        # the aggregate datasets i expose, one per selector assignment my members share, which
+        # i build rather than anyone configures; none until first contact
+        self.datasets = []
         # first contact has not been made; this is the state of an instance, so it is set
         # here rather than shared through the class
         self._opened = False

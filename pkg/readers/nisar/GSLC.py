@@ -17,7 +17,7 @@ from .products.SLC import SLC
 
 
 # the GSLC reader
-class GSLC(H5, family="qed.readers.nisar.gslc"):
+class GSLC(H5, family="qed.readers.nisar.gslc", implements=qed.viz.reader):
     """
     The reader of GSLC files
     """
