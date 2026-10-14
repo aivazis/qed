@@ -23,6 +23,9 @@ from .Metadata import Metadata as metadata
 # the generic proposal for the name of a reader, and the way text becomes a level of a name
 from .nickname import nickname, sanitize
 
+# the description of what a reader found in its file, for its contents
+from .contents import contents
+
 # the statistics prober the dataset flavors seed themselves with
 from .probes import probe, windows
 

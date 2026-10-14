@@ -20,7 +20,7 @@ from .products.SLC import SLC
 
 
 # the RIFG reader
-class RIFG(H5, family="qed.readers.nisar.rifg"):
+class RIFG(H5, family="qed.readers.nisar.rifg", implements=qed.viz.reader):
     """
     The reader of RIFG files
     """

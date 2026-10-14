@@ -17,7 +17,7 @@ from .products.BFPQSLC import BFPQSLC
 
 
 # the RRSD reader
-class RRSD(H5, family="qed.readers.nisar.rrsd"):
+class RRSD(H5, family="qed.readers.nisar.rrsd", implements=qed.viz.reader):
     """
     The reader of RRSD files
     """

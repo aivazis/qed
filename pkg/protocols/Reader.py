@@ -11,9 +11,6 @@ import qed
 # my superclass
 from .Producer import Producer
 
-# my product specs
-from .Dataset import Dataset
-
 # local traits
 from . import properties
 
@@ -21,7 +18,8 @@ from . import properties
 # the product payload
 class Reader(Producer, family="qed.readers"):
     """
-    A dataset factory
+    A dataset factory: once open, it keeps the datasets it found in its file in {datasets}, which
+    is state it discovers rather than configuration
     """
 
     # public data
@@ -30,10 +28,6 @@ class Reader(Producer, family="qed.readers"):
 
     selectors = properties.selectors()
     selectors.doc = "a map of selector names to their allowed values"
-
-    datasets = qed.properties.list(schema=Dataset())
-    datasets.persistent = False
-    datasets.doc = "the list of data sets provided by the reader"
 
     # requirements
     @qed.provides

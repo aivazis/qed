@@ -51,13 +51,9 @@ class Reader(
     # the user prefers comes from the files, which keep it as written
     selections.persistent = False
 
-    datasets = qed.properties.list(schema=qed.protocols.dataset.output())
-    datasets.doc = "the list of data sets provided by the reader"
-    datasets.persistent = False
-
-    raster = qed.viz.raster.output()
-    raster.doc = "the cells of my dataset, as a pipeline recipe reads them"
-    raster.persistent = False
+    contents = qed.viz.protocols.contents.output()
+    contents.doc = "the datasets in my file, and the axes that tell them apart"
+    contents.persistent = False
 
     # constants
     # my dataset can describe itself in a discovery record and materialize as a
@@ -131,10 +127,26 @@ class Reader(
         # all done
         return self
 
+    # flow hooks
+    def pyre_run(self, **kwds):
+        """
+        Make first contact with my file, if i haven't yet, and describe what is in it as my
+        contents
+        """
+        # make first contact
+        self.open()
+        # and fill my contents with what i found
+        self.contents.fill(**qed.readers.contents(reader=self))
+        # and chain up
+        return super().pyre_run(**kwds)
+
     # metamethods
     def __init__(self, name, archive=None, **kwds):
         # chain up; construction is passive, so nothing touches the file until {open}
         super().__init__(name=name, **kwds)
+        # the datasets i find in my file, which i discover rather than anyone configures; none
+        # until first contact
+        self.datasets = []
         # first contact has not been made; this is the state of an instance, so it is set
         # here rather than shared through the class
         self._opened = False

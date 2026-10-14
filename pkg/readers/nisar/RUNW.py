@@ -20,7 +20,7 @@ from .products.Mask import Mask
 
 
 # the RUNW reader
-class RUNW(H5, family="qed.readers.nisar.runw"):
+class RUNW(H5, family="qed.readers.nisar.runw", implements=qed.viz.reader):
     """
     The reader of RUNW files
     """

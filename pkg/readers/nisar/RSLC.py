@@ -17,7 +17,7 @@ from .products.SLC import SLC
 
 
 # the RSLC reader
-class RSLC(H5, family="qed.readers.nisar.rslc"):
+class RSLC(H5, family="qed.readers.nisar.rslc", implements=qed.viz.reader):
     """
     The reader of RSLC files
     """

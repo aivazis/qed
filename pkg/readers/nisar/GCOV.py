@@ -19,7 +19,7 @@ from .products.SLC import SLC
 
 
 # the GCOV reader
-class GCOV(H5, family="qed.readers.nisar.gcov"):
+class GCOV(H5, family="qed.readers.nisar.gcov", implements=qed.viz.reader):
     """
     The reader of GCOV files
     """

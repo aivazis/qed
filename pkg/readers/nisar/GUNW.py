@@ -21,7 +21,7 @@ from .products.UNW import UNW
 
 
 # the GUNW reader
-class GUNW(H5, family="qed.readers.nisar.gunw"):
+class GUNW(H5, family="qed.readers.nisar.gunw", implements=qed.viz.reader):
     """
     The reader of GUNW files
     """
