@@ -30,6 +30,7 @@ import pickle
 import types
 
 # support
+import pyre
 import qed
 from qed.readers import access
 
@@ -79,6 +80,12 @@ assert dict(qed.nexus.survey(reader=wired).config)["credentials"] == {
     "profile": "st",
     "region": "eu-west-1",
 }
+# but never into what the reader writes about itself, e.g. the documents of a flow, since
+# those are files that are read back
+weaver = pyre.weaver.weaver()
+weaver.language = "pfg"
+written = "\n".join(weaver.weave(document=wired.pyre_renderTraitValues(renderer=weaver.language)))
+assert "credentials" not in written and "eu-west-1" not in written, written
 
 # a reader with an archive and settings of its own: its own win
 both = qed.readers.nisar.gslc(
