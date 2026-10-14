@@ -36,7 +36,7 @@ class FlowSuggestions(graphene.ObjectType):
         Get whether the suggestions are all the values the setting can take
         """
         # unpack
-        closed, _ = suggestions
+        closed, _, _ = suggestions
         # and hand off
         return closed
 
@@ -46,16 +46,16 @@ class FlowSuggestions(graphene.ObjectType):
         Describe each suggestion by the text that sets it and how it reads
         """
         # unpack
-        _, values = suggestions
+        _, values, trait = suggestions
         # describe each one
-        return [FlowSuggestions.describe(value=value) for value in values]
+        return [FlowSuggestions.describe(value=value, trait=trait) for value in values]
 
     @staticmethod
-    def describe(value):
+    def describe(value, trait):
         """
-        Render a suggested {value}: a class by its family, which reads as its last part; a tuple
-        by its parts, the way a configuration file lists them; a map by its entries, the way the
-        diagram shows one; the rest the way a setting reads
+        Render a suggested {value} of {trait}: a class by its family, which reads as its last
+        part; a tuple by its parts, the way a configuration file lists them; the rest, maps
+        included, the way a setting reads
         """
         # a class of components
         if isinstance(value, type) and issubclass(value, qed.component):
@@ -67,13 +67,8 @@ class FlowSuggestions(graphene.ObjectType):
             # is set by its parts, and reads as them
             text = ", ".join(str(part) for part in value)
             return FlowSuggestion(value=text, label=text)
-        # a map
-        if isinstance(value, dict):
-            # is set by its entries, and reads the way the diagram shows a map
-            text = "{" + ", ".join(f"{key}: {item}" for key, item in value.items()) + "}"
-            return FlowSuggestion(value=text, label=text)
         # the rest read the way a setting does
-        text = FlowFactory.render(value=value)
+        text = FlowFactory.render(value=value, trait=trait)
         # and are set by the same text
         return FlowSuggestion(value=text, label=text)
 

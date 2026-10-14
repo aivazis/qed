@@ -71,7 +71,7 @@ def test() -> None:
     request = {"diagram": playground.relay, "node": factory.relay}
 
     # the cell is a component
-    closed, cells = store.diagramSuggest(**request, trait="cell")
+    closed, cells, _ = store.diagramSuggest(**request, trait="cell")
     # so its suggestions are the datatypes, and nothing else
     assert closed is True
     # each once
@@ -82,7 +82,7 @@ def test() -> None:
     assert families[-1] == "qed.datatypes.complex128", families
 
     # the shape of a class
-    closed, shapes = store.diagramSuggest(**request, trait="shape")
+    closed, shapes, _ = store.diagramSuggest(**request, trait="shape")
     # has no guesses, since a class has no file
     assert closed is False and shapes == [], shapes
     # and a slot, which holds a product the diagram does not set
@@ -94,7 +94,7 @@ def test() -> None:
         pin=qed.readers.native.flat(name=f"suggest_{uuid.uuid1().hex[:8]}", uri=raster, cell="c16"),
     )
     # the shape
-    closed, shapes = store.diagramSuggest(**request, trait="shape")
+    closed, shapes, _ = store.diagramSuggest(**request, trait="shape")
     # is open
     assert closed is False
     # and the arrangements of its cells include the right one
@@ -112,7 +112,9 @@ def test() -> None:
         pin=qed.readers.native.envi(name=f"suggest_{uuid.uuid1().hex[:8]}", uri=raster, cell="c16"),
     )
     # has no guesses for its shape, which its header decides
-    closed, shapes = store.diagramSuggest(diagram=playground.relay, node=envi.relay, trait="shape")
+    closed, shapes, _ = store.diagramSuggest(
+        diagram=playground.relay, node=envi.relay, trait="shape"
+    )
     assert closed is False and shapes == [], shapes
     # all done
     return

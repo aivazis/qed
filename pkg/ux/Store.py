@@ -1794,8 +1794,9 @@ class Store(qed.component, family="qed.ux.store"):
         Suggest values for the setting {trait} of the factory with the relay id {node} on the
         pipeline diagram {diagram}: a component is one of the classes that implement the protocol
         of its trait, a closed set, and the rest are whatever the instance the factory is pinned to
-        suggests, given its current state; hand back whether the set is closed and the values, or
-        nothing when the diagram, the factory, or the setting cannot be found or changed
+        suggests, given its current state; hand back whether the set is closed, the values, and
+        the trait, which knows how they read, or nothing when the diagram, the factory, or the
+        setting cannot be found or changed
         """
         # find the diagram
         found = self.findDiagram(relay=diagram)
@@ -1832,11 +1833,11 @@ class Store(qed.component, family="qed.ux.store"):
         # a component
         if isinstance(descriptor, pyre.traits.Facility.Facility):
             # is one of the classes that implement its protocol
-            return True, list(self._implementers(protocol=descriptor.protocol))
+            return True, list(self._implementers(protocol=descriptor.protocol)), descriptor
         # the rest come from an instance, which knows its own state
         if recipe.level != "instance":
             # so a class has none
-            return False, []
+            return False, [], descriptor
         # ask it
         try:
             # for all of them
@@ -1846,7 +1847,7 @@ class Store(qed.component, family="qed.ux.store"):
             # there are none
             values = []
         # hand them off
-        return False, values
+        return False, values, descriptor
 
     def _implementers(self, protocol):
         """
