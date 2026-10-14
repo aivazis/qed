@@ -1505,34 +1505,6 @@ class Store(qed.component, family="qed.ux.store"):
         # hand off the recipe
         return recipe
 
-    def pipeline(self, reader=None):
-        """
-        The amplitude recipe with its source in front of it: a reader opens a file and exposes
-        the cells of a dataset in it as a raster, and a slicer cuts tiles out of the raster; the
-        reader is pinned to {reader} when there is one, and left a protocol otherwise, which can
-        be drawn but not staged
-        """
-        # start with the amplitude recipe
-        recipe = self.amplitude()
-        # a reader
-        recipe.factory(name="reader", protocol=qed.viz.reader, pin=reader)
-        # and a slicer
-        recipe.factory(name="slice", protocol=qed.viz.slicer)
-        # the raster the reader exposes
-        recipe.product(name="raster")
-        # the bindings
-        bindings = [
-            ("reader", "raster", "raster"),
-            ("slice", "source", "raster"),
-            ("slice", "slice", "signal"),
-        ]
-        # make them
-        for factory, slot, product in bindings:
-            # one at a time
-            recipe.bind(factory=factory, slot=slot, product=product)
-        # hand off the recipe
-        return recipe
-
     def findDiagram(self, relay):
         """
         Find the pipeline diagram with the given {relay} id: the playground, or the diagram of one
@@ -1734,6 +1706,14 @@ class Store(qed.component, family="qed.ux.store"):
         if not entity.editable(trait=descriptor):
             # is refused
             return found, f"'{trait}' cannot be changed from the diagram"
+        # a map arrives as text, which the framework cannot make a map of, so make it here
+        if isinstance(descriptor, pyre.traits.Dict.Dict):
+            # by reading its entries
+            value, error = self._mapping(text=value)
+            # if they do not make sense
+            if error is not None:
+                # say why
+                return found, error
         # a plain property can be checked without storing the value anywhere; a component is
         # resolved, and so made, by its conversion, so it is checked when it is set
         if isinstance(descriptor, pyre.traits.Property.Property):
@@ -1901,37 +1881,43 @@ class Store(qed.component, family="qed.ux.store"):
         """
         Invoke {method} of the instance the factory with the relay id {node} on the pipeline
         diagram {diagram} is pinned to, with no arguments; hand back the diagram, what the method
-        returned, with the products of a generator gathered in a list, and the reason the call
-        was refused or failed, if it was, in which case there is no result
+        returned, with the products of a generator gathered in a list, the reason the call was
+        refused or failed, if it was, and, when the factory refused to make one of its products,
+        the product and the reason, kept apart so whoever shows them can put them in words
         """
         # find the diagram
         found = self.findDiagram(relay=diagram)
         # an id that names no diagram
         if found is None:
             # has nothing to invoke
-            return None, None, f"there is no diagram '{diagram}'"
+            return None, None, f"there is no diagram '{diagram}'", None
         # a diagram that cannot be edited
         if not found.editable:
             # stays as it is
-            return found, None, "this diagram cannot be edited"
+            return found, None, "this diagram cannot be edited", None
         # find the node
         entity = found.locate(relay=node)
         # only factories have methods
         if entity is None or entity not in found.factories:
             # so anything else stays as it is
-            return found, None, f"there is no factory '{node}' on this diagram"
+            return found, None, f"there is no factory '{node}' on this diagram", None
         # the recipe node behind it
         recipe = entity.node
         # only an instance has methods that can be invoked
         if recipe.level != "instance":
             # so ask for one first
-            return found, None, f"make an instance of '{recipe.name}' before invoking its methods"
+            return (
+                found,
+                None,
+                f"make an instance of '{recipe.name}' before invoking its methods",
+                None,
+            )
         # find the method among the ones the diagram can invoke
         behavior = next((b for b in entity.methods() if b.name == method), None)
         # a name that is not among them
         if behavior is None:
             # is refused
-            return found, None, f"'{method}' cannot be invoked from the diagram"
+            return found, None, f"'{method}' cannot be invoked from the diagram", None
         # invoke it
         try:
             # on the instance, with no arguments
@@ -1940,12 +1926,20 @@ class Store(qed.component, family="qed.ux.store"):
             if inspect.isgenerator(result):
                 # so drain it, keeping what it made
                 result = list(result)
-        # if the framework, or the file system under it, says no
-        except (pyre.PyreError, OSError) as error:
+        # if the factory refuses to make one of its products
+        except qed.flow.exceptions.ProductionError as error:
+            # say which, and why
+            return found, None, None, {"product": error.product, "reason": error.reason}
+        # if the framework says no
+        except pyre.PyreError as error:
+            # say why, without where it was raised from, which means nothing on the diagram
+            return found, None, error.description.format(error), None
+        # if the file system under it says no
+        except OSError as error:
             # say why
-            return found, None, str(error)
+            return found, None, str(error), None
         # hand off the diagram and the result
-        return found, result, None
+        return found, result, None, None
 
     def _instantiate(self, diagram, entity, cls, name=None, setup=None):
         """
@@ -1997,6 +1991,33 @@ class Store(qed.component, family="qed.ux.store"):
             return str(error)
         # all done
         return None
+
+    def _mapping(self, text):
+        """
+        Read the map in {text}, written the way the diagram shows one, `{band: L, layer: x}`, or
+        the way it is typed, `band=L, layer=x`, with the braces optional either way; hand back the
+        map, and the reason it could not be read, if it could not
+        """
+        # drop the space around it
+        body = text.strip()
+        # and the braces, if it has them
+        if body.startswith("{") and body.endswith("}"):
+            # by keeping what is between them
+            body = body[1:-1]
+        # the map
+        mapping = {}
+        # go through its entries, skipping the empty ones
+        for entry in filter(None, (part.strip() for part in body.split(","))):
+            # split it into its key and its value, at the first "=", or else the first ":"
+            key, mark, value = entry.partition("=" if "=" in entry else ":")
+            # an entry without either, or without a key
+            if not mark or not key.strip():
+                # cannot be read
+                return None, f"'{entry}' is not of the form key=value"
+            # record it, without the space around its parts or the quotes around its value
+            mapping[key.strip()] = value.strip().strip("'\"")
+        # hand it off
+        return mapping, None
 
     def _configure(self, component, trait, value):
         """
@@ -2091,6 +2112,7 @@ class Store(qed.component, family="qed.ux.store"):
         # hand them off
         return (
             qed.viz.reader,
+            qed.viz.picker,
             qed.viz.accessor,
             qed.viz.slicer,
             qed.viz.operator,
@@ -2260,9 +2282,9 @@ class Store(qed.component, family="qed.ux.store"):
         self._playground = None
         # how every client looks at it: flat or isometric, the quarter turns, and from which side
         self._playgroundProjection = {"kind": "flat", "azimuth": 0, "below": False}
-        # the trays of the playground's panel that are open, by name; the inspector, which
-        # describes the picked factory, starts open
-        self._playgroundTrays = {"inspector"}
+        # the trays of the playground's panel that are open, by name; the producers on offer, and
+        # the inspector, which describes the picked node, start open
+        self._playgroundTrays = {"producers", "inspector"}
         # where every client's camera looks on it: the diagram point at the middle of the view and
         # the zoom, once some client has moved its camera
         self._playgroundCamera = None

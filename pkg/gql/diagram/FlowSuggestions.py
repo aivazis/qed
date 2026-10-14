@@ -54,7 +54,8 @@ class FlowSuggestions(graphene.ObjectType):
     def describe(value):
         """
         Render a suggested {value}: a class by its family, which reads as its last part; a tuple
-        by its parts, the way a configuration file lists them; the rest the way a setting reads
+        by its parts, the way a configuration file lists them; a map by its entries, the way the
+        diagram shows one; the rest the way a setting reads
         """
         # a class of components
         if isinstance(value, type) and issubclass(value, qed.component):
@@ -65,6 +66,11 @@ class FlowSuggestions(graphene.ObjectType):
         if isinstance(value, tuple):
             # is set by its parts, and reads as them
             text = ", ".join(str(part) for part in value)
+            return FlowSuggestion(value=text, label=text)
+        # a map
+        if isinstance(value, dict):
+            # is set by its entries, and reads the way the diagram shows a map
+            text = "{" + ", ".join(f"{key}: {item}" for key, item in value.items()) + "}"
             return FlowSuggestion(value=text, label=text)
         # the rest read the way a setting does
         text = FlowFactory.render(value=value)

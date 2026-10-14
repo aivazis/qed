@@ -30,6 +30,69 @@ class Slot(Node):
         return self.product is not None
 
     # interface
+    def specification(self):
+        """
+        What i must hold: the specification of my product, or else the one the trait i belong to
+        expects
+        """
+        # get my product
+        product = self.product
+        # if i stand for one that has a specification
+        if product is not None and product.specification is not None:
+            # that is it
+            return product.specification
+        # otherwise, go through my connections
+        for connector in self.connections():
+            # and the traits of each one
+            for trait in connector:
+                # the first one says
+                return trait.protocol
+        # i have no connections, which a slot on a diagram always has
+        return None
+
+    def level(self):
+        """
+        How far down what i hold is pinned: my product's level, when i stand for one, or else
+        "instance" when an instance holds a product in me; nothing otherwise
+        """
+        # get my product
+        product = self.product
+        # if i stand for one
+        if product is not None:
+            # ask it
+            return product.level
+        # otherwise, find what i hold
+        behind, held = self.holds()
+        # a product held by an instance is an instance; anything else has no level
+        return "instance" if behind and held is not None else None
+
+    def holds(self):
+        """
+        What i hold, as a pair: whether there is an instance behind me, and the product it holds,
+        possibly none; a product of the recipe holds its instance once it is one, and a trait's
+        own slot holds whatever the instance of its factory holds in it
+        """
+        # get my product
+        product = self.product
+        # if i stand for one
+        if product is not None:
+            # it holds its instance, once it is one
+            return (True, product.pin) if product.level == "instance" else (False, None)
+        # otherwise, go through my connections
+        for connector in self.connections():
+            # to the factory behind each one
+            node = connector.factory.node
+            # a factory that is not an instance
+            if node.level != "instance":
+                # holds nothing yet
+                continue
+            # otherwise, the trait it connects me to
+            for trait in connector:
+                # holds whatever the instance has in it
+                return True, node.pin.pyre_inventory[trait].value
+        # no instance is behind me
+        return False, None
+
     def connectReader(self, factory, trait):
         """
         Make a connection between {factory} and me for the given input {trait}
