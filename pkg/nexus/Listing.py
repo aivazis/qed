@@ -41,8 +41,9 @@ class Listing(Chore):
         # any failure at all
         except Exception as error:
             # is reported as a task failure that leaves the crew member healthy; the tree
-            # side records the reason against the folder
-            raise self.RecoverableError(description=str(error)) from None
+            # side records the reason against the folder; the text travels as the error, since the
+            # description is a template and the text may hold braces
+            raise self.RecoverableError(description="{0.error}", error=str(error)) from None
         # hand off the report
         return manifest
 

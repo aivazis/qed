@@ -92,11 +92,15 @@ class Crew(crew, family="qed.nexus.crews.tile"):
                 warning.line(f"the process is probably out of file descriptors")
                 # flush
                 warning.log()
-                # the member is fine; the task is not, and whoever asked for it is told
+                # the member is fine; the task is not, and whoever asked for it is told, with
+                # the text as the error, since the description is a template and the text may
+                # hold braces
                 return (
                     memberstatus,
                     self.taskcodes.failed,
-                    RecoverableError(description=f"payload not received: {error}"),
+                    RecoverableError(
+                        description="{0.error}", error=f"payload not received: {error}"
+                    ),
                 )
             # a missing descriptor means the member died between the report and its trailer,
             # which is a death like any other
