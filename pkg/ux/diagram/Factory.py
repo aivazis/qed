@@ -7,7 +7,6 @@
 
 # externals
 import inspect
-import pyre
 
 # superclass
 from .Node import Node
@@ -154,7 +153,7 @@ class Factory(Node):
         Decide whether my {trait} can be changed from the diagram: only the settings of a factory
         pinned to a class or an instance, whose value can be written as a single piece of text,
         which components can too, since the framework makes them from their names, and maps can,
-        as a list of entries; a secret map, e.g. credentials, is never typed on a canvas
+        as a list of entries; a secret, e.g. credentials, is never typed on a canvas
         """
         # a factory pinned only to its protocol has no settings to change
         if self.node.level == "protocol":
@@ -164,8 +163,8 @@ class Factory(Node):
         if trait.input or trait.output:
             # which hold products
             return False
-        # the rest are, unless they are secret maps
-        return not (isinstance(trait, pyre.traits.Dict.Dict) and getattr(trait, "secret", False))
+        # the rest are, unless they are secret
+        return not trait.secret
 
     def methods(self):
         """
