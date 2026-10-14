@@ -9,7 +9,7 @@
 """
 A picker on a diagram, bound to the contents of a NISAR reader: making its dataset before its
 selection names every axis is refused, and the refusal reaches the diagram as the product and the
-reason, kept apart; the selections it suggests read the way the diagram shows a map, and taking
+reason, kept apart; the selections it suggests read the way the trait reads a map, and taking
 one makes the dataset; a secret map is never edited from the diagram
 """
 
@@ -115,19 +115,24 @@ def test() -> None:
     assert refusal["reason"] == "the selection names no band, frequency or polarization", refusal
 
     # the selections the picker suggests
-    closed, selections = store.diagramSuggest(**request, trait="selection")
+    closed, selections, trait = store.diagramSuggest(**request, trait="selection")
     # are open, one per dataset of the product
     assert closed is False and len(selections) == 4, selections
-    # and read the way the diagram shows a map
+    # and read the way the trait reads a map
     text, *_ = [
-        qed.gql.diagram.FlowSuggestions.FlowSuggestions.describe(value=value).value
+        qed.gql.diagram.FlowSuggestions.FlowSuggestions.describe(value=value, trait=trait).value
         for value in selections
     ]
-    assert text == "{band: L, frequency: A, polarization: HH}", text
+    assert text == "band:L, frequency:A, polarization:HH", text
 
     # taking one
     _, error = store.diagramConfigure(**request, trait="selection", value=text)
     assert error is None, error
+    # shows it on the diagram the way it was typed
+    shown = qed.gql.diagram.FlowFactory.FlowFactory.render(
+        value=picker.node.pin.selection, trait=trait
+    )
+    assert shown == text, shown
     # makes the dataset
     _, _, error, refusal = store.diagramInvoke(**request, method="pyre_make")
     assert error is None and refusal is None, (error, refusal)

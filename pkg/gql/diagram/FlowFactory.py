@@ -6,6 +6,7 @@
 
 
 # externals
+import collections.abc
 import graphene
 import inspect
 
@@ -149,7 +150,7 @@ class FlowFactory(graphene.ObjectType):
                     name=trait.name,
                     kind=kind,
                     type=trait.typename,
-                    value=FlowFactory.render(value=value),
+                    value=FlowFactory.render(value=value, trait=trait),
                     default=FlowFactory.default(trait=trait),
                     doc=trait.doc,
                     editable=factory.editable(trait=trait),
@@ -178,16 +179,21 @@ class FlowFactory(graphene.ObjectType):
         ]
 
     @staticmethod
-    def render(value):
+    def render(value, trait=None):
         """
         Render the {value} of a trait as text: a class of components by its family, e.g. the
         default of a trait of a class, a datatype by its spec, which is how it is configured, any
-        other component by its family, and the rest the way they print
+        other component by its family, a map of {trait} the way the trait reads one, and the
+        rest the way they print
         """
         # a trait with no value
         if value is None:
             # has nothing to show
             return None
+        # a map, when the trait that holds it is known
+        if trait is not None and isinstance(value, collections.abc.Mapping):
+            # reads as the text the trait makes it from, e.g. "band:L, frequency:A"
+            return trait.string(value)
         # a class of components, whose instance properties, e.g. the spec of a datatype, mean
         # nothing yet
         if isinstance(value, type) and issubclass(value, qed.component):
@@ -215,6 +221,10 @@ class FlowFactory(graphene.ObjectType):
         if default is None or callable(default):
             # so there is nothing to show
             return None
+        # a map reads the way the trait reads one
+        if isinstance(default, collections.abc.Mapping):
+            # as its text
+            return trait.string(default)
         # otherwise, render it
         return str(default)
 
