@@ -104,15 +104,20 @@ def spy(module, name):
 
 def compiled(event, args):
     """
-    Check whether an event reads a compiled module from the installation, which is what
-    importing a module on first use does
+    Check whether an event is part of importing a module from the installation on first use:
+    reading its compiled module, or listing its package folder, which the import system does the
+    first time it looks for a module there
     """
-    # only opens qualify
+    # get the path
+    path = str(args[0])
+    # a package folder in the installation, listed by the import system
+    if event == "os.listdir":
+        # qualifies
+        return path.startswith(installed)
+    # otherwise, only opens qualify
     if event != "open":
         # so nothing else does
         return False
-    # get the path
-    path = str(args[0])
     # a compiled module in the installation
     return path.startswith(installed) and path.endswith(".pyc")
 

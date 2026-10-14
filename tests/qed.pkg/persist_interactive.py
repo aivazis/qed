@@ -79,15 +79,15 @@ reader.pyre_setTrait(
     priority=command(),
     locator=pyre.tracking.interactive(interface="the flow editor"),
 )
-# while its datasets come from the command line itself
+# while its selections come from the command line itself
 reader.pyre_setTrait(
-    alias="datasets",
-    value="[]",
+    alias="selections",
+    value={"band": "1"},
     priority=command(),
-    locator=pyre.tracking.command(arg="--edited.datasets=[]"),
+    locator=pyre.tracking.command(arg="--edited.selections=band:1"),
 )
 # both took
-assert reader.offset == 16
+assert reader.offset == 16 and dict(reader.selections) == {"band": "1"}
 
 # save the session
 store.persist(archives=False, views=False)
@@ -96,7 +96,7 @@ saved = pyre.config.newYamlEditor(uri="qed.yaml")
 # the edit is in it
 assert str(saved.get("edited", "offset")) == "16", saved.get("edited", "offset")
 # the value from the command line is not
-assert saved.get("edited", "datasets") is None, saved.get("edited", "datasets")
+assert saved.get("edited", "selections") is None, saved.get("edited", "selections")
 # and the rest of the section is as the user wrote it
 assert saved.get("edited", "uri") == "{qed.native}/c16.dat"
 assert saved.get("edited", "shape") == "65, 65"
