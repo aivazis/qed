@@ -164,7 +164,9 @@ export const Provider = React.forwardRef((
     }
     // center on my focus when i first show up, and whenever what i look at changes, as told by
     // {focusKey}; not when the focus merely shifts because something in view moved, which would
-    // pull the picture out from under the user. this waits until the commit is over, since my
+    // pull the picture out from under the user, nor when the first thing shows up in a view that
+    // was empty, which would carry it away from where the user put it. this waits until the
+    // commit is over, since my
     // area belongs to my client, whose ref is attached after my own layout effects run
     React.useEffect(() => {
         // without a focus there is nothing to aim at
@@ -176,7 +178,7 @@ export const Provider = React.forwardRef((
         setCamera(camera => ({ ...camera, ...home(camera.z) }))
         // all done
         return
-    }, [focusKey, focus === null])
+    }, [focusKey])
     // the cursor position in ICS
     const [cursor, setCursor] = React.useState(null)
     // and the same position before it is rounded onto the grid, for clients that map it further
@@ -344,12 +346,12 @@ export const Provider = React.forwardRef((
             // all done
             return
         }
-        // reset the camera
+        // bring the focus back to the middle of my area
         if (key == "s") {
             // it is a move of the user
             moved()
-            // go back to the focus at the original zoom, keeping the orientation
-            setCamera(camera => ({ ...camera, ...home() }))
+            // go back to the focus, keeping the zoom and the orientation
+            setCamera(camera => ({ ...camera, ...home(camera.z) }))
         }
         // ignore everything else
         return
