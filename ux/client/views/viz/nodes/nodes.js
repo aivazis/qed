@@ -60,25 +60,34 @@ export const Palette = ({ catalog, trays }) => {
 }
 
 
-// the inspector: the description of the factory picked on {diagram}, in a tray of its own, which
-// starts open; with {trays}, whoever owns them decides whether it is open, and hears about every
-// toggle
+// the inspector: the description of the factory picked on {diagram}, or else of what the picked
+// slot holds, in a tray of its own, which starts open; with {trays}, whoever owns them decides
+// whether it is open, and hears about every toggle
 export const Inspector = ({ diagram, trays }) => {
     // the nodes picked on the diagram
     const { selection } = useSelection()
     // the factories on the diagram
     const factories = diagram?.factories ?? []
-    // the one to describe: the first pick that is a factory of this diagram
+    // and its slots
+    const slots = diagram?.slots ?? []
+    // the factory to describe: the first pick that is a factory of this diagram
     const factory = factories.find(candidate => selection.includes(candidate.id)) ?? null
+    // without one, the slot to describe: the first pick that is a slot of this diagram
+    const slot = factory === null
+        ? slots.find(candidate => selection.includes(candidate.id)) ?? null
+        : null
     // render
     return (
         <Tray title="inspector" initially={true} scale={0.5} data-qed-palette="inspector"
             expanded={trays?.isOpen("inspector")} onToggle={trays?.toggle("inspector")}>
             {/* without a pick, say how to make one */}
-            {factory === null && <Note>pick a factory on the diagram to see what it does</Note>}
-            {/* otherwise, describe it */}
+            {factory === null && slot === null &&
+                <Note>pick a factory or a slot on the diagram to see what it is</Note>}
+            {/* a factory */}
             {factory !== null &&
                 <Description diagram={diagram.id} editable={diagram.editable} factory={factory} />}
+            {/* a slot */}
+            {slot !== null && <Holding product={slot.product} />}
         </Tray>
     )
 }
@@ -92,6 +101,26 @@ export const Note = styled.div`
     padding: 0.5rem 1.0rem;
     color: ${styles.dim};
 `
+
+
+// the producers on offer, the protocol of each group of the {catalog}, in a tray of their own,
+// which starts open; with {trays}, whoever owns them decides whether it is open
+export const Producers = ({ catalog, trays }) => {
+    // the protocol of each group, which leads its entries
+    const protocols = catalog.flatMap(group => group.entries.filter(entry => entry.level === "protocol"))
+    // the count of the producers, next to the title
+    const count = <Count>{protocols.length}</Count>
+    // render
+    return (
+        <Tray title="producers" initially={true} scale={0.5} controls={count}
+            data-qed-palette="producers"
+            expanded={trays?.isOpen("producers")} onToggle={trays?.toggle("producers")}>
+            <Entries>
+                {protocols.map(entry => <Entry key={entry.family} entry={entry} />)}
+            </Entries>
+        </Tray>
+    )
+}
 
 
 // a protocol and the factories that implement it, in a tray of their own; with {trays}, whoever
@@ -174,6 +203,58 @@ const Description = ({ diagram, editable, factory }) => {
             <Traits title="inputs" traits={pick("input")} />
             <Traits title="outputs" traits={pick("output")} />
             <Traits title="settings" traits={pick("setting")} settings />
+        </Section>
+    )
+}
+
+
+// the description of what a slot holds, its {product}: the specification it must satisfy, how far
+// down it is pinned, the instance behind it, if any, and what that says it holds
+const Holding = ({ product }) => {
+    // unpack
+    const { specification, doc, level, family, given, empty, stale, facts } = product
+    // its short name is the last part of the family of its specification
+    const name = specification?.split(".").pop() ?? "product"
+    // what it is, in words: nothing, a product made or yet to be made, or one that stands for
+    // a class or any implementation of its specification
+    const status = empty ? "holds nothing"
+        : level === "instance" ? (stale ? "stale" : "made")
+            : level === "class" ? "any instance of its class"
+                : level === "protocol" ? "any implementation of its specification"
+                    : "bound to nothing"
+    // render
+    return (
+        <Section data-qed-inspector={specification} data-qed-level={level}>
+            {/* what it must be */}
+            <Product>{name}</Product>
+            <Family>{specification}</Family>
+            {/* what that is for */}
+            {doc && <Doc>{doc}</Doc>}
+            {/* what stands behind it */}
+            <Title>product</Title>
+            <Trait>
+                <TraitName>status</TraitName>
+                <TraitValue data-qed-status={status}>{status}</TraitValue>
+            </Trait>
+            {family !== null &&
+                <Trait>
+                    <TraitName>class</TraitName>
+                    <TraitType>{family}</TraitType>
+                </Trait>}
+            {given !== null &&
+                <Trait>
+                    <TraitName>name</TraitName>
+                    <TraitValue>{given === "" ? "-" : given}</TraitValue>
+                </Trait>}
+            {/* and what it says it holds */}
+            <Title>contents</Title>
+            {facts.length === 0 && <Empty>none</Empty>}
+            {facts.map((fact, index) => (
+                <Trait key={index}>
+                    <TraitName>{fact.name}</TraitName>
+                    <TraitValue>{fact.value === "" ? "-" : fact.value}</TraitValue>
+                </Trait>
+            ))}
         </Section>
     )
 }
@@ -301,6 +382,13 @@ const Name = styled.div`
     color: ${styles.factory};
 `
 
+// the short name of the specification of a product
+const Product = styled.div`
+    font-family: noto-italic;
+    font-size: 120%;
+    color: ${styles.product};
+`
+
 // its family
 const Family = styled.div`
     font-family: inconsolata;
@@ -385,6 +473,23 @@ const nodesGetDiagramFragment = graphql`
                 id
                 # whether its structure can change
                 editable
+                # and what the inspector shows of what its slots hold
+                slots {
+                    id
+                    product {
+                        specification
+                        doc
+                        level
+                        family
+                        given
+                        empty
+                        stale
+                        facts {
+                            name
+                            value
+                        }
+                    }
+                }
                 # its factories, as the inspector describes them
                 factories {
                     id

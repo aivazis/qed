@@ -20,7 +20,7 @@ import { glyphs } from './glyphs'
 // render a slot: read its state, and hand it to the drawing of the view in use
 export const Slot = ({ slot }) => {
     // unpack
-    const { id, at, bound, level } = useFragment(slotFlowDiagramFragment, slot)
+    const { id, at, bound, level, empty, stale } = useFragment(slotFlowDiagramFragment, slot)
     // get the current selection
     const { selection } = useSelection()
     // am i selected
@@ -29,7 +29,10 @@ export const Slot = ({ slot }) => {
     const { Slot: Glyph } = glyphs[useProjection().name]
     // render
     return (
-        <Glyph id={id} at={at} bound={bound} level={level} selected={selected} />
+        <Glyph
+            id={id} at={at} bound={bound} level={level} empty={empty} stale={stale}
+            selected={selected}
+        />
     )
 }
 
@@ -49,6 +52,10 @@ const slotFlowDiagramFragment = graphql`
         bound
         # how far down its product is pinned
         level
+        # whether an instance behind it holds nothing in it
+        empty
+        # whether the product it holds is stale
+        stale
     }
 `
 

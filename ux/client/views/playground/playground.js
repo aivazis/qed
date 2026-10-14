@@ -16,7 +16,7 @@ import { useActivityPanel } from '~/views/main'
 // widgets
 import { Flex, Header, Tray } from '~/widgets'
 // the canvas, the palette, and the inspector of the picked factory
-import { Canvas, Inspector, Note, Palette } from '~/views/viz'
+import { Canvas, Inspector, Note, Palette, Producers } from '~/views/viz'
 // paint
 import styles from '~/views/viz/viz/styles'
 
@@ -74,18 +74,20 @@ export const Playground = ({ qed }) => {
                 <Panel data-qed-panel="playground">
                     {/* the title of the panel */}
                     <Header title="pipeline playground" />
+                    {/* the producers on offer */}
+                    <Producers catalog={catalog} trays={trays} />
                     {/* the factories on offer, one tray per protocol */}
-                    <Palette catalog={catalog} trays={trays} />
+                    {clutter && <Palette catalog={catalog} trays={trays} />}
                     {/* the products, which will hold the datasets */}
-                    <Tray title="products" scale={0.5} data-qed-palette="products"
+                    {clutter && <Tray title="products" scale={0.5} data-qed-palette="products"
                         expanded={trays.isOpen("products")} onToggle={trays.toggle("products")}>
                         <Note>the datasets of the readers will appear here</Note>
-                    </Tray>
+                    </Tray>}
                     {/* the pipelines the user designed */}
-                    <Tray title="designs" scale={0.5} data-qed-palette="designs"
+                    {clutter && <Tray title="designs" scale={0.5} data-qed-palette="designs"
                         expanded={trays.isOpen("designs")} onToggle={trays.toggle("designs")}>
                         <Note>the pipelines you design will appear here</Note>
-                    </Tray>
+                    </Tray>}
                     {/* the inspector of the factory picked on the diagram */}
                     <Inspector diagram={playground} trays={trays} />
                 </Panel>
@@ -101,6 +103,11 @@ export const Playground = ({ qed }) => {
         </Flex.Box>
     )
 }
+
+
+// whether the panel shows more than the producers and the inspector: the trays of the classes of
+// each protocol, the products, and the designs; hidden while the protocols are reworked
+const clutter = false
 
 
 // the viewport: the tab over the canvas
@@ -155,6 +162,23 @@ const playgroundGetDiagramFragment = graphql`
             editable
             # what the canvas draws
             ...canvasFlowDiagramFragment
+            # and what the inspector shows of what its slots hold
+            slots {
+                id
+                product {
+                    specification
+                    doc
+                    level
+                    family
+                    given
+                    empty
+                    stale
+                    facts {
+                        name
+                        value
+                    }
+                }
+            }
             # and what the inspector shows of its factories
             factories {
                 id

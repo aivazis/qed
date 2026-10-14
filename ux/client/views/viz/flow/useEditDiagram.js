@@ -106,13 +106,14 @@ export const useEditDiagram = diagram => {
             onCompleted: response => done?.({
                 result: response?.diagramInvoke?.result ?? null,
                 error: response?.diagramInvoke?.error ?? null,
+                refusal: response?.diagramInvoke?.refusal ?? null,
             }),
             // on failure, report, and say so
             onError: errors => {
                 // report
                 complain(`invoking ${method} of ${id}`, errors)
                 // and say so
-                done?.({ result: null, error: "the server could not be reached" })
+                done?.({ result: null, error: "the server could not be reached", refusal: null })
             },
         })
         // all done
@@ -164,6 +165,10 @@ const useEditDiagramInvokeMutation = graphql`
         diagramInvoke(input: $input) {
             result
             error
+            refusal {
+                product
+                reason
+            }
             diagram {
                 id
                 ...contentsFlowDiagramFragment

@@ -44,7 +44,7 @@ const forest = {
 // outline around a darker {top} and {side}, so its border stays visible; an outline is filled with
 // the paint of the page, rather than with nothing, so it hides what is behind it and can be picked
 // up anywhere
-const isoLevels = ({ solid, top, side }) => ({
+const isoLevels = ({ solid, top, side, fresh = null }) => ({
     // a dashed outline
     protocol: {
         top: { ...solid.top, fill: theme.page.background, strokeDasharray: "3 2" },
@@ -64,6 +64,28 @@ const isoLevels = ({ solid, top, side }) => ({
         top: { ...solid.top, fill: top },
         side: { ...solid.side, fill: side },
         band: { ...solid.band, fill: side },
+        highlight: solid.highlight,
+    },
+    // an instance that has not been made yet looks the same
+    stale: {
+        top: { ...solid.top, fill: top },
+        side: { ...solid.side, fill: side },
+        band: { ...solid.band, fill: side },
+        highlight: solid.highlight,
+    },
+    // nothing, where a product should be, is an outline, struck through by whoever draws it
+    empty: {
+        top: { ...solid.top, fill: theme.page.background },
+        side: { ...solid.side, fill: theme.page.background },
+        band: { ...solid.band, fill: theme.page.background },
+        highlight: solid.highlight,
+    },
+    // and one that has, with its outline and its fill brighter by the same amount, so the fill
+    // never drowns the outline
+    fresh: {
+        top: { ...solid.top, ...fresh?.top },
+        side: { ...solid.side, ...fresh?.side },
+        band: { ...solid.band, fill: fresh?.side?.fill ?? side },
         highlight: solid.highlight,
     },
 })
@@ -185,14 +207,22 @@ export default {
         // factories
         factory: isoLevels({ solid: isoFactory, top: "hsl(28deg, 70%, 25%)", side: "hsl(28deg, 70%, 15%)" }),
         // products
-        product: isoLevels({ solid: isoProduct, top: "hsl(200deg, 80%, 15%)", side: "hsl(200deg, 80%, 10%)" }),
+        product: isoLevels({
+            solid: isoProduct, top: "hsl(200deg, 80%, 15%)", side: "hsl(200deg, 80%, 10%)",
+            fresh: {
+                top: { fill: "hsl(200deg, 80%, 35%)", stroke: "hsl(200deg, 80%, 75%)" },
+                side: { fill: "hsl(200deg, 80%, 30%)", stroke: "hsl(200deg, 80%, 55%)" },
+            },
+        }),
     },
 
     // the paint of the flat glyphs, by how far down their node is pinned: a protocol is a dashed
     // outline, a class is a solid one, and an instance is a solid outline around a darker fill, the
     // way the shapes are drawn on their own; an outline is filled with the paint of the page,
     // rather than with nothing, so it hides what runs behind it and can still be picked up
-    // anywhere inside it
+    // anywhere inside it; a product that is an instance is dim while it is stale, and once it is
+    // made both its outline and its fill are brighter by the same amount; a slot whose instance
+    // holds nothing is an outline, struck through
     levels: {
         // factories, in the color of factories
         factory: {
@@ -205,6 +235,9 @@ export default {
             protocol: { icon: { fill: theme.page.background, strokeDasharray: "3 2" } },
             class: { icon: { fill: theme.page.background } },
             instance: { icon: { fill: "hsl(200deg, 80%, 15%)" } },
+            stale: { icon: { fill: "hsl(200deg, 80%, 15%)" } },
+            fresh: { icon: { fill: "hsl(200deg, 80%, 35%)", stroke: "hsl(200deg, 80%, 55%)" } },
+            empty: { icon: { fill: theme.page.background } },
         },
     },
 
