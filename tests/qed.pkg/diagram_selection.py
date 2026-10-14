@@ -10,7 +10,7 @@
 A picker on a diagram, bound to the contents of a NISAR reader: making its dataset before its
 selection names every axis is refused, and the refusal reaches the diagram as the product and the
 reason, kept apart; the selections it suggests read the way the trait reads a map, and taking
-one makes the dataset; a secret map is never edited from the diagram
+one makes the dataset; a secret map is never edited from the diagram, nor shown on it
 """
 
 # externals
@@ -102,7 +102,10 @@ def test() -> None:
     )
     # both instances
     tag = uuid.uuid1().hex[:8]
-    playground.pin(entity=reader, pin=qed.readers.nisar.gslc(name=f"gslc_{tag}", uri=gslc))
+    playground.pin(
+        entity=reader,
+        pin=qed.readers.nisar.gslc(name=f"gslc_{tag}", uri=gslc, credentials={"profile": "st"}),
+    )
     playground.pin(entity=picker, pin=qed.viz.pickers.match()(name=f"match_{tag}"))
     # the requests to the picker
     request = {"diagram": playground.relay, "node": picker.relay}
@@ -141,10 +144,19 @@ def test() -> None:
 
     # the credentials of the reader are a secret map
     _, error = store.diagramConfigure(
-        diagram=playground.relay, node=reader.relay, trait="credentials", value="key=value"
+        diagram=playground.relay, node=reader.relay, trait="credentials", value="key:value"
     )
     # which the diagram never edits
     assert error, error
+    # and describes without their value
+    (credentials,) = [
+        trait
+        for trait in qed.gql.diagram.FlowFactory.FlowFactory.resolve_traits(
+            factory=reader, info=None
+        )
+        if trait.name == "credentials"
+    ]
+    assert credentials.value is None and credentials.editable is False, credentials.value
 
     # all done
     return

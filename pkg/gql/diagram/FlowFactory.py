@@ -144,6 +144,10 @@ class FlowFactory(graphene.ObjectType):
             else:
                 # are kept by the node
                 value = node.settings.get(trait.name)
+            # a secret, e.g. credentials, never leaves the server
+            if trait.secret:
+                # so it is described without its value
+                value = None
             # describe the trait
             traits.append(
                 FlowTrait(
