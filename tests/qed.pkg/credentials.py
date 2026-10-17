@@ -88,22 +88,21 @@ merged = both.grant(resolve=False)
 assert merged["region"] == "eu-west-1"
 assert merged["access_key"] == "AKIATEST"
 
-# a reader with no archive and no settings has nothing to ship
+# a reader with no archive and no settings has an empty grant
 bare = qed.readers.nisar.gslc(name="cred_bare", uri=uri)
 assert bare.grant(resolve=False) == {}
-assert "credentials" not in dict(qed.nexus.survey(reader=bare).config)
+# so what travels is its own credentials, which are just as empty
+assert dict(qed.nexus.survey(reader=bare).config)["credentials"] == {}
 
 # a reader rebuilt on a worker from a recipe presents exactly what the recipe carried
 rebuilt = qed.readers.nisar.gslc(name="cred_rebuilt", uri=uri, credentials=dict(keys))
 assert rebuilt.grant(resolve=False) == keys
 
-# the grant is carried by hand, and it has to be: {credentials} is a {kv}, and pyre builds
-# {kv} out of {dict}, which is neither a property nor a facility. so the trait walk that
-# assembles every other part of a recipe never sees it, and a reader whose keys were left to
-# that walk would ship them as the string form of the table and rebuild with nothing
-assert "credentials" not in {trait.name for trait in remote.pyre_properties()}
-assert "credentials" not in {trait.name for trait in remote.pyre_facilities()}
-assert "credentials" in {trait.name for trait in remote.pyre_traits()}
+# {credentials} is a {kv}, and pyre builds {kv} out of {dict}, a property whose value is a map;
+# so the trait walk that assembles a recipe carries the reader's own as a table, like every
+# other property, and the grant takes their place whenever it has anything in it, since only
+# the team side can ask the archive for its part
+assert "credentials" in {trait.name for trait in remote.pyre_properties()}
 
 # so a recipe must survive being rebuilt into a live reader, not merely look right
 worker = qed.readers.nisar.gslc(name="cred_worker", **dict(qed.nexus.survey(reader=remote).config))
