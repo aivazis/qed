@@ -6,9 +6,10 @@
 
 
 # externals
-import journal
+import collections.abc
 
 # support
+import journal
 import pyre
 import qed
 
@@ -50,9 +51,10 @@ class Chore(pyre.nexus.task):
         for trait in reader.pyre_properties():
             # get the name
             name = trait.name
-            # the dataset pile is derived state; workers rebuild it from the file
-            if name == "datasets":
-                # so leave it behind
+            # the dataset pile and the selector table are derived state; workers rebuild them
+            # from the file
+            if name in ("datasets", "selectors"):
+                # so leave them behind
                 continue
             # get the value
             value = getattr(reader, name)
@@ -76,10 +78,6 @@ class Chore(pyre.nexus.task):
         for trait in reader.pyre_facilities():
             # get the name
             name = trait.name
-            # the selector table is derived from the file contents
-            if name == "selectors":
-                # so leave it behind
-                continue
             # get the bound component
             value = getattr(reader, name)
             # unbound facilities contribute nothing
@@ -90,14 +88,6 @@ class Chore(pyre.nexus.task):
             # they know a richer specification that resolves back into them, the way a datatype
             # carries its byte order
             config[name] = value.spec if hasattr(value, "spec") else value.pyre_family()
-        # the selections of the reader pick the datasets the worker opens, and they are a
-        # {kv}, which the walks above never visit; they are whatever the team side holds now,
-        # what the user configured or what a survey reported and the team side adopted
-        selections = getattr(reader, "selections", None)
-        # if there are any
-        if selections:
-            # they travel by hand, in wire-friendly form
-            config["selections"] = self._scrub(value=dict(selections))
         # a worker cannot reach the archive that manages a reader, but it can present what the
         # archive hands out; so ask the reader for its grant now, while the archive is within
         # reach. this must not depend on the reader having made first contact in this
@@ -106,11 +96,11 @@ class Chore(pyre.nexus.task):
         # one that opens the product. an archive itself generates credentials on demand and
         # mounts on the worker from its traits alone
         grant = reader.grant(resolve=False) if hasattr(reader, "grant") else None
-        # if there is anything in it; an empty one is not worth shipping, and since
-        # {credentials} is a {kv} the walks never put the reader's own in the recipe
+        # if there is anything in it; an empty one adds nothing to the reader's own
+        # {credentials}, which the walk has already put in the recipe
         if grant:
-            # it travels as the credentials of the reader the worker builds; it already
-            # includes the reader's own, which win over what the archive hands out
+            # it travels as the credentials of the reader the worker builds, in place of the
+            # reader's own; it already includes them, and they win over what the archive hands out
             config["credentials"] = dict(grant)
         # say what got left behind; {datasets} and {selectors} are named as deliberate, so
         # the report distinguishes them from state that went missing
@@ -119,7 +109,7 @@ class Chore(pyre.nexus.task):
         )
         # and account for the grant separately, since it is assembled rather than read off a
         # trait, and what it carries is worth a line of its own
-        self._reportGrant(reader=reader, grant=config.get("credentials"))
+        self._reportGrant(reader=reader, grant=grant)
         # hand off the recipe
         return config
 
@@ -202,12 +192,11 @@ class Chore(pyre.nexus.task):
         Name the state of {component} that the harvest could not carry to a worker
 
         Three things go missing here. A value that cannot be reduced to primitives is
-        {dropped}. A trait that is neither a property nor a facility is never looked at:
-        that is every {dict} flavor, which is what {kv} is built from, so {credentials} and
-        {selections} are invisible to the walk and have to be carried by hand or not at
-        all; {_harvestReader} carries both by hand, whenever they are not empty. And
-        {skipped} names what the harvest leaves behind on purpose, e.g. the flow
-        bookkeeping, which belongs to this process and nothing else
+        {dropped}. A configurable trait that is neither a property nor a facility is never
+        looked at, since the walk visits only those two kinds; the {dict} flavors, {kv}
+        among them, are properties whose values are maps, so {credentials} and {selections}
+        are walked like everything else. And {skipped} names what the harvest leaves behind
+        on purpose, e.g. the flow bookkeeping, which belongs to this process and nothing else
 
         What is left over is a worker that will render against state the client never sent,
         so it gets said out loud where somebody hunting a wrong tile can find it
@@ -225,8 +214,7 @@ class Chore(pyre.nexus.task):
         # and the ones the walk above actually visits
         seen = {trait.name for trait in component.pyre_properties()}
         seen |= {trait.name for trait in component.pyre_facilities()}
-        # the rest it never looks at, less whatever was carried by hand anyway, the way the
-        # reader grant and selections land in the recipe without ever being walked
+        # the rest it never looks at, less whatever made it into the recipe some other way
         invisible = sorted(declared - seen - set(harvested) - skipped)
         # the values that could not be reduced, less the ones nobody meant to send
         dropped = sorted(set(dropped) - skipped)
@@ -267,8 +255,9 @@ class Chore(pyre.nexus.task):
             members = tuple(self._scrub(value=item, strict=strict) for item in value)
             # a sequence with an opaque member is itself opaque
             return self._opaque if self._opaque in members else members
-        # tables travel entry by entry
-        if isinstance(value, dict):
+        # tables, e.g. the maps that hold the values of {dict} traits, travel entry by entry,
+        # as plain dictionaries
+        if isinstance(value, collections.abc.Mapping):
             # reduce the entries
             entries = {key: self._scrub(value=item, strict=strict) for key, item in value.items()}
             # a table with an opaque entry is itself opaque
