@@ -22,10 +22,14 @@ class Stack(qed.flow.factory, family="qed.readers.stack", implements=qed.protoco
     # the uri of my data source; synthetic, since a stack spans many files
     uri = qed.properties.uri()
     uri.doc = "the uri of the data source"
+    # i synthesize it from my name every time i am built, so there is nothing to save
+    uri.persistent = False
 
     # the map of selector names to their allowed values
     selectors = qed.protocols.selectors()
     selectors.doc = "a map of selector names to their allowed values"
+    # i borrow it from my first member every time i am built, so there is nothing to save
+    selectors.persistent = False
 
     # a key value store of preferred values for selectors
     selections = qed.properties.kv()
@@ -34,6 +38,8 @@ class Stack(qed.flow.factory, family="qed.readers.stack", implements=qed.protoco
     # the aggregate datasets i expose, one per selector assignment my members share
     datasets = qed.properties.list(schema=qed.protocols.dataset.output())
     datasets.doc = "the aggregate datasets i expose"
+    # i assemble them from my members at first contact, so there is nothing to save
+    datasets.persistent = False
 
     # my member readers
     readers = qed.properties.list(schema=qed.protocols.reader())

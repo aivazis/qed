@@ -360,8 +360,12 @@ class Chore(pyre.nexus.task):
             if dict(dataset.selector) == selector:
                 # hand it off
                 return dataset
-        # not finding one means the reconstruction diverged from the team side view
-        raise self.RecoverableError(description=f"no dataset matches the selector {selector}")
+        # not finding one means the reconstruction diverged from the team side view; spell the
+        # selector as assignments, since the rendering of a table is full of braces and pyre
+        # reads the description as a template
+        spec = ", ".join(f"{key}={value}" for key, value in selector.items()) or "(empty)"
+        # and complain
+        raise self.RecoverableError(description=f"no dataset matches the selector {spec}")
 
     def _configure(self, component, config):
         """
