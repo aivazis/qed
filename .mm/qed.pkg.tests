@@ -27,6 +27,8 @@ tests.qed.pkg.envi.clean := \
     envi_bsq_0.dat envi_bsq_0.hdr envi_bil_0.dat envi_bil_0.hdr envi_bip_0.dat envi_bip_0.hdr \
     envi_band0_5.dat envi_band1_5.dat envi_band2_5.dat envi_bsq_5.dat envi_bsq_5.hdr \
     envi_bil_5.dat envi_bil_5.hdr envi_bip_5.dat envi_bip_5.hdr
+# the driver that restores views writes the product they look at
+tests.qed.pkg.view_restore.clean := view_restore.dat view_restore.hdr
 
 # the flow driver writes the flat file its pipeline reads
 tests.qed.pkg.flow_flat_amplitude.clean := flow_flat_amplitude.c8
