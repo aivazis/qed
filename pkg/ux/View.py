@@ -304,12 +304,12 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
         # all done
         return self
 
-    def toggleMeasure(self):
+    def measureSetLayer(self, active):
         """
-        Toggle the measure layer state
+        Turn the measure layer on or off
         """
-        # toggle the active flag
-        self.measure.active ^= True
+        # record the new state
+        self.measure.active = active
         # all done
         return self
 

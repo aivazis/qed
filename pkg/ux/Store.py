@@ -905,16 +905,21 @@ class Store(qed.component, family="qed.ux.store"):
 
     def toggleMeasure(self, viewport, source):
         """
-        Toggle the measure layer state on {viewport}
+        Toggle the measure layer of {viewport}, and give every viewport that is path synced with
+        it the same state
         """
         # locate the source
         source = self.source(name=source)
         # get the viewport configuration
         port = self._viewports[viewport]
+        # make sure {viewport} shows {source}; the viewports synced with it keep their own readers
+        port.selectSource(source=source)
+        # flip the layer of {viewport}, and use the result for the entire sync group
+        active = not port.view().measure.active
         # go through all viewports that are path synced
         for port in self._syncedWith(viewport=viewport, aspect="path"):
-            # toggle their measure layer
-            view = port.toggleMeasure(source=source)
+            # and set the layer of the view each one is showing
+            view = port.measureSetLayer(active=active)
             # hand off the measure configuration
             yield view.measure
         # all done
