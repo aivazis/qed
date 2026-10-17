@@ -100,16 +100,16 @@ class Viewport(
         # all done
         return self.view()
 
-    def toggleMeasure(self, source):
+    def measureSetLayer(self, active):
         """
-        Toggle the measure layer
+        Turn the measure layer of my current view on or off
         """
-        # activate the {source}
-        view = self._selectSource(source=source)
-        # and delegate
-        view.toggleMeasure()
+        # get my active view
+        view = self._view
+        # and set its layer
+        view.measureSetLayer(active=active)
         # all done
-        return self.view()
+        return view
 
     def measureAnchorAdd(self, x, y, index):
         """
