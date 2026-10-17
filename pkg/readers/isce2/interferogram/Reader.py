@@ -45,6 +45,9 @@ class Reader(
 
     selections = qed.properties.kv()
     selections.doc = "a key value store of preferred values for selectors"
+    # the session adds only the picks of first contact, which are made again every time; what
+    # the user prefers comes from the files, which keep it as written
+    selections.persistent = False
 
     datasets = qed.properties.list(schema=qed.protocols.dataset.output())
     datasets.doc = "the list of data sets provided by the reader"

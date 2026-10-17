@@ -34,6 +34,9 @@ class Stack(qed.flow.factory, family="qed.readers.stack", implements=qed.protoco
     # a key value store of preferred values for selectors
     selections = qed.properties.kv()
     selections.doc = "a key value store of preferred values for selectors"
+    # the session adds only the picks of first contact, which are made again every time; what
+    # the user prefers comes from the files, which keep it as written
+    selections.persistent = False
 
     # the aggregate datasets i expose, one per selector assignment my members share
     datasets = qed.properties.list(schema=qed.protocols.dataset.output())

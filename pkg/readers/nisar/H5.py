@@ -35,6 +35,9 @@ class H5(qed.flow.factory, family="qed.readers.nisar.h5", implements=qed.protoco
 
     selections = qed.properties.kv()
     selections.doc = "a key value store of preferred values for selectors"
+    # the session adds only the picks of first contact, which are made again every time; what
+    # the user prefers comes from the files, which keep it as written
+    selections.persistent = False
 
     pages = qed.properties.int()
     pages.default = 1024**2
