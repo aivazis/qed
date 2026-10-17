@@ -1073,8 +1073,14 @@ class View(qed.component, family="qed.ux.views.view", implements=qed.protocols.u
 
     def _validateSelections(self):
         """
-        Drop any selection whose value is no longer available, e.g. after collapsing a pin
+        Drop any selection whose value is no longer available, e.g. after collapsing a pin; a
+        reader that has not made first contact cannot say, so my selections wait until it has
         """
+        # a reader that has not made first contact knows nothing about what is available, e.g.
+        # at boot, when the selections a saved session restores must survive until it does
+        if not getattr(self.reader, "_opened", False):
+            # so leave them alone; {refresh} judges them once contact is made
+            return
         # the values currently available, given any pin
         available = self.availableSelectors()
         # my selections
