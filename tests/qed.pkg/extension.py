@@ -58,7 +58,9 @@ try:
         # complain
         assert False, "a missing extension went unnoticed"
 
-    # the server declines to come up; its error channel is fatal by default
+    # the server declines to come up; its error channel is fatal by default, and the refusal is
+    # expected here, so keep it out of the output
+    journal.error("qed.nexus.server").device = journal.trash()
     server = qed.nexus.server(name="ext_server")
     # attempt to
     try:
