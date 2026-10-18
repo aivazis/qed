@@ -5,6 +5,19 @@
 # (c) 1998-2026 all rights reserved
 
 
+# the suite runs against an installation with no web client, so keep the complaint about its
+# absence out of the output of every test that builds the app
+qed.app:
+    # by putting the channel under the control of the user
+    journal:
+        channels:
+            - warning, qed.startup.assets
+
+# and turning it off; the switch is addressed by the app's nickname, {qed}
+qed.journal.warning.qed.startup.assets:
+    active: no
+
+
 # the archive
 qed.native: .
 

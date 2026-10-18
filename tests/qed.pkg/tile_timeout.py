@@ -14,6 +14,7 @@ and remembered as a suspect so it is never handed to another crew member
 """
 
 # externals
+import functools
 import types
 
 # support
@@ -73,6 +74,8 @@ def deliver(error: Exception) -> tuple:
     # a stand-in for the dispatcher with no inline renderer, so any attempt to render in the
     # server fails loudly
     dispatcher = types.SimpleNamespace()
+    # but with the real way of refusing a request
+    dispatcher._notFound = functools.partial(qed.ux.dispatcher._notFound, dispatcher)
     # a stand-in for the server that knows the http responses, and the name they carry
     server = types.SimpleNamespace(name="qed.test.server", responses=pyre.http.responses)
     # the parked response

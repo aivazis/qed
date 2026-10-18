@@ -133,7 +133,7 @@ def ask(url: str, reader=rslc, fleet=None):
     # the dispatcher, with the parts of the real one the route uses
     dispatcher = types.SimpleNamespace(store=Store(reader=reader))
     # go through them
-    for name in ("_spectrumRefused", "_dataDocument", "_dataDeliver"):
+    for name in ("_spectrumRefused", "_dataDocument", "_dataDeliver", "_notFound"):
         # and bind each one to the stand-in
         setattr(dispatcher, name, functools.partial(getattr(qed.ux.dispatcher, name), dispatcher))
     # the server, with the responses and documents the route makes, and the crews if any
