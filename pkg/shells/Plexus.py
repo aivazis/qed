@@ -133,9 +133,9 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
 
     complex128 = qed.properties.bool(default=False)
     complex128.aliases = {"c16", "complex*16"}
-    complex128.doc = "set the cell type to a 32-bit complex"
+    complex128.doc = "set the cell type to a 128-bit complex"
 
-    # journal control; useful until journal is once again configurable
+    # journal control
     logfile = qed.properties.path()
     logfile.default = None
     logfile.doc = "file that captures all journal output"
