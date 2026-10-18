@@ -6,6 +6,7 @@
 
 
 # externals
+import html
 import textwrap
 
 # framework access
@@ -223,12 +224,26 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
                 docroot = docroot[name]
             # if not there
             except prefix.NotFoundError:
-                # grab a channel
-                channel = self.warning
-                # complain
-                channel.line(f"while looking for UX support:")
-                channel.line(f"directory '{docroot.uri}/{name}' not found")
-                channel.line(f"disabling the web shell")
+                # explain the absence once, for both the journal and the browser
+                self._missing = self._explainMissingAssets(
+                    prefix=prefix, missing=f"{docroot.uri}/{name}"
+                )
+                # grab a channel dedicated to this complaint, so it can be silenced by itself
+                channel = journal.warning("qed.startup.assets")
+                # say that this installation has no web client
+                channel.line("this installation of qed has no web client:")
+                # indent the explanation
+                channel.indent()
+                # and give it
+                channel.report(report=self._missing)
+                # back to the margin
+                channel.outdent()
+                # say what happens instead
+                channel.line(
+                    "a web server started from here answers every request with a page "
+                    "that says so"
+                )
+                # flush
                 channel.log()
                 # mark the UX as unavailable
                 self._docroot = None
@@ -287,12 +302,60 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         # if i don't have one, there is something wrong with my installation
         if ux is None:
             # so everything is an error
-            return server.responses.NotFound(server=server)
+            response = server.responses.NotFound(server=server)
+            # whose page says what is missing and where it was expected, for users who launch
+            # qed from environments that never show them the journal, e.g. jupyter-lab; one
+            # line per fact, escaped so the page shows them as text
+            response.description = "<br>".join(
+                html.escape(line)
+                for line in ("this installation of qed has no web client:", *self._missing)
+            )
+            # hand it off
+            return response
 
         # otherwise, ask the dispatcher to do its thing
         return ux.dispatch(plexus=self, server=server, request=request)
 
     # implementation detail
+    def _explainMissingAssets(self, prefix, missing):
+        """
+        Build the lines that explain why the web client is not under {prefix}, given the first
+        folder on the way to it that is {missing}
+        """
+        # the folder the web client was expected in
+        expected = f"{prefix.uri}/etc/{self.pyre_namespace}/ux"
+        # the folder of the script that launched me, if there was one
+        home = self.pyre_home
+        # the prefix is the parent of that folder, when there is one
+        if home is not None:
+            # so say so
+            source = f"the parent of '{home}', the folder of the script that launched qed"
+        # otherwise, it came from the installed package
+        else:
+            # so say that instead
+            source = "where the qed package says it is installed"
+        # the missing folder is either the expected one
+        if missing == expected:
+            # in which case there is no point in naming it twice
+            absence = "that folder does not exist"
+        # or one of its ancestors
+        else:
+            # which is worth naming, since it tells how much of the installation is gone
+            absence = f"'{missing}' does not exist"
+        # assemble the explanation, one fact per line
+        return (
+            # what qed looks for
+            "qed serves its web client, the page, script, styles, fonts and images, from",
+            # where
+            f"'{expected}',",
+            # under which prefix
+            f"under the installation prefix '{prefix.uri}',",
+            # and why that one
+            f"{source};",
+            # and what is wrong
+            f"but {absence}",
+        )
+
     def _configureCell(self):
         """
         Resolve the configuration of my cell type
@@ -490,6 +553,7 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     _ds = 0
     _ux = None  # the UX manager, built on first use
     _docroot = None  # the folder with the web documents, if the installation has one
+    _missing = None  # the lines that explain why the installation has no web documents
     _pfs = None  # my private filespace, which the UX manager needs
     _cliSources = None  # readers built from bare command line uris, drained by the store
 
