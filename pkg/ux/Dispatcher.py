@@ -9,6 +9,7 @@
 import collections
 import csv
 import functools
+import html
 import io
 import re
 import signal
@@ -58,7 +59,7 @@ class Dispatcher:
             # flush
             channel.log()
             # and return an error to the client
-            return server.responses.NotFound(server=server)
+            return self._notFound(server=server, reason=f"this server has no handler for '{url}'")
 
         # find who matched
         token = match.lastgroup
@@ -154,7 +155,11 @@ class Dispatcher:
             # flush
             firewall.log()
             # and refuse, in case firewalls aren't fatal
-            return server.responses.NotFound(server=server)
+            return self._notFound(
+                server=server,
+                reason=f"the preview of '{uri}' with view {view} at zoom {zoom} oversteps "
+                f"its dataset, whose shape is {data.shape}",
+            )
         # get the first registered channel
         channel, *_ = data.channels.values()
         # render the tile
@@ -287,7 +292,12 @@ class Dispatcher:
             # record the refusal
             record(code=404, via="refused")
             # and refuse, in case firewalls aren't fatal
-            return server.responses.NotFound(server=server)
+            return self._notFound(
+                server=server,
+                reason=f"the tile of '{channelName}' from '{datasetName}' with shape {shape} "
+                f"at {origin}, zoom {zoom}, oversteps its dataset, whose shape is "
+                f"{dataset.shape}",
+            )
 
         # look for the fleet of tile rendering teams; only the qed flavor of the server has one
         fleet = getattr(server, "fleet", None)
@@ -358,7 +368,12 @@ class Dispatcher:
             # record the refusal
             record(code=404, via="suspect")
             # and refuse
-            return server.responses.NotFound(server=server)
+            return self._notFound(
+                server=server,
+                reason=f"rendering the tile of '{channelName}' from '{datasetName}' with shape "
+                f"{shape} at {origin}, zoom {zoom}, took down a crew member before, so this "
+                f"server will not render it again",
+            )
 
         # the settings the request was made with; clients that do not name them, e.g. the
         # measurements, take no part in the bursts
@@ -412,6 +427,18 @@ class Dispatcher:
         fleet.render(task=task, callback=callback)
         # and hand the placeholder to the server
         return deferred
+
+    def _notFound(self, server, reason):
+        """
+        Refuse a request with a {NotFound} response whose page explains why, in {reason}, so
+        that whoever inspects the response in the browser sees what went wrong
+        """
+        # build the response
+        response = server.responses.NotFound(server=server)
+        # replace its stock description with the reason, escaped so the page shows it as text
+        response.description = html.escape(reason)
+        # and hand it off
+        return response
 
     def _burst(self, viewport, session, fleet, server):
         """
@@ -550,7 +577,11 @@ class Dispatcher:
             # and flush
             chnl.log()
             # let the client know
-            return server.responses.NotFound(server=server)
+            return self._notFound(
+                server=server,
+                reason=f"rendering the tile of '{channelName}' from '{datasetName}' with shape "
+                f"{shape} at {origin}, zoom {zoom}, failed: {error}",
+            )
 
         # if all went well, we have a {tile} in memory; wrap it up
         return self._dataDocument(
@@ -604,8 +635,14 @@ class Dispatcher:
             # record the casualty
             if record is not None:
                 record(code=404, via="crew")
-            # let the client know; it can always ask again
-            return deferred.resolve(response=server.responses.NotFound(server=server))
+            # let the client know
+            return deferred.resolve(
+                response=self._notFound(
+                    server=server,
+                    reason=f"the crew member rendering the tile of '{channelName}' from "
+                    f"'{datasetName}' with shape {shape} at {origin}, zoom {zoom}, died: {error}",
+                )
+            )
         # if the worker could not produce the tile for a benign reason, e.g. it ran out of
         # time on a slow read; the server holds only a metadata-only twin of the product, so
         # it cannot render the tile itself, and repeating a read that just took too long on
@@ -719,12 +756,17 @@ class Dispatcher:
             chnl.line(f"at zoom level {zoom}")
             # and flush
             chnl.log()
+            # describe the failure for the client, while the error is still in reach
+            reason = (
+                f"packaging the tile of '{channelName}' from '{datasetName}' with shape "
+                f"{shape} at {origin}, zoom {zoom}, failed: {error}"
+            )
         # a payload that will not be sent
         if payload is not None:
             # still holds a descriptor, so let it go
             payload.close()
         # let the client know
-        return server.responses.NotFound(server=server)
+        return self._notFound(server=server, reason=reason)
 
     def graphql(self, **kwds):
         """
@@ -844,7 +886,11 @@ class Dispatcher:
         # a request whose work took a crew member down before is refused on the spot
         if fleet.suspected(task=task):
             # so it cannot take down another one
-            return server.responses.NotFound(server=server)
+            return self._notFound(
+                server=server,
+                reason=f"computing the spectrum of '{datasetName}' over {spec} took down a crew "
+                f"member before, so this server will not compute it again",
+            )
         # a cached picture of this exact request can be served on the spot
         cached = fleet.lookup(task=task)
         # if there is one
@@ -893,7 +939,10 @@ class Dispatcher:
         # flush
         firewall.log()
         # and refuse, in case firewalls aren't fatal
-        return server.responses.NotFound(server=server)
+        return self._notFound(
+            server=server,
+            reason=f"cannot compute the spectrum of '{datasetName}' over {spec}: {reason}",
+        )
 
     def profile(self, server, match, request, **kwds):
         """
@@ -935,7 +984,11 @@ class Dispatcher:
             # flush
             firewall.log()
             # and refuse, in case firewalls aren't fatal
-            return server.responses.NotFound(server=server)
+            return self._notFound(
+                server=server,
+                reason=f"the profile of '{name}' along {points} oversteps its dataset, whose "
+                f"shape is {dataset.shape}",
+            )
         # get the profile
         profile = dataset.profile(points=points, closed=closed)
         # form the file name
@@ -1023,7 +1076,7 @@ class Dispatcher:
         The client requested the app icon
         """
         # we don't have one
-        return server.responses.NotFound(server=server)
+        return self._notFound(server=server, reason="qed has no icon")
 
     def root(self, plexus, server, request, **kwds):
         """
