@@ -23,16 +23,19 @@ import { Cell } from './cell'
 // the body of the sync control table
 export const Dataset = ({ viewport, view }) => {
     // unpack the view
-    const { dataset } = useFragment(datasetSyncTableFragment, view)
+    const { reader, dataset } = useFragment(datasetSyncTableFragment, view)
     // get the active viewport and the active viewport selector
     const { activeViewport, activate } = useViewports()
+    // name the dataset on display; a view whose selections are not complete yet has none, so
+    // name its reader instead, and mark a viewport that shows nothing at all with a dash
+    const label = dataset?.name ?? reader?.name ?? "-"
 
     // if this is the active viewport
     if (viewport === activeViewport) {
         // render the selected dataset
         return (
             <SelectedDataset>
-                {dataset.name}
+                {label}
             </SelectedDataset>
         )
     }
@@ -57,7 +60,7 @@ export const Dataset = ({ viewport, view }) => {
     // and render an active dataset
     return (
         <ActiveDataset {...behaviors}>
-            {dataset.name}
+            {label}
         </ActiveDataset>
     )
 }
@@ -80,6 +83,9 @@ const SelectedDataset = styled(ActiveDataset)`
 
 const datasetSyncTableFragment = graphql`
     fragment datasetSyncTableFragment on View {
+        reader {
+            name
+        }
         dataset {
             name
         }
