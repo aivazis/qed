@@ -37,7 +37,13 @@ one = f"file:{os.path.realpath(os.path.join(workspace, 'one'))}"
 two = f"file:{os.path.realpath(os.path.join(workspace, 'two'))}"
 
 # the configuration file says nothing about archives, so the application attaches its default
-original = "# -*- pyre -*-\n\n# nothing to see here\n\n# end of file\n"
+original = (
+    "# -*- pyre -*-\n\n"
+    "# the installation under test has no web client; keep the complaint about it quiet\n"
+    "qed.journal.warning.qed.startup.assets:\n"
+    "    active: no\n\n"
+    "# end of file\n"
+)
 # write it
 with open(os.path.join(workspace, "qed.yaml"), mode="w", encoding="utf-8") as stream:
     # all at once

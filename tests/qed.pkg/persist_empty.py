@@ -37,6 +37,10 @@ root = f"file:{os.path.realpath(os.path.join(workspace, 'data'))}"
 # it must stay apart from, and a list that attaches them
 original = f"""# -*- pyre -*-
 
+# the installation under test has no web client; keep the complaint about it quiet
+qed.journal.warning.qed.startup.assets:
+    active: no
+
 # the archive under test
 first:
     uri: {root}

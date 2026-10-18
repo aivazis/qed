@@ -40,6 +40,10 @@ os.makedirs(workspace)
 # the configuration file attaches one reader over the raster in this directory
 original = """# -*- pyre -*-
 
+# the installation under test has no web client; keep the complaint about it quiet
+qed.journal.warning.qed.startup.assets:
+    active: no
+
 # the location of the rasters
 qed.native: ..
 

@@ -57,8 +57,16 @@ recorded = [
 ]
 # write the configuration file
 with open(os.path.join(workspace, "qed.yaml"), mode="w", encoding="utf-8") as stream:
+    # the header
+    stream.write("# -*- pyre -*-\n\n")
+    # the switch that keeps the complaint about the missing web client quiet
+    stream.write(
+        "# the installation under test has no web client; keep the complaint about it quiet\n"
+        "qed.journal.warning.qed.startup.assets:\n"
+        "    active: no\n\n"
+    )
     # the archive, with its record
-    stream.write("# -*- pyre -*-\n\n# the archive\nrestored:\n")
+    stream.write("# the archive\nrestored:\n")
     stream.write(f"    uri: {at()}\n    expanded:\n")
     stream.write("".join(f"        - {folder}\n" for folder in recorded))
     # and the list that attaches it
