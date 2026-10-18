@@ -141,6 +141,13 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     logfile.default = None
     logfile.doc = "file that captures all journal output"
 
+    # the journal channels qed puts under the control of its users, as (severity, name) pairs;
+    # each one can be switched on and off by configuring '{nickname}.journal.{severity}.{name}'
+    journalChannels = (
+        # the complaint about an installation with no web client
+        ("warning", "qed.startup.assets"),
+    )
+
     # metamethods
     def __init__(self, **kwds):
         # chain up
@@ -167,6 +174,24 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         # load any datasets from the command line
         yield from self._loadDatasets()
 
+        # all done
+        return
+
+    def pyre_journalChannels(self):
+        """
+        Generate the (severity, name) pairs of the journal channels users may configure: the ones
+        i own, followed by the ones the user asked for that i don't
+        """
+        # the ones i own
+        yield from self.journalChannels
+        # go through the ones the user asked for
+        for channel in super().pyre_journalChannels():
+            # skip the ones i own, so none is configured twice
+            if channel in self.journalChannels:
+                # move on
+                continue
+            # and hand off the rest
+            yield channel
         # all done
         return
 
