@@ -35,6 +35,10 @@ with open(os.path.join(workspace, "qed.yaml"), mode="w", encoding="utf-8") as st
     # write it
     stream.write("""# -*- pyre -*-
 
+# the installation under test has no web client; keep the complaint about it quiet
+qed.journal.warning.qed.startup.assets:
+    active: no
+
 # the location of the rasters
 qed.native: ..
 
