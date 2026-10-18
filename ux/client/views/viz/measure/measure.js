@@ -13,6 +13,7 @@ import styled from 'styled-components'
 // project
 // hooks
 import { useEvent } from '~/hooks'
+import { useViewports } from '~/views/viz'
 // widgets
 import { SVG } from '~/widgets'
 
@@ -55,6 +56,8 @@ const Layer = ({ viewport, view, shape, scale }) => {
     const { add } = useAnchorAdd(viewport)
     // the anchor mover
     const { move } = useAnchorMove(viewport)
+    // and the viewport the user is working in
+    const { activeViewport } = useViewports()
 
     // unpack the measure layer info
     const { path, selection, closed } = measure
@@ -66,6 +69,11 @@ const Layer = ({ viewport, view, shape, scale }) => {
 
     // add an anchor to the pile
     const pick = evt => {
+        // a click in a viewport the user is not working in is meant to make it the active one
+        if (viewport !== activeViewport) {
+            // so let it through to the viewport, and leave the path alone
+            return
+        }
         // stop this event from bubbling up
         evt.stopPropagation()
         // and quash any side effects
@@ -139,7 +147,7 @@ const Layer = ({ viewport, view, shape, scale }) => {
     // when the user clicks in my area
     useEvent({
         name: "mouseup", listener: pick, client: me,
-        triggers: [viewport, scale, add]
+        triggers: [viewport, activeViewport, scale, add]
     })
 
     // dragging happens when mouse move events are delivered
