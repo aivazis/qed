@@ -39,9 +39,9 @@ def generate():
     try:
         # and we are within a git repository, show its status
         yield from gitRepository()
-    # otherwise
-    except:
-        # ignore
+    # if it is not installed, or cannot be run
+    except OSError:
+        # skip it in the prompt
         pass
 
     # add a final separator

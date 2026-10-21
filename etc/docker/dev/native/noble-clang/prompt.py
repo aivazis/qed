@@ -60,18 +60,18 @@ def generate():
     try:
         # and we are within a bzr repository, show its status
         yield from bzrRepository()
-    # otherwise
-    except:
-        # ignore
+    # if it is not installed, or cannot be run
+    except OSError:
+        # skip it in the prompt
         pass
 
     # if git is installed
     try:
         # and we are within a git repository, show its status
         yield from gitRepository()
-    # otherwise
-    except:
-        # ignore
+    # if it is not installed, or cannot be run
+    except OSError:
+        # skip it in the prompt
         pass
 
     # add a final separator
@@ -219,7 +219,7 @@ def bzrParseStatus(status):
             table["changed"] += 1
         elif case in bzrIgnored:
             # update the counter
-            table["ignore"] += 1
+            table["ignored"] += 1
         elif case in bzrUnknown:
             # update the counter
             table["unknown"] += 1
