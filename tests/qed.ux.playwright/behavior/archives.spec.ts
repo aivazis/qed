@@ -164,7 +164,7 @@ test.describe.serial("the archive trays follow the server", () => {
         await page.goto("/explore", { waitUntil: "load" })
         await page.waitForFunction(() => Boolean(window.qed))
         // bring up the form for a new archive, and pick a local one
-        await page.getByLabel("connect to this archive").click()
+        await page.getByLabel("connect a new archive").click()
         await page.getByText("local", { exact: true }).click()
         // name the folder; the nickname field takes its name
         await page.getByLabel("path", { exact: true }).fill(folder)

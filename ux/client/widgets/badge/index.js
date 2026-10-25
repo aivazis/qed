@@ -55,10 +55,13 @@ export const Badge = ({ size, state, behaviors, style, children, ...options }) =
     // the cursor was still over it, e.g. by the very click that made it irrelevant, loses it
     // right away rather than when the cursor leaves
     const paint = paintBadge({ state, client: style, polish: polish && state === "enabled" })
+    // the hover text says what a click does: the client's own title, or else the label that
+    // names the badge
+    const title = options.title ?? options["aria-label"]
     // and render; a {Badge} is a button by default (the client may override {role}, e.g. to none
     // when it nests the badge inside a link); the svg is decorative, named by the badge's label
     return (
-        <div role="button" {...options} style={paint.badge} {...controls}>
+        <div role="button" {...options} title={title} style={paint.badge} {...controls}>
             <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width={size} height={size} aria-hidden="true" >
                 <g transform={shrink} style={paint.shape} >
                     {React.cloneElement(React.Children.only(children), { style: paint })}
