@@ -176,6 +176,10 @@ export const localArchiveMutation = graphql`
                     name
                     value
                 }
+                earth {
+                    collection conceptId pattern count begin end
+                    bbox point circle line polygon
+                }
                 readers
                 expanded
                 pending
@@ -210,6 +214,10 @@ export const localArchiveReconfigureMutation = graphql`
                 credentials {
                     name
                     value
+                }
+                earth {
+                    collection conceptId pattern count begin end
+                    bbox point circle line polygon
                 }
                 readers
                 expanded

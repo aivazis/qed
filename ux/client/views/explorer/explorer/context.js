@@ -29,6 +29,10 @@ export const Provider = ({ qed, children }) => {
                     name
                     value
                 }
+                earth {
+                    collection conceptId pattern count begin end
+                    bbox point circle line polygon
+                }
                 readers
                 expanded
                 pending

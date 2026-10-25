@@ -86,7 +86,7 @@ const Panel = () => {
 
 
 // the kinds of archives whose form can reconfigure them
-const editable = new Set(["local", "s3"])
+const editable = new Set(["local", "s3", "earth"])
 
 
 // end of file

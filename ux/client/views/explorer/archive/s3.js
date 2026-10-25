@@ -180,6 +180,10 @@ const connectMutation = graphql`
                     name
                     value
                 }
+                earth {
+                    collection conceptId pattern count begin end
+                    bbox point circle line polygon
+                }
                 readers
                 expanded
                 pending
@@ -253,6 +257,10 @@ const reconfigureMutation = graphql`
                 credentials {
                     name
                     value
+                }
+                earth {
+                    collection conceptId pattern count begin end
+                    bbox point circle line polygon
                 }
                 readers
                 expanded
