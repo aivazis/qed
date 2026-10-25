@@ -23,6 +23,7 @@ import { useGetActiveView } from '../explorer/useGetActiveView'
 // components
 import { Directory } from './directory'
 import { Disconnect } from './disconnect'
+import { Edit } from './edit'
 import { Failure } from './failure'
 import { Persist } from './persist'
 import { Refresh } from './refresh'
@@ -46,7 +47,7 @@ const Panel = () => {
     const expand = useExpandFolder()
     const collapse = useCollapseFolder()
     // unpack the archive information
-    const { id, name, uri, expanded, pending, error, hits, dirty } = archive
+    const { id, name, type, uri, expanded, pending, error, hits, dirty } = archive
     // deduce my state
     const state = (activeArchive?.id === id) ? "selected" : "enabled"
     // toggling the tray asks the server to put the root on display, or take it off
@@ -54,6 +55,7 @@ const Panel = () => {
     // build my controls
     const Controls = (
         <>
+            {editable.has(type) && <Edit archive={archive} />}
             <Refresh uri={uri} />
             <Persist uri={uri} dirty={dirty} />
             <Disconnect uri={uri} />
@@ -81,6 +83,10 @@ const Panel = () => {
         </Tray>
     )
 }
+
+
+// the kinds of archives whose form can reconfigure them
+const editable = new Set(["local", "s3"])
 
 
 // end of file

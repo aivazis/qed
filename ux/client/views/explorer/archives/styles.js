@@ -83,6 +83,12 @@ export const refresh = {
     ...collapse,
 }
 
+// the button that brings up the form that reconfigures an archive
+export const edit = {
+    // inherit
+    ...collapse,
+}
+
 // the button that saves an archive
 export const persist = {
     // inherit

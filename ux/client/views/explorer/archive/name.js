@@ -7,13 +7,14 @@
 
 // external
 import React from 'react'
+import styled from 'styled-components'
 
 // local
 // components
 import { EnabledInput, Field, Value } from '../form'
 
-// the name the archive
-export const Name = ({ value, update }) => {
+// the name the archive; an archive that exists already keeps its name, so it is {fixed}
+export const Name = ({ value, update, fixed = false }) => {
     // build the name mutator
     const setName = evt => {
         // set up the validation regex
@@ -27,6 +28,15 @@ export const Name = ({ value, update }) => {
     const behaviors = {
         onChange: setName,
     }
+    // a name that cannot change
+    if (fixed) {
+        // shows, but takes no input
+        return (
+            <Field name="nickname" value={value} tip="the name of the data archive, which stays">
+                <Fixed>{value}</Fixed>
+            </Field>
+        )
+    }
     // all done
     return (
         <Field name="nickname" value={value} tip="the name of the data archive">
@@ -36,6 +46,13 @@ export const Name = ({ value, update }) => {
         </Field>
     )
 }
+
+
+// a name that takes no input
+const Fixed = styled(Value)`
+    color: hsl(0deg, 0%, 60%);
+    padding: 0.0rem 0.25rem 0.0rem 0.25rem;
+`
 
 
 // end of file

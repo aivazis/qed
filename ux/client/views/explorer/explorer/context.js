@@ -23,6 +23,7 @@ export const Provider = ({ qed, children }) => {
             archives {
                 id
                 name
+                type
                 uri
                 credentials {
                     name

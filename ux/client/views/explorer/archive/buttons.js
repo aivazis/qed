@@ -18,8 +18,8 @@ import { Button, EnabledPrimaryButton, EnabledSecondaryButton } from '../form'
 // the cancel button
 export const Cancel = styled(EnabledSecondaryButton)``
 
-// the connect button
-export const EnabledConnect = ({ connect }) => {
+// the connect button, which says {label}
+export const EnabledConnect = ({ connect, label = "connect" }) => {
     // build the handler that registers a new data archive
     const connectArchive = evt => {
         // stop this event from bubbling up
@@ -38,17 +38,17 @@ export const EnabledConnect = ({ connect }) => {
     // render
     return (
         <EnabledPrimaryButton {...behaviors}>
-            connect
+            {label}
         </EnabledPrimaryButton>
     )
 }
 
 // the connect button when disabled
-export const DisabledConnect = ({ children }) => {
+export const DisabledConnect = ({ label = "connect" }) => {
     // render
     return (
         <Button>
-            connect
+            {label}
         </Button>
     )
 }

@@ -13,7 +13,7 @@ import { graphql, useMutation } from 'react-relay/hooks'
 // hooks
 import { useSetActiveView } from '../explorer/useSetActiveView'
 // the store updater the archive mutations share
-import { connectArchiveUpdater } from '../archives/archiveListUpdaters'
+import { connectArchiveUpdater, reconfigureArchiveUpdater } from '../archives/archiveListUpdaters'
 // components
 import { Busy } from './busy'
 import { Panel } from './panel'
@@ -23,21 +23,23 @@ import { Name } from './name'
 import { Path } from './path'
 import { Form, Body, Error } from '../form'
 
-// a data archive local to the qed server
-export const Local = ({ view, setType, hide }) => {
+// a data archive local to the qed server; the form connects a new one, or reconfigures {edit}
+export const Local = ({ view, edit = null, setType, hide }) => {
     // error placeholder
     const [error, setError] = React.useState(null)
-    // set up my state
+    // set up my state, from what the archive being reconfigured says about itself, if any
     const [form, setForm] = React.useState({
-        // the nickname
-        name: "",
-        // the path
-        path: "",
+        // the nickname, which is the name of the archive without its kind
+        name: edit === null ? "" : edit.name.replace(/^local:/, ""),
+        // the path, which is its location without the scheme
+        path: edit === null ? "" : edit.uri.replace(/^file:/, ""),
     })
     // get the view mutator
     const decorate = useSetActiveView()
-    // build the mutation request
-    const [request, isInFlight] = useMutation(localArchiveMutation)
+    // build the mutation request: a new archive gets connected, an existing one reconfigured
+    const [request, isInFlight] = useMutation(
+        edit === null ? localArchiveMutation : reconfigureMutation
+    )
     // set up the state update
     const update = (field, value) => {
         // clear any errors
@@ -74,21 +76,22 @@ export const Local = ({ view, setType, hide }) => {
         // otherwise, collect the current state
         const name = form.name
         const path = form.path
+        // the location of the archive
+        const uri = `file:${path}`
+        // which needs no settings to get at
+        const credentials = { tokens: [] }
+        // a new archive is connected under its name, an existing one is moved to the new location
+        const input = (edit === null)
+            ? { name: `local:${name}`, uri, credentials }
+            : { uri: edit.uri, location: uri, credentials }
         // send the mutation to the server
         request({
             // input
-            variables: {
-                input: {
-                    // the payload
-                    name: `local:${name}`,
-                    uri: `file:${path}`,
-                    credentials: {
-                        tokens: []
-                    },
-                }
-            },
-            // updater
-            updater: connectArchiveUpdater("connectArchive"),
+            variables: { input },
+            // updater: a new archive joins the pile, an existing one takes its own old place
+            updater: (edit === null)
+                ? connectArchiveUpdater("connectArchive")
+                : reconfigureArchiveUpdater(edit.id),
             // when done
             onCompleted: data => {
                 // clear the error
@@ -103,7 +106,7 @@ export const Local = ({ view, setType, hide }) => {
                 // record the error
                 setError([
                     `got: ${error}`,
-                    `while connecting to the data archive '${name}'`,
+                    `while ${edit === null ? "connecting" : "reconfiguring"} the data archive '${name}'`,
                     `at '${path}'`,
                 ])
                 // all done
@@ -136,11 +139,11 @@ export const Local = ({ view, setType, hide }) => {
             <Form>
                 <Body>
                     <TypeSelector value="local" update={setType} />
-                    <Name value={form.name} update={update} />
+                    <Name value={form.name} update={update} fixed={edit !== null} />
                     <Path value={form.path} update={update} />
                 </Body>
             </Form>
-            <Connect connect={connect} />
+            <Connect connect={connect} label={edit === null ? "connect" : "update"} />
             {!isInFlight && <Cancel onClick={cancel}>cancel</Cancel>}
             {error && <Error errors={error} />}
             {isInFlight && <Busy />}
@@ -156,7 +159,47 @@ export const localArchiveMutation = graphql`
             archive {
                 id
                 name
+                type
                 uri
+                credentials {
+                    name
+                    value
+                }
+                readers
+                expanded
+                pending
+                error
+                hits
+                dirty
+                items {
+                    id
+                    name
+                    uri
+                    isFolder
+                    parent
+                    expanded
+                    pending
+                    error
+                }
+            }
+        }
+    }
+`
+
+
+// the mutation that points a local archive at a new location
+const reconfigureMutation = graphql`
+    mutation localArchiveReconfigureMutation($input: ReconfigureArchiveInput!) {
+        reconfigureArchive(input: $input) {
+            archive {
+                id
+                name
+                type
+                uri
+                credentials {
+                    name
+                    value
+                }
                 readers
                 expanded
                 pending
