@@ -29,15 +29,27 @@ class Archive(graphene.ObjectType):
 
     # my fields
     id = graphene.ID()
+    # the name of the archive
     name = graphene.String()
+    # its kind, which picks the form that configures it
+    type = graphene.String()
+    # its location
     uri = graphene.String()
+    # the settings that say how to get at its contents, never the keys of a session
     credentials = graphene.List(Credential)
+    # the readers that can open what it holds
     readers = graphene.List(graphene.String)
+    # the entries of its folders that are on display
     items = graphene.List(Item)
+    # whether its root is on display
     expanded = graphene.Boolean()
+    # whether the listing of its root is under way
     pending = graphene.Boolean()
+    # why the listing of its root failed, if it did
     error = graphene.String()
+    # how many entries it holds in all, when it can tell
     hits = graphene.Int()
+    # whether saving it would change the configuration files
     dirty = graphene.Boolean()
 
     # the resolvers
@@ -56,6 +68,14 @@ class Archive(graphene.ObjectType):
         """
         # use the component name
         return archive.pyre_name
+
+    @staticmethod
+    def resolve_type(archive, *_):
+        """
+        Get the kind of the {archive}, which picks the form that configures it
+        """
+        # the archive class knows
+        return archive.tag
 
     @staticmethod
     def resolve_uri(archive, *_):

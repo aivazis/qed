@@ -156,6 +156,17 @@ class S3(Archive, family="qed.archives.s3"):
         # and hand it off
         return session
 
+    def reconfigure(self, **kwds):
+        """
+        Point me at a new location, with new settings
+        """
+        # chain up
+        super().reconfigure(**kwds)
+        # the session i built was for the old settings, so the next request builds a new one
+        self._session = None
+        # all done
+        return self
+
     # hooks
     @classmethod
     def isSupported(cls):
