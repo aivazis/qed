@@ -20,6 +20,7 @@ import { Panel } from './panel'
 import { EnabledConnect, DisabledConnect, Cancel } from './buttons'
 import { TypeSelector } from './type'
 import { Name } from './name'
+import { useFetchArchiveNickname } from './useFetchArchiveNickname'
 import { Path } from './path'
 import { Form, Body, Error } from '../form'
 
@@ -40,6 +41,15 @@ export const Local = ({ view, edit = null, setType, hide }) => {
     const [request, isInFlight] = useMutation(
         edit === null ? localArchiveMutation : reconfigureMutation
     )
+    // ask the server for a nickname for a new archive, once the form names a folder
+    const suggestion = useFetchArchiveNickname({
+        // of my kind
+        type: "local",
+        // at the location the form describes
+        uri: form.path ? `file:${form.path}` : "",
+        // an archive that exists already keeps its name
+        skip: edit !== null,
+    })
     // set up the state update
     const update = (field, value) => {
         // clear any errors
@@ -74,7 +84,7 @@ export const Local = ({ view, edit = null, setType, hide }) => {
             return
         }
         // otherwise, collect the current state
-        const name = form.name
+        const name = form.name || suggestion
         const path = form.path
         // the location of the archive
         const uri = `file:${path}`
@@ -128,8 +138,8 @@ export const Local = ({ view, edit = null, setType, hide }) => {
     // determine whether i have enough information to make the connection
     const ready = (
         !isInFlight &&
-        form.name !== null && form.name.length &&
-        form.path !== null && form.path.length
+        (form.name || suggestion).length > 0 &&
+        form.path !== null && form.path.length > 0
     )
     // use this to figure out which button to render
     const Connect = ready ? EnabledConnect : DisabledConnect
@@ -139,7 +149,8 @@ export const Local = ({ view, edit = null, setType, hide }) => {
             <Form>
                 <Body>
                     <TypeSelector value="local" update={setType} />
-                    <Name value={form.name} update={update} fixed={edit !== null} />
+                    <Name value={form.name} suggestion={suggestion} update={update}
+                        fixed={edit !== null} />
                     <Path value={form.path} update={update} />
                 </Body>
             </Form>

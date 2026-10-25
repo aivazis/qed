@@ -25,6 +25,7 @@ export { Error } from './error'
 // editors
 export { Value, EnabledValue, Values } from './value'
 export { Input, EnabledInput, SelectedInput, Numeric } from './input'
+export { Nickname } from './nickname'
 
 // spacers
 export { SpacerFirst, SpacerBetween } from './spacers'

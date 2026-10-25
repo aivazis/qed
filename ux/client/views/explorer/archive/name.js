@@ -11,23 +11,11 @@ import styled from 'styled-components'
 
 // local
 // components
-import { EnabledInput, Field, Value } from '../form'
+import { Field, Nickname, Value } from '../form'
 
-// the name the archive; an archive that exists already keeps its name, so it is {fixed}
-export const Name = ({ value, update, fixed = false }) => {
-    // build the name mutator
-    const setName = evt => {
-        // set up the validation regex
-        const regex = /^[\w_]?[\w\d@$()_-]*$/g
-        // get the value
-        const candidate = evt.target.value
-        // update the form state
-        update("name", regex.test(candidate) ? candidate : value)
-    }
-    // assemble my behaviors
-    const behaviors = {
-        onChange: setName,
-    }
+// the name of the archive, with the server's {suggestion} dimmed while the field is empty; an
+// archive that exists already keeps its name, so it is {fixed}
+export const Name = ({ value, suggestion = "", update, fixed = false }) => {
     // a name that cannot change
     if (fixed) {
         // shows, but takes no input
@@ -37,16 +25,16 @@ export const Name = ({ value, update, fixed = false }) => {
             </Field>
         )
     }
-    // all done
+    // otherwise, the user picks it
     return (
-        <Field name="nickname" value={value} tip="the name of the data archive">
-            <Value>
-                <EnabledInput type="text" value={value === null ? "" : value} {...behaviors} />
-            </Value>
-        </Field>
+        <Nickname value={value} suggestion={suggestion} update={update} pattern={pattern}
+            tip="the name of the data archive" />
     )
 }
 
+
+// the names an archive can have
+const pattern = /^[\w_]?[\w\d@$()_-]*$/
 
 // a name that takes no input
 const Fixed = styled(Value)`

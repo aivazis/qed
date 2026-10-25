@@ -7,7 +7,8 @@
 
 // the archive trays follow the tree the server keeps: expanding through the facade opens the
 // archive's tray and shows its folders as trays of their own, and collapsing closes it; the edit
-// control of a tray brings up the form that moves its archive, which keeps its name
+// control of a tray brings up the form that moves its archive, which keeps its name; a new
+// archive is offered a name made from where it is
 
 import { test, expect } from "@playwright/test"
 import fs from "node:fs"
@@ -75,6 +76,32 @@ test.describe.serial("the archive trays follow the server", () => {
         // clean up the server
         await page.evaluate(uri => window.qed.disconnectArchive(uri), corrected)
         await expect(tray(page, edited)).toHaveCount(0)
+    })
+
+    test("a new local archive is offered the name of its folder, and takes it", async ({ page }) => {
+        // a folder whose name no archive holds
+        const folder = path.join(root, "suggested_folder")
+        fs.mkdirSync(folder)
+        await page.goto("/explore", { waitUntil: "load" })
+        await page.waitForFunction(() => Boolean(window.qed))
+        // bring up the form for a new archive, and pick a local one
+        await page.getByLabel("connect to this archive").click()
+        await page.getByText("local", { exact: true }).click()
+        // name the folder; the nickname field offers its name, dimmed
+        await page.locator("input").last().fill(folder)
+        const nickname = page.locator("input").first()
+        await expect(nickname).toHaveAttribute("placeholder", "suggested_folder")
+        await expect(nickname).toHaveValue("")
+        // connecting without typing a name takes the suggestion
+        await page.getByText("connect", { exact: true }).click()
+        await expect(tray(page, "local:suggested_folder")).toHaveCount(1)
+        // under that name, at the folder
+        const archives = await page.evaluate(() => window.qed.archives())
+        expect(archives.filter(archive => archive.name === "local:suggested_folder")
+            .map(archive => archive.uri)).toEqual([`file:${folder}`])
+        // clean up the server
+        await page.evaluate(uri => window.qed.disconnectArchive(uri), `file:${folder}`)
+        await expect(tray(page, "local:suggested_folder")).toHaveCount(0)
     })
 })
 
