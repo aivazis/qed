@@ -29,7 +29,9 @@ store = ux.store
 # the store writes the archives back to the workspace file on every change; point the
 # workspace at a scratch directory so the fixtures of this directory stay untouched
 scratch = os.path.join(os.path.dirname(os.path.abspath(__file__)), "browse_fleet_ws")
+# make it
 os.makedirs(scratch, exist_ok=True)
+# and point the workspace at it
 app.workspace.path = scratch
 # build a fleet
 fleet = qed.nexus.fleet(name="qed.test.fleet")
@@ -40,8 +42,9 @@ store.fleet = fleet
 
 # the archive is the test tree, one level up
 root = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-# connect it
+# make an archive of it
 archive = qed.archives.local(name="browse_worker", uri=f"file:{root}")
+# and connect it
 store.connectArchive(archive=archive)
 # its uri is how the mutations address it
 uri = str(archive.uri)
@@ -67,6 +70,7 @@ store.notifier = notifier
 store.expandFolder(archive=uri, uri=uri)
 # the listing is under way on a worker
 assert archive.isPending(uri=uri)
+# with nothing listed yet
 assert archive.listing(uri=uri) is None
 # the scouts of this archive were formed
 assert set(fleet.explorers) == {archive.pyre_name}
@@ -76,15 +80,20 @@ assert fleet.explorers[archive.pyre_name].size == 1
 fleet.dispatcher.watch()
 # the listing is over
 assert not archive.isPending(uri=uri)
+# without a failure
 assert archive.failure(uri=uri) is None
 # and this directory is among the entries
 items = {item["name"]: item for item in archive.items()}
+# as a folder
 assert items["qed.pkg"]["isFolder"]
+# under the root
 assert items["qed.pkg"]["parent"] == uri
 
 # moving the archive into the directory of the browser suites sends its scouts home
 moved = f"{uri}/qed.ux.playwright"
+# by pointing it there
 store.reconfigureArchive(uri=uri, location=moved, settings={})
+# so the fleet has none
 assert not fleet.explorers
 # and listing its new location puts the scouts back to work
 store.expandFolder(archive=moved, uri=moved)
@@ -94,13 +103,16 @@ assert set(fleet.explorers) == {archive.pyre_name}
 fleet.dispatcher.watch()
 # the listing is over
 assert not archive.isPending(uri=moved)
+# without a failure
 assert archive.failure(uri=moved) is None
 # and the configuration of the suites is among the entries of the new location
 items = {item["name"]: item for item in archive.items()}
+# under the new location
 assert items["playwright.config.ts"]["parent"] == moved, items
 
 # disconnecting the archive sends its scouts home
 store.disconnectArchive(uri=moved)
+# so the fleet has none
 assert not fleet.explorers
 
 # send everybody home
