@@ -9,7 +9,8 @@
 """
 Check that a listing travels to a worker: with a fleet attached, expanding a folder hands the
 listing to the scouts of the archive, the mutation returns with the folder pending, and the
-manifest lands through the callback and moves the tree
+manifest lands through the callback and moves the tree; an archive moved to a new location sends
+its scouts home, and the next listing puts them back to work at the new location
 """
 
 # externals
@@ -81,8 +82,25 @@ items = {item["name"]: item for item in archive.items()}
 assert items["qed.pkg"]["isFolder"]
 assert items["qed.pkg"]["parent"] == uri
 
+# moving the archive into the directory of the browser suites sends its scouts home
+moved = f"{uri}/qed.ux.playwright"
+store.reconfigureArchive(uri=uri, location=moved, settings={})
+assert not fleet.explorers
+# and listing its new location puts the scouts back to work
+store.expandFolder(archive=moved, uri=moved)
+# under the same name
+assert set(fleet.explorers) == {archive.pyre_name}
+# spin the event loop until the manifest lands
+fleet.dispatcher.watch()
+# the listing is over
+assert not archive.isPending(uri=moved)
+assert archive.failure(uri=moved) is None
+# and the configuration of the suites is among the entries of the new location
+items = {item["name"]: item for item in archive.items()}
+assert items["playwright.config.ts"]["parent"] == moved, items
+
 # disconnecting the archive sends its scouts home
-store.disconnectArchive(uri=uri)
+store.disconnectArchive(uri=moved)
 assert not fleet.explorers
 
 # send everybody home

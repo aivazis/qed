@@ -246,14 +246,15 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
 
     def recall(self, archive):
         """
-        Disband the scouts dedicated to {archive}, e.g. because it was disconnected
+        Send home the scouts dedicated to {archive}, e.g. because it was disconnected, or moved
         """
         # look up the team, removing it from my registry
         team = self.explorers.pop(archive, None)
         # if there is one
         if team is not None:
-            # send its crews home
-            team.disband()
+            # send its crews home; standing down, rather than disbanding, leaves a team that an
+            # archive listed again under the same name, e.g. after a move, can put back to work
+            team.standDown()
         # all done
         return self
 
