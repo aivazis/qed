@@ -60,7 +60,9 @@ store = ux.store
 
 # the kinds of archives
 local = qed.archives.local
+# an archive in a bucket
 s3 = qed.archives.s3
+# and one of earth access granules
 earth = qed.archives.earth
 
 

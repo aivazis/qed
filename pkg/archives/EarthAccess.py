@@ -28,46 +28,57 @@ class EarthAccess(Archive, family="qed.archives.earth"):
     uri.default = qed.primitives.uri(scheme="earth", address=())
     uri.doc = "the archive identifier"
 
+    # the collection
     collection = qed.properties.str()
     collection.default = None
     collection.doc = "the short name of the data collection"
 
+    # its concept id
     conceptId = qed.properties.str()
     conceptId.default = None
     conceptId.doc = "the concept id of the data collection"
 
+    # a pattern for the granule names
     pattern = qed.properties.str()
     pattern.default = None
     pattern.doc = "a pattern, with wildcards, that the granule names must match"
 
+    # the most granules to fetch
     count = qed.properties.int()
     count.default = None
     count.doc = "the cap on the number of granules fetched; unset fetches every match"
 
+    # the start of the acquisition window
     begin = qed.properties.str()
     begin.default = None
     begin.doc = "the start of the acquisition window, as an ISO 8601 date"
 
+    # its end
     end = qed.properties.str()
     end.default = None
     end.doc = "the end of the acquisition window, as an ISO 8601 date"
 
+    # a bounding box
     bbox = qed.properties.tuple(schema=qed.properties.float())
     bbox.default = None
     bbox.doc = "a bounding box as (west, south, east, north), in degrees"
 
+    # a point of interest
     point = qed.properties.tuple(schema=qed.properties.float())
     point.default = None
     point.doc = "a point of interest as (longitude, latitude), in degrees"
 
+    # a circle
     circle = qed.properties.tuple(schema=qed.properties.float())
     circle.default = None
     circle.doc = "a circle as (longitude, latitude, radius), in degrees and meters"
 
+    # a line
     line = qed.properties.list(schema=qed.properties.tuple(schema=qed.properties.float()))
     line.default = None
     line.doc = "the (longitude, latitude) vertices of a line, in degrees"
 
+    # a polygon
     polygon = qed.properties.list(schema=qed.properties.tuple(schema=qed.properties.float()))
     polygon.default = None
     polygon.doc = "the (longitude, latitude) vertices of a polygon, in degrees"
@@ -109,7 +120,9 @@ class EarthAccess(Archive, family="qed.archives.earth"):
             channel = journal.warning("qed.archives.earth.contents")
             # explain
             channel.line(f"'{self.pyre_name}' lists nothing")
+            # why
             channel.line("an earth archive needs a spatial or temporal constraint")
+            # or what else would do
             channel.line("or a pattern for the granule names")
             # flush
             channel.log()
@@ -141,6 +154,7 @@ class EarthAccess(Archive, family="qed.archives.earth"):
                 channel = journal.warning("qed.archives.earth.contents")
                 # explain
                 channel.line(f"'{self.pyre_name}': no folder at '{uri}'")
+                # and why that might be
                 channel.line("the page may have changed since the folder was listed")
                 # flush
                 channel.log()
@@ -153,9 +167,13 @@ class EarthAccess(Archive, family="qed.archives.earth"):
         channel = journal.debug("qed.archives.earth.contents")
         # show me
         channel.line(f"{self}")
+        # indent
         channel.indent()
+        # the query
         channel.line(f"query: {fs.query}")
+        # the hits
         channel.line(f"hits: {fs.hits}")
+        # the folder
         channel.line(f"folder: {folder.uri}")
         # make a pile for the folders
         folders = []
@@ -171,9 +189,13 @@ class EarthAccess(Archive, family="qed.archives.earth"):
                 continue
             # show me
             channel.line(f"entry:")
+            # indent
             channel.indent()
+            # the name
             channel.line(f"name: {name}")
+            # the location
             channel.line(f"location: {location}")
+            # outdent
             channel.outdent()
             # form the item
             item = (name, location, node.isFolder)
@@ -307,6 +329,7 @@ class EarthAccess(Archive, family="qed.archives.earth"):
             return (gid,)
         # the stack is the track, the pass direction, and the frame
         track = descriptor.track
+        # the pass direction
         direction = descriptor.direction
         # which products at level 0 do not have
         frame = getattr(descriptor, "frame", None)
@@ -349,6 +372,7 @@ class EarthAccess(Archive, family="qed.archives.earth"):
 
     # constants
     tag = "earth"
+    # and the label that names my kind to the user
     label = "earth-access"
 
     # private data
