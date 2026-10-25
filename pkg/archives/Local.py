@@ -81,6 +81,18 @@ class Local(Archive, family="qed.archives.local"):
         # and hand it back
         return fs
 
+    # naming
+    @classmethod
+    def nicknames(cls, uri: str, collection: str | None = None) -> list:
+        """
+        Propose the nicknames of an archive at {uri}: the name of its folder, then more and more
+        of the path that leads to it, until all of it is in
+        """
+        # the folders on the way to the archive
+        levels = [level for level in qed.primitives.uri.parse(uri).address.split("/") if level]
+        # the last one, then the last two, and so on, each joined into a single level
+        return ["_".join(levels[-count:]) for count in range(1, len(levels) + 1)]
+
     # hooks
     @classmethod
     def isSupported(cls):

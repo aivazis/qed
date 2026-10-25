@@ -172,6 +172,26 @@ class S3(Archive, family="qed.archives.s3"):
         # all done
         return self
 
+    # naming
+    @classmethod
+    def nicknames(cls, uri: str, collection: str | None = None) -> list:
+        """
+        Propose the nicknames of an archive at {uri}: the name of its bucket, then the bucket with
+        more and more of the path within it, until all of it is in
+        """
+        # parse the location
+        location = qed.primitives.uri.parse(uri, scheme="s3")
+        # the bucket
+        bucket = location.authority
+        # a location without a bucket has nothing to suggest
+        if not bucket:
+            # so don't
+            return []
+        # the folders within the bucket
+        levels = [level for level in location.address.split("/") if level]
+        # the bucket, then the bucket with its first folder, and so on, each joined into one level
+        return ["_".join([bucket] + levels[:count]) for count in range(len(levels) + 1)]
+
     # hooks
     @classmethod
     def isSupported(cls):

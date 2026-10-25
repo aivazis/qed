@@ -61,6 +61,14 @@ class Query(graphene.ObjectType):
         uri=graphene.String(required=True),
         module=graphene.String(required=True),
     )
+    # a nickname for a new archive
+    archiveNickname = graphene.Field(
+        graphene.String,
+        required=True,
+        type=graphene.String(required=True),
+        uri=graphene.String(required=True),
+        collection=graphene.String(),
+    )
 
     # the resolvers
     # the session manager
@@ -322,6 +330,32 @@ class Query(graphene.ObjectType):
         store = info.context["store"]
         # and make sure no one else in the configuration store holds the name
         return store.unclaimed(name=name)
+
+    @staticmethod
+    def resolve_archiveNickname(root, info, type, uri, collection=None, **kwds):
+        """
+        Suggest a nickname for a new archive of the kind {type} at {uri}, or of the granules of
+        {collection}, that no component holds yet
+        """
+        # find the archive kind among the ones with runtime support
+        factory = next((kind for kind in qed.archives.available() if kind.tag == type), None)
+        # the client takes the kind from the list the server gave it, so one that is not there
+        # means the two have drifted apart
+        if factory is None:
+            # make a channel
+            channel = journal.firewall("qed.gql.nickname")
+            # complain
+            channel.line(f"unknown archive kind '{type}'")
+            # say what was going on
+            channel.line(f"while suggesting a name for the archive at '{uri}'")
+            # flush
+            channel.log()
+            # and bail, in case firewalls aren't fatal
+            return ""
+        # grab the store
+        store = info.context["store"]
+        # and ask it for a name nobody holds
+        return store.archiveNickname(factory=factory, uri=uri, collection=collection)
 
     # version
     @staticmethod

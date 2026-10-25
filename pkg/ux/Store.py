@@ -718,18 +718,50 @@ class Store(qed.component, family="qed.ux.store"):
         """
         Turn the proposed {name} into one that no top-level entry of the configuration store holds
         """
-        # the configuration store
-        nameserver = self.pyre_nameserver
         # go through the proposal and its numbered variants
         for count in itertools.count(start=1):
             # the proposal itself first, then with a counter
             candidate = name if count == 1 else f"{name}-{count}"
-            # a top-level name is held if any key is the name itself or starts a level below it
-            pattern = re.escape(candidate) + r"(\.|$)"
             # if nobody holds it
-            if next(nameserver.find(pattern=pattern), None) is None:
+            if not self.claimed(name=candidate):
                 # it is the one
                 return candidate
+
+    def claimed(self, name: str) -> bool:
+        """
+        Check whether a top-level entry of the configuration store holds {name}
+        """
+        # a top-level name is held if any key is the name itself or starts a level below it
+        pattern = re.escape(name) + r"(\.|$)"
+        # so look for one
+        return next(self.pyre_nameserver.find(pattern=pattern), None) is not None
+
+    def archiveNickname(self, factory, uri: str, collection: str | None = None) -> str:
+        """
+        Suggest a nickname for an archive made by {factory} at {uri} that no component holds yet;
+        the nickname becomes the name of the archive behind the kind of the archive, and pyre
+        hands back the archive that held a name before, even once it is disconnected
+        """
+        # the proposals of the archive kind, in order of preference, made into single levels of
+        # a pyre name
+        proposals = [
+            qed.readers.sanitize(name=proposal)
+            for proposal in factory.nicknames(uri=uri, collection=collection)
+        ]
+        # the names the archive would go by
+        for proposal in proposals:
+            # if nobody holds the name it makes
+            if not self.claimed(name=f"{factory.tag}:{proposal}"):
+                # it is the one
+                return proposal
+        # an archive kind with nothing to propose leaves the nickname to the user
+        if not proposals:
+            # so say nothing
+            return ""
+        # otherwise, every proposal is held, so number the most specific one
+        name = self.unclaimed(name=f"{factory.tag}:{proposals[-1]}")
+        # and hand it back without the kind
+        return name.removeprefix(f"{factory.tag}:")
 
     def connectSource(self, source):
         """

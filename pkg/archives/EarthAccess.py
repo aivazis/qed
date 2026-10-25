@@ -317,6 +317,19 @@ class EarthAccess(Archive, family="qed.archives.earth"):
         # place the granule
         return stack, date, gid
 
+    # naming
+    @classmethod
+    def nicknames(cls, uri: str, collection: str | None = None) -> list:
+        """
+        Propose the nickname of an archive of the granules of {collection}: the collection
+        """
+        # an archive without a collection has nothing to suggest
+        if not collection:
+            # so don't
+            return []
+        # otherwise, the collection names it
+        return [collection]
+
     # hooks
     @classmethod
     def isSupported(cls):
