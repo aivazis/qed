@@ -88,6 +88,8 @@ assert suggest(local, "file:/other/nisar/gcov") == "other_nisar_gcov"
 store.connectArchive(archive=local(name="local:other_nisar_gcov", uri="file:/elsewhere"))
 # it gets a number
 assert suggest(local, "file:/other/nisar/gcov") == "other_nisar_gcov-2"
+# the name an archive being reconfigured holds is its own to keep
+assert store.archiveNickname(factory=local, uri="file:/data/nisar/gcov", current="local:gcov") == "gcov"
 # the root of the filesystem has no name to offer
 assert suggest(local, "file:/") == ""
 

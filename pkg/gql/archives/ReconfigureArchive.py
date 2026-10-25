@@ -44,7 +44,7 @@ class ReconfigureArchive(graphene.Mutation):
         settings = {token["name"]: token["value"] or None for token in tokens}
         # reconfigure the archive
         archive = store.reconfigureArchive(
-            uri=input.uri, location=input.location, settings=settings
+            uri=input.uri, location=input.location, settings=settings, name=input.name
         )
         # if that failed
         if archive is None:

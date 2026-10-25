@@ -447,11 +447,12 @@ class Store(qed.component, family="qed.ux.store"):
         # hand it back
         return archive
 
-    def reconfigureArchive(self, uri, location, settings):
+    def reconfigureArchive(self, uri, location, settings, name=None):
         """
         Point the archive at {uri} to {location}, with the {settings} that say how to get at it,
-        e.g. once the user has corrected a misspelled bucket; the archive keeps its name, which a
-        new archive could not have, since pyre hands back the old instance for a name it knows
+        e.g. once the user has corrected a misspelled bucket; the archive keeps its name, unless
+        the user gave it a new {name}, in which case a new archive takes its place, since pyre
+        cannot rename a component
         """
         # look up the archive
         archive = self._locateArchive(uri=uri)
@@ -461,9 +462,9 @@ class Store(qed.component, family="qed.ux.store"):
             return None
         # the settings must name traits of the archive, which complains about any that don't;
         # asking now leaves the archive alone if one is wrong
-        for name in settings:
+        for trait in settings:
             # one at a time
-            archive.pyre_trait(alias=name)
+            archive.pyre_trait(alias=trait)
         # parse the new location
         location = qed.primitives.uri.parse(location, scheme="file")
         # look for an archive that is already there
@@ -482,6 +483,12 @@ class Store(qed.component, family="qed.ux.store"):
             channel.log()
             # and leave both alone
             return None
+        # a new name calls for a new archive
+        if name is not None and name != archive.pyre_name:
+            # so make one
+            return self._renameArchive(
+                archive=archive, name=name, location=location, settings=settings
+            )
         # if a fleet is attached
         if self.fleet is not None:
             # send home the scouts that know the old location
@@ -736,11 +743,14 @@ class Store(qed.component, family="qed.ux.store"):
         # so look for one
         return next(self.pyre_nameserver.find(pattern=pattern), None) is not None
 
-    def archiveNickname(self, factory, uri: str, collection: str | None = None) -> str:
+    def archiveNickname(
+        self, factory, uri: str, collection: str | None = None, current: str | None = None
+    ) -> str:
         """
         Suggest a nickname for an archive made by {factory} at {uri} that no component holds yet;
         the nickname becomes the name of the archive behind the kind of the archive, and pyre
-        hands back the archive that held a name before, even once it is disconnected
+        hands back the archive that held a name before, even once it is disconnected; the
+        {current} name of an archive being reconfigured is its own, so it is free for it
         """
         # the proposals of the archive kind, in order of preference, made into single levels of
         # a pyre name
@@ -750,8 +760,10 @@ class Store(qed.component, family="qed.ux.store"):
         ]
         # the names the archive would go by
         for proposal in proposals:
-            # if nobody holds the name it makes
-            if not self.claimed(name=f"{factory.tag}:{proposal}"):
+            # the name it makes
+            candidate = f"{factory.tag}:{proposal}"
+            # if it is the archive's own, or nobody holds it
+            if candidate == current or not self.claimed(name=candidate):
                 # it is the one
                 return proposal
         # an archive kind with nothing to propose leaves the nickname to the user
@@ -2195,6 +2207,50 @@ class Store(qed.component, family="qed.ux.store"):
             self.notifier()
         # all done
         return self
+
+    def _renameArchive(self, archive, name, location, settings):
+        """
+        Replace {archive} with a new one called {name} at {location}, configured the way it is,
+        with the {settings} on top; the new archive takes the place of the old one, and the
+        configuration files let go of the old name
+        """
+        # pyre hands back the component that held a name before, so the name must be free
+        if self.claimed(name=name):
+            # make a channel
+            channel = journal.warning("qed.ux.archives")
+            # complain
+            channel.line(f"could not rename the archive '{archive.pyre_name}'")
+            # say what to
+            channel.line(f"to '{name}'")
+            # and why not
+            channel.line("since that name is taken")
+            # flush
+            channel.log()
+            # and leave the archive alone
+            return None
+        # the configuration of the archive, less its location and what it has on display, which
+        # belong to the old one
+        traits = {
+            trait.name: getattr(archive, trait.name)
+            for trait in archive.pyre_properties()
+            if trait.name not in ("uri", "expanded")
+        }
+        # with the new settings on top
+        traits.update(settings)
+        # make the new archive
+        renamed = type(archive)(name=name, uri=location, **traits)
+        # if a fleet is attached
+        if self.fleet is not None:
+            # send home the scouts of the old one
+            self.fleet.recall(archive=archive.pyre_name)
+        # the new archive takes the place of the old one
+        self._dataArchives.replaceArchive(archive=archive, replacement=renamed)
+        # the user let go of the old name, so the configuration lets go of it as well
+        self._keep(lambda keeper: keeper.forgetArchive(archive=archive))
+        # the tree moved, so let the clients know
+        self._announce()
+        # and hand off the new archive
+        return renamed
 
     def _locateArchive(self, uri):
         """

@@ -68,6 +68,7 @@ class Query(graphene.ObjectType):
         type=graphene.String(required=True),
         uri=graphene.String(required=True),
         collection=graphene.String(),
+        archive=graphene.String(),
     )
 
     # the resolvers
@@ -379,10 +380,11 @@ class Query(graphene.ObjectType):
         return store.unclaimed(name=name)
 
     @staticmethod
-    def resolve_archiveNickname(root, info, type, uri, collection=None, **kwds):
+    def resolve_archiveNickname(root, info, type, uri, collection=None, archive=None, **kwds):
         """
-        Suggest a nickname for a new archive of the kind {type} at {uri}, or of the granules of
-        {collection}, that no component holds yet
+        Suggest a nickname for an archive of the kind {type} at {uri}, or of the granules of
+        {collection}, that no component holds yet; the name of the {archive} being reconfigured,
+        if any, is its own to keep
         """
         # find the archive kind among the ones with runtime support
         factory = next((kind for kind in qed.archives.available() if kind.tag == type), None)
@@ -402,7 +404,9 @@ class Query(graphene.ObjectType):
         # grab the store
         store = info.context["store"]
         # and ask it for a name nobody holds
-        return store.archiveNickname(factory=factory, uri=uri, collection=collection)
+        return store.archiveNickname(
+            factory=factory, uri=uri, collection=collection, current=archive
+        )
 
     # version
     @staticmethod

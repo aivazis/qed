@@ -54,6 +54,22 @@ class Archives:
         # all done
         return archive
 
+    def replaceArchive(self, archive, replacement):
+        """
+        Put {replacement} in the place {archive} has in the catalog
+        """
+        # the location of the archive
+        location = str(archive.uri)
+        # rebuild the catalog in its current order, swapping the archive for its replacement
+        self._archives = {
+            (str(replacement.uri) if key == location else key): (
+                replacement if key == location else entry
+            )
+            for key, entry in self._archives.items()
+        }
+        # all done
+        return replacement
+
     def removeArchive(self, uri):
         """
         Remove a archive given its {uri}

@@ -22,6 +22,8 @@ class ReconfigureArchiveInput(graphene.InputObjectType):
     uri = graphene.String(required=True)
     # the location it moves to
     location = graphene.String(required=True)
+    # its name, which, when it differs from the current one, makes a new archive take its place
+    name = graphene.String()
     # the settings that say how to get at it; an empty value clears a setting
     credentials = CredentialsInput()
 
