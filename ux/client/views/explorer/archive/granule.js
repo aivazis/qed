@@ -67,7 +67,8 @@ const Name = ({ form, update }) => {
     // render
     return (
         <Value>
-            <Entry type="text" value={form.granule.pattern} {...behaviors} />
+            <Entry type="text" value={form.granule.pattern} {...behaviors}
+                aria-label="granule name pattern" />
         </Value>
     )
 }
