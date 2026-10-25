@@ -78,6 +78,50 @@ test.describe.serial("the archive trays follow the server", () => {
         await expect(tray(page, edited)).toHaveCount(0)
     })
 
+    test("the edit button replaces the query of an earth access archive", async ({ page }) => {
+        // send a graphql document to the server under test
+        const gql = (query: string, variables = {}) => page.evaluate(async ([query, variables]) => {
+            const response = await fetch("/graphql", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ query, variables }),
+            })
+            return (await response.json()).data
+        }, [query, variables] as const)
+        await page.goto("/explore", { waitUntil: "load" })
+        await page.waitForFunction(() => Boolean(window.qed))
+        // an archive of the granules of a collection around a point; connecting runs no query
+        const uri = "earth:spec_earth"
+        await gql(`mutation ($input: ConnectEarthAccessArchiveInput!) {
+            connectEarthAccessArchive(input: $input) { archive { name } } }`, {
+            input: {
+                name: uri, uri, count: "10",
+                collection: { shortName: "NISAR_L2_GCOV_BETA_V1", conceptId: "" },
+                filters: ["geo"], geo: "point", point: { longitude: "-118.5", latitude: "34.25" },
+            },
+        })
+        // its tray shows up
+        await page.reload({ waitUntil: "load" })
+        // its edit control brings up the form, filled in with its query
+        await tray(page, uri).getByLabel("edit this archive").click()
+        await expect(page.getByLabel("collection short name")).toHaveValue("NISAR_L2_GCOV_BETA_V1")
+        await expect(page.getByLabel("Count", { exact: true })).toHaveValue("10")
+        await expect(page.getByLabel("longitude")).toHaveValue("-118.5")
+        await expect(page.getByLabel("latitude")).toHaveValue("34.25")
+        // pick another collection and send it
+        await page.getByLabel("collection short name").fill("NISAR_L2_GUNW_BETA_V1")
+        await page.getByText("update", { exact: true }).click()
+        await expect(page.getByText("update", { exact: true })).toHaveCount(0)
+        // the archive keeps its name and its point, and searches the new collection
+        const data = await gql("query { qed { archives { name earth { collection point } } } }")
+        expect(data.qed.archives.filter(archive => archive.name === uri)).toEqual([
+            { name: uri, earth: { collection: "NISAR_L2_GUNW_BETA_V1", point: [-118.5, 34.25] } },
+        ])
+        // clean up the server
+        await page.evaluate(uri => window.qed.disconnectArchive(uri), uri)
+        await expect(tray(page, uri)).toHaveCount(0)
+    })
+
     test("a new local archive takes the name of its folder, which can be cleared and put back", async ({ page }) => {
         // a folder whose name no archive holds
         const folder = path.join(root, "suggested_folder")
