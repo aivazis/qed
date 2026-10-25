@@ -31,11 +31,15 @@ if os.path.exists(workspace):
     shutil.rmtree(workspace)
 # make it, with a few folders to turn into archives
 os.makedirs(os.path.join(workspace, "one", "inner"))
+# another
 os.makedirs(os.path.join(workspace, "two"))
+# and a third
 os.makedirs(os.path.join(workspace, "three"))
 # their locations
 one = f"file:{os.path.realpath(os.path.join(workspace, 'one'))}"
+# the second
 two = f"file:{os.path.realpath(os.path.join(workspace, 'two'))}"
+# and the third
 three = f"file:{os.path.realpath(os.path.join(workspace, 'three'))}"
 
 # the configuration file
@@ -73,6 +77,7 @@ store = ux.store
 archive = store.connectArchive(archive=qed.archives.local(name="local:moving", uri=one))
 # with a folder on display
 store.expandFolder(archive=one, uri=one)
+# and a folder beneath it
 store.expandFolder(archive=one, uri=f"{one}/inner")
 # saved, so the files know about it
 store.persistArchive(uri=one)
