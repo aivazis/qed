@@ -84,6 +84,7 @@ window.qed = {
                   items:[{ name, uri, isFolder, parent, expanded, pending, error }] }],
   connectArchive(name, uri),                      // a local archive rooted at uri, e.g. "file:/data"
   disconnectArchive(uri),
+  reconfigureArchive(uri, location, settings?),   // move an archive, keeping its name; settings e.g. { profile, region }
   expandFolder(archive, uri?),                    // put a folder on display and list it; the root is the archive's own uri
   collapseFolder(archive, uri?),                  // take a folder, and everything beneath it, off display
   refreshArchive(uri),                            // list every folder on display again

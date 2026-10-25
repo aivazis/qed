@@ -106,7 +106,7 @@ export const S3 = ({ view, edit = null, setType, hide }) => {
             // updater: a new archive joins the pile, an existing one takes its own old place
             updater: (edit === null)
                 ? connectArchiveUpdater("connectArchive")
-                : reconfigureArchiveUpdater(edit.id),
+                : reconfigureArchiveUpdater(edit.uri),
             // when done
             onCompleted: data => {
                 // clear the error

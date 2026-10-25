@@ -39,7 +39,8 @@ and `S3.discover` both keep a `dead` set), so re-discovery is an honest refresh,
 - The list of connected archives: `Store._dataArchives`, an `Archives` catalog keyed by the
   uri string (`pkg/ux/Archives.py`), seeded at boot from the plexus `archives` trait, whose
   default is one local archive rooted at the launch directory (`pkg/shells/Plexus.py:28`).
-  `connectArchive`, `connectEarthAccessArchive`, and `disconnectArchive` mutate it in memory.
+  `connectArchive`, `connectEarthAccessArchive`, `reconfigureArchive`, and `disconnectArchive`
+  mutate it in memory.
 - The archive list is on the app query (`QED.archives`), and every successful mutation
   broadcasts the SSE change frame (`pkg/ux/GraphQL.py:119`), so a connect on one client already
   shows up on every other client. The list is shared; it is just not persisted.

@@ -39,7 +39,7 @@ export const Local = ({ view, edit = null, setType, hide }) => {
     const decorate = useSetActiveView()
     // build the mutation request: a new archive gets connected, an existing one reconfigured
     const [request, isInFlight] = useMutation(
-        edit === null ? localArchiveMutation : reconfigureMutation
+        edit === null ? localArchiveMutation : localArchiveReconfigureMutation
     )
     // ask the server for a nickname for a new archive, once the form names a folder
     const suggestion = useFetchArchiveNickname({
@@ -101,7 +101,7 @@ export const Local = ({ view, edit = null, setType, hide }) => {
             // updater: a new archive joins the pile, an existing one takes its own old place
             updater: (edit === null)
                 ? connectArchiveUpdater("connectArchive")
-                : reconfigureArchiveUpdater(edit.id),
+                : reconfigureArchiveUpdater(edit.uri),
             // when done
             onCompleted: data => {
                 // clear the error
@@ -198,8 +198,8 @@ export const localArchiveMutation = graphql`
 `
 
 
-// the mutation that points a local archive at a new location
-const reconfigureMutation = graphql`
+// the mutation that points an archive at a new location
+export const localArchiveReconfigureMutation = graphql`
     mutation localArchiveReconfigureMutation($input: ReconfigureArchiveInput!) {
         reconfigureArchive(input: $input) {
             archive {
