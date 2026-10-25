@@ -24,8 +24,8 @@ class Imaginary(Value, family="qed.channels.imaginary"):
     """
 
     # the selector that extracts the imaginary part
-    selector = qed.viz.selector()
-    selector.default = qed.viz.selectors.imaginary
+    selector = qed.viz.accessor()
+    selector.default = qed.viz.accessors.imaginary
     selector.doc = "the selector that extracts the imaginary part of each sample"
 
     # framework hooks

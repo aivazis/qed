@@ -42,9 +42,13 @@ class QED(graphene.ObjectType):
     id = graphene.ID(required=True)
     # my parts
     availableArchiveTypes = graphene.List(ArchiveType)
+    # the active views
     views = graphene.List(views.view)
+    # the known data archives
     archives = graphene.List(Archive)
+    # the known dataset readers
     readers = graphene.List(Reader)
+    # and the journal channels the server knows about
     journal = graphene.List(JournalChannel)
     # the factories that can be placed on a pipeline diagram
     catalog = graphene.List(graphene.NonNull(CatalogGroup), required=True)
@@ -101,7 +105,7 @@ class QED(graphene.ObjectType):
         # the protocols, in pipeline order
         protocols = (
             qed.viz.reader,
-            qed.viz.selector,
+            qed.viz.accessor,
             qed.viz.slicer,
             qed.viz.operator,
             qed.viz.normalizer,

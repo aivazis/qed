@@ -24,8 +24,8 @@ class Real(Value, family="qed.channels.real"):
     """
 
     # the selector that extracts the real part
-    selector = qed.viz.selector()
-    selector.default = qed.viz.selectors.real
+    selector = qed.viz.accessor()
+    selector.default = qed.viz.accessors.real
     selector.doc = "the selector that extracts the real part of each sample"
 
     # framework hooks

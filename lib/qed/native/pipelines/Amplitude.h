@@ -45,8 +45,7 @@ public:
     // a view of its bytes
     using image_view_type = image_type::constview_type;
     // the factories
-    using selector_type =
-        pyre::flow::factories::selectors::amplitude_t<signal_type, amplitude_type>;
+    using modulus_type = pyre::flow::factories::operators::amplitude_t<signal_type, amplitude_type>;
     using normalizer_type =
         pyre::flow::factories::filters::parametric_t<amplitude_type, channel_type>;
     using colormap_type = pyre::viz::factories::colormaps::gray_t<channel_type>;
@@ -65,7 +64,7 @@ public:
         std::shared_ptr<channel_type> blue;
         std::shared_ptr<image_type> image;
         // the factories
-        std::shared_ptr<selector_type> selector;
+        std::shared_ptr<modulus_type> modulus;
         std::shared_ptr<normalizer_type> normalizer;
         std::shared_ptr<colormap_type> colormap;
         std::shared_ptr<codec_type> codec;

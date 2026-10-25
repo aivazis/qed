@@ -168,12 +168,12 @@ qed::native::pipelines::Complex<cellT>::build(int rows, int columns) -> graph_ty
     // and writes the hue
     g.scaler->affine(g.hue);
 
-    // the amplitude branch: make the selector
-    g.selector = selector_type::create("amplitude");
+    // the amplitude branch: make the operator that computes the amplitude
+    g.modulus = modulus_type::create("amplitude");
     // it reads the signal
-    g.selector->signal(g.signal);
+    g.modulus->signal(g.signal);
     // and writes the magnitudes
-    g.selector->amplitude(g.amplitude);
+    g.modulus->amplitude(g.amplitude);
     // make the normalizer
     g.normalizer = normalizer_type::create("brightness");
     // it reads the magnitudes
@@ -241,9 +241,9 @@ qed::native::pipelines::Complex<cellT>::dismantle(graph_type & g) -> void
     // unhook the normalizer from the magnitudes and the brightness
     g.normalizer->removeInput("signal");
     g.normalizer->removeOutput("normalized");
-    // unhook the selector from the signal and the magnitudes
-    g.selector->removeInput("signal");
-    g.selector->removeOutput("amplitude");
+    // unhook the operator from the signal and the magnitudes
+    g.modulus->removeInput("signal");
+    g.modulus->removeOutput("amplitude");
     // unhook the scaler from the phases and the hue
     g.scaler->removeInput("signal");
     g.scaler->removeOutput("affine");
