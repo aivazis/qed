@@ -23,6 +23,7 @@ from .archives.ExpandFolder import ExpandFolder
 from .archives.CollapseFolder import CollapseFolder
 from .archives.PersistArchive import PersistArchive
 from .archives.ReconfigureArchive import ReconfigureArchive
+from .archives.ReconfigureEarthAccessArchive import ReconfigureEarthAccessArchive
 from .archives.RefreshArchive import RefreshArchive
 from .archives.RestoreArchives import RestoreArchives
 from .readers.ConnectReader import ConnectReader
@@ -143,6 +144,8 @@ class Mutation(graphene.ObjectType):
     persistArchive = PersistArchive.Field()
     # point an archive at a new location, keeping its name
     reconfigureArchive = ReconfigureArchive.Field()
+    # replace the query of an earth access archive, keeping its name
+    reconfigureEarthAccessArchive = ReconfigureEarthAccessArchive.Field()
     # list every folder of an archive on display again
     refreshArchive = RefreshArchive.Field()
     # list the folders on display that have nothing to show, e.g. the ones a session saved

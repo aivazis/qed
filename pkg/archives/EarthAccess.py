@@ -85,6 +85,21 @@ class EarthAccess(Archive, family="qed.archives.earth"):
 
     # constants
     readers = ("nisar",)
+    # the traits that make up my query; reconfiguring me replaces all of them, so a constraint
+    # the user dropped goes away
+    constraints = (
+        "count",
+        "collection",
+        "conceptId",
+        "pattern",
+        "begin",
+        "end",
+        "bbox",
+        "point",
+        "circle",
+        "line",
+        "polygon",
+    )
 
     # public data
     @property

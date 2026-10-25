@@ -13,6 +13,7 @@ from ..Node import Node
 
 # my parts
 from .Credential import Credential
+from .EarthAccessQuery import EarthAccessQuery
 from .Item import Item
 
 
@@ -37,6 +38,8 @@ class Archive(graphene.ObjectType):
     uri = graphene.String()
     # the settings that say how to get at its contents, never the keys of a session
     credentials = graphene.List(Credential)
+    # the query of an earth access archive; nothing for the other kinds
+    earth = graphene.Field(EarthAccessQuery)
     # the readers that can open what it holds
     readers = graphene.List(graphene.String)
     # the entries of its folders that are on display
@@ -100,6 +103,18 @@ class Archive(graphene.ObjectType):
             yield {"name": name, "value": value}
         # all done
         return
+
+    @staticmethod
+    def resolve_earth(archive, *_):
+        """
+        Get the traits that make up the query of an earth access {archive}
+        """
+        # the other kinds have no query
+        if archive.tag != "earth":
+            # so say nothing
+            return None
+        # otherwise, read the traits the archive names
+        return {name: getattr(archive, name) for name in archive.constraints}
 
     @staticmethod
     def resolve_readers(archive, *_):
