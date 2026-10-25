@@ -71,9 +71,12 @@ class Real(Channel, family="qed.channels.nisar.real"):
         # cut the signal out of the raster
         self.head(recipe=recipe)
         # pick its real part
-        recipe.factory(name="real", protocol=qed.viz.selector, pin=qed.viz.selectors.real())
+        recipe.factory(name="real", protocol=qed.viz.accessor, pin=qed.viz.accessors.real())
+        # which goes into a product of its own
         recipe.product(name="part")
+        # the accessor reads the signal
         recipe.bind(factory="real", slot="signal", product="signal")
+        # and writes the part
         recipe.bind(factory="real", slot="real", product="part")
         # and paint it gray
         self.gray(recipe=recipe, signal="part")
@@ -106,6 +109,7 @@ class Real(Channel, family="qed.channels.nisar.real"):
         # the real part, painted gray
         return qed.channels.real
 
+    # constants
     category = "slc"
 
 

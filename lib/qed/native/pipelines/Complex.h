@@ -51,7 +51,7 @@ public:
     using cycle_type = pyre::flow::factories::filters::cycle_t<signal_type, real_type>;
     using affine_type = pyre::flow::factories::filters::affine_t<real_type, real_type>;
     // the factories of the amplitude branch
-    using selector_type = pyre::flow::factories::selectors::amplitude_t<signal_type, real_type>;
+    using modulus_type = pyre::flow::factories::operators::amplitude_t<signal_type, real_type>;
     using normalizer_type = pyre::flow::factories::filters::parametric_t<real_type, channel_type>;
     // the saturation
     using constant_type = pyre::flow::factories::filters::constant_t<real_type>;
@@ -79,7 +79,7 @@ public:
         // the factories
         std::shared_ptr<cycle_type> cycler;
         std::shared_ptr<affine_type> scaler;
-        std::shared_ptr<selector_type> selector;
+        std::shared_ptr<modulus_type> modulus;
         std::shared_ptr<normalizer_type> normalizer;
         std::shared_ptr<constant_type> constant;
         std::shared_ptr<colormap_type> colormap;

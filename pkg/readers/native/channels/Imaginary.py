@@ -72,10 +72,13 @@ class Imaginary(Channel, family="qed.channels.native.imaginary"):
         self.head(recipe=recipe)
         # pick its imaginary part
         recipe.factory(
-            name="imaginary", protocol=qed.viz.selector, pin=qed.viz.selectors.imaginary()
+            name="imaginary", protocol=qed.viz.accessor, pin=qed.viz.accessors.imaginary()
         )
+        # which goes into a product of its own
         recipe.product(name="part")
+        # the accessor reads the signal
         recipe.bind(factory="imaginary", slot="signal", product="signal")
+        # and writes the part
         recipe.bind(factory="imaginary", slot="imaginary", product="part")
         # and paint it gray
         self.gray(recipe=recipe, signal="part")

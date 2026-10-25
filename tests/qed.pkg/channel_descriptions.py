@@ -39,7 +39,7 @@ def gray():
     """
     Check the order of the factories of the flows that paint a signal gray
     """
-    # the stages after the selector
+    # the stages after the accessor
     tail = ["pyre.viz.normalizers.parametric", "pyre.viz.colormaps.gray", "pyre.viz.encoders.bmp"]
     # a value goes straight to the normalizer
     assert factories(qed.channels.value) == tail
@@ -48,7 +48,7 @@ def gray():
     # the others pick a part of a complex signal first
     for name in ["real", "imaginary"]:
         # draw it
-        assert factories(getattr(qed.channels, name)) == [f"pyre.viz.selectors.{name}"] + tail
+        assert factories(getattr(qed.channels, name)) == [f"pyre.viz.accessors.{name}"] + tail
     # all done
     return
 

@@ -142,12 +142,12 @@ qed::native::pipelines::Amplitude<cellT>::build(int rows, int columns) -> graph_
     // the encoded image
     g.image = image_type::create("image", shape);
 
-    // make the selector
-    g.selector = selector_type::create("amplitude");
+    // make the operator that computes the amplitude
+    g.modulus = modulus_type::create("amplitude");
     // it reads the signal
-    g.selector->signal(g.signal);
+    g.modulus->signal(g.signal);
     // and writes the magnitudes
-    g.selector->amplitude(g.amplitude);
+    g.modulus->amplitude(g.amplitude);
 
     // make the normalizer
     g.normalizer = normalizer_type::create("normalizer");
@@ -206,10 +206,10 @@ qed::native::pipelines::Amplitude<cellT>::dismantle(graph_type & g) -> void
     g.normalizer->removeInput("signal");
     // and the normalized values
     g.normalizer->removeOutput("normalized");
-    // unhook the selector from the signal
-    g.selector->removeInput("signal");
+    // unhook the operator from the signal
+    g.modulus->removeInput("signal");
     // and the magnitudes
-    g.selector->removeOutput("amplitude");
+    g.modulus->removeOutput("amplitude");
     // all done
     return;
 }

@@ -1612,7 +1612,7 @@ class Store(qed.component, family="qed.ux.store"):
         # the protocols the palette offers factories for
         protocols = (
             qed.viz.reader,
-            qed.viz.selector,
+            qed.viz.accessor,
             qed.viz.slicer,
             qed.viz.operator,
             qed.viz.normalizer,
