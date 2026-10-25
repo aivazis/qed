@@ -120,6 +120,7 @@ class Discovery:
                     channel = journal.firewall("qed.nexus.survey")
                     # complain
                     channel.line(f"while hydrating '{reader.pyre_name}{finding.suffix}'")
+                    # and what is missing
                     channel.line(
                         f"its '{role}' companion '{reader.pyre_name}{suffix}' was not surveyed"
                     )

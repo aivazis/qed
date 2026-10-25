@@ -238,6 +238,7 @@ class Factory(Node):
         # traits overload the comparison operators to build expressions, so membership is
         # decided by identity
         inIds = {id(trait) for trait in ins}
+        # and so is that of the outputs
         outIds = {id(trait) for trait in outs}
         # isolate the ones that are just input
         insOnly = [trait for trait in ins if id(trait) not in outIds]
@@ -337,6 +338,7 @@ class Factory(Node):
             slot = Slot(product=None, position=position)
             # connect it to me
             slot.connectReader(factory=self, trait=trait)
+            # in both directions
             slot.connectWriter(factory=self, trait=trait)
             # and publish it
             yield slot

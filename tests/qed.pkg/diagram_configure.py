@@ -117,16 +117,20 @@ def test() -> None:
     assert error is None, error
     # the factory is pinned to an instance of its class, under that name
     instance = factory.node.pin
+    # it is an instance of the flat reader
     assert factory.node.level == "instance" and isinstance(instance, flat)
+    # under the name it was given
     assert instance.pyre_name == name
     # which carries the new value
     assert instance.offset == 12
     # and the label says so
     (label,) = factory.labels
+    # naming the instance and its class
     assert (label.given, label.family) == (name, "qed.readers.native.flat"), label.given
 
     # the value was set the way an edit is: noted as interactive
     _, locator = instance.pyre_getTrait(alias="offset")
+    # so its locator says the flow editor set it
     assert str(locator) == "set interactively in the flow editor", str(locator)
 
     # once it is an instance, a change needs no name
@@ -144,6 +148,7 @@ def test() -> None:
     assert error is None and instance.cell.spec == "qed.datatypes.complex128", error
     # a key of a map given on the command line
     executive = pyre.executive
+    # goes into the configuration store with the priority of the command line
     executive.nameserver.insert(
         name=f"{name}.selections.band",
         value="0",
@@ -184,6 +189,7 @@ def test() -> None:
     assert error is None and other.node.level == "instance", error
     # which reads as an instance of its class with an empty name
     (label,) = other.labels
+    # with no name, and its class
     assert (label.given, label.family) == ("", "qed.readers.native.flat"), label.given
 
     # a reader pinned only to its protocol
@@ -198,6 +204,7 @@ def test() -> None:
     assert error is None and third.node.level == "instance", error
     # and reads as its name and its class
     (label,) = third.labels
+    # the name it was given, and the envi reader
     assert (label.given, label.family) == ("hdr", "qed.readers.native.envi"), label.given
     # the instance it is pinned to
     hdr = third.node.pin

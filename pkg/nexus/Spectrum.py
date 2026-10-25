@@ -85,6 +85,7 @@ class Spectrum(Chore):
         # execution and a cached picture; access credentials are not part of what is computed,
         # so a rotated token must not invalidate cached work
         spec = {name: value for name, value in self.config.items() if name != "credentials"}
+        # and freeze it into my identity
         self.identity = self._freeze(
             value=(
                 "spectrum",

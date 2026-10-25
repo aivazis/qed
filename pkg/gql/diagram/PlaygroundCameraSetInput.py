@@ -17,6 +17,7 @@ class PlaygroundCameraSetInput(graphene.InputObjectType):
 
     # the diagram point at the middle of the view
     x = graphene.Float(required=True)
+    # in both of its coordinates
     y = graphene.Float(required=True)
     # the zoom: the distance of the camera from the diagram
     z = graphene.Float(required=True)

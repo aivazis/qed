@@ -98,6 +98,7 @@ def test() -> None:
     (factory,) = playground.factories
     # pin it to amplitude, so it has slots to lose
     _, amplitude = store.implementer(family="pyre.viz.operators.amplitude")
+    # and pin the factory to it directly
     playground.pin(entity=factory, pin=amplitude)
     # record the state
     before = snapshot(diagram=playground)
@@ -123,9 +124,11 @@ def test() -> None:
     module = importlib.import_module("qed.ux.diagram.Factory")
     # is simulated by a factory that never finds a place for anything
     home = module.Factory.home
+    # and install it in place of the real one
     module.Factory.home = lambda self, trait: None
     # so pinning to a class with a slot the factory does not have yet
     _, add = store.implementer(family="pyre.viz.operators.add")
+    # when asked for directly
     try:
         # pin
         playground.pin(entity=factory, pin=add)
@@ -145,6 +148,7 @@ def test() -> None:
     playground.pin(entity=factory, pin=add)
     # and changes the factory
     assert snapshot(diagram=playground) != before
+    # into one with two inputs and one output
     assert (factory.inputs, factory.outputs) == (2, 1)
     # all done
     return

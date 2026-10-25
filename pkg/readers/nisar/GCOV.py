@@ -94,6 +94,7 @@ class GCOV(H5, family="qed.readers.nisar.gcov", implements=qed.viz.reader):
                     channel = journal.warning("qed.nisar.gcov")
                     # and complain
                     channel.line(f"while exploring '{self.pyre_name}'")
+                    # say which frequency is missing
                     channel.line(f"no '{frequency}' frequency in the '{band}'-band grids")
                     # flush
                     channel.log()
@@ -116,9 +117,13 @@ class GCOV(H5, family="qed.readers.nisar.gcov", implements=qed.viz.reader):
                     channel = journal.warning("qed.nisar.gcov")
                     # and complain
                     channel.line(f"while exploring '{self.pyre_name}':")
+                    # indent
                     channel.indent()
+                    # say what is missing
                     channel.line(f"no 'mask' dataset")
+                    # and where i looked for it
                     channel.line(f"in band '{band}', frequency '{frequency}'")
+                    # outdent
                     channel.outdent()
                     # flush
                     channel.log()
@@ -159,6 +164,7 @@ class GCOV(H5, family="qed.readers.nisar.gcov", implements=qed.viz.reader):
                         channel = journal.warning("qed.nisar.gcov")
                         # and complain
                         channel.line(f"while exploring '{self.pyre_name}'")
+                        # say which term is missing
                         channel.line(f"no '{term}' in the '{frequency}' grid")
                         # flush
                         channel.log()

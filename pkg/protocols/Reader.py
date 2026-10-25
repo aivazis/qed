@@ -26,6 +26,7 @@ class Reader(Producer, family="qed.readers"):
     uri = qed.properties.uri()
     uri.doc = "the uri of the data source"
 
+    # the map of selector names to their allowed values
     selectors = properties.selectors()
     selectors.doc = "a map of selector names to their allowed values"
 

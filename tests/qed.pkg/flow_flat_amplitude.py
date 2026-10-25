@@ -53,17 +53,22 @@ def test():
     picker.dataset.pyre_make()
     # the dataset the reader found, which is also the data the iterators read
     dataset = picker.dataset.source
+    # which is the one the reader holds
     assert dataset is reader.datasets[0]
     # its cells, as the raster the slicer reads
     raster = qed.libpyre.flow.raster(source=dataset.data, name="flow_flat_amplitude.raster")
 
     # a store stand-in, with the amplitude recipe
     store = types.SimpleNamespace()
+    # make the amplitude recipe
     recipe = qed.ux.store.amplitude(store)
     # behind a slicer of the raster
     recipe.factory(name="slice", protocol=qed.viz.slicer)
+    # with a product for the raster
     recipe.product(name="raster")
+    # which the slicer reads
     recipe.bind(factory="slice", slot="source", product="raster")
+    # and whose slice is the signal of the recipe
     recipe.bind(factory="slice", slot="slice", product="signal")
     # stage it for a raster of these cells
     plan = recipe.stage(products={"raster": raster.decl})
@@ -78,6 +83,7 @@ def test():
         with plan.realize(shape=shape, nodes={"raster": raster}) as graph:
             # move the window
             graph["slice"].set(setting="origin", value=origin)
+            # with the stride of this tile
             graph["slice"].set(setting="stride", value=stride)
             # set the range
             graph["normalizer"].set(setting="interval", value=(low, high))

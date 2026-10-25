@@ -76,9 +76,11 @@ def test() -> None:
     assert closed is True
     # each once
     families = [cell.pyre_family() for cell in cells]
+    # so no family repeats
     assert len(families) == len(set(families)), families
     # in the order their package publishes them
     assert families[0] == "qed.datatypes.char", families
+    # and ending with complex128
     assert families[-1] == "qed.datatypes.complex128", families
 
     # the shape of a class
@@ -115,6 +117,7 @@ def test() -> None:
     closed, shapes, _ = store.diagramSuggest(
         diagram=playground.relay, node=envi.relay, trait="shape"
     )
+    # it is open, and empty
     assert closed is False and shapes == [], shapes
     # all done
     return

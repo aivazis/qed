@@ -19,6 +19,7 @@ class L0A(qed.flow.factory, family="qed.readers.nisar.l0a", implements=qed.proto
     uri = qed.properties.uri(scheme="file")
     uri.doc = "the uri of the data source"
 
+    # the map of selector names to their allowed values
     selectors = qed.protocols.selectors()
     selectors.doc = "a map of selector names to their allowed values"
     selectors.persistent = False

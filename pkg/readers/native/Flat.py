@@ -25,28 +25,34 @@ class Flat(
     uri = qed.properties.uri(scheme="file")
     uri.doc = "the uri of the data source"
 
+    # the type of my cells
     cell = qed.protocols.datatype()
     cell.default = None
     cell.doc = "the type of the dataset payload"
 
+    # the shape of my raster, in (lines, samples)
     shape = qed.properties.tuple(schema=qed.properties.int())
     shape.doc = "the size of the dataset in (lines, samples)"
 
+    # the bytes to skip before the first cell
     offset = qed.properties.int()
     offset.default = None
     offset.doc = "the number of bytes in front of the first cell, e.g. an embedded header"
 
+    # the map of selector names to their allowed values
     selectors = qed.protocols.selectors()
     selectors.persistent = False
     selectors.default = {}
     selectors.doc = "a map of selector names to their allowed values"
 
+    # a key value store of preferred values for selectors
     selections = qed.properties.kv()
     selections.doc = "a key value store of preferred values for selectors"
     # the session adds only the picks of first contact, which are made again every time; what
     # the user prefers comes from the files, which keep it as written
     selections.persistent = False
 
+    # the datasets in my file, and the axes that tell them apart
     contents = qed.viz.protocols.contents.output()
     contents.doc = "the datasets in my file, and the axes that tell them apart"
     contents.persistent = False
@@ -131,6 +137,7 @@ class Flat(
             return
         # get my cell and my uri
         cell = self.cell
+        # and my uri
         uri = self.uri
         # without both
         if not cell or uri is None:
@@ -181,6 +188,7 @@ class Flat(
             channel = journal.warning("qed.readers.native.flat")
             # explain
             channel.line(f"'{self.uri.address}' holds {len(datasets)} datasets")
+            # and why that needs a selector
             channel.line(f"picking the one a pipeline reads needs a selector")
             # flush
             channel.log()
@@ -241,7 +249,9 @@ class Flat(
             channel = journal.error("qed.readers.native.flat")
             # complain
             channel.line(f"could not load a dataset from '{self.uri.address}'")
+            # say what is missing
             channel.line(f"missing data type specification")
+            # and how to supply it
             channel.line(f"please provide a value for '--cell'")
             # flush
             channel.log()
@@ -282,8 +292,11 @@ class Flat(
             channel = journal.warning("qed.readers.unw")
             # generate a list of possible shapes
             channel.line(f"while attempting to load '{self.uri.address}'")
+            # say what is missing
             channel.line(f"missing shape information; here are some possibilities")
+            # and how the guesses read
             channel.line(f"as lines x samples")
+            # indent
             channel.indent()
             # generate some options
             for lines, samples in qed.libqed.factor(
@@ -291,7 +304,9 @@ class Flat(
             ):
                 # and show them
                 channel.line(f"{lines} x {samples}")
+            # outdent
             channel.outdent()
+            # and tell the user how to settle it
             channel.line(f"please use '--lines' or '--samples' to provide the dataset shape")
             # flush
             channel.log()
@@ -311,6 +326,7 @@ class Flat(
             channel = journal.error("qed.readers.native.flat")
             # complain
             channel.line(f"could not load a dataset from '{self.uri.address}'")
+            # and what was wrong with it
             channel.line(f"the offset of the first cell cannot be negative, but it is {skip}")
             # flush
             channel.log()
@@ -328,9 +344,11 @@ class Flat(
         channel = journal.warning("qed.readers.native.flat")
         # complain
         channel.line(f"'{self.uri.address}' is too small for the declared shape")
+        # say how much the shape needs past the offset
         channel.line(
             f"shape {tuple(shape)} past an offset of {skip} bytes requires {required} bytes"
         )
+        # and how much there is
         channel.line(f"but the file holds only {actual}")
         # flush
         channel.log()

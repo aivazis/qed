@@ -91,12 +91,15 @@ def test() -> None:
         # the label has the parts promised: no given name, the family of the class, and the
         # role of the protocol
         (label,) = factory.labels
+        # the parts the preview promised
         promised = (None, preview["family"], preview["role"])
+        # match the parts of the label
         assert (label.given, label.family, label.role) == promised, (label.family, promised)
         # the slots that went are the ones promised
         assert {id(slot) for slot in old - set(factory.slots)} == dropped, family
         # the slots that came are where they were promised
         gained = set(factory.slots) - old
+        # and sit at the spots promised
         assert sorted(slot.position for slot in gained) == sorted(fresh.values()), family
     # a family that is not a class of the protocol has no preview
     assert (

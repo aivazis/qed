@@ -86,6 +86,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw", implements=qed.viz.reader):
                     channel = journal.warning("qed.nisar.gunw")
                     # and complain
                     channel.line(f"while exploring '{self.pyre_name}'")
+                    # say which frequency is missing
                     channel.line(f"no frequency '{frequency}' in the band '{band}' grids")
                     # flush
                     channel.log()
@@ -127,6 +128,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw", implements=qed.viz.reader):
             channel = journal.warning("qed.nisar.gunw")
             # and complain
             channel.line(f"while exploring '{self.pyre_name}'")
+            # say which polarization is missing
             channel.line(f"no polarization '{polarization}' in the '{frequency}' interferogram")
             # flush
             channel.log()
@@ -151,9 +153,13 @@ class GUNW(H5, family="qed.readers.nisar.gunw", implements=qed.viz.reader):
             channel = journal.warning("qed.nisar.gunw")
             # and complain
             channel.line(f"while exploring '{self.pyre_name}':")
+            # indent
             channel.indent()
+            # say what is missing
             channel.line(f"no 'mask' dataset in the 'interferogram' group")
+            # and where i looked for it
             channel.line(f"in band '{band}', frequency '{frequency}'")
+            # outdent
             channel.outdent()
             # flush
             channel.log()
@@ -191,11 +197,15 @@ class GUNW(H5, family="qed.readers.nisar.gunw", implements=qed.viz.reader):
             channel = journal.warning("qed.nisar.gunw")
             # and complain
             channel.line(f"while exploring '{self.pyre_name}':")
+            # indent
             channel.indent()
+            # say what is missing
             channel.line(f"no 'unwrappedPhase' dataset ")
+            # and where i looked for it
             channel.line(
                 f"in band '{band}', frequency '{frequency}', polarization '{polarization}'"
             )
+            # outdent
             channel.outdent()
             # flush
             channel.log()
@@ -231,11 +241,15 @@ class GUNW(H5, family="qed.readers.nisar.gunw", implements=qed.viz.reader):
             channel = journal.warning("qed.nisar.gunw")
             # and complain
             channel.line(f"while exploring '{self.pyre_name}':")
+            # indent
             channel.indent()
+            # say what is missing
             channel.line(f"no 'coherenceMagnitude' dataset ")
+            # and where i looked for it
             channel.line(
                 f"in band '{band}', frequency '{frequency}', polarization '{polarization}'"
             )
+            # outdent
             channel.outdent()
             # flush
             channel.log()
@@ -271,11 +285,15 @@ class GUNW(H5, family="qed.readers.nisar.gunw", implements=qed.viz.reader):
             channel = journal.warning("qed.nisar.gunw")
             # and complain
             channel.line(f"while exploring '{self.pyre_name}':")
+            # indent
             channel.indent()
+            # say what is missing
             channel.line(f"no 'ionospherePhaseScreen' dataset ")
+            # and where i looked for it
             channel.line(
                 f"in band '{band}', frequency '{frequency}', polarization '{polarization}'"
             )
+            # outdent
             channel.outdent()
             # flush
             channel.log()
@@ -318,6 +336,7 @@ class GUNW(H5, family="qed.readers.nisar.gunw", implements=qed.viz.reader):
             channel = journal.warning("qed.nisar.gunw")
             # and complain
             channel.line(f"while exploring '{self.pyre_name}'")
+            # say which polarization is missing
             channel.line(f"no polarization '{polarization}' in the '{frequency}' interferogram")
             # flush
             channel.log()
@@ -342,9 +361,13 @@ class GUNW(H5, family="qed.readers.nisar.gunw", implements=qed.viz.reader):
             channel = journal.warning("qed.nisar.gunw")
             # and complain
             channel.line(f"while exploring '{self.pyre_name}':")
+            # indent
             channel.indent()
+            # say what is missing
             channel.line(f"no 'mask' dataset in the 'interferogram' group")
+            # and where i looked for it
             channel.line(f"in band '{band}', frequency '{frequency}'")
+            # outdent
             channel.outdent()
             # flush
             channel.log()
@@ -382,11 +405,15 @@ class GUNW(H5, family="qed.readers.nisar.gunw", implements=qed.viz.reader):
             channel = journal.warning("qed.nisar.gunw")
             # and complain
             channel.line(f"while exploring '{self.pyre_name}':")
+            # indent
             channel.indent()
+            # say what is missing
             channel.line(f"no 'wrappedInterferogram' dataset ")
+            # and where i looked for it
             channel.line(
                 f"in band '{band}', frequency '{frequency}', polarization '{polarization}'"
             )
+            # outdent
             channel.outdent()
             # flush
             channel.log()
@@ -422,11 +449,15 @@ class GUNW(H5, family="qed.readers.nisar.gunw", implements=qed.viz.reader):
             channel = journal.warning("qed.nisar.gunw")
             # and complain
             channel.line(f"while exploring '{self.pyre_name}':")
+            # indent
             channel.indent()
+            # say what is missing
             channel.line(f"no wrapped 'coherenceMagnitude' dataset ")
+            # and where i looked for it
             channel.line(
                 f"in band '{band}', frequency '{frequency}', polarization '{polarization}'"
             )
+            # outdent
             channel.outdent()
             # flush
             channel.log()

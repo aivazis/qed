@@ -162,13 +162,17 @@ class Slot(Node):
         """
         # make the label update piles
         newLabels = []
+        # the labels that go away
         delLabels = []
+        # and the labels that change
         updatedLabels = []
         # pack them in a pile
         deltaLabels = newLabels, delLabels, updatedLabels
         # and the connection update piles
         newConnectors = []
+        # the connectors that go away
         delConnectors = []
+        # and the connectors that change
         updatedConnectors = []
         # pack them in a pile
         deltaConnectors = newConnectors, delConnectors, updatedConnectors

@@ -75,6 +75,7 @@ class Decimate(Chore):
             rasters.clear()
             # the pages my tiles cost, if the reader's file can tell
             after = self._fetched(reader=reader)
+            # the difference is what they cost; nothing, when either count is missing
             fetched = after - before if after is not None and before is not None else 0
         # any failure at all
         except Exception as error:
@@ -140,6 +141,7 @@ class Decimate(Chore):
         # my identity: the reader, the dataset, the level, and the tiles; the credentials
         # are left out, since they do not change what the work is
         spec = {name: value for name, value in self.config.items() if name != "credentials"}
+        # and freeze it into my identity
         self.identity = self._freeze(
             value=(
                 self.reader,

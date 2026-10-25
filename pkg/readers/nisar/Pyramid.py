@@ -127,6 +127,7 @@ class Pyramid:
             channel = journal.warning("qed.readers.pyramid")
             # explain, since the absence will show as a view that is slow rather than wrong
             channel.line(f"no levels built for '{self._name}'")
+            # and why
             channel.line(f"its cells are encoded, and only a decoder can read them")
             # flush
             channel.log()
@@ -162,11 +163,13 @@ class Pyramid:
                 break
             # the tile the level is diced into
             tile = self._tileOf(extent=extent)
-            # make the file at its full padded size and take hold of it for writing
+            # make the file at its full padded size
             self.create(exponent=exponent)
+            # and open it for writing
             draft = self.draft(exponent=exponent)
             # the tiles of the level, in tile order; nothing is written yet
             _, _, grid = self.layout(exponent=exponent)
+            # and a record of their occupancy, with none of them written
             occupancy = bytearray(math.prod(grid))
             # the width of the grid of tiles, for placing an entry in the record
             columns = grid[1]
@@ -272,6 +275,7 @@ class Pyramid:
         # and never serves a zoom; it lays out levels, hands out the work, and keeps the
         # records
         data = getattr(dataset, "data", None)
+        # and the full resolution dataset that serves a request no level can
         self._base = data.dataset if data is not None else None
         # the kernels that read cells of this type. a raster whose samples are encoded
         # rather than stored has none, and it must not get levels: decimation is a read and
@@ -382,6 +386,7 @@ class Pyramid:
                 continue
             # the extent of the level and its tile
             extent = self._extent(exponent=exponent)
+            # and the tile it is diced into
             tile = self._tileOf(extent=extent)
             # carefully, since the files may not be what the record promises
             try:
@@ -393,7 +398,9 @@ class Pyramid:
                 channel = journal.warning("qed.readers.pyramid")
                 # complain
                 channel.line(f"could not attach level {exponent} of '{self._name}'")
+                # where i looked for it
                 channel.line(f"at '{self.home}'")
+                # and what went wrong
                 channel.line(f"got: {error}")
                 # flush
                 channel.log()
@@ -484,8 +491,9 @@ class Pyramid:
         The record lands under a temporary name and is renamed into place, so a reader
         never sees a partial one and a build that dies leaves no record at all
         """
-        # where the record goes, and where it is assembled
+        # where the record goes
         final = self._occupancyPath(exponent=exponent)
+        # and the temporary name it is assembled under
         partial = final.parent / (final.name + ".partial")
         # write it
         with open(str(partial), "wb") as record:
@@ -513,8 +521,9 @@ class Pyramid:
             "tile": list(self._tile),
             "statistics": {part: float(value) for part, value in self._parts().items()},
         }
-        # where it goes, and where it is assembled
+        # where it goes
         final = self.sidecar
+        # and the temporary name it is assembled under
         partial = final.parent / (final.name + ".partial")
         # write it
         with open(str(partial), "w") as sidecar:
@@ -576,7 +585,9 @@ class Pyramid:
             channel = journal.warning("qed.readers.pyramid")
             # complain
             channel.line(f"could not read the sidecar of '{self._name}'")
+            # where i looked for it
             channel.line(f"at '{path}'")
+            # and what went wrong
             channel.line(f"got: {error}")
             # flush
             channel.log()

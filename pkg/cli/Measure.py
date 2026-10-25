@@ -59,10 +59,12 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     only.default = []
     only.doc = "restrict the sweep to the datasets of these readers; empty sweeps all"
 
+    # the channels to sweep
     channels = qed.properties.strings()
     channels.default = []
     channels.doc = "restrict the sweep to these channels; empty sweeps all"
 
+    # the rendering engine to measure
     engine = qed.properties.str()
     engine.default = None
     engine.doc = (
@@ -71,6 +73,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "renders every channel the way it is configured"
     )
 
+    # the datasets to sweep
     rasters = qed.properties.strings()
     rasters.default = []
     rasters.doc = "restrict the sweep to the datasets with these names; empty sweeps all"
@@ -80,6 +83,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     shapes.default = (8, 12)
     shapes.doc = "the half open range of tile shape exponents; (8,12) sweeps 256 through 2048"
 
+    # the zoom levels to sweep
     zooms = qed.properties.tuple(schema=qed.properties.int())
     zooms.default = (0, 3)
     zooms.doc = "the half open range of zoom levels; higher zoom pulls a larger source footprint"
@@ -94,18 +98,22 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     trials.default = 3
     trials.doc = "the number of repetitions of each measurement point"
 
+    # the label of the state of the caches
     cache = qed.properties.str()
     cache.default = "warm"
     cache.doc = "the cache state label stamped on each record"
 
+    # whether each point runs in a fresh process
     cold = qed.properties.bool()
     cold.default = False
     cold.doc = "rerun each point in a fresh process, defeating the in-process caches"
 
+    # where the records go
     output = qed.properties.str()
     output.default = "measurements.csv"
     output.doc = "the file that accumulates the measurement records"
 
+    # whether to sample the display range at first contact
     sample = qed.properties.bool()
     sample.default = True
     sample.doc = "sample the display range at first contact; off keeps it from warming the tiles"
@@ -115,24 +123,29 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     clients.default = (1, 2, 4, 8)
     clients.doc = "the sequence of client concurrency levels to sweep"
 
+    # the size of the team of the launched server
     team = qed.properties.int()
     team.default = 4
     team.doc = "the size of the rendering team of the launched server"
 
+    # the port it listens to
     port = qed.properties.int()
     port.default = 8181
     port.doc = "the port of the launched server"
 
+    # the size of the swarm workload
     tiles = qed.properties.int()
     tiles.default = 64
     tiles.doc = "the number of distinct tiles in the swarm workload"
 
+    # whether to warm the workers up first
     warm = qed.properties.bool()
     warm.default = True
     warm.doc = (
         "warm the workers with a full pass first; off gives every level tiles nobody has fetched"
     )
 
+    # the size of the team that builds the pyramid
     builders = qed.properties.int()
     builders.default = None
     builders.doc = (
@@ -140,10 +153,12 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "it the size of the {team} that serves the tiles"
     )
 
+    # the most tiles one task of the construction builds
     run = qed.properties.int()
     run.default = 8
     run.doc = "the most tiles of a pyramid level one task of its construction builds"
 
+    # whether a dataset builds its first level along with the rasters it is read with
     joint = qed.properties.bool()
     joint.default = True
     joint.doc = (
@@ -151,10 +166,12 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "way the server does; off builds each raster on its own"
     )
 
+    # the request rate of the contention program
     rate = qed.properties.float()
     rate.default = 20.0
     rate.doc = "the tiles per second the contention program asks for, the way a panning client does"
 
+    # what the tiles of the swarm cost
     workload = qed.properties.str()
     workload.default = "data"
     workload.validators = qed.constraints.isMember("data", "fill", "cached")
@@ -164,6 +181,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "replays tiles the server keeps in its tile cache, which involves no worker at all"
     )
 
+    # whether the launched server builds reduced resolution levels
     levels = qed.properties.bool()
     levels.default = True
     levels.doc = (
@@ -175,6 +193,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     crews.default = (1, 2, 4, 8, 16)
     crews.doc = "the sequence of team sizes to sweep in the whole-dataset pass"
 
+    # the size of the whole-dataset pass
     resolution = qed.properties.int()
     resolution.default = 2048
     resolution.doc = "the target long axis of the decimated whole-dataset pass"
@@ -187,12 +206,14 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "HDF5 driver for S3 replaces with a buffer of 64 MiB of its own"
     )
 
+    # the chunk cache sizes to sweep
     budgets = qed.properties.tuple(schema=qed.properties.int())
     budgets.default = (0, 64)
     budgets.doc = (
         "the chunk cache sizes the cache program sweeps, in MiB; zero keeps the library default"
     )
 
+    # the access patterns to sweep
     patterns = qed.properties.strings()
     patterns.default = ["stream", "revisit"]
     patterns.validators = qed.constraints.isSubset(choices=["stream", "revisit"])
@@ -202,10 +223,12 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "block twice, a chunk at a time in raster order, the way a tile team does"
     )
 
+    # the size of the block to read
     block = qed.properties.int()
     block.default = 8
     block.doc = "the side of the block the cache program reads, in chunks"
 
+    # the path of the measured dataset in its file
     location = qed.properties.str()
     location.default = None
     location.doc = (
@@ -218,6 +241,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     chunks.default = True
     chunks.doc = "record every chunk of each dataset; off keeps only the per dataset summaries"
 
+    # whether to compress the records of the chunks
     compress = qed.properties.bool()
     compress.default = False
     compress.doc = "compress the records of the chunks with gzip"
@@ -228,15 +252,18 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
     granule.default = None
     granule.doc = "the s3 uri of the NISAR granule the s3 program measures"
 
+    # the reader of the granule
     flavor = qed.properties.str()
     flavor.default = "gslc"
     flavor.validators = qed.constraints.isMember(*FLAVORS)
     flavor.doc = "the NISAR reader that understands the granule of the s3 program"
 
+    # the deepest level of the zoom ladder
     depth = qed.properties.int()
     depth.default = 6
     depth.doc = "the deepest zoom level of the s3 zoom ladder; 6 is the deepest the client asks for"
 
+    # where the results go
     results = qed.properties.path()
     results.default = None
     results.doc = (
@@ -253,6 +280,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "product, date, and granule"
     )
 
+    # how many granules of each product to measure
     quota = qed.properties.int()
     quota.default = None
     quota.doc = (
@@ -260,6 +288,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "cycle; unset measures every one"
     )
 
+    # where the granules come from
     scrape = qed.properties.path()
     scrape.default = None
     scrape.doc = (
@@ -267,6 +296,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "after its reader, e.g. rslc.txt, that the census takes its granules from"
     )
 
+    # how many granules of each complete cycle to look up in the bucket
     check = qed.properties.int()
     check.default = None
     check.doc = (
@@ -274,16 +304,19 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         "in the bucket; unset looks up none"
     )
 
+    # the censuses to digest or compare
     inputs = qed.properties.strings()
     inputs.default = []
     inputs.doc = (
         "the censuses to digest or compare, as the folders or the tarballs they left behind"
     )
 
+    # the repeat cycle to take the granules from
     cycle = qed.properties.int()
     cycle.default = None
     cycle.doc = "the repeat cycle whose granules the census takes from the scrape"
 
+    # how many granules to measure at the same time
     workers = qed.properties.int()
     workers.default = 8
     workers.doc = "the number of granules the census measures at the same time"
@@ -316,6 +349,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if not records:
             # complain
             error = journal.error("qed.measure.fit")
+            # and say where the records should come from
             error.log(f"no records in '{self.output}'; run 'qed measure tile' first")
             # and bail
             return 1
@@ -348,6 +382,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if first is None:
             # complain
             error = journal.error("qed.measure.swarm")
+            # and say what to check
             error.log("no dataset to measure; check the configuration and the restrictions")
             # and bail
             return 1
@@ -355,6 +390,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         reader, dataset, name, _ = first
         # the workload geometry: the smallest configured tile at the lowest configured zoom
         span = 2 ** self.shapes[0]
+        # and the zoom
         zoom = self.zooms[0]
         # tiles served from the cache have to be put there first, by a warm up pass
         warm = self.warm or self.workload == "cached"
@@ -378,6 +414,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if len(origins) < batches:
             # complain
             error = journal.error("qed.measure.swarm")
+            # and say why
             error.log(f"'{dataset.pyre_name}' cannot fit a {span}x{span} tile at zoom {zoom}")
             # and bail
             return 1
@@ -404,6 +441,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             if not self._ready():
                 # if it never came up, complain
                 error = journal.error("qed.measure.swarm")
+                # and point at its log
                 error.log(f"the server on port {self.port} never came up; see '{log.name}'")
                 # and bail
                 return 1
@@ -426,6 +464,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 if failures:
                     # complain
                     warning = journal.warning("qed.measure.swarm")
+                    # and say how many failed
                     warning.log(f"{failures} requests failed at {workers} clients")
                 # the aggregate rate, counting only delivered tiles
                 rate = len(latencies) / (elapsed / 1000) if elapsed > 0 else 0
@@ -472,6 +511,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if first is None:
             # complain
             error = journal.error("qed.measure.crew")
+            # and say what to check
             error.log("no dataset to measure; check the configuration and the restrictions")
             # and bail
             return 1
@@ -483,6 +523,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if not slices:
             # complain
             error = journal.error("qed.measure.crew")
+            # and say why
             error.log(f"'{dataset.pyre_name}' yielded no slices")
             # and bail
             return 1
@@ -513,6 +554,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 if not self._ready():
                     # if it never came up, complain
                     error = journal.error("qed.measure.crew")
+                    # and point at its log
                     error.log(f"the server on port {self.port} never came up; see '{log.name}'")
                     # and bail
                     return 1
@@ -536,6 +578,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             if failures:
                 # complain
                 warning = journal.warning("qed.measure.crew")
+                # and say how many failed
                 warning.log(f"{failures} slices failed with a team of {size}")
             # collect the level
             results.append((size, elapsed, latencies))
@@ -545,6 +588,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         _, base, _ = results[0]
         # report the shape of the curve
         channel.line("")
+        # under a title
         channel.line("speedup against the smallest team:")
         # go through the levels
         for size, elapsed, _ in results:
@@ -557,9 +601,11 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             # the work is only as divisible as its largest indivisible piece: a slice is
             # the unit of work, so no crew can finish the pass faster than its slowest one
             total = sum(costs)
+            # and the slowest slice
             slowest = max(costs)
             # which sets a ceiling on the speedup, whatever the crew size
             channel.line("")
+            # and report the balance of the load
             channel.line(
                 f"load balance: {len(costs)} slices, "
                 f"{total / 1000:.2f} s of work in total, "
@@ -602,6 +648,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if first is None:
             # complain
             error = journal.error("qed.measure.pyramid")
+            # and say what to check
             error.log("no dataset to measure; check the configuration and the restrictions")
             # and bail
             return 1
@@ -619,6 +666,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             if directory.exists():
                 # which would make this one a measurement of nothing, so refuse it
                 error = journal.error("qed.measure.pyramid")
+                # and say why
                 error.log(f"'{directory}' already exists; its levels would be reused")
                 # and bail
                 return 1
@@ -683,6 +731,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if first is None:
             # complain
             error = journal.error("qed.measure.contention")
+            # and say what to check
             error.log("no dataset to measure; check the configuration and the restrictions")
             # and bail
             return 1
@@ -694,6 +743,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if view is None:
             # complain
             error = journal.error("qed.measure.contention")
+            # and say why
             error.log(f"could not point a view at '{dataset.pyre_name}.{name}'")
             # and bail
             return 1
@@ -705,6 +755,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if directory.exists():
             # which would make this one a measurement of nothing, so refuse it
             error = journal.error("qed.measure.contention")
+            # and say why
             error.log(f"'{directory}' already exists; its levels would be reused")
             # and bail
             return 1
@@ -899,6 +950,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             if got.returncode != 0:
                 # a missing record is easy to miss, so make it loud
                 warning = journal.warning("qed.measure.caches")
+                # and name the configuration
                 warning.log(f"{pattern}, {buffer} MiB, {budget} MiB: failed")
         # all done
         return 0
@@ -1037,7 +1089,9 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         teams = [size for size in self.crews if size <= cores]
         # say what is about to happen
         channel.line(f"on {self.pyre_host.nickname}, {cores} cores")
+        # the granule and its reader
         channel.line(f"granule {self.granule} as nisar.{flavor}")
+        # and where the results go
         channel.line(f"results in {results}")
         # flush
         channel.log()
@@ -1311,6 +1365,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         total = qed.timers.wall(f"qed.measure.census.total.{product}")
         # started afresh
         total.reset()
+        # and running
         total.start()
         # make a channel for the progress of the census
         channel = journal.info("qed.measure.census")
@@ -1318,15 +1373,18 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         channel.device = journal.tee(paths=[str(results / "run.log")])
         # say what is about to happen
         channel.line(f"on {self.pyre_host.nickname}")
+        # the granules to measure
         channel.line(
             f"{'every' if self.quota is None else self.quota} granule(s) of {product}, "
             f"cycle {self.cycle} of the scrape {self.scrape}"
         )
+        # and where they live
         channel.line(f"from {self.bucket}")
         # the lists of the scrape left out, so nothing goes missing silently
         if ignored:
             # say which
             channel.line(f"lists without a reader, left out: {', '.join(ignored)}")
+        # and where the results go
         channel.line(f"results in {results}")
         # flush
         channel.log()
@@ -1344,6 +1402,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         clock = qed.timers.wall(f"qed.measure.census.measure.{product}")
         # started afresh
         clock.reset()
+        # and running
         clock.start()
         # measure the granules, a few at a time, on the pyre event loop
         failures, absent = self._survey(channel=channel, results=results, bucket=bucket, jobs=jobs)
@@ -1468,6 +1527,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 # the seconds spent on the fill chunks, encoding them once and decoding them on
                 # every read of the whole raster
                 encoding = entry["fill"] * encode / 1e3 if encode is not None else None
+                # and decoding them
                 decoding = entry["fill"] * decode / 1e3 if decode is not None else None
                 # add the row
                 table.append(
@@ -1486,7 +1546,9 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 )
                 # and fold it into the totals
                 totals.update({key: value for key, value in entry.items()})
+                # including the seconds spent encoding the fill
                 totals["encoding"] += encoding or 0
+                # and decoding it
                 totals["decoding"] += decoding or 0
             # the totals
             table.append(
@@ -1590,6 +1652,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         names = [self._censusName(source=source) for source in (first, second)]
         # read them
         a = qed.measurements.census.load(source=first)
+        # both of them
         b = qed.measurements.census.load(source=second)
         # pair their rasters
         matched = qed.measurements.census.pairs(first=a, second=b)
@@ -1675,6 +1738,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         )
         # the percentiles of every measure
         lines += ["", "## Measures", ""]
+        # in a table
         lines += census.markdown(
             headers=("measure", "p10", "median", "p90", "max", "rasters"),
             rows=[
@@ -1703,6 +1767,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             )
         # the pooled histograms
         lines += ["", "## Pooled histograms, counts by tenth of the range", ""]
+        # in a table
         lines += census.markdown(
             headers=("histogram", *(f"{10 * i}-{10 * (i + 1)}%" for i in range(10))),
             rows=[
@@ -1859,17 +1924,25 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         description = qed.readers.pages.describe(dataset=dataset, tables=tables, paging=layout)
         # unpack
         name = description["name"]
+        # the shape of the raster
         rows, cols = description["storage"]["shape"]
+        # the shape of its chunks
         tileRows, tileCols = description["storage"]["tile"]
+        # the size of a chunk before its filters
         raw = description["raw"]
+        # the number of chunks in its grid
         grid = description["grid"]
+        # its storage
         storage = description["storage"]
+        # the tally of its chunk table
         record = description["record"]
+        # and what is known about its fill
         nodata = description["nodata"]
         # go through its chunks, unless nobody wants them one by one
         for address, size, (row, col) in tables[name] if chunks is not None else ():
             # the pages it spans, when the file has pages
             first = address // pageSize if pageSize else 0
+            # through the last one
             last = (address + size - 1) // pageSize if pageSize else 0
             # record it
             chunks.writerow(
@@ -1877,7 +1950,9 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             )
         # sign on
         channel.line(f"{name}:")
+        # the layout of the file
         channel.line(f"  file: {strategy} strategy, pages of {pageSize / 2**20:g} MiB")
+        # the storage of the dataset
         channel.line(
             f"  storage: {rows}x{cols} {storage['cell']} in chunks of {tileRows}x{tileCols}, "
             f"filters: {', '.join(storage['filters']) or 'none'}"
@@ -2167,6 +2242,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 seen.add(reader.pyre_name)
                 # read the open time costs its constructor accumulated
                 discovery = qed.timers.wall(f"qed.profiler.discovery.{reader.pyre_name}").ms()
+                # and its statistics
                 stats = qed.timers.wall(f"qed.profiler.stats.{reader.pyre_name}").ms()
                 # and report them; they are the per-dataset part of the fixed cost
                 channel.line(
@@ -2180,13 +2256,17 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 channel.line(f"  {dataset.pyre_name}.{label}: {span}x{span} @ zoom {zoom}")
                 # the clocks of the trials
                 wallclock = qed.timers.wall("qed.measure.tile.wall")
+                # the cpu one too
                 cpuclock = qed.timers.cpu("qed.measure.tile.cpu")
                 # repeat the point
                 for trial in range(self.trials):
                     # start both clocks afresh
                     wallclock.reset()
+                    # the cpu one too
                     cpuclock.reset()
+                    # then start the wall clock
                     wallclock.start()
+                    # and the cpu one
                     cpuclock.start()
                     # render the tile through the full pipeline, encoder included
                     dataset.render(
@@ -2197,12 +2277,15 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                     )
                     # stop the clocks
                     wallclock.stop()
+                    # the cpu one too
                     cpuclock.stop()
                     # and read them
                     wall = wallclock.ms()
+                    # the cpu one too
                     cpu = cpuclock.ms()
                     # the two denominators: output pixels drawn, source cells touched
                     pixels = span * span
+                    # and the source cells it covers
                     cells = pixels * 4**zoom
                     # record the trial
                     writer.writerow(
@@ -2280,6 +2363,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 if got.returncode != 0:
                     # a missing point silently skews the fit, so make it loud
                     warning = journal.warning("qed.measure.tile")
+                    # and name the point
                     warning.log(
                         f"point failed: {dataset.pyre_name}.{name} " f"{span}x{span} @ zoom {zoom}"
                     )
@@ -2433,6 +2517,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         else:
             # the measurement will be of fill, so say so
             warning = journal.warning("qed.measure")
+            # and where it is measuring instead
             warning.log(f"found no data in '{name}'; measuring at its center")
         # remember it
         self._anchors[name] = anchor
@@ -2534,6 +2619,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             label = ", ".join(f"{field}={value}" for field, value in zip(grouping, key))
             # and report
             channel.line(f"  {label}:")
+            # its fixed cost
             channel.line(f"    a: {a:.3f} ms fixed cost per request")
             # a positive slope has a meaningful throughput reading
             if b > 0:
@@ -2556,10 +2642,13 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         n = len(points)
         # the means
         mx = sum(x for x, _ in points) / n
+        # of both coordinates
         my = sum(y for _, y in points) / n
         # the second moments
         sxx = sum((x - mx) ** 2 for x, _ in points)
+        # of both coordinates
         syy = sum((y - my) ** 2 for _, y in points)
+        # and their cross moment
         sxy = sum((x - mx) * (y - my) for x, y in points)
         # the slope
         b = sxy / sxx
@@ -2580,6 +2669,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         rows, cols = dataset.shape
         # reduce it to the decimated extents at this zoom
         decRows = rows >> zoom
+        # of both axes
         decCols = cols >> zoom
         # the anchor, in the same coordinates
         center = tuple(cell / 2**zoom for cell in self._anchor(dataset=dataset))
@@ -2632,6 +2722,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         found = 0
         # go through the tiles of the client's grid that fit inside the raster
         for r in range(0, (rows >> zoom) - span + 1, span):
+            # and across the columns
             for c in range(0, (cols >> zoom) - span + 1, span):
                 # the chunks under the footprint
                 under = (
@@ -2871,6 +2962,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         clock = qed.timers.wall("qed.measure.swarm.batch")
         # started afresh
         clock.reset()
+        # and running
         clock.start()
         # set every client going
         for client in clients:
@@ -2949,7 +3041,9 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 latencies.sort()
                 # so the percentiles are direct lookups
                 mean = sum(latencies) / len(latencies) if latencies else 0
+                # the median
                 median = latencies[len(latencies) // 2] if latencies else 0
+                # and the 95th percentile
                 p95 = latencies[int(len(latencies) * 0.95)] if latencies else 0
                 # the measured speedup over one client
                 speedup = rate / baseline if baseline > 0 else 0
@@ -3272,6 +3366,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         fleet.dispatcher = pyre.ipc.newPSL()
         # whose crews are forked by the helper, and whose journal is heard on its event loop
         fleet.recruiter = qed.nexus.forkserver()
+        # start the helper, on the event loop of the fleet
         fleet.recruiter.start(dispatcher=fleet.dispatcher)
         # the builders of the reader, with the size under measurement
         fleet.builders(reader=reader.pyre_name).size = team
@@ -3349,6 +3444,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             )
         # start the clock
         clock.reset()
+        # and running
         clock.start()
         # when asked to, the dataset makes the first level of the rasters it is read with along
         # with its own, so the pages of the product they share are fetched once
@@ -3433,6 +3529,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         fleet.dispatcher = pyre.ipc.newPSL()
         # whose crews are forked by the helper, and whose journal is heard on its event loop
         fleet.recruiter = qed.nexus.forkserver()
+        # start the helper, on the event loop of the fleet
         fleet.recruiter.start(dispatcher=fleet.dispatcher)
         # the team that serves the tiles of the reader, with the size under measurement
         fleet.team(reader=reader.pyre_name).size = self.team
@@ -3445,10 +3542,13 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         # and the cpu this process spends, which tells a loop that is busy with its own work
         # from one that is waiting; it runs from here to the end of the run
         cpu = qed.timers.cpu(f"qed.measure.contention.team{self.team}.cpu")
+        # started afresh
         cpu.reset()
+        # and running
         cpu.start()
         # the geometry of the tiles
         span = 2 ** self.shapes[0]
+        # at the lowest configured zoom
         zoom = self.zooms[0]
         # distinct tiles for both phases, so that neither is served from the caches the other
         # warmed up, taken alternately from the tiles nearest the data, so that both phases
@@ -3632,6 +3732,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             )
         # start the clock
         clock.reset()
+        # and running
         clock.start()
         # when asked to, the dataset makes the first level of the rasters it is read with along
         # with its own, so the pages of the product they share are fetched once
@@ -3688,6 +3789,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if reader is None:
             # complain
             error = journal.error("qed.measure.caches")
+            # and name the readers that were asked for
             error.log(f"no reader among {', '.join(self.only)}")
             # and bail
             return 1
@@ -3730,6 +3832,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if dataset is None:
             # complain
             error = journal.error("qed.measure.caches")
+            # and name the datasets that were asked for
             error.log(f"'{reader.pyre_name}' has no dataset among {', '.join(self.rasters)}")
             # and bail
             return 1
@@ -3753,6 +3856,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         if corner is None:
             # complain
             error = journal.error("qed.measure.caches")
+            # and say why
             error.log(f"'{dataset.pyre_name}' has no block of chunks that all hold data")
             # and bail
             return 1
@@ -3785,6 +3889,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
             passes = [origins, origins]
         # the clocks
         wallclock = qed.timers.wall("qed.measure.caches.wall")
+        # the cpu one too
         cpuclock = qed.timers.cpu("qed.measure.caches.cpu")
         # open the file of records for appending
         with self._records(path=f"{stem}-caches.csv", headers=self._cacheHeaders) as out:
@@ -3794,8 +3899,11 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 file.resetPageBuffer()
                 # start both clocks afresh
                 wallclock.reset()
+                # the cpu one too
                 cpuclock.reset()
+                # then start the wall clock
                 wallclock.start()
+                # and the cpu one
                 cpuclock.start()
                 # read the chunks
                 for origin in order:
@@ -3803,6 +3911,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                     h5ds.read(data=data, memtype=memtype, origin=origin, shape=tile)
                 # stop the clocks
                 wallclock.stop()
+                # the cpu one too
                 cpuclock.stop()
                 # what the page buffer saw, if there is one, as (metadata, raw data)
                 seen = file.pageBuffer
@@ -3856,6 +3965,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         """
         # the extent of the chunks that hold data
         rows = [origin[0] for origin in chunks]
+        # along both axes
         cols = [origin[1] for origin in chunks]
         # and its center
         center = ((min(rows) + max(rows)) / 2, (min(cols) + max(cols)) / 2)
@@ -3905,6 +4015,7 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
         clock = qed.timers.wall(f"qed.measure.census.parse.{product}")
         # started afresh
         clock.reset()
+        # and running
         clock.start()
         # the number of ids in the list
         ids = 0

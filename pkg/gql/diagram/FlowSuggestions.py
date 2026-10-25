@@ -61,11 +61,13 @@ class FlowSuggestions(graphene.ObjectType):
         if isinstance(value, type) and issubclass(value, qed.component):
             # is set by its family and reads as the last part of it
             family = value.pyre_family()
+            # so describe it that way
             return FlowSuggestion(value=family, label=family.split(".")[-1])
         # a tuple
         if isinstance(value, tuple):
             # is set by its parts, and reads as them
             text = ", ".join(str(part) for part in value)
+            # so describe it that way
             return FlowSuggestion(value=text, label=text)
         # the rest read the way a setting does
         text = FlowFactory.render(value=value, trait=trait)

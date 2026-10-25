@@ -194,6 +194,7 @@ class Tile(Chore):
             chnl = journal.warning("qed.nexus.recipe")
             # complain
             chnl.line(f"the statistics of '{self.dataset}' cannot travel to a worker")
+            # and what that means
             chnl.line("so its channels will render untuned")
             # flush
             chnl.log()
@@ -208,6 +209,7 @@ class Tile(Chore):
         self.stacked = isinstance(view.dataset, qed.stacks.dataset)
         # which travels with the request when there is one
         members = getattr(view, "members", None)
+        # as the list of the participating members of an aggregate
         self.mask = list(members) if self.stacked and members is not None else None
         # my identity is the complete request specification: two tiles are the same work
         # only when everything that shapes the render agrees, controller state included, so
@@ -215,6 +217,7 @@ class Tile(Chore):
         # access credentials are not part of what is rendered: a rotated token must not
         # invalidate cached work
         spec = {name: value for name, value in self.config.items() if name != "credentials"}
+        # and freeze it into my identity
         self.identity = self._freeze(
             value=(
                 self.reader,

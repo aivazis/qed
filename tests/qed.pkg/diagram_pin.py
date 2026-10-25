@@ -103,11 +103,13 @@ def test():
     view = run(reading)["qed"]["playground"]
     # one factory, at the protocol level, with no slots
     (factory,) = view["factories"]
+    # is the operator protocol, at the protocol level
     assert (factory["family"], factory["protocol"], factory["level"]) == (
         "pyre.viz.operators",
         "pyre.viz.operators",
         "protocol",
     )
+    # and has no slots
     assert view["slots"] == []
     # the payload that pins it
     payload = {"diagram": playground.relay, "node": factory["id"]}
@@ -116,10 +118,13 @@ def test():
     run(pinning, {"payload": {**payload, "family": "pyre.viz.operators.amplitude"}})
     # read it back
     view = run(reading)["qed"]["playground"]
+    # the one factory
     (factory,) = view["factories"]
     # it is the class now, with a signal in and an amplitude out
     assert (factory["family"], factory["level"]) == ("pyre.viz.operators.amplitude", "class")
+    # with one input and one output
     assert (factory["inputs"], factory["outputs"]) == (1, 1)
+    # and a slot for each
     assert len(view["slots"]) == 2
     # and its label, as the schema serves it, says so
     assert [
@@ -128,7 +133,9 @@ def test():
 
     # pin it to add, which takes two inputs and makes one output
     run(pinning, {"payload": {**payload, "family": "pyre.viz.operators.add"}})
+    # read it back
     view = run(reading)["qed"]["playground"]
+    # the one factory
     (factory,) = view["factories"]
     # its slots follow
     assert (factory["family"], factory["inputs"], factory["outputs"]) == (
@@ -136,22 +143,28 @@ def test():
         2,
         1,
     )
+    # and a slot for each
     assert len(view["slots"]) == 3
     # and no two of them share a spot
     spots = [slot.position for slot in playground.slots]
+    # so check that none of the spots repeats
     assert len(set(spots)) == len(spots)
 
     # back to nothing
     run(pinning, {"payload": payload})
+    # read it back
     view = run(reading)["qed"]["playground"]
+    # the one factory
     (factory,) = view["factories"]
     # it is the protocol again, with its slots, which are none
     assert (factory["family"], factory["level"]) == ("pyre.viz.operators", "protocol")
+    # and has no slots
     assert view["slots"] == []
     # and nothing is left over in the diagram's indices or the recipe
     assert set(playground.nodes) == {factory.eid for factory in playground.factories} | {
         label.eid for label in playground.labels
     }
+    # and the recipe binds nothing
     assert playground.recipe.bindings == []
 
     # a class of another protocol is reported, so quiet the report
@@ -160,6 +173,7 @@ def test():
     run(pinning, {"payload": {**payload, "family": "pyre.viz.colormaps.gray"}})
     # leaves the factory as it was
     (factory,) = run(reading)["qed"]["playground"]["factories"]
+    # still pinned to its protocol
     assert factory["level"] == "protocol"
     # all done
     return

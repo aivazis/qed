@@ -139,7 +139,9 @@ class Mutation(graphene.ObjectType):
     diagramRemove = diagram.diagramRemove.Field()
     # how the playground is looked at
     playgroundCameraSet = diagram.playgroundCameraSet.Field()
+    # how it is projected
     playgroundProjectionSet = diagram.playgroundProjectionSet.Field()
+    # and which trays of its panel are open
     playgroundTraySet = diagram.playgroundTraySet.Field()
 
     # data archive connection management: connect an archive

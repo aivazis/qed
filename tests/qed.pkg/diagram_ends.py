@@ -70,34 +70,41 @@ def test() -> None:
     # an empty diagram, under a name of its own: pyre hands back the old instance for a name it
     # has seen before
     diagram = qed.ux.diagram(name=f"diagram_ends.{uuid.uuid1()}", recipe=None)
+    # and a store that knows it
     store = storeOf(diagram)
     # with the gray colormap at the origin, whose ends are a cell away on either side
     gray, *_ = diagram.addFactory(pin=qed.viz.colormaps.gray(), position=(0, 0, 0))
+    # its ends are a cell away on either side
     assert gray.ends() == [(-2, 0, 0), (2, 0, 0)], gray.ends()
     # and the encoder well to its right
     bmp, *_ = diagram.addFactory(pin=qed.viz.encoders.bmp(), position=(30, 0, 0))
 
     # the slot of the red output of the colormap, and where it is
     red = slotOf(gray, "red")
+    # and where it sits
     home = red.position
     # moved onto either end of the colormap
     for end in gray.ends():
         # it stays where it was
         move(store, red, end)
+        # so it is still at home
         assert red.position == home, (end, red.position)
         # and the layout still has it there
         assert diagram.layout[home] is red
     # moved with a group onto an end, it stays too
     assert diagram.moveGroup(nodes=[red], anchor=red, position=(2, 0, 0)) is False
+    # and the slot is still at home
     assert red.position == home
 
     # the encoder moved so that its input end lands on the slot
     x, y, z = home
+    # so its input end, two cells to its left, lands on the slot
     move(store, bmp, (x + 2, y, z))
     # stays where it was
     assert bmp.position == (30, 0, 0), bmp.position
     # while a move that keeps its ends clear goes through
     move(store, bmp, (30, 20, 0))
+    # and the encoder is where it was sent
     assert bmp.position == (30, 20, 0), bmp.position
 
     # a factory from the palette whose spot is the end of the colormap

@@ -173,6 +173,7 @@ def strays(allowed):
 # watch the native entry points, which do their work where the audit hook cannot see it: the
 # products opened through the h5 layer
 spy(module=pyre.h5, name="read")
+# whether read directly or through a reader
 spy(module=pyre.h5, name="reader")
 # the flat files mapped into memory
 spy(module=qed.libpyre.grid, name="map")
@@ -286,6 +287,7 @@ watch(
 )
 # none of them touched anything but the modules they imported on first use
 found = strays(allowed=compiled)
+# so there is nothing to report
 assert not found, "\n".join(f"{name}: {event} {args}" for name, event, args in found)
 # and the archives have mounted nothing
 assert local.fs is None and bucket.fs is None
@@ -318,6 +320,7 @@ def configuring(event, args):
 
 # check
 found = strays(allowed=configuring)
+# that nothing strayed
 assert not found, "\n".join(f"{name}: {event} {args}" for name, event, args in found)
 # the application built none of the state it manages
 assert app._ux is None
@@ -329,9 +332,11 @@ ux = watch(
 )
 # which built the store and everything it manages without touching anything
 found = strays(allowed=compiled)
+# so there is nothing to report
 assert not found, "\n".join(f"{name}: {event} {args}" for name, event, args in found)
 # including the archive in the bucket, which has not been mounted
 archives = {archive.pyre_name: archive for archive in ux.store._dataArchives.archives()}
+# and the one in the bucket has no filespace yet
 assert archives["passive.app.bucket"].fs is None
 
 

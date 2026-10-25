@@ -33,13 +33,17 @@ class FlowLabel(graphene.ObjectType):
     id = graphene.ID(required=True)
     # fields
     at = graphene.Field(Point, required=True)
+    # the kind of node it labels, e.g. a factory or a product
     category = graphene.String(required=True)
     # the parts of what it says, each one missing when it does not apply: the given name of an
     # instance, possibly empty, the family of a component, the role of a protocol, and the names
     # of the traits of a connector
     given = graphene.String()
+    # the family of a component
     family = graphene.String()
+    # the role of a protocol
     role = graphene.String()
+    # and the names of the traits of a connector
     traits = graphene.List(graphene.NonNull(graphene.String), required=True)
     # the id of the node it follows when that node is dragged
     owner = graphene.ID()
