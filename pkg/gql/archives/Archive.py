@@ -68,10 +68,12 @@ class Archive(graphene.ObjectType):
     @staticmethod
     def resolve_credentials(archive, *_):
         """
-        Get the archive location
+        Get the settings that say how to get at the contents of the {archive}, e.g. the name of
+        an authentication profile; never what it takes, since the keys of a session are secrets
+        and a client has no use for them
         """
-        # get the archive credentials
-        credentials = archive.credentials()
+        # get the archive access settings
+        credentials = archive.access()
         # go through them
         for name, value in credentials.items():
             # and convert them into credential form
