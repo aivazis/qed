@@ -212,7 +212,7 @@ class ENVI(Flat, family="qed.readers.native.envi"):
             # carefully
             try:
                 # read the header
-                return pyre.envi.reader().read(uri=candidate, name=f"{self.pyre_name}.header")
+                return pyre.envi.reader().read(uri=candidate, name=f"{self.pyre_name}.sidecar")
             # if it is not a well formed header
             except pyre.envi.exceptions.ENVIError as error:
                 # make a channel
