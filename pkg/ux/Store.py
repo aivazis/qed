@@ -477,16 +477,16 @@ class Store(qed.component, family="qed.ux.store"):
             channel.log()
             # and leave both alone
             return None
-        # the catalog knows the archive by its location, so take it out while that changes
-        self._dataArchives.removeArchive(uri=archive.uri)
         # if a fleet is attached
         if self.fleet is not None:
             # send home the scouts that know the old location
             self.fleet.recall(archive=archive.pyre_name)
-        # point the archive at the new location
+        # remember where the archive was
+        previous = archive.uri
+        # point it at the new location
         archive.reconfigure(uri=location, settings=settings)
-        # and put it back in the catalog
-        self._dataArchives.addArchive(archive=archive)
+        # and file it there in the catalog, which knows it by its location, keeping its place
+        self._dataArchives.relocateArchive(archive=archive, uri=previous)
         # the tree moved, so let the clients know
         self._announce()
         # and hand it back
