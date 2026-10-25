@@ -79,8 +79,15 @@ store.persistArchive(uri=one)
 # and so it has nothing new to say
 assert not archive.dirty
 
+# another archive, connected after it
+later = store.connectArchive(archive=qed.archives.local(name="local:later", uri=f"{one}/inner"))
+# the order of the catalog
+order = [entry.pyre_name for entry in store.archives]
+
 # point it at the right location
 moved = store.reconfigureArchive(uri=one, location=two, settings={})
+# leaves the catalog in the same order
+assert [entry.pyre_name for entry in store.archives] == order, list(store.archives)
 # is the same archive
 assert moved is archive
 # with the same name

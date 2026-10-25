@@ -41,6 +41,19 @@ class Archives:
         # add the new archive to the pile
         return self._addArchive(archive=archive)
 
+    def relocateArchive(self, archive, uri):
+        """
+        File {archive}, which used to live at {uri}, under its current location, in the place it
+        had in the catalog
+        """
+        # rebuild the catalog in its current order, swapping the old location for the new one
+        self._archives = {
+            (str(archive.uri) if location == str(uri) else location): entry
+            for location, entry in self._archives.items()
+        }
+        # all done
+        return archive
+
     def removeArchive(self, uri):
         """
         Remove a archive given its {uri}
