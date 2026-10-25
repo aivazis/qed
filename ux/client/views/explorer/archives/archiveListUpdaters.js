@@ -58,9 +58,9 @@ export const disconnectArchiveUpdater = store => {
 }
 
 
-// the updater for the mutation that reconfigures the archive whose id was {previous}; the id of
-// an archive is made from its location, so the archive comes back as a new record that takes
-// the place of the old one
+// the updater for the mutation that reconfigures the archive that was at the location {previous};
+// the id of an archive is made from its location, so the archive comes back as a new record that
+// takes the place of the old one
 export const reconfigureArchiveUpdater = previous => store => {
     // get the root field of the query result
     const payload = store.getRootField("reconfigureArchive")
@@ -77,8 +77,8 @@ export const reconfigureArchiveUpdater = previous => store => {
     const archives = qed.getLinkedRecords("archives")
     // put the reconfigured archive in the place of the old one
     const replaced = archives.map(
-        // by swapping out the entry that matches the old id
-        entry => entry.getDataID() === previous ? archive : entry
+        // by swapping out the entry at the old location
+        entry => entry.getValue("uri") === previous ? archive : entry
     )
     // attach the modified pile to the session manager
     qed.setLinkedRecords(replaced, "archives")

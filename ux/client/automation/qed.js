@@ -46,12 +46,14 @@ import { splitViewUpdater, collapseViewUpdater } from '~/views/viz/viz/viewListU
 import { useSyncToggleViewportMutation as syncToggleViewportMutation } from '~/views/viz/controls/sync/useSyncToggleViewport'
 import { useSyncUpdateOffsetMutation as syncUpdateOffsetMutation } from '~/views/viz/controls/sync/useSyncUpdateOffset'
 // the archive tree: the explorer's documents and the store updater the archive list needs
-import { localArchiveMutation } from '~/views/explorer/archive/local'
+import { localArchiveMutation, localArchiveReconfigureMutation } from '~/views/explorer/archive/local'
 import { disconnectArchiveMutation } from '~/views/explorer/archives/disconnect'
 import { useExpandFolderMutation as expandFolderMutation } from '~/views/explorer/archives/useExpandFolder'
 import { useCollapseFolderMutation as collapseFolderMutation } from '~/views/explorer/archives/useCollapseFolder'
 import { useRefreshArchiveMutation as refreshArchiveMutation } from '~/views/explorer/archives/useRefreshArchive'
-import { connectArchiveUpdater, disconnectArchiveUpdater } from '~/views/explorer/archives/archiveListUpdaters'
+import {
+    connectArchiveUpdater, disconnectArchiveUpdater, reconfigureArchiveUpdater,
+} from '~/views/explorer/archives/archiveListUpdaters'
 // the journal console's buffer, so the facade reads what the panel renders
 import { journal as console } from '~/views/viz/console/store'
 // the channel listing and switch the console uses
@@ -218,6 +220,19 @@ export const makeQED = () => ({
 
     // disconnect the archive at {uri}
     disconnectArchive: uri => command(disconnectArchiveMutation, { uri }, disconnectArchiveUpdater),
+
+    // point the archive at {uri} to {location}, keeping its name; {settings} assigns its traits,
+    // e.g. { profile, region } for an archive in a bucket, and an empty value clears one
+    reconfigureArchive: (uri, location, settings = {}) => command(
+        localArchiveReconfigureMutation,
+        {
+            uri, location,
+            credentials: {
+                tokens: Object.entries(settings).map(([name, value]) => ({ name, value: value ?? "" })),
+            },
+        },
+        reconfigureArchiveUpdater(uri),
+    ),
 
     // put the folder at {uri} of the archive at {archive} on display and list it; the root of an
     // archive is the folder at the archive's own uri

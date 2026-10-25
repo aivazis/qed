@@ -7,8 +7,9 @@
 
 // the archive tree at the model level: a spec owns a scratch directory on the server's host,
 // connects it as a local archive, and drives the tree through {window.qed} -- expanding lists a
-// folder, a change on disk shows only after a refresh, collapsing forgets the subtree, and
-// disconnecting takes the archive away. nothing here reads the DOM
+// folder, a change on disk shows only after a refresh, reconfiguring moves the archive under its
+// name, collapsing forgets the subtree, and disconnecting takes the archive away. nothing here
+// reads the DOM
 
 import { test, expect } from "@playwright/test"
 import fs from "node:fs"
@@ -71,6 +72,30 @@ test.describe.serial("the automation surface drives the archive tree", () => {
         // refresh
         await page.evaluate(uri => window.qed.refreshArchive(uri), uri)
         await expect.poll(() => entries(page, folder)).toEqual(["inner.dat", "later.dat"])
+    })
+
+    test("reconfiguring moves the archive under its name, and it lists its new location", async ({ page }) => {
+        await page.goto("/explore", { waitUntil: "load" })
+        await page.waitForFunction(() => Boolean(window.qed))
+        // move the archive into its folder
+        const moved = `${uri}/nested`
+        await page.evaluate(([uri, moved]) => window.qed.reconfigureArchive(uri, moved), [uri, moved])
+        // it keeps its name, sits at the new location, and has nothing on display
+        const catalog = await page.evaluate(async () => (await window.qed.archives()))
+        expect(catalog.filter(archive => archive.name === name)).toMatchObject([
+            { uri: moved, expanded: false, items: [] },
+        ])
+        // and lists what is there
+        await page.evaluate(moved => window.qed.expandFolder(moved), moved)
+        await expect.poll(async () => page.evaluate(async moved => {
+            const archive = (await window.qed.archives()).find(archive => archive.uri === moved)
+            return archive.items.filter(item => item.parent === moved).map(item => item.name)
+        }, moved)).toEqual(["inner.dat"])
+        // move it back, for the rest of the specs
+        await page.evaluate(([moved, uri]) => window.qed.reconfigureArchive(moved, uri), [moved, uri])
+        const back = await page.evaluate(async () => (await window.qed.archives()).map(archive => archive.uri))
+        expect(back).toContain(uri)
+        expect(back).not.toContain(moved)
     })
 
     test("collapsing the root forgets the subtree, and disconnecting removes the archive", async ({ page }) => {
