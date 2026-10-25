@@ -56,8 +56,8 @@ export const Earth = ({ view, edit = null, setType, hide }) => {
         uri: form.collection.shortName ? "earth:" : "",
         // for the granules of the collection
         collection: form.collection.shortName || null,
-        // an archive that exists already keeps its name
-        skip: edit !== null,
+        // and the name of the archive being reconfigured, which is its own to keep
+        current: edit?.name ?? null,
     })
     // set up the state update
     const update = (field, value) => {
@@ -99,10 +99,15 @@ export const Earth = ({ view, edit = null, setType, hide }) => {
             // input
             variables: {
                 input: {
-                    // the payload: a new archive is named after its nickname, and an existing one
-                    // keeps its name and its location
-                    name: edit === null ? `earth:${name}` : edit.name,
-                    uri: edit === null ? `earth:${name}` : edit.uri,
+                    // the payload: an archive is named after its nickname, and its location is made
+                    // from its name; an existing one is found by the location it has now, keeps
+                    // its name if the user left the nickname alone, and is replaced by a new one
+                    // if the user renamed it
+                    ...(edit === null
+                        ? { name: `earth:${name}`, uri: `earth:${name}` }
+                        : name === describe(edit).name
+                            ? { name: edit.name, uri: edit.uri, location: edit.uri }
+                            : { name: `earth:${name}`, uri: edit.uri, location: `earth:${name}` }),
                     count: form.count,
                     collection: form.collection,
                     granule: form.granule,
@@ -119,7 +124,7 @@ export const Earth = ({ view, edit = null, setType, hide }) => {
             // updater: a new archive joins the pile, an existing one takes its own old place
             updater: (edit === null)
                 ? connectArchiveUpdater("connectEarthAccessArchive")
-                : reconfigureArchiveUpdater(edit.uri),
+                : reconfigureArchiveUpdater(edit.uri, "reconfigureEarthAccessArchive"),
             // when done
             onCompleted: data => {
                 // clear the error
@@ -179,8 +184,7 @@ export const Earth = ({ view, edit = null, setType, hide }) => {
                     {when && <When interval={form.when} update={update} />}
                     {geo && <Geo value={form.geo} update={update} types={regionTypes} />}
                     {geo && form.geo && <Region region={form[form.geo]} update={update} />}
-                    <Name value={form.name} suggestion={suggestion} update={update}
-                        fixed={edit !== null} />
+                    <Name value={form.name} suggestion={suggestion} update={update} />
                 </Body>
             </Form>
             <Connect connect={connect} label={edit === null ? "connect" : "update"} />

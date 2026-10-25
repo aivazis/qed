@@ -7,8 +7,8 @@
 
 // the archive trays follow the tree the server keeps: expanding through the facade opens the
 // archive's tray and shows its folders as trays of their own, and collapsing closes it; the edit
-// control of a tray brings up the form that moves its archive, which keeps its name; a new
-// archive is offered a name made from where it is
+// control of a tray brings up the form that moves its archive, which keeps its name unless the
+// user renames it; an archive is offered a name made from where it is
 
 import { test, expect } from "@playwright/test"
 import fs from "node:fs"
@@ -61,10 +61,14 @@ test.describe.serial("the archive trays follow the server", () => {
         await expect(page.getByText("edit archive", { exact: true })).toBeVisible()
         const location = page.getByLabel("path", { exact: true })
         await expect(location).toHaveValue(`${root}/fodler`)
-        // the nickname shows, but takes no input
-        await expect(page.getByText(edited, { exact: true }).last()).toBeVisible()
-        // correct the location and send it
+        // the nickname the user picked, which does not follow the folder
+        const nickname = page.getByLabel("nickname", { exact: true })
+        await expect(nickname).toHaveValue(edited)
+        // correct the location; the nickname stays put
         await location.fill(`${root}/folder`)
+        await page.waitForTimeout(500)
+        await expect(nickname).toHaveValue(edited)
+        // send it
         await page.getByText("update", { exact: true }).click()
         // the form goes away, and the archive is at the corrected location, under the same name
         await expect(page.getByText("update", { exact: true })).toHaveCount(0)
@@ -76,6 +80,37 @@ test.describe.serial("the archive trays follow the server", () => {
         // clean up the server
         await page.evaluate(uri => window.qed.disconnectArchive(uri), corrected)
         await expect(tray(page, edited)).toHaveCount(0)
+    })
+
+    test("a nickname that follows the folder follows it to the corrected one, renaming the archive", async ({ page }) => {
+        // an archive named after the misspelled folder it was connected at
+        const misspelled = `file:${root}/fodler`
+        const corrected = `file:${root}/folder`
+        await page.goto("/explore", { waitUntil: "load" })
+        await page.waitForFunction(() => Boolean(window.qed))
+        await page.evaluate(uri => window.qed.connectArchive("local:fodler", uri), misspelled)
+        // bring up its form
+        await tray(page, "local:fodler").getByLabel("edit this archive").click()
+        const nickname = page.getByLabel("nickname", { exact: true })
+        await expect(nickname).toHaveValue("fodler")
+        // let the suggestion for its current folder arrive, then correct the folder
+        await page.waitForTimeout(500)
+        await page.getByLabel("path", { exact: true }).fill(`${root}/folder`)
+        // the nickname follows
+        await expect(nickname).toHaveValue("folder")
+        // send it
+        await page.getByText("update", { exact: true }).click()
+        await expect(page.getByText("update", { exact: true })).toHaveCount(0)
+        // the archive at the corrected location goes by the new name, in place of the old one
+        const archives = await page.evaluate(() => window.qed.archives())
+        expect(archives.filter(archive => archive.uri === corrected).map(archive => archive.name))
+            .toEqual(["local:folder"])
+        expect(archives.filter(archive => archive.name === "local:fodler")).toEqual([])
+        await expect(tray(page, "local:folder")).toHaveCount(1)
+        await expect(tray(page, "local:fodler")).toHaveCount(0)
+        // clean up the server
+        await page.evaluate(uri => window.qed.disconnectArchive(uri), corrected)
+        await expect(tray(page, "local:folder")).toHaveCount(0)
     })
 
     test("the edit button replaces the query of an earth access archive", async ({ page }) => {
@@ -105,7 +140,7 @@ test.describe.serial("the archive trays follow the server", () => {
         // its edit control brings up the form, filled in with its query
         await tray(page, uri).getByLabel("edit this archive").click()
         await expect(page.getByLabel("collection short name")).toHaveValue("NISAR_L2_GCOV_BETA_V1")
-        await expect(page.getByLabel("Count", { exact: true })).toHaveValue("10")
+        await expect(page.getByLabel("granule count limit")).toHaveValue("10")
         await expect(page.getByLabel("longitude")).toHaveValue("-118.5")
         await expect(page.getByLabel("latitude")).toHaveValue("34.25")
         // pick another collection and send it
