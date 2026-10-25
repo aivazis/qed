@@ -24,10 +24,12 @@ class S3(Archive, family="qed.archives.s3"):
     uri.default = qed.primitives.uri(scheme="s3")
     uri.doc = "the location of the archive"
 
+    # the authentication profile
     profile = qed.properties.str()
     profile.default = None
     profile.doc = "the name of the authentication profile"
 
+    # the region of the bucket
     region = qed.properties.str()
     region.default = None
     region.doc = "the name of the region where the data bucket resides"
@@ -99,8 +101,11 @@ class S3(Archive, family="qed.archives.s3"):
         frozen = session.get_credentials().get_frozen_credentials()
         # pack the S3 credentials
         credentials["region"] = region
+        # the access key
         credentials["access_key"] = frozen.access_key
+        # the secret key
         credentials["secret_key"] = frozen.secret_key
+        # and the session token
         credentials["token"] = frozen.token
         # and hand them off
         return credentials
@@ -192,6 +197,7 @@ class S3(Archive, family="qed.archives.s3"):
 
     # constants
     tag = "s3"
+    # and the label that names my kind to the user
     label = "s3"
 
 

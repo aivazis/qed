@@ -21,6 +21,7 @@ class Archive(qed.component, family="qed.archives.base", implements=qed.protocol
     uri.default = qed.primitives.uri(scheme="file", address=qed.primitives.path.cwd())
     uri.doc = "the location of the archive"
 
+    # the folders on display
     expanded = qed.properties.list(schema=qed.properties.str())
     expanded.default = []
     expanded.doc = "the folders on display, by uri"
@@ -173,6 +174,7 @@ class Archive(qed.component, family="qed.archives.base", implements=qed.protocol
         """
         # my root, and everything beneath it
         root = str(self.uri).rstrip("/")
+        # and the prefix of everything beneath it
         stem = root + "/"
         # anything else does not belong
         return [
@@ -356,6 +358,7 @@ class Archive(qed.component, family="qed.archives.base", implements=qed.protocol
 
     # constants
     tag = "<base>"
+    # and the label that names my kind to the user
     label = "<base>"
 
 

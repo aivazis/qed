@@ -191,7 +191,9 @@ class Store(qed.component, family="qed.ux.store"):
                 channel = journal.warning("qed.ux.staging")
                 # complain
                 channel.line(f"could not read values from '{name}'")
+                # say what was going on
                 channel.line(f"while opening '{source.uri}' for a direct read")
+                # and what went wrong
                 channel.line(f"got: {error}")
                 # flush
                 channel.log()
@@ -219,6 +221,7 @@ class Store(qed.component, family="qed.ux.store"):
         channel = journal.warning("qed.ux.staging")
         # complain
         channel.line(f"could not read values from '{dataset.pyre_name}'")
+        # and why
         channel.line(f"the product no longer holds a dataset with its identity")
         # flush
         channel.log()
@@ -471,7 +474,9 @@ class Store(qed.component, family="qed.ux.store"):
             channel = journal.warning("qed.ux.archives")
             # complain
             channel.line(f"could not move the archive '{archive.pyre_name}'")
+            # where to
             channel.line(f"to '{location}'")
+            # and what is in the way
             channel.line(f"since '{occupant.pyre_name}' is already there")
             # flush
             channel.log()
@@ -582,6 +587,7 @@ class Store(qed.component, family="qed.ux.store"):
             channel = journal.warning("qed.ux.persistence")
             # complain
             channel.line("could not persist the session")
+            # and what went wrong
             channel.line(f"got: {error}")
             # flush
             channel.log()
@@ -749,6 +755,7 @@ class Store(qed.component, family="qed.ux.store"):
             self._realized.pop(name, None)
             # and of the layout of its file and its datasets
             self._storages.pop(name, None)
+            # go through its datasets
             for dataset in source.datasets:
                 # one at a time
                 self._layouts.pop(dataset.pyre_name, None)
@@ -1136,6 +1143,7 @@ class Store(qed.component, family="qed.ux.store"):
             view = port.measureReset()
             # an empty viewport has nothing to reset
             if view is None:
+                # so skip it
                 continue
             # hand off the measure configuration
             yield view.measure
@@ -1816,6 +1824,7 @@ class Store(qed.component, family="qed.ux.store"):
         channel = journal.warning("qed.ux.staging")
         # complain
         channel.line(f"could not stage '{name}'")
+        # and why
         channel.line(f"there is no such source")
         # flush
         channel.log()
@@ -1840,7 +1849,9 @@ class Store(qed.component, family="qed.ux.store"):
             channel = journal.warning("qed.cli")
             # complain
             channel.line(f"could not open '{source.pyre_name}'")
+            # say what was going on
             channel.line(f"while establishing first contact with '{source.uri}'")
+            # and what went wrong
             channel.line(f"got: {error}")
             # flush
             channel.log()
@@ -1876,7 +1887,9 @@ class Store(qed.component, family="qed.ux.store"):
             channel = journal.warning("qed.ux.staging")
             # complain
             channel.line(f"could not stage '{name}'")
+            # say what was going on
             channel.line(f"while surveying '{source.uri}'")
+            # and what went wrong
             channel.line(f"got: {error}")
             # flush
             channel.log()
@@ -2064,6 +2077,7 @@ class Store(qed.component, family="qed.ux.store"):
         channel = journal.warning("qed.ux.preparation")
         # complain
         channel.line(f"could not prepare '{name}'")
+        # and what went wrong
         channel.line(f"got: {error}")
         # flush
         channel.log()
@@ -2227,7 +2241,9 @@ class Store(qed.component, family="qed.ux.store"):
             channel = journal.warning("qed.ux.archives")
             # complain
             channel.line(f"could not list '{uri}'")
+            # in which archive
             channel.line(f"of the archive at '{archive.uri}'")
+            # and what went wrong
             channel.line(f"got: {error}")
             # flush
             channel.log()
@@ -2278,6 +2294,7 @@ class Store(qed.component, family="qed.ux.store"):
         channel = journal.info("qed.ux.archives")
         # explain
         channel.line(f"the archive at '{archive.uri}' has changed shape")
+        # and introduce the folders that went
         channel.line("these folders were on display but are no longer there:")
         # indent
         channel.indent()
@@ -2354,7 +2371,9 @@ class Store(qed.component, family="qed.ux.store"):
         # the store is now the authority on the connected sources; empty the plexus piles,
         # recording the handoff as the provenance
         locator = pyre.tracking.simple("while handing the data sources to the store")
+        # empty the pile of datasets
         plexus.pyre_setTrait(alias="datasets", value=[], locator=locator)
+        # and the pile of stacks
         plexus.pyre_setTrait(alias="stacks", value=[], locator=locator)
         # all done
         return sources
@@ -2426,7 +2445,9 @@ class Store(qed.component, family="qed.ux.store"):
                 channel = journal.warning("qed.cli")
                 # complain
                 channel.line(f"could not load '{entry}'")
+                # say what was going on
                 channel.line(f"while processing the '{alias}' configuration")
+                # and what went wrong
                 channel.line(f"got: {error}")
                 # flush
                 channel.log()
@@ -2459,7 +2480,9 @@ class Store(qed.component, family="qed.ux.store"):
                 channel = journal.warning("qed.cli")
                 # complain
                 channel.line(f"could not build a viewport for '{view}'")
+                # say what was going on
                 channel.line(f"while processing the 'views' configuration")
+                # and what went wrong
                 channel.line(f"got: {error}")
                 # flush
                 channel.log()
@@ -2535,6 +2558,7 @@ class Store(qed.component, family="qed.ux.store"):
         channel = journal.info("qed.ux")
         # sign on
         channel.line("qed store:")
+        # and indent what follows
         channel.indent()
         # show me the static assets
         # channel.line("static assets:")
@@ -2544,14 +2568,20 @@ class Store(qed.component, family="qed.ux.store"):
 
         # my archives
         channel.line("archives:")
+        # indent
         channel.indent()
+        # list their locations
         channel.report(archive.uri for archive in self._dataArchives.archives())
+        # and outdent
         channel.outdent()
 
         # my readers
         channel.line("readers:")
+        # indent
         channel.indent()
+        # list their locations
         channel.report(reader.uri for reader in self._dataSources.sources())
+        # and outdent
         channel.outdent()
 
         # flush
