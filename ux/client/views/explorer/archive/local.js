@@ -149,9 +149,9 @@ export const Local = ({ view, edit = null, setType, hide }) => {
             <Form>
                 <Body>
                     <TypeSelector value="local" update={setType} />
+                    <Path value={form.path} update={update} />
                     <Name value={form.name} suggestion={suggestion} update={update}
                         fixed={edit !== null} />
-                    <Path value={form.path} update={update} />
                 </Body>
             </Form>
             <Connect connect={connect} label={edit === null ? "connect" : "update"} />
