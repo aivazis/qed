@@ -40,6 +40,7 @@ class Stack(
     # the user prefers comes from the files, which keep it as written
     selections.persistent = False
 
+    # the datasets of my stack, and the axes that tell them apart
     contents = qed.viz.protocols.contents.output()
     contents.doc = "the datasets in my file, and the axes that tell them apart"
     contents.persistent = False
@@ -179,6 +180,7 @@ class Stack(
             # the selector SPEC is shared by every member by construction, a class default
             # that requires no file contact, so i can borrow it from the first one
             head, *_ = readers
+            # and borrow its selectors
             self.selectors = head.selectors
         # all done
         return

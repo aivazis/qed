@@ -37,20 +37,24 @@ class Reader(
     cell.default = "real32"
     cell.doc = "the type of the dataset payload"
 
+    # the shape of my raster, in (lines, samples)
     shape = qed.properties.tuple(schema=qed.properties.int())
     shape.doc = "the size of the dataset in (lines, samples)"
 
+    # the map of selector names to their allowed values
     selectors = qed.protocols.selectors()
     selectors.persistent = False
     selectors.default = {}
     selectors.doc = "a map of selector names to their allowed values"
 
+    # a key value store of preferred values for selectors
     selections = qed.properties.kv()
     selections.doc = "a key value store of preferred values for selectors"
     # the session adds only the picks of first contact, which are made again every time; what
     # the user prefers comes from the files, which keep it as written
     selections.persistent = False
 
+    # the datasets in my file, and the axes that tell them apart
     contents = qed.viz.protocols.contents.output()
     contents.doc = "the datasets in my file, and the axes that tell them apart"
     contents.persistent = False
@@ -197,8 +201,11 @@ class Reader(
                 channel = journal.warning("qed.readers.unw")
                 # generate a list of possible shapes
                 channel.line(f"while attempting to load '{self.uri.address}'")
+                # say what is missing
                 channel.line(f"missing shape information; here are some possibilities")
+                # and how the guesses read
                 channel.line(f"as lines x samples")
+                # indent
                 channel.indent()
                 # generate some options
                 for lines, samples in qed.libqed.factor(
@@ -206,7 +213,9 @@ class Reader(
                 ):
                     # and show them
                     channel.line(f"{lines} x {samples}")
+                # outdent
                 channel.outdent()
+                # and tell the user how to settle it
                 channel.line(f"please use '--lines' or '--samples' to provide the dataset shape")
                 # flush
                 channel.log()
@@ -231,7 +240,9 @@ class Reader(
         channel = journal.warning("qed.readers.unw")
         # complain
         channel.line(f"'{self.uri.address}' is too small for the declared shape")
+        # say how much the shape needs
         channel.line(f"shape {tuple(shape)} requires {required} bytes")
+        # and how much there is
         channel.line(f"but the file holds only {actual}")
         # flush
         channel.log()

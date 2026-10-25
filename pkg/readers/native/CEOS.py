@@ -65,6 +65,7 @@ class CEOS(Flat, family="qed.readers.native.ceos"):
         if not shape[0]:
             # the height
             shape[0] = layout.lines
+        # and if the width is missing
         if not shape[1]:
             # the width
             shape[1] = layout.samples
@@ -226,8 +227,9 @@ class CEOS(Flat, family="qed.readers.native.ceos"):
         Derive the placement of the raster in the {records} data records of {record} bytes each
         that follow a descriptor of {descriptor} bytes, from the {layout} fields
         """
-        # the bytes of each record in front of the samples, and after them
+        # the bytes of each record in front of the samples
         prefix = layout.prefix or 0
+        # and the bytes after them
         suffix = layout.suffix or 0
         # the bytes of each pixel
         group = layout.group

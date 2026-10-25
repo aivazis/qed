@@ -78,6 +78,7 @@ def adding():
     """
     # an empty diagram
     diagram = empty()
+    # and a store that knows it
     store = storeOf(diagram)
     # place the oklch colormap
     result = add(store, "pyre.viz.colormaps.oklch", (0, 0, 0))
@@ -85,18 +86,23 @@ def adding():
     assert result is diagram
     # which now holds the colormap, with its three inputs and three outputs
     assert len(diagram.factories) == 1
+    # and its six slots
     assert len(diagram.slots) == 6
     # the factory is in the recipe of the diagram as well
     oklch = factoryOf(diagram, "pyre.viz.colormaps.oklch")
+    # where the recipe finds the node of the factory
     assert diagram.recipe.node(name=oklch.node.name) is oklch.node
     # as a colormap, pinned to the class the palette offers
     assert oklch.node.protocol is qed.viz.colormap
+    # pinned to its class
     assert oklch.node.level == "class"
     # another one on top of it does not fit, so it is refused
     add(store, "pyre.viz.colormaps.oklch", (0, 0, 0))
+    # so the diagram still holds just the one
     assert len(diagram.factories) == 1
     # and so is a factory nobody offers
     add(store, "pyre.viz.colormaps.nonsense", (40, 0, 0))
+    # and the diagram still holds just the one
     assert len(diagram.factories) == 1
     # all done
     return
@@ -109,18 +115,24 @@ def removing():
     """
     # an empty diagram
     diagram = empty()
+    # and a store that knows it
     store = storeOf(diagram)
     # place the colormap and the encoder, apart
     add(store, "pyre.viz.colormaps.gray", (0, 0, 0))
+    # and the encoder to its right
     add(store, "pyre.viz.encoders.bmp", (15, 0, 0))
+    # find the colormap
     gray = factoryOf(diagram, "pyre.viz.colormaps.gray")
+    # and the encoder
     bmp = factoryOf(diagram, "pyre.viz.encoders.bmp")
     # four slots each
     assert len(diagram.slots) == 8
     # bind the red output of the colormap to the red input of the encoder, by dropping the one on
     # the other
     red = next(slot for slot in gray.slots if slot.writers and slot.position[1] < 0)
+    # and the red input of the encoder
     target = next(slot for slot in bmp.slots if slot.readers and slot.position[1] < 0)
+    # drop the one on the other, and let it settle
     qed.ux.store.diagramMove(
         store, diagram=store.relay, node=red.relay, position=target.position, settled=True
     )
@@ -128,7 +140,9 @@ def removing():
     assert len(diagram.slots) == 7
     # the slot that stays stands for a new product of the recipe, which both reds are bound to
     product = red.product.name
+    # the colormap writes its red into that product
     assert diagram.recipe.binding(factory=gray.node.name, slot="red").product == product
+    # and the encoder reads its red from it
     assert diagram.recipe.binding(factory=bmp.node.name, slot="red").product == product
     # and which holds color channels, since that is what both slots expect
     assert red.product.specification is qed.viz.tiles.channel
@@ -138,16 +152,20 @@ def removing():
     assert result is diagram
     # the encoder is gone, from the diagram and from its recipe
     assert bmp not in diagram.factories
+    # and from the recipe
     assert bmp.node.name not in diagram.recipe.nodes
     # so are its own slots, but the slot it shared with the colormap stays, connected to the
     # colormap only
     assert len(diagram.slots) == 4
+    # the shared slot is still there
     assert red in diagram.slots
+    # written by the colormap, and read by nobody
     assert set(red.writers) == {gray} and not red.readers
     # and still stands for its product, which the colormap writes
     assert [tuple(b) for b in diagram.recipe.bindings] == [(gray.node.name, "red", product)]
     # and nothing on the diagram mentions the encoder any more
     assert all(label.owner is not bmp for label in diagram.labels)
+    # nor any of its connectors
     assert all(connector.factory is not bmp for connector in diagram.connectors)
     # all done
     return
@@ -186,32 +204,43 @@ def splitting():
     """
     # an empty diagram
     diagram = empty()
+    # and a store that knows it
     store = storeOf(diagram)
     # the colormap and the encoder
     add(store, "pyre.viz.colormaps.gray", (0, 0, 0))
+    # and the encoder to its right
     add(store, "pyre.viz.encoders.bmp", (15, 0, 0))
+    # find the colormap
     gray = factoryOf(diagram, "pyre.viz.colormaps.gray")
+    # and the encoder
     bmp = factoryOf(diagram, "pyre.viz.encoders.bmp")
     # bind the reds by dropping the output on the input
     red = slotOf(gray, "red")
+    # drop it on the red input of the encoder
     move(store, red, slotOf(bmp, "red").position)
+    # so the two reds share a slot, one fewer than before
     assert len(diagram.slots) == 7
     # remove the slot of the binding
     remove(store, red)
     # the binding is undone: the slot is gone, and each red has a slot of its own again
     assert red not in diagram.slots
+    # so there are eight slots again
     assert len(diagram.slots) == 8
     # each one at its home
     assert slotOf(gray, "red").position == gray.home(trait=gray.node.slots["red"])
+    # and so is the red of the encoder
     assert slotOf(bmp, "red").position == bmp.home(trait=bmp.node.slots["red"])
     # connected the way it was, and to nobody else
     assert set(slotOf(gray, "red").writers) == {gray} and not slotOf(gray, "red").readers
+    # and the red of the encoder is read by the encoder alone
     assert set(slotOf(bmp, "red").readers) == {bmp} and not slotOf(bmp, "red").writers
     # and the recipe forgot both the bindings and the product
     assert diagram.recipe.bindings == [] and not list(diagram.recipe.products())
     # a slot that is already one trait's own has nothing to undo
     own = slotOf(gray, "green")
+    # removing it
     remove(store, own)
+    # leaves it on the diagram, with all eight slots
     assert own in diagram.slots and len(diagram.slots) == 8
     # all done
     return
@@ -225,25 +254,32 @@ def packed():
     """
     # an empty diagram
     diagram = empty()
+    # and a store that knows it
     store = storeOf(diagram)
     # the first filter at the origin, and the second well to its right, for now
     add(store, "pyre.viz.normalizers.parametric", (0, 0, 0))
+    # and the second, to its right for now
     add(store, "pyre.viz.normalizers.parametric", (20, 0, 0))
+    # tell them apart by where they are
     first, second = sorted(
         (entity for entity in diagram.factories), key=lambda entity: entity.position
     )
     # bind the output of the first to the input of the second, and bring the binding back to
     # the home of the output
     output = slotOf(first, "normalized")
+    # drop it on the input of the second, which binds them
     move(store, output, slotOf(second, "signal").position)
+    # and bring the binding back to the home of the output
     move(store, output, (5, 0, 0))
     # bring the second filter close, so its input calls the same spot home
     move(store, second, (10, 0, 0))
+    # so the home of its input is the spot of the binding
     assert second.home(trait=second.node.slots["signal"]) == (5, 0, 0)
     # split the binding
     remove(store, output)
     # each slot stepped half a cell toward its own factory, so the two do not pile up
     assert slotOf(first, "normalized").position == (4, 0, 0)
+    # and the input of the second toward the second
     assert slotOf(second, "signal").position == (6, 0, 0)
     # all done
     return
@@ -257,11 +293,15 @@ def refusing():
     """
     # an empty diagram
     diagram = empty()
+    # and a store that knows it
     store = storeOf(diagram)
     # the amplitude, and the colormap well to its right
     add(store, "pyre.viz.operators.amplitude", (0, 0, 0))
+    # and the colormap well to its right
     add(store, "pyre.viz.colormaps.gray", (20, 0, 0))
+    # find the amplitude
     amplitude = factoryOf(diagram, "pyre.viz.operators.amplitude")
+    # and the colormap
     gray = factoryOf(diagram, "pyre.viz.colormaps.gray")
     # the output of the amplitude
     output = slotOf(amplitude, "amplitude")
@@ -273,6 +313,7 @@ def refusing():
     assert output.position == origin
     # and binds nothing
     assert diagram.recipe.bindings == []
+    # and every slot is still there
     assert len(diagram.slots) == 6
     # all done
     return
@@ -290,6 +331,7 @@ def readonly():
         recipe=qed.flow.recipe.harvest(flow=qed.channels.covariance()),
         editable=False,
     )
+    # and a store that knows it
     store = storeOf(diagram)
 
     # what it looks like
@@ -303,6 +345,7 @@ def readonly():
             sorted(node.position for node in [*diagram.factories, *diagram.slots]),
         )
 
+    # take a picture of it before any edits
     before = picture()
     # adding a factory
     add(store, "pyre.viz.filters.power", (0, 30, 0))
@@ -314,18 +357,23 @@ def readonly():
     assert picture() == before
     # dropping a slot that is not shared on another one
     loose = [slot for slot in diagram.slots if not (slot.readers and slot.writers)]
+    # pick two of them
     first, second = loose[0], loose[1]
+    # remember where the first one is
     origin = first.position
+    # drop the first on the second, and let it settle
     qed.ux.store.diagramMove(
         store, diagram=store.relay, node=first.relay, position=second.position, settled=True
     )
     # binds nothing: the slot stays where it was
     assert first.position == origin
+    # and the picture is unchanged
     assert picture() == before
     # but a move to an empty spot goes through
     qed.ux.store.diagramMove(
         store, diagram=store.relay, node=first.relay, position=(0, 40, 0), settled=True
     )
+    # and the slot is where it was sent
     assert first.position == (0, 40, 0)
     # all done
     return
@@ -342,6 +390,7 @@ def test():
     removing()
     # undo bindings
     splitting()
+    # and split them in a packed diagram
     packed()
     # refuse bindings of unrelated specifications
     refusing()

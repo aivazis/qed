@@ -72,6 +72,7 @@ assert store.fleet is None
 
 # connect an archive over this directory
 archive = qed.archives.local(name="persist_local", uri=f"file:{here}")
+# and connect it to the store
 store.connectArchive(archive=archive)
 # its uri
 uri = str(archive.uri)
@@ -86,16 +87,21 @@ assert [os.path.abspath(str(path)) for path in written] == [os.path.join(workspa
 doc = pyre.config.newYamlEditor(uri="qed.yaml")
 # the archive has a section with what the session assigned
 assert doc.get("persist_local", "uri") == f"file:{here}"
+# along with the folders it expanded
 assert list(doc.get("persist_local", "expanded")) == [uri]
 # the default workspace archive, which came from code with nothing assigned, has no section
 assert doc.get("local:workspace") is None
 # both are in the archives list
 archives = list(doc.get("archives"))
+# the one over this directory
 assert "qed.archives.local#persist_local" in archives
+# and the workspace archive
 assert "qed.archives.local#local:workspace" in archives
 # the reader keeps its section exactly as written, macro and all
 assert doc.get("d16", "uri") == "{qed.native}/c16.dat"
+# its shape
 assert doc.get("d16", "shape") == "65, 65"
+# and its cell
 assert doc.get("d16", "cell") == "c16"
 # and its cell, which that entry spells completely, gets no section of its own
 assert doc.find("d16.cell", section=True) is None
@@ -108,7 +114,9 @@ assert doc.get("view.0", "reader") == "qed.readers.native.flat#d16"
 
 # a second write is idempotent
 store.persist()
+# read it back
 again = pyre.config.newYamlEditor(uri="qed.yaml")
+# and it reads the same as the first one
 assert again.render() == doc.render()
 
 

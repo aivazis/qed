@@ -49,6 +49,7 @@ class FlowFactory(graphene.ObjectType):
     methods = graphene.List(graphene.NonNull(FlowMethod), required=True)
     # product counts
     inputs = graphene.Int(required=True)
+    # and the number of its outputs
     outputs = graphene.Int(required=True)
     # placements
     at = graphene.Field(Point, required=True)
@@ -119,6 +120,7 @@ class FlowFactory(graphene.ObjectType):
         # the identities of its slots, by direction; traits overload their comparison operators,
         # so membership is decided by identity
         inputs = {id(trait) for trait in node.inputs}
+        # and those of its outputs, on their own
         outputs = {id(trait) for trait in node.outputs}
         # the descriptions
         traits = []

@@ -164,6 +164,7 @@ def test() -> None:
             )
             # and the pinned one is the class, labeled by its family and the role of its protocol
             label = (None, family, protocol.pyre_role())
+            # which is what the pinned one shows
             assert summary(pinned)[:3] == (family, "class", label), family
     # there must have been some
     assert classes > 0

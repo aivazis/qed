@@ -61,6 +61,7 @@ def test():
     playground = store.playground()
     # which has nothing on it
     assert not playground.factories
+    # and no slots
     assert not playground.slots
     # and can be edited
     assert playground.editable

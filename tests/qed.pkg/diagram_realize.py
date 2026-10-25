@@ -102,9 +102,11 @@ def test() -> None:
     playground = store.playground()
     # with a flat reader
     store.diagramAdd(diagram=playground.relay, family="qed.readers.native.flat", position=(0, 0, 0))
+    # find it
     (reader,) = playground.factories
     # and a picker
     store.diagramAdd(diagram=playground.relay, family="pyre.viz.pickers.match", position=(8, 0, 0))
+    # and find it, apart from the reader
     (picker,) = [entity for entity in playground.factories if entity is not reader]
 
     # drop the contents the reader writes on the ones the picker reads
@@ -115,6 +117,7 @@ def test() -> None:
     )
     # the two share a slot
     shared = slotOf(reader, "contents")
+    # since the picker finds the same one
     assert shared is slotOf(picker, "contents")
     # which stands for a product that is only a specification
     assert shared.product is not None and shared.product.level == "protocol"
@@ -132,26 +135,33 @@ def test() -> None:
     _, error = store.diagramInstantiate(
         diagram=playground.relay, node=picker.relay, name=f"realize_{uuid.uuid1().hex[:8]}"
     )
+    # which goes through
     assert error is None, error
     # which reads the contents, so they stay a specification, and it holds nothing
     assert shared.product.level == "protocol"
+    # and the picker holds no contents
     assert picker.node.pin.contents is None
     # while the dataset it writes, which is bound to nothing, is a product of its own, not made yet
     dataset = describe(slotOf(picker, "dataset"))
+    # an instance that is stale
     assert (dataset["level"], dataset["stale"]) == ("instance", True), dataset
+    # of a dataset in memory
     assert dataset["family"] == "pyre.viz.datasets.memory", dataset
     # so it has no selections to suggest; the diagram cannot change a map until it has an editor
     # for one, so the picker is asked directly
     selection = picker.node.pin.pyre_trait(alias="selection")
+    # which suggests nothing
     assert list(picker.node.pin.pyre_suggest(trait=selection)) == []
 
     # the reader becomes an instance that knows its file and its cell
     flat = qed.readers.native.flat(
         name=f"realize_{uuid.uuid1().hex[:8]}", uri=raster, cell="c16", shape=(65, 65)
     )
+    # pin the reader to it
     playground.pin(entity=reader, pin=flat)
     # so the contents become its own
     assert shared.product.level == "instance"
+    # the very contents of the instance
     assert shared.product.pin is flat.contents
     # which the picker reads
     assert picker.node.pin.contents is flat.contents
@@ -162,12 +172,17 @@ def test() -> None:
     selections = list(picker.node.pin.pyre_suggest(trait=selection))
     # pulls the contents, which opens the file and finds its one dataset, on no axes
     assert selections == [{}], selections
+    # the reader holds that one dataset
     assert len(flat.datasets) == 1
+    # and its contents are no longer stale
     assert not flat.contents.pyre_stale
     # so the contents are made, and say they hold one dataset, on no axes
     made = describe(shared)
+    # an instance that is not stale
     assert (made["level"], made["stale"]) == ("instance", False), made
+    # of contents in memory
     assert made["family"] == "pyre.viz.contents.memory", made
+    # holding one dataset, on no axes
     assert made["facts"] == [("dataset", "")], made
 
     # all done

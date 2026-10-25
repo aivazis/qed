@@ -102,7 +102,9 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
             channel = journal.firewall("qed.ux.diagram.nodes")
             # so complain
             channel.line(f"while looking up '{relay}'")
+            # in which diagram
             channel.line(f"in the diagram {self.relay}")
+            # and what went missing
             channel.log(f"node '{eid}' not found")
             # in case firewalls aren't fatal, return the found node
             return node
@@ -113,7 +115,9 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
             channel = journal.firewall("qed.ux.diagram.nodes")
             # so complain
             channel.line(f"while looking up '{relay}'")
+            # in which diagram
             channel.line(f"in the diagram {self.relay}")
+            # and what was found instead
             channel.log(f"type mismatch: retrieved node is '{typename}'")
             # in case firewalls aren't fatal, return the found node
             return node
@@ -307,6 +311,7 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         """
         # the connections of the slot, with their direction
         connections = [(factory, connector, True) for factory, connector in slot.readers.items()]
+        # including the ones that write to it
         connections += [(factory, connector, False) for factory, connector in slot.writers.items()]
         # the traits connected to it, one entry each, with their factory and direction
         traits = [
@@ -336,6 +341,7 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
             self.forget(nodes=connector.labels)
         # and the slot itself, along with its labels
         self.forget(nodes=slot.labels)
+        # followed by the slot itself
         self.forget(nodes=[slot])
         # the factories no longer use the slot
         for factory, _, _ in connections:
@@ -381,6 +387,7 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         """
         # unpack
         x, y, z = spot
+        # and where the factory is
         fx, fy, _ = factory.position
         # if they are in different columns
         if fx != x:
@@ -398,10 +405,13 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         labels = [label for connector in slot.connections() for label in connector.labels]
         # the slot
         self.slots.add(slot)
+        # under its id
         self.nodes[slot.eid] = slot
+        # and at its spot in the layout
         self.layout[slot.position] = slot
         # and the labels
         self.labels |= set(labels)
+        # under their ids
         self.nodes.update((label.eid, label) for label in labels)
         # all done
         return
@@ -474,11 +484,13 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
                 self.forget(nodes=connector.labels)
             # detach the slot from the factory, on whichever side it was
             slot.readers.pop(entity, None)
+            # whether it read from it or wrote to it
             slot.writers.pop(entity, None)
             # a slot that nobody uses any more
             if not slot.readers and not slot.writers:
                 # goes, along with its labels
                 self.forget(nodes=slot.labels)
+                # followed by the slot itself
                 self.forget(nodes=[slot])
                 # and its product, which the factory's removal leaves with no bindings
                 if slot.product is not None:
@@ -507,7 +519,9 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
                 del self.layout[node.position]
             # and out of whichever pile it is on
             self.factories.discard(node)
+            # be it the slots
             self.slots.discard(node)
+            # or the labels
             self.labels.discard(node)
         # all done
         return
@@ -877,6 +891,7 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         for slot in plan["dead"]:
             # go, along with their labels
             self.forget(nodes=slot.labels)
+            # followed by the slots themselves
             self.forget(nodes=[slot])
             # and so do their products, which no binding names any more
             if slot.product is not None:
@@ -904,6 +919,7 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         entity.refreshLabels()
         # and file it
         self.labels |= entity.labels
+        # under their ids
         self.nodes.update((label.eid, label) for label in entity.labels)
         # all done
         return
@@ -1156,11 +1172,15 @@ class Diagram(qed.component, family="qed.ux.flow.diagrams.diagram"):
         yield f"diagram: {self.relay}"
         # go through my slots
         yield f"  slots:"
+        # one at a time
         for slot in self.slots:
+            # on a line of its own
             yield f"    {slot}"
         # go through my factories
         yield f"  factories:"
+        # one at a time
         for factory in self.factories:
+            # on a line of its own
             yield f"    {factory}"
         # all done
         return

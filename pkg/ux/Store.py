@@ -1419,6 +1419,7 @@ class Store(qed.component, family="qed.ux.store"):
             channel = journal.warning("qed.ux.playground")
             # complain
             channel.line(f"unknown projection '{kind}'")
+            # and say what i can draw
             channel.line(f"the playground is drawn either 'flat' or 'iso'")
             # flush
             channel.log()

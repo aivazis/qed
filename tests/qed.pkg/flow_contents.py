@@ -57,16 +57,20 @@ def test() -> None:
     assert len(reader.datasets) == 1
     # a flat file has no axes, and one dataset
     assert reader.contents.axes == {}, reader.contents.axes
+    # which is its only entry
     assert len(reader.contents.entries) == 1
     # so there is one selection, which names no axis
     assert suggestions == [{}], suggestions
 
     # picking it
     picker.selection = {}
+    # and running the picker
     picker.pyre_run()
     # writes the dataset of the reader
     (dataset,) = reader.datasets
+    # the product of the picker draws from it
     assert picker.dataset.source is dataset
+    # and selects nothing within it
     assert picker.dataset.selector == {}
 
     # a selection that names an axis the file does not have
@@ -75,9 +79,12 @@ def test() -> None:
     other.selection = {"band": "1"}
     # matches nothing, and is refused
     try:
+        # running it
         other.pyre_run()
+        # must not succeed
         assert False, "a selection with an axis a flat file does not have was accepted"
     except qed.flow.exceptions.ProductionError as error:
+        # and the reason says that nothing matched
         assert "no dataset matches" in error.reason, error.reason
 
     # all done

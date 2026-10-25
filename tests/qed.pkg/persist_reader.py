@@ -100,6 +100,7 @@ assert store.isSaved(name="booted") is True
 
 # connect two more readers over the same raster, the way the session does
 raster = os.path.join(here, "c16.dat")
+# one under each name
 for name in ("first", "second"):
     # make each one
     reader = qed.readers.native.flat(name=name, uri=f"file:{raster}", shape=(65, 65), cell="c16")
@@ -109,6 +110,7 @@ for name in ("first", "second"):
 assert text() == original
 # so the files do not know about them
 assert store.isSaved(name="first") is False
+# neither of them
 assert store.isSaved(name="second") is False
 
 # make first contact with the reader that came from the file; this resolves its shape and
@@ -119,7 +121,9 @@ next(source for source in store.sources if source.pyre_name == "booted").open()
 assert store.persistSource(name="first").pyre_name == "first"
 # now they know about it, and not about the other one
 assert store.isSaved(name="first") is True
+# but not the other one
 assert store.isSaved(name="second") is False
+# load the file
 saved = doc()
 # it has a section that says what it is
 assert saved.get("first", "uri") == f"file:{raster}"
@@ -134,6 +138,7 @@ again = qed.readers.native.flat(
     shape=[int(extent) for extent in saved.get("first", "shape")],
     cell=saved.get("first", "cell"),
 )
+# with the same cell
 assert again.cell.pyre_family() == "qed.datatypes.complex128"
 # nothing about how it was being looked at made it into the file
 assert "amplitude" not in text()
@@ -145,18 +150,24 @@ assert list(saved.get("datasets")) == [
 # the reader that came from the file keeps its section as the user wrote it, macro and all,
 # even though the session has resolved its shape since
 assert saved.get("booted", "uri") == "{qed.native}/c16.dat"
+# its shape as written
 assert saved.get("booted", "shape") == "65, 65"
+# and its cell as the user spelled it
 assert saved.get("booted", "cell") == "c16"
 # and saving it explicitly changes nothing, since all that is missing is nothing
 before = text()
+# save it
 store.persistSource(name="booted")
+# and the file is as it was
 assert text() == before
 # and the other reader of the session is nowhere to be found
 assert saved.get("second") is None
 
 # saving it again changes nothing
 before = text()
+# save it
 store.persistSource(name="first")
+# and the file is as it was
 assert text() == before
 # and its cell, which its entry spells completely, got no section of its own
 assert doc().find("first.cell", section=True) is None
@@ -167,6 +178,7 @@ swapped = qed.readers.native.flat(name="swapped", uri=f"file:{raster}", shape=(6
 store.connectSource(source=swapped)
 # and save it
 store.persistSource(name="swapped")
+# load the file
 saved = doc()
 # its cell is spelled by its specification, which keeps the byte order along with the family
 assert saved.get("swapped", "cell") == swapped.cell.spec
@@ -179,10 +191,13 @@ rebuilt = qed.readers.native.flat(
     shape=[int(extent) for extent in saved.get("swapped", "shape")],
     cell=saved.get("swapped", "cell"),
 )
+# with the same family
 assert rebuilt.cell.pyre_family() == swapped.cell.pyre_family()
+# and the same byte order
 assert rebuilt.cell.byteswap == swapped.cell.byteswap
 # let go of it, so the rest of the driver is about the readers it had
 store.disconnectSource(name="swapped")
+# which removes its section from the file
 assert doc().get("swapped") is None
 
 # a reader that came through an archive: the archive hands out keys, and says how to get in
@@ -192,40 +207,54 @@ archive = types.SimpleNamespace(
 )
 # connect it; the product lives in a bucket, and nobody opens it here
 remote = qed.readers.nisar.gslc(name="remote", uri="s3://bucket/products/gslc.h5", archive=archive)
+# and hand it to the store
 store.connectSource(source=remote)
 # and save it
 store.persistSource(name="remote")
+# load the file
 saved = doc()
 # its section says how to get at the product, so that it can outlive its archive
 assert dict(saved.get("remote", "credentials")) == {"profile": "st", "region": "us-west-2"}
 # and the keys are nowhere in the file
 assert "AKIATEST" not in text()
+# not even the secret one
 assert "sekrit" not in text()
 # let go of it, so the rest of the driver is about the local readers
 store.disconnectSource(name="remote")
+# which removes its section from the file
 assert doc().get("remote") is None
 
 # a name that matches nothing writes nothing
 before = text()
+# saving under it finds no reader
 assert store.persistSource(name="nobody") is None
+# and leaves the file as it was
 assert text() == before
 
 # disconnect the reader that was never saved; the files never knew about it
 store.disconnectSource(name="second")
+# so the file is as it was
 assert text() == before
 
 # disconnect the one that was saved; its entry and its section go
 store.disconnectSource(name="first")
+# the files no longer know about it
 assert store.isSaved(name="first") is False
+# load the file
 after = doc()
+# its section is gone
 assert after.get("first") is None
+# and so is its entry in the list of datasets
 assert list(after.get("datasets")) == ["qed.readers.native.flat#booted"]
 
 # disconnect the one that came from the file; its entry goes, and so does its section, since
 # it lives in the workspace file
 store.disconnectSource(name="booted")
+# load the file
 final = doc()
+# its section is gone
 assert final.get("booted") is None
+# and the list of datasets is empty
 assert list(final.get("datasets")) == []
 
 

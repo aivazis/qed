@@ -35,6 +35,7 @@ def test() -> None:
             cls = implementer() if isinstance(implementer, qed.foundry) else implementer
             # keep it, once
             if cls not in classes:
+                # add it to the pile
                 classes.append(cls)
     # there are plenty of them
     assert len(classes) > 10, len(classes)

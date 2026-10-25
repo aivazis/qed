@@ -22,9 +22,11 @@ class Datatype(qed.component, implements=qed.protocols.datatype):
     byteswap = qed.properties.bool(default=False)
     byteswap.doc = "control whether byte swapping is necessary"
 
+    # the names of the channels i provide
     channels = qed.properties.strings()
     channels.doc = "the names of channels provided by this datatype"
 
+    # the preferred shape of the tiles of my datasets
     tile = qed.properties.tuple(schema=qed.properties.int())
     tile.default = 512, 512
     tile.doc = "the preferred shape of dataset subsets"

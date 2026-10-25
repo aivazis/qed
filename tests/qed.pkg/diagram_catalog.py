@@ -39,6 +39,7 @@ def test():
     for group, protocol in zip(groups, store.palette()):
         # the first entry is the protocol itself
         first, *rest = group.entries
+        # with the family of the protocol
         assert first.family == protocol.pyre_family()
         # placed pinned to nothing
         assert first.level == "protocol"
@@ -50,7 +51,9 @@ def test():
         assert [entry.family for entry in rest] == sorted(entry.family for entry in rest)
     # the reader protocol describes its file as its contents, and reads nothing
     reader = groups[0].entries[0]
+    # takes no inputs
     assert reader.inputs == []
+    # and makes its contents
     assert reader.outputs == ["contents"], reader.outputs
     # all done
     return

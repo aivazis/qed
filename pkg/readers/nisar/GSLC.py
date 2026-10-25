@@ -80,6 +80,7 @@ class GSLC(H5, family="qed.readers.nisar.gslc", implements=qed.viz.reader):
                     channel = journal.warning("qed.nisar.gslc")
                     # and complain
                     channel.line(f"while exploring '{self.pyre_name}'")
+                    # say which frequency is missing
                     channel.line(f"no '{frequency}' frequency in the '{band}'-band grids")
                     # flush
                     channel.log()
@@ -99,6 +100,7 @@ class GSLC(H5, family="qed.readers.nisar.gslc", implements=qed.viz.reader):
                         channel = journal.warning("qed.nisar.gslc")
                         # and complain
                         channel.line(f"while exploring '{self.pyre_name}'")
+                        # say which polarization is missing
                         channel.line(f"no '{polarization}' polarization in the '{frequency}' grid")
                         # flush
                         channel.log()

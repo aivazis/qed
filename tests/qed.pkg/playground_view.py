@@ -116,6 +116,7 @@ def test():
     payload = {"kind": "iso", "azimuth": -5, "below": True}
     # the turns fold into a full turn
     view = run(projecting, {"payload": payload})["playgroundProjectionSet"]["view"]
+    # so the view is isometric, three quarter turns around, seen from below
     assert (view["kind"], view["azimuth"], view["below"]) == ("iso", 3, True)
     # and the next reader sees the same
     assert run(reading)["qed"]["playgroundView"] == view
@@ -134,14 +135,19 @@ def test():
     payload = {"x": 12.5, "y": -3.0, "z": 0.75}
     # and every reader sees where they look
     view = run(pointing, {"payload": payload})["playgroundCameraSet"]["view"]
+    # the mutation hands back the camera
     assert view["camera"] == payload
+    # and so does a fresh read
     assert run(reading)["qed"]["playgroundView"]["camera"] == payload
     # a change of projection forgets it, since the point belongs to the old projection
     payload = {"kind": "flat", "azimuth": 0, "below": False}
+    # switch back to the flat projection
     view = run(projecting, {"payload": payload})["playgroundProjectionSet"]["view"]
+    # and the camera is gone
     assert view["camera"] is None
     # put the projection back where the rest of the test expects it
     payload = {"kind": "iso", "azimuth": 3, "below": True}
+    # and ask for it
     run(projecting, {"payload": payload})
 
     # a projection it does not know is reported, so quiet the report
@@ -150,6 +156,7 @@ def test():
     payload = {"kind": "oblique", "azimuth": 1, "below": False}
     # leaves the view as it was
     view = run(projecting, {"payload": payload})["playgroundProjectionSet"]["view"]
+    # still isometric, three quarter turns around, seen from below
     assert (view["kind"], view["azimuth"], view["below"]) == ("iso", 3, True)
     # all done
     return

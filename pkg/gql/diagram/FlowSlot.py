@@ -31,6 +31,7 @@ class FlowSlot(graphene.ObjectType):
     id = graphene.ID(required=True)
     # fields
     at = graphene.Field(Point, required=True)
+    # whether it stands for a product of the recipe
     bound = graphene.Boolean(required=True)
     # how far down its product is pinned: "protocol", "class", or "instance", which is also the
     # level of a trait's own slot on an instance that holds a product; none otherwise

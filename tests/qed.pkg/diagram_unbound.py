@@ -56,6 +56,7 @@ def test() -> None:
     playground = store.playground()
     # with a picker
     store.diagramAdd(diagram=playground.relay, family="pyre.viz.pickers.match", position=(0, 0, 0))
+    # which is the only factory there
     (picker,) = playground.factories
     # pinned to an instance, with nothing bound to its contents
     playground.pin(entity=picker, pin=qed.viz.pickers.match()(name=f"match_{uuid.uuid1().hex[:8]}"))

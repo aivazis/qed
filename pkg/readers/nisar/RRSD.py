@@ -80,6 +80,7 @@ class RRSD(H5, family="qed.readers.nisar.rrsd", implements=qed.viz.reader):
                     channel = journal.warning("qed.nisar.rrsd")
                     # and complain
                     channel.line(f"while exploring '{self.pyre_name}'")
+                    # say which frequency is missing
                     channel.line(f"no '{frequency}' frequency in the '{band}'-band swaths")
                     # flush
                     channel.log()
@@ -107,6 +108,7 @@ class RRSD(H5, family="qed.readers.nisar.rrsd", implements=qed.viz.reader):
                             channel = journal.warning("qed.nisar.rrsd")
                             # and complain
                             channel.line(f"while exploring '{self.pyre_name}'")
+                            # say which receive group is missing
                             channel.line(
                                 f"no 'rx{rxPol}' group for the '{txPol}' transmit polarization "
                                 f"in the '{frequency}' swath"
@@ -125,6 +127,7 @@ class RRSD(H5, family="qed.readers.nisar.rrsd", implements=qed.viz.reader):
                             channel = journal.warning("qed.nisar.rrsd")
                             # and complain
                             channel.line(f"while exploring '{self.pyre_name}'")
+                            # say which dataset is missing
                             channel.line(f"no '{pol}' dataset in the '{frequency}' swath")
                             # flush
                             channel.log()
@@ -140,6 +143,7 @@ class RRSD(H5, family="qed.readers.nisar.rrsd", implements=qed.viz.reader):
                             channel = journal.warning("qed.nisar.rrsd")
                             # and complain
                             channel.line(f"while exploring '{self.pyre_name}'")
+                            # say which lookup table is missing
                             channel.line(
                                 f"no BFPQ lookup table for the '{pol}' dataset in the '{frequency}' swath"
                             )

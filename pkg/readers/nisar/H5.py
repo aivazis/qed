@@ -30,29 +30,35 @@ class H5(
     uri = qed.properties.uri(scheme="file")
     uri.doc = "the uri of the data source"
 
+    # the map of selector names to their allowed values
     selectors = qed.protocols.selectors()
     selectors.doc = "a map of selector names to their allowed values"
     selectors.persistent = False
 
+    # a key value store of preferred values for selectors
     selections = qed.properties.kv()
     selections.doc = "a key value store of preferred values for selectors"
     # the session adds only the picks of first contact, which are made again every time; what
     # the user prefers comes from the files, which keep it as written
     selections.persistent = False
 
+    # the datasets in my file, and the axes that tell them apart
     contents = qed.viz.protocols.contents.output()
     contents.doc = "the datasets in my file, and the axes that tell them apart"
     contents.persistent = False
 
+    # the size of my aggregation cache, in 4K pages
     pages = qed.properties.int()
     pages.default = 1024**2
     pages.doc = "the number of 4K pages in the aggregation cache"
 
+    # the size of the chunk cache of each of my datasets
     chunks = qed.properties.int(default=None)
     chunks.doc = (
         "the size of the chunk cache of each dataset, in MiB; unset keeps the library's default"
     )
 
+    # how to get access to my product, which is a secret
     credentials = qed.properties.kv()
     credentials.secret = True
     credentials.doc = "how to get access to my product, e.g. the AWS {profile} and {region}"

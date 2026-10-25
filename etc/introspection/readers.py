@@ -34,6 +34,7 @@ class Readers(pyre.application, family="qed.etc.introspection.readers"):
     format.validators = pyre.constraints.isMember("json", "markdown")
     format.doc = "how to write the survey: the rows as json, or the tables in markdown"
 
+    # where to write it
     output = pyre.properties.path()
     output.default = None
     output.doc = "the file that receives the survey; by default, 'readers' with the format's suffix"

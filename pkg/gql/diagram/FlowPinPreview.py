@@ -22,6 +22,7 @@ class FlowPinPreview(graphene.ObjectType):
     # the parts of the label the factory would have: the family of the class, and the role of
     # the protocol it satisfies, if it is known
     family = graphene.String(required=True)
+    # and the role of its protocol, if it is known
     role = graphene.String()
     # the slots it would gain
     slots = graphene.List(graphene.NonNull(FlowPinPreviewSlot), required=True)

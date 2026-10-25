@@ -132,6 +132,7 @@ class Chore(pyre.nexus.task):
             return
         # name the reader
         channel.line(f"'{reader.pyre_name}' grant")
+        # indent
         channel.indent()
         # a grant that came out empty is how a product in a bucket fails to open on a
         # worker, so it is worth a line of its own rather than silence
@@ -142,6 +143,7 @@ class Chore(pyre.nexus.task):
         else:
             # name what it carries, and nothing more
             channel.line(f"carries: {', '.join(sorted(grant))}")
+        # outdent
         channel.outdent()
         # flush
         channel.log()
@@ -213,6 +215,7 @@ class Chore(pyre.nexus.task):
         declared = {trait.name for trait in component.pyre_traits() if trait.isConfigurable}
         # and the ones the walk above actually visits
         seen = {trait.name for trait in component.pyre_properties()}
+        # the facilities included
         seen |= {trait.name for trait in component.pyre_facilities()}
         # the rest it never looks at, less whatever made it into the recipe some other way
         invisible = sorted(declared - seen - set(harvested) - skipped)
@@ -224,6 +227,7 @@ class Chore(pyre.nexus.task):
             return
         # otherwise, name the component
         channel.line(f"'{component.pyre_name}', an instance of '{component.pyre_family()}'")
+        # indent
         channel.indent()
         # the values that could not be reduced
         if dropped:
@@ -235,6 +239,7 @@ class Chore(pyre.nexus.task):
             channel.line(f"not visited: {', '.join(invisible)}")
         # and what did make it, so the two lists can be read against each other
         channel.line(f"carried: {', '.join(sorted(harvested))}")
+        # outdent
         channel.outdent()
         # flush
         channel.log()

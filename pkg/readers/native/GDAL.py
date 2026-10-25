@@ -31,6 +31,7 @@ class GDAL(
     uri = qed.properties.uri(scheme="file")
     uri.doc = "the uri of the data source"
 
+    # the map of selector names to their allowed values
     selectors = qed.protocols.selectors()
     selectors.persistent = False
     selectors.default = {
@@ -38,12 +39,14 @@ class GDAL(
     }
     selectors.doc = "a map of selector names to their allowed values"
 
+    # a key value store of preferred values for selectors
     selections = qed.properties.kv()
     selections.doc = "a key value store of preferred values for selectors"
     # the session adds only the picks of first contact, which are made again every time; what
     # the user prefers comes from the files, which keep it as written
     selections.persistent = False
 
+    # the datasets in my file, and the axes that tell them apart
     contents = qed.viz.protocols.contents.output()
     contents.doc = "the datasets in my file, and the axes that tell them apart"
     contents.persistent = False
@@ -154,8 +157,11 @@ class GDAL(
         channel = journal.error("qed.readers.native")
         # so complain
         channel.line(f"unsupported scheme '{uri.scheme}'")
+        # in which uri
         channel.line(f"in the uri '{uri}")
+        # what i was doing
         channel.line(f"while attempting to read a GDAL dataset")
+        # and who was doing it
         channel.line(f"using {self}")
         # flush
         channel.log()

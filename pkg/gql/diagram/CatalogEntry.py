@@ -27,6 +27,7 @@ class CatalogEntry(graphene.ObjectType):
     doc = graphene.String()
     # the names of its input and output slots, in the order it declares them
     inputs = graphene.List(graphene.NonNull(graphene.String), required=True)
+    # and those of its output slots
     outputs = graphene.List(graphene.NonNull(graphene.String), required=True)
 
 

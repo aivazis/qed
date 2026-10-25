@@ -63,6 +63,7 @@ class Listing(Chore):
         # not change what a folder holds, so two requests for the same folder are the same
         # work and a repeat joins the one in flight
         spec = {name: value for name, value in self.config.items() if name != "expanded"}
+        # and freeze it, with the archive and the folder, into my identity
         self.identity = self._freeze(value=(self.archive, self.factory, spec, self.uri))
         # all done
         return

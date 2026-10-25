@@ -99,6 +99,7 @@ assert str(saved.get("edited", "offset")) == "16", saved.get("edited", "offset")
 assert saved.get("edited", "selections") is None, saved.get("edited", "selections")
 # and the rest of the section is as the user wrote it
 assert saved.get("edited", "uri") == "{qed.native}/c16.dat"
+# its shape included
 assert saved.get("edited", "shape") == "65, 65"
 
 

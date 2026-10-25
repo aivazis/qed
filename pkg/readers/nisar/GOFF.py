@@ -75,6 +75,7 @@ class GOFF(H5, family="qed.readers.nisar.goff", implements=qed.viz.reader):
                     channel = journal.warning("qed.nisar.goff")
                     # and complain
                     channel.line(f"while exploring '{self.pyre_name}'")
+                    # say which frequency is missing
                     channel.line(f"no '{frequency}' frequency in the '{band}'-band grids")
                     # flush
                     channel.log()
@@ -94,6 +95,7 @@ class GOFF(H5, family="qed.readers.nisar.goff", implements=qed.viz.reader):
                         channel = journal.warning("qed.nisar.goff")
                         # and complain
                         channel.line(f"while exploring '{self.pyre_name}'")
+                        # say which polarization is missing
                         channel.line(
                             f"no '{polarization}' polarization in the '{frequency}' pixel offsets"
                         )

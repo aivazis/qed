@@ -182,6 +182,7 @@ class Keeper:
         """
         # describe the archive, to find out where it lives
         recipe = pyre.config.newRecipe()
+        # with the archive in it
         recipe.add(archive)
         # its name
         name = archive.pyre_name
@@ -258,6 +259,7 @@ class Keeper:
                     continue
                 # take the section out of the recipe
                 section = recipe.sections.pop(key)
+                # and the component it describes
                 component = recipe.components[key]
                 # keep what the session assigned; the view itself keeps everything, since it
                 # is being written under a new name
@@ -582,6 +584,7 @@ class Keeper:
                 channel = journal.warning("qed.ux.persistence")
                 # complain
                 channel.line(f"could not write '{path}'")
+                # and what went wrong
                 channel.line(f"got: {error}")
                 # flush
                 channel.log()
@@ -617,13 +620,15 @@ class Keeper:
         """
         # describe the entity and its parts
         recipe = pyre.config.newRecipe()
+        # starting with the entity itself
         recipe.add(entity)
         # go through the parts
         for part in parts:
             # and describe each one
             recipe.add(part)
-        # the name of the entity, and the way the list spells it
+        # the name of the entity
         name = entity.pyre_name
+        # and the way the list spells it
         spec = recipe.spec(name)
         # the sections to write, keyed by the file they go to
         targets = {}

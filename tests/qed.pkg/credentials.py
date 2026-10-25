@@ -84,25 +84,32 @@ assert dict(qed.nexus.survey(reader=wired).config)["credentials"] == {
 # those are files that are read back
 weaver = pyre.weaver.weaver()
 weaver.language = "pfg"
+# render what it would save about itself
 written = "\n".join(weaver.weave(document=wired.pyre_renderTraitValues(renderer=weaver.language)))
+# and check that neither its credentials nor what they hold made it in
 assert "credentials" not in written and "eu-west-1" not in written, written
 
 # a reader with an archive and settings of its own: its own win
 both = qed.readers.nisar.gslc(
     name="cred_both", uri=uri, archive=archive, credentials={"region": "eu-west-1"}
 )
+# get its grant
 merged = both.grant(resolve=False)
+# whose region is the reader's own
 assert merged["region"] == "eu-west-1"
+# while its keys come from the archive
 assert merged["access_key"] == "AKIATEST"
 
 # a reader with no archive and no settings has an empty grant
 bare = qed.readers.nisar.gslc(name="cred_bare", uri=uri)
+# so it presents nothing
 assert bare.grant(resolve=False) == {}
 # so what travels is its own credentials, which are just as empty
 assert dict(qed.nexus.survey(reader=bare).config)["credentials"] == {}
 
 # a reader rebuilt on a worker from a recipe presents exactly what the recipe carried
 rebuilt = qed.readers.nisar.gslc(name="cred_rebuilt", uri=uri, credentials=dict(keys))
+# which are the keys the recipe carried
 assert rebuilt.grant(resolve=False) == keys
 
 # {credentials} is a {kv}, and pyre builds {kv} out of {dict}, a property whose value is a map;
@@ -127,18 +134,23 @@ members = [
     )
     for index in range(2)
 ]
+# put them in a stack
 stack = qed.stacks.stack(name="cred_stack", readers=members)
+# and describe its first contact
 recipe = dict(qed.nexus.survey(reader=stack).config)
 # the stack has nothing of its own to present
 assert "credentials" not in recipe
 # while each member recipe carries the grant its reader would have presented
 for family, member in recipe["readers"]:
+    # which is what the archive hands out
     assert member["credentials"] == dict(keys)
 # and each one rebuilds into a reader that can still present it
 for index, (family, member) in enumerate(recipe["readers"]):
+    # rebuild the member from its recipe, the way a worker does
     crew = qed.protocols.reader.pyre_resolveSpecification(spec=family)(
         name=f"cred_stack.crew.{index}", **member
     )
+    # and check that it presents the keys of the archive
     assert crew.grant(resolve=False) == dict(keys)
 
 # the lookup of what is missing; stand in for the AWS chain, and note what it is asked
@@ -157,22 +169,30 @@ access.chain = chain
 
 # a grant that carries its keys is left alone
 assert access.resolve(uri=uri, grant=keys) == keys
+# without asking the chain for anything
 assert asked == []
 # one that names a profile has its keys looked up under it; the region it names wins over
 # the one the chain found, and the token, which the chain did not find, is there but blank
 found = access.resolve(uri=uri, grant={"profile": "st", "region": "eu-west-1"})
+# so the chain was asked under the profile and the region of the grant
 assert asked == [("st", "eu-west-1")]
+# the keys are the ones the chain found
 assert found["access_key"] == "AKIACHAIN"
+# the region is the one the grant names
 assert found["region"] == "eu-west-1"
+# and the token is blank
 assert found["token"] == ""
 # an empty grant gets whatever the chain comes up with, which is what an instance that runs
 # next to the data expects
 found = access.resolve(uri=uri, grant={})
+# so the chain was asked with neither a profile nor a region
 assert asked[-1] == (None, None)
+# and the grant holds the keys and the region it found
 assert (found["access_key"], found["region"]) == ("AKIACHAIN", "us-east-2")
 # a chain that comes up empty leaves a grant with every field the driver expects, all blank
 # but the region of last resort, which is how the driver is told that the bucket is public
 access.chain = lambda profile=None, region=None: {}
+# so the grant has blank keys and the region of last resort
 assert access.resolve(uri=uri, grant={}) == {
     "region": "us-west-2",
     "access_key": "",
@@ -203,13 +223,18 @@ assert managed.grant(resolve=False) == keys
 
 # an unmanaged reader has none
 plain = qed.readers.nisar.gslc(name="cred_plain", uri=product)
+# make first contact
 plain.open()
+# and has nothing of its own to save
 assert dict(plain.credentials) == {}
 
 # describe a tile of the managed reader
 dataset = managed.find(selector={"band": "L", "frequency": "A", "polarization": "HH"})
+# pick its amplitude channel
 pipeline = dataset.channel(name="amplitude")
+# stand in for a view of it
 view = types.SimpleNamespace(reader=managed, dataset=dataset, pipeline=lambda channel: pipeline)
+# and describe the work of rendering a tile of it
 task = qed.nexus.tile(
     view=view, channel="cred.amplitude", zoom=(4, 4), origin=(0, 0), shape=(32, 32)
 )
@@ -226,10 +251,13 @@ reference = bytes(
 # push the task through the wire and execute it the way a worker does; the rebuilt reader
 # presents the credentials, which the local scheme ignores
 task = pickle.loads(pickle.dumps(task))
+# with an empty registry of readers, so the reader is rebuilt from the recipe
 spool = task.execute(readers={})
 # read the payload back
 spool.file.seek(0)
+# get the bytes of the tile
 tile = spool.file.read()
+# and let go of the spool
 spool.close()
 # the worker render matches the inline reference
 assert tile == reference

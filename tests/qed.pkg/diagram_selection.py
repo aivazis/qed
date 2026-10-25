@@ -91,8 +91,11 @@ def test() -> None:
     playground = store.playground()
     # with a GSLC reader and a picker
     store.diagramAdd(diagram=playground.relay, family="qed.readers.nisar.gslc", position=(0, 0, 0))
+    # find the reader
     (reader,) = playground.factories
+    # place the picker to its right
     store.diagramAdd(diagram=playground.relay, family="pyre.viz.pickers.match", position=(8, 0, 0))
+    # and find it
     (picker,) = [entity for entity in playground.factories if entity is not reader]
     # bound through their contents
     store.diagramMove(
@@ -102,10 +105,12 @@ def test() -> None:
     )
     # both instances
     tag = uuid.uuid1().hex[:8]
+    # the reader, over the product, with credentials of its own
     playground.pin(
         entity=reader,
         pin=qed.readers.nisar.gslc(name=f"gslc_{tag}", uri=gslc, credentials={"profile": "st"}),
     )
+    # and the picker
     playground.pin(entity=picker, pin=qed.viz.pickers.match()(name=f"match_{tag}"))
     # the requests to the picker
     request = {"diagram": playground.relay, "node": picker.relay}
@@ -114,7 +119,9 @@ def test() -> None:
     _, result, error, refusal = store.diagramInvoke(**request, method="pyre_make")
     # is refused, as the product and the reason
     assert result is None and error is None, (result, error)
+    # naming the dataset as the product it refused
     assert refusal["product"] == "dataset", refusal
+    # and the missing parts of the selection as the reason
     assert refusal["reason"] == "the selection names no band, frequency or polarization", refusal
 
     # the selections the picker suggests
@@ -126,20 +133,26 @@ def test() -> None:
         qed.gql.diagram.FlowSuggestions.FlowSuggestions.describe(value=value, trait=trait).value
         for value in selections
     ]
+    # the first of them names a band, a frequency and a polarization
     assert text == "band:L, frequency:A, polarization:HH", text
 
     # taking one
     _, error = store.diagramConfigure(**request, trait="selection", value=text)
+    # goes through
     assert error is None, error
     # shows it on the diagram the way it was typed
     shown = qed.gql.diagram.FlowFactory.FlowFactory.render(
         value=picker.node.pin.selection, trait=trait
     )
+    # exactly as typed
     assert shown == text, shown
     # makes the dataset
     _, _, error, refusal = store.diagramInvoke(**request, method="pyre_make")
+    # with no error and no refusal
     assert error is None and refusal is None, (error, refusal)
+    # the dataset the picker holds
     dataset = picker.node.pin.dataset
+    # selects what was taken
     assert dataset.selector == {"band": "L", "frequency": "A", "polarization": "HH"}
 
     # the credentials of the reader are a secret map
@@ -156,6 +169,7 @@ def test() -> None:
         )
         if trait.name == "credentials"
     ]
+    # with no value, and closed to edits
     assert credentials.value is None and credentials.editable is False, credentials.value
 
     # all done
