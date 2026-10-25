@@ -23,10 +23,10 @@ class Real(Value, family="qed.channels.real"):
     client
     """
 
-    # the selector that extracts the real part
-    selector = qed.viz.accessor()
-    selector.default = qed.viz.accessors.real
-    selector.doc = "the selector that extracts the real part of each sample"
+    # the accessor that extracts the real part
+    accessor = qed.viz.accessor()
+    accessor.default = qed.viz.accessors.real
+    accessor.doc = "the accessor that extracts the real part of each sample"
 
     # framework hooks
     def pyre_configured(self, **kwds):
@@ -34,7 +34,7 @@ class Real(Value, family="qed.channels.real"):
         Hook invoked after configuration is finished
         """
         # the normalizer reads the real part
-        self.normalizer.signal = self.selector.real
+        self.normalizer.signal = self.accessor.real
         # all done
         return super().pyre_configured(**kwds)
 
