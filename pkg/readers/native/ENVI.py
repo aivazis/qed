@@ -64,8 +64,11 @@ class ENVI(Flat, family="qed.readers.native.envi"):
             channel = journal.error("qed.readers.native.envi")
             # complain
             channel.line(f"'{path}' is too small for the declared layout")
+            # what the layout asks for
             channel.line(f"{bands} bands of {tuple(shape)} {cell.cell} cells")
+            # past the offset
             channel.line(f"past an offset of {skip} bytes require")
+            # and what the file has
             channel.line(f"{required} bytes, but the file holds only {actual}")
             # flush
             channel.log()
@@ -145,6 +148,7 @@ class ENVI(Flat, family="qed.readers.native.envi"):
             if not shape[0] and hdr.lines:
                 # the height
                 shape[0] = hdr.lines
+            # and the width, likewise
             if not shape[1] and hdr.samples:
                 # the width
                 shape[1] = hdr.samples
@@ -170,6 +174,7 @@ class ENVI(Flat, family="qed.readers.native.envi"):
             channel = journal.error("qed.readers.native.envi")
             # complain
             channel.line(f"could not load a dataset from '{self.uri.address}'")
+            # and why
             channel.line(f"the header does not declare a data type")
             # flush
             channel.log()
@@ -219,7 +224,9 @@ class ENVI(Flat, family="qed.readers.native.envi"):
                 channel = journal.error("qed.readers.native.envi")
                 # complain
                 channel.line(f"could not load a dataset from '{self.uri.address}'")
+                # say what was going on
                 channel.line(f"while reading its header '{candidate}'")
+                # and what went wrong
                 channel.line(f"{error}")
                 # flush
                 channel.log()
@@ -229,13 +236,17 @@ class ENVI(Flat, family="qed.readers.native.envi"):
         channel = journal.error("qed.readers.native.envi")
         # complain
         channel.line(f"could not load a dataset from '{self.uri.address}'")
+        # and why
         channel.line(f"no ENVI header; looked for")
+        # indent the places
         channel.indent()
         # list the places
         for candidate in candidates:
             # one per line
             channel.line(f"{candidate}")
+        # outdent
         channel.outdent()
+        # and say what to do about it
         channel.line(f"please use '--header' to point to the header")
         # flush
         channel.log()
