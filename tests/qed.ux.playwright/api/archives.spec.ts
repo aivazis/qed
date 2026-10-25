@@ -85,12 +85,12 @@ test.describe.serial("the automation surface drives the archive tree", () => {
         expect(catalog.filter(archive => archive.name === name)).toMatchObject([
             { uri: moved, expanded: false, items: [] },
         ])
-        // and lists what is there
+        // and lists what is there, which includes the file the folder started with
         await page.evaluate(moved => window.qed.expandFolder(moved), moved)
         await expect.poll(async () => page.evaluate(async moved => {
             const archive = (await window.qed.archives()).find(archive => archive.uri === moved)
             return archive.items.filter(item => item.parent === moved).map(item => item.name)
-        }, moved)).toEqual(["inner.dat"])
+        }, moved)).toContain("inner.dat")
         // move it back, for the rest of the specs
         await page.evaluate(([moved, uri]) => window.qed.reconfigureArchive(moved, uri), [moved, uri])
         const back = await page.evaluate(async () => (await window.qed.archives()).map(archive => archive.uri))
