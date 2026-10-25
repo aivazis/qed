@@ -20,8 +20,8 @@ from . import asar
 # reader metadata
 from .Metadata import Metadata as metadata
 
-# the generic proposal for the name of a reader
-from .nickname import nickname
+# the generic proposal for the name of a reader, and the way text becomes a level of a name
+from .nickname import nickname, sanitize
 
 # the statistics prober the dataset flavors seed themselves with
 from .probes import probe, windows

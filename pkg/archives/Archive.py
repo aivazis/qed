@@ -339,6 +339,16 @@ class Archive(qed.component, family="qed.archives.base", implements=qed.protocol
             "error": error,
         }
 
+    # naming
+    @classmethod
+    def nicknames(cls, uri: str, collection: str | None = None) -> list:
+        """
+        Propose the nicknames an archive of my kind at {uri} could go by, in order of
+        preference; the {collection}, for the kinds that have one, is part of where they are
+        """
+        # i have no opinion
+        return []
+
     # metamethods
     def __init__(self, **kwds):
         # chain up
