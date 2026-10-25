@@ -9,6 +9,7 @@
 """
 Check that an archive the user reconfigures keeps its name and moves: the catalog finds it at
 its new location and not at the old one, it forgets what it had on display, and it needs saving;
+a new name makes a new archive take its place, unless some component holds the name already;
 an archive cannot move to a location another one holds, or take a setting that is not one of its
 traits, and either attempt leaves it where it was; an archive in a bucket builds a new session
 for its new settings
@@ -147,6 +148,31 @@ except pyre.components.exceptions.TraitNotFoundError as error:
     assert error.name == "bogus", error.name
 # and it stays where it was
 assert store.archive(uri=two) is archive and str(archive.uri) == two
+
+# a new name
+order = [entry.pyre_name for entry in store.archives]
+# makes a new archive, since pyre cannot rename a component
+renamed = store.reconfigureArchive(uri=two, location=two, settings={}, name="local:renamed")
+# with the new name
+assert renamed is not archive and renamed.pyre_name == "local:renamed", renamed
+# at the location
+assert store.archive(uri=two) is renamed and str(renamed.uri) == two
+# in the place the old one had
+assert [entry.pyre_name for entry in store.archives] == [
+    "local:renamed" if name == "local:moving" else name for name in order
+], list(store.archives)
+# and it needs saving
+assert renamed.dirty
+# while the configuration file lets go of the old name
+with open("qed.yaml", mode="r", encoding="utf-8") as stream:
+    # all at once
+    text = stream.read()
+# which is nowhere in it
+assert "local:moving" not in text, text
+# a name some component holds already
+assert store.reconfigureArchive(uri=two, location=two, settings={}, name="local:other") is None
+# is refused, and the archive stays as it was
+assert store.archive(uri=two) is renamed and renamed.pyre_name == "local:renamed"
 
 # an archive in a bucket
 bucket = store.connectArchive(

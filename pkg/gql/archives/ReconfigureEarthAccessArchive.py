@@ -22,7 +22,8 @@ from .Archive import Archive
 # replace the query of a connected earth access archive
 class ReconfigureEarthAccessArchive(graphene.Mutation):
     """
-    Reconfigure an earth access archive, keeping its name and its location
+    Reconfigure an earth access archive, keeping its name and its location unless the user
+    renamed it
     """
 
     # inputs
@@ -64,8 +65,13 @@ class ReconfigureEarthAccessArchive(graphene.Mutation):
             return None
         # the new query replaces the old one, so every constraint it leaves out is cleared
         settings = {name: query.get(name) for name in archive.constraints}
-        # reconfigure the archive in place
-        archive = store.reconfigureArchive(uri=input.uri, location=input.uri, settings=settings)
+        # reconfigure the archive, in place unless the user renamed it
+        archive = store.reconfigureArchive(
+            uri=input.uri,
+            location=input.location or input.uri,
+            settings=settings,
+            name=input.name,
+        )
         # put it in the mutation resolution context
         context = {"archive": archive}
         # and resolve the mutation
