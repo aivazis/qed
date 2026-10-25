@@ -42,8 +42,8 @@ export const S3 = ({ view, edit = null, setType, hide }) => {
         type: "s3",
         // at the location the form describes
         uri: form.bucket ? `s3://${form.bucket}/${form.path}` : "",
-        // an archive that exists already keeps its name
-        skip: edit !== null,
+        // and the name of the archive being reconfigured, which is its own to keep
+        current: edit?.name ?? null,
     })
     // set up the state update
     const update = (field, value) => {
@@ -95,10 +95,15 @@ export const S3 = ({ view, edit = null, setType, hide }) => {
                 { name: "region", value: region },
             ]
         }
-        // a new archive is connected under its name, an existing one is moved to the new location
+        // a new archive is connected under its name; an existing one is moved to the new location,
+        // and replaced by a new one if the user renamed it
         const input = (edit === null)
             ? { name: `s3:${name}`, uri, credentials }
-            : { uri: edit.uri, location: uri, credentials }
+            : {
+                uri: edit.uri, location: uri, credentials,
+                // a nickname the user left alone keeps the name the archive has
+                ...(name === describe(edit).name ? {} : { name: `s3:${name}` }),
+            }
         // send the mutation to the server
         request({
             // input
@@ -154,8 +159,7 @@ export const S3 = ({ view, edit = null, setType, hide }) => {
                     <Region value={form.region} update={update} />
                     <Bucket value={form.bucket} update={update} />
                     <Path value={form.path} update={update} />
-                    <Name value={form.name} suggestion={suggestion} update={update}
-                        fixed={edit !== null} />
+                    <Name value={form.name} suggestion={suggestion} update={update} />
                 </Body>
             </Form>
             <Connect connect={connect} label={edit === null ? "connect" : "update"} />

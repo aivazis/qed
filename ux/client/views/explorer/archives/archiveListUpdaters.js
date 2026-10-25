@@ -58,12 +58,12 @@ export const disconnectArchiveUpdater = store => {
 }
 
 
-// the updater for the mutation that reconfigures the archive that was at the location {previous};
-// the id of an archive is made from its location, so the archive comes back as a new record that
-// takes the place of the old one
-export const reconfigureArchiveUpdater = previous => store => {
+// the updater for a mutation whose payload, under {field}, carries the archive that was at the
+// location {previous}; the id of an archive is made from its location, and an archive that was
+// renamed is a new one, so the archive comes back as a new record that takes the place of the old
+export const reconfigureArchiveUpdater = (previous, field = "reconfigureArchive") => store => {
     // get the root field of the query result
-    const payload = store.getRootField("reconfigureArchive")
+    const payload = store.getRootField(field)
     // ask for the reconfigured archive
     const archive = payload?.getLinkedRecord("archive")
     // if the server could not reconfigure it
