@@ -12,6 +12,7 @@ import { graphql, useMutation } from 'react-relay/hooks'
 // local
 // hooks
 import { useSetActiveView } from '../explorer/useSetActiveView'
+import { connectArchiveUpdater, reconfigureArchiveUpdater } from '../archives/archiveListUpdaters'
 // components
 import { Busy } from './busy'
 import { Panel } from './panel'
@@ -24,27 +25,16 @@ import { Bucket } from './bucket'
 import { Path } from './path'
 import { Form, Body, Error } from '../form'
 
-// a data archive in an S3 bucket
-export const S3 = ({ view, setType, hide }) => {
+// a data archive in an S3 bucket; the form connects a new one, or reconfigures {edit}
+export const S3 = ({ view, edit = null, setType, hide }) => {
     // error placeholder
     const [error, setError] = React.useState(null)
-    // set up my state
-    const [form, setForm] = React.useState({
-        // the nickname of the archive; gets used to generate the name of the component
-        name: "",
-        // the connection profile with the AWS credentials
-        profile: "",
-        // the AWS region
-        region: "",
-        // the name of the bucket
-        bucket: "",
-        // the path
-        path: "",
-    })
+    // set up my state, from what the archive being reconfigured says about itself, if any
+    const [form, setForm] = React.useState(() => describe(edit))
     // get the view mutator
     const decorate = useSetActiveView()
-    // build the mutation request
-    const [request, isInFlight] = useMutation(connectMutation)
+    // build the mutation request: a new archive gets connected, an existing one reconfigured
+    const [request, isInFlight] = useMutation(edit === null ? connectMutation : reconfigureMutation)
     // set up the state update
     const update = (field, value) => {
         // clear any errors
@@ -88,42 +78,25 @@ export const S3 = ({ view, setType, hide }) => {
         const path = form.path
         // update the uri of the archive in the current view
         const uri = `s3://${bucket}/${path}`
+        // the settings that say how to get at it
+        const credentials = {
+            tokens: [
+                { name: "profile", value: profile },
+                { name: "region", value: region },
+            ]
+        }
+        // a new archive is connected under its name, an existing one is moved to the new location
+        const input = (edit === null)
+            ? { name: `s3:${name}`, uri, credentials }
+            : { uri: edit.uri, location: uri, credentials }
         // send the mutation to the server
         request({
             // input
-            variables: {
-                input: {
-                    // the payload
-                    name: `s3:${name}`,
-                    uri,
-                    credentials: {
-                        tokens: [
-                            { name: "profile", value: profile },
-                            { name: "region", value: region },
-                        ]
-                    },
-                }
-            },
-            // updater
-            updater: store => {
-                // get the root field of the query result
-                const payload = store.getRootField("connectArchive")
-                // if it's trivial
-                if (!payload) {
-                    // raise an issue
-                    throw new Error("could not connect to the data archive")
-                }
-                // ask for the new archive
-                const archive = payload.getLinkedRecord("archive")
-                // get the session manager
-                const qed = store.get("QED")
-                // get its connected archives
-                const archives = qed.getLinkedRecords("archives")
-                // add the new one to the pile
-                qed.setLinkedRecords([...archives, archive], "archives")
-                // all done
-                return
-            },
+            variables: { input },
+            // updater: a new archive joins the pile, an existing one takes its own old place
+            updater: (edit === null)
+                ? connectArchiveUpdater("connectArchive")
+                : reconfigureArchiveUpdater(edit.id),
             // when done
             onCompleted: data => {
                 // clear the error
@@ -138,7 +111,7 @@ export const S3 = ({ view, setType, hide }) => {
                 // record the error
                 setError([
                     `got: ${error}`,
-                    `while connecting to the data archive '${name}'`,
+                    `while ${edit === null ? "connecting" : "reconfiguring"} the data archive '${name}'`,
                     `at '${uri}'`,
                 ])
                 // all done
@@ -167,14 +140,14 @@ export const S3 = ({ view, setType, hide }) => {
             <Form>
                 <Body>
                     <TypeSelector value="s3" update={setType} />
-                    <Name value={form.name} update={update} />
+                    <Name value={form.name} update={update} fixed={edit !== null} />
                     <Profile value={form.profile} update={update} />
                     <Region value={form.region} update={update} />
                     <Bucket value={form.bucket} update={update} />
                     <Path value={form.path} update={update} />
                 </Body>
             </Form>
-            <Connect connect={connect} />
+            <Connect connect={connect} label={edit === null ? "connect" : "update"} />
             {!isInFlight && <Cancel onClick={cancel}>cancel</Cancel>}
             {error && <Error errors={error} />}
             {isInFlight && <Busy />}
@@ -190,6 +163,81 @@ const connectMutation = graphql`
             archive {
                 id
                 name
+                type
+                uri
+                credentials {
+                    name
+                    value
+                }
+                readers
+                expanded
+                pending
+                error
+                hits
+                dirty
+                items {
+                    id
+                    name
+                    uri
+                    isFolder
+                    parent
+                    expanded
+                    pending
+                    error
+                }
+            }
+        }
+    }
+`
+
+
+// the state of the form that describes {archive}, or of a blank one when there is no archive
+const describe = archive => {
+    // with no archive
+    if (archive === null) {
+        // the form starts out blank
+        return {
+            // the nickname of the archive; gets used to generate the name of the component
+            name: "",
+            // the connection profile with the AWS credentials
+            profile: "",
+            // the AWS region
+            region: "",
+            // the name of the bucket
+            bucket: "",
+            // the path
+            path: "",
+        }
+    }
+    // the settings of the archive, by name
+    const settings = Object.fromEntries(archive.credentials.map(({ name, value }) => [name, value]))
+    // its location, without the scheme
+    const location = archive.uri.replace(/^s3:\/\//, "")
+    // the bucket ends at the first slash
+    const slash = location.indexOf("/")
+    // fill the form
+    return {
+        // with the nickname, which is the name of the archive without its kind
+        name: archive.name.replace(/^s3:/, ""),
+        // the profile
+        profile: settings.profile ?? "",
+        // the region
+        region: settings.region ?? "",
+        // the bucket
+        bucket: slash === -1 ? location : location.slice(0, slash),
+        // and the path within it
+        path: slash === -1 ? "" : location.slice(slash + 1),
+    }
+}
+
+
+const reconfigureMutation = graphql`
+    mutation s3ArchiveReconfigureMutation($input: ReconfigureArchiveInput!) {
+        reconfigureArchive(input: $input) {
+            archive {
+                id
+                name
+                type
                 uri
                 credentials {
                     name

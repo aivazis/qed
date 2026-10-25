@@ -228,7 +228,12 @@ const connectMutation = graphql`
             archive {
                 id
                 name
+                type
                 uri
+                credentials {
+                    name
+                    value
+                }
                 readers
                 expanded
                 pending

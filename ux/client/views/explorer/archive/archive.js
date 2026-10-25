@@ -23,12 +23,19 @@ import { S3 } from './s3'
 
 // the form
 export const Archive = ({ view, viewport }) => {
-    // make some room for the archive type
-    const [type, setType] = React.useState(null)
+    // the archive this form reconfigures, if any
+    const edit = view.archive?.edit ?? null
+    // make some room for the archive type, which is the kind of the archive being reconfigured
+    const [type, setType] = React.useState(edit?.type ?? null)
     // make a handler that collapses this viewport
     const hide = useCollapseViewport(viewport)
     // build a selector with the correct signature
     const update = (field, value) => {
+        // an archive that exists already cannot change its kind
+        if (edit !== null) {
+            // so leave it alone
+            return
+        }
         // set the value
         setType(value)
         // all done
@@ -64,7 +71,7 @@ export const Archive = ({ view, viewport }) => {
     const Connector = supportedArchiveTypes[type]
     // and render it
     return (
-        <Connector view={view} setType={update} hide={hide} />
+        <Connector view={view} edit={edit} setType={update} hide={hide} />
     )
 }
 

@@ -33,7 +33,7 @@ export const Selector = ({ viewport, view }) => {
     return (
         <span style={paint.box}>
             {/* the archive name */}
-            <span style={paint.name}>connect archive</span>
+            <span style={paint.name}>{archive?.edit ? "edit archive" : "connect archive"}</span>
             {/* a separator */}
             <span style={paint.separator}>&middot;</span>
             {/* the archive uri */}
