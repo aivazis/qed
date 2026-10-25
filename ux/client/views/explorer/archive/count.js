@@ -54,7 +54,8 @@ const Limit = ({ form, update }) => {
     // render
     return (
         <Value>
-            <Entry type="text" value={form.count} {...behaviors} />
+            <Entry type="text" value={form.count} {...behaviors}
+                aria-label="granule count limit" />
         </Value>
     )
 }
