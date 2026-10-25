@@ -213,7 +213,6 @@ export const Earth = ({ view, setType, hide }) => {
             <Form>
                 <Body>
                     <TypeSelector value="earth" update={setType} />
-                    <Name value={form.name} suggestion={suggestion} update={update} />
                     <Count form={form} update={update} />
                     <Collection form={form} update={update} />
                     <Granule form={form} update={update} />
@@ -221,6 +220,7 @@ export const Earth = ({ view, setType, hide }) => {
                     {when && <When interval={form.when} update={update} />}
                     {geo && <Geo value={form.geo} update={update} types={regionTypes} />}
                     {geo && form.geo && <Region region={form[form.geo]} update={update} />}
+                    <Name value={form.name} suggestion={suggestion} update={update} />
                 </Body>
             </Form>
             <Connect connect={connect} />

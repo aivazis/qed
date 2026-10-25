@@ -59,7 +59,7 @@ test.describe.serial("the archive trays follow the server", () => {
         // its header carries the edit control, which brings up the form, filled in
         await tray(page, edited).getByLabel("edit this archive").click()
         await expect(page.getByText("edit archive", { exact: true })).toBeVisible()
-        const location = page.locator("input").last()
+        const location = page.getByLabel("path", { exact: true })
         await expect(location).toHaveValue(`${root}/fodler`)
         // the nickname shows, but takes no input
         await expect(page.getByText(edited, { exact: true }).last()).toBeVisible()
@@ -88,8 +88,8 @@ test.describe.serial("the archive trays follow the server", () => {
         await page.getByLabel("connect to this archive").click()
         await page.getByText("local", { exact: true }).click()
         // name the folder; the nickname field offers its name, dimmed
-        await page.locator("input").last().fill(folder)
-        const nickname = page.locator("input").first()
+        await page.getByLabel("path", { exact: true }).fill(folder)
+        const nickname = page.getByLabel("nickname", { exact: true })
         await expect(nickname).toHaveAttribute("placeholder", "suggested_folder")
         await expect(nickname).toHaveValue("")
         // connecting without typing a name takes the suggestion

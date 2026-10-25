@@ -150,12 +150,12 @@ export const S3 = ({ view, edit = null, setType, hide }) => {
             <Form>
                 <Body>
                     <TypeSelector value="s3" update={setType} />
-                    <Name value={form.name} suggestion={suggestion} update={update}
-                        fixed={edit !== null} />
                     <Profile value={form.profile} update={update} />
                     <Region value={form.region} update={update} />
                     <Bucket value={form.bucket} update={update} />
                     <Path value={form.path} update={update} />
+                    <Name value={form.name} suggestion={suggestion} update={update}
+                        fixed={edit !== null} />
                 </Body>
             </Form>
             <Connect connect={connect} label={edit === null ? "connect" : "update"} />
