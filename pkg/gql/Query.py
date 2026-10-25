@@ -108,9 +108,13 @@ class Query(graphene.ObjectType):
         channel = journal.info("qed.gsl.discover")
         # show me
         channel.line(f"retrieving metadata for '{uri}'")
+        # indent
         channel.indent()
+        # the archive
         channel.line(f"archive: {archive}")
+        # the module
         channel.line(f"module: {module}")
+        # outdent
         channel.outdent()
         # flush
         channel.log()
@@ -124,11 +128,17 @@ class Query(graphene.ObjectType):
             channel = journal.error("qed.gql.discover")
             # complain
             channel.line(f"'{module}' not found")
+            # indent
             channel.indent()
+            # the error
             channel.line(f"{error}")
+            # say what was going on
             channel.line(f"while attempting to discover metadata")
+            # for which dataset
             channel.line(f"for dataset '{uri}'")
+            # in which archive
             channel.line(f"in archive '{archive}'")
+            # outdent
             channel.outdent()
             # flush
             channel.log()
@@ -140,11 +150,17 @@ class Query(graphene.ObjectType):
             channel = journal.error("qed.gql.discover")
             # complain
             channel.line(f"'{module}' does not support metadata discovery")
+            # indent
             channel.indent()
+            # the error
             channel.line(f"{error}")
+            # say what was going on
             channel.line(f"while attempting to discover metadata")
+            # for which dataset
             channel.line(f"for dataset '{uri}'")
+            # in which archive
             channel.line(f"in archive '{archive}'")
+            # outdent
             channel.outdent()
             # flush
             channel.log()
@@ -166,11 +182,17 @@ class Query(graphene.ObjectType):
             channel = journal.error("qed.gql.discover")
             # complain
             channel.line(f"'{module}' does not recognize this file")
+            # indent
             channel.indent()
+            # the error
             channel.line(f"{error}")
+            # say what was going on
             channel.line(f"while attempting to discover metadata")
+            # for which dataset
             channel.line(f"for dataset '{uri}'")
+            # in which archive
             channel.line(f"in archive '{archive}'")
+            # outdent
             channel.outdent()
             # flush
             channel.log()
@@ -179,20 +201,35 @@ class Query(graphene.ObjectType):
 
         # show me
         channel.line("metadata:")
+        # indent
         channel.indent()
+        # the uri
         channel.line(f"uri: {metadata.uri}")
+        # the product
         channel.line(f"product: {metadata.product}")
+        # the description
         channel.line(f"description: {metadata.description}")
+        # the auxiliary file
         channel.line(f"auxiliary file: {metadata.aux}")
+        # the size
         channel.line(f"size: {metadata.bytes}")
+        # the width
         channel.line(f"width: {metadata.width}")
+        # the height
         channel.line(f"height: {metadata.height}")
+        # the bands
         channel.line(f"bands: {metadata.bands}")
+        # the interleaving
         channel.line(f"interleaving: {metadata.interleaving}")
+        # the type
         channel.line(f"type: {metadata.type}")
+        # the endian
         channel.line(f"endian: {metadata.endian}")
+        # the version
         channel.line(f"version: {metadata.version}")
+        # the spec
         channel.line(f"spec: {metadata.spec}")
+        # outdent
         channel.outdent()
         # flush
         channel.log()
@@ -224,8 +261,11 @@ class Query(graphene.ObjectType):
                 firewall = journal.firewall("qed.gql.sample")
                 # complain
                 firewall.line(f"sample point out of bounds")
+                # say what was going on
                 firewall.line(f"while sampling '{dataset.pyre_name}'")
+                # where
                 firewall.line(f"at line {line}, sample {sample}")
+                # and the shape of the dataset
                 firewall.line(f"of a dataset with shape {dataset.shape}")
                 # flush
                 firewall.log()
@@ -285,6 +325,7 @@ class Query(graphene.ObjectType):
         """
         # cast the inputs
         size = int(size)
+        # and the aspect ratio
         aspect = int(aspect)
         # factorize
         for lines, samples in qed.libqed.factor(product=size, aspect=aspect):
@@ -311,11 +352,17 @@ class Query(graphene.ObjectType):
             channel = journal.firewall("qed.gql.nickname")
             # complain
             channel.line(f"'{module}' not found")
+            # indent
             channel.indent()
+            # the error
             channel.line(f"{error}")
+            # say what was going on
             channel.line(f"while suggesting a name for the reader")
+            # for which dataset
             channel.line(f"of dataset '{uri}'")
+            # in which archive
             channel.line(f"in archive '{archive}'")
+            # outdent
             channel.outdent()
             # flush
             channel.log()

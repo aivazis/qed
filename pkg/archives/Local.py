@@ -24,6 +24,7 @@ class Local(Archive, family="qed.archives.local"):
     uri.default = qed.primitives.uri(scheme="file", address=qed.primitives.path.cwd())
     uri.doc = "the location of the archive"
 
+    # whether to show the entries whose names start with a dot
     all = qed.properties.bool()
     all.default = False
     all.doc = "do not ignore entries that start with '.'"
@@ -104,6 +105,7 @@ class Local(Archive, family="qed.archives.local"):
 
     # constants
     tag = "local"
+    # and the label that names my kind to the user
     label = "local"
 
     # private data
