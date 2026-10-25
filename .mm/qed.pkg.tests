@@ -39,6 +39,7 @@ tests.qed.pkg.browse.clean := browse_ws
 tests.qed.pkg.archive_symlink.clean := archive_symlink_ws archive_symlink_link
 tests.qed.pkg.browse_fleet.clean := browse_fleet_ws
 # the drivers below clear their workspace when they start and leave it behind for inspection
+tests.qed.pkg.archive_reconfigure.clean := archive_reconfigure_ws
 tests.qed.pkg.archive_restore.clean := archive_restore_ws
 tests.qed.pkg.persist_archive.clean := persist_archive_ws
 tests.qed.pkg.persist_empty.clean := persist_empty_ws

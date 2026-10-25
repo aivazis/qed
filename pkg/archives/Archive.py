@@ -205,8 +205,12 @@ class Archive(qed.component, family="qed.archives.base", implements=qed.protocol
         if self._saved is None:
             # so it is
             return True
-        # otherwise, the only thing about me that a session changes is what i have on display;
-        # the order in which the folders were opened is not worth a save
+        # an archive the user reconfigured no longer says what the files say about it
+        if self._reconfigured:
+            # so it is
+            return True
+        # otherwise, the only other thing about me that a session changes is what i have on
+        # display; the order in which the folders were opened is not worth a save
         return set(self.expanded) != self._saved
 
     def saved(self):
@@ -216,6 +220,37 @@ class Archive(qed.component, family="qed.archives.base", implements=qed.protocol
         """
         # remember what i have on display
         self._saved = frozenset(self.expanded)
+        # and that the files have caught up with any reconfiguration
+        self._reconfigured = False
+        # all done
+        return self
+
+    def reconfigure(self, uri, settings):
+        """
+        Point me at {uri}, with the {settings} that say how to get at it, e.g. once the user has
+        corrected a misspelled location; i keep my name, and forget everything i learned at the
+        old location
+        """
+        # say where the new values came from
+        locator = qed.tracking.simple("while the user was reconfiguring the archive")
+        # take the new location
+        self.pyre_setTrait(alias="uri", value=uri, locator=locator)
+        # and the rest of the settings, which must name my traits
+        for name, value in settings.items():
+            # one at a time
+            self.pyre_setTrait(alias=name, value=value, locator=locator)
+        # the filesystem i mounted belongs to the old location
+        self.fs = None
+        # nothing is on display at the new location
+        self.expanded = []
+        # nothing has been listed there
+        self._manifests = {}
+        # or is being listed
+        self._pending = set()
+        # or failed to list
+        self._errors = {}
+        # and the configuration files, if they mention me, describe the old me
+        self._reconfigured = True
         # all done
         return self
 
@@ -312,6 +347,8 @@ class Archive(qed.component, family="qed.archives.base", implements=qed.protocol
         self._pending = set()
         # what the configuration files say i have on display; nothing, until somebody tells me
         self._saved = None
+        # whether the user changed how to get at my contents since the files were read or written
+        self._reconfigured = False
         # the folders whose listing failed, with the reason
         self._errors = {}
         # all done

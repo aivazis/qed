@@ -444,6 +444,54 @@ class Store(qed.component, family="qed.ux.store"):
         # hand it back
         return archive
 
+    def reconfigureArchive(self, uri, location, settings):
+        """
+        Point the archive at {uri} to {location}, with the {settings} that say how to get at it,
+        e.g. once the user has corrected a misspelled bucket; the archive keeps its name, which a
+        new archive could not have, since pyre hands back the old instance for a name it knows
+        """
+        # look up the archive
+        archive = self._locateArchive(uri=uri)
+        # an unknown archive has already been reported
+        if archive is None:
+            # so there is nothing to do
+            return None
+        # the settings must name traits of the archive, which complains about any that don't;
+        # asking now leaves the archive alone if one is wrong
+        for name in settings:
+            # one at a time
+            archive.pyre_trait(alias=name)
+        # parse the new location
+        location = qed.primitives.uri.parse(location, scheme="file")
+        # look for an archive that is already there
+        occupant = self.archive(uri=location)
+        # if there is one, and it is some other archive
+        if occupant is not None and occupant is not archive:
+            # make a channel
+            channel = journal.warning("qed.ux.archives")
+            # complain
+            channel.line(f"could not move the archive '{archive.pyre_name}'")
+            channel.line(f"to '{location}'")
+            channel.line(f"since '{occupant.pyre_name}' is already there")
+            # flush
+            channel.log()
+            # and leave both alone
+            return None
+        # the catalog knows the archive by its location, so take it out while that changes
+        self._dataArchives.removeArchive(uri=archive.uri)
+        # if a fleet is attached
+        if self.fleet is not None:
+            # send home the scouts that know the old location
+            self.fleet.recall(archive=archive.pyre_name)
+        # point the archive at the new location
+        archive.reconfigure(uri=location, settings=settings)
+        # and put it back in the catalog
+        self._dataArchives.addArchive(archive=archive)
+        # the tree moved, so let the clients know
+        self._announce()
+        # and hand it back
+        return archive
+
     def persistArchive(self, uri):
         """
         Write the archive at {uri} into the user's configuration files, along with what it
