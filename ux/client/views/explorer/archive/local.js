@@ -84,7 +84,7 @@ export const Local = ({ view, edit = null, setType, hide }) => {
             return
         }
         // otherwise, collect the current state
-        const name = form.name || suggestion
+        const name = form.name
         const path = form.path
         // the location of the archive
         const uri = `file:${path}`
@@ -138,7 +138,7 @@ export const Local = ({ view, edit = null, setType, hide }) => {
     // determine whether i have enough information to make the connection
     const ready = (
         !isInFlight &&
-        (form.name || suggestion).length > 0 &&
+        form.name.length > 0 &&
         form.path !== null && form.path.length > 0
     )
     // use this to figure out which button to render

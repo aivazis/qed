@@ -78,7 +78,7 @@ test.describe.serial("the archive trays follow the server", () => {
         await expect(tray(page, edited)).toHaveCount(0)
     })
 
-    test("a new local archive is offered the name of its folder, and takes it", async ({ page }) => {
+    test("a new local archive takes the name of its folder, which can be cleared and put back", async ({ page }) => {
         // a folder whose name no archive holds
         const folder = path.join(root, "suggested_folder")
         fs.mkdirSync(folder)
@@ -87,11 +87,16 @@ test.describe.serial("the archive trays follow the server", () => {
         // bring up the form for a new archive, and pick a local one
         await page.getByLabel("connect to this archive").click()
         await page.getByText("local", { exact: true }).click()
-        // name the folder; the nickname field offers its name, dimmed
+        // name the folder; the nickname field takes its name
         await page.getByLabel("path", { exact: true }).fill(folder)
         const nickname = page.getByLabel("nickname", { exact: true })
-        await expect(nickname).toHaveAttribute("placeholder", "suggested_folder")
+        await expect(nickname).toHaveValue("suggested_folder")
+        // the field can be cleared
+        await page.getByLabel("clear the nickname").click()
         await expect(nickname).toHaveValue("")
+        // and the suggestion put back
+        await page.getByLabel("use the suggested nickname").click()
+        await expect(nickname).toHaveValue("suggested_folder")
         // connecting without typing a name takes the suggestion
         await page.getByText("connect", { exact: true }).click()
         await expect(tray(page, "local:suggested_folder")).toHaveCount(1)

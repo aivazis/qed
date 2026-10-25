@@ -17,8 +17,9 @@ import { EnabledInput } from './input'
 
 
 // the nickname of a component the form makes, e.g. a reader or an archive: the server's
-// {suggestion} shows dimmed when the field is empty, the right arrow fills it in, and a control
-// puts it back; what the user types must match {pattern}, and {tip} says what the name is for
+// {suggestion} fills the field, and keeps filling it as it changes until the user edits the name;
+// a control clears the field, another puts the suggestion back, and the right arrow fills an empty
+// field with it; what the user types must match {pattern}, and {tip} says what the name is for
 export const Nickname = ({ value, suggestion = "", update, tip, pattern }) => {
     // keep track of the input, so the cursor can go back to it
     const input = React.useRef(null)
@@ -36,6 +37,21 @@ export const Nickname = ({ value, suggestion = "", update, tip, pattern }) => {
         // all done
         return
     }, [value])
+    // the suggestion the field took last
+    const followed = React.useRef(suggestion)
+    // when the suggestion changes
+    React.useEffect(() => {
+        // a field that still holds the suggestion it took last takes the new one too; one the
+        // user edited keeps what the user typed
+        if ((value ?? "") === followed.current && suggestion !== followed.current) {
+            // fill it
+            update("name", suggestion)
+        }
+        // either way, remember the suggestion, so putting it back resumes the following
+        followed.current = suggestion
+        // all done
+        return
+    }, [suggestion])
     // the field is empty when the user has erased the name
     const empty = value === null || value.length == 0
     // whether the server had anything to suggest
@@ -52,6 +68,15 @@ export const Nickname = ({ value, suggestion = "", update, tip, pattern }) => {
         // replace the name with the suggestion
         update("name", suggestion)
         // and return the cursor to the field, so the user can keep editing
+        input.current?.focus()
+        // all done
+        return
+    }
+    // build a handler that empties the field
+    const clear = () => {
+        // erase the name
+        update("name", "")
+        // and return the cursor to the field, so the user can type another
         input.current?.focus()
         // all done
         return
@@ -76,17 +101,20 @@ export const Nickname = ({ value, suggestion = "", update, tip, pattern }) => {
         onChange: setName,
         onKeyDown: accept,
     }
-    // all done; an empty field with a suggestion is not missing its name, since the suggestion
-    // fills it
+    // all done
     return (
-        <Field name="nickname" value={empty ? suggestion : value} tip={tip}>
+        <Field name="nickname" value={value} tip={tip}>
             <Value>
                 <NameInput ref={input} type="text" value={value === null ? "" : value}
                     placeholder={suggestion}
                     title={empty && suggested ? "→ fills in the suggestion" : null}
                     {...behaviors} />
+                {!empty &&
+                    <Action label="clear" description="clear the nickname" act={clear} />
+                }
                 {suggested && value !== suggestion &&
-                    <Restore suggestion={suggestion} restore={restore} />
+                    <Action label={`use ${suggestion} instead`}
+                        description="use the suggested nickname" act={restore} />
                 }
             </Value>
         </Field>
@@ -94,25 +122,26 @@ export const Nickname = ({ value, suggestion = "", update, tip, pattern }) => {
 }
 
 
-// the control that puts the suggested name back in the field
-const Restore = ({ suggestion, restore }) => {
+// a control next to the field, e.g. the one that clears it, or the one that puts the suggested
+// name back in it; {label} is what it shows, {description} what it does
+const Action = ({ label, description, act }) => {
     // build a handler that lets the keyboard press the control
     const press = evt => {
         // only the keys that press a button
         if (evt.key !== "Enter" && evt.key !== " ") return
         // keep the space from scrolling the panel
         evt.preventDefault()
-        // put the suggestion back
-        restore()
+        // do what the control does
+        act()
         // all done
         return
     }
     // render
     return (
-        <Suggestion role="button" tabIndex={0} aria-label="use the suggested nickname"
-            onClick={restore} onKeyDown={press}>
-            use {suggestion} instead
-        </Suggestion>
+        <Control role="button" tabIndex={0} aria-label={description}
+            onClick={act} onKeyDown={press}>
+            {label}
+        </Control>
     )
 }
 
@@ -124,8 +153,8 @@ const NameInput = styled(EnabledInput)`
     }
 `
 
-// the look of the control
-const Suggestion = styled.span`
+// the look of the controls
+const Control = styled.span`
     & {
         cursor: pointer;
         margin-left: 0.5rem;

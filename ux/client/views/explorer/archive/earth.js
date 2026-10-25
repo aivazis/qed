@@ -119,7 +119,7 @@ export const Earth = ({ view, setType, hide }) => {
             return
         }
         // otherwise, collect the current state
-        const name = form.name || suggestion
+        const name = form.name
         // send the mutation to the server
         request({
             // input
@@ -196,7 +196,7 @@ export const Earth = ({ view, setType, hide }) => {
     // determine whether i have enough information to make the connection
     const ready = (
         !isInFlight &&
-        (form.name || suggestion).length > 0
+        form.name.length > 0
     )
     // use this to figure out which button to render
     const Connect = ready ? EnabledConnect : DisabledConnect

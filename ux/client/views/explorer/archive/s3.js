@@ -81,7 +81,7 @@ export const S3 = ({ view, edit = null, setType, hide }) => {
             return
         }
         // otherwise, collect the current state
-        const name = form.name || suggestion
+        const name = form.name
         const profile = form.profile
         const region = form.region
         const bucket = form.bucket
@@ -141,7 +141,7 @@ export const S3 = ({ view, edit = null, setType, hide }) => {
         return
     }
     // determine whether i have enough information to make the connection
-    const ready = (!isInFlight && (form.name || suggestion).length > 0)
+    const ready = (!isInFlight && form.name.length > 0)
     // use this to figure out which button to render
     const Connect = ready ? EnabledConnect : DisabledConnect
     // render
