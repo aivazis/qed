@@ -23,10 +23,10 @@ class Imaginary(Value, family="qed.channels.imaginary"):
     client
     """
 
-    # the selector that extracts the imaginary part
-    selector = qed.viz.accessor()
-    selector.default = qed.viz.accessors.imaginary
-    selector.doc = "the selector that extracts the imaginary part of each sample"
+    # the accessor that extracts the imaginary part
+    accessor = qed.viz.accessor()
+    accessor.default = qed.viz.accessors.imaginary
+    accessor.doc = "the accessor that extracts the imaginary part of each sample"
 
     # framework hooks
     def pyre_configured(self, **kwds):
@@ -34,7 +34,7 @@ class Imaginary(Value, family="qed.channels.imaginary"):
         Hook invoked after configuration is finished
         """
         # the normalizer reads the imaginary part
-        self.normalizer.signal = self.selector.imaginary
+        self.normalizer.signal = self.accessor.imaginary
         # all done
         return super().pyre_configured(**kwds)
 
