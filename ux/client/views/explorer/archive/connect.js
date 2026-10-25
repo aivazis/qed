@@ -43,7 +43,7 @@ export const Connect = () => {
     // render
     return (
         <Badge size={10} state="enabled" behaviors={behaviors} style={paintConnect}
-            aria-label="connect to this archive">
+            aria-label="connect a new archive">
             <Icon />
         </Badge>
 

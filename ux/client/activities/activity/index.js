@@ -48,10 +48,11 @@ export const Activity = ({ size, url, current, disabled = false, children, style
     const onClick = current ? toggleActivityPanel : showActivityPanel
     // assemble my behaviors
     const behaviors = { onClick }
-    // paint me; the {Link} is the control and carries the accessible name and nav identity, so the
-    // badge inside opts out of the button role (no interactive element nested in another)
+    // paint me; the {Link} is the control and carries the accessible name, the hover text, and the
+    // nav identity, so the badge inside opts out of the button role (no interactive element nested
+    // in another)
     return (
-        <Link to={url} aria-label={label} data-qed-nav={label} >
+        <Link to={url} aria-label={label} title={label} data-qed-nav={label} >
             <Badge size={size} state={state} behaviors={behaviors} style={paint} role={undefined} >
                 {children}
             </Badge>
