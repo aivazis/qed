@@ -21,6 +21,7 @@ import { Form, Body, Error } from '../form'
 
 // fields
 import { Name } from './name'
+import { useFetchArchiveNickname } from './useFetchArchiveNickname'
 import { Count } from './count'
 import { Collection } from './collection'
 import { Granule } from './granule'
@@ -74,6 +75,16 @@ export const Earth = ({ view, setType, hide }) => {
     const decorate = useSetActiveView()
     // build the mutation request
     const [request, isInFlight] = useMutation(connectMutation)
+    // ask the server for a nickname, once the form names a collection; the location of the
+    // archive is made from its name, so the collection is all there is to go on
+    const suggestion = useFetchArchiveNickname({
+        // of my kind
+        type: "earth",
+        // with no location yet, and nothing to go on until there is a collection
+        uri: form.collection.shortName ? "earth:" : "",
+        // for the granules of the collection
+        collection: form.collection.shortName || null,
+    })
     // set up the state update
     const update = (field, value) => {
         // clear any errors
@@ -108,7 +119,7 @@ export const Earth = ({ view, setType, hide }) => {
             return
         }
         // otherwise, collect the current state
-        const name = form.name
+        const name = form.name || suggestion
         // send the mutation to the server
         request({
             // input
@@ -185,7 +196,7 @@ export const Earth = ({ view, setType, hide }) => {
     // determine whether i have enough information to make the connection
     const ready = (
         !isInFlight &&
-        form.name !== null && form.name.length
+        (form.name || suggestion).length > 0
     )
     // use this to figure out which button to render
     const Connect = ready ? EnabledConnect : DisabledConnect
@@ -202,7 +213,7 @@ export const Earth = ({ view, setType, hide }) => {
             <Form>
                 <Body>
                     <TypeSelector value="earth" update={setType} />
-                    <Name value={form.name} update={update} />
+                    <Name value={form.name} suggestion={suggestion} update={update} />
                     <Count form={form} update={update} />
                     <Collection form={form} update={update} />
                     <Granule form={form} update={update} />

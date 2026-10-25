@@ -19,6 +19,7 @@ import { Panel } from './panel'
 import { EnabledConnect, DisabledConnect, Cancel } from './buttons'
 import { TypeSelector } from './type'
 import { Name } from './name'
+import { useFetchArchiveNickname } from './useFetchArchiveNickname'
 import { Profile } from './profile'
 import { Region } from './region'
 import { Bucket } from './bucket'
@@ -35,6 +36,15 @@ export const S3 = ({ view, edit = null, setType, hide }) => {
     const decorate = useSetActiveView()
     // build the mutation request: a new archive gets connected, an existing one reconfigured
     const [request, isInFlight] = useMutation(edit === null ? connectMutation : reconfigureMutation)
+    // ask the server for a nickname for a new archive, once the form names a bucket
+    const suggestion = useFetchArchiveNickname({
+        // of my kind
+        type: "s3",
+        // at the location the form describes
+        uri: form.bucket ? `s3://${form.bucket}/${form.path}` : "",
+        // an archive that exists already keeps its name
+        skip: edit !== null,
+    })
     // set up the state update
     const update = (field, value) => {
         // clear any errors
@@ -71,7 +81,7 @@ export const S3 = ({ view, edit = null, setType, hide }) => {
             return
         }
         // otherwise, collect the current state
-        const name = form.name
+        const name = form.name || suggestion
         const profile = form.profile
         const region = form.region
         const bucket = form.bucket
@@ -131,7 +141,7 @@ export const S3 = ({ view, edit = null, setType, hide }) => {
         return
     }
     // determine whether i have enough information to make the connection
-    const ready = (!isInFlight && (form.name !== null) && (form.name.length))
+    const ready = (!isInFlight && (form.name || suggestion).length > 0)
     // use this to figure out which button to render
     const Connect = ready ? EnabledConnect : DisabledConnect
     // render
@@ -140,7 +150,8 @@ export const S3 = ({ view, edit = null, setType, hide }) => {
             <Form>
                 <Body>
                     <TypeSelector value="s3" update={setType} />
-                    <Name value={form.name} update={update} fixed={edit !== null} />
+                    <Name value={form.name} suggestion={suggestion} update={update}
+                        fixed={edit !== null} />
                     <Profile value={form.profile} update={update} />
                     <Region value={form.region} update={update} />
                     <Bucket value={form.bucket} update={update} />
