@@ -20,15 +20,11 @@ data_c16:
         amplitude:
             auto: no
             min: 0.0
-            low: 0.5
-            high: 5.0
-            max: 50.0
+            low: 0.0
+            high: 1.0
+            max: 2.0
         phase:
-            auto: no
-            min: -3.15
-            low: -1.6
-            high: 1.6
-            max: 3.15
+            auto: yes
         saturation:
             auto: no
             min: 0.0
@@ -40,16 +36,24 @@ datasets:
     - native.flat#data_c16
 
 
+# change the default crew size
+qed.nexus.teams.tile:
+    size: 16
+
 # run as a web app on a default test port; a runner launches {qed} from this directory and may
 # override the port on the command line so parallel suites do not collide; the {nexus} node is
 # not an application trait, so the override must use the fully qualified name, e.g.
 #     qed --qed.app.nexus.services.web.address=ip4:0.0.0.0:<port>
 qed.app:
+    # the shell
     shell: web
+    # the web server port
     nexus.services.web:
         address: ip4:0.0.0.0:8123
-    # place the tile and stats diagnostics under user control
+        address: ip4:0.0.0.0:8005
+    # journal
     journal:
+        # the list of interesting channels
         channels:
           - debug, pyre.viz
           - debug, qed.ux.tiles
@@ -57,15 +61,15 @@ qed.app:
 
 # and turn them on: tile pipelines
 qed.journal.debug.pyre.viz:
-    active: yes
+    active: no
 
 # one line per tile request, with outcome and timings
 qed.journal.debug.qed.ux.tiles:
-    active: yes
+    active: no
 
 # and one line per statistics merge, with the running whole-dataset accumulation
 qed.journal.debug.qed.ux.stats:
-    active: yes
+    active: no
 
 # never spawn a browser; the test driver owns the browser
 pyre.shells.web#qed.app.shell:
