@@ -81,10 +81,13 @@ def gitRepository():
         branch = summary["local"]
         # get the divergence information
         ahead = summary["ahead"]
+        # and how many it is behind
         behind = summary["behind"]
         # get change info
         index = summary["index"]
+        # the number of changes in the worktree
         worktree = summary["worktree"]
+        # and the number of conflicts
         conflicts = summary["conflicts"]
 
         # start rendering
@@ -135,6 +138,9 @@ def gitRepository():
 
 
 def gitParseStatus(status):
+    """
+    Parse the git status output and collect the statistics we need to colorize the prompt
+    """
     # the summary table
     table = {
         "local": None,
@@ -207,8 +213,11 @@ def gitTracking(table, match):
     info = match.groupdict()
     # set the branch name
     table["local"] = info["local"]
+    # and the name of the remote one
     table["remote"] = info["remote"]
+    # the number of commits the local branch is ahead, if any
     table["ahead"] = 0 if info["ahead"] is None else int(info["ahead"])
+    # and the number it is behind
     table["behind"] = 0 if info["behind"] is None else int(info["behind"])
     # all done
     return table
@@ -216,7 +225,7 @@ def gitTracking(table, match):
 
 def gitLocal(table, match):
     """
-    Extract the branch name from a repository that tracks a remote one
+    Extract the branch name from a repository that does not track a remote one
     """
     # get the match group dictionary
     info = match.groupdict()
@@ -267,6 +276,7 @@ def gitChanged(table, match):
 
     # if the code has any info on the worktree side
     if code[1] != " ":
+        # update the worktree count
         table["worktree"] += 1
 
     # all done
@@ -281,7 +291,7 @@ gitParser = re.compile(
             r"(?P<no_commits>## No commits yet on (?P<new>.+))$",
             # detached HEAD
             r"(?P<detached>## HEAD \(no branch\))$",
-            # repositories at a known branch that tack a remote
+            # repositories at a known branch that track a remote
             r"(?P<tracking>## " +
             # the local branch name
             r"(?P<local>.+)" +
@@ -321,7 +331,9 @@ gitDispatcher = {
 
 # git status code sets
 gitUntracked = {"??"}
+# the code of ignored files
 gitIgnored = {"!!"}
+# the codes of files with merge conflicts
 gitConflicts = {"DD", "AU", "UD", "UA", "DU", "AA", "UU"}
 
 
@@ -392,26 +404,44 @@ def csi24(red, green, blue):
 # constants
 # ascii codes
 ascii_nul = "\x00"
+# start of heading; readline takes it to open a run of invisible characters
 ascii_soh = "\x01"
+# start of text; readline takes it to close a run of invisible characters
 ascii_stx = "\x02"
+# end of text
 ascii_etx = "\x03"
+# end of transmission
 ascii_eot = "\x04"
+# enquiry
 ascii_enq = "\x05"
+# acknowledge
 ascii_ack = "\x06"
+# the bell, which also ends an xterm control sequence
 ascii_bel = "\x07"
+# backspace
 ascii_bs = "\x08"
+# horizontal tab
 ascii_tab = "\x09"
+# line feed
 ascii_lf = "\x0a"
+# vertical tab
 ascii_vt = "\x0b"
+# form feed
 ascii_ff = "\x0c"
+# carriage return
 ascii_cr = "\x0d"
+# shift out
 ascii_so = "\x0e"
+# shift in
 ascii_si = "\x0f"
+# escape, which opens every control sequence
 ascii_esc = "\x1b"
+# delete
 ascii_del = "\x7f"
 
 # readline hidden characters escapes
 rl_hide = ascii_soh
+# the marker that closes a run of invisible characters, which readline leaves out of the width
 rl_unhide = ascii_stx
 
 # commands
@@ -423,27 +453,49 @@ normal = csi3(code=0)
 
 # 24bit
 amber = csi24(red=255, green=191, blue=0)
+# burlywood
 burlywood = csi24(red=0xDE, green=0xB8, blue=0x87)
+# dark goldenrod
 dark_goldenrod = csi24(red=0xB8, green=0x86, blue=0x0B)
+# dark khaki
 dark_khaki = csi24(red=0xBD, green=0xB7, blue=0x6B)
+# dark orange
 dark_orange = csi24(red=0xFF, green=0x8C, blue=0x00)
+# dark sea green
 dark_sea_green = csi24(red=0x8F, green=0xBC, blue=0x8F)
+# firebrick
 firebrick = csi24(red=0xB2, green=0x22, blue=0x22)
+# a nearly black gray
 gray10 = csi24(red=0x19, green=0x19, blue=0x19)
+# a dark gray
 gray30 = csi24(red=0x4C, green=0x4C, blue=0x4C)
+# dim gray
 gray41 = csi24(red=0x69, green=0x69, blue=0x69)
+# a middle gray
 gray50 = csi24(red=0x80, green=0x80, blue=0x80)
+# dark gray, which is lighter than dim gray
 gray66 = csi24(red=169, green=169, blue=169)
+# a light gray
 gray75 = csi24(red=0xBE, green=0xBE, blue=0xBE)
+# hot pink
 hot_pink = csi24(red=0xFF, green=0x69, blue=0xB4)
+# indian red
 indian_red = csi24(red=0xCD, green=0x5C, blue=0x5C)
+# lavender
 lavender = csi24(red=192, green=176, blue=224)
+# light green
 light_green = csi24(red=0x90, green=0xEE, blue=0x90)
+# light steel blue
 light_steel_blue = csi24(red=0xB0, green=0xC4, blue=0xDE)
+# lime green
 lime_green = csi24(red=0x32, green=0xCD, blue=0x32)
+# navajo white
 navajo_white = csi24(red=0xFF, green=0xDE, blue=0xAD)
+# olive drab
 olive_drab = csi24(red=0x6B, green=0x8E, blue=0x23)
+# peach puff
 peach_puff = csi24(red=0xFF, green=0xDA, blue=0xB9)
+# sage
 sage = csi24(red=176, green=208, blue=176)
 
 # functional
@@ -451,11 +503,17 @@ sage = csi24(red=176, green=208, blue=176)
 prompt_normal = gray41
 # branch
 branch_ahead = prompt_normal
+# a branch behind its remote
 branch_behind = prompt_normal
+# a branch with no changes
 branch_clean = olive_drab
+# a branch with changes in both the index and the worktree
 branch_modified = indian_red
+# a branch with changes in the worktree only
 branch_modified_worktree = amber
+# a branch with changes in the index only
 branch_modified_index = dark_sea_green
+# a branch with merge conflicts
 branch_conflicts = firebrick
 
 
