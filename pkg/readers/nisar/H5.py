@@ -293,6 +293,12 @@ class H5(
         Make first contact with my file, if i haven't yet, and describe what is in it as my
         contents
         """
+        # a reader that was never told where its file is
+        if self.uri is None or not str(self.uri):
+            # has nothing to describe
+            raise self.ProductionError(
+                node=self, product="contents", reason="the uri of the file to read is not set"
+            )
         # make first contact
         self.open()
         # and fill my contents with what i found
