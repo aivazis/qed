@@ -410,7 +410,7 @@ class Channel(qed.flow.dynamic, implements=qed.protocols.channel):
         # a constant saturation
         recipe.factory(name="saturation", protocol=qed.viz.filter, pin=qed.viz.filters.constant())
         recipe.product(name="saturations")
-        recipe.bind(factory="saturation", slot="tile", product="saturations")
+        recipe.bind(factory="saturation", slot="result", product="saturations")
         # the colormap
         recipe.factory(name="hsb", protocol=qed.viz.colormap, pin=qed.viz.colormaps.hsb())
         # wire its inputs
