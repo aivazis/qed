@@ -119,7 +119,7 @@ class Phase(Channel, family="qed.channels.isce2.unw.phase"):
         recipe.bind(factory="normalizer", slot="normalized", product="phases")
         recipe.bind(factory="hue", slot="signal", product="phases")
         recipe.bind(factory="hue", slot="affine", product="hues")
-        recipe.bind(factory="brightness", slot="tile", product="luminosities")
+        recipe.bind(factory="brightness", slot="result", product="luminosities")
         # and paint
         self.light(recipe=recipe, hues="hues", luminosity="luminosities")
         # hand it off

@@ -102,7 +102,7 @@ class Phase(Channel, family="qed.channels.isce2.int.phase"):
         # a constant luminosity
         recipe.factory(name="brightness", protocol=qed.viz.filter, pin=qed.viz.filters.constant())
         recipe.product(name="luminosities")
-        recipe.bind(factory="brightness", slot="tile", product="luminosities")
+        recipe.bind(factory="brightness", slot="result", product="luminosities")
         # turn the phase into hues that span a full turn
         self.turn(recipe=recipe, signal="signal")
         recipe.node(name="hue").settings["interval"] = (0, 2 * cmath.pi)

@@ -113,7 +113,7 @@ class Phase(Channel, family="qed.channels.native.phase"):
         # a constant brightness
         recipe.factory(name="brightness", protocol=qed.viz.filter, pin=qed.viz.filters.constant())
         recipe.product(name="brightnesses")
-        recipe.bind(factory="brightness", slot="tile", product="brightnesses")
+        recipe.bind(factory="brightness", slot="result", product="brightnesses")
         # paint the phase on a color wheel
         self.wheel(recipe=recipe, signal="signal", brightness="brightnesses")
         # the hue spans a full turn
