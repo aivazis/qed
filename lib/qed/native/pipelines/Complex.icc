@@ -184,7 +184,7 @@ qed::native::pipelines::Complex<cellT>::build(int rows, int columns) -> graph_ty
     // make the constant that supplies the saturation
     g.constant = constant_type::create("saturation", 1.0);
     // it fills the saturation tile
-    g.constant->tile(g.saturation);
+    g.constant->result(g.saturation);
 
     // make the colormap, where the branches meet
     g.colormap = colormap_type::create("hsb");
@@ -237,7 +237,7 @@ qed::native::pipelines::Complex<cellT>::dismantle(graph_type & g) -> void
     g.colormap->removeOutput("green");
     g.colormap->removeOutput("blue");
     // unhook the constant from the saturation
-    g.constant->removeOutput("tile");
+    g.constant->removeOutput("result");
     // unhook the normalizer from the magnitudes and the brightness
     g.normalizer->removeInput("signal");
     g.normalizer->removeOutput("normalized");
