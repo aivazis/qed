@@ -1,17 +1,11 @@
 {
-    "spellright.language": [
-        "en"
-    ],
-    "spellright.documentTypes": [
-        "cpp",
-        "javascriptreact",
-        "makefile",
-        "markdown",
-        "latex",
-        "plaintext",
-        "python",
-        "html"
-    ],
+    "cSpell.customDictionaries": {
+        "qed": {
+            "name": "qed",
+            "path": "${workspaceFolder}/etc/ci/conventions/codespell-words.txt",
+            "addWords": true
+        }
+    },
     "python.analysis.typeCheckingMode": "basic",
     "files.associations": {
         "*.def": "makefile",

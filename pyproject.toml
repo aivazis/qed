@@ -22,9 +22,9 @@ exempt = [".graphqlconfig", "LICENSE"]
 
 # spell checking of the prose in comments, docstrings, and documentation, the way pyre does it:
 # {skip} leaves out binary files and the npm lock file, whose package names and hashes are not
-# prose, {ignore-words} lists real words that codespell mistakes for misspellings, and
-# {ignore-regex} leaves out mixed case identifiers such as {afterAll} or {selectReader}, which are
-# code rather than prose
+# prose, {ignore-words} lists real words that codespell mistakes for misspellings, and that VS
+# Code's spell checker reads too, so both accept the same words, and {ignore-regex} leaves out
+# mixed case identifiers such as {afterAll} or {selectReader}, which are code rather than prose
 [tool.codespell]
 skip = "*.graffle,*.nb,*.png,*.jpg,*.gif,*.ico,*.pdf,*.svg,*.woff,*.woff2,*.ttf,package-lock.json"
 ignore-words = "etc/ci/conventions/codespell-words.txt"
