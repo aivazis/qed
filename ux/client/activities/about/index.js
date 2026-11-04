@@ -18,7 +18,7 @@ import { QED as Icon } from '~/shapes'
 import styles from './styles'
 
 
-// visualize
+// the information about the application, under its logo
 export const About = ({ size, style }) => {
     // get the current location
     const location = useLocation().pathname
