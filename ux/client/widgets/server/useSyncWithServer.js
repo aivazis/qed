@@ -6,7 +6,7 @@
 
 
 // externals
-import { useLazyLoadQuery, usePreloadedQuery, useQueryLoader } from "react-relay/hooks"
+import { graphql, useLazyLoadQuery, usePreloadedQuery, useQueryLoader } from "react-relay/hooks"
 
 
 // fetch the contents of a table lazily

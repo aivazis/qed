@@ -62,7 +62,13 @@ export const Badge = ({ size, state, behaviors, style, children, ...options }) =
     // when it nests the badge inside a link); the svg is decorative, named by the badge's label
     return (
         <div role="button" {...options} title={title} style={paint.badge} {...controls}>
-            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width={size} height={size} aria-hidden="true" >
+            <svg
+                version="1.1"
+                xmlns="http://www.w3.org/2000/svg"
+                width={size}
+                height={size}
+                aria-hidden="true"
+            >
                 <g transform={shrink} style={paint.shape} >
                     {React.cloneElement(React.Children.only(children), { style: paint })}
                 </g>

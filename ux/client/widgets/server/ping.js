@@ -27,17 +27,10 @@ export const Ping = ({ style, standing, ...props }) => {
         const options = {
             fetchPolicy: "network-only",
         }
-        // get the data immediately
+        // get the data once; the event stream keeps track of the server from then on
         getVersion(variables, options)
-        // and schedule a recurring refresh
-        // const timer = setInterval(getVersion, 1000, variables, options)
-        // return the cleanup function
-        return () => {
-            // disable the timer
-            // clearInterval(timer)
-            // all done
-            return
-        }
+        // all done
+        return
     }, [])
     // if this is the first time
     if (qref === null) {

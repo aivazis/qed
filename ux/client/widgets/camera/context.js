@@ -10,7 +10,10 @@ import React from 'react'
 
 
 // the provider factory
-export const Provider = React.forwardRef(({ viewport, scale, focus, focusKey, children }, clientRef) => {
+export const Provider = React.forwardRef((
+    { viewport, scale, focus, focusKey, children },
+    clientRef
+) => {
     // save the external length scale
     const els = scale
     // build a camera

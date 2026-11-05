@@ -20,8 +20,8 @@ export const Version = ({ qref, style, standing }) => {
     const { version } = useServerQuery(qref)
     // unpack the version info
     const { major, minor, micro, revision } = version
-    // unpack where we stand with the server; a caller that does not track it leaves us
-    // saying nothing about it, which is what this widget did before there was anything to say
+    // unpack where we stand with the server; a caller that does not track it leaves the
+    // standing unknown, and we say nothing about it
     const { state = "unknown", since = null } = standing ?? {}
 
     // merge the overall styles
