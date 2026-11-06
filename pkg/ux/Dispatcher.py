@@ -49,17 +49,19 @@ class Dispatcher:
 
         # take a look
         match = self.regex.match(url)
-        # if there is no match
+        # if there is no match, the url is not one a client of this server sends: it does not start
+        # with a slash, the way the probes of network scanners do
         if not match:
-            # we have a bug
-            channel = journal.firewall("qed.ux.dispatch")
-            # complain
-            channel.line(f"could not find handler")
-            channel.line(f"while resolving ${url}")
+            # make a channel
+            channel = journal.debug("qed.ux.dispatch.refused")
+            # note the refusal
+            channel.line(f"refused a {command} request")
+            # for this url
+            channel.line(f"for {url!r}")
             # flush
             channel.log()
-            # and return an error to the client
-            return self._notFound(server=server, reason=f"this server has no handler for '{url}'")
+            # and hang up without a word, since whoever sent it has no business with this server
+            return server.responses.NoResponse(server=server)
 
         # find who matched
         token = match.lastgroup
