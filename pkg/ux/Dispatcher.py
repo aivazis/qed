@@ -117,12 +117,17 @@ class Dispatcher:
         """
         Build a preview of a dataset
         """
-        # unpack
+        # unpack the request: the reader
         reader = match.group("preview_reader").split(".")
+        # the location of the dataset
         uri = match.group("preview_uri")
+        # the type of its cells
         cell = match.group("preview_cell")
+        # its shape
         shape = tuple(map(int, match.group("preview_shape").split(",")))
+        # the zoom level of the preview
         zoom = int(match.group("preview_zoom"))
+        # and the size of the preview
         view = tuple(map(int, match.group("preview_view").split(",")))
 
         # set up the reader configuration
@@ -151,8 +156,11 @@ class Dispatcher:
             firewall = journal.firewall("qed.ux.dispatch")
             # complain
             firewall.line(f"preview out of bounds")
+            # what was being previewed
             firewall.line(f"while previewing '{uri}'")
+            # the size of the preview and its zoom level
             firewall.line(f"with view {view} at zoom {zoom}")
+            # and the shape of the dataset
             firewall.line(f"of a dataset with shape {data.shape}")
             # flush
             firewall.log()
@@ -179,14 +187,21 @@ class Dispatcher:
         cached payload holding a file descriptor that nothing will ever read again. They are
         small and quick, so they are drawn here and forgotten
         """
-        # unpack
+        # unpack the request: the viewport
         viewport = int(match.group("peek_viewport"))
+        # the dataset
         datasetName = match.group("peek_dataset")
+        # the channel
         channelName = match.group("peek_channel")
+        # the zoom level, as the url spells it
         zoomSpec = match.group("peek_zoom")
+        # and as a pair of levels
         zoom = tuple(map(int, zoomSpec.split("x")))
+        # the tile, as the url spells it
         spec = match.group("peek_tile")
+        # its origin
         origin = tuple(map(int, match.group("peek_origin").split("x")))
+        # and its shape
         shape = tuple(map(int, match.group("peek_shape").split("x")))
         # draw it here and now; nothing about this tile is worth keeping
         return self._dataInline(
@@ -205,17 +220,24 @@ class Dispatcher:
         """
         Handle a data request
         """
-        # unpack
+        # unpack the request: the viewport
         viewport = int(match.group("data_viewport"))
+        # the dataset
         datasetName = match.group("data_dataset")
+        # the channel
         channelName = match.group("data_channel")
+        # the zoom level, as the url spells it
         zoomSpec = match.group("data_zoom")
+        # and as a pair of levels
         zoom = tuple(map(int, zoomSpec.split("x")))
         # count the request against its zoom; the pyramid exists on the belief that people
         # look at products zoomed out, and this is where that belief gets measured
         self.zooms[zoom] += 1
+        # the tile, as the url spells it
         spec = match.group("data_tile")
+        # its origin
         origin = tuple(map(int, match.group("data_origin").split("x")))
+        # and its shape
         shape = tuple(map(int, match.group("data_shape").split("x")))
         # bundle the request details so the helpers can share them
         tilespec = {
@@ -241,6 +263,7 @@ class Dispatcher:
         # request that arrives and never completes is otherwise indistinguishable from one
         # that never arrived, and those are opposite faults
         self._sequence += 1
+        # and remember the number
         sequence = self._sequence
         # bind the diagnostic to this request; a no-op while the channel is inactive
         record = functools.partial(
@@ -286,8 +309,11 @@ class Dispatcher:
             firewall = journal.firewall("qed.ux.dispatch")
             # complain
             firewall.line(f"tile out of bounds")
+            # what was being fetched
             firewall.line(f"while fetching a tile of '{channelName}' from '{datasetName}'")
+            # the shape and origin of the tile, and the zoom level
             firewall.line(f"with shape {shape} at {origin}, zoom {zoom}")
+            # and the shape of the dataset
             firewall.line(f"of a dataset with shape {dataset.shape}")
             # flush
             firewall.log()
@@ -573,8 +599,11 @@ class Dispatcher:
             chnl = journal.error("qed.ux.dispatch")
             # show me
             chnl.line(str(error))
+            # what was being fetched
             chnl.line(f"while fetching a tile of '{channelName}' from '{datasetName}'")
+            # the shape and origin of the tile
             chnl.line(f"with shape {shape} at {origin}")
+            # and at which zoom level
             chnl.line(f"at zoom level {zoom}")
             # and flush
             chnl.log()
@@ -626,8 +655,11 @@ class Dispatcher:
             chnl = journal.warning("qed.nexus.tiles")
             # what happened
             chnl.line(str(error))
+            # what was being fetched
             chnl.line(f"while fetching a tile of '{channelName}' from '{datasetName}'")
+            # the shape and origin of the tile
             chnl.line(f"with shape {shape} at {origin}")
+            # and what happens next
             chnl.line(f"the task is suspect; refusing to retry it")
             # and flush
             chnl.log()
@@ -636,6 +668,7 @@ class Dispatcher:
             fleet.suspect(task=task)
             # record the casualty
             if record is not None:
+                # as a refusal by the crew
                 record(code=404, via="crew")
             # let the client know
             return deferred.resolve(
@@ -654,13 +687,17 @@ class Dispatcher:
             chnl = journal.warning("qed.nexus.tiles")
             # what happened
             chnl.line(str(error))
+            # what was being fetched
             chnl.line(f"while fetching a tile of '{channelName}' from '{datasetName}'")
+            # the shape and origin of the tile
             chnl.line(f"with shape {shape} at {origin}")
+            # and what that means for the client
             chnl.line(f"the tile is not available for now")
             # and flush
             chnl.log()
             # record the outcome
             if record is not None:
+                # as a tile that is not available for now
                 record(code=503, via="crew")
             # and let the client know it may ask again later
             return deferred.resolve(response=server.responses.ServiceUnavailable(server=server))
@@ -676,14 +713,19 @@ class Dispatcher:
             chnl = journal.warning("qed.nexus.tiles")
             # what happened
             chnl.line(f"could not share the payload")
+            # what was being fetched
             chnl.line(f"while fetching a tile of '{channelName}' from '{datasetName}'")
+            # the shape and origin of the tile
             chnl.line(f"with shape {shape} at {origin}")
+            # what went wrong
             chnl.line(f"got: {error}")
+            # and its likely cause
             chnl.line(f"the process is probably out of file descriptors")
             # and flush
             chnl.log()
             # record the outcome
             if record is not None:
+                # as a tile the server had no room to share
                 record(code=503, via="starved")
             # and let the client know; it can always ask again, and the render is cached
             return deferred.resolve(response=server.responses.ServiceUnavailable(server=server))
@@ -701,6 +743,7 @@ class Dispatcher:
         )
         # record the delivery
         if record is not None:
+            # as a tile the crew delivered
             record(code=200, via="crew")
         # deliver it; the write to the client happens within
         status = deferred.resolve(response=response)
@@ -753,8 +796,11 @@ class Dispatcher:
             chnl = journal.error("qed.ux.dispatch")
             # show me
             chnl.line(str(error))
+            # what was being generated
             chnl.line(f"while generating a tile of '{channelName}' from '{datasetName}'")
+            # the shape and origin of the tile
             chnl.line(f"with shape {shape} at {origin}")
+            # and at which zoom level
             chnl.line(f"at zoom level {zoom}")
             # and flush
             chnl.log()
@@ -794,11 +840,15 @@ class Dispatcher:
         """
         Handle a request for the spectrum of a region of the dataset on display in a viewport
         """
-        # unpack
+        # unpack the request: the viewport
         viewport = int(match.group("spectrum_viewport"))
+        # the dataset
         datasetName = match.group("spectrum_dataset")
+        # the region, as the url spells it
         spec = match.group("spectrum_region")
+        # its origin
         origin = tuple(map(int, match.group("spectrum_origin").split("x")))
+        # and its shape
         shape = tuple(map(int, match.group("spectrum_shape").split("x")))
         # bundle the request details the way the tile delivery expects them; a spectrum is
         # computed at full resolution, and is named as a channel of its own
@@ -937,6 +987,7 @@ class Dispatcher:
         firewall = journal.firewall("qed.ux.dispatch")
         # complain
         firewall.line(f"cannot compute the spectrum of '{datasetName}' over {spec}")
+        # and why
         firewall.line(reason)
         # flush
         firewall.log()
@@ -950,8 +1001,9 @@ class Dispatcher:
         """
         Handle a request for a dataset profile
         """
-        # unpack
+        # unpack the request: the dataset
         name = match.group("profile_dataset")
+        # and the format of the profile
         encoding = match.group("profile_format").lower()
         # the url contains the points of interest
         url = request.url
@@ -980,8 +1032,11 @@ class Dispatcher:
             firewall = journal.firewall("qed.ux.dispatch")
             # complain
             firewall.line(f"profile point out of bounds")
+            # what was being profiled
             firewall.line(f"while profiling '{name}'")
+            # along which points
             firewall.line(f"along {points}")
+            # and the shape of the dataset
             firewall.line(f"of a dataset with shape {dataset.shape}")
             # flush
             firewall.log()
@@ -1126,15 +1181,19 @@ class Dispatcher:
         """
         # our headless probe marks itself explicitly
         if "qed-probe" in agent:
+            # it is the probe
             return "probe"
         # edge identifies with {Edg}, but also carries {Chrome} and {Safari}, so test it first
         if "Edg" in agent:
+            # it is edge
             return "edge"
         # chrome carries {Safari} too, so it must come before the safari test
         if "Chrome" in agent or "Chromium" in agent:
+            # it is chrome
             return "chrome"
         # safari last
         if "Safari" in agent:
+            # it is safari
             return "safari"
         # anything else, including our probe's fallback
         return "other"
@@ -1249,30 +1308,40 @@ class Dispatcher:
         # gathering and formatting below -- the only real cost -- out of the hot path in the
         # common inactive case
         if not tiles.active:
+            # so bail
             return
-        # read the request clocks; {dt} is elapsed latency, including any time spent queued
-        # and rendered in a worker, while {cpu} is this server's own compute
+        # read the request clocks: the time since the request arrived, including any time it
+        # spent queued and rendered in a worker
         dt = (time.perf_counter() - clocks[0]) * 1000 if clocks else 0.0
+        # and the processor time this server spent on it
         cpu = (time.process_time() - clocks[1]) * 1000 if clocks else 0.0
         # identify the requesting client from its user agent
         try:
+            # read the user agent
             agent = request.headers["User-Agent"]
         except (KeyError, TypeError):
+            # a request without one is anonymous
             agent = ""
+        # and turn it into a label
         client = self._tileClient(agent=agent)
         # the session token rides in the query string; it is what pierces the tile {Mosaic} memo
         query = urllib.parse.parse_qs(urllib.parse.urlsplit(request.url).query)
+        # pick the session token out of the query
         session = query.get("session", ["?"])[0]
         # the current shared look-at, for context on whether this tile sits near the viewport
         try:
+            # find the center of the view
             center = self.store.view(viewport=viewport).center
+            # and round it to a cell
             lookAt = (round(center.row), round(center.col))
         except (IndexError, AttributeError, TypeError):
+            # a viewport without a view has no center
             lookAt = None
         # how many requests are waiting, and how long the most patient of them has waited;
         # a queue that grows and an age that never resets are the signature of tiles that
         # are being accepted and never answered
         waiting = len(self._parked)
+        # and the age of the oldest of them
         oldest = (
             f"{time.time() - min(when for when, _ in self._parked.values()):.1f}s"
             if self._parked
@@ -1290,11 +1359,15 @@ class Dispatcher:
     # private data
     # how many of the most recent tiles the record of how they were served keeps
     _window = 1024
-    # recognizer fragments
+    # recognizer fragments: a uuid
     uuid = r"\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"
+    # the name of a dataset
     pyreid = r"[^&?#:\s]+"
+    # a zoom level, as a pair
     zoom = r"-?\d+x-?\d+"
+    # the origin of a tile
     origin = r"-?\d+x-?\d+"
+    # and its shape
     shape = r"\d+x\d+"
     # currently, only {csv} is supported
     profileFormat = r"(CSV)"

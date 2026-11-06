@@ -36,10 +36,12 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     workspace = qed.protocols.workspace()
     workspace.doc = "the directory i work out of, and the keeper of what i derive"
 
+    # whether to build reduced resolution versions of the datasets
     pyramids = qed.properties.bool()
     pyramids.default = True
     pyramids.doc = "build the reduced resolution levels of the datasets clients look at"
 
+    # where to find the census digests of known datasets
     census = qed.properties.path()
     census.default = None
     census.doc = (
@@ -70,69 +72,84 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     cell.default = None
     cell.doc = "the format string that specifies the type of the dataset payload"
 
+    # the smallest index of the dataset
     origin = qed.properties.tuple(schema=qed.properties.int())
     origin.default = (0, 0)
     origin.doc = "the smallest possible index"
 
+    # its shape
     shape = qed.properties.tuple(schema=qed.properties.int())
     shape.default = None
     shape.doc = "the shape of the dataset, in (lines x samples)"
 
-    # shorthands for specifying shape parts
+    # shorthands for specifying shape parts: the number of lines
     lines = qed.properties.int(default=None)
     lines.aliases = {"rows", "lines", "l"}
     lines.doc = "set the vertical dimension of the dataset"
 
+    # and the number of samples in each line
     samples = qed.properties.int(default=None)
     samples.aliases = {"cols", "columns", "s"}
     samples.doc = "set the horizontal dimension of the dataset"
 
     # shorthands for selecting the cell type
     # the aliases provide {mdx} compatibility
+    # an unsigned 8-bit integer
     uint8 = qed.properties.bool(default=False)
     uint8.aliases = {"byte", "b1", "u1"}
     uint8.doc = "set the cell type to an unsigned 8-bit integer"
 
+    # an unsigned 16-bit integer
     uint16 = qed.properties.bool(default=False)
     uint16.aliases = {"byte2", "b2", "u2"}
     uint16.doc = "set the cell type to an unsigned 16-bit integer"
 
+    # an unsigned 32-bit integer
     uint32 = qed.properties.bool(default=False)
     uint32.aliases = {"u4"}
     uint32.doc = "set the cell type to an unsigned 32-bit integer"
 
+    # an unsigned 64-bit integer
     uint64 = qed.properties.bool(default=False)
     uint64.aliases = {"u8"}
     uint64.doc = "set the cell type to an unsigned 64-bit integer"
 
+    # an 8-bit integer
     int8 = qed.properties.bool(default=False)
     int8.aliases = {"i1", "integer*1"}
     int8.doc = "set the cell type to an 8-bit integer"
 
+    # a 16-bit integer
     int16 = qed.properties.bool(default=False)
     int16.aliases = {"i2", "integer*2"}
     int16.doc = "set the cell type to a 16-bit integer"
 
+    # a 32-bit integer
     int32 = qed.properties.bool(default=False)
     int32.aliases = {"i4", "integer*4"}
     int32.doc = "set the cell type to a 32-bit integer"
 
+    # a 64-bit integer
     int64 = qed.properties.bool(default=False)
     int64.aliases = {"i8", "integer*8"}
     int64.doc = "set the cell type to a 64-bit integer"
 
+    # a 32-bit float
     float32 = qed.properties.bool(default=False)
     float32.aliases = {"r4", "real*4"}
     float32.doc = "set the cell type to a 32-bit float"
 
+    # a 64-bit float
     float64 = qed.properties.bool(default=False)
     float64.aliases = {"r8", "real*8"}
     float64.doc = "set the cell type to a 64-bit float"
 
+    # a 64-bit complex
     complex64 = qed.properties.bool(default=False)
     complex64.aliases = {"c8", "complex*8"}
     complex64.doc = "set the cell type to a 64-bit complex"
 
+    # a 128-bit complex
     complex128 = qed.properties.bool(default=False)
     complex128.aliases = {"c16", "complex*16"}
     complex128.doc = "set the cell type to a 128-bit complex"
@@ -500,9 +517,11 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         if not reader:
             # make a channel
             channel = journal.error("qed.cli")
-            # complain
+            # say what was being loaded
             channel.line(f"while attempting to load '{argv[0]}'")
+            # what is missing
             channel.line(f"no registered reader")
+            # and how to supply it
             channel.line(f"please specify the reader using the '--reader' option")
             # flush
             channel.log()
@@ -518,8 +537,9 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
         except self.ResolutionError as error:
             # make a channel
             channel = journal.error("qed.cli")
-            # complain
+            # name the reader
             channel.line(f"unknown reader '{self.reader}'")
+            # and say what was being done
             channel.line(f"while attempting to resolve the dataset reader")
             # flush
             channel.log()
@@ -550,9 +570,11 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
             except Exception as error:
                 # make a channel
                 channel = journal.warning("qed.cli")
-                # complain
+                # say what could not be loaded
                 channel.line(f"could not load datasets from '{uri}'")
+                # when
                 channel.line(f"while processing the command line")
+                # and why
                 channel.line(f"got: {error}")
                 # flush
                 channel.log()
