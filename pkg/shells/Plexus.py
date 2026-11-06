@@ -8,6 +8,7 @@
 # externals
 import html
 import textwrap
+import traceback
 
 # framework access
 import pyre
@@ -142,10 +143,13 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
     logfile.doc = "file that captures all journal output"
 
     # the journal channels qed puts under the control of its users, as (severity, name) pairs;
-    # each one can be switched on and off by configuring '{nickname}.journal.{severity}.{name}'
+    # each one is configured through '{nickname}.journal.{severity}.{name}', e.g. to switch it
+    # on and off, or to decide whether it stops the application
     journalChannels = (
         # the complaint about an installation with no web client
         ("warning", "qed.startup.assets"),
+        # the bugs a request trips in the handlers of the web server
+        ("firewall", "qed.ux.handler"),
     )
 
     # metamethods
@@ -338,8 +342,33 @@ class Plexus(pyre.plexus, family="qed.shells.plexus"):
             # hand it off
             return response
 
-        # otherwise, ask the dispatcher to do its thing
-        return ux.dispatch(plexus=self, server=server, request=request)
+        # otherwise, attempt to
+        try:
+            # ask the dispatcher to do its thing
+            return ux.dispatch(plexus=self, server=server, request=request)
+        # a handler that refuses a request does so with one of the responses of the server
+        except server.exceptions.ProtocolError:
+            # which the server sends to the client
+            raise
+        # any other exception is a bug in a handler; this is the one place where catching every
+        # exception is right: the server answers whoever reaches its address, so a bug that one
+        # request trips may be tripped by anyone, and whether that stops the server or only fails
+        # the request is for the user to decide, by making the firewall below fatal or not, rather
+        # than for whichever exception the bug happened to raise
+        except Exception as error:
+            # report the bug
+            channel = journal.firewall("qed.ux.handler")
+            # say what went wrong
+            channel.line(f"{type(error).__name__}: {error}")
+            # while doing what
+            channel.line(f"while handling a {request.command} request for {request.url!r}")
+            # and where
+            channel.report(report="".join(traceback.format_exception(error)).splitlines())
+            # flush; this stops the server, unless the user made the firewall non-fatal
+            channel.log()
+            # in which case only this request fails, with a page that tells the client nothing
+            # about the bug
+            return server.responses.InternalServerError(server=server)
 
     # implementation detail
     def _explainMissingAssets(self, prefix, missing):
