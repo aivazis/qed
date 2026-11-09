@@ -298,10 +298,10 @@ class EarthAccess(Archive, family="qed.archives.earth"):
             rel = node.uri.relativeTo(qed.primitives.path("/"))
             # appended to my own address
             return str(self.uri.clone(address=str(self.base() / rel)))
-        # a granule is addressed by its payload; go through the direct access links
-        for link in node.info.links:
+        # a granule is addressed by its payload; go through the links that reach it on s3
+        for link in node.info.links.get("s3", []):
             # looking for the product
-            if link.startswith("s3://") and link.endswith(".h5"):
+            if link.endswith(".h5"):
                 # convert it into a uri the readers understand; the address keeps the slash
                 # that separates it from the authority
                 uri = qed.primitives.uri(
