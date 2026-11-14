@@ -61,7 +61,7 @@ class MeanPower(Channel, family="qed.channels.nisar.meanpower"):
         # all done
         return
 
-    def tile(self, source, zoom, origin, shape, datatype, members, **kwds):
+    def tile(self, source, zoom, origin, shape, members, **kwds):
         """
         Render a mean-power tile over the given {members} of a {source} stack
         """
@@ -78,7 +78,6 @@ class MeanPower(Channel, family="qed.channels.nisar.meanpower"):
         # build the visualization pipeline and return it
         return pipeline(
             sources=sources,
-            datatype=datatype,
             origin=origin,
             shape=shape,
             stride=stride,

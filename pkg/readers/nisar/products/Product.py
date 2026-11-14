@@ -55,15 +55,6 @@ class Product(
     tile.doc = "the preferred shape of dataset subsets"
 
     @property
-    def memtype(self):
-        """
-        The hdf5 type that reads my cells into memory, lined up with the way my file stores them
-        """
-        # my in-memory layout knows whether the file has a say in how it is described: the
-        # members of a radar sample are matched by position, whatever the file calls them
-        return self.datatype.aligned(dataset=self.data.dataset)
-
-    @property
     def kernels(self):
         """
         The raster kernels that read my cells the way my file stores them
@@ -164,7 +155,6 @@ class Product(
         # ask it to build a profile
         profile = factory(
             source=self.data.dataset,
-            datatype=self.memtype,
             points=points,
             closed=closed,
         )
@@ -187,7 +177,6 @@ class Product(
         # render a tile and return it
         return channel.tile(
             source=self,
-            datatype=self.memtype,
             zoom=zoom,
             origin=origin,
             shape=shape,
@@ -216,7 +205,6 @@ class Product(
         # sample the strided footprint and return the mergeable record
         return kernels.sample(
             source=data,
-            datatype=self.memtype,
             origin=origin,
             shape=shape,
             stride=stride,

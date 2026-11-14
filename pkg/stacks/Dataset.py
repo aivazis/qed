@@ -74,7 +74,6 @@ class Dataset(qed.flow.product, family="qed.datasets.stack", implements=qed.prot
         # hand the request to the channel, naming the members it should reduce over
         return channel.tile(
             source=self,
-            datatype=self.datatype.htype,
             zoom=zoom,
             origin=origin,
             shape=shape,
@@ -209,9 +208,7 @@ class Dataset(qed.flow.product, family="qed.datasets.stack", implements=qed.prot
         # centered in my shape
         center = tuple((extent - t) // 2 for extent, t in zip(self.shape, tile))
         # sample the per-pixel mean power over my members
-        return qed.libqed.nisar.stack.stats(
-            sources=sources, datatype=self.datatype.htype, origin=center, shape=tile
-        )
+        return qed.libqed.nisar.stack.stats(sources=sources, origin=center, shape=tile)
 
     def _registerChannels(self):
         """

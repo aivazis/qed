@@ -64,7 +64,6 @@ class Decimate(Chore):
                     record = dataset.kernels.decimate(
                         source=source,
                         destination=draft,
-                        datatype=dataset.datatype.htype,
                         origin=origin,
                         shape=shape,
                         stride=(2, 2),
