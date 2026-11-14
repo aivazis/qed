@@ -22,13 +22,6 @@ class Bandwidth(Discrete, qed.properties.int):
     allowed = (0, 5, 20, 40, 77)
 
     # properties
-    def doc(self):
-        """
-        Set up my docstring
-        """
-        # fold my name and return
-        return self.name
-
     @property
     def lexer(self):
         """
@@ -53,6 +46,8 @@ class Bandwidth(Discrete, qed.properties.int):
     def __init__(self, allowed=allowed, **kwds):
         # chain up
         super().__init__(default=allowed[0], allowed=allowed, **kwds)
+        # set up my docstring
+        self.__doc__ = "bandwidth"
         # {eval} fails on expressions where integers have leading zeroes, so strip them
         self.converters.append(lambda value, **kwds: int(value))
         # all done

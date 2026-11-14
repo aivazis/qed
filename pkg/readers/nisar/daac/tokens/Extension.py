@@ -20,6 +20,15 @@ class Extension(Literal):
     # i can't have a match group, so hide me from the trait searches
     internal = True
 
+    # properties
+    @property
+    def wildcard(self):
+        """
+        What i stand for in a pattern with wildcards: the dot itself, which needs no escape there
+        """
+        # easy enough
+        return "."
+
     # interface
     def gid(self, **kwds):
         """

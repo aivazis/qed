@@ -34,7 +34,7 @@ class RRST(SDS, family="qed.readers.nisar.daac.rrst"):
         """
         Return the timestamp that is used to place me in canonical archives
         """
-        # use the start time of the acquisition
+        # use the earth received time of the daphne file with the lowest rangeline index
         return self.begin
 
     # implementation details
@@ -65,7 +65,6 @@ class RRST(SDS, family="qed.readers.nisar.daac.rrst"):
             "separator",
             # the CRID
             "environment",
-            "phase",
             "major",
             "minor",
             "patch",

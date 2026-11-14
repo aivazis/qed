@@ -23,7 +23,7 @@ class GOFF(Pair, family="qed.readers.nisar.daac.goff"):
 
     # my tokens
     product = tokens.product(product="GOFF")
-    level = tokens.level(level=2)
+    level = tokens.level(default=2)
 
 
 # end of file

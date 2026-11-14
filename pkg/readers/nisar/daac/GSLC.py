@@ -23,7 +23,7 @@ class GSLC(Single, family="qed.readers.nisar.daac.gslc"):
 
     # my tokens
     product = tokens.product(product="GSLC")
-    level = tokens.level(level=2)
+    level = tokens.level(default=2)
 
 
 # end of file

@@ -30,6 +30,14 @@ class Literal(Token, qed.properties.str):
         # easy enough
         return self.lexeme
 
+    @property
+    def wildcard(self):
+        """
+        What i stand for in a pattern with wildcards: my text
+        """
+        # easy enough
+        return self.lexeme
+
     # interface
     def gid(self, **kwds):
         """

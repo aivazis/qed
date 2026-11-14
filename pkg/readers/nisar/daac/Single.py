@@ -5,6 +5,9 @@
 # (c) 1998-2026 all rights reserved
 
 
+# support
+import qed
+
 # superclass
 from .SDS import SDS
 
@@ -18,25 +21,41 @@ class Single(SDS, internal=True):
     The descriptor for products formed by processing one scene
     """
 
-    # my tokens
+    # my tokens, in the order they appear in the granule name
+    # the product level, one unless the product says otherwise
     level = tokens.level(default=1)
+    # the processing type: production, urgent response, or on demand
     processing = tokens.processing(allowed=("PR", "UR", "OD"))
+    # the cycle of the acquisition
     cycle = tokens.cycle()
+    # its track within the cycle
     track = tokens.track()
+    # the direction the spacecraft was flying
     direction = tokens.direction()
+    # the frame along the track
     frame = tokens.frame()
+    # the bandwidth of the primary band
     primaryBandwidth = tokens.bandwidth()
+    # and of the secondary one
     secondaryBandwidth = tokens.bandwidth()
+    # the polarization of the primary band, among the codes of sections 3.7 and 3.8 of the naming
+    # conventions, since the archives hold single products in the quasi polarizations of 3.8
     primaryPolarization = tokens.polarization(
-        allowed=("SH", "SV", "DH", "DV", "CL", "CR", "QP", "NA", "XX")
+        allowed=("SH", "SV", "DH", "DV", "CL", "CR", "QP", "QH", "QV", "QD", "NA", "XX")
     )
+    # and of the secondary one
     secondaryPolarization = tokens.polarization(
-        allowed=("SH", "SV", "DH", "DV", "CL", "CR", "QP", "NA", "XX")
+        allowed=("SH", "SV", "DH", "DV", "CL", "CR", "QP", "QH", "QV", "QD", "NA", "XX")
     )
+    # the acquisition mode
     acquisition = tokens.acquisition()
-    begin = tokens.ert()
-    end = tokens.ert()
+    # the radar time of the start of the data processed as zero doppler
+    begin = tokens.zeroDoppler()
+    # and of its end
+    end = tokens.zeroDoppler()
+    # the accuracy and fidelity of the product
     fidelity = tokens.fidelity(allowed=("T", "P", "M", "N", "F", "X"))
+    # and the coverage mode
     coverage = tokens.coverage()
 
     # properties
@@ -47,6 +66,22 @@ class Single(SDS, internal=True):
         """
         # use the start time of the acquisition
         return self.begin
+
+    # interface
+    def support(self):
+        """
+        My support on the timeline: the interval of the acquisition that went into me
+        """
+        # from the start of my scene to its end
+        return qed.readers.nisar.timeline.interval(begin=self.begin, end=self.end)
+
+    def lies(self, places):
+        """
+        Check whether i lie on one of the {places}, a set of (track, direction, frame) triples,
+        with the direction spelled as its initial
+        """
+        # by my track, direction and frame
+        return (self.track, self.direction, self.frame) in places
 
     # implementation details
     @classmethod
@@ -98,17 +133,16 @@ class Single(SDS, internal=True):
             "acquisition",
             # a separator
             "separator",
-            # the earth receive time of the beginning of the transmission
+            # the radar time of the start of the data, processed to zero Doppler
             "begin",
             # a separator
             "separator",
-            # the earth receive time of the end of the transmission
+            # the radar time of the end of the data, processed to zero Doppler
             "end",
             # a separator
             "separator",
             # the CRID
             "environment",
-            "phase",
             "major",
             "minor",
             "patch",
