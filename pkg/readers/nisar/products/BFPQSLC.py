@@ -28,8 +28,8 @@ class BFPQSLC(Product, family="qed.datasets.nisar.products.bfpqslc"):
     cell.doc = "the type of the dataset payload"
 
     # constants
-    # the in-memory data layout of BFPQ encoded NISAR complex data products
-    datatype = qed.h5.memtypes.complexUInt16
+    # the in-memory layout of the samples of BFPQ encoded NISAR products: pairs of codes
+    datatype = qed.h5.memtypes.iqUInt16
 
     # interface
     def peek(self, pixel):
@@ -63,7 +63,7 @@ class BFPQSLC(Product, family="qed.datasets.nisar.products.bfpqslc"):
         # build a profile
         profile = qed.libqed.nisar.profileBFPQ(
             source=self.data.dataset,
-            datatype=self.datatype.htype,
+            datatype=self.memtype,
             bfpq=self.bfpq,
             points=points,
             closed=closed,
@@ -103,7 +103,7 @@ class BFPQSLC(Product, family="qed.datasets.nisar.products.bfpqslc"):
         # sample the decoded strided footprint and return the mergeable record
         return qed.libqed.nisar.sampleBFPQ(
             source=self.data.dataset,
-            datatype=self.datatype.htype,
+            datatype=self.memtype,
             bfpq=self.bfpq,
             origin=origin,
             shape=shape,
@@ -140,7 +140,7 @@ class BFPQSLC(Product, family="qed.datasets.nisar.products.bfpqslc"):
         # compute the stats
         stats = qed.libqed.nisar.statsBFPQ(
             source=source,
-            datatype=self.datatype.htype,
+            datatype=self.memtype,
             bfpq=self.bfpq,
             origin=center,
             shape=tile,

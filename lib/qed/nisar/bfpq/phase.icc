@@ -54,11 +54,11 @@ qed::nisar::bfpq::phase(
     auto decoded = sourceT(packing, packing.cells());
     // the decoder
     auto decoder = [&](bfpq_slc_cell_t encoded) -> value_t {
-        // unpack and decode
-        auto r = bfpq.at(encoded.real());
-        auto i = bfpq.at(encoded.imag());
-        // pack and ship
-        return value_t { r, i };
+        // decode the in-phase and quadrature codes
+        auto inPhase = bfpq.at(encoded.i);
+        auto quadrature = bfpq.at(encoded.q);
+        // and assemble the complex value they describe
+        return value_t { inPhase, quadrature };
     };
     // decode the tile
     std::transform(encoded.cbegin(), encoded.cend(), decoded.begin(), decoder);

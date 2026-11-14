@@ -55,18 +55,25 @@ class Product(
     tile.doc = "the preferred shape of dataset subsets"
 
     @property
+    def memtype(self):
+        """
+        The hdf5 type that reads my cells into memory, lined up with the way my file stores them
+        """
+        # my in-memory layout knows whether the file has a say in how it is described: the
+        # members of a radar sample are matched by position, whatever the file calls them
+        return self.datatype.aligned(dataset=self.data.dataset)
+
+    @property
     def kernels(self):
         """
         The raster kernels that read my cells the way my file stores them
         """
         # my in-memory layout names the cell type, in the vocabulary the kernels are
-        # gathered under. a product whose samples are encoded rather than stored -- the
-        # quantized pairs of a BFPQ raster, which only the lookup table turns into numbers
-        # -- has no native cell, and so has no kernel that could read it as it stands
+        # gathered under
         cell = self.datatype.cell
         # if there is no name
         if cell is None:
-            # there is no kernel either; whoever needs one must decode first
+            # there is no kernel either
             return None
         # the kernels live in the extension; its absence must be named rather than tripped
         # over, since an attribute error raised here would be reported as the absence of
@@ -76,7 +83,9 @@ class Product(
             raise qed.exceptions.ExtensionError(
                 reason=f"{qed.ext.libqed_error}; the cells of '{self.pyre_name}' cannot be read"
             )
-        # otherwise, hand back the set that matches
+        # otherwise, hand back the set that matches, if there is one: a product whose samples
+        # are encoded rather than stored -- the quantized pairs of a BFPQ raster, which only
+        # the lookup table turns into numbers -- has no kernel that could read it as it stands
         return getattr(qed.libqed.nisar.cells, cell, None)
 
     @property
@@ -155,7 +164,7 @@ class Product(
         # ask it to build a profile
         profile = factory(
             source=self.data.dataset,
-            datatype=self.datatype.htype,
+            datatype=self.memtype,
             points=points,
             closed=closed,
         )
@@ -178,7 +187,7 @@ class Product(
         # render a tile and return it
         return channel.tile(
             source=self,
-            datatype=self.datatype.htype,
+            datatype=self.memtype,
             zoom=zoom,
             origin=origin,
             shape=shape,
@@ -207,7 +216,7 @@ class Product(
         # sample the strided footprint and return the mergeable record
         return kernels.sample(
             source=data,
-            datatype=self.datatype.htype,
+            datatype=self.memtype,
             origin=origin,
             shape=shape,
             stride=stride,
