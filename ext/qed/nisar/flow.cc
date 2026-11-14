@@ -125,40 +125,39 @@ qed::py::nisar::flow(py::module & m)
         // the name
         "raster",
         // the implementation
-        [](const dataset_t & source, const datatype_t & datatype, const std::string & cell,
+        [](const dataset_t & source, const std::string & cell,
            const std::string & name) -> std::shared_ptr<product_t> {
             // complex cells
             if (cell == "complex64") {
                 // make the raster and hand it off
-                return qed::nisar::flow::raster_t<dataset_t, c64_t>::create(name, source, datatype);
+                return qed::nisar::flow::raster_t<dataset_t, c64_t>::create(name, source);
             }
             // real ones
             if (cell == "float32") {
                 // make the raster and hand it off
-                return qed::nisar::flow::raster_t<dataset_t, f32_t>::create(name, source, datatype);
+                return qed::nisar::flow::raster_t<dataset_t, f32_t>::create(name, source);
             }
             // nothing else
             throw py::value_error("there are no rasters of '" + cell + "' cells");
         },
         // the signature
-        "source"_a, "datatype"_a, "cell"_a, "name"_a,
+        "source"_a, "cell"_a, "name"_a,
         // the docstring
         "make a raster over the dataset {source}, whose windows are read as {cell} cells, "
-        "converted on the way by the memory {datatype}");
+        "converted on the way by the library");
 
     // make a raster over a level of a pyramid of complex cells
     flow.def(
         // the name
         "raster",
         // the implementation
-        [](const level_t<c64_t> & source, const datatype_t & datatype, const std::string &,
+        [](const level_t<c64_t> & source, const std::string &,
            const std::string & name) -> std::shared_ptr<product_t> {
             // make the raster and hand it off
-            return qed::nisar::flow::raster_t<level_t<c64_t>, c64_t>::create(
-                name, source, datatype);
+            return qed::nisar::flow::raster_t<level_t<c64_t>, c64_t>::create(name, source);
         },
         // the signature
-        "source"_a, "datatype"_a, "cell"_a, "name"_a,
+        "source"_a, "cell"_a, "name"_a,
         // the docstring
         "make a raster over the pyramid level {source}");
 
@@ -167,14 +166,13 @@ qed::py::nisar::flow(py::module & m)
         // the name
         "raster",
         // the implementation
-        [](const level_t<f32_t> & source, const datatype_t & datatype, const std::string &,
+        [](const level_t<f32_t> & source, const std::string &,
            const std::string & name) -> std::shared_ptr<product_t> {
             // make the raster and hand it off
-            return qed::nisar::flow::raster_t<level_t<f32_t>, f32_t>::create(
-                name, source, datatype);
+            return qed::nisar::flow::raster_t<level_t<f32_t>, f32_t>::create(name, source);
         },
         // the signature
-        "source"_a, "datatype"_a, "cell"_a, "name"_a,
+        "source"_a, "cell"_a, "name"_a,
         // the docstring
         "make a raster over the pyramid level {source}");
 
@@ -185,8 +183,7 @@ qed::py::nisar::flow(py::module & m)
         // the implementation
         [](const dataset_t & source, const std::string & name) -> std::shared_ptr<product_t> {
             // make the raster, reading the codes wide, and hand it off
-            return qed::nisar::flow::raster_t<dataset_t, u32_t>::create(
-                name, source, pyre::h5::datatype<u32_t>());
+            return qed::nisar::flow::raster_t<dataset_t, u32_t>::create(name, source);
         },
         // the signature
         "source"_a, "name"_a,
@@ -200,8 +197,7 @@ qed::py::nisar::flow(py::module & m)
         // the implementation
         [](const level_t<u8_t> & source, const std::string & name) -> std::shared_ptr<product_t> {
             // make the raster and hand it off; a level has no use for the memory type
-            return qed::nisar::flow::raster_t<level_t<u8_t>, u32_t>::create(
-                name, source, pyre::h5::datatype<u32_t>());
+            return qed::nisar::flow::raster_t<level_t<u8_t>, u32_t>::create(name, source);
         },
         // the signature
         "source"_a, "name"_a,

@@ -23,96 +23,90 @@ namespace qed::py::nisar {
             // the name
             "amplitude",
             // the handler
-            [](const rasterT & source, const datatype_t & datatype, const py::iterable & origin,
-               const py::iterable & shape, const py::iterable & stride, double min,
-               double max) -> bmp_t {
+            [](const rasterT & source, const py::iterable & origin, const py::iterable & shape,
+               const py::iterable & stride, double min, double max) -> bmp_t {
                 // gather the tile and render it
                 return qed::nisar::slc::amplitude<grid_t>(
-                    source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride),
-                    min, max);
+                    source, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min, max);
             },
             // the signature
-            "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+            "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
             // the docstring
             "render the amplitude of a complex slc tile");
         slc.def(
             // the name
             "complex",
             // the handler
-            [](const rasterT & source, const datatype_t & datatype, const py::iterable & origin,
-               const py::iterable & shape, const py::iterable & stride, double min, double max,
-               double minPhase, double maxPhase, double saturation) -> bmp_t {
+            [](const rasterT & source, const py::iterable & origin, const py::iterable & shape,
+               const py::iterable & stride, double min, double max, double minPhase,
+               double maxPhase, double saturation) -> bmp_t {
                 // gather the tile and render it
                 return qed::nisar::slc::complex<grid_t>(
-                    source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride),
-                    min, max, minPhase, maxPhase, saturation);
+                    source, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min, max,
+                    minPhase, maxPhase, saturation);
             },
             // the signature
-            "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-            "minPhase"_a, "maxPhase"_a, "saturation"_a,
+            "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "minPhase"_a,
+            "maxPhase"_a, "saturation"_a,
             // the docstring
             "render the value of a complex slc tile");
         slc.def(
             // the name
             "imaginary",
             // the handler
-            [](const rasterT & source, const datatype_t & datatype, const py::iterable & origin,
-               const py::iterable & shape, const py::iterable & stride, double min,
-               double max) -> bmp_t {
+            [](const rasterT & source, const py::iterable & origin, const py::iterable & shape,
+               const py::iterable & stride, double min, double max) -> bmp_t {
                 // gather the tile and render it
                 return qed::nisar::slc::imaginary<grid_t>(
-                    source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride),
-                    min, max);
+                    source, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min, max);
             },
             // the signature
-            "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+            "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
             // the docstring
             "render the imaginary part of a complex slc tile");
         slc.def(
             // the name
             "phase",
             // the handler
-            [](const rasterT & source, const datatype_t & datatype, const py::iterable & origin,
-               const py::iterable & shape, const py::iterable & stride, double low, double high,
-               double saturation, double brightness) -> bmp_t {
+            [](const rasterT & source, const py::iterable & origin, const py::iterable & shape,
+               const py::iterable & stride, double low, double high, double saturation,
+               double brightness) -> bmp_t {
                 // gather the tile and render it
                 return qed::nisar::slc::phase<grid_t>(
-                    source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride),
-                    low, high, saturation, brightness);
+                    source, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), low, high,
+                    saturation, brightness);
             },
             // the signature
-            "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "low"_a, "high"_a,
-            "saturation"_a, "brightness"_a,
+            "source"_a, "origin"_a, "shape"_a, "stride"_a, "low"_a, "high"_a, "saturation"_a,
+            "brightness"_a,
             // the docstring
             "render the phase of a complex slc tile");
         slc.def(
             // the name
             "real",
             // the handler
-            [](const rasterT & source, const datatype_t & datatype, const py::iterable & origin,
-               const py::iterable & shape, const py::iterable & stride, double min,
-               double max) -> bmp_t {
+            [](const rasterT & source, const py::iterable & origin, const py::iterable & shape,
+               const py::iterable & stride, double min, double max) -> bmp_t {
                 // gather the tile and render it
                 return qed::nisar::slc::real<grid_t>(
-                    source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride),
-                    min, max);
+                    source, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min, max);
             },
             // the signature
-            "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+            "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
             // the docstring
             "render the real part of a complex slc tile");
         slc.def(
             // the name
             "fft",
             // the handler
-            [](const rasterT & source, const datatype_t & datatype, const py::iterable & origin,
-               const py::iterable & shape, double range, bool taper) -> bmp_t {
+            [](const rasterT & source, const py::iterable & origin, const py::iterable & shape,
+               double range, bool taper) -> bmp_t {
                 // read the region, transform it, and render its spectrum
                 return qed::nisar::slc::fft<grid_t>(
-                    source, datatype, asIndex<2>(origin), asShape<2>(shape), range, taper);
+                    source, asIndex<2>(origin), asShape<2>(shape), range, taper);
             },
             // the signature
-            "source"_a, "datatype"_a, "origin"_a, "shape"_a, "range"_a = 60.0, "taper"_a = false,
+            "source"_a, "origin"_a, "shape"_a, "range"_a = 60.0, "taper"_a = false,
             // the docstring
             "render the spectrum of the region at {origin}+{shape} of a complex slc, with the "
             "{range} decibels below its strongest frequency spanning the gray scale; {taper} "

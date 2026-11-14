@@ -22,8 +22,8 @@ qed::py::nisar::stack(py::module & m)
         // its docstring
         "support for aggregate views over stacks of nisar datasets");
 
-    // the stack kernels read a tile out of each of a pile of h5 datasets (using {datatype} for the
-    // on-disk layout) into grids of a fixed cell type, then aggregate and render them
+    // the stack kernels read a tile out of each of a pile of h5 datasets into grids of a fixed
+    // cell type, which the library converts the stored cells to, then aggregate and render them
     using grid_t = heapgrid_t<std::complex<float>>;
 
     // render the mean power of a stack tile
@@ -31,16 +31,15 @@ qed::py::nisar::stack(py::module & m)
         // the name
         "meanpower",
         // the handler
-        [](const std::vector<dataset_t> & sources, const datatype_t & datatype,
-           const py::iterable & origin, const py::iterable & shape, const py::iterable & stride,
-           double min, double max) -> bmp_t {
+        [](const std::vector<dataset_t> & sources, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double min,
+           double max) -> bmp_t {
             // read the tiles and render their mean power
             return qed::nisar::stack::meanpower<grid_t>(
-                sources, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
-                max);
+                sources, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min, max);
         },
         // the signature
-        "sources"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        "sources"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the mean power of a stack tile");
 
@@ -49,16 +48,15 @@ qed::py::nisar::stack(py::module & m)
         // the name
         "coherence",
         // the handler
-        [](const std::vector<dataset_t> & sources, const datatype_t & datatype,
-           const py::iterable & origin, const py::iterable & shape, const py::iterable & stride,
-           double min, double max) -> bmp_t {
+        [](const std::vector<dataset_t> & sources, const py::iterable & origin,
+           const py::iterable & shape, const py::iterable & stride, double min,
+           double max) -> bmp_t {
             // read the tiles and render their coherence
             return qed::nisar::stack::coherence<grid_t>(
-                sources, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
-                max);
+                sources, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min, max);
         },
         // the signature
-        "sources"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+        "sources"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
         // the docstring
         "render the coherence of a stack tile");
 
@@ -67,14 +65,13 @@ qed::py::nisar::stack(py::module & m)
         // the name
         "stats",
         // the handler
-        [](const std::vector<dataset_t> & sources, const datatype_t & datatype,
-           const py::iterable & origin, const py::iterable & shape) -> stats_t {
+        [](const std::vector<dataset_t> & sources, const py::iterable & origin,
+           const py::iterable & shape) -> stats_t {
             // read the tiles and collect their statistics
-            return qed::nisar::stack::stats<grid_t>(
-                sources, datatype, asIndex<2>(origin), asShape<2>(shape));
+            return qed::nisar::stack::stats<grid_t>(sources, asIndex<2>(origin), asShape<2>(shape));
         },
         // the signature
-        "sources"_a, "datatype"_a, "origin"_a, "shape"_a,
+        "sources"_a, "origin"_a, "shape"_a,
         // the docstring
         "compute the statistics of a stack tile");
 

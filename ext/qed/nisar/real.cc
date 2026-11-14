@@ -23,116 +23,108 @@ namespace qed::py::nisar {
             // the name
             "value",
             // the handler
-            [](const rasterT & source, const datatype_t & datatype, const py::iterable & origin,
-               const py::iterable & shape, const py::iterable & stride, double min,
-               double max) -> bmp_t {
+            [](const rasterT & source, const py::iterable & origin, const py::iterable & shape,
+               const py::iterable & stride, double min, double max) -> bmp_t {
                 // gather the tile and render it
                 return qed::nisar::real::value<grid_t>(
-                    source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride),
-                    min, max);
+                    source, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min, max);
             },
             // the signature
-            "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+            "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
             // the docstring
             "render the value of a real tile");
         real.def(
             // the name
             "abs",
             // the handler
-            [](const rasterT & source, const datatype_t & datatype, const py::iterable & origin,
-               const py::iterable & shape, const py::iterable & stride, double min,
-               double max) -> bmp_t {
+            [](const rasterT & source, const py::iterable & origin, const py::iterable & shape,
+               const py::iterable & stride, double min, double max) -> bmp_t {
                 // gather the tile and render it
                 return qed::nisar::real::abs<grid_t>(
-                    source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride),
-                    min, max);
+                    source, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min, max);
             },
             // the signature
-            "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+            "source"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
             // the docstring
             "render the absolute value of a real tile");
         real.def(
             // the name
             "coherence",
             // the handler
-            [](const rasterT & source, const maskRasterT & mask, const datatype_t & datatype,
-               const py::iterable & origin, const py::iterable & shape, const py::iterable & stride,
-               double min, double max, double fill) -> bmp_t {
+            [](const rasterT & source, const maskRasterT & mask, const py::iterable & origin,
+               const py::iterable & shape, const py::iterable & stride, double min, double max,
+               double fill) -> bmp_t {
                 // gather the tile and render it
                 return qed::nisar::real::coherence<grid_t>(
-                    source, mask, datatype, asIndex<2>(origin), asShape<2>(shape),
-                    asIndex<2>(stride), min, max, fill);
+                    source, mask, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
+                    max, fill);
             },
             // the signature
-            "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-            "fill"_a,
+            "source"_a, "mask"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "fill"_a,
             // the docstring
             "render the coherence of a real tile");
         real.def(
             // the name
             "coherenceMasked",
             // the handler
-            [](const rasterT & source, const maskRasterT & mask, const datatype_t & datatype,
-               const py::iterable & origin, const py::iterable & shape, const py::iterable & stride,
-               double min, double max, double fill) -> bmp_t {
+            [](const rasterT & source, const maskRasterT & mask, const py::iterable & origin,
+               const py::iterable & shape, const py::iterable & stride, double min, double max,
+               double fill) -> bmp_t {
                 // gather the tile and render it
                 return qed::nisar::real::coherenceMasked<grid_t>(
-                    source, mask, datatype, asIndex<2>(origin), asShape<2>(shape),
-                    asIndex<2>(stride), min, max, fill);
+                    source, mask, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
+                    max, fill);
             },
             // the signature
-            "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-            "fill"_a,
+            "source"_a, "mask"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "fill"_a,
             // the docstring
             "render the coherence of a real tile, masked");
         real.def(
             // the name
             "covariance",
             // the handler
-            [](const rasterT & source, const maskRasterT & mask, const datatype_t & datatype,
-               const py::iterable & origin, const py::iterable & shape, const py::iterable & stride,
-               double min, double max, double fill) -> bmp_t {
+            [](const rasterT & source, const maskRasterT & mask, const py::iterable & origin,
+               const py::iterable & shape, const py::iterable & stride, double min, double max,
+               double fill) -> bmp_t {
                 // gather the tile and render it
                 return qed::nisar::real::covariance<grid_t>(
-                    source, mask, datatype, asIndex<2>(origin), asShape<2>(shape),
-                    asIndex<2>(stride), min, max, fill);
+                    source, mask, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
+                    max, fill);
             },
             // the signature
-            "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-            "fill"_a,
+            "source"_a, "mask"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "fill"_a,
             // the docstring
             "render the covariance of a real tile");
         real.def(
             // the name
             "covarianceMasked",
             // the handler
-            [](const rasterT & source, const maskRasterT & mask, const datatype_t & datatype,
-               const py::iterable & origin, const py::iterable & shape, const py::iterable & stride,
-               double min, double max, double fill) -> bmp_t {
+            [](const rasterT & source, const maskRasterT & mask, const py::iterable & origin,
+               const py::iterable & shape, const py::iterable & stride, double min, double max,
+               double fill) -> bmp_t {
                 // gather the tile and render it
                 return qed::nisar::real::covarianceMasked<grid_t>(
-                    source, mask, datatype, asIndex<2>(origin), asShape<2>(shape),
-                    asIndex<2>(stride), min, max, fill);
+                    source, mask, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
+                    max, fill);
             },
             // the signature
-            "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
-            "fill"_a,
+            "source"_a, "mask"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a, "fill"_a,
             // the docstring
             "render the covariance of a real tile, masked");
         real.def(
             // the name
             "unwrapped",
             // the handler
-            [](const rasterT & source, const maskRasterT & mask, const datatype_t & datatype,
-               const py::iterable & origin, const py::iterable & shape, const py::iterable & stride,
-               double min, double max, double brightness, double fill) -> bmp_t {
+            [](const rasterT & source, const maskRasterT & mask, const py::iterable & origin,
+               const py::iterable & shape, const py::iterable & stride, double min, double max,
+               double brightness, double fill) -> bmp_t {
                 // gather the tile and render it
                 return qed::nisar::real::unwrapped<grid_t>(
-                    source, mask, datatype, asIndex<2>(origin), asShape<2>(shape),
-                    asIndex<2>(stride), min, max, brightness, fill);
+                    source, mask, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
+                    max, brightness, fill);
             },
             // the signature
-            "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+            "source"_a, "mask"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
             "brightness"_a, "fill"_a,
             // the docstring
             "render the unwrapped phase of a real tile");
@@ -140,16 +132,16 @@ namespace qed::py::nisar {
             // the name
             "unwrappedMasked",
             // the handler
-            [](const rasterT & source, const maskRasterT & mask, const datatype_t & datatype,
-               const py::iterable & origin, const py::iterable & shape, const py::iterable & stride,
-               double min, double max, double brightness, double fill) -> bmp_t {
+            [](const rasterT & source, const maskRasterT & mask, const py::iterable & origin,
+               const py::iterable & shape, const py::iterable & stride, double min, double max,
+               double brightness, double fill) -> bmp_t {
                 // gather the tile and render it
                 return qed::nisar::real::unwrappedMasked<grid_t>(
-                    source, mask, datatype, asIndex<2>(origin), asShape<2>(shape),
-                    asIndex<2>(stride), min, max, brightness, fill);
+                    source, mask, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride), min,
+                    max, brightness, fill);
             },
             // the signature
-            "source"_a, "mask"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
+            "source"_a, "mask"_a, "origin"_a, "shape"_a, "stride"_a, "min"_a, "max"_a,
             "brightness"_a, "fill"_a,
             // the docstring
             "render the unwrapped phase of a real tile, masked");
