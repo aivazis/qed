@@ -56,7 +56,6 @@ namespace qed::py {
     // aliases for hdf5 entities
     using dataset_t = pyre::h5::dataset_t;
     using dataspace_t = pyre::h5::dataspace_t;
-    using datatype_t = pyre::h5::datatype_t;
 
     // the levels of a pyramid, as a reader sees them and as a builder writes them
     template <class cellT>

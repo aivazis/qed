@@ -23,28 +23,28 @@ namespace qed::py::nisar {
             // the name
             "gcov",
             // the handler
-            [](const rasterT & source, const datatype_t & datatype, const py::iterable & origin,
-               const py::iterable & shape, const py::iterable & stride) -> bmp_t {
+            [](const rasterT & source, const py::iterable & origin, const py::iterable & shape,
+               const py::iterable & stride) -> bmp_t {
                 // gather the tile and render it
                 return qed::nisar::masks::gcov<grid_t>(
-                    source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride));
+                    source, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride));
             },
             // the signature
-            "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a,
+            "source"_a, "origin"_a, "shape"_a, "stride"_a,
             // the docstring
             "render a gcov mask tile");
         masks.def(
             // the name
             "gunw",
             // the handler
-            [](const rasterT & source, const datatype_t & datatype, const py::iterable & origin,
-               const py::iterable & shape, const py::iterable & stride) -> bmp_t {
+            [](const rasterT & source, const py::iterable & origin, const py::iterable & shape,
+               const py::iterable & stride) -> bmp_t {
                 // gather the tile and render it
                 return qed::nisar::masks::gunw<grid_t>(
-                    source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride));
+                    source, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride));
             },
             // the signature
-            "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a,
+            "source"_a, "origin"_a, "shape"_a, "stride"_a,
             // the docstring
             "render a gunw mask tile");
         // all done

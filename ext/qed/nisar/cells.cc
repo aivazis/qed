@@ -24,16 +24,14 @@ namespace qed::py::nisar {
             // the name
             "decimate",
             // the handler
-            [](const rasterT & source, draftT & destination, const datatype_t & datatype,
-               const py::iterable & origin, const py::iterable & shape,
-               const py::iterable & stride) -> sample_t {
+            [](const rasterT & source, draftT & destination, const py::iterable & origin,
+               const py::iterable & shape, const py::iterable & stride) -> sample_t {
                 // read the strided tile and deposit it in the destination
                 return qed::nisar::decimate<grid_t>(
-                    source, destination, datatype, asIndex<2>(origin), asShape<2>(shape),
-                    asIndex<2>(stride));
+                    source, destination, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride));
             },
             // the signature
-            "source"_a, "destination"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a,
+            "source"_a, "destination"_a, "origin"_a, "shape"_a, "stride"_a,
             // the docstring
             "fill the {destination} tile at {origin}+{shape} by decimating {source} by "
             "{stride}, and report a mergeable statistical record of what it held");
@@ -52,14 +50,14 @@ namespace qed::py::nisar {
             // the name
             "sample",
             // the handler
-            [](const rasterT & source, const datatype_t & datatype, const py::iterable & origin,
-               const py::iterable & shape, const py::iterable & stride) -> sample_t {
+            [](const rasterT & source, const py::iterable & origin, const py::iterable & shape,
+               const py::iterable & stride) -> sample_t {
                 // read the decimated tile and sample it
                 return qed::nisar::sample<grid_t>(
-                    source, datatype, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride));
+                    source, asIndex<2>(origin), asShape<2>(shape), asIndex<2>(stride));
             },
             // the signature
-            "source"_a, "datatype"_a, "origin"_a, "shape"_a, "stride"_a,
+            "source"_a, "origin"_a, "shape"_a, "stride"_a,
             // the docstring
             "collect a mergeable statistical sample of the strided tile at "
             "{origin}+{shape}");
@@ -95,14 +93,13 @@ namespace qed::py::nisar {
             // the name
             "stats",
             // the handler
-            [](const dataset_t & source, const datatype_t & datatype, const py::iterable & origin,
+            [](const dataset_t & source, const py::iterable & origin,
                const py::iterable & shape) -> stats_t {
                 // read the tile and collect its statistics
-                return qed::nisar::stats<grid_t>(
-                    source, datatype, asIndex<2>(origin), asShape<2>(shape));
+                return qed::nisar::stats<grid_t>(source, asIndex<2>(origin), asShape<2>(shape));
             },
             // the signature
-            "source"_a, "datatype"_a, "origin"_a, "shape"_a,
+            "source"_a, "origin"_a, "shape"_a,
             // the docstring
             "compute the statistics of the tile at {origin}+{shape}");
         // all done
