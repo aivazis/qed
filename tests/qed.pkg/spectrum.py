@@ -45,11 +45,7 @@ shape = tuple(min(extent, size) for extent, size in zip(dataset.shape, (64, 48))
 # the picture the kernel makes in place
 data, _, _ = dataset.resolve(zoom=(0, 0))
 reference = bytes(
-    memoryview(
-        qed.libqed.nisar.slc.fft(
-            source=data, datatype=dataset.datatype.htype, origin=origin, shape=shape, range=60
-        )
-    )
+    memoryview(qed.libqed.nisar.slc.fft(source=data, origin=origin, shape=shape, range=60))
 )
 
 # describe the request as a task
@@ -88,7 +84,6 @@ assert picture == bytes(
     memoryview(
         qed.libqed.nisar.slc.fft(
             source=data,
-            datatype=dataset.datatype.htype,
             origin=origin,
             shape=shape,
             range=60,

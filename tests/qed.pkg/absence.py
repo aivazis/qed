@@ -72,7 +72,6 @@ corner = {"origin": (0, 0), "shape": (64, 64)}
 assert (
     covariance.kernels.sample(
         source=covariance.data.dataset,
-        datatype=covariance.datatype.htype,
         stride=(1, 1),
         **corner,
     )[0]
@@ -95,7 +94,6 @@ for tag in ("covariance", "covarianceMasked"):
 tile = qed.libqed.nisar.real.covariance(
     source=covariance.data.dataset,
     mask=covariance.mask.data.dataset,
-    datatype=covariance.datatype.htype,
     stride=(1, 1),
     min=covariance.stats[0],
     max=covariance.stats[2],
