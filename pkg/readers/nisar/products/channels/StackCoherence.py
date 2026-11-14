@@ -64,7 +64,7 @@ class StackCoherence(Channel, family="qed.channels.nisar.stack.coherence"):
         # all done
         return
 
-    def tile(self, source, zoom, origin, shape, datatype, members, **kwds):
+    def tile(self, source, zoom, origin, shape, members, **kwds):
         """
         Render a coherence tile over the given {members} of a {source} stack
         """
@@ -77,7 +77,6 @@ class StackCoherence(Channel, family="qed.channels.nisar.stack.coherence"):
         # build the visualization pipeline and return it; the coherence range is already linear
         return pipeline(
             sources=sources,
-            datatype=datatype,
             origin=origin,
             shape=shape,
             stride=stride,

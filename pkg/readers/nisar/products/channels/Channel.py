@@ -40,7 +40,7 @@ class Channel(Base):
     screenClass = None
 
     # interface
-    def tile(self, source, zoom, origin, shape, datatype, **kwds):
+    def tile(self, source, zoom, origin, shape, **kwds):
         """
         Generate a tile of the given characteristics
         """
@@ -67,7 +67,7 @@ class Channel(Base):
                     if cell == "uint32"
                     # or the cells of a measurement
                     else qed.libqed.nisar.flow.raster(
-                        source=data, datatype=datatype, cell=cell, name=f"{self.pyre_name}.raster"
+                        source=data, cell=cell, name=f"{self.pyre_name}.raster"
                     )
                 )
             }
@@ -88,7 +88,6 @@ class Channel(Base):
             source=source,
             data=data,
             companions=companions,
-            datatype=datatype,
             origin=origin,
             shape=shape,
             stride=stride,
@@ -152,7 +151,7 @@ class Channel(Base):
         # hand off the colors to encode
         return colors
 
-    def iterators(self, source, data, companions, datatype, origin, shape, stride, **kwds):
+    def iterators(self, source, data, companions, origin, shape, stride, **kwds):
         """
         Render the tile at {origin}+{shape} of {data}, the source of {source} that serves the
         zoom, read with its {companions} at the given {stride}, with the fused kernel of my
@@ -169,7 +168,6 @@ class Channel(Base):
         # build the visualization pipeline and return it
         return pipeline(
             source=data,
-            datatype=datatype,
             origin=origin,
             shape=shape,
             stride=stride,

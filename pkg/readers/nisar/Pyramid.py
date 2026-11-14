@@ -177,7 +177,6 @@ class Pyramid:
                 record = self._kernels.decimate(
                     source=source,
                     destination=draft,
-                    datatype=self._datatype,
                     origin=origin,
                     shape=shape,
                     stride=(2, 2),
@@ -272,9 +271,6 @@ class Pyramid:
         # records
         data = dataset.data
         self._base = data.dataset if data is not None else None
-        # the hdf5 type that reads the cells of the payload, lined up with its dataset; a
-        # twin reads no cells, so it has none
-        self._datatype = dataset.memtype if data is not None else None
         # the kernels that read cells of this type. a raster whose samples are encoded
         # rather than stored has none, and it must not get levels: decimation is a read and
         # a write, and a read into a buffer laid out for the wrong cell type deposits

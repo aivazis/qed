@@ -43,7 +43,6 @@ class Spectrum(Chore):
             # read it, taper it if asked to, transform it, and render the result
             picture = qed.libqed.nisar.slc.fft(
                 source=data,
-                datatype=dataset.datatype.htype,
                 origin=self.origin,
                 shape=self.shape,
                 range=self.range,

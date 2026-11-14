@@ -63,7 +63,6 @@ class BFPQSLC(Product, family="qed.datasets.nisar.products.bfpqslc"):
         # build a profile
         profile = qed.libqed.nisar.profileBFPQ(
             source=self.data.dataset,
-            datatype=self.memtype,
             bfpq=self.bfpq,
             points=points,
             closed=closed,
@@ -103,7 +102,6 @@ class BFPQSLC(Product, family="qed.datasets.nisar.products.bfpqslc"):
         # sample the decoded strided footprint and return the mergeable record
         return qed.libqed.nisar.sampleBFPQ(
             source=self.data.dataset,
-            datatype=self.memtype,
             bfpq=self.bfpq,
             origin=origin,
             shape=shape,
@@ -140,7 +138,6 @@ class BFPQSLC(Product, family="qed.datasets.nisar.products.bfpqslc"):
         # compute the stats
         stats = qed.libqed.nisar.statsBFPQ(
             source=source,
-            datatype=self.memtype,
             bfpq=self.bfpq,
             origin=center,
             shape=tile,
