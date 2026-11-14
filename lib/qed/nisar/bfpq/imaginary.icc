@@ -62,7 +62,7 @@ qed::nisar::bfpq::imaginary(
     std::transform(source.cbegin(), source.cend(), decoded.begin(), decoder);
 
     // render and return
-    return native::channels::imaginary(source, { 0, 0 }, tile, { 1, 1 }, min, max);
+    return native::channels::imaginary(decoded, { 0, 0 }, tile, { 1, 1 }, min, max);
 }
 
 

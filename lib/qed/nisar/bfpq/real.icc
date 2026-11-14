@@ -62,7 +62,7 @@ qed::nisar::bfpq::real(
     std::transform(source.cbegin(), source.cend(), decoded.begin(), decoder);
 
     // render and return
-    return native::channels::real(source, { 0, 0 }, tile, { 1, 1 }, min, max);
+    return native::channels::real(decoded, { 0, 0 }, tile, { 1, 1 }, min, max);
 }
 
 
