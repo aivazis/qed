@@ -20,8 +20,6 @@ namespace qed::nisar {
     auto stats(
         // the source
         const dataset_t & source,
-        // the data layout
-        const datatype_t & datatype,
         // the origin of the tile
         typename sourceT::index_type origin,
         // the tile shape
@@ -32,8 +30,6 @@ namespace qed::nisar {
     auto statsBFPQ(
         // the source
         const dataset_t & source,
-        // the data layout
-        const datatype_t & datatype,
         // the BFPQ lookup table
         bfpq_lut_t bfpq,
         // the origin of the tile
@@ -49,8 +45,6 @@ namespace qed::nisar {
     auto sample(
         // the source
         const rasterT & source,
-        // the data layout
-        const datatype_t & datatype,
         // the origin of the tile
         typename sourceT::index_type origin,
         // the tile shape
@@ -63,8 +57,6 @@ namespace qed::nisar {
     auto sampleBFPQ(
         // the source
         const dataset_t & source,
-        // the data layout
-        const datatype_t & datatype,
         // the BFPQ lookup table
         bfpq_lut_t bfpq,
         // the origin of the tile

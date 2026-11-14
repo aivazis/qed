@@ -20,8 +20,6 @@ namespace qed::nisar::bfpq {
     inline auto real(
         // the source
         const dataset_t & source,
-        // the data layout
-        const datatype_t & datatype,
         // the BFPQ lookup table
         bfpq_lut_t bfpq,
         // the origin of the tile

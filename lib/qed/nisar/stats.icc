@@ -19,8 +19,6 @@ auto
 qed::nisar::stats(
     // the source
     const dataset_t & dataset,
-    // the layout
-    const datatype_t & datatype,
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
@@ -29,7 +27,7 @@ qed::nisar::stats(
     // we operate at zoom level 0
     auto strides = sourceT::index_type::one();
     // read the data
-    auto source = pyre::h5::read<sourceT>(dataset, datatype, origin, tile, strides);
+    auto source = pyre::h5::read<sourceT>(dataset, origin, tile, strides);
     // compute the statistics and pass them on
     return native::collectStatistics(source);
 }
@@ -40,8 +38,6 @@ auto
 qed::nisar::statsBFPQ(
     // the source
     const dataset_t & dataset,
-    // the layout
-    const datatype_t & datatype,
     // the BFPQ lookup table
     bfpq_lut_t bfpq,
     // the origin of the tile
@@ -58,7 +54,7 @@ qed::nisar::statsBFPQ(
     // we operate at zoom level 0
     auto strides = sourceT::index_type::one();
     // read the BFPQ encoded data into a grid
-    auto source = pyre::h5::read<bfpq_slc_t>(dataset, datatype, origin, tile, strides);
+    auto source = pyre::h5::read<bfpq_slc_t>(dataset, origin, tile, strides);
     // describe the decoded tile
     auto packing = layout_t { tile };
     // build storage for the decoded tile
@@ -85,8 +81,6 @@ auto
 qed::nisar::sample(
     // the source
     const rasterT & dataset,
-    // the layout
-    const datatype_t & datatype,
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
@@ -102,7 +96,7 @@ qed::nisar::sample(
         from[axis] *= stride[axis];
     }
     // read the decimated tile; the hyperslab machinery applies the stride
-    auto source = fetch<sourceT>(dataset, datatype, from, tile, stride);
+    auto source = fetch<sourceT>(dataset, from, tile, stride);
     // the data is now dense in memory, so sample it at unit stride
     return native::sample(source, { 0, 0 }, tile, { 1, 1 });
 }
@@ -114,8 +108,6 @@ auto
 qed::nisar::sampleBFPQ(
     // the source
     const dataset_t & dataset,
-    // the layout
-    const datatype_t & datatype,
     // the BFPQ lookup table
     bfpq_lut_t bfpq,
     // the origin of the tile
@@ -137,7 +129,7 @@ qed::nisar::sampleBFPQ(
         from[axis] *= stride[axis];
     }
     // read the decimated BFPQ encoded data into a grid
-    auto source = pyre::h5::read<bfpq_slc_t>(dataset, datatype, from, tile, stride);
+    auto source = pyre::h5::read<bfpq_slc_t>(dataset, from, tile, stride);
     // describe the decoded tile
     auto packing = layout_t { tile };
     // build storage for the decoded tile

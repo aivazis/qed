@@ -18,8 +18,6 @@ auto
 qed::nisar::stack::meanpower(
     // the member datasets, one per stack entry
     const std::vector<dataset_t> & datasets,
-    // how the cells are laid out on disk
-    const datatype_t & datatype,
     // where the tile starts
     typename sourceT::index_type origin,
     // how big the tile is
@@ -47,7 +45,7 @@ qed::nisar::stack::meanpower(
     // go through the member datasets
     for (const auto & dataset : datasets) {
         // read this member's tile and stash it alongside the others
-        sources.push_back(pyre::h5::read<sourceT>(dataset, datatype, from, tile, stride));
+        sources.push_back(pyre::h5::read<sourceT>(dataset, from, tile, stride));
     }
 
     // the tiles are already decimated, so let the native pipeline render them at unit stride

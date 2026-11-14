@@ -17,8 +17,6 @@ auto
 qed::nisar::profile(
     // the data source
     const dataset_t & dataset,
-    // the layout
-    const datatype_t & datatype,
     // the points
     const native::points_t & path,
     // the closed path indicator
@@ -89,7 +87,7 @@ qed::nisar::profile(
                 << pyre::journal::endl;
 
             // read the data
-            auto data = pyre::h5::read<sourceT>(dataset, datatype, origin, shape, strides);
+            auto data = pyre::h5::read<sourceT>(dataset, origin, shape, strides);
             // compute the pixel separation; make sure it's a floating point number so we don't do
             // integer arithmetic prematurely
             double sep = std::max(shape[0], shape[1]);
@@ -127,8 +125,8 @@ qed::nisar::profile(
     auto writeSpace = dataspace_t(count);
     // make room for the value
     value_t value;
-    // transfer
-    dataset.read(datatype.id(), &value, writeSpace.id(), readSpace.id());
+    // transfer, through the memory type the dataset lines up with the cell
+    dataset.read(dataset.memtype<value_t>().id(), &value, writeSpace.id(), readSpace.id());
     // and build the last entry
     values.emplace_back(std::get<0>(last), std::get<1>(last), value);
 
@@ -142,8 +140,6 @@ auto
 qed::nisar::profileBFPQ(
     // the data source
     const dataset_t & dataset,
-    // the layout
-    const datatype_t & datatype,
     // the BFPQ lookup table
     bfpq_lut_t bfpq,
     // the points
@@ -227,7 +223,7 @@ qed::nisar::profileBFPQ(
                 << pyre::journal::endl;
 
             // read the BFPQ encode data
-            auto encoded = pyre::h5::read<bfpq_slc_t>(dataset, datatype, origin, shape, strides);
+            auto encoded = pyre::h5::read<bfpq_slc_t>(dataset, origin, shape, strides);
             // report
             channel << "encoded tile shape: " << encoded.packing().shape() << pyre::journal::endl;
 
@@ -288,8 +284,8 @@ qed::nisar::profileBFPQ(
     auto writeSpace = dataspace_t(shape);
     // allocate room for the value
     bfpq_slc_cell_t value;
-    // transfer
-    dataset.read(datatype.id(), &value, writeSpace.id(), readSpace.id());
+    // transfer, through the memory type the dataset lines up with the sample
+    dataset.read(dataset.memtype<bfpq_slc_cell_t>().id(), &value, writeSpace.id(), readSpace.id());
     // decode
     auto decoded = decoder(value);
     // and build the last entry

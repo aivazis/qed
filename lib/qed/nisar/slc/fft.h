@@ -28,8 +28,6 @@ namespace qed::nisar::slc {
     inline auto fft(
         // the source
         const rasterT & dataset,
-        // the data layout
-        const datatype_t & datatype,
         // the origin of the region
         typename sourceT::index_type origin,
         // the shape of the region

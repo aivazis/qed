@@ -21,8 +21,6 @@ namespace qed::nisar::stack {
     auto stats(
         // the member datasets, one per stack entry
         const std::vector<dataset_t> & datasets,
-        // how the cells are laid out on disk
-        const datatype_t & datatype,
         // where the sample tile starts
         typename sourceT::index_type origin,
         // how big the sample tile is

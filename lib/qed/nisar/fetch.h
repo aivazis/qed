@@ -21,28 +21,26 @@
 // template parameter and never ask what it is
 namespace qed::nisar {
     // gather the tile at {origin}+{shape} of an hdf5 dataset, taking every {stride}-th cell
-    // along each axis, into a fresh {gridT}; the {datatype} is the memory type the library
-    // converts the cells to on the way
+    // along each axis, into a fresh {gridT}; the library converts the stored cells to the cells
+    // of {gridT}, described the way the dataset lines them up with its own
     template <class gridT>
     inline auto fetch(
-        const dataset_t & source, const datatype_t & datatype,
-        const typename gridT::index_type & origin, const typename gridT::shape_type & shape,
-        const typename gridT::index_type & stride) -> gridT;
+        const dataset_t & source, const typename gridT::index_type & origin,
+        const typename gridT::shape_type & shape, const typename gridT::index_type & stride)
+        -> gridT;
 
-    // gather the same tile from a level of a pyramid; a level holds cells of one type only,
-    // so the {datatype} an hdf5 read would convert to has no bearing on it
+    // gather the same tile from a level of a pyramid, which holds cells of one type only
     template <class gridT, class cellT>
     inline auto fetch(
-        const level_t<cellT> & source, const datatype_t &,
-        const typename gridT::index_type & origin, const typename gridT::shape_type & shape,
-        const typename gridT::index_type & stride) -> gridT;
+        const level_t<cellT> & source, const typename gridT::index_type & origin,
+        const typename gridT::shape_type & shape, const typename gridT::index_type & stride)
+        -> gridT;
 
-    // place the dense {data} in a draft of a pyramid level with its first cell at {origin}; the
-    // draft has its own idea of the cell type, so the {datatype} has no bearing on it
+    // place the dense {data} in a draft of a pyramid level with its first cell at {origin}
     template <class gridT, class cellT>
     inline auto deposit(
-        draft_t<cellT> & destination, const datatype_t &, const typename gridT::index_type & origin,
-        const gridT & data) -> void;
+        draft_t<cellT> & destination, const typename gridT::index_type & origin, const gridT & data)
+        -> void;
 } // namespace qed::nisar
 
 // the inline definitions

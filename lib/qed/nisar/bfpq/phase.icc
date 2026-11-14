@@ -17,8 +17,6 @@ auto
 qed::nisar::bfpq::phase(
     // the source
     const dataset_t & dataset,
-    // the layout
-    const datatype_t & datatype,
     // the BFPQ lookup table
     bfpq_lut_t bfpq,
     // the origin of the tile
@@ -47,7 +45,7 @@ qed::nisar::bfpq::phase(
     }
 
     // read the BFPQ encoded data into a grid
-    auto encoded = pyre::h5::read<bfpq_slc_t>(dataset, datatype, from, tile, stride);
+    auto encoded = pyre::h5::read<bfpq_slc_t>(dataset, from, tile, stride);
     // describe the decoded tile
     auto packing = layout_t { tile };
     // build storage for the decoded tile

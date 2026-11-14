@@ -34,8 +34,6 @@ public:
     using source_type = sourceT;
     // the type of the cells a window of me is read into
     using cell_type = cellT;
-    // the memory type an hdf5 read converts the cells to on the way
-    using datatype_type = datatype_t;
 
     // shared pointers to my instances
     using ref_type = std::shared_ptr<Raster>;
@@ -51,29 +49,24 @@ public:
 
     // factory
 public:
-    inline static auto create(const name_type & name, source_type source, datatype_type datatype)
-        -> ref_type;
+    inline static auto create(const name_type & name, source_type source) -> ref_type;
 
     // metamethods
 public:
     // destructor
     inline virtual ~Raster();
     // constructor; DON'T CALL
-    inline Raster(sentinel_type, const name_type &, source_type, datatype_type);
+    inline Raster(sentinel_type, const name_type &, source_type);
 
     // accessors
 public:
     // what i read
     inline auto source() const -> const source_type &;
-    // the memory type of the cells
-    inline auto datatype() const -> const datatype_type &;
 
     // implementation details - data
 private:
     // what i read
     source_type _source;
-    // the memory type of the cells
-    datatype_type _datatype;
 
     // suppressed metamethods
 private:

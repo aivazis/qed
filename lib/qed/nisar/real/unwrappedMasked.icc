@@ -23,8 +23,6 @@ qed::nisar::real::unwrappedMasked(
     const rasterT & dataset,
     // the mask
     const maskRasterT & maskDataset,
-    // the layout
-    const datatype_t & datatype,
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
@@ -57,10 +55,9 @@ qed::nisar::real::unwrappedMasked(
         zoomedOrigin[axis] *= stride[axis];
     }
     // read the data
-    auto source = fetch<source_t>(dataset, datatype, zoomedOrigin, tile, stride);
+    auto source = fetch<source_t>(dataset, zoomedOrigin, tile, stride);
     // and the mask, read into our storage width whatever the on-disk type
-    auto mask =
-        fetch<mask_t>(maskDataset, pyre::h5::datatype<std::uint32_t>(), zoomedOrigin, tile, stride);
+    auto mask = fetch<mask_t>(maskDataset, zoomedOrigin, tile, stride);
 
     // build the workflow
     auto workflow = MaskedPhase(source, mask, min, max, brightness);

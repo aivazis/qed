@@ -19,8 +19,6 @@ auto
 qed::nisar::slc::fft(
     // the source
     const rasterT & dataset,
-    // the layout
-    const datatype_t & datatype,
     // the origin of the region
     typename sourceT::index_type origin,
     // the shape of the region
@@ -50,7 +48,7 @@ qed::nisar::slc::fft(
         return bmp_t(0, 0);
     }
     // read the region at full resolution
-    auto region = fetch<sourceT>(dataset, datatype, origin, shape, { 1, 1 });
+    auto region = fetch<sourceT>(dataset, origin, shape, { 1, 1 });
     // the samples the product marks as fill contribute nothing
     native::zeroNonFinite(region);
     // if asked to
