@@ -270,7 +270,7 @@ class Pyramid:
         # the payload, when there is one: a metadata-only twin on the team side has none,
         # and never serves a zoom; it lays out levels, hands out the work, and keeps the
         # records
-        data = getattr(dataset, "data", None)
+        data = dataset.data
         self._base = data.dataset if data is not None else None
         # the hdf5 type that reads the cells of the payload, lined up with its dataset; a
         # twin reads no cells, so it has none
