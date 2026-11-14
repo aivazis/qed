@@ -18,7 +18,7 @@ class Minor(Numeric):
     # metamethods
     def __init__(self, default=0, **kwds):
         # chain up
-        super().__init__(default=default, low=0, high=10, width=1, **kwds)
+        super().__init__(default=default, low=0, high=100, width=2, **kwds)
         # set up my docstring
         self.__doc__ = "minor release"
         # all done

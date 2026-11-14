@@ -24,17 +24,21 @@ class SDS(NISAR, internal=True):
     # constants
     stage = "unknown"
 
-    # tokens
+    # tokens: the radar band
     band = tokens.band()
+    # the processing level
     level = tokens.level(default=0)
-    # CRID
+    # the composite release identifier, EMMmmp: the environment
     environment = tokens.environment()
-    phase = tokens.phase()
+    # the major release
     major = tokens.major()
+    # the minor release
     minor = tokens.minor()
+    # and the patch
     patch = tokens.patch()
-    # others
+    # the location of the science data system that made the product
     sds = tokens.sds()
+    # and the product counter
     counter = tokens.counter()
 
     # interface
@@ -47,6 +51,15 @@ class SDS(NISAR, internal=True):
         return f"{self.band}SAR"
 
     @property
+    def venue(self):
+        """
+        The meaning of my environment letter, or "user extension" for a letter the naming
+        conventions do not define
+        """
+        # my environment token knows
+        return self.pyre_trait(alias="environment").describe(self.environment)
+
+    @property
     def filename(self):
         """
         Build the canonical filename for this product
@@ -56,7 +69,7 @@ class SDS(NISAR, internal=True):
 
     # metamethods
     def __init__(self, name, granule, **kwds):
-        # the granule id is the stem; drop any extension that came along with it
+        # {qed} strips all extensions from the SDS granule ids
         granule, *_ = granule.split(".")
         # chain up
         super().__init__(name=name, granule=granule, **kwds)

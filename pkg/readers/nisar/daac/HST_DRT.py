@@ -21,15 +21,23 @@ class HST_DRT(SDS, family="qed.readers.nisar.daac.hst_drt"):
     # constants
     stage = "L0B"
 
-    # my tokens
+    # my tokens, in the order they appear in the granule name
+    # the product level, zero for these
     level = tokens.level(default=0)
+    # the product type
     product = tokens.product(product="HST_DRT")
+    # the processing type: production or urgent response
     processing = tokens.processing(allowed=("PR", "UR"))
+    # the cycle of the acquisition
     cycle = tokens.cycle()
+    # its track within the cycle
     track = tokens.track()
+    # the direction the spacecraft was flying
     direction = tokens.direction()
-    begin = tokens.ert()
-    end = tokens.ert()
+    # the radar start time of the data in the file, from the pre-take
+    begin = tokens.datatake()
+    # and its end time, from the post-take
+    end = tokens.datatake()
 
     # properties
     @property
@@ -70,17 +78,16 @@ class HST_DRT(SDS, family="qed.readers.nisar.daac.hst_drt"):
             "direction",
             # a separator
             "separator",
-            # the earth receive time of the beginning of the transmission
+            # the radar start time of the data in the file, from the pre-take
             "begin",
             # a separator
             "separator",
-            # the earth receive time of the end of the transmission
+            # the radar end time of the data in the file, from the post-take
             "end",
             # a separator
             "separator",
             # the CRID
             "environment",
-            "phase",
             "major",
             "minor",
             "patch",

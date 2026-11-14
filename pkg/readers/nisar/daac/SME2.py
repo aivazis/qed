@@ -23,7 +23,7 @@ class SME2(Single, family="qed.readers.nisar.daac.sme2"):
 
     # my tokens
     product = tokens.product(product="SME2")
-    level = tokens.level(level=3)
+    level = tokens.level(default=3)
 
 
 # end of file

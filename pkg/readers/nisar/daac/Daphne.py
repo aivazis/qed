@@ -5,6 +5,10 @@
 # (c) 1998-2026 all rights reserved
 
 
+# support
+import datetime
+import qed
+
 # superclass
 from .NISAR import NISAR
 
@@ -40,6 +44,23 @@ class Daphne(NISAR, family="qed.readers.nisar.daac.daphne"):
 
     # data
     product = "Daphne"
+
+    # properties
+    @property
+    def mark(self) -> datetime.date:
+        """
+        Return the date that is used to place me in downlink archives: the day my file was created
+        """
+        # convert my ordinal day within the year into a date
+        return datetime.date(self.year, 1, 1) + datetime.timedelta(days=self.day - 1)
+
+    @property
+    def filename(self) -> qed.primitives.path:
+        """
+        Build the canonical filename for this product, which is my granule id
+        """
+        # easy
+        return qed.primitives.path(self.gid)
 
     # implementation details
     @classmethod

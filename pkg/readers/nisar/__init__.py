@@ -44,6 +44,9 @@ from .GCOVScreen import GCOVScreen as gcovScreen
 from .GUNWPalette import GUNWPalette as gunwPalette
 from .GCOVPalette import GCOVPalette as gcovPalette
 
+# the line of time the granules live on, with its epoch at the start of 1970 in UTC
+timeline = qed.geometry.timeline()
+
 # contribute the flow nodes of products to the catalogs recipes are staged against, when the
 # extension that holds them was built
 if qed.libqed is not None:
@@ -78,8 +81,8 @@ def nickname(uri: str, **kwds) -> str:
     order = (cycle, "track", "direction", "frame", "secondaryCycle")
     # pick the ones this granule has
     acquisition = "_".join(fields[field] for field in order if field in fields)
-    # the composite release id is spelled out by five fields
-    crid = "".join(fields[field] for field in ("environment", "phase", "major", "minor", "patch"))
+    # the composite release id is spelled out by four fields
+    crid = "".join(fields[field] for field in ("environment", "major", "minor", "patch"))
     # assemble the name: the product, the acquisition, and the release
     return f"{fields['product'].lower()}-{acquisition}-{crid}"
 

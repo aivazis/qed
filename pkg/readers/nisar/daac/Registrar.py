@@ -6,23 +6,8 @@
 
 
 # support
-import journal
+import qed
 import re
-
-# product descriptors
-from .Daphne import Daphne
-from .HST_DRT import HST_DRT
-from .RRST import RRST
-from .RRSD import RRSD
-from .RSLC import RSLC
-from .GSLC import GSLC
-from .GCOV import GCOV
-from .SME2 import SME2
-from .RIFG import RIFG
-from .RUNW import RUNW
-from .ROFF import ROFF
-from .GUNW import GUNW
-from .GOFF import GOFF
 
 
 # the recognizer
@@ -34,52 +19,61 @@ class Registrar:
     # interface
     def parse(self, granule):
         """
-        Determine the product type and dispatch to more specific recognizers
+        Determine the product type and build its descriptor; return {None} if the id is not
+        recognized, and let {daac.descriptor} tell the caller
+        """
+        # find the descriptor of the product
+        factory = self.factory(granule=granule)
+        # if the id does not obey the naming conventions
+        if factory is None:
+            # there is no descriptor to build
+            return None
+        # build the descriptor and return it; it is anonymous, so the configuration store holds
+        # nothing on its behalf and it goes away when its clients let go of it
+        return factory(granule=granule)
+
+    def fields(self, granule):
+        """
+        Extract the fields of the {granule} id as strings, without building a descriptor;
+        return {None} if the id is not recognized
+
+        This is a cheap way to sift through many ids, e.g. for the ones of one cycle, before
+        building descriptors for the ones that are wanted
+        """
+        # find the descriptor of the product
+        factory = self.factory(granule=granule)
+        # if the id does not obey the naming conventions
+        if factory is None:
+            # there are no fields to extract
+            return None
+        # match the id against the naming conventions of its product
+        match = factory.regex.match(granule)
+        # and return its fields, if it matched
+        return match.groupdict() if match else None
+
+    # implementation details
+    def factory(self, granule):
+        """
+        Find the descriptor of the product named by the {granule} id in the {daac} package;
+        return {None} if the id does not obey the naming conventions
         """
         # extract enough metadata to figure out the type of product
         meta = self.grok(granule)
         # if the spacecraft id is present
         if meta["sid"] == "S198":
-            # this a Daphne product from the download link
-            handler = self.daphne
+            # this is a Daphne product from the download link
+            product = "daphne"
         # otherwise
         else:
-            # look up the product field to see what we matched
+            # the product field names it
             product = meta["product"].lower()
-            # and use it to get the correct handler
-            handler = getattr(self, product)
-        # build the descriptor and return it; it is anonymous, so the configuration store holds
-        # nothing on its behalf and it goes away when its clients let go of it
-        return handler(granule=granule)
-
-    def fields(self, granule):
-        """
-        Extract the fields of the {granule} id as the strings the naming conventions spell
-        them with, without building a descriptor, or {None} if the id is not recognizable
-
-        This is the cheap way to sift through many ids, e.g. for the ones of one cycle, before
-        building descriptors for the ones that are wanted
-        """
-        # figure out the type of product
-        meta = self.grok(granule)
-        # a precursor product, recognized by its spacecraft id
-        if meta["sid"] == "S198":
-            # has a descriptor of its own
-            descriptor = Daphne
-        # everybody else
-        else:
-            # is identified by the product field, if there was one
-            descriptor = self.descriptors.get(meta["product"])
-        # an id that is not recognizable
-        if descriptor is None:
-            # has no fields
+        # if the id does not obey the naming conventions
+        if product == "unknown":
+            # there is no descriptor
             return None
-        # match the id against the conventions of its type
-        match = descriptor.regex.match(granule)
-        # and hand off its fields, if it matched
-        return match.groupdict() if match else None
+        # otherwise, the {daac} package publishes the descriptor under the product name
+        return getattr(qed.readers.nisar.daac, product)
 
-    # implementation details
     def grok(self, granule):
         """
         Analyze the {granule} id and extract some metadata
@@ -97,134 +91,16 @@ class Registrar:
         if not match:
             # go no further
             return meta
-        # otherwise, extract some fields
+        # otherwise, extract some fields: the spacecraft id
         meta["sid"] = match.group("sid")
+        # the band
         meta["band"] = match.group("band")
+        # the product
         meta["product"] = match.group("product")
+        # and the processing level
         meta["level"] = match.group("level")
         # all done
         return meta
-
-    # the product type handlers
-    def daphne(self, **kwds):
-        """
-        Build a Daphne product descriptor
-        """
-        # dispatch
-        return Daphne(**kwds)
-
-    def hst_drt(self, **kwds):
-        """
-        Convert a filename to an HST_DRT product descriptor
-        """
-        # dispatch to the HST_DTR factory
-        return HST_DRT(**kwds)
-
-    def rrst(self, **kwds):
-        """
-        Convert a filename to an RRST product descriptor
-        """
-        # dispatch to the RRST factory
-        return RRST(**kwds)
-
-    def rrsd(self, **kwds):
-        """
-        Convert a filename to an RRSD product descriptor
-        """
-        # dispatch to the RRSD factory
-        return RRSD(**kwds)
-
-    def rslc(self, **kwds):
-        """
-        Convert a filename to an RSLC product descriptor
-        """
-        # dispatch to the RSLC factory
-        return RSLC(**kwds)
-
-    def rifg(self, **kwds):
-        """
-        Convert a filename to an RIFG product descriptor
-        """
-        # dispatch to the RIFG factory
-        return RIFG(**kwds)
-
-    def runw(self, **kwds):
-        """
-        Convert a filename to an RUNW product descriptor
-        """
-        # dispatch to the RUNW factory
-        return RUNW(**kwds)
-
-    def roff(self, **kwds):
-        """
-        Convert a filename to an ROFF product descriptor
-        """
-        # dispatch to the ROFF factory
-        return ROFF(**kwds)
-
-    def gslc(self, **kwds):
-        """
-        Convert a filename to an GSLC product descriptor
-        """
-        # dispatch to the GSLC factory
-        return GSLC(**kwds)
-
-    def gcov(self, **kwds):
-        """
-        Convert a filename to an GCOV product descriptor
-        """
-        # dispatch to the GCOV factory
-        return GCOV(**kwds)
-
-    def gunw(self, **kwds):
-        """
-        Convert a filename to an GUNW product descriptor
-        """
-        # dispatch to the GUNW factory
-        return GUNW(**kwds)
-
-    def goff(self, **kwds):
-        """
-        Convert a filename to an GOFF product descriptor
-        """
-        # dispatch to the GOFF factory
-        return GOFF(**kwds)
-
-    def sme2(self, **kwds):
-        """
-        Convert a filename to an SME2 product descriptor
-        """
-        # dispatch to the SME2 factory
-        return SME2(**kwds)
-
-    def unknown(self, granule, **kwds):
-        """
-        Handler for names that don't obey the naming conventions
-        """
-        # make a channel
-        channel = journal.warning("qed.readers.nisar.daac")
-        # complain
-        channel.line(f"unable to recognize '{granule}' as a NISAR data product ")
-        # flush
-        channel.log()
-        # and bail
-        return
-
-    # the descriptors of the standard products, by the product field of their ids
-    descriptors = {
-        "HST_DRT": HST_DRT,
-        "RRST": RRST,
-        "RRSD": RRSD,
-        "RSLC": RSLC,
-        "GSLC": GSLC,
-        "GCOV": GCOV,
-        "SME2": SME2,
-        "RIFG": RIFG,
-        "RUNW": RUNW,
-        "ROFF": ROFF,
-        "GUNW": GUNW,
-        "GOFF": GOFF,
-    }
 
     # the scanner
     scanner = (
@@ -247,7 +123,7 @@ class Registrar:
         # processing type; not present in all products
         r"((PR|UR|OD)_)?"
         # and a product specific portion
-        r"(?P<product>HST_DRT|RRST|RTLM|CRSD|RRSD|RSLC|RIFG|RUNW|ROFF|GSLC|GUNW|GOFF|GCOV|SME2)"
+        r"(?P<product>HST_DRT|RRST|RRSD|RSLC|RIFG|RUNW|ROFF|GSLC|GUNW|GOFF|GCOV|SME2)"
         # end of the canonical match
         r")"
         # done

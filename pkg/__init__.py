@@ -29,6 +29,7 @@ from pyre import (
     plexus,
     # miscellaneous
     filesystem,
+    geometry,
     patterns,
     primitives,
     tracking,

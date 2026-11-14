@@ -23,7 +23,7 @@ class GUNW(Pair, family="qed.readers.nisar.daac.gunw"):
 
     # my tokens
     product = tokens.product(product="GUNW")
-    level = tokens.level(level=2)
+    level = tokens.level(default=2)
 
 
 # end of file

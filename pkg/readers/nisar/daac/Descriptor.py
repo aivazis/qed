@@ -40,10 +40,16 @@ class Descriptor(qed.actor):
         # all done
         return
 
+    def recognizes(self, granule):
+        """
+        Check whether {granule} is the id of a granule of my kind
+        """
+        # it is when my recognizer matches all of it
+        return self.regex.fullmatch(granule) is not None
+
     def __call__(self, granule, name=None, **kwds):
         """
-        Parse the {granule} and use it to create an instance of the product descriptor, named
-        {name} if the caller wants one to configure, and anonymous otherwise
+        Parse the {granule} and use it to create an instance of the product descriptor
         """
         # if we are not supposed to touch this record
         if self.pyre_internal:
@@ -56,9 +62,11 @@ class Descriptor(qed.actor):
         if not match:
             # we have a problem
             channel = journal.warning("qed.readers.nisar.daac")
-            # complain
+            # complain: name the descriptor
             channel.line(f"{self}:")
+            # the granule
             channel.line(f"could not recognize '{granule}'")
+            # and the kind of product it was expected to be
             channel.line(f"as a product of type '{self.__name__}'")
             # flush
             channel.log()

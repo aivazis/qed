@@ -14,6 +14,16 @@ class Token:
     # by default, tokens are visible
     internal = False
 
+    # properties
+    @property
+    def wildcard(self):
+        """
+        What i stand for in a pattern with wildcards, the way catalogs of granules spell a partial
+        name: any text
+        """
+        # anything goes
+        return "*"
+
     # interface
     def gid(self, descriptor):
         """
@@ -26,8 +36,8 @@ class Token:
         """
         Build a string representation in normal form
         """
-        # by default, leave {value} alone
-        return value
+        # by default, use the string form of {value}
+        return str(value)
 
 
 # end of file
