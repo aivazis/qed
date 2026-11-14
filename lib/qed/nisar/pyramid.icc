@@ -21,8 +21,6 @@ qed::nisar::decimate(
     const rasterT & source,
     // the level being written
     draftT & destination,
-    // the data layout, shared by both
-    const datatype_t & datatype,
     // the origin of the tile, in the coordinates of the destination
     typename sourceT::index_type origin,
     // the shape of the tile, in the coordinates of the destination
@@ -41,7 +39,7 @@ qed::nisar::decimate(
 
     // gather the strided tile; whichever kind of raster the source is, what comes back is
     // dense in memory and already the shape of the destination tile
-    auto data = fetch<sourceT>(source, datatype, from, tile, stride);
+    auto data = fetch<sourceT>(source, from, tile, stride);
 
     // measure what the tile holds. every cell of it is in hand already, so the statistics
     // of the level, and through it of the whole raster, cost nothing beyond the arithmetic
@@ -59,7 +57,7 @@ qed::nisar::decimate(
     }
 
     // deposit it where the destination keeps this tile
-    deposit(destination, datatype, origin, data);
+    deposit(destination, origin, data);
     // report what the tile held
     return measured;
 }

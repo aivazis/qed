@@ -39,8 +39,6 @@ namespace qed::nisar {
         const rasterT & source,
         // the level being written
         draftT & destination,
-        // the data layout, shared by both
-        const datatype_t & datatype,
         // the origin of the tile, in the coordinates of the destination
         typename sourceT::index_type origin,
         // the shape of the tile, in the coordinates of the destination

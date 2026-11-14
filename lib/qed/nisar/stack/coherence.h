@@ -21,8 +21,6 @@ namespace qed::nisar::stack {
     inline auto coherence(
         // the member datasets, one per stack entry
         const std::vector<dataset_t> & datasets,
-        // how the cells are laid out on disk
-        const datatype_t & datatype,
         // where the tile starts
         typename sourceT::index_type origin,
         // how big the tile is

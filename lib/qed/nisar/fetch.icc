@@ -14,20 +14,19 @@
 template <class gridT>
 auto
 qed::nisar::fetch(
-    const dataset_t & source, const datatype_t & datatype,
-    const typename gridT::index_type & origin, const typename gridT::shape_type & shape,
-    const typename gridT::index_type & stride) -> gridT
+    const dataset_t & source, const typename gridT::index_type & origin,
+    const typename gridT::shape_type & shape, const typename gridT::index_type & stride) -> gridT
 {
     // the hyperslab machinery applies the decimation, so what comes back is dense in
     // memory and already the shape of the tile
-    return pyre::h5::read<gridT>(source, datatype, origin, shape, stride);
+    return pyre::h5::read<gridT>(source, origin, shape, stride);
 }
 
 // gather a strided tile of a pyramid level
 template <class gridT, class cellT>
 auto
 qed::nisar::fetch(
-    const level_t<cellT> & source, const datatype_t &, const typename gridT::index_type & origin,
+    const level_t<cellT> & source, const typename gridT::index_type & origin,
     const typename gridT::shape_type & shape, const typename gridT::index_type & stride) -> gridT
 {
     // the level walks its mapping and answers with fill wherever nothing was written
@@ -38,8 +37,8 @@ qed::nisar::fetch(
 template <class gridT, class cellT>
 auto
 qed::nisar::deposit(
-    draft_t<cellT> & destination, const datatype_t &, const typename gridT::index_type & origin,
-    const gridT & data) -> void
+    draft_t<cellT> & destination, const typename gridT::index_type & origin, const gridT & data)
+    -> void
 {
     // the draft copies the cells into its mapping and drops whatever falls past its edge
     destination.write(origin, data);

@@ -230,8 +230,7 @@ qed::nisar::flow::Fetch<rasterT, tileT>::make(
     // and the distance between them
     auto stride = typename grid_type::index_type { lineStride, sampleStride };
     // read the cells the window samples into a dense grid, the way the kernels do
-    auto cells =
-        qed::nisar::fetch<grid_type>(raster->source(), raster->datatype(), from, extent, stride);
+    auto cells = qed::nisar::fetch<grid_type>(raster->source(), from, extent, stride);
     // and copy them into the tile, converting them to its cells on the way
     std::copy(cells.begin(), cells.end(), tile.begin());
     // all done

@@ -22,8 +22,6 @@ auto
 qed::nisar::stack::stats(
     // the member datasets, one per stack entry
     const std::vector<dataset_t> & datasets,
-    // the layout
-    const datatype_t & datatype,
     // where the sample tile starts
     typename sourceT::index_type origin,
     // how big the sample tile is
@@ -39,7 +37,7 @@ qed::nisar::stack::stats(
     // go through the member datasets
     for (const auto & dataset : datasets) {
         // read this member's tile and stash it alongside the others
-        sources.push_back(pyre::h5::read<sourceT>(dataset, datatype, origin, tile, strides));
+        sources.push_back(pyre::h5::read<sourceT>(dataset, origin, tile, strides));
     }
 
     // the number of members

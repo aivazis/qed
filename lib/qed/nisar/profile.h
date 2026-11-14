@@ -20,8 +20,6 @@ namespace qed::nisar {
     auto profile(
         // the source
         const dataset_t & source,
-        // the data layout
-        const datatype_t & datatype,
         // the points
         const native::points_t &,
         // the closed path indicator
@@ -32,8 +30,6 @@ namespace qed::nisar {
     auto profileBFPQ(
         // the source
         const dataset_t & source,
-        // the data layout
-        const datatype_t & datatype,
         // the BFPQ lookup table
         bfpq_lut_t bfpq,
         // the points

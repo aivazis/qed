@@ -27,8 +27,6 @@ namespace qed::nisar::real {
         const rasterT & source,
         // the mask
         const maskRasterT & mask,
-        // the data layout
-        const datatype_t & datatype,
         // the origin of the tile
         typename sourceT::index_type origin,
         // the tile shape

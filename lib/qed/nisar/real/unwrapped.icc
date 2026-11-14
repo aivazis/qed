@@ -20,8 +20,6 @@ qed::nisar::real::unwrapped(
     const rasterT & dataset,
     // the mask (unused)
     const maskRasterT &,
-    // the layout
-    const datatype_t & datatype,
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
@@ -59,7 +57,7 @@ qed::nisar::real::unwrapped(
         zoomedOrigin[axis] *= stride[axis];
     }
     // read the data
-    auto source = fetch<sourceT>(dataset, datatype, zoomedOrigin, tile, stride);
+    auto source = fetch<sourceT>(dataset, zoomedOrigin, tile, stride);
 
     // make a bitmap
     bmp_t bmp(tile[0], tile[1]);

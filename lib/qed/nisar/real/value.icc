@@ -18,8 +18,6 @@ auto
 qed::nisar::real::value(
     // the source
     const rasterT & dataset,
-    // the layout
-    const datatype_t & datatype,
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
@@ -41,7 +39,7 @@ qed::nisar::real::value(
         zoomedOrigin[axis] *= stride[axis];
     }
     // read the data
-    auto source = fetch<sourceT>(dataset, datatype, zoomedOrigin, tile, stride);
+    auto source = fetch<sourceT>(dataset, zoomedOrigin, tile, stride);
     // render and return
     return native::channels::real(source, { 0, 0 }, tile, { 1, 1 }, min, max);
 }

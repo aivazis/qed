@@ -19,8 +19,6 @@ auto
 qed::nisar::slc::amplitude(
     // the source
     const rasterT & dataset,
-    // the layout
-    const datatype_t & datatype,
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
@@ -43,7 +41,7 @@ qed::nisar::slc::amplitude(
     }
 
     // read the data
-    auto source = fetch<sourceT>(dataset, datatype, from, tile, stride);
+    auto source = fetch<sourceT>(dataset, from, tile, stride);
     // and render
     return native::channels::amplitude(source, { 0, 0 }, tile, { 1, 1 }, min, max);
 }

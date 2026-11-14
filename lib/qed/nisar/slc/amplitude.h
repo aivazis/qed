@@ -23,8 +23,6 @@ namespace qed::nisar::slc {
     inline auto amplitude(
         // the source
         const rasterT & dataset,
-        // the data layout
-        const datatype_t & datatype,
         // the origin of the tile
         typename sourceT::index_type origin,
         // the tile shape

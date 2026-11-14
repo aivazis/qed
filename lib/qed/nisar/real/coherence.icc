@@ -20,8 +20,6 @@ qed::nisar::real::coherence(
     const rasterT & dataset,
     // the mask (unused)
     const maskRasterT &,
-    // the layout
-    const datatype_t & datatype,
     // the origin of the tile
     typename sourceT::index_type origin,
     // the tile shape
@@ -57,7 +55,7 @@ qed::nisar::real::coherence(
         zoomedOrigin[axis] *= stride[axis];
     }
     // read the data
-    auto source = fetch<source_t>(dataset, datatype, zoomedOrigin, tile, stride);
+    auto source = fetch<source_t>(dataset, zoomedOrigin, tile, stride);
     // set up the workflow
     // the normalizer
     auto normalizer = norm_t { source.cbegin(), { min, max } };
