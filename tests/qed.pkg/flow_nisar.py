@@ -35,7 +35,7 @@ scratch = pyre.primitives.path(__file__).parent / "flow_nisar.scratch"
 
 
 # compare the two engines of {channel} over {tiles} of {source}, each time after {configure}
-def compare(channel, source, datatype, tiles, configurations):
+def compare(channel, source, tiles, configurations):
     """
     Render each of the {tiles} of {source} through both engines of {channel}, under each of
     the {configurations}, and check that they agree byte for byte
@@ -49,17 +49,11 @@ def compare(channel, source, datatype, tiles, configurations):
             # render with the kernel
             channel.engine = "iterators"
             expected = bytes(
-                memoryview(
-                    channel.tile(
-                        source=source, datatype=datatype, zoom=zoom, origin=origin, shape=shape
-                    )
-                )
+                memoryview(channel.tile(source=source, zoom=zoom, origin=origin, shape=shape))
             )
             # and with the pipeline
             channel.engine = "flow"
-            rendered = channel.tile(
-                source=source, datatype=datatype, zoom=zoom, origin=origin, shape=shape
-            )
+            rendered = channel.tile(source=source, zoom=zoom, origin=origin, shape=shape)
             # they must agree
             assert rendered == expected, (channel.pyre_name, origin, shape, zoom)
     # all done
@@ -129,7 +123,6 @@ def level(dataset, origins, name="level1"):
         dataset.kernels.decimate(
             source=dataset.data.dataset,
             destination=draft,
-            datatype=dataset.datatype.htype,
             origin=origin,
             shape=tile,
             stride=(2, 2),
@@ -297,7 +290,6 @@ def test():
         compare(
             channel=channel(kind),
             source=served(source=base.data.dataset),
-            datatype=base.datatype.htype,
             tiles=tiles,
             configurations=configurations,
         )
@@ -318,7 +310,6 @@ def test():
         compare(
             channel=channel(kind),
             source=served(source=first, depth=1),
-            datatype=base.datatype.htype,
             tiles=tiles,
             configurations=configurations,
         )
@@ -338,7 +329,6 @@ def test():
     compare(
         channel=channel("value"),
         source=served(source=covariance.data.dataset),
-        datatype=covariance.datatype.htype,
         tiles=tiles,
         configurations=[ranged(0, 0.5), ranged(0.01, 0.2)],
     )
@@ -380,7 +370,6 @@ def test():
                     companions={"mask": mask.data.dataset},
                     fill=fill,
                 ),
-                datatype=covariance.datatype.htype,
                 tiles=tiles,
                 configurations=configurations,
             )
@@ -403,7 +392,6 @@ def test():
         compare(
             channel=channel(kind),
             source=served(source=data, depth=1, companions={"mask": codes}, fill=float("nan")),
-            datatype=covariance.datatype.htype,
             tiles=tiles,
             configurations=configurations,
         )
@@ -417,7 +405,6 @@ def test():
         compare(
             channel=channel(kind),
             source=served(source=mask.data.dataset),
-            datatype=mask.datatype.htype,
             tiles=[
                 ((12288, 3584), (64, 64), (0, 0)),
                 ((7168, 5632), (37, 53), (1, 1)),
@@ -430,7 +417,6 @@ def test():
         compare(
             channel=channel(kind),
             source=served(source=codes, depth=1),
-            datatype=mask.datatype.htype,
             tiles=tiles,
             configurations=asis,
         )

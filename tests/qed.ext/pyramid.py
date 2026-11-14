@@ -101,9 +101,6 @@ def window(origin, shape):
 storage = qed.libqed.pyramid.float32
 # the kernels over the same cells
 kernels = qed.libqed.nisar.cells.float32
-# the memory type the hdf5 path would convert to; a level has no use for it, but the
-# kernels ask for one either way
-datatype = qed.h5.memtypes.float32.htype
 
 # the files
 tiles = "pyramid.tiles"
@@ -217,13 +214,12 @@ reference = tile(
     cell="float32", rows=4, columns=5, values=[cell for row in decimated for cell in row]
 )
 # the sample kernel over the level must agree with the native one over the cells
-record = kernels.sample(source=level, datatype=datatype, origin=(0, 0), shape=(4, 5), stride=(2, 2))
+record = kernels.sample(source=level, origin=(0, 0), shape=(4, 5), stride=(2, 2))
 native = qed.libqed.native.sample(source=reference, origin=(0, 0), shape=(4, 5), stride=(1, 1))
 assert record == native
 # and so must a render
 bmp = qed.libqed.nisar.real.value(
     source=level,
-    datatype=datatype,
     origin=(0, 0),
     shape=(4, 5),
     stride=(2, 2),
@@ -248,7 +244,6 @@ draftAbove = storage.Draft(tiles=above, shape=aboveShape, tile=tile_)
 record = kernels.decimate(
     source=level,
     destination=draftAbove,
-    datatype=datatype,
     origin=(0, 0),
     shape=aboveShape,
     stride=(2, 2),

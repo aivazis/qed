@@ -27,8 +27,6 @@
 // the decoded tile, as the bindings instantiate the kernel
 using packing_t = pyre::grid::canonical_t<2>;
 using grid_t = pyre::grid::grid_t<packing_t, pyre::memory::heap_t<std::complex<float>>>;
-// a sample, as qed reads it
-using cell_t = qed::nisar::bfpq_slc_cell_t;
 // the layout of the stored samples, independent of the cell type
 struct stored_t {
     // the first code
@@ -103,9 +101,9 @@ main(int argc, char * argv[])
         }
     }
 
-    // render the encoded tile, read through the memory type the dataset lines up with its cells
+    // render the encoded tile; the kernel reads its samples lined up with the members of the file
     auto encoded = qed::nisar::bfpq::imaginary<grid_t>(
-        dataset, dataset.memtype<cell_t>(), lut, { 0, 0 }, { side, side }, { 1, 1 }, min, max);
+        dataset, lut, { 0, 0 }, { side, side }, { 1, 1 }, min, max);
     // render the decoded values
     auto expected =
         qed::native::channels::imaginary(decoded, { 0, 0 }, { side, side }, { 1, 1 }, min, max);

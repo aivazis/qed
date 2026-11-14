@@ -196,7 +196,6 @@ assert abs(theirs.m2 - reference.statistics.m2) < 1e-9 * abs(reference.statistic
 # a reader attaching to the crew's levels serves the same cells as one attaching to the
 # other build, over a window that holds data
 kernels = covariance.kernels
-datatype = covariance.datatype.htype
 theirs = qed.readers.nisar.pyramid(reader=gcov, dataset=covariance, workspace=workspace)
 theirs.attach()
 reference.attach()
@@ -205,11 +204,11 @@ window = {"origin": (512, 512), "shape": (64, 64), "stride": (1, 1)}
 # go through the levels
 for exponent in range(1, reference.reach() + 1):
     # the samples agree
-    assert kernels.sample(
-        source=theirs.at(exponent=exponent), datatype=datatype, **window
-    ) == kernels.sample(source=reference.at(exponent=exponent), datatype=datatype, **window)
+    assert kernels.sample(source=theirs.at(exponent=exponent), **window) == kernels.sample(
+        source=reference.at(exponent=exponent), **window
+    )
 # and the first level holds data there
-assert kernels.sample(source=theirs.at(exponent=1), datatype=datatype, **window)[0] > 0
+assert kernels.sample(source=theirs.at(exponent=1), **window)[0] > 0
 
 # let go
 theirs.close()

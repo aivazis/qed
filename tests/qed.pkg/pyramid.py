@@ -102,7 +102,6 @@ base, *_ = reader.datasets
 # its geometry
 shape = tuple(base.shape)
 tile = tuple(base.tile)
-datatype = base.datatype.htype
 # the kernels that read its cells
 kernels = base.kernels
 # a real product carries a nan for absence
@@ -127,19 +126,15 @@ for origin in origins:
     deposited = kernels.decimate(
         source=base.data.dataset,
         destination=draft,
-        datatype=datatype,
         origin=origin,
         shape=tile,
         stride=(2, 2),
     )
     # what the level holds there
-    stored = kernels.sample(
-        source=first, datatype=datatype, origin=origin, shape=tile, stride=(1, 1)
-    )
+    stored = kernels.sample(source=first, origin=origin, shape=tile, stride=(1, 1))
     # and what a strided read of the base holds
     strided = kernels.sample(
         source=base.data.dataset,
-        datatype=datatype,
         origin=origin,
         shape=tile,
         stride=(2, 2),
@@ -168,17 +163,15 @@ draft2, second = level(
 kernels.decimate(
     source=first,
     destination=draft2,
-    datatype=datatype,
     origin=origin,
     shape=tile,
     stride=(2, 2),
 )
 # what the second level holds
-stored = kernels.sample(source=second, datatype=datatype, origin=origin, shape=tile, stride=(1, 1))
+stored = kernels.sample(source=second, origin=origin, shape=tile, stride=(1, 1))
 # is what striding the base by four holds: halving composes
 strided = kernels.sample(
     source=base.data.dataset,
-    datatype=datatype,
     origin=origin,
     shape=tile,
     stride=(4, 4),
@@ -193,7 +186,6 @@ assert (
     kernels.decimate(
         source=base.data.dataset,
         destination=draft,
-        datatype=datatype,
         origin=empty,
         shape=tile,
         stride=(2, 2),
@@ -201,9 +193,7 @@ assert (
     == 0
 )
 # and the level, whose record does not name that tile, reads fill there
-assert (
-    kernels.sample(source=first, datatype=datatype, origin=empty, shape=tile, stride=(1, 1))[0] == 0
-)
+assert kernels.sample(source=first, origin=empty, shape=tile, stride=(1, 1))[0] == 0
 
 
 # a render through the level must be the render off the base
@@ -281,7 +271,6 @@ if covariances.exists():
         record = dataset.kernels.decimate(
             source=dataset.data.dataset,
             destination=draft,
-            datatype=dataset.datatype.htype,
             origin=where["origin"],
             shape=chunk,
             stride=(2, 2),
@@ -351,17 +340,9 @@ if covariances.exists():
     # the corner of the product is empty: the base says so
     corner = {"origin": (0, 0), "shape": (64, 64), "stride": (1, 1)}
     kernels = covariance.kernels
-    assert (
-        kernels.sample(
-            source=covariance.data.dataset, datatype=covariance.datatype.htype, **corner
-        )[0]
-        == 0
-    )
+    assert kernels.sample(source=covariance.data.dataset, **corner)[0] == 0
     # and so does the level, whose record does not name that tile
-    assert (
-        kernels.sample(source=levels._levels[1], datatype=covariance.datatype.htype, **corner)[0]
-        == 0
-    )
+    assert kernels.sample(source=levels._levels[1], **corner)[0] == 0
     # a second pyramid over the same dataset finds the level, and the numbers, on disk
     again = qed.readers.nisar.pyramid(reader=gcov, dataset=covariance, workspace=scratchWorkspace)
     again.attach()

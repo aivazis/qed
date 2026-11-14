@@ -87,7 +87,7 @@ def subsetRender():
     # a fake channel that records the members it is asked to reduce
     seen = {}
 
-    def tile(source, datatype, zoom, origin, shape, members, **kwds):
+    def tile(source, zoom, origin, shape, members, **kwds):
         # remember what arrived
         seen["members"] = members
         # the result is irrelevant to this check
