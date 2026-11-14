@@ -10,7 +10,7 @@ michael a.g. aïvázis <michael.aivazis@para-sim.com>
 
 > **Status, 2026-11-14.** The design questions are settled; nothing beyond the BFPQ rasters of
 > NISAR's RRSD products is implemented. The guard that keeps reads of samples honest
-> ([reading samples](#reading-samples)) is on the pyre branch `h5-compound-guard`.
+> ([reading samples](#reading-samples)) is in pyre since pyre#408.
 
 Many radar products store each sample as a pair of integers: raw echoes as the instrument
 digitized them, and single look complex images stored with integer parts. pyre has a cell for
@@ -105,13 +105,18 @@ Each checked in the code or the data on 2026-11-14.
   GeoTIFFs, and read cells their format table does not list as doubles, which keeps the real part
   only. What a CInt16 band does end to end has not been run: no such file is on disk.
 - **CEOS** refuses complex integer codes (`CI*…`), and `tests/qed.pkg/ceos.py` checks the
-  refusal. Raw products declare such a code, so they are refused rather than misread: JAXA's ALOS
-  PALSAR level 1.0 says `CI*1`, while ESA's ALOS RAW, JERS-1 level 0 and GDAL's CEOS driver say
-  `CI*2` for the same layout, a pixel of two one-byte samples (descriptor fields 32–34: 8 bits per
-  sample, 2 samples and 2 bytes per pixel), 3 or 5 of the bits significant. The number after `CI`
-  is not used consistently, so the layout has to come from fields 32–34. Sources: JAXA's PALSAR
-  level 1.0 format description, revision J; ESA's PLSR-CEOS specification, version 3.2; NASDA's
-  JERS-1 user's guide; isce3's ALOS reader.
+  refusal. Raw products declare such a code, so they are refused rather than misread. Their
+  pixels are two one-byte samples, 3 or 5 of the bits significant, but the descriptors name that
+  layout in different ways. JAXA's ALOS PALSAR level 1.0 says `CI*1`, while ESA's ALOS RAW,
+  JERS-1 level 0 and GDAL's CEOS driver say `CI*2`. These sources fill descriptor fields 32–34
+  with 8 bits per sample, 2 samples and 2 bytes per pixel. GMTSAR's ALOS level 1.0 sample agrees,
+  and gives 31 as the largest count. The ERS-2 level 0 sample says `CIS2`, "complex signed
+  integer\*2", and its fields 32–34 give 16 bits per sample, 1 sample and 2 bytes per pixel, with
+  65535 as the largest count. Its payload is nonetheless two unsigned bytes per pixel, from 4 to
+  25 and centered on 15.5. Neither the code nor fields 32–34 settle the layout, so a reader has
+  to know its mission. Sources: JAXA's PALSAR level 1.0 format description, revision J; ESA's
+  PLSR-CEOS specification, version 3.2; NASDA's JERS-1 user's guide; isce3's ALOS reader; the two
+  samples below.
 - **ENVI** headers have no data type for a pair of integers: pyre's header
   (`packages/pyre/envi/Header.py`) accepts the codes 1–6, 9 and 12–15, which name integers, reals
   and complex floats only.
@@ -120,10 +125,9 @@ Each checked in the code or the data on 2026-11-14.
 ## Open questions
 
 - What a CInt16 GDAL band does today, end to end.
-- CEOS raw products need the bias decoder and a sample file: ERS-2 raw from MathWorks
-  (`ERSData.zip`) and an ALOS level 1.0 set from GMTSAR (`ALOS_Baja_EQ.tar.gz`), both public.
-- Whether python passes hdf5 types to the NISAR kernels at all, now that every kernel is compiled
-  for one cell type and could deduce its own.
+- CEOS raw products need the bias decoder and a way to tell their layout apart from what their
+  descriptors claim. Two public samples exist: ERS-2 level 0 from MathWorks (`ERSData.zip`) and
+  an ALOS level 1.0 set from GMTSAR (`ALOS_Baja_EQ.tar.gz`).
 
 
 <!-- end of file -->
