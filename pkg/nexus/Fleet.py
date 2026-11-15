@@ -152,6 +152,8 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         team = self.builds.pop(reader, None)
         # if they are there
         if team is not None:
+            # say so
+            journal.debug("qed.nexus.fleet").log(f"retiring the builders of '{reader}'")
             # send them home; a team that stood down, unlike one that was disbanded, can be
             # formed again under its name, since pyre hands back the same instance for it
             team.standDown()
@@ -306,6 +308,11 @@ class Fleet(qed.component, family="qed.nexus.fleets.tile"):
         """
         Disband all my teams
         """
+        # say so
+        journal.debug("qed.nexus.fleet").log(
+            f"disbanding {len(self.teams)} tile teams, {len(self.builds)} builder teams, "
+            f"and {len(self.explorers)} scout teams"
+        )
         # go through my teams
         for team in self.teams.values():
             # and send each one's crews home
