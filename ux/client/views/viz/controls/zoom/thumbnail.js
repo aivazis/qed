@@ -16,8 +16,12 @@ import { tileURI } from '~/views/viz'
 
 // the dataset thumbnail: a small mosaic of heavily decimated tiles from the {data} api that
 // covers the gray placeholder once every slice has arrived; the same render pass seeds the
-// server side dataset statistics, so the reveal marks the end of the collection
-export const Thumbnail = ({ viewport, reader, dataset, channel, session, shape, scale, ils }) => {
+// server side dataset statistics, so the reveal marks the end of the collection. a dataset whose
+// levels are being built shows its thumbnail once the level it reads exists: of the {depth}
+// levels it supports, the first {reach} can be shown now
+export const Thumbnail = ({
+    viewport, reader, dataset, channel, session, shape, scale, ils, depth, reach,
+}) => {
     // the generation currently on display; starts out empty, which leaves the gray placeholder
     // visible while the first generation is being fetched
     const [current, setCurrent] = React.useState(null)
@@ -44,6 +48,14 @@ export const Thumbnail = ({ viewport, reader, dataset, channel, session, shape, 
         // nothing on screen, while the render decomposes into many standard slices that keep
         // the whole crew busy and sample the raster densely enough to seed useful statistics
         const exp = Math.max(0, Math.trunc(Math.log2(Math.max(dHeight, dWidth) / resolution)))
+        // a dataset whose levels are being built can show fewer of them than it supports; until
+        // the one at {exp} exists, its slices would be decimated off the full resolution product,
+        // slowly, while the builders read it too. a dataset that builds no levels shows every one
+        // it supports, so it never waits here
+        if (reach < Math.min(exp, depth)) {
+            // so there is nothing to fetch yet
+            return null
+        }
         // deduce the corresponding stride
         const stride = 2 ** exp
         // form the decimated raster shape; floor division, so the footprint stays within bounds
@@ -74,8 +86,9 @@ export const Thumbnail = ({ viewport, reader, dataset, channel, session, shape, 
         }
         // a generation is identified by its base uri and the session token
         return { key: `${base}?session=${session}`, stride, decimated, tiles }
-        // the {scale} is deliberately not an input: it affects placement, not identity
-    }, [live, viewport, reader, dataset, channel, session, shape])
+        // the {scale} is deliberately not an input: it affects placement, not identity; the
+        // levels are, since the generation waits on them
+    }, [live, viewport, reader, dataset, channel, session, shape, depth, reach])
 
     // when the desired generation is new, reset the ledger; this happens during render, but it
     // is idempotent because it is gated by the generation key

@@ -129,7 +129,8 @@ export const Zoom = ({ viewport, view, max = 4, ils = 200 }) => {
                 {/* the minimap */}
                 <g transform={`translate(100 0) scale(${ils})`}>
                     <Minimap viewport={viewport} ils={ils} zoom={zoom} shape={dataset.shape}
-                        reader={reader} dataset={dataset} channel={channel} session={session} />
+                        reader={reader} dataset={dataset} channel={channel} session={session}
+                        depth={depth} reach={reach} />
                 </g>
                 {/* the lock */}
                 <g transform="translate(60 240)">

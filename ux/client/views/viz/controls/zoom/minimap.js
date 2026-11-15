@@ -21,10 +21,13 @@ import { Thumbnail } from './thumbnail'
 
 
 // export the minimap
-export const Minimap = ({ viewport, ils, shape, zoom, reader, dataset, channel, session }) => {
+export const Minimap = ({
+    viewport, ils, shape, zoom, reader, dataset, channel, session, depth, reach,
+}) => {
     // we have
     // - the shape of the dataset in the active view
     // - the current zoom level
+    // - how many levels the dataset supports, and how many of them exist now
     // we need
     // - the origin + shape of the active viewport
 
@@ -291,7 +294,8 @@ export const Minimap = ({ viewport, ils, shape, zoom, reader, dataset, channel, 
             <Data ref={data} x={0} y={0} width={dWidth * scale} height={dHeight * scale} />
             {/* the dataset thumbnail covers the gray placeholder once its slices arrive */}
             <Thumbnail viewport={viewport} reader={reader} dataset={dataset} channel={channel}
-                session={session} shape={shape} scale={scale} ils={ils} />
+                session={session} shape={shape} scale={scale} ils={ils}
+                depth={depth} reach={reach} />
             <Viewport ref={rep} x={zoomX * x * scale} y={zoomY * y * scale}
                 width={zoomX * width * scale} height={zoomY * height * scale}
                 data-qed-view-origin={viewOrigin} data-qed-view-shape={viewShape} />
