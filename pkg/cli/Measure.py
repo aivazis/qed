@@ -4145,8 +4145,8 @@ class Measure(qed.shells.command, family="qed.cli.measure"):
                 )
                 # it is under way
                 running.add(process)
-                # wrap its output, so the event loop can watch it
-                output = Pipe(infd=process.stdout.fileno(), outfd=process.stdout.fileno())
+                # wrap its output in a channel that only reads, so the event loop can watch it
+                output = Pipe(infd=process.stdout.fileno())
                 # collect what it says, and learn from the end of it that it is done
                 selector.whenReadReady(
                     channel=output,
