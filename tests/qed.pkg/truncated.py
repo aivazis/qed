@@ -10,8 +10,8 @@
 Check that messages cut short mid-body are treated as a death, on both sides of the channel
 
 A peer that dies mid-write leaves a header that promises more than the channel delivers; the
-pickler trips over the stub with an unpickling error rather than the header unpacking error,
-so this path is distinct from a channel that closed cleanly
+marshaler finds the channel closed before the body is complete and raises {EndOfStream}, which
+each side treats as the end of its peer
 """
 
 # externals
@@ -27,8 +27,9 @@ import qed
 parent, child = pyre.ipc.newSocket().open()
 # build a worker side member; nothing gets reaped here, so my own pid will do
 worker = qed.nexus.crew(pid=os.getpid(), channel=child)
-# hand-craft a message whose header promises far more than what follows
-parent.write(bytes=struct.pack("<L", 100) + b"stub")
+# hand-craft a message whose header, framed the way the member reads it, promises far more than
+# what follows, and no descriptors
+parent.write(bytes=struct.pack(worker.marshaler.packing, 100, 0) + b"stub")
 # and hang up
 parent.close()
 # fire the task handler; it finds the stub
@@ -76,8 +77,9 @@ def deliver(result, error):
 
 # register the callback
 team.pending[task] = [deliver]
-# the worker dies mid-report: a header, a fragment of the body, then nothing
-child.write(bytes=struct.pack("<L", 64) + b"partial")
+# the worker dies mid-report: a header, framed the way the team reads it, a fragment of the
+# body, then nothing
+child.write(bytes=struct.pack(team.marshaler.packing, 64, 0) + b"partial")
 # and the channel closes
 child.close()
 # fire the harvesting handler; it finds the fragment
