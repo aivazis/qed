@@ -42,15 +42,18 @@ class Team(Staff, family="qed.nexus.teams.tile"):
     size = pyre.properties.int(default=4)
     size.doc = "the number of crew members to recruit"
 
+    # how my members come to be
     recruiter = pyre.nexus.recruiter(default=Fork)
     recruiter.doc = "the strategy for recruiting crew members"
 
+    # the page buffer of the products my members open
     pages = pyre.properties.int(default=None)
     pages.doc = (
         "the page buffer my members open a product with, in pages of 4 KiB; unset keeps the "
         "setting of the reader"
     )
 
+    # the chunk cache of the datasets my members open
     chunks = pyre.properties.int(default=256)
     chunks.doc = (
         "the chunk cache of each dataset my members open, in MiB; unset keeps the setting of "
@@ -106,10 +109,12 @@ class Team(Staff, family="qed.nexus.teams.tile"):
         except OSError as error:
             # make a channel
             channel = journal.warning("qed.nexus.crew")
-            # complain
+            # say what failed
             channel.line(f"a subscriber to {task} failed while taking delivery")
+            # why
             channel.line(f"got: {error}")
-            channel.line(f"the member is fine; the remaining subscribers were not served")
+            # and what it cost
+            channel.line("the member is fine; the remaining subscribers were not served")
             # flush
             channel.log()
         # if the result is spooled

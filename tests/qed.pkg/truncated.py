@@ -88,11 +88,15 @@ keep = crew.assess(channel=parent, team=team, task=task)
 assert keep is False
 # the bad news was delivered
 result, error = outcomes[0]
+# with no result
 assert result is None
+# and an error
 assert error is not None
-# and the member was buried, with a replacement recruited on the spot
+# the member was buried
 survivors = list(team.crews())
+# and is gone from the roster
 assert crew not in survivors
+# with a replacement recruited on the spot
 assert len(survivors) == 1
 
 # send everybody home
