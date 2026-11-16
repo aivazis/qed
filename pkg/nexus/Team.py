@@ -166,7 +166,6 @@ class Team(Staff, family="qed.nexus.teams.tile"):
             f"deaf={self._deaf()} waking={self._waking()}"
         )
 
-    # private data
     # implementation details
     def _deaf(self) -> int:
         """
@@ -175,8 +174,7 @@ class Team(Staff, family="qed.nexus.teams.tile"):
         A member reports on its channel, and the report is read only if the event loop
         holds a read handler for that channel: the harvester while the member is on a task,
         the death watch while it is parked. A member with neither is deaf: whatever it says
-        next is never heard, and if it is counted as busy the work behind it never moves.
-        This reaches into the loop's registry, which is the only place the fact exists
+        next is never heard, and if it is counted as busy the work behind it never moves
         """
         # the loop
         dispatcher = self.dispatcher
@@ -184,18 +182,12 @@ class Team(Staff, family="qed.nexus.teams.tile"):
         if dispatcher is None:
             # so say so
             return 0
-        # the read registrations, by channel
-        listening = getattr(dispatcher, "_read", None)
-        # a loop that keeps them some other way cannot be asked
-        if listening is None:
-            # so report nothing
-            return 0
-        # count the members nobody listens to; a member without a channel is not a member
-        # anybody could listen to, and does not count
+        # count the members whose channel the loop does not read; a member without a channel is
+        # not a member anybody could listen to, and does not count
         return sum(
             1
             for crew in set(self.active) | set(self.idle)
-            if crew.channel is not None and not listening.get(crew.channel.inbound)
+            if crew.channel is not None and not dispatcher.reading(channel=crew.channel)
         )
 
     def _waking(self) -> int:
@@ -205,17 +197,15 @@ class Team(Staff, family="qed.nexus.teams.tile"):
         """
         # the loop
         dispatcher = self.dispatcher
-        # the write registrations, by channel
-        pending = getattr(dispatcher, "_write", None) if dispatcher is not None else None
-        # a loop that cannot be asked reports nothing
-        if pending is None:
+        # a team without one wakes nobody
+        if dispatcher is None:
             # so say so
             return 0
-        # count the members with a wake-up pending
+        # count the members whose channel the loop is waiting to write to
         return sum(
             1
             for crew in set(self.active) | set(self.idle)
-            if crew.channel is not None and pending.get(crew.channel.outbound)
+            if crew.channel is not None and dispatcher.writing(channel=crew.channel)
         )
 
     # constants
