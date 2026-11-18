@@ -13,6 +13,8 @@ qed.libraries := qed.lib
 qed.extensions := qed.ext
 # a ux bundle
 qed.webpack := qed.ux
+# an iPad client, which only apple's developer tools can build
+qed.ios := ${if $(toolchain.xcode.supported),qed.ios,}
 # tests
 qed.tests := qed.data qed.pkg.tests qed.lib.tests qed.ext.tests \
     qed.ux.playwright.chromium qed.ux.playwright.webkit qed.ux.playwright.firefox \
@@ -33,6 +35,8 @@ include $(qed.libraries)
 include $(qed.extensions)
 # the ux
 include $(qed.webpack)
+# the iPad client, where it can be built
+include $(qed.ios)
 # the test suites
 include $(qed.tests)
 # and the docker images
