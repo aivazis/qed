@@ -13,10 +13,11 @@ qed.ios.testing.stem := qed.ios.testing
 qed.ios.testing.runner := swift-testing
 # the compiler comes from apple's developer tools
 qed.ios.testing.toolchain := xcode
-# the sources under test: the reader that cuts the event stream into frames, and the server that
-# makes the requests
+# the sources under test: the reader that cuts the event stream into frames, the server that
+# makes the requests, and the client that runs operations and reads their answers
 qed.ios.testing.sources = \
-    ${addprefix $(project.home)/ux/swift/,Frame.swift FrameReader.swift Server.swift}
+    ${addprefix $(project.home)/ux/swift/, \
+        Frame.swift FrameReader.swift Server.swift Operation.swift Client.swift StateQuery.swift}
 
 
 # end of file
