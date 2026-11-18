@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+-*- xml -*-
+-*- coding: utf-8 -*-
+
+michael a.g. aïvázis <michael.aivazis@para-sim.com>
+(c) 1998-2026 all rights reserved
+-->
+
+
+<!-- what iOS needs to know about the app; the build fills in the words in at-signs -->
+<plist version="1.0">
+<dict>
+    <!-- who the app is -->
+    <key>CFBundleIdentifier</key>
+    <string>@IDENTIFIER@</string>
+    <key>CFBundleName</key>
+    <string>@NAME@</string>
+    <key>CFBundleDisplayName</key>
+    <string>@NAME@</string>
+    <key>CFBundleShortVersionString</key>
+    <string>@VERSION@</string>
+    <key>CFBundleVersion</key>
+    <string>@VERSION@</string>
+    <!-- what it is: an application, with this executable -->
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleExecutable</key>
+    <string>@EXECUTABLE@</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <!-- where it runs: an ipad, of this release or later, on this platform -->
+    <key>UIDeviceFamily</key>
+    <array>
+        <integer>2</integer>
+    </array>
+    <key>MinimumOSVersion</key>
+    <string>@MINOS@</string>
+    <key>CFBundleSupportedPlatforms</key>
+    <array>
+        <string>@PLATFORM@</string>
+    </array>
+    <!-- it fills the screen in every orientation; the empty launch screen asks for that -->
+    <key>UILaunchScreen</key>
+    <dict/>
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <!-- it may talk plain http to servers on the local network, where qed runs during development -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsLocalNetworking</key>
+        <true/>
+    </dict>
+</dict>
+</plist>
+
+
+<!-- end of file -->
