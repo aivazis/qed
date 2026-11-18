@@ -1,0 +1,116 @@
+# -*- makefile -*-
+# -*- coding: utf-8 -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2026 all rights reserved
+
+
+# the iPad client, written in swift with SwiftUI and built for the simulator. mm does not build
+# apps by itself yet, so this fragment carries the rules: compile the sources, lay out the bundle,
+# describe it to iOS, and sign it. every apple tool is reached through the {xcode} toolchain, and
+# {.mm/qed.mm} reads this file only where that toolchain can exist
+
+# the sources
+qed.ios.root := ux/swift/
+qed.ios.sources = ${wildcard $(project.home)/$(qed.ios.root)*.swift}
+# the platform whose sdk the compiler uses, the oldest release the app runs on, and the target
+# built for; the simulator is a platform of its own, with its own sdk and target
+qed.ios.sdk := iphonesimulator
+qed.ios.minos := 26.0
+qed.ios.target := arm64-apple-ios$(qed.ios.minos)-simulator
+# the swift 6 language, with an entry point marked by {@main}; optimize unless this is a debug
+# build, which gets symbols instead
+qed.ios.flags := \
+    -swift-version 6 -parse-as-library \
+    ${if ${filter debug,$(target.variants)},-Onone -g,-O}
+
+# the app: its name, its identity, its version, and the platform recorded in its description
+qed.ios.name := qed
+qed.ios.identifier := com.para-sim.qed
+qed.ios.version := 0.1
+qed.ios.platform := iPhoneSimulator
+# the template of its description
+qed.ios.plist := $(project.home)/$(qed.ios.root)Info.plist.in
+# the simulator accepts the ad hoc signature, which needs no identity
+qed.ios.identity := -
+
+# the bundle is made in the staging area of the build, in a directory of its own
+qed.ios.staging := $(builder.staging)qed.ios/
+qed.ios.bundle := $(qed.ios.staging)$(qed.ios.name).app/
+# its parts: the executable and the description
+qed.ios.executable := $(qed.ios.bundle)$(qed.ios.name)
+qed.ios.info := $(qed.ios.bundle)Info.plist
+# signing rewrites the executable, so the time of the signature is kept by a stamp outside the
+# bundle instead
+qed.ios.signed := $(qed.ios.staging)$(qed.ios.name).signed
+
+# the simulated device the app runs on, picked by its name among the devices of a runtime, since
+# every runtime has its own devices and they share their names
+qed.ios.simulator.runtime := iOS 27.2
+qed.ios.simulator.device := iPad Pro 13-inch (M5)
+
+
+# the app is the signed bundle. it is built only when asked for, since a build of qed on a mac
+# that has the command line tools but not xcode cannot make it; cleaning qed removes it, though
+qed.ios: $(qed.ios.signed)
+qed.clean: qed.ios.clean
+
+# remove the bundle and its stamp
+qed.ios.clean:
+	@${call log.action,"rm",$(qed.ios.staging)}
+	$(rm.force-recurse) $(qed.ios.staging)
+
+# run the app in the simulator: find the device, boot it unless it is running, install the app,
+# launch it, and bring up the window that shows it. this changes the state of the simulator, so it
+# is never part of a build, and only runs when asked for
+qed.ios.simulator: $(qed.ios.signed) | xcode.verify
+	@${call log.action,"simulator","$(qed.ios.simulator.device) on $(qed.ios.simulator.runtime)"}
+	@udid=$$($(toolchain.xcode.env) $(toolchain.xcode.cli) simctl list devices available | \
+	    awk -v runtime="$(qed.ios.simulator.runtime)" -v name="$(qed.ios.simulator.device)" ' \
+	        /^-- / { current = $$0; next } \
+	        current == "-- " runtime " --" { \
+	            line = $$0; sub(/^ +/, "", line); \
+	            if (index(line, name " (") == 1) { print substr(line, length(name) + 3, 36); exit } \
+	        }') ; \
+	test -n "$$udid" || { \
+	    ${call log.error,"there is no '$(qed.ios.simulator.device)' on '$(qed.ios.simulator.runtime)'"} ; \
+	    exit 1 ; \
+	} ; \
+	$(toolchain.xcode.env) $(toolchain.xcode.cli) simctl bootstatus $$udid -b > /dev/null && \
+	$(toolchain.xcode.env) $(toolchain.xcode.cli) simctl install $$udid $(qed.ios.bundle) && \
+	$(toolchain.xcode.env) $(toolchain.xcode.cli) simctl launch $$udid $(qed.ios.identifier) && \
+	open "$(toolchain.xcode.devicehub)"
+
+# sign the bundle once its parts are in place; the signature covers all of them, so it is redone
+# whenever any of them changes
+$(qed.ios.signed): $(qed.ios.executable) $(qed.ios.info)
+	@${call log.action,"codesign",$(qed.ios.bundle)}
+	$(toolchain.xcode.env) $(toolchain.xcode.cli) codesign \
+	    --force --sign $(qed.ios.identity) --timestamp=none $(qed.ios.bundle)
+	touch $@
+
+# compile all the sources into one module and link them into the bundle, once the toolchain is
+# known to be present
+$(qed.ios.executable): $(qed.ios.sources) | xcode.verify
+	@${call log.action,"swiftc",$(qed.ios.root)}
+	$(mkdirp) $(@D)
+	$(toolchain.xcode.env) $(toolchain.xcode.cli) --sdk $(qed.ios.sdk) swiftc \
+	    -target $(qed.ios.target) $(qed.ios.flags) \
+	    -module-name $(qed.ios.name) -o $@ $(qed.ios.sources)
+
+# describe the app by filling in its template, and make sure the result is a valid property list
+$(qed.ios.info): $(qed.ios.plist) $(project.home)/.mm/qed.ios
+	@${call log.action,"plist",$@}
+	$(mkdirp) $(@D)
+	sed \
+	    -e 's|@IDENTIFIER@|$(qed.ios.identifier)|g' \
+	    -e 's|@NAME@|$(qed.ios.name)|g' \
+	    -e 's|@VERSION@|$(qed.ios.version)|g' \
+	    -e 's|@EXECUTABLE@|$(qed.ios.name)|g' \
+	    -e 's|@MINOS@|$(qed.ios.minos)|g' \
+	    -e 's|@PLATFORM@|$(qed.ios.platform)|g' \
+	    $< > $@
+	plutil -lint -s $@
+
+
+# end of file
