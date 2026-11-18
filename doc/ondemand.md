@@ -175,7 +175,12 @@ Should live sync stop working there, any one of them can be the cause. Most like
    keepalive comments* until its buffer fills or the connection closes; an SSE connection never
    closes, so nothing is ever delivered. `X-Accel-Buffering: no` is honored by **nginx** but ignored
    by CHP, jupyter-server-proxy (tornado), and Apache `mod_proxy`, which have their own buffering
-   knobs. gzip / `mod_deflate` on the stream does the same.
+   knobs. gzip / `mod_deflate` on the stream does the same. **jupyter-server-proxy streams a
+   response only when the request asks for one**: its `Accept` header must be exactly
+   `text/event-stream`, as a browser's `EventSource` sends it. Any other request, including one
+   with curl's default `Accept: */*`, is buffered until the response ends, so a stream request
+   without the header hangs until the outer proxy gives up (Apache answers `502 Proxy Error` after
+   its 60 s timeout).
 2. **Idle read timeouts** — `proxy_read_timeout` (nginx), `ProxyTimeout` (Apache), CHP
    `--proxy-timeout`. If a hop also buffers the keepalives, the upstream looks idle and gets killed,
    giving reconnect loops or silence instead of sync.
@@ -186,16 +191,19 @@ Should live sync stop working there, any one of them can be the cause. Most like
   with frames accumulating. Completed / 0-byte / hung-with-no-frames → buffering downstream.
 - **Inspect the headers that reach the browser** on that response: is `X-Accel-Buffering: no` still
   present? Is `Content-Type` still `text/event-stream`? Did something add `Content-Encoding: gzip`?
-- **`curl -N` at increasing depth** (`-N`/`--no-buffer` is essential):
+- **`curl -N` at increasing depth** (`-N`/`--no-buffer` is essential, and so is
+  `-H "Accept: text/event-stream"` on every request that crosses jupyter-server-proxy):
   - Inside the Jupyter session, against the local qed port: `curl -N http://localhost:<port>/events`
     — proves qed streams.
   - Inside the Jupyter session, through the single-user server and jupyter-server-proxy:
-    `curl -N -H "Authorization: token $JUPYTERHUB_API_TOKEN"
+    `curl -N -H "Accept: text/event-stream" -H "Authorization: token $JUPYTERHUB_API_TOKEN"
     http://127.0.0.1:<port>/ondemand/user/<user>/qed/events`, with the port taken from
     `$JUPYTERHUB_SERVICE_URL` — isolates the proxy hop.
-  - Public URL with the auth cookie:
-    `curl -N -H 'Cookie: …' https://nisar.jpl.nasa.gov/ondemand/user/<user>/qed/events` — if frames
-    stop appearing here, a public-facing hop is buffering.
+  - Public URL, with the auth cookie (`-H 'Cookie: …'`) or with an API token the user minted on
+    the hub's token page (`-H "Authorization: token …"`):
+    `curl -N -H "Accept: text/event-stream" -H "Authorization: token …"
+    https://nisar.jpl.nasa.gov/ondemand/user/<user>/qed/events` — if frames stop appearing here, a
+    public-facing hop is buffering.
 - **Timing tell**: events arriving only in a burst on reload/close is textbook buffering.
 
 ### Levers
