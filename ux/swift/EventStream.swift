@@ -10,8 +10,9 @@ import Foundation
 import Observation
 
 
-/// The event stream of a qed server: follow it for as long as the app runs, and keep track of
-/// the state of the link, the run of the server on the other end, and the changes it announces
+/// The event stream of a qed server: follow it for as long as the app runs, keep track of the
+/// state of the link, the run of the server on the other end, and the changes it announces, and
+/// tell a listener about each of them
 @MainActor
 @Observable
 final class EventStream {
@@ -25,6 +26,16 @@ final class EventStream {
         case lost
     }
 
+    /// What the stream tells its listener
+    enum Notice: Sendable, Equatable {
+        // the stream is flowing again; whatever happened while it was not went unannounced
+        case opened
+        // the server named the run on the other end, if its greeting could be read
+        case greeted(String?)
+        // the server announced a change of its state
+        case changed
+    }
+
     // the server whose stream this is
     let server: Server
     // the state of the link
@@ -34,14 +45,18 @@ final class EventStream {
     // how many changes the server announced since the app started
     private(set) var changes = 0
 
+    // who hears about what the stream says
+    private let listener: @MainActor (Notice) -> Void
     // the shortest and longest waits between attempts to reconnect
     private let shortest = 1.0
     private let longest = 30.0
 
-    /// Follow the stream of {server}
-    init(server: Server) {
+    /// Follow the stream of {server}, and tell {listener} what it says
+    init(server: Server, listener: @escaping @MainActor (Notice) -> Void = { _ in }) {
         // record the server
         self.server = server
+        // and the listener
+        self.listener = listener
     }
 
     /// Follow the stream until the task that runs this is cancelled, reconnecting whenever the
@@ -104,6 +119,8 @@ final class EventStream {
     private func opened() {
         // the link is up
         link = .open
+        // say so
+        listener(.opened)
     }
 
     /// Take in a {frame} from the server
@@ -112,8 +129,10 @@ final class EventStream {
         switch frame.event {
         case "hello":
             instance = EventStream.instance(in: frame.data)
+            listener(.greeted(instance))
         default:
             changes += 1
+            listener(.changed)
         }
     }
 
