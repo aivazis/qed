@@ -142,24 +142,20 @@ pending.
 
 ## Live sync (SSE) behind the proxy
 
-A separate symptom on On-Demand: two browsers connected to the *same* hosted qed server **do not
-live-sync** (a recenter in one does not move the other). Locally, multi-client sync works — three
-clients followed each other on the local server — so the regression is the proxy chain, not qed.
-
-### Why it's the proxy, not qed
-
 qed pushes state changes over **Server-Sent Events (SSE)**: the client opens an `EventSource` and the
 server holds the connection open, pushing a frame whenever state changes
 ([automation-surface.md](./automation-surface.md) live-sync; the transport is pyre's `EventStream` /
-`Hub`). The server already does everything SSE-correctly:
+`Hub`). Every client connected to the same hosted server follows the others through these streams,
+and the server sends them in a form each hop of the proxy chain forwards as it arrives:
 
 - **Headers**: `Content-Type: text/event-stream`, `Cache-Control: no-cache`, `Connection: keep-alive`,
   and `X-Accel-Buffering: no` (the hint that tells nginx not to buffer the stream).
+- **Framing**: the stream has no end, hence no length, so each frame travels as one chunk of the
+  chunked transfer coding. A hop that sees neither a length nor chunks holds the whole body until the
+  connection closes; jupyter-server-proxy's tornado client is one such hop.
 - **Keepalive**: periodic `: keepalive` comment frames on a timer hold idle connections open.
-- **Concurrency**: each held connection is driven non-blocking through a `Hub`, so many browsers can
-  each hold a stream at once — which is exactly why local multi-client sync works.
-
-So the variable that changed is the proxy in front of it.
+- **Concurrency**: each held connection is driven non-blocking through a `Hub`, so many clients can
+  each hold a stream at once.
 
 ### The chain SSE must survive
 
@@ -173,16 +169,14 @@ browser → outer TLS proxy (nginx/Apache at nisar.jpl.nasa.gov)
         → qed
 ```
 
-Any one can break SSE. Most likely, in order:
+Should live sync stop working there, any one of them can be the cause. Most likely, in order:
 
 1. **Response buffering** — the usual cause. A buffering hop holds the `data:` frames *and the
    keepalive comments* until its buffer fills or the connection closes; an SSE connection never
    closes, so nothing is ever delivered. `X-Accel-Buffering: no` is honored by **nginx** but ignored
    by CHP, jupyter-server-proxy (tornado), and Apache `mod_proxy`, which have their own buffering
    knobs. gzip / `mod_deflate` on the stream does the same.
-2. **No `Content-Length` / no chunked framing** — the stream carries neither delimiter (legal for
-   SSE), but a stricter intermediary may buffer the whole body until EOF when it sees neither.
-3. **Idle read timeouts** — `proxy_read_timeout` (nginx), `ProxyTimeout` (Apache), CHP
+2. **Idle read timeouts** — `proxy_read_timeout` (nginx), `ProxyTimeout` (Apache), CHP
    `--proxy-timeout`. If a hop also buffers the keepalives, the upstream looks idle and gets killed,
    giving reconnect loops or silence instead of sync.
 
@@ -195,6 +189,10 @@ Any one can break SSE. Most likely, in order:
 - **`curl -N` at increasing depth** (`-N`/`--no-buffer` is essential):
   - Inside the Jupyter session, against the local qed port: `curl -N http://localhost:<port>/events`
     — proves qed streams.
+  - Inside the Jupyter session, through the single-user server and jupyter-server-proxy:
+    `curl -N -H "Authorization: token $JUPYTERHUB_API_TOKEN"
+    http://127.0.0.1:<port>/ondemand/user/<user>/qed/events`, with the port taken from
+    `$JUPYTERHUB_SERVICE_URL` — isolates the proxy hop.
   - Public URL with the auth cookie:
     `curl -N -H 'Cookie: …' https://nisar.jpl.nasa.gov/ondemand/user/<user>/qed/events` — if frames
     stop appearing here, a public-facing hop is buffering.
@@ -202,10 +200,8 @@ Any one can break SSE. Most likely, in order:
 
 ### Levers
 
-- **qed side** — headers are already right; little to do. Safe hardening: emit
-  `Transfer-Encoding: chunked` explicitly (removes the #2 ambiguity) and lower the `heartbeat`
-  interval so keepalives outrun idle timeouts. Neither helps if a hop buffers, since buffering
-  swallows keepalives too.
+- **qed side** — lower the `heartbeat` interval so keepalives outrun idle timeouts. This does not
+  help if a hop buffers, since buffering swallows keepalives too.
 - **Proxy side** (for ops/security to apply) — disable buffering and compression for the qed
   location: nginx `proxy_buffering off`; Apache `SetEnv proxy-sendchunked` and no `mod_deflate` on
   `text/event-stream`; verify the jupyter-server-proxy version streams non-websocket responses; raise
@@ -223,9 +219,6 @@ Any one can break SSE. Most likely, in order:
 - Is copying a live session cookie out of the browser (approach B) ever acceptable, or off-limits?
 - Are there session/keystroke-monitoring or rules-of-behavior implications (the On-Demand login page
   states keystrokes and data content are monitored) for any of the above?
-- Can ops adjust the On-Demand proxy chain to pass SSE through unbuffered (see
-  [Live sync (SSE) behind the proxy](#live-sync-sse-behind-the-proxy)) — disable
-  buffering/compression on the qed location and raise read timeouts — so live sync works?
 
 ## See also
 
