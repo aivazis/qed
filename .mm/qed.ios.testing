@@ -1,0 +1,22 @@
+# -*- makefile -*-
+# -*- coding: utf-8 -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# (c) 1998-2026 all rights reserved
+
+
+# the swift tests of the iPad client: the parts that use nothing from SwiftUI, so they can be
+# tested on the mac that builds the app
+qed.ios.testing.stem := qed.ios.testing
+# delegate to swift's test library: compile the tests and the sources they test into one program
+# and run it
+qed.ios.testing.runner := swift-testing
+# the compiler comes from apple's developer tools
+qed.ios.testing.toolchain := xcode
+# the sources under test: the reader that cuts the event stream into frames, and the server that
+# makes the requests
+qed.ios.testing.sources = \
+    ${addprefix $(project.home)/ux/swift/,Frame.swift FrameReader.swift Server.swift}
+
+
+# end of file

@@ -18,7 +18,8 @@ qed.ios := ${if $(toolchain.xcode.supported),qed.ios,}
 # tests
 qed.tests := qed.data qed.pkg.tests qed.lib.tests qed.ext.tests \
     qed.ux.playwright.chromium qed.ux.playwright.webkit qed.ux.playwright.firefox \
-    qed.perf
+    qed.perf \
+    ${if $(toolchain.xcode.supported),qed.ios.testing,}
 # docker images
 qed.docker-images := \
     qed.ci.lunar-gcc qed.ci.jammy-gcc  \
