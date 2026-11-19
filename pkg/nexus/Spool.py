@@ -5,8 +5,8 @@
 # (c) 1998-2026 all rights reserved
 
 
-# the channel over the file that holds the payload
-from pyre.ipc.File import File
+# support
+import pyre
 
 
 # declaration
@@ -32,7 +32,7 @@ class Spool:
         # normalize the payload so its true extent is known
         data = memoryview(data)
         # make a file with no name
-        file = File.temporary()
+        file = pyre.ipc.file.temporary()
         # deposit the payload
         file.write(bytes=data)
         # and wrap it up
