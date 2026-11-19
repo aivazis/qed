@@ -60,19 +60,26 @@ struct ServerWindow: View {
     // whether the controls of the view are on the screen
     @State private var controls = false
 
-    // the contents
+    // the contents; the sidebar and the controls slide over the view, which stays where it is
     var body: some View {
         NavigationSplitView {
             ConnectionView(stream: stream, store: store, active: $active)
         } detail: {
             if let viewport = store.views.first(where: { $0.index == active }) {
-                // the view, with its controls beside it when they are asked for
+                // the view, with its controls over its trailing edge when they are asked for
                 Viewer(viewport: viewport, store: store, tiles: tiles)
+                    .overlay(alignment: .trailing) {
+                        if controls {
+                            Controls(viewport: viewport, store: store)
+                                .scrollContentBackground(.hidden)
+                                .frame(width: 340)
+                                .background(.regularMaterial)
+                                .transition(.move(edge: .trailing))
+                        }
+                    }
+                    .animation(.default, value: controls)
                     .navigationTitle(viewport.view.reader?.name ?? viewport.view.name)
                     .navigationBarTitleDisplayMode(.inline)
-                    .inspector(isPresented: $controls) {
-                        Controls(viewport: viewport, store: store)
-                    }
                     .toolbar {
                         Button("Controls", systemImage: "slider.horizontal.3") {
                             controls.toggle()
@@ -84,6 +91,7 @@ struct ServerWindow: View {
                     description: Text("The server has no view to show."))
             }
         }
+        .navigationSplitViewStyle(.prominentDetail)
     }
 }
 
