@@ -43,14 +43,13 @@ dataset, *_ = reader.datasets
 # nobody has measured it
 assert dataset.stats is None
 
-# the extent, and the single center window the old seed used to look at
+# the extent, and a single window at its center
 shape = tuple(dataset.shape)
 # a window of at most 256 cells on each side
 window = tuple(min(256, axis) for axis in shape)
 # placed at the center of the extent
 center = tuple((axis - side) // 2 for axis, side in zip(shape, window))
-# that window holds nothing but fill: its mergeable record counts no cells at all, which
-# is what made the seed a fabrication rather than a measurement
+# that window holds nothing but fill: its mergeable record counts no cells at all
 assert dataset.sample(zoom=(0, 0), origin=center, shape=window)[0] == 0
 
 # the probe, on the other hand, finds the data
@@ -74,8 +73,7 @@ assert amplitude.low is not None
 assert amplitude.high is not None
 
 # a probe that finds nothing anywhere says so, and still yields a usable range: a linear
-# channel cannot render without one, so the nominal values are a deliberate fallback rather
-# than a measurement dressed up as one
+# channel cannot render without one, so it falls back to the nominal values
 empty = types.SimpleNamespace(
     # a name, for the complaint
     pyre_name="empty",
