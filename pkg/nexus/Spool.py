@@ -5,22 +5,20 @@
 # (c) 1998-2026 all rights reserved
 
 
-# externals
-import mmap
-import os
-import tempfile
+# the channel over the file that holds the payload
+from pyre.ipc.File import File
 
 
-# the parking place for rendered payloads
+# declaration
 class Spool:
     """
-    A payload parked in an unlinked temporary file whose descriptor, rather than its contents,
-    travels between processes
+    A payload parked in an unlinked temporary file, which travels between processes as a
+    channel over the file rather than as its contents
 
-    Workers {stash} their product and ship the spool with their completion report: the pickled
-    part is just the size, and the descriptor follows as ancillary data on the crew channel.
-    The team side {adopt}s the descriptor and hands out {share}s of the payload, files of their
-    own that a response sends straight to the peer, or {view}s of it. The file is
+    Workers {stash} their product and return the spool as the result of their task; the
+    marshaler carries the channel inside the completion report, and the worker releases its
+    own copy once the report is sent. The team side hands out {share}s of the payload, files
+    of their own that a response sends straight to the peer, or {view}s of it. The file is
     unlinked from birth, so the kernel reclaims the storage when the last descriptor closes,
     no matter how either process exits
     """
@@ -33,38 +31,27 @@ class Spool:
         """
         # normalize the payload so its true extent is known
         data = memoryview(data)
-        # make an unlinked temporary file
-        file = tempfile.TemporaryFile()
+        # make a file with no name
+        file = File.temporary()
         # deposit the payload
-        file.write(data)
-        # and push it out so the descriptor can travel
-        file.flush()
-        # wrap it up
+        file.write(bytes=data)
+        # and wrap it up
         return cls(size=data.nbytes, file=file)
 
     # interface - team side
-    def adopt(self, descriptor):
-        """
-        Attach the payload {descriptor} that arrived over the wire
-        """
-        # dress it up as a file
-        self.file = os.fdopen(descriptor, "rb")
-        # all done
-        return self
-
     def share(self):
         """
         Hand out a file of its own over the payload, for a response to send and then close
         """
         # a duplicate of my descriptor outlives me, so the response owns what it sends
-        return os.fdopen(os.dup(self.file.fileno()), "rb")
+        return self.file.share()
 
     def view(self):
         """
         Map the payload
         """
-        # map the spool contents; the file position the descriptor arrived with is irrelevant
-        return mmap.mmap(self.file.fileno(), self.size, access=mmap.ACCESS_READ)
+        # map the spool contents
+        return self.file.map(size=self.size)
 
     def close(self):
         """
@@ -85,31 +72,10 @@ class Spool:
         super().__init__(**kwds)
         # the payload size
         self.size = size
-        # the file that holds the payload
+        # the channel over the file that holds the payload
         self.file = file
         # the statistical sample of the rendered source region, when the worker took one
         self.stats = stats
-        # all done
-        return
-
-    def __getstate__(self):
-        """
-        Prepare for the trip over the wire
-        """
-        # descriptors cannot travel in the byte stream; the size and the statistics record,
-        # a small tuple of floats, are the only pickled cargo
-        return {"size": self.size, "stats": self.stats}
-
-    def __setstate__(self, state):
-        """
-        Arrive from the wire
-        """
-        # restore the size
-        self.size = state["size"]
-        # and the statistics record, tolerating reports from workers that took no sample
-        self.stats = state.get("stats")
-        # the descriptor arrives separately, as ancillary data
-        self.file = None
         # all done
         return
 
