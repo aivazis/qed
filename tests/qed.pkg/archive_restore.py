@@ -31,7 +31,9 @@ if os.path.exists(workspace):
     shutil.rmtree(workspace)
 # the archive lives inside it; build the part of its tree that still exists
 root = os.path.realpath(os.path.join(workspace, "data"))
+# a branch with a folder within it
 os.makedirs(os.path.join(root, "kept", "deeper"))
+# and a folder that is never opened
 os.makedirs(os.path.join(root, "idle"))
 # with something to find at the bottom
 open(os.path.join(root, "kept", "deeper", "product.dat"), mode="w").close()
@@ -67,7 +69,9 @@ with open(os.path.join(workspace, "qed.yaml"), mode="w", encoding="utf-8") as st
     )
     # the archive, with its record
     stream.write("# the archive\nrestored:\n")
+    # with its location and the folders it had on display
     stream.write(f"    uri: {at()}\n    expanded:\n")
+    # one per line
     stream.write("".join(f"        - {folder}\n" for folder in recorded))
     # and the list that attaches it
     stream.write("\n# attach it\narchives:\n    - qed.archives.local#restored\n\n# end of file\n")
@@ -83,6 +87,7 @@ import qed
 # the store narrates what it prunes, and complains about the folder this driver makes
 # unreadable on purpose; both are expected here
 journal.info("qed.ux.archives").deactivate()
+# both of them
 journal.warning("qed.ux.archives").deactivate()
 
 # load the app
@@ -97,6 +102,7 @@ assert store.fleet is None
 archive = store.archive(uri=at())
 # it came up with the record of the earlier session, and nothing to show for it
 assert list(archive.expanded) == recorded
+# and no items
 assert list(archive.items()) == []
 
 # bring the tree back
@@ -107,20 +113,25 @@ assert store.restoreArchives() is True
 assert list(archive.expanded) == [at(), at("kept"), at("kept", "deeper")]
 # and every one of them has its listing, all the way down
 assert archive.listing(uri=at()) is not None
+# the branch
 assert archive.listing(uri=at("kept")) is not None
+# and the folder within it
 assert archive.listing(uri=at("kept", "deeper")) is not None
 # nothing is left under way, and nothing failed
 assert not any(archive.isPending(uri=folder) for folder in recorded)
+# for any of the folders on record
 assert not any(archive.failure(uri=folder) for folder in recorded)
 # so the tree shows its contents: the two folders of the root, the folder within the branch
 # that was open, and the product at the bottom
 names = sorted(item["name"] for item in archive.items())
+# in alphabetical order
 assert names == ["deeper", "idle", "kept", "product.dat"], names
 # a folder that exists but was not on display stays closed
 assert archive.listing(uri=at("idle")) is None
 
 # the configuration file was corrected as well
 doc = pyre.config.newYamlEditor(uri="qed.yaml")
+# with the folders that were pruned taken out
 assert list(doc.get("restored", "expanded")) == [at(), at("kept"), at("kept", "deeper")]
 # so the archive says what the file says, and there is nothing for the user to save: the
 # folders that went were taken out of both
@@ -140,6 +151,7 @@ try:
     assert archive.failure(uri=at("kept")) is not None
     # and it is still on display, along with what was open beneath it
     assert at("kept") in archive.expanded
+    # and the folder within it
     assert at("kept", "deeper") in archive.expanded
 # put things back
 finally:
@@ -154,6 +166,7 @@ store.refreshArchive(uri=at())
 assert list(archive.expanded) == [at()]
 # in the configuration file as well
 doc = pyre.config.newYamlEditor(uri="qed.yaml")
+# with only the root on display
 assert list(doc.get("restored", "expanded")) == [at()]
 
 

@@ -53,6 +53,7 @@ assert nisar(uri="file:/data/scene.h5") == "scene"
 assert generic(uri="file:/tmp/x/raster.bin") == "raster"
 # whose dots would make levels and whose punctuation does not belong
 assert generic(uri="file:/d/nisar.89e8cbe.A.sci") == "nisar_89e8cbe_A"
+# and neither do spaces and parentheses
 assert generic(uri="file:/d/my file (2).int") == "my_file__2_"
 # a path without a scheme works too
 assert generic(uri="/tmp/x/a.int") == "a"

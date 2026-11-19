@@ -43,6 +43,7 @@ assert sorted(team["kind"] for team in fleet.describe()) == ["build", "tile"]
 # a team marks the tasks it is handed with its budgets, before anything else happens to them;
 # a disbanded team turns the task down right away, which is all this needs
 stamper = fleet.builders(reader="stamper")
+# send it home right away
 stamper.disband()
 # a stand-in for a task
 task = qed.nexus.chore()
@@ -57,18 +58,23 @@ assert outcome and outcome[0] is not None
 
 # releasing the builders takes them off the roster
 fleet.retire(reader="product")
+# so it is no longer among the builds
 assert "product" not in fleet.builds
 # pyre hands back the same team for the same name, which stood down rather than disbanded, so
 # it is ready to recruit again when the next build arrives
 again = fleet.builders(reader="product")
+# so it is the same team, ready to work
 assert again is builders and not again._disbanded
 # the same goes for the team that serves the tiles of a reader that is disconnected and
 # connected again
 fleet.dismiss(reader="product")
+# so it is no longer among the teams
 assert "product" not in fleet.teams
+# and connecting it again brings back the same team, ready to work
 assert fleet.team(reader="product") is tiles and not tiles._disbanded
 # letting the fleet go takes everybody
 fleet.disband()
+# and leaves no teams and no builds behind
 assert not fleet.teams and not fleet.builds
 
 # a worker opens its reader with the budgets of its team, for the settings the reader has

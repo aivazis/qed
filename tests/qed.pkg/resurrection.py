@@ -54,6 +54,7 @@ def deliver(result, error):
 
 # queue a task and spin until it is delivered
 team.assign(task=Echo(), callback=deliver)
+# spin
 team.dispatcher.watch()
 # the task succeeded
 assert outcomes[0] == ("echo", None)
@@ -72,7 +73,9 @@ assert list(team.crews()) == []
 team.assign(task=Echo(), callback=deliver)
 # with the bad news delivered synchronously
 result, error = outcomes[1]
+# without a result
 assert result is None
+# and with an error
 assert error is not None
 # and no crews were recruited for it
 assert list(team.crews()) == []

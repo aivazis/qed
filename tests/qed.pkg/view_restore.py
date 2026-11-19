@@ -57,15 +57,18 @@ def test():
     stale = qed.ux.view(name="view_restore.stale", reader=reader, selections={"band": "7"})
     # before first contact, both keep what they were given
     assert dict(kept.selections) == {"band": "2"}, dict(kept.selections)
+    # both of them
     assert dict(stale.selections) == {"band": "7"}, dict(stale.selections)
     # and neither has a dataset yet
     assert kept.dataset is None
+    # neither of them
     assert stale.dataset is None
 
     # make first contact
     reader.open()
     # and let the views catch up
     kept.refresh()
+    # both of them
     stale.refresh()
     # the band the product has survives
     assert dict(kept.selections) == {"band": "2"}, dict(kept.selections)

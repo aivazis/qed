@@ -58,7 +58,9 @@ keep = crew.activate(channel=crew.channel, team=team)
 assert keep is False
 # the member was buried and a replacement recruited on the spot
 survivors = list(team.crews())
+# so it is off the roster
 assert crew not in survivors
+# which is back at full strength
 assert len(survivors) == 1
 # and the corpse was reaped
 try:
@@ -97,7 +99,9 @@ keep = crew.activate(channel=parent, team=team)
 assert keep is False
 # and the member was buried, with a replacement recruited on the spot
 survivors = list(team.crews())
+# so it is off the roster
 assert crew not in survivors
+# which is back at full strength
 assert len(survivors) == 1
 
 # send everybody home

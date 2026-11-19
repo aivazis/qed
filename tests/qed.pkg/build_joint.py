@@ -30,8 +30,9 @@ if not product.exists():
 # the reader complains about the missing web assets on open; this driver is not the app
 journal.warning("qed.cli").deactivate()
 
-# open the product without measuring it
+# make a reader for the product
 gcov = qed.readers.nisar.gcov(name="joint.gcov", uri=f"file:{product}")
+# and open it without measuring it
 gcov.open(measure=False)
 # find the covariance term
 covariance = [
@@ -52,7 +53,9 @@ def build(label, joint):
     scratch = pyre.primitives.path(__file__).parent / f"build_joint.{label}"
     # start clean
     if scratch.exists():
+        # remove it
         shutil.rmtree(str(scratch))
+    # and make a fresh one
     scratch.mkdir()
     # the workspace the crew builds into
     workspace = qed.workspaces.local(name=f"joint.{label}.workspace")
@@ -97,6 +100,7 @@ def build(label, joint):
         builds[0].lead(partners=builds[1:])
     # start the builds
     for build in builds:
+        # one at a time
         build.start()
     # run the loop until they are over
     fleet.dispatcher.watch()
@@ -113,9 +117,13 @@ def level(pyramid, exponent):
     Read the occupancy record and the tile file of the level at {exponent} of {pyramid}
     """
     # the record
-    occupancy = open(str(pyramid.home / f"level-{exponent:02d}.occupancy"), "rb").read()
+    with open(str(pyramid.home / f"level-{exponent:02d}.occupancy"), "rb") as stream:
+        # all of it
+        occupancy = stream.read()
     # and the tiles
-    tiles = open(str(pyramid.home / f"level-{exponent:02d}.tiles"), "rb").read()
+    with open(str(pyramid.home / f"level-{exponent:02d}.tiles"), "rb") as stream:
+        # all of them
+        tiles = stream.read()
     # hand them off
     return occupancy, tiles
 
@@ -138,7 +146,9 @@ for mine, theirs in zip(alone, joint):
         # the same tiles held something, and the tiles that did hold the same cells; the tiles
         # that held nothing were never written, so their bytes are not compared
         occupancy, tiles = level(pyramid=mine.pyramid, exponent=exponent)
+        # the same level of the other pyramid
         others, otherTiles = level(pyramid=theirs.pyramid, exponent=exponent)
+        # held something in the same tiles
         assert occupancy == others, (mine.dataset.pyre_name, exponent)
         # the size of a tile in the file
         size = len(tiles) // len(occupancy)
@@ -146,13 +156,16 @@ for mine, theirs in zip(alone, joint):
         for index, held in enumerate(occupancy):
             # skipping the ones that were not
             if held:
+                # hold the same bytes
                 assert (
                     tiles[index * size : (index + 1) * size]
                     == otherTiles[index * size : (index + 1) * size]
                 ), (mine.dataset.pyre_name, exponent, index)
     # and the same statistics
     assert mine.statistics.count == theirs.statistics.count
+    # the same smallest value
     assert mine.statistics.min == theirs.statistics.min
+    # and the same largest one
     assert mine.statistics.max == theirs.statistics.max
 
 

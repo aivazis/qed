@@ -79,9 +79,11 @@ def deliver(key):
         # a successful render arrives parked in a spool the team still holds open; map it
         # now, since the team releases the spool once every subscriber has been served
         payload = None
+        # if the render succeeded
         if result is not None:
             # take a private copy of the payload
             view = result.view()
+            # into the outcome
             payload = bytes(view)
             # and release the mapping
             view.close()

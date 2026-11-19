@@ -89,25 +89,31 @@ def text():
 # save the archive under test before anything is on display; the file already lists it, so
 # this is the state the trip must come back to
 store.persistArchive(uri=root)
+# and remember what the file says
 baseline = text()
 # nothing in there about what is on display, since nothing is
 assert "expanded" not in baseline
 
 # put the root of the first archive on display, and save it
 store.expandFolder(archive=root, uri=root)
+# and save the archive
 store.persistArchive(uri=root)
 # the file records it, within the section of the archive
 doc = pyre.config.newYamlEditor(uri="qed.yaml")
+# as the only folder on display
 assert list(doc.get("first", "expanded")) == [root]
 # and says nothing about the archive nobody touched
 assert doc.get("second", "expanded") is None
 
 # take it off display again, and save it
 store.collapseFolder(archive=root, uri=root)
+# and save the archive
 store.persistArchive(uri=root)
 # the record is gone, not emptied
 doc = pyre.config.newYamlEditor(uri="qed.yaml")
+# so there is no record of what is on display
 assert doc.get("first", "expanded") is None
+# anywhere in the file
 assert "expanded" not in text()
 # and the file is back to where it was, to the character
 assert text() == baseline, text()

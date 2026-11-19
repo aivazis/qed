@@ -34,8 +34,9 @@ if not product.exists():
 # quiet the configuration chatter
 journal.warning("qed.cli").deactivate()
 
-# open the product without measuring it, so the datasets carry no statistics yet
+# make a reader for the product
 reader = qed.readers.nisar.gslc(name="probed", uri=f"file:{product}")
+# and open it without measuring it, so its datasets carry no statistics yet
 reader.open(measure=False)
 # take its first dataset
 dataset, *_ = reader.datasets
@@ -44,7 +45,9 @@ assert dataset.stats is None
 
 # the extent, and the single center window the old seed used to look at
 shape = tuple(dataset.shape)
+# a window of at most 256 cells on each side
 window = tuple(min(256, axis) for axis in shape)
+# placed at the center of the extent
 center = tuple((axis - side) // 2 for axis, side in zip(shape, window))
 # that window holds nothing but fill: its mergeable record counts no cells at all, which
 # is what made the seed a fabrication rather than a measurement
@@ -61,11 +64,13 @@ assert (low, mean, high) != (0.0, 0.5, 1.0)
 
 # measuring the dataset installs exactly that
 dataset.measure()
+# the very record computed above
 assert dataset.stats == (low, mean, high)
 # and tunes the channels against it; the amplitude range is the one the stretch reads
 amplitude = dataset.channel(name="amplitude").amplitude
 # so it must have moved off its configured default and onto the measured data
 assert amplitude.low is not None
+# both of them
 assert amplitude.high is not None
 
 # a probe that finds nothing anywhere says so, and still yields a usable range: a linear

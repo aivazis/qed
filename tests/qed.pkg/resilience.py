@@ -44,14 +44,18 @@ ns.insert(
 )
 # point the good reader at the fixture, a 65x65 c16 raster
 ns.insert(name="good.uri", value=str(fixture), priority=pri.user(), locator=loc)
+# with complex cells
 ns.insert(name="good.cell", value="c16", priority=pri.user(), locator=loc)
+# and the shape of the fixture
 ns.insert(name="good.shape", value="65,65", priority=pri.user(), locator=loc)
 # point the broken one at a file that does not exist
 ns.insert(name="broken.uri", value="/nope/missing.slc", priority=pri.user(), locator=loc)
 # and declare a shape one sample too large for the short one, which would otherwise let
 # the render machinery read past the end of the map
 ns.insert(name="short.uri", value=str(fixture), priority=pri.user(), locator=loc)
+# with complex cells
 ns.insert(name="short.cell", value="c16", priority=pri.user(), locator=loc)
+# and a shape one sample wider than the fixture
 ns.insert(name="short.shape", value="65,66", priority=pri.user(), locator=loc)
 # n.b.: a broken view entry rides the same per-entry containment as the datasets, but it
 # cannot be exercised from this directory: resolving an unresolvable spec sends the pyre
@@ -60,6 +64,7 @@ ns.insert(name="short.shape", value="65,66", priority=pri.user(), locator=loc)
 
 # the discards are reported on these channels; quiet them so the test passes silently
 journal.warning("qed.cli").deactivate()
+# both of them
 journal.warning("qed.readers.native.flat").deactivate()
 
 # boot the application

@@ -34,8 +34,9 @@ if not product.exists():
 # quiet the configuration chatter
 journal.warning("qed.cli").deactivate()
 
-# open the product
+# make a reader for the product
 reader = qed.readers.nisar.gcov(name="layout", uri=f"file:{product}")
+# and open it without measuring it
 reader.open(measure=False)
 # the page layout of its file
 paging = qed.readers.pages.paging(reader=reader)
@@ -44,6 +45,7 @@ tables = qed.readers.pages.tables(reader=reader)
 
 # the file is paged
 pageSize, strategy, size = paging
+# with pages of some size, and a file of some size
 assert strategy == "page" and pageSize > 0 and size > 0
 # and the storage covers the datasets the reader does not display, under their paths
 assert any(name.startswith("/") for name in tables)
@@ -58,21 +60,27 @@ term, mask = (
 described = qed.readers.pages.describe(dataset=term, tables=tables, paging=paging)
 # its storage settings
 storage = described["storage"]
+# tiles of 512x512 cells
 assert storage["tile"] == (512, 512)
+# shuffled and deflated
 assert storage["filters"] == ["shuffle", "deflate"]
 # every cell of its chunk grid was written
 record = described["record"]
+# so the record counts the whole grid
 assert record["written"] == record["grid"]
 # the library was never told the fill, so it hands out its default of zero
 fill = described["nodata"]
+# so the library reports it as its default
 assert fill["status"] == "default" and fill["hdf5"] == 0.0
 # while the attribute declares nan, and the empty chunks hold it
 assert math.isnan(fill["cf"]) and math.isnan(fill["found"])
 # the grid of states covers every chunk
 grid = described["states"]
+# one for each chunk
 assert grid["rows"] * grid["cols"] == record["grid"]
 # none of them unwritten, since the writer cannot leave any out
 states = collections.Counter(qed.readers.pages.STATES[code] for code in grid["codes"])
+# so there are none
 assert states["unwritten"] == 0
 # the chunks of fill in the grid are the ones the fill check counted
 assert states["fill"] == fill["fillChunks"] > 0
@@ -81,10 +89,13 @@ assert fill["verified"] == 2
 
 # the map of the file covers every one of its pages
 filemap = described["filemap"]
+# so it has as many as the file needs, rounded up
 assert filemap["pages"] == -(-size // pageSize)
 # with every raster of the product, and the covariance term among them
 rasters = filemap["rasters"]
+# one for each dataset of the reader
 assert len(rasters) == len(reader.datasets)
+# with the one that was described selected
 assert rasters[filemap["selected"]]["name"] == term.pyre_name
 # each raster accounts for every byte and every chunk it stores
 for raster in rasters:
@@ -105,19 +116,23 @@ assert Layout.resolve_filemap(described) is filemap
 
 # the graphql view of the fill says the two disagree
 view = Layout.resolve_fill(described)
+# since the library holds zero and the chunks hold nan
 assert view["hdf5"] == "0.0" and view["holds"] == "nan" and view["agrees"] is False
 # and the grid carries the names of the states
 assert Layout.resolve_grid(described)["states"] == list(qed.readers.pages.STATES)
 
 # the measures of the raster, by the names the census gives them, cover every measure of a census
 mine = qed.measurements.census.measures(description=described)
+# all of them
 assert {name for name, _, _ in qed.measurements.census.MEASURES} <= set(mine)
 # and agree with the description
 assert mine["fill_chunks"] == fill["fillChunks"]
+# including the count of chunks never written
 assert mine["unwritten"] == 0
 
 # the mask uses 255 for the places outside the swath, which the library does not know either
 fill = qed.readers.pages.describe(dataset=mask, tables=tables, paging=paging)["nodata"]
+# so the library holds zero, while the attribute and the chunks hold 255
 assert fill["hdf5"] == 0 and fill["cf"] == 255 and fill["found"] == 255
 
 

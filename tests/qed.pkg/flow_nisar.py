@@ -24,6 +24,7 @@ import qed
 
 # the fixtures this driver reads; part of the shared test data tree
 gslc = pyre.primitives.path(__file__).parent / ".." / "data" / "nisar" / "gslc.h5"
+# and the covariance product
 gcov = pyre.primitives.path(__file__).parent / ".." / "data" / "nisar" / "gcov.h5"
 # if they have not been generated
 if not gslc.exists() or not gcov.exists():
@@ -48,11 +49,13 @@ def compare(channel, source, tiles, configurations):
         for origin, shape, zoom in tiles:
             # render with the kernel
             channel.engine = "iterators"
+            # into a buffer of its own
             expected = bytes(
                 memoryview(channel.tile(source=source, zoom=zoom, origin=origin, shape=shape))
             )
             # and with the pipeline
             channel.engine = "flow"
+            # into a tile
             rendered = channel.tile(source=source, zoom=zoom, origin=origin, shape=shape)
             # they must agree
             assert rendered == expected, (channel.pyre_name, origin, shape, zoom)
@@ -96,14 +99,17 @@ def level(dataset, origins, name="level1"):
     storage = getattr(qed.libqed.pyramid, dataset.datatype.cell)
     # the shape of the level, and the shape of its tiles
     extent = tuple(axis // 2 for axis in dataset.shape)
+    # with the tiles of the dataset
     tile = tuple(dataset.tile)
     # the files of the level
     tiles = str(scratch / f"{name}.tiles")
+    # and its occupancy record
     record = scratch / f"{name}.occupancy"
     # make the level
     storage.Draft.create(tiles=tiles, shape=extent, tile=tile)
     # the number of tiles along each axis
     rows = (extent[0] + tile[0] - 1) // tile[0]
+    # and across
     columns = (extent[1] + tile[1] - 1) // tile[1]
     # the occupancy record, naming the tiles about to be written
     occupancy = bytearray(rows * columns)
@@ -150,9 +156,11 @@ def cover(tiles, depth, tile):
         stride = tuple(2 ** (level - depth) for level in zoom)
         # the first and last cells of the level the window reads, along each axis
         first = tuple(o * s for o, s in zip(origin, stride))
+        # and the last cells
         last = tuple((o + n - 1) * s for o, n, s in zip(origin, shape, stride))
         # the tiles they span
         rows = range(first[0] // tile[0], last[0] // tile[0] + 1)
+        # and across
         columns = range(first[1] // tile[1], last[1] // tile[1] + 1)
         # add them to the pile
         origins.update((r * tile[0], c * tile[1]) for r in rows for c in columns)
@@ -180,6 +188,7 @@ def test():
         def configure(channel):
             # set the range
             channel.range.low = low
+            # both ends of it
             channel.range.high = high
             # all done
             return
@@ -197,6 +206,7 @@ def test():
         def configure(channel):
             # set the range
             channel.amplitude.low = low
+            # both ends of it
             channel.amplitude.high = high
             # all done
             return
@@ -214,6 +224,7 @@ def test():
         def configure(channel):
             # set the range of the phase
             channel.phase.low = low
+            # both ends of it
             channel.phase.high = high
             # the saturation
             channel.saturation.value = saturation
@@ -237,6 +248,7 @@ def test():
         def configure(channel):
             # set the range of the phase
             channel.phase.low = low
+            # both ends of it
             channel.phase.high = high
             # and the brightness
             channel.brightness.value = brightness
@@ -273,8 +285,9 @@ def test():
         "complex": [complete(-4, -1, 0, 1, 0.5), complete(-3, 0, 0.1, 0.9, 1)],
     }
 
-    # open the slc product
+    # make a reader for the slc product
     reader = qed.readers.nisar.gslc(name="flow_nisar.gslc", uri=f"file:{gslc}")
+    # and open it without measuring it
     reader.open(measure=False)
     # its first dataset
     base, *_ = reader.datasets
@@ -314,8 +327,9 @@ def test():
             configurations=configurations,
         )
 
-    # open the covariance product, whose datasets hold reals
+    # make a reader for the covariance product, whose datasets hold reals
     reader = qed.readers.nisar.gcov(name="flow_nisar.gcov", uri=f"file:{gcov}")
+    # and open it without measuring it
     reader.open(measure=False)
     # its first dataset of reals
     (covariance,) = [d for d in reader.datasets if d.datatype.cell == "float32"][:1]

@@ -62,19 +62,23 @@ reader = ux.store.source(name="gslc")
 # describe its product as a survey task, push it through the wire, and execute it the way
 # a worker does: a fresh registry, so the reader is rebuilt from the recipe and opened
 task = pickle.loads(pickle.dumps(qed.nexus.survey(reader=reader)))
+# and push the record it produces back through the wire
 record = pickle.loads(pickle.dumps(task.execute(readers={})))
 # hydrate the passive reader from what came back
 record.hydrate(reader=reader)
 
 # build a reference by opening the product the blocking way, from the same recipe
 factory = qed.protocols.reader.pyre_resolveSpecification(spec=task.factory)
+# build the reference with it
 reference = factory(name="reference", **task.config)
 # make first contact
 reference.open()
 
 # the rich selector tree crossed intact
 assert len(reader.datasets) == len(reference.datasets)
+# and there is more than one of them
 assert len(reader.datasets) > 1
+# and the availability map is the same
 assert reader.available == reference.available
 
 # go through the twins and their live counterparts
@@ -91,6 +95,7 @@ for twin, live in zip(reader.datasets, reference.datasets):
             assert controller.auto == mirror.auto
             # and arrived at the same display bounds
             assert getattr(controller, "low", None) == getattr(mirror, "low", None)
+            # both of them
             assert getattr(controller, "high", None) == getattr(mirror, "high", None)
 
 # and the twins hold no payload, so nothing in this process touched the product

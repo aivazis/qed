@@ -32,7 +32,9 @@ server = qed.nexus.server(name="qed.test.server")
 scratch = pyre.primitives.path(__file__).parent / "graphql_workspace.scratch"
 # start clean
 if scratch.exists():
+    # remove it
     shutil.rmtree(str(scratch))
+# and make a fresh one
 scratch.mkdir()
 # point the workspace at it
 app.workspace.path = str(scratch)
@@ -51,6 +53,7 @@ def ask(query):
     )
     # feed it to a request
     request = Request()
+    # which takes all of it
     assert request.extract(server=server, chunk=head + body)
     # resolve it
     response = ux.gql.respond(store=ux.store, server=server, request=request)
@@ -72,7 +75,9 @@ assert workspace["path"] == str(scratch) and workspace["products"] == [], worksp
 
 # the levels of a product: a sparse level, sized far beyond what was written into it
 home = scratch / ".qed" / "pyramids" / "GRANULE" / "L" / "A" / "HH"
+# make its folder
 home.mkdir(parents=True)
+# write the level
 with open(str(home / "level-01.tiles"), "wb") as level:
     # a large hole
     level.truncate(64 * 2**20)
@@ -80,15 +85,18 @@ with open(str(home / "level-01.tiles"), "wb") as level:
     level.write(b"\x01" * 4096)
 # and a small sidecar
 with open(str(home / "pyramid.json"), "w") as sidecar:
+    # with an empty document
     sidecar.write("{}")
 
 # the product is there
 products = ask(query)["server"]["workspace"]["products"]
+# named after its granule
 assert [(product["kind"], product["name"]) for product in products] == [
     ("pyramids", "GRANULE")
 ], products
 # measured by the blocks that were written, which is far less than the size of its files
 written = products[0]["bytes"]
+# so it is small
 assert 0 < written < 2**20, written
 # and exactly what the system says they occupy
 assert written == sum(

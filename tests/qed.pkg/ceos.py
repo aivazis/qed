@@ -62,6 +62,7 @@ def image(
     records = LINES * channels
     # the descriptor: its header, and the rest blank
     record = bytearray(struct.pack(">I4sI", 1, b"\x3f\xc0\x12\x12", descriptor))
+    # padded with blanks to its full length
     record += b" " * (descriptor - 12)
 
     # place a field right justified in the 1-based byte range {first} through {last}
@@ -73,20 +74,33 @@ def image(
 
     # the layout fields
     put(181, 186, records)
+    # the length of a data record
     put(187, 192, length)
+    # the bytes of a pixel
     put(225, 228, group)
+    # the number of channels
     put(233, 236, channels)
+    # the number of lines
     put(237, 244, LINES)
+    # no border pixels on the left
     put(245, 248, 0)
+    # nor on the right
     put(257, 260, 0)
+    # the interleave
     put(269, 272, interleave)
+    # one record per line
     put(273, 274, 1)
+    # the bytes of the prefix
     put(277, 280, prefix)
+    # the bytes of samples in a record
     put(281, 288, data)
+    # the bytes of the suffix
     put(289, 292, suffix)
+    # and the format of the cells
     put(429, 432, code)
     # the pixels of a line, unless the descriptor leaves them blank
     if pixels:
+        # record them
         put(249, 256, SAMPLES)
     # write the file
     with open(uri, "wb") as stream:
@@ -96,8 +110,10 @@ def image(
         for sequence in range(records):
             # the channel and the line of this record
             if interleave == "BSQ":
+                # the channels follow each other
                 channel, line = divmod(sequence, LINES)
             else:
+                # or each line holds every channel
                 line, channel = divmod(sequence, channels)
             # the samples, with each channel offset so the channels differ
             cells = b"".join(
@@ -110,7 +126,9 @@ def image(
             stream.write(struct.pack(">I4sI", sequence + 2, b"\x32\x0a\x12\x14", length + extra))
             # the prefix past the header, the samples, and the suffix
             stream.write(b"\xab" * (prefix - (12 if counted else 0)))
+            # the samples
             stream.write(cells)
+            # and the suffix, longer in the last record of a file whose records vary
             stream.write(b"\xcd" * (suffix + extra))
     # all done
     return
@@ -124,8 +142,11 @@ def flat(uri, code, channel=0):
     fmt, value = FORMATS[code]
     # write the cells
     with open(uri, "wb") as stream:
+        # line by line
         for i in range(LINES):
+            # sample by sample
             for j in range(SAMPLES):
+                # in the native byte order
                 stream.write(struct.pack("=" + fmt, *_parts(value(i + 3 * channel, j))))
     # all done
     return
@@ -145,6 +166,7 @@ def compare(dataset, expected):
     """
     # the layout agrees
     assert dataset.shape == expected.shape
+    # and so do the cells
     assert dataset.cell.cell == expected.cell.cell
     # tiles agree at a few zoom levels and origins, including footprints that stride, and in
     # every channel
@@ -154,7 +176,9 @@ def compare(dataset, expected):
         ((0, 1), (5, 0), (16, 16)),
         ((2, 0), (1, 7), (8, 8)),
     ]:
+        # in every channel
         for name in expected.channels:
+            # render the reference
             tile = bytes(
                 memoryview(
                     expected.render(
@@ -162,6 +186,7 @@ def compare(dataset, expected):
                     )
                 )
             )
+            # and the dataset
             actual = bytes(
                 memoryview(
                     dataset.render(
@@ -169,6 +194,7 @@ def compare(dataset, expected):
                     )
                 )
             )
+            # and compare
             assert actual == tile, (name, zoom, origin, shape)
         # and so do the samples of the footprint
         assert dataset.sample(zoom=zoom, origin=origin, shape=shape) == expected.sample(
@@ -178,7 +204,9 @@ def compare(dataset, expected):
     assert dataset.stats == expected.stats
     # profiles agree along paths in every direction, open and closed
     for points in [[(1, 2), (10, 20), (30, 60)], [(30, 60), (10, 20), (1, 2)], [(5, 5)]]:
+        # open and closed
         for closed in (False, True):
+            # the profiles agree
             assert list(dataset.profile(points=points, closed=closed)) == list(
                 expected.profile(points=points, closed=closed)
             )
@@ -190,16 +218,19 @@ def reference(name, code, channel=0):
     """
     Open the flat reference for {code} and {channel}
     """
-    # write it
+    # the file that holds it
     uri = f"ceos_{name}_reference.dat"
+    # write it
     flat(uri=uri, code=code, channel=channel)
     # read it
     reader = qed.readers.native.flat(
         name=f"ceos.{name}.reference", uri=uri, shape=(LINES, SAMPLES), cell=CELLS[code]
     )
+    # make first contact
     reader.open()
-    # hand off its dataset
+    # get its dataset
     (dataset,) = reader.datasets
+    # and hand it off
     return dataset
 
 
@@ -235,8 +266,9 @@ def test():
     ]
     # go through them
     for name, code, options in layouts:
-        # write the image file
+        # the image file
         uri = f"ceos_{name}.dat"
+        # write it, with this layout
         image(uri=uri, code=code, **options)
         # read it
         reader = contact(name=f"ceos.{name}", uri=uri)
@@ -247,8 +279,9 @@ def test():
 
     # files with two channels, in either interleave
     for interleave in ("BSQ", "BIL"):
-        # write the image file
+        # the image file
         uri = f"ceos_{interleave.lower()}.dat"
+        # write it, with two channels in this interleave
         image(uri=uri, code="IU2", prefix=192, counted=True, channels=2, interleave=interleave)
         # read it
         reader = contact(name=f"ceos.{interleave.lower()}", uri=uri)
@@ -274,8 +307,11 @@ def test():
     image(uri="ceos_vary.dat", code="IU2", vary=True)
     # a file with a format that is not supported
     image(uri="ceos_cint.dat", code="IU2")
+    # open it
     with open("ceos_cint.dat", "r+b") as stream:
+        # go to the code of its format
         stream.seek(428)
+        # and replace it with one that is not supported
         stream.write(b"CI*4")
     # a file that is not a CEOS image file
     flat(uri="ceos_flat.dat", code="IU2")

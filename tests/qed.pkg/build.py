@@ -36,17 +36,20 @@ journal.warning("qed.cli").deactivate()
 
 # the scratch areas: one for the crew, one for the single process
 scratch = pyre.primitives.path(__file__).parent / "build.scratch"
+# and the other
 alone = pyre.primitives.path(__file__).parent / "build.alone"
 # start clean
 for area in (scratch, alone):
-    # by removing whatever a previous run left behind
+    # if a previous run left something behind
     if area.exists():
+        # remove it
         shutil.rmtree(str(area))
-    # and making the area
+    # and make the area
     area.mkdir()
 
-# open the product without measuring it; the numbers come out of the build
+# make a reader for the product; the numbers come out of the build
 gcov = qed.readers.nisar.gcov(name="build.gcov", uri=f"file:{product}")
+# and open it without measuring it
 gcov.open(measure=False)
 # find the covariance term and its mask
 covariance = [
@@ -54,6 +57,7 @@ covariance = [
     for entry in gcov.datasets
     if dict(entry.selector) == {"band": "L", "frequency": "B", "cov": "HHHH"}
 ][0]
+# and its mask
 mask = covariance.mask
 # the mask is the one companion
 assert covariance.companions() == {"mask": mask}
@@ -80,34 +84,44 @@ def watch(name):
         """
         The probe's tiles have reported
         """
+        # record the event
         events.append((name, "seeded"))
+        # all done
         return
 
     def progressed(build):
         """
         More of the first level has reported
         """
+        # record the event
         events.append((name, "progress"))
+        # all done
         return
 
     def done(build):
         """
         The pyramid is complete
         """
+        # record the event
         events.append((name, "done"))
         # stop the loop when every build is over
         if all(build.done for build in builds.values()):
+            # stop the loop
             fleet.dispatcher.stop()
+        # all done
         return
 
     def failed(build, error):
         """
         The build failed
         """
+        # record the event, with the reason
         events.append((name, "failed", str(error)))
         # stop the loop when every build is over
         if all(build.done for build in builds.values()):
+            # stop the loop
             fleet.dispatcher.stop()
+        # all done
         return
 
     # hand back the hooks
@@ -134,6 +148,7 @@ for name, raster in (("covariance", covariance), ("mask", mask)):
     )
 # start them
 for build in builds.values():
+    # one at a time
     build.start()
 # and run the loop until they are over
 fleet.dispatcher.watch()
@@ -163,7 +178,11 @@ for name, build in builds.items():
         assert pyramid.holds(exponent=exponent), (name, exponent)
         # its record names as many tiles as the level has
         _, _, grid = pyramid.layout(exponent=exponent)
-        record = open(str(pyramid.home / f"level-{exponent:02d}.occupancy"), "rb").read()
+        # read the record
+        with open(str(pyramid.home / f"level-{exponent:02d}.occupancy"), "rb") as stream:
+            # all of it
+            record = stream.read()
+        # which names a tile per cell of the grid
         assert len(record) == grid[0] * grid[1], (name, exponent)
     # and the sidecar is beside them
     assert pyramid.sidecar.exists(), name
@@ -171,33 +190,47 @@ for name, build in builds.items():
 # a single process builds the same covariance pyramid on its own
 solo = qed.workspaces.local(name="build.solo")
 solo.path = str(alone)
+# make a pyramid in the area of the single process
 reference = qed.readers.nisar.pyramid(reader=gcov, dataset=covariance, workspace=solo)
+# and build it
 reference.build()
 # it reaches the same depth
 assert reference.reach() == builds["covariance"].depth
 # the records of every level are identical: the same tiles held something
 for exponent in range(1, reference.reach() + 1):
     # the crew's record
-    crew = open(
+    with open(
         str(builds["covariance"].pyramid.home / f"level-{exponent:02d}.occupancy"), "rb"
-    ).read()
+    ) as stream:
+        # all of it
+        crew = stream.read()
     # and the single process's
-    mine = open(str(reference.home / f"level-{exponent:02d}.occupancy"), "rb").read()
+    with open(str(reference.home / f"level-{exponent:02d}.occupancy"), "rb") as stream:
+        # all of it
+        mine = stream.read()
     # match
     assert crew == mine, exponent
 # and so are the statistics, up to the order the records were merged in
 theirs = builds["covariance"].statistics
+# the same number of cells
 assert theirs.count == reference.statistics.count
+# the same smallest value
 assert theirs.min == reference.statistics.min
+# the same largest one
 assert theirs.max == reference.statistics.max
+# the same mean
 assert abs(theirs.mean - reference.statistics.mean) < 1e-9 * abs(reference.statistics.mean)
+# and the same second moment
 assert abs(theirs.m2 - reference.statistics.m2) < 1e-9 * abs(reference.statistics.m2)
 
 # a reader attaching to the crew's levels serves the same cells as one attaching to the
 # other build, over a window that holds data
 kernels = covariance.kernels
+# the pyramid the crew built
 theirs = qed.readers.nisar.pyramid(reader=gcov, dataset=covariance, workspace=workspace)
+# attach to it
 theirs.attach()
+# and to the other one
 reference.attach()
 # the window
 window = {"origin": (512, 512), "shape": (64, 64), "stride": (1, 1)}
@@ -212,6 +245,7 @@ assert kernels.sample(source=theirs.at(exponent=1), **window)[0] > 0
 
 # let go
 theirs.close()
+# both of them
 reference.close()
 
 

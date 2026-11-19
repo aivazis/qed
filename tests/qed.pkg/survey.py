@@ -52,6 +52,7 @@ assert len(reader.datasets) == len(record.findings)
 # build a reference by opening the product the blocking way, in a second reader built from
 # the same recipe the survey traveled with
 factory = qed.protocols.reader.pyre_resolveSpecification(spec=task.factory)
+# build the reference with it
 reference = factory(name="reference", **task.config)
 # make first contact
 reference.open()
@@ -64,6 +65,7 @@ assert [dict(data.selector) for data in reader.datasets] == [
 assert [tuple(data.shape) for data in reader.datasets] == [
     tuple(data.shape) for data in reference.datasets
 ]
+# the same tiling
 assert [tuple(data.tile) for data in reader.datasets] == [
     tuple(data.tile) for data in reference.datasets
 ]
@@ -74,6 +76,7 @@ assert [sorted(data.channels) for data in reader.datasets] == [
 
 # the availability map and the auto-picked selections crossed intact
 assert reader.available == reference.available
+# both of them
 assert dict(reader.selections) == dict(reference.selections)
 
 # the seed statistics crossed the wire unchanged, so the twins carry exactly what the
@@ -90,6 +93,7 @@ amplitude = twin.channel(name="amplitude").amplitude
 assert amplitude.auto is False
 # with the bounds the configuration asked for, rather than anything derived from the seed
 assert amplitude.low == -0.5
+# both of them
 assert amplitude.high == 0.5
 
 # a twin holds no payload, so nothing in this process opened the file

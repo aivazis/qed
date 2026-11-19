@@ -29,7 +29,9 @@ if os.path.lexists(actual):
     shutil.rmtree(actual)
 # make it, with a folder and a file
 os.makedirs(os.path.join(actual, "nested"))
+# an empty file at the top
 open(os.path.join(actual, "top.dat"), "w").close()
+# and another one in the folder
 open(os.path.join(actual, "nested", "inner.dat"), "w").close()
 # and a symbolic link to it
 link = os.path.join(here, "archive_symlink_link")
@@ -37,6 +39,7 @@ link = os.path.join(here, "archive_symlink_link")
 if os.path.lexists(link):
     # start clean
     os.remove(link)
+# make the link
 os.symlink(actual, link)
 
 # connect the archive through the link
@@ -47,7 +50,9 @@ entries = archive.contents(uri=qed.primitives.uri.parse(f"file:{link}"))
 assert [name for name, _, _ in entries] == ["nested", "top.dat"]
 # the folder is addressed by its resolved location
 _, nested, isFolder = entries[0]
+# and is a folder
 assert isFolder
+# addressed through its real location
 assert nested == f"file:{os.path.realpath(actual)}/nested"
 # and listing it works too
 assert [name for name, _, _ in archive.contents(uri=qed.primitives.uri.parse(nested))] == [

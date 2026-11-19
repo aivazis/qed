@@ -85,12 +85,15 @@ assert len(outcomes) == 1
 
 # an identical later request is a hit
 cached = fleet.lookup(task=build())
+# so there is something in the cache
 assert cached is not None
 # still open, since the cache owns it
 assert cached.file is not None
 # and pixel-identical to the inline reference
 mapped = cached.view()
+# byte for byte
 assert bytes(mapped) == reference
+# and release the mapping
 mapped.close()
 
 # a different request is a miss
@@ -109,6 +112,7 @@ assert (
 
 # disband the fleet, which releases the cache
 fleet.disband()
+# so the cache no longer holds the payload
 assert cached.file is None
 
 

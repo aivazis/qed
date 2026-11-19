@@ -28,12 +28,14 @@ store.open()
 # attach a fleet, so that preparation is on the table
 fleet = qed.nexus.fleet(name="qed.test.fleet")
 fleet.dispatcher = pyre.ipc.newPSL()
+# and hand it to the store
 store.fleet = fleet
 
 # select the flat raster in the first viewport
 view = store.selectSource(viewport=0, name="d16")
 # the view landed on its dataset
 assert view.dataset is not None
+# the one that belongs to the flat raster
 assert view.dataset.pyre_name == "d16.data"
 # and nothing was prepared, since a memory mapped raster has no levels
 assert store.preparation(name="d16.data") is None

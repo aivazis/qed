@@ -122,7 +122,9 @@ ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.virtual(), pfs=app.pfs
 store = ux.store
 # attach the stand-ins, the way the server wires the real fleet and event stream
 fleet = Fleet()
+# and an event stream
 notifier = Notifier()
+# hand the fleet to the store
 store.fleet = fleet
 store.notifier = notifier
 
@@ -142,11 +144,14 @@ assert notifier.count == 1
 
 # a second request while the survey is in flight is absorbed rather than duplicated
 store.stage()
+# so there is still only one request
 assert len(fleet.requests) == 1
 
 # now produce the report a worker would have sent back, by surveying in this process
 reader, callback = fleet.requests[0]
+# describe its product as a survey task and push it through the wire
 task = pickle.loads(pickle.dumps(qed.nexus.survey(reader=reader)))
+# execute it, and push the record it produces back through the wire
 record = pickle.loads(pickle.dumps(task.execute(readers={})))
 # and deliver it the way a team delivers a completed task
 callback(result=record, error=None)
@@ -166,6 +171,7 @@ assert fleet.retired == ["gslc"]
 
 # the hydrated twins hold no payload
 twin = store.dataset(name="gslc.L.A.HH")
+# so it has no data
 assert twin.data is None
 # but a peek can still read the product: the store opens a live copy on the spot, which is
 # the escape hatch that keeps the profile and the pixel peek working
@@ -179,6 +185,7 @@ store.stage(name="doomed")
 assert len(fleet.requests) == 2
 # deliver the failure the way a team reports a casualty
 reader, callback = fleet.requests[1]
+# and report the failure through it
 callback(result=None, error=qed.nexus.exceptions.RecoverableError(description="no file"))
 
 # the source is marked as failed

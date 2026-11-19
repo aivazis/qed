@@ -63,6 +63,7 @@ assert lines == (
 )
 # when an ancestor is missing instead, and there was no launching script
 plexus.pyre_home = None
+# explain a missing folder whose parent is missing too
 lines = qed.shells.qed._explainMissingAssets(plexus, prefix=prefix, missing="/opt/qed/etc")
 # the explanation names the ancestor, and credits the package with the prefix
 assert lines[2:] == (

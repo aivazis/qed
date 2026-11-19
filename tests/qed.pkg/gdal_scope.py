@@ -43,12 +43,15 @@ name = reader._vsis3(uri=reader.uri)
 assert name == "/vsis3/some-bucket/some/folder/raster.tif", name
 # gdal sees the settings for the object
 assert gdal.GetPathSpecificOption(name, "AWS_PROFILE", None) == "someone"
+# both of them
 assert gdal.GetPathSpecificOption(name, "AWS_REGION", None) == "us-east-9"
 # and for the files next to it, e.g. its overviews
 overviews = "/vsis3/some-bucket/some/folder/raster.tif.ovr"
+# they apply as well
 assert gdal.GetPathSpecificOption(overviews, "AWS_PROFILE", None) == "someone"
 # but not for anything in another folder
 elsewhere = "/vsis3/some-bucket/other/raster.tif"
+# they do not apply
 assert gdal.GetPathSpecificOption(elsewhere, "AWS_PROFILE", None) is None
 # and the environment of this process is untouched
 assert {key: os.environ.get(key) for key in before} == before

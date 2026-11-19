@@ -78,6 +78,7 @@ def miscount():
 if __name__ == "__main__":
     # run the checks
     box()
+    # and with a path that does not have exactly two anchors
     miscount()
 
 

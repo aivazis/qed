@@ -89,12 +89,14 @@ def test():
     views[0].measure.active = False
     # toggling the second viewport turns its layer off, and the first one follows it
     toggle(viewport=1)
+    # so both layers are off
     check(False, False)
 
     # take the first viewport out of the path sync group
     views[0].sync.path = False
     # and toggling the second viewport no longer affects it
     toggle(viewport=1)
+    # so its layer stays off while the second one turns on
     check(False, True)
     # all done
     return

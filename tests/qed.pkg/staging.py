@@ -75,7 +75,9 @@ result = qed.gql.schema.execute(catalog, context=context)
 assert result.errors is None
 # it finds the single passive source
 readers = result.data["qed"]["readers"]
+# exactly one
 assert len(readers) == 1
+# by its name
 assert readers[0]["name"] == "solo"
 # the source has made no contact
 assert readers[0]["status"] == "connected"
@@ -88,7 +90,9 @@ result = qed.gql.schema.execute(stage, context=context, variables={"payload": {}
 assert result.errors is None
 # it reports the source as ready
 readers = result.data["stage"]["readers"]
+# the only one
 assert len(readers) == 1
+# as ready
 assert readers[0]["status"] == "ready"
 # and the source has discovered its datasets
 assert len(store.source(name="solo").datasets) > 0

@@ -32,14 +32,16 @@ journal.warning("qed.cli").deactivate()
 
 # the scratch area
 scratch = pyre.primitives.path(__file__).parent / "build_levels.scratch"
-# start clean, by removing whatever a previous run left behind
+# start clean: if a previous run left something behind
 if scratch.exists():
+    # remove it
     shutil.rmtree(str(scratch))
-# and making the area
+# and make the area
 scratch.mkdir()
 
-# open the product without measuring it
+# make a reader for the product
 gcov = qed.readers.nisar.gcov(name="levels.gcov", uri=f"file:{product}")
+# and open it without measuring it
 gcov.open(measure=False)
 # find the covariance term
 covariance = [
@@ -81,6 +83,7 @@ def over(build, error=None):
     """
     # a failure is noted in the record
     if error is not None:
+        # by failing the record
         record.fail(error=error)
     # once they all are
     if all(build.done for build in record.builds):
@@ -110,12 +113,16 @@ for raster in (covariance, mask):
 
 # before the builds start, nothing is available
 before = record.describe()
+# the work is under way
 assert before["status"] == "working"
+# with nothing within reach
 assert before["reach"] == 0
+# started, and not finished
 assert before["started"] is not None and before["finished"] is None
 
 # start the builds
 for build in record.builds:
+    # one at a time
     build.start()
 # and run the loop until they are over
 fleet.dispatcher.watch()
@@ -143,13 +150,17 @@ for name, exponent, snapshot in snapshots:
 after = record.describe()
 # the work is done
 assert after["status"] == "ready"
+# and finished after it started
 assert after["finished"] is not None and after["finished"] >= after["started"]
 # every raster is available to the bottom of its pyramid, with nothing under construction
 for raster in after["rasters"]:
+    # within reach all the way down a pyramid deeper than one level
     assert raster["reach"] == raster["depth"] > 1, raster
+    # with no level under construction and no work left
     assert raster["level"] is None and raster["runs"] == 0 and raster["outstanding"] == 0
 # and the dataset is as deep as its shallowest raster
 assert after["depth"] == min(raster["depth"] for raster in after["rasters"])
+# and within reach all the way down
 assert after["reach"] == after["depth"]
 
 

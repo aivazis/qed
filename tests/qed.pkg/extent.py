@@ -18,6 +18,7 @@ import journal
 
 # the refusals below are reported on channels that would otherwise break the silence
 journal.warning("qed.ux.controllers").device = journal.trash()
+# and so are the errors
 journal.error("qed.ux.controllers").device = journal.trash()
 
 # load the app so the configuration in this directory is processed
@@ -46,6 +47,7 @@ _, controller = ux.store.vizUpdateController(
 )
 # lands both the picks and the extent
 assert controller is amplitude
+# with the extent and picks of the configuration
 assert (amplitude.min, amplitude.low, amplitude.high, amplitude.max) == (
     -2.0,
     -0.75,
@@ -79,6 +81,7 @@ _, controller = ux.store.vizResizeController(
 )
 # moves only the bounds
 assert controller is amplitude
+# to the new extent, with the picks inside it
 assert (amplitude.min, amplitude.low, amplitude.high, amplitude.max) == (
     -0.5,
     -0.5,
@@ -109,6 +112,7 @@ assert (amplitude.min, amplitude.low, amplitude.high, amplitude.max) == (
     0.5,
     1.0,
 )
+# and the session of the view is unchanged
 assert view.session == session
 
 # a value controller behaves the same way; an extent that leaves the pick outside
@@ -129,22 +133,30 @@ assert (saturation.min, saturation.value, saturation.max) == (0.2, 0.4, 0.6)
 _, controller = ux.store.vizResizeController(
     viewport=0, channel=channel, name="saturation", min=0.4, max=1.0
 )
+# the controller that answers is the saturation
 assert controller is saturation
+# with its bounds moved and its pick at the new floor
 assert (saturation.min, saturation.value, saturation.max) == (0.4, 0.4, 1.0)
+# and the session of the view is unchanged
 assert view.session == session
 
 # the hand edits pinned both controllers
 assert amplitude.auto is False
+# both of them
 assert saturation.auto is False
 # releasing one with no statistics on record flips the flag and leaves the bounds alone
 _, controller = ux.store.vizSetControllerAuto(
     viewport=0, channel=channel, name="saturation", auto=True
 )
+# the controller that answers is the saturation
 assert controller is saturation
+# which is released
 assert saturation.auto is True
+# with its bounds and its pick where they were
 assert (saturation.min, saturation.value, saturation.max) == (0.4, 0.4, 1.0)
 # pinning it again is just as quiet
 ux.store.vizSetControllerAuto(viewport=0, channel=channel, name="saturation", auto=False)
+# so it is pinned
 assert saturation.auto is False
 
 # seed the accumulated statistics of the dataset on display, the way rendered tiles would
@@ -159,7 +171,9 @@ ux.store._statistics[view.dataset.pyre_name] = sample
 _, controller = ux.store.vizSetControllerAuto(
     viewport=0, channel=channel, name="amplitude", auto=True
 )
+# the controller that answers is the amplitude
 assert controller is amplitude
+# which is released
 assert amplitude.auto is True
 # the top stretches to the decade above the data, in log scale
 assert amplitude.max == 4

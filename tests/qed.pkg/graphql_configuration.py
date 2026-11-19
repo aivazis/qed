@@ -47,6 +47,7 @@ def ask(query):
     )
     # feed it to a request
     request = Request()
+    # which takes all of it
     assert request.extract(server=server, chunk=head + body)
     # resolve it
     response = ux.gql.respond(store=ux.store, server=server, request=request)
@@ -71,11 +72,13 @@ components = document["data"]["server"]["configuration"]
 assert components[0]["name"] == app.pyre_name
 # and describes every component once
 names = [component["name"] for component in components]
+# so none appears twice
 assert len(names) == len(set(names)), names
 # the traits of the application
 traits = {trait["name"]: trait for trait in components[0]["traits"]}
 # include its datasets, which refer to the reader
 datasets = traits["datasets"]
+# and the reader is among them
 assert "secretive" in datasets["components"], datasets
 # which is described
 assert "secretive" in names
@@ -89,6 +92,7 @@ credentials = next(trait for trait in reader["traits"] if trait["name"] == "cred
 assert credentials["secret"] is True and credentials["value"] is None
 # while its address is there
 uri = next(trait for trait in reader["traits"] if trait["name"] == "uri")
+# marked as not secret, with its value
 assert uri["secret"] is False and "nowhere.h5" in uri["value"]
 
 

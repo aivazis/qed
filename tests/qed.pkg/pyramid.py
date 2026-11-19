@@ -56,6 +56,7 @@ def occupancy(path, extent, tile, written):
     """
     # the grid of tiles, edge tiles included
     columns = (extent[1] + tile[1] - 1) // tile[1]
+    # and the rows
     rows = (extent[0] + tile[0] - 1) // tile[0]
     # nothing written
     record = bytearray(rows * columns)
@@ -81,6 +82,7 @@ def level(dataset, name, extent, tile, written, fill):
     storage = getattr(qed.libqed.pyramid, dataset.datatype.cell)
     # the files
     tiles = str(scratch / f"{name}.tiles")
+    # and its occupancy record
     record = scratch / f"{name}.occupancy"
     # make the tile file at its full padded size
     storage.Draft.create(tiles=tiles, shape=extent, tile=tile)
@@ -89,18 +91,21 @@ def level(dataset, name, extent, tile, written, fill):
     # take hold of the file for writing, and the way a reader would; both map the same
     # file, so a tile written through the one is visible through the other
     draft = storage.Draft(tiles=tiles, shape=extent, tile=tile)
+    # and a reader
     reader = storage.Level(tiles=tiles, occupancy=str(record), shape=extent, tile=tile, fill=fill)
     # hand them off
     return draft, reader
 
 
-# open the product without measuring it; the numbers come out of the decimation
+# make a reader for the product; the numbers come out of the decimation
 reader = qed.readers.nisar.gslc(name="pyramid", uri=f"file:{product}")
+# and open it without measuring it
 reader.open(measure=False)
 # get the base dataset
 base, *_ = reader.datasets
 # its geometry
 shape = tuple(base.shape)
+# and the shape of its tiles
 tile = tuple(base.tile)
 # the kernels that read its cells
 kernels = base.kernels
@@ -176,7 +181,9 @@ strided = kernels.sample(
     shape=tile,
     stride=(4, 4),
 )
+# the second level holds every cell of the tile
 assert stored[0] == tile[0] * tile[1]
+# and matches the base strided by four
 assert stored == strided
 
 # a tile of pure fill is not written; the corner of this product is empty
@@ -206,6 +213,7 @@ class Stub:
         """
         Serve everything from the level, which owes one halving less than the request
         """
+        # all of it
         return first, tuple(step - 1 for step in zoom)
 
 
@@ -233,8 +241,9 @@ del draft, draft2, first, second
 covariances = pyre.primitives.path(__file__).parent / ".." / "data" / "nisar" / "gcov.h5"
 # if it is
 if covariances.exists():
-    # open it
+    # make a reader for it
     gcov = qed.readers.nisar.gcov(name="pyramid.gcov", uri=f"file:{covariances}")
+    # and open it without measuring it
     gcov.open(measure=False)
     # find the covariance term and its mask
     covariance = [
@@ -242,9 +251,11 @@ if covariances.exists():
         for entry in gcov.datasets
         if dict(entry.selector) == {"band": "L", "frequency": "B", "cov": "HHHH"}
     ][0]
+    # and its mask
     mask = covariance.mask
     # the covariance is real, the mask is a byte
     assert covariance.datatype.cell == "float32"
+    # and so is the mask
     assert mask.datatype.cell == "uint8"
     # the tile this driver checks, at zoom one
     where = {"zoom": (1, 1), "origin": (1024, 1024), "shape": (128, 128)}
@@ -255,6 +266,7 @@ if covariances.exists():
         """
         # the extent of the level and its tile
         extent = tuple(axis // 2 for axis in tuple(dataset.shape))
+        # and the shape of its tile
         chunk = where["shape"]
         # a cell type that cannot say "nothing" fills with what the product declared
         fill = dataset.cell.blank if dataset.cell.blank is not None else 0
@@ -297,12 +309,14 @@ if covariances.exists():
             """
             Serve everything from my one level, which owes one halving less than the request
             """
+            # all of it
             return self.first, tuple(step - 1 for step in zoom)
 
         def at(self, exponent):
             """
             Answer the exact request, which i can do at exactly one depth
             """
+            # and nothing at any other depth
             return self.first if exponent == 1 else None
 
     # the masked channel
@@ -314,14 +328,19 @@ if covariances.exists():
     # give the data a level but not the mask: the render must fall back to the base for
     # both, since a level and a full resolution mask do not pair
     covariance.pyramid = Stub(level=decimate(dataset=covariance, name="covariance"))
+    # render the tile
     guarded = bytes(memoryview(covariance.render(channel=channel, **where)))
+    # which matches the one off the base
     assert straight == guarded
     # give the mask its level too: now both come from depth one
     mask.pyramid = Stub(level=decimate(dataset=mask, name="mask"))
+    # render the tile again
     served = bytes(memoryview(covariance.render(channel=channel, **where)))
+    # which still matches
     assert straight == served
     # the product declares zero as its fill, while framing its data in nans
     assert covariance.data.dataset.fillValue == 0.0
+    # which compare unequal to themselves
     assert covariance.cell.blank != covariance.cell.blank
     # and a byte mask has no way to say "nothing"
     assert mask.cell.blank is None
@@ -329,80 +348,125 @@ if covariances.exists():
     # the pyramid proper: build the first level of the covariance in a scratch workspace
     scratchWorkspace = qed.workspaces.local(name="pyramid.companions.workspace")
     scratchWorkspace.path = str(scratch)
+    # make the pyramid
     levels = qed.readers.nisar.pyramid(reader=gcov, dataset=covariance, workspace=scratchWorkspace)
+    # and build its first level
     levels.build(depth=1)
     # the level exists: its files are there, and so is the sidecar with the statistics
     assert levels.reach() == 1
+    # the tiles
     assert (levels.home / "level-01.tiles").exists()
+    # the occupancy record
     assert (levels.home / "level-01.occupancy").exists()
+    # and the sidecar
     assert levels.sidecar.exists()
+    # with the statistics of the cells
     assert levels.statistics.count > 0
     # the corner of the product is empty: the base says so
     corner = {"origin": (0, 0), "shape": (64, 64), "stride": (1, 1)}
+    # the kernels of the covariance
     kernels = covariance.kernels
+    # find no cells there
     assert kernels.sample(source=covariance.data.dataset, **corner)[0] == 0
     # and so does the level, whose record does not name that tile
     assert kernels.sample(source=levels._levels[1], **corner)[0] == 0
     # a second pyramid over the same dataset finds the level, and the numbers, on disk
     again = qed.readers.nisar.pyramid(reader=gcov, dataset=covariance, workspace=scratchWorkspace)
+    # attach it
     again.attach()
+    # it reaches the same depth
     assert again.reach() == 1
+    # with the same number of cells
     assert again.statistics.count == levels.statistics.count
+    # and the same mean
     assert again.statistics.mean == levels.statistics.mean
     # a sidecar for another layout disowns the levels beside it: a third pyramid finds
     # nothing, and would start over
-    sidecar = json.load(open(str(levels.sidecar), "r"))
+    with open(str(levels.sidecar), "r") as stream:
+        # read the real one
+        sidecar = json.load(stream)
+    # a sidecar of another format
     stale = dict(sidecar, format=sidecar["format"] + 1)
-    json.dump(stale, open(str(levels.sidecar), "w"))
+    # written over the real one
+    with open(str(levels.sidecar), "w") as stream:
+        # in its place
+        json.dump(stale, stream)
+    # make the third pyramid
     third = qed.readers.nisar.pyramid(reader=gcov, dataset=covariance, workspace=scratchWorkspace)
+    # attach it
     third.attach()
+    # it reaches nothing
     assert third.reach() == 0
+    # it holds no level
     assert not third.holds(exponent=1)
+    # and has no statistics
     assert third.statistics.count == 0
     # and without a sidecar at all the levels are not consulted either
     os.remove(str(levels.sidecar))
+    # the level is not held
     assert not third.holds(exponent=1)
     # the layout this code reads brings them back
-    json.dump(sidecar, open(str(levels.sidecar), "w"))
+    with open(str(levels.sidecar), "w") as stream:
+        # once it is written back
+        json.dump(sidecar, stream)
+    # attach again
     third.attach()
+    # and the level is within reach
     assert third.reach() == 1
     # let go
     levels.close()
+    # all of them
     again.close()
+    # the third one too
     third.close()
+    # and take the pyramids off the datasets
     covariance.pyramid = None
+    # both of them
     mask.pyramid = None
 
 # a pyramid with no levels serves everything off the base, owing the whole zoom
 workspace = qed.workspaces.local(name="pyramid.workspace")
+# make the pyramid
 pyramid = qed.readers.nisar.pyramid(reader=reader, dataset=base, workspace=workspace)
 # the extent supports several halvings
 assert pyramid.depth() > 1
 # a symmetric request
 source, residual = pyramid.level(zoom=(3, 3))
+# the source is the base
 assert source is base.data.dataset
+# owing the whole zoom
 assert residual == (3, 3)
 # full resolution
 source, residual = pyramid.level(zoom=(0, 0))
+# the source is the base
 assert source is base.data.dataset
+# owing nothing
 assert residual == (0, 0)
 # an asymmetric one
 source, residual = pyramid.level(zoom=(3, 1))
+# the source is the base
 assert source is base.data.dataset
+# owing the whole zoom
 assert residual == (3, 1)
 
 # the cache is named after the product, not the reader: a second reader of the same file
 # under another name lands on the same directory
 other = qed.readers.nisar.gslc(name="pyramid.other", uri=f"file:{product}")
+# open it without measuring it
 other.open(measure=False)
+# get its base dataset
 twin, *_ = other.datasets
+# which has a name of its own
 assert twin.pyre_name != base.pyre_name
+# yet its pyramid lives in the same place
 assert (
     qed.readers.nisar.pyramid(reader=other, dataset=twin, workspace=workspace).home == pyramid.home
 )
 # the default workspace is the current directory
 assert str(workspace.path) == "."
+# its cache of pyramids is in there
 assert str(workspace.cache(name="pyramids")) == "./.qed/pyramids"
+# and so is the home of this pyramid
 assert str(pyramid.home).startswith("./.qed/pyramids/")
 # nothing was built there, so the cache is empty
 assert os.listdir("./.qed/pyramids") == []
@@ -410,13 +474,18 @@ assert os.listdir("./.qed/pyramids") == []
 # a workspace that cannot make its cache says so, and makes nothing
 stray = qed.workspaces.local(name="pyramid.stray")
 stray.path = "no/such/place"
+# the complaint is not fatal
 journal.error("qed.workspace").fatal = False
+# and is expected, so keep it quiet
 journal.error("qed.workspace").deactivate()
+# no cache
 assert stray.cache(name="pyramids") is None
+# and nothing made
 assert not os.path.exists("no")
 
 # the app owns a workspace
 app = qed.shells.qed(name="pyramid.app")
+# a local one
 assert isinstance(app.workspace, qed.workspaces.local)
 
 

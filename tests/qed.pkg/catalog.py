@@ -60,6 +60,7 @@ class Dataset:
 registry = Sources()
 # and register three products, in the order a configuration file would list them
 for tag in ("first", "second", "third"):
+    # each with a dataset of its own
     registry.addSource(source=Source(name=tag, datasets=[Dataset(name=f"{tag}.data")]))
 # which is the order it reports them in
 assert [source.pyre_name for source in registry.sources()] == [
@@ -79,11 +80,14 @@ assert [source.pyre_name for source in registry.sources()] == [
 ]
 # and the index must carry what the survey found rather than what stood there before
 names = {dataset.pyre_name for dataset in registry.datasets()}
+# so the dataset the survey discovered is there
 assert "second.discovered" in names
+# and the one that stood there before is gone
 assert "second.data" not in names
 
 # let them all report back, in an order no configuration file would produce
 for tag in ("third", "first", "second"):
+    # each with a dataset of its own
     registry.addSource(source=Source(name=tag, datasets=[Dataset(name=f"{tag}.data")]))
 # the catalog still reflects the configuration rather than the finishing order
 assert [source.pyre_name for source in registry.sources()] == [
@@ -94,9 +98,11 @@ assert [source.pyre_name for source in registry.sources()] == [
 
 # a source that genuinely departs does leave
 registry.removeSource(name="second")
+# so it is gone from the catalog
 assert [source.pyre_name for source in registry.sources()] == ["first", "third"]
 # and taking its place at the end is then correct, since it is a new arrival
 registry.addSource(source=Source(name="second", datasets=[]))
+# so it is listed last
 assert [source.pyre_name for source in registry.sources()] == [
     "first",
     "third",

@@ -89,6 +89,7 @@ team.dispatcher.alarm(interval=1 * second, call=expire)
 team.dispatcher.watch()
 # the task was delivered and the member is parked
 assert outcomes[0] == ("echo", None)
+# with the member parked as idle
 assert len(team.idle) == 1
 
 # phase 2: kill the parked member and, before the loop can notice, hand it more work

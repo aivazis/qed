@@ -46,6 +46,7 @@ def setMembers():
 
     # turning every member off would empty the stack, so it is rejected
     calls = []
+    # a stand-in for a view over a stack of two members, which records each re-resolution
     standin = types.SimpleNamespace(members=[True, True], resolve=lambda: calls.append(1))
     # ask to turn everyone off
     setter(standin, members=[False, False])

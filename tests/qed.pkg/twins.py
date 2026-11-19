@@ -69,6 +69,7 @@ for index, (family, cell, seed) in enumerate(flavors):
 # the unwrapped flavor is the one that would break under a uniform seed, so check that its
 # per-band records reached the right controllers; give the two bands distinct statistics
 amplitudeBand = (0.0, 2.0, 10.0)
+# and the phase band another
 phaseBand = (-3.0, 0.0, 3.0)
 # resolve the flavor
 factory = qed.protocols.dataset.pyre_resolveSpecification(spec="qed.datasets.isce2.unw")

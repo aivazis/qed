@@ -43,6 +43,7 @@ def test():
     band = qed.readers.native.datasets.gdal(name="peek.gdal", rid=0, dataset=raster)
     # the summary of its cell type names a channel the band does not have
     assert "abs" in band.cell.summary
+    # so the band does not have it
     assert "abs" not in band.channels
 
     # peek at a cell, collecting the representations each channel produces
@@ -51,6 +52,7 @@ def test():
     assert "cursor" in reps
     # and so is the value, read from the right cell
     assert "value" in reps
+    # which holds the value written there
     assert float(reps["value"][0][0]) == 3 * SAMPLES + 5
     # but nothing about the channel the band does not have
     assert "abs" not in reps

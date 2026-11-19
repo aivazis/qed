@@ -76,6 +76,7 @@ def query(document, variables=None):
 
 # the listing shows the channel the device has heard, with its live state
 channels = query(listing)["qed"]["journal"]
+# with its severity, its name, and its state
 assert channels == [
     {
         "id": "info:qed.test.channels.spoken",
@@ -88,9 +89,11 @@ assert channels == [
 
 # a debug channel nobody has heard of is off
 name = "qed.test.channels.quiet"
+# so it is off
 assert not journal.debug(name).active
 # turn it on
 payload = {"severity": "debug", "name": name, "active": True}
+# by asking for it
 channel = query(toggle, variables={"payload": payload})["journalChannelSet"]["channel"]
 # the mutation reports the new state
 assert channel == {
@@ -104,6 +107,7 @@ assert channel == {
 assert journal.debug(name).active
 # and the fleet was told, so running crew members follow
 assert len(instructions) == 1
+# with the instruction for this channel
 assert (instructions[0].severity, instructions[0].name, instructions[0].active) == (
     "debug",
     name,
@@ -111,20 +115,25 @@ assert (instructions[0].severity, instructions[0].name, instructions[0].active) 
 )
 # and the channel joined the census, so the listing shows it from now on
 channels = query(listing)["qed"]["journal"]
+# in order
 assert [(channel["severity"], channel["name"]) for channel in channels] == [
     ("debug", name),
     ("info", "qed.test.channels.spoken"),
 ]
 # turn it back off
 payload["active"] = False
+# by asking for it
 channel = query(toggle, variables={"payload": payload})["journalChannelSet"]["channel"]
+# the mutation reports the new state
 assert channel["active"] is False
+# and the live channel agrees
 assert not journal.debug(name).active
 
 # a severity the journal does not have is refused
 result = qed.gql.schema.execute(
     toggle, context=context, variables={"payload": {**payload, "severity": "gossip"}}
 )
+# with an error
 assert result.errors
 
 

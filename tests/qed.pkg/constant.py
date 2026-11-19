@@ -33,6 +33,7 @@ log.autotune(stats=zeros)
 assert (log.min, log.low, log.high, log.max) == configured
 # a sample with a zero floor but a positive ceiling is fine: the floor gets clipped
 log.autotune(stats=(0.0, 0.5, 2.0))
+# and the picks and bounds are in order
 assert log.min < log.low < log.high < log.max
 
 # a linear range controller pretends the data spans a unit interval around the value
@@ -41,12 +42,15 @@ linear = qed.controllers.linearRange(name="constant_linear")
 linear.autotune(stats=zeros)
 # the picks are distinct and bracket the value
 assert linear.low < 0.0 < linear.high
+# a unit apart
 assert linear.high - linear.low == 1.0
 # and the bounds enclose the picks with room to move
 assert linear.min < linear.low and linear.high < linear.max
 # the same holds away from zero
 linear.autotune(stats=(3.0, 3.0, 3.0))
+# the picks bracket the value
 assert linear.low < 3.0 < linear.high
+# and the bounds enclose them
 assert linear.min < linear.low and linear.high < linear.max
 
 # an all-zero raster, the way a user would meet one: a 65x65 complex file of nothing

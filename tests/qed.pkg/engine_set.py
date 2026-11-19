@@ -29,16 +29,21 @@ def test():
     journal.warning("qed.ux.engines").deactivate()
     # build the app and the store over the configuration of this directory
     app = qed.shells.qed(name="qed.app")
+    # the dispatcher of its user interface
     ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.virtual(), pfs=app.pfs)
+    # its store
     store = ux.store
+    # and make first contact
     store.open()
     # the reader, and the view of the first viewport
     reader, *_ = store.sources
+    # the view of the first viewport
     view = store._viewports[0].view()
     # show the amplitude of its dataset
     list(store.channelSet(viewport=0, source=reader.pyre_name, tag="amplitude"))
     # the channel the view shows
     channel = view.channel
+    # is the amplitude
     assert channel.tag == "amplitude"
 
     # the amplitude of complex cells in host byte order has a pipeline that can draw them
@@ -48,25 +53,33 @@ def test():
 
     # switch to the iterators
     session = view.session
+    # ask for the iterators
     (changed,) = store.engineSet(viewport=0, engine="iterators")
     # the store hands back the view it changed
     assert changed is view
     # which now draws with the iterators
     assert view.engine() == "iterators"
+    # and so does its channel
     assert channel.engine == "iterators"
     # and asks for its tiles again
     assert view.session != session
 
     # and back to the pipeline
     session = view.session
+    # switch
     store.engineSet(viewport=0, engine="flow")
+    # the view draws with the pipeline again
     assert view.engine() == "flow"
+    # and asks for its tiles again
     assert view.session != session
 
     # an engine nobody knows changes nothing
     session = view.session
+    # ask for it
     store.engineSet(viewport=0, engine="gpu")
+    # the view still draws with the pipeline
     assert view.engine() == "flow"
+    # and keeps its tiles
     assert view.session == session
 
     # the pipeline decides from the description of a dataset alone: cells in the host's order
@@ -84,14 +97,19 @@ def test():
     view.channel.flows = lambda source: False
     # draws with the iterators whatever its engine says
     assert not view.flowable()
+    # so the view draws with the iterators
     assert view.engine() == "iterators"
     # pick the iterators
     store.engineSet(viewport=0, engine="iterators")
     # and asking for the pipeline is refused, leaving the tiles alone
     session = view.session
+    # ask for the pipeline
     store.engineSet(viewport=0, engine="flow")
+    # the channel keeps the iterators
     assert channel.engine == "iterators"
+    # and so does the view
     assert view.engine() == "iterators"
+    # which keeps its tiles
     assert view.session == session
 
     # all done

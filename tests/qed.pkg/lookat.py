@@ -24,25 +24,35 @@ def center():
     """
     # a fresh center sits at the origin and is clean
     point = qed.ux.center(name="lookat.center")
+    # on the first axis
     assert point.row == 0
+    # and the second
     assert point.col == 0
+    # and clean
     assert point.dirty is False
 
     # moving it marks it dirty
     point.row = 12.5
     point.col = 34.0
+    # so it is dirty
     assert point.dirty is True
 
     # a clone carries the same place
     twin = point.clone()
+    # on the first axis
     assert twin.row == 12.5
+    # and the second
     assert twin.col == 34.0
 
     # a reset to a set of defaults restores the place and marks it clean
     defaults = types.SimpleNamespace(row=0, col=0)
+    # reset it
     point.reset(defaults=defaults)
+    # the place is back at the origin
     assert point.row == 0
+    # on both axes
     assert point.col == 0
+    # and the center is clean
     assert point.dirty is False
 
     # all done
@@ -62,6 +72,7 @@ def lookAt():
     result = setter(standin, row=42.0, col=7.0)
     # the center moved
     assert standin.center.row == 42.0
+    # on both axes
     assert standin.center.col == 7.0
     # and the mutator returns the view, for chaining
     assert result is standin
@@ -91,9 +102,13 @@ def storeLookAt():
 
         # its look-at delegate records the call and moves the center
         def portLookAt(row, col):
+            # record the call
             calls.append(tag)
+            # move the center
             view.center.row = row
+            # on both axes
             view.center.col = col
+            # and hand back the view
             return view
 
         # hand back the port
@@ -116,9 +131,11 @@ def storeLookAt():
     assert calls == [1]
     # the first viewport stayed at the origin
     assert ports[0]._view.center.row == 0
+    # on both axes
     assert ports[0]._view.center.col == 0
     # the second viewport moved
     assert ports[1]._view.center.row == 100.0
+    # on both axes
     assert ports[1]._view.center.col == 200.0
     # and the returned center is the second viewport's
     assert result is ports[1]._view.center
@@ -126,6 +143,7 @@ def storeLookAt():
     # start over, with three viewports: two that scroll in sync, with offsets (x, y), and one that
     # does not
     calls.clear()
+    # make them
     ports = [makePort(0, True, (5, 3)), makePort(1, True, (1, 1)), makePort(2, False, (0, 0))]
     # aim the second one
     result = setter(makeStore(ports), viewport=1, row=100.0, col=200.0)
