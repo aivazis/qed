@@ -253,10 +253,12 @@ reference = bytes(
 task = pickle.loads(pickle.dumps(task))
 # with an empty registry of readers, so the reader is rebuilt from the recipe
 spool = task.execute(readers={})
-# read the payload back
-spool.file.seek(0)
+# map the payload
+mapped = spool.view()
 # get the bytes of the tile
-tile = spool.file.read()
+tile = bytes(mapped)
+# release the mapping
+mapped.close()
 # and let go of the spool
 spool.close()
 # the worker render matches the inline reference

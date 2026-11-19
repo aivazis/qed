@@ -40,10 +40,12 @@ view = types.SimpleNamespace(reader=reader, dataset=dataset)
 
 # a region inside the raster, with uneven sides
 origin = (0, 0)
+# and as large as the raster allows
 shape = tuple(min(extent, size) for extent, size in zip(dataset.shape, (64, 48)))
 
 # the picture the kernel makes in place
 data, _, _ = dataset.resolve(zoom=(0, 0))
+# for the region
 reference = bytes(
     memoryview(qed.libqed.nisar.slc.fft(source=data, origin=origin, shape=shape, range=60))
 )
@@ -57,10 +59,13 @@ task = pickle.loads(pickle.dumps(task))
 spool = task.execute(readers={})
 # the picture is parked in a spool of the right size
 assert spool.size == len(reference), (spool.size, len(reference))
-# read the payload back
-spool.file.seek(0)
-picture = spool.file.read()
-# and release the spool
+# map the payload
+mapped = spool.view()
+# read it back
+picture = bytes(mapped)
+# release the mapping
+mapped.close()
+# and the spool
 spool.close()
 # the worker made the same picture
 assert picture == reference
@@ -73,13 +78,20 @@ assert task != qed.nexus.spectrum(view=view, origin=origin, shape=shape, range=4
 assert task != qed.nexus.spectrum(view=view, origin=(1, 0), shape=shape)
 # or one whose region is tapered first
 tapered = qed.nexus.spectrum(view=view, origin=origin, shape=shape, taper=True)
+# is a different request
 assert task != tapered
 
 # a tapered region makes the picture the kernel makes when asked to taper
 spool = tapered.execute(readers={})
-spool.file.seek(0)
-picture = spool.file.read()
+# map the payload
+mapped = spool.view()
+# read it back
+picture = bytes(mapped)
+# release the mapping
+mapped.close()
+# and the spool
 spool.close()
+# check it against the one the kernel makes in place
 assert picture == bytes(
     memoryview(
         qed.libqed.nisar.slc.fft(
@@ -96,6 +108,7 @@ assert picture == bytes(
 # rather than measurements; the fill carries no energy, so the picture is black throughout; a
 # region that is only partly fill is checked by the tests of the library
 assert set(reference[54:]) == {0}, set(reference[54:])
+# and so is the picture the worker made
 assert set(picture[54:]) == {0}, set(picture[54:])
 
 # a region longer than the limit is refused by the kernel; keep its report out of the output

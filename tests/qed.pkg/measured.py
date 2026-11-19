@@ -87,9 +87,12 @@ def dispatch(reader, dataset, tag, readers):
     task = pickle.loads(pickle.dumps(task))
     # execute it on a reader rebuilt from the recipe it carries
     spool = task.execute(readers=readers)
-    # read the payload back
-    spool.file.seek(0)
-    tile = spool.file.read()
+    # map the payload
+    mapped = spool.view()
+    # read it back
+    tile = bytes(mapped)
+    # release the mapping
+    mapped.close()
     # release the spool
     spool.close()
     # hand back the tile and the task that produced it
@@ -121,6 +124,7 @@ def test():
         assert dataset.channel(name=tag).mean == dataset.stats[0][1]
         # the tile a worker renders matches the one produced here
         tile, task = dispatch(reader=reader, dataset=dataset, tag=tag, readers=readers)
+        # and the one rendered here
         assert tile == render(dataset=dataset, tag=tag)
         # and the measurement is part of what makes this request what it is
         assert task.stats is not None
@@ -131,9 +135,11 @@ def test():
     amplitude, phase = dataset.stats
     # a mean an order of magnitude off, with the bounds left alone
     low, mean, high = amplitude
+    # and seed the dataset with it
     dataset.measure(seed=[(low, 10 * mean, high), phase])
     # every channel followed the new numbers
     for tag in TAGS:
+        # and so does the mean of every channel
         assert dataset.channel(name=tag).mean == 10 * mean
 
     # the worker must follow them too, on the reader it already holds from the round above
@@ -144,7 +150,9 @@ def test():
         assert tile == render(dataset=dataset, tag=tag)
         # the worker's own copy of the dataset adopted the seed rather than sampling
         (twin,) = readers["measured"].datasets
+        # with the mean of the seed
         assert twin.stats[0][1] == 10 * mean
+        # and so did its channels
         assert twin.channel(name=tag).mean == 10 * mean
 
     # all done
