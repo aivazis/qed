@@ -105,10 +105,12 @@ kernels = qed.libqed.nisar.cells.float32
 
 # the files
 tiles = "pyramid.tiles"
+# and the record of the tiles that were written
 occupancy = "pyramid.occupancy"
 # a level of 7x9 cells diced into 3x4 tiles: a 3x3 grid of tiles, with padding on both
 # trailing edges
 shape = (7, 9)
+# and the shape of its tiles
 tile_ = (3, 4)
 # the fill
 fill = float("nan")
@@ -129,7 +131,9 @@ storage.Draft.create(tiles=tiles, shape=shape, tile=tile_)
 draft = storage.Draft(tiles=tiles, shape=shape, tile=tile_)
 # the layout must be what we asked for
 assert draft.shape == shape
+# with tiles of the requested shape
 assert draft.tile == tile_
+# laid out in a 3x3 grid
 assert draft.tiles == (3, 3)
 # write the interior tile at the origin
 draft.write(origin=(0, 0), data=window(origin=(0, 0), shape=(3, 4)))
@@ -139,17 +143,22 @@ draft.write(origin=(3, 8), data=window(origin=(3, 8), shape=(3, 1)))
 draft.write(origin=(6, 4), data=window(origin=(6, 4), shape=(1, 4)))
 # a buffer of the wrong cell type is refused
 try:
+    # write a buffer of doubles into the draft of floats
     draft.write(origin=(0, 0), data=grid.heap(shape=[3, 4], cell="float64"))
 except ValueError:
+    # which is the expected outcome
     pass
 else:
+    # while anything else is a failure
     raise AssertionError("a float64 buffer was accepted by a float32 draft")
 # name the tiles that were written, in tile order
 with open(occupancy, "wb") as record:
+    # the first tile, the last one in the middle row, and the middle one in the last row
     record.write(bytes([1, 0, 0, 0, 0, 1, 0, 1, 0]))
 
 # what a reader should see: the written tiles, and fill everywhere else
 written = [((0, 0), (3, 4)), ((3, 8), (3, 1)), ((6, 4), (1, 4))]
+# cell by cell
 expected = [
     [
         (
@@ -166,17 +175,25 @@ expected = [
 level = storage.Level(tiles=tiles, occupancy=occupancy, shape=shape, tile=tile_, fill=fill)
 # the layout must match
 assert level.shape == shape
+# the tiles
 assert level.tile == tile_
+# the grid of tiles
 assert level.tiles == (3, 3)
+# and the fill
 assert math.isnan(level.fill)
 # the occupancy record must be honored
 assert level.occupied(tile=(0, 0))
+# and so is the edge tile in the middle row
 assert level.occupied(tile=(1, 2))
+# and the one in the last row
 assert level.occupied(tile=(2, 1))
+# but not the tile in the middle, which was never written
 assert not level.occupied(tile=(1, 1))
 # a cell in a written tile is held, one outside the extent is not
 assert level.holds(cell=(5, 8))
+# a cell past the trailing column is not
 assert not level.holds(cell=(3, 9))
+# and neither is a cell in a tile that was never written
 assert not level.holds(cell=(0, 4))
 
 # read the whole level at unit stride
@@ -198,6 +215,7 @@ assert same(
 )
 # a destination of the wrong shape is refused
 try:
+    # read into a destination that is too small for the tile
     level.read(
         destination=grid.heap(shape=[2, 2], cell="float32"),
         origin=(0, 0),
@@ -205,18 +223,23 @@ try:
         stride=(1, 1),
     )
 except ValueError:
+    # which is the expected outcome
     pass
 else:
+    # while anything else is a failure
     raise AssertionError("a 2x2 destination was accepted for a 3x3 tile")
 
 # the cells of every other row and column, as a dense grid of their own
 decimated = pick(expected, origin=(0, 0), shape=(4, 5), stride=(2, 2))
+# laid out as a grid of its own
 reference = tile(
     cell="float32", rows=4, columns=5, values=[cell for row in decimated for cell in row]
 )
 # the sample kernel over the level must agree with the native one over the cells
 record = kernels.sample(source=level, origin=(0, 0), shape=(4, 5), stride=(2, 2))
+# and the native kernel over the dense grid
 native = qed.libqed.native.sample(source=reference, origin=(0, 0), shape=(4, 5), stride=(1, 1))
+# must agree
 assert record == native
 # and so must a render
 bmp = qed.libqed.nisar.real.value(
@@ -227,13 +250,16 @@ bmp = qed.libqed.nisar.real.value(
     min=0.0,
     max=608.0,
 )
+# and the native one over the dense grid
 native = qed.libqed.native.channels.value(
     source=reference, origin=(0, 0), shape=(4, 5), stride=(1, 1), min=0.0, max=608.0
 )
+# must produce the same bitmap
 assert memoryview(bmp).tobytes() == memoryview(native).tobytes()
 
 # the next level up is built by decimating this one into a draft
 above = "above.tiles"
+# and the record of its tiles
 aboveOccupancy = "above.occupancy"
 # half the extent on each axis
 aboveShape = (3, 4)
@@ -251,14 +277,17 @@ record = kernels.decimate(
 )
 # the record describes the cells that were moved
 native = qed.libqed.native.sample(source=reference, origin=(0, 0), shape=aboveShape, stride=(1, 1))
+# the same record the native kernel produces
 assert record == native
 # the tile held something, so it was written
 with open(aboveOccupancy, "wb") as record:
+    # its only tile
     record.write(bytes([1]))
 # read it back
 levelAbove = storage.Level(
     tiles=above, occupancy=aboveOccupancy, shape=aboveShape, tile=tile_, fill=fill
 )
+# and check it holds every other cell of the level below
 assert same(
     read(levelAbove, origin=(0, 0), shape=aboveShape, stride=(1, 1)),
     pick(decimated, origin=(0, 0), shape=aboveShape, stride=(1, 1)),
