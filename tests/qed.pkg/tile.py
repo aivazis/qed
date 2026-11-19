@@ -53,11 +53,11 @@ spool = task.execute(readers={})
 # the render is parked in a spool of the right size
 assert spool.size == len(reference)
 # map the payload
-view = spool.view()
+mapped = spool.view()
 # read it back
-tile = bytes(view)
+tile = bytes(mapped)
 # release the mapping
-view.close()
+mapped.close()
 # and the spool
 spool.close()
 # check that the worker render matches the reference

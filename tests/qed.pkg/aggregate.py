@@ -99,11 +99,11 @@ task = pickle.loads(pickle.dumps(task))
 # rebuilt from the recipe with their own file handles
 spool = task.execute(readers={})
 # map the payload
-view = spool.view()
+mapped = spool.view()
 # read it back
-tile = bytes(view)
+tile = bytes(mapped)
 # release the mapping
-view.close()
+mapped.close()
 # and the spool
 spool.close()
 # the worker render matches the inline reference
