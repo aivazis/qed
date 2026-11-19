@@ -57,6 +57,8 @@ struct ServerWindow: View {
 
     // the position of the view on the screen; the iPad picks its own, starting with the first
     @State private var active = 0
+    // whether the controls of the view are on the screen
+    @State private var controls = false
 
     // the contents
     var body: some View {
@@ -64,9 +66,18 @@ struct ServerWindow: View {
             ConnectionView(stream: stream, store: store, active: $active)
         } detail: {
             if let viewport = store.views.first(where: { $0.index == active }) {
+                // the view, with its controls beside it when they are asked for
                 Viewer(viewport: viewport, store: store, tiles: tiles)
                     .navigationTitle(viewport.view.reader?.name ?? viewport.view.name)
                     .navigationBarTitleDisplayMode(.inline)
+                    .inspector(isPresented: $controls) {
+                        Controls(viewport: viewport, store: store)
+                    }
+                    .toolbar {
+                        Button("Controls", systemImage: "slider.horizontal.3") {
+                            controls.toggle()
+                        }
+                    }
             } else {
                 ContentUnavailableView(
                     "No view", systemImage: "rectangle.dashed",
