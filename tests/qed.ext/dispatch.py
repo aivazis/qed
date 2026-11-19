@@ -82,6 +82,7 @@ for cell in ("complex64", "complex128"):
     count, low, mean, m2, high = native.sample(source=z, origin=(0, 0), shape=(2, 2), stride=(1, 1))
     # four samples spanning 0 to 10, with mean 15/4 and the matching second moment
     assert (count, low, high) == (4.0, 0.0, 10.0) and abs(mean - 3.75) < 1e-6
+    # and the second moment about the mean
     assert abs(m2 - 68.75) < 1e-6
 
 # the real valued channels render every integer width, signed and unsigned
