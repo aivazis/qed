@@ -41,10 +41,15 @@ final class Store {
     private var stale = false
     // whoever is waiting for the copy to catch up
     private var waiting: [CheckedContinuation<Void, Never>] = []
+    // the kinds of change with one in flight
+    private var busy: Set<String> = []
+    // the latest change of each kind asked for while one of its kind was in flight
+    private var next: [String: () async throws -> Void] = [:]
+
     // whether a move of a view is in flight
-    private(set) var moving = false
-    // the latest move asked for while one was in flight
-    private var nextMove: ViewMutations.LookAt? = nil
+    var moving: Bool {
+        busy.contains("lookAt")
+    }
 
     /// Keep a copy of the state of the server that {client} talks to
     init(client: Client) {
@@ -118,43 +123,108 @@ final class Store {
         }
     }
 
-    /// Put the pixel at {row} and {col} of its dataset at the center of the view at {viewport}
+    /// Send the change {work} of the {kind}, paced: at most one change of a kind is in flight,
+    /// the latest one asked for while it is waits behind it, and the ones in between are dropped
     ///
-    /// Moves come far faster than the server answers, so at most one is in flight; the latest
-    /// one asked for while it is waits behind it, and the ones in between are dropped
-    func lookAt(viewport: Int, row: Double, col: Double) {
-        // the move
-        let move = ViewMutations.LookAt(viewport: viewport, row: row, col: col)
-        // if one is in flight, this one is next
-        guard !moving else {
-            nextMove = move
+    /// A finger moves a view or a slider far faster than the server answers, and only where it
+    /// comes to rest matters, so that one is never dropped
+    func pace(_ kind: String, _ work: @escaping () async throws -> Void) {
+        // if a change of this kind is in flight, this one is next
+        guard !busy.contains(kind) else {
+            next[kind] = work
             return
         }
         // otherwise, send it
-        moving = true
+        busy.insert(kind)
         Task {
-            await send(move)
+            await send(kind, work)
         }
     }
 
-    /// Send {move}, and then whatever move was asked for while it was on its way
-    private func send(_ move: ViewMutations.LookAt) async {
-        // send moves until none are waiting
-        var pending: ViewMutations.LookAt? = move
+    /// Send {work}, and then whatever change of the same {kind} was asked for while it was on
+    /// its way
+    private func send(_ kind: String, _ work: @escaping () async throws -> Void) async {
+        // send changes until none are waiting
+        var pending: (() async throws -> Void)? = work
         while let current = pending {
             do {
-                _ = try await client.run(ViewMutations.lookAt, input: current)
+                try await current()
             } catch {
-                // say why the move failed, and go on to the next one regardless, so a passing
+                // say why the change failed, and go on to the next one regardless, so a passing
                 // failure does not strand the view where it was
                 problem = String(describing: error)
             }
             // take the next one, if any
-            pending = nextMove
-            nextMove = nil
+            pending = next.removeValue(forKey: kind)
         }
-        // nothing is in flight anymore
-        moving = false
+        // nothing of this kind is in flight anymore
+        busy.remove(kind)
+    }
+
+    /// Send {input} to the server through {mutation} right away, reporting a failure
+    private func change<Input, Answer>(_ mutation: Mutation<Input, Answer>, _ input: Input) {
+        Task {
+            do {
+                _ = try await client.run(mutation, input: input)
+            } catch {
+                problem = String(describing: error)
+            }
+        }
+    }
+
+    /// Put the pixel at {row} and {col} of its dataset at the center of the view at {viewport}
+    func lookAt(viewport: Int, row: Double, col: Double) {
+        let input = ViewMutations.LookAt(viewport: viewport, row: row, col: col)
+        pace("lookAt") { [client] in
+            _ = try await client.run(ViewMutations.lookAt, input: input)
+        }
+    }
+
+    /// Set the zoom of the view at {viewport} to {vertical} and {horizontal} as a slider moves
+    func slideZoom(viewport: Int, vertical: Double, horizontal: Double) {
+        let input = ViewMutations.SetZoom(viewport: viewport, vertical: vertical, horizontal: horizontal)
+        pace("zoom") { [client] in
+            _ = try await client.run(ViewMutations.setZoom, input: input)
+        }
+    }
+
+    /// Let the zoom of the view at {viewport} move along both axes together, or each on its own
+    func toggleCoupled(viewport: Int) {
+        change(ViewMutations.toggleCoupled, ViewMutations.Viewport(viewport: viewport))
+    }
+
+    /// Put the zoom of the view at {viewport} back where it started
+    func resetZoom(viewport: Int) {
+        change(ViewMutations.resetZoom, ViewMutations.Viewport(viewport: viewport))
+    }
+
+    /// Show the channel {tag} of the dataset of {reader} in the view at {viewport}
+    func setChannel(viewport: Int, reader: String, tag: String) {
+        change(ViewMutations.setChannel, ViewMutations.SetChannel(viewport: viewport, reader: reader, value: tag))
+    }
+
+    /// Set a range controller as {input} says, as a slider moves
+    func setRange(_ input: ViewMutations.SetRange) {
+        pace("range.\(input.controller)") { [client] in
+            _ = try await client.run(ViewMutations.setRange, input: input)
+        }
+    }
+
+    /// Set a value controller as {input} says, as a slider moves
+    func setValue(_ input: ViewMutations.SetValue) {
+        pace("value.\(input.controller)") { [client] in
+            _ = try await client.run(ViewMutations.setValue, input: input)
+        }
+    }
+
+    /// Let a controller follow the data, or hold it where it is
+    func setAuto(_ input: ViewMutations.SetAuto, range: Bool) {
+        change(range ? ViewMutations.setRangeAuto : ViewMutations.setValueAuto, input)
+    }
+
+    /// Put a controller back where it started
+    func reset(_ input: ViewMutations.Slot, range: Bool) {
+        change(range ? ViewMutations.resetRange : ViewMutations.resetValue, input)
     }
 
     /// Set the zoom of the view at {viewport} to the levels {vertical} and {horizontal}, and come
