@@ -24,7 +24,14 @@ let stateAnswer = """
             "shape": [17280, 17496], "origin": [0, 0],
             "channels": [{"tag": "covariance"}, {"tag": "covarianceMasked"}]
         },
-        "channel": {"tag": "covarianceMasked"},
+        "channel": {
+            "tag": "covarianceMasked",
+            "name": "5f94ab5c.gcov-033_166_D_069-P05023.L.A.HHHH.covarianceMasked",
+            "controllers": [{
+                "__typename": "RangeController", "slot": "amplitude", "auto": true,
+                "min": -2.0, "max": 5.0, "low": -1.6553355868503854, "high": 0.03486049317812839
+            }]
+        },
         "zoom": {"vertical": -2.0, "horizontal": -2.0, "coupled": true}
     }]}}}
     """
@@ -46,6 +53,26 @@ let stateAnswer = """
     #expect(view.dataset?.shape == [17280, 17496])
     #expect(view.dataset?.channels?.compactMap { $0?.tag } == ["covariance", "covarianceMasked"])
     #expect(view.zoom?.vertical == -2 && view.zoom?.horizontal == -2 && view.zoom?.coupled == true)
+}
+
+/// The controllers of a channel read with their kind, their slot, and their state
+@Test func decodesTheControllers() throws {
+    // read the answer
+    let answer = try Client.decode(StateQuery.Answer.self, from: Data(stateAnswer.utf8))
+    let view = try #require(answer.qed?.views?.first ?? nil)
+    // the channel carries its full name
+    #expect(view.channel?.name == "5f94ab5c.gcov-033_166_D_069-P05023.L.A.HHHH.covarianceMasked")
+    // and its one controller, a range that follows the data
+    let controllers = view.channel?.controllers ?? []
+    try #require(controllers.count == 1)
+    let controller = try #require(controllers[0])
+    #expect(controller.kind == "RangeController")
+    #expect(controller.slot == "amplitude")
+    #expect(controller.auto == true)
+    #expect(controller.min == -2 && controller.max == 5)
+    #expect(controller.low == -1.6553355868503854 && controller.high == 0.03486049317812839)
+    // with no single value, which only value controllers have
+    #expect(controller.value == nil)
 }
 
 /// A view that shows nothing yet still reads, with its missing parts left empty
