@@ -25,10 +25,18 @@ struct Server: Sendable {
         self.token = token
     }
 
-    /// Make a request for {path}, asking for an answer of the {accept} kind when one is given
-    func request(for path: String, accept: String? = nil) -> URLRequest {
-        // resolve the path against the address of the server
-        var request = URLRequest(url: base.appending(path: path))
+    /// Make a request for {path} with the parameters in {query}, asking for an answer of the
+    /// {accept} kind when one is given
+    func request(
+        for path: String, query: [URLQueryItem] = [], accept: String? = nil
+    ) -> URLRequest {
+        // resolve the path against the address of the server, and attach the parameters
+        var url = base.appending(path: path)
+        if !query.isEmpty {
+            url.append(queryItems: query)
+        }
+        // make the request
+        var request = URLRequest(url: url)
         // ask for the kind of answer the caller wants; some proxies decide by it whether to
         // stream the answer or hold it until it is complete
         if let accept {
