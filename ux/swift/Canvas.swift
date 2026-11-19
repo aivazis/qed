@@ -85,8 +85,9 @@ struct Canvas: UIViewRepresentable {
         let content = UIView()
         // the view of each tile placed at the current level
         private var views: [Tile: UIImageView] = [:]
-        // the views of the previous level, kept underneath until the current one has every tile
-        // on the screen, so a change of level never shows an empty screen
+        // the views of tiles that are no longer placed, from a previous level or a previous
+        // rendering, kept underneath until what took their place has arrived, so a change of
+        // level or of rendering never shows an empty screen
         private var retiring: [Tile: UIImageView] = [:]
         // the most recent description of the canvas
         private var canvas: Canvas? = nil
@@ -122,17 +123,34 @@ struct Canvas: UIViewRepresentable {
             guard scroller.bounds.size != laid else {
                 return
             }
-            // the first time, the view goes where the server has it
-            let first = laid == .zero
+            // the first time, the view goes where the server has it; after that, the pixel at
+            // the center of the screen stays there
+            let old = laid
             laid = scroller.bounds.size
-            if first {
-                follow(scroller)
+            UIView.performWithoutAnimation {
+                if old == .zero {
+                    follow(scroller)
+                } else {
+                    scroller.contentOffset = clamp(
+                        CGPoint(
+                            x: scroller.contentOffset.x - (laid.width - old.width) / 2,
+                            y: scroller.contentOffset.y - (laid.height - old.height) / 2),
+                        in: scroller)
+                }
+                place(scroller)
             }
-            place(scroller)
+        }
+
+        /// Lay {content} out at the level of {canvas}, keeping the pixel at the center in place,
+        /// with the tiles going straight to their places even when the change is animated
+        private func relevel(_ scroller: UIScrollView, to canvas: Canvas) {
+            UIView.performWithoutAnimation {
+                relayout(scroller, to: canvas)
+            }
         }
 
         /// Lay {content} out at the level of {canvas}, keeping the pixel at the center in place
-        private func relevel(_ scroller: UIScrollView, to canvas: Canvas) {
+        private func relayout(_ scroller: UIScrollView, to canvas: Canvas) {
             // the center of the screen, in points of the content as it is laid out now
             let middle = CGPoint(
                 x: scroller.bounds.midX / scroller.zoomScale,
@@ -149,8 +167,7 @@ struct Canvas: UIViewRepresentable {
                 view.frame = CGRect(
                     x: frame.minX * grow.x, y: frame.minY * grow.y,
                     width: frame.width * grow.x, height: frame.height * grow.y)
-                retiring.removeValue(forKey: tile)?.removeFromSuperview()
-                retiring[tile] = view
+                retire(tile, view)
             }
             // and so do the ones already retiring, which are older still
             for (tile, view) in retiring where views[tile] == nil {
@@ -173,8 +190,9 @@ struct Canvas: UIViewRepresentable {
                 in: scroller)
         }
 
-        /// Place a view for every tile on the screen, with its image once it is at hand; let go of
-        /// the views of the tiles that left, and of the old level once the new one is complete
+        /// Place a view for every tile on the screen, with its image once it is at hand; the views
+        /// of the tiles that left, whether off the screen or replaced by a rendering of the same
+        /// part of the dataset, stay underneath until what took their place has arrived
         private func place(_ scroller: UIScrollView) {
             guard let canvas, applied == canvas.level else {
                 return
@@ -182,21 +200,31 @@ struct Canvas: UIViewRepresentable {
             // the tiles on the screen, or nearly
             let shown = canvas.layout.placements(in: visible(scroller), margin: canvas.margin)
             let wanted = Set(shown.map(\.tile))
-            // let go of the views of the tiles that left
+            // the views of the tiles that left retire
             for (tile, view) in views where !wanted.contains(tile) {
-                view.removeFromSuperview()
                 views[tile] = nil
+                retire(tile, view)
             }
-            // place each tile, reusing its view if it has one, here or among the retiring
-            for placement in shown {
-                let view = views[placement.tile] ?? reclaim(placement.tile) ?? makeView(for: placement.tile)
-                view.frame = placement.frame
-                view.image = canvas.images[placement.tile]
+            // place each tile, reusing its view if it has one, here or among the retiring, and
+            // straight where it goes, even when the change is animated
+            UIView.performWithoutAnimation {
+                for placement in shown {
+                    let view = views[placement.tile] ?? reclaim(placement.tile) ?? makeView(for: placement.tile)
+                    view.frame = placement.frame
+                    view.image = canvas.images[placement.tile]
+                }
             }
-            // once every tile on the screen has its image, the old level has nothing left to cover
+            // once every tile on the screen has its image, the retiring views have nothing left
+            // to cover
             if shown.allSatisfy({ canvas.images[$0.tile] != nil }) {
                 retiring.values.forEach { $0.removeFromSuperview() }
                 retiring.removeAll()
+            }
+            // and before then, neither does one hidden under a tile that has arrived
+            let covers = views.values.filter { $0.image != nil }.map(\.frame)
+            for (tile, view) in retiring where covers.contains(where: { $0.contains(view.frame) }) {
+                view.removeFromSuperview()
+                retiring[tile] = nil
             }
             // ask for the tiles on the screen, when they are not the ones asked for last
             let tiles = shown.map(\.tile)
@@ -208,7 +236,20 @@ struct Canvas: UIViewRepresentable {
             }
         }
 
-        /// Take back the retiring view of {tile}, if the old level had the same tile
+        /// Keep the {view} of {tile} underneath the current tiles, as long as it has something to
+        /// show
+        private func retire(_ tile: Tile, _ view: UIImageView) {
+            // a view without an image covers nothing
+            guard view.image != nil else {
+                view.removeFromSuperview()
+                return
+            }
+            // otherwise it takes the place of any older view of the same tile
+            retiring.removeValue(forKey: tile)?.removeFromSuperview()
+            retiring[tile] = view
+        }
+
+        /// Take back the retiring view of {tile}, if it has one
         private func reclaim(_ tile: Tile) -> UIImageView? {
             guard let view = retiring.removeValue(forKey: tile) else {
                 return nil
