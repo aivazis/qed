@@ -14,10 +14,13 @@ qed.ios.testing.runner := swift-testing
 # the compiler comes from apple's developer tools
 qed.ios.testing.toolchain := xcode
 # the sources under test: the reader that cuts the event stream into frames, the server that
-# makes the requests, and the client that runs operations and reads their answers
+# makes the requests, the client that runs operations and changes and reads their answers, and
+# the tiles of a view and where they go on the screen
 qed.ios.testing.sources = \
     ${addprefix $(project.home)/ux/swift/, \
-        Frame.swift FrameReader.swift Server.swift Operation.swift Client.swift StateQuery.swift}
+        Frame.swift FrameReader.swift Server.swift \
+        Operation.swift Mutation.swift Client.swift StateQuery.swift ViewMutations.swift \
+        Tile.swift TileLayout.swift}
 
 
 # end of file
