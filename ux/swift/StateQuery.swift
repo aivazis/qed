@@ -22,7 +22,15 @@ enum StateQuery {
                         selections { name value }
                         reader { name api }
                         dataset { name shape origin tile channels { tag } }
-                        channel { tag }
+                        channel {
+                            tag
+                            name
+                            controllers {
+                                __typename slot auto min max
+                                ... on RangeController { low high }
+                                ... on ValueController { value }
+                            }
+                        }
                         center { row col }
                         zoom { vertical horizontal coupled }
                     }
@@ -82,9 +90,32 @@ enum StateQuery {
         let col: Double?
     }
 
-    /// A channel of a dataset
+    /// A channel of a dataset: its tag, its full name, and the controllers of its rendering; the
+    /// channels a dataset lists carry only their tags
     struct Channel: Decodable, Sendable {
         let tag: String?
+        let name: String?
+        let controllers: [Controller?]?
+    }
+
+    /// A controller of the rendering of a channel, in a slot of its own: a range, with a low and a
+    /// high end, or a single value, each within its bounds, and either set by hand or following
+    /// the data
+    struct Controller: Decodable, Sendable {
+        let kind: String?
+        let slot: String?
+        let auto: Bool?
+        let min: Double?
+        let max: Double?
+        let low: Double?
+        let high: Double?
+        let value: Double?
+
+        // the kind of a controller is its type in the schema
+        enum CodingKeys: String, CodingKey {
+            case kind = "__typename"
+            case slot, auto, min, max, low, high, value
+        }
     }
 
     /// The zoom of a view: a level along each axis, and whether the two move together
