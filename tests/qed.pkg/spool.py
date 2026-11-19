@@ -46,8 +46,9 @@ assert clone.size == len(payload)
 # with a file of its own
 assert clone.file is not None
 
-# the payload survives the round trip
+# map the payload
 view = clone.view()
+# which survives the round trip
 assert bytes(view) == payload
 # release the mapping
 view.close()
@@ -58,6 +59,7 @@ share = clone.share()
 assert os.pread(share.fileno(), clone.size, 0) == payload
 # and outlives the spool, the way a response outlives the eviction of its tile from the cache
 clone.close()
+# so it still holds the payload
 assert os.pread(share.fileno(), len(payload), 0) == payload
 # until the response lets it go
 share.close()
