@@ -95,9 +95,13 @@ task = pickle.loads(pickle.dumps(task))
 # execute it the way a worker does: a fresh registry, so the stack and both members are
 # rebuilt from the recipe with their own file handles
 spool = task.execute(readers={})
-# read the payload back
-spool.file.seek(0)
-tile = spool.file.read()
+# map the payload
+view = spool.view()
+# read it back
+tile = bytes(view)
+# release the mapping
+view.close()
+# and the spool
 spool.close()
 # the worker render matches the inline reference
 assert tile == reference

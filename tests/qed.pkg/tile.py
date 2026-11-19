@@ -52,10 +52,13 @@ task = pickle.loads(pickle.dumps(task))
 spool = task.execute(readers={})
 # the render is parked in a spool of the right size
 assert spool.size == len(reference)
-# read the payload back
-spool.file.seek(0)
-tile = spool.file.read()
-# and release the spool
+# map the payload
+view = spool.view()
+# read it back
+tile = bytes(view)
+# release the mapping
+view.close()
+# and the spool
 spool.close()
 # check that the worker render matches the reference
 assert tile == reference
