@@ -9,48 +9,54 @@
 import SwiftUI
 
 
-/// Show the link to a qed server, what its stream has said, and the views it holds
+/// Show the link to a qed server, what its stream has said, and the views it holds; the view
+/// picked here is the one the iPad shows
 struct ConnectionView: View {
     // the stream whose state this shows
     let stream: EventStream
     // the app's copy of the state of the server
     let store: Store
+    // the position of the view the iPad shows
+    @Binding var active: Int
 
     // the contents
     var body: some View {
-        NavigationStack {
-            Form {
-                // the server and the state of its link
-                Section("Server") {
-                    LabeledContent("Address", value: stream.server.base.absoluteString)
-                    LabeledContent("Link") {
-                        HStack(spacing: 6) {
-                            Image(systemName: "circle.fill")
-                                .imageScale(.small)
-                            Text(link.label)
-                        }
-                        .foregroundStyle(link.color)
+        Form {
+            // the server and the state of its link
+            Section("Server") {
+                LabeledContent("Address", value: stream.server.base.absoluteString)
+                LabeledContent("Link") {
+                    HStack(spacing: 6) {
+                        Image(systemName: "circle.fill")
+                            .imageScale(.small)
+                        Text(link.label)
                     }
-                }
-                // what the stream has said
-                Section("Stream") {
-                    LabeledContent("Instance", value: stream.instance ?? "unknown")
-                        .monospaced()
-                    LabeledContent("Changes", value: stream.changes, format: .number)
-                }
-                // the views of the server, and why they may be out of date
-                Section("Views") {
-                    if let problem = store.problem {
-                        Text(problem)
-                            .foregroundStyle(.red)
-                    }
-                    ForEach(store.views, id: \.name) { view in
-                        ViewSummary(view: view)
-                    }
+                    .foregroundStyle(link.color)
                 }
             }
-            .navigationTitle("qed")
+            // what the stream has said
+            Section("Stream") {
+                LabeledContent("Instance", value: stream.instance ?? "unknown")
+                    .monospaced()
+                LabeledContent("Changes", value: stream.changes, format: .number)
+            }
+            // the views of the server, and why they may be out of date; a tap picks one
+            Section("Views") {
+                if let problem = store.problem {
+                    Text(problem)
+                        .foregroundStyle(.red)
+                }
+                ForEach(store.views, id: \.index) { viewport in
+                    Button {
+                        active = viewport.index
+                    } label: {
+                        ViewSummary(view: viewport.view, picked: viewport.index == active)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
         }
+        .navigationTitle("qed")
     }
 
     // the words and the color that show the state of the link
@@ -68,13 +74,16 @@ struct ConnectionView: View {
 struct ViewSummary: View {
     // the view
     let view: StateQuery.View
+    // whether it is the one the iPad shows
+    let picked: Bool
 
     // the contents
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            // the view by name
-            Text(view.name)
+            // the view by name, marked when it is the one on the screen
+            Label(view.name, systemImage: picked ? "eye.fill" : "eye.slash")
                 .font(.headline)
+                .foregroundStyle(picked ? Color.accentColor : Color.primary)
             // what it shows: the reader, the value picked for each of its selectors, in the order
             // the server lists them
             LabeledContent("Reader", value: view.reader?.name ?? "none")

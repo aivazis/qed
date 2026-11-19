@@ -16,6 +16,8 @@ struct QEDApp: App {
     @State private var store: Store
     // the stream that keeps it current
     @State private var stream: EventStream
+    // the tiles at hand
+    @State private var tiles: Tiles
 
     /// Connect to the server
     init() {
@@ -26,17 +28,50 @@ struct QEDApp: App {
         let store = Store(client: Client(server: server))
         // and let its stream tell the copy when to catch up
         let stream = EventStream(server: server, listener: { notice in store.hear(notice) })
-        // hold on to both for as long as the app runs
+        // hold on to both for as long as the app runs, along with the tiles it fetches
         _store = State(initialValue: store)
         _stream = State(initialValue: stream)
+        _tiles = State(initialValue: Tiles(server: server))
     }
 
     // the window and its contents
     var body: some Scene {
         WindowGroup {
-            // show the link and the views, and follow the stream for as long as the window lives
-            ConnectionView(stream: stream, store: store)
+            // the server and its views beside the view on the screen; follow the stream for as
+            // long as the window lives
+            ServerWindow(stream: stream, store: store, tiles: tiles)
                 .task { await stream.follow() }
+        }
+    }
+}
+
+
+/// The window: the server and its views in a sidebar, and the view the iPad shows beside it
+struct ServerWindow: View {
+    // the stream of the server
+    let stream: EventStream
+    // the app's copy of its state
+    let store: Store
+    // the tiles at hand
+    let tiles: Tiles
+
+    // the position of the view on the screen; the iPad picks its own, starting with the first
+    @State private var active = 0
+
+    // the contents
+    var body: some View {
+        NavigationSplitView {
+            ConnectionView(stream: stream, store: store, active: $active)
+        } detail: {
+            if let viewport = store.views.first(where: { $0.index == active }) {
+                Viewer(viewport: viewport, store: store, tiles: tiles)
+                    .navigationTitle(viewport.view.reader?.name ?? viewport.view.name)
+                    .navigationBarTitleDisplayMode(.inline)
+            } else {
+                ContentUnavailableView(
+                    "No view", systemImage: "rectangle.dashed",
+                    description: Text("The server has no view to show."))
+            }
         }
     }
 }

@@ -17,10 +17,13 @@ enum StateQuery {
                 qed {
                     views {
                         name
+                        session
+                        depth
                         selections { name value }
-                        reader { name }
-                        dataset { shape origin channels { tag } }
+                        reader { name api }
+                        dataset { name shape origin tile channels { tag } }
                         channel { tag }
+                        center { row col }
                         zoom { vertical horizontal coupled }
                     }
                 }
@@ -37,14 +40,18 @@ enum StateQuery {
         let views: [View?]?
     }
 
-    /// A view: the values it picked for the selectors of its reader, the reader, dataset and
-    /// channel it shows, and its zoom
+    /// A view: the session it belongs to, how far it can zoom out, the values it picked for the
+    /// selectors of its reader, the reader, dataset and channel it shows, the pixel at its center,
+    /// and its zoom
     struct View: Decodable, Sendable {
         let name: String
+        let session: String?
+        let depth: Int?
         let selections: [Selector?]?
         let reader: Reader?
         let dataset: Dataset?
         let channel: Channel?
+        let center: Center?
         let zoom: Zoom?
     }
 
@@ -54,16 +61,25 @@ enum StateQuery {
         let value: String?
     }
 
-    /// The reader of a view
+    /// The reader of a view, and the path under which the server serves its tiles
     struct Reader: Decodable, Sendable {
         let name: String?
+        let api: String?
     }
 
-    /// The dataset of a view: its shape and origin, row first, and its channels
+    /// The dataset of a view: its name, its shape, origin and tile, row first, and its channels
     struct Dataset: Decodable, Sendable {
+        let name: String?
         let shape: [Int?]?
         let origin: [Int?]?
+        let tile: [Int?]?
         let channels: [Channel?]?
+    }
+
+    /// The pixel of the dataset at the center of a view
+    struct Center: Decodable, Sendable {
+        let row: Double?
+        let col: Double?
     }
 
     /// A channel of a dataset
