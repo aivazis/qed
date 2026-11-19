@@ -91,12 +91,14 @@ for twin, live in zip(reader.datasets, reference.datasets):
         peer = live.channels[tag]
         # walk the controllers of both in step
         for (controller, _), (mirror, _) in zip(pipeline.controllers(), peer.controllers()):
+            # they are the same kind of controller
+            assert type(controller) is type(mirror)
             # nothing pins these, so both tuned themselves from the same statistics
             assert controller.auto == mirror.auto
-            # and arrived at the same display bounds
-            assert getattr(controller, "low", None) == getattr(mirror, "low", None)
-            # both of them
-            assert getattr(controller, "high", None) == getattr(mirror, "high", None)
+            # and arrived at the same settings, the display bounds among them
+            for trait in controller.pyre_configurables():
+                # trait by trait
+                assert getattr(controller, trait.name) == getattr(mirror, trait.name), trait.name
 
 # and the twins hold no payload, so nothing in this process touched the product
 assert all(twin.data is None for twin in reader.datasets)
