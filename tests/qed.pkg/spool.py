@@ -7,13 +7,12 @@
 
 
 """
-Check that spooled payloads survive their trip: stashed, pickled as a stub, their descriptor
-shipped over a channel, adopted, mapped, and shared with a response that outlives the spool
+Check that spooled payloads survive their trip: stashed, carried inside a message over a
+channel, mapped on arrival, and shared with a response that outlives the spool
 """
 
 # externals
 import os
-import pickle
 
 # support
 import pyre
@@ -29,24 +28,23 @@ assert spool.size == len(payload)
 # and holds the payload
 assert spool.file is not None
 
-# the wire form carries only the size, never the descriptor
-clone = pickle.loads(pickle.dumps(spool))
-assert clone.size == spool.size
-assert clone.file is None
-
-# ship the descriptor over a channel, the way a crew member does with its report
+# the channel the message travels over, the way a crew member reports to its team
 parent, child = pyre.ipc.newSocket().open()
-# the worker side sends it
-child.sendDescriptors(descriptors=[spool.file.fileno()])
-# and releases its copy; the kernel keeps the payload alive for the recipient
+# and the marshaler
+marshaler = pyre.ipc.newPickler()
+# the worker side sends the spool inside a message
+manifest = marshaler.send(item=spool, channel=child)
+# which carries the file the spool holds
+assert manifest.channels == [spool.file]
+# the worker releases its copy; the kernel keeps the payload alive for the recipient
 spool.close()
 
-# the team side receives it
-_, descriptors = parent.recvDescriptors(limit=1)
-# exactly one made the trip
-assert len(descriptors) == 1
-# attach it to the stub that came off the wire
-clone.adopt(descriptor=descriptors[0])
+# the team side receives the message
+clone = marshaler.recv(channel=parent)
+# the spool arrives whole
+assert clone.size == len(payload)
+# with a file of its own
+assert clone.file is not None
 
 # the payload survives the round trip
 view = clone.view()
@@ -63,6 +61,11 @@ clone.close()
 assert os.pread(share.fileno(), len(payload), 0) == payload
 # until the response lets it go
 share.close()
+
+# clean up
+parent.close()
+# both ends
+child.close()
 
 
 # end of file
