@@ -29,9 +29,11 @@ if not os.path.exists(product):
     # there is nothing to check
     raise SystemExit(0)
 
-# build a two member stack over the same product
+# open the product once
 one = qed.readers.nisar.gslc(name="agg_one", uri=product)
+# and once more, under another name
 two = qed.readers.nisar.gslc(name="agg_two", uri=product)
+# and build a two member stack over them
 stack = qed.stacks.stack(name="agg", readers=[one, two])
 # make first contact, which also opens the members
 stack.open()
@@ -88,6 +90,7 @@ partial = qed.nexus.tile(
     origin=(0, 0),
     shape=(64, 64),
 )
+# so a task over fewer members is a different task
 assert task != partial
 
 # push the task through the wire, the way the team marshals it to a crew member
