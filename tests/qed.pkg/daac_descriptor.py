@@ -44,18 +44,25 @@ for granule in granules:
 
 # a single acquisition product knows its stack and its acquisition time
 gcov = daac.descriptor(granule=granules[6])
+# its track, direction, and frame
 assert (gcov.track, gcov.direction, gcov.frame) == (3, "A", 28)
+# and when it was acquired
 assert str(gcov.mark) == "2025-09-23 09:37:02"
 
 # a pair product carries the same stack and marks time by its reference acquisition
 gunw = daac.descriptor(granule=granules[11])
+# its track, direction, and frame
 assert (gunw.track, gunw.direction, gunw.frame) == (3, "A", 28)
+# the time of its reference acquisition
 assert str(gunw.mark) == "2025-09-23 09:37:02"
+# which is when the reference acquisition began
 assert str(gunw.referenceBegin) == "2025-09-23 09:37:02"
 
 # a level 0 product has a track and a direction but no frame
 rrsd = daac.descriptor(granule=granules[3])
+# its track and direction
 assert (rrsd.track, rrsd.direction) == (143, "D")
+# and no frame
 assert not hasattr(rrsd, "frame")
 
 # an id that does not follow the conventions is not recognized

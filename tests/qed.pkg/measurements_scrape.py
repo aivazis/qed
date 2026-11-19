@@ -61,18 +61,23 @@ assert scrape.lists(scrape=folder) == ["gunw", "rrst", "rslc"]
 assert scrape.cycles(scrape=folder, products=["rrst"]) == {"rrst": {None: 1}}
 # the counts by cycle, with a pair counted under the cycle of its reference acquisition
 counts = scrape.cycles(scrape=folder, products=["rslc", "gunw"])
+# three in cycle 31, one in cycle 13, and one without a cycle
 assert counts["rslc"] == {31: 3, 13: 1, None: 1}
+# and the one pair in cycle 13
 assert counts["gunw"] == {13: 1}
 # the one cycle both products have
 assert scrape.complete(counts=counts) == [13]
 # which a product without cycles leaves alone
 counts.update(scrape.cycles(scrape=folder, products=["rrst"]))
+# is still the same
 assert scrape.complete(counts=counts) == [13]
 # an even sample of two of the three RSLC of cycle 31: the first and the last
 picked = scrape.spread(scrape=folder, product="rslc", cycle=31, count=2)
+# picked by their sequence numbers
 assert [granule.split("_")[5] for granule in picked] == ["001", "003"]
 # a sample of one is the one in the middle
 picked = scrape.spread(scrape=folder, product="rslc", cycle=31, count=1)
+# the second of the three
 assert [granule.split("_")[5] for granule in picked] == ["002"]
 # and a sample larger than the cycle is the whole cycle
 assert len(scrape.spread(scrape=folder, product="rslc", cycle=31, count=10)) == 3

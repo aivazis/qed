@@ -25,10 +25,12 @@ class Select(qed.application, family="qed.apps.selector"):
     uri.default = "rslc.h5"
     uri.doc = "the path to the data product"
 
+    # the frequency band
     frequency = qed.properties.str()
     frequency.default = "B"
     frequency.doc = "the band frequency"
 
+    # and the polarization
     polarization = qed.properties.str()
     polarization.default = "HH"
     polarization.doc = "the dataset polarization"

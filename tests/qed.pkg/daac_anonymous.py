@@ -31,6 +31,7 @@ granule = (
 descriptor = registrar.parse(granule)
 # the fields are there
 assert int(descriptor.cycle) == 5
+# both of them
 assert int(descriptor.track) == 3
 # but the descriptor has no name
 assert descriptor.pyre_name is None

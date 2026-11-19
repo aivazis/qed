@@ -86,11 +86,13 @@ def compare(channel, source, configurations):
             zoom = tuple(s.bit_length() - 1 for s in stride)
             # render with the iterators
             channel.engine = "iterators"
+            # into a buffer of its own
             expected = bytes(
                 memoryview(channel.tile(source=source, zoom=zoom, origin=origin, shape=shape))
             )
             # and with the pipeline
             channel.engine = "flow"
+            # into a tile
             rendered = channel.tile(source=source, zoom=zoom, origin=origin, shape=shape)
             # they must agree
             assert rendered == expected, (channel.pyre_name, origin, shape, stride)
@@ -127,6 +129,7 @@ def test():
         def configure(channel):
             # set the range
             channel.range.low = low
+            # both ends of it
             channel.range.high = high
             # all done
             return
@@ -144,6 +147,7 @@ def test():
         def configure(channel):
             # set the range
             channel.amplitude.low = low
+            # both ends of it
             channel.amplitude.high = high
             # all done
             return
@@ -161,6 +165,7 @@ def test():
         def configure(channel):
             # set the range
             channel.phase.low = low
+            # both ends of it
             channel.phase.high = high
             # all done
             return
@@ -260,6 +265,7 @@ def test():
 
     # amplitudes that wrap every 23 cells, and phases that sweep a few turns
     amplitude = lambda i: 0.5 + i % 23
+    # the phases
     phase = lambda i: 0.01 * i - 3.0
     # go through the cell types of unwrapped interferograms
     for cell in ("float32", "float64"):

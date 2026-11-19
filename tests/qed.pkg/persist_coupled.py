@@ -82,9 +82,11 @@ store.persist()
 doc = pyre.config.newYamlEditor(uri="qed.yaml")
 # the shared controller has a section under the name of its quantity
 assert float(doc.get("d16.data.controllers.amplitude", "low")) == amplitude.low
+# both of them
 assert float(doc.get("d16.data.controllers.amplitude", "high")) == amplitude.high
 # as do the others the channels share
 assert doc.get("d16.data.controllers.phase") is not None
+# and the saturation
 assert doc.get("d16.data.controllers.saturation") is not None
 # the channels that share them record nothing about the binding
 for channel in ("complex", "amplitude", "phase"):
@@ -96,11 +98,14 @@ for channel in ("complex", "amplitude", "phase"):
 assert doc.get("d16.data.real.range") is not None
 # and none were written under the names the channels made for themselves at construction
 assert doc.get("d16.data.complex.amplitude") is None
+# nor under the name the amplitude channel made for itself
 assert doc.get("d16.data.amplitude.amplitude") is None
 
 # a second write is idempotent
 store.persist()
+# read it back
 again = pyre.config.newYamlEditor(uri="qed.yaml")
+# and compare
 assert again.render() == doc.render()
 
 

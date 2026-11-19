@@ -34,11 +34,15 @@ def synthesize():
     cells = LINES * SAMPLES
     # the little endian product, with its header next to it under the same stem
     with open("envi_le.dat", "wb") as product:
+        # write the cells, little end first
         product.write(struct.pack(f"<{cells}f", *VALUES))
+    # and the header
     pyre.envi.writer().write(header=describe(order=0), uri="envi_le.hdr")
     # the big endian product, with its header named after the full product name
     with open("envi_be.dat", "wb") as product:
+        # write the cells, big end first
         product.write(struct.pack(f">{cells}f", *VALUES))
+    # and the header
     pyre.envi.writer().write(header=describe(order=1), uri="envi_be.dat.hdr")
     # all done
     return
@@ -83,6 +87,7 @@ def test():
     host = sys.byteorder
     # readers over the two products
     le = contact(name="envi.le", uri="envi_le.dat")
+    # both of them
     be = contact(name="envi.be", uri="envi_be.dat")
     # and the reference: the flat reader over the product that is in the host's order
     reference = qed.readers.native.flat(
@@ -91,6 +96,7 @@ def test():
         shape=(LINES, SAMPLES),
         cell="float32",
     )
+    # make first contact
     reference.open()
     # its dataset
     (expected,) = reference.datasets
@@ -101,20 +107,26 @@ def test():
         (dataset,) = reader.datasets
         # of the declared shape and type
         assert dataset.shape == (LINES, SAMPLES)
+        # both of them
         assert dataset.cell.cell == "float32"
     # the datasets
     (little,) = le.datasets
+    # both of them
     (big,) = be.datasets
     # the swap flag follows the product, not the host
     assert little.cell.byteswap == (host != "little")
+    # for both of them
     assert big.cell.byteswap == (host != "big")
     # and the buffer description carries the order of the product
     assert memoryview(little.data).format == ("f" if host == "little" else "<f")
+    # for both of them
     assert memoryview(big.data).format == ("f" if host == "big" else ">f")
 
     # cells read as native values through the grid, whatever the order on disk
     for dataset in (little, big):
+        # inside the raster
         assert dataset.data[3, 5] == VALUES[3 * SAMPLES + 5]
+        # and at its far corner
         assert dataset.data[LINES - 1, SAMPLES - 1] == VALUES[-1]
 
     # tiles rendered from either product are identical to the reference, at a few zoom levels
@@ -128,6 +140,7 @@ def test():
     for zoom, origin, shape in geometries:
         # render the reference
         pipeline = expected.channel(name="value")
+        # into a buffer of its own
         tile = bytes(
             memoryview(expected.render(channel=pipeline, zoom=zoom, origin=origin, shape=shape))
         )
@@ -135,6 +148,7 @@ def test():
         for dataset in (little, big):
             # the same way
             pipeline = dataset.channel(name="value")
+            # into a buffer of its own
             actual = bytes(
                 memoryview(dataset.render(channel=pipeline, zoom=zoom, origin=origin, shape=shape))
             )
@@ -143,15 +157,19 @@ def test():
 
     # the statistics gathered at first contact agree
     for dataset in (little, big):
+        # for both of them
         assert dataset.stats == expected.stats
     # so do samples of a strided footprint
     for dataset in (little, big):
+        # for both of them
         assert dataset.sample(zoom=(1, 0), origin=(3, 4), shape=(10, 10)) == expected.sample(
             zoom=(1, 0), origin=(3, 4), shape=(10, 10)
         )
     # and profiles along a path
     points = [(1, 2), (10, 20), (30, 60)]
+    # for both of them
     for dataset in (little, big):
+        # the profiles agree
         assert dataset.profile(points=points) == expected.profile(points=points)
 
     # the refusals: send the complaints to the trash, since they are expected
@@ -200,6 +218,7 @@ def readonly(expected):
         pass
     # write the product in the host's order
     with open("envi_readonly.dat", "wb") as product:
+        # write its cells
         product.write(struct.pack(f"={LINES * SAMPLES}f", *VALUES))
     # with its header
     pyre.envi.writer().write(
@@ -223,6 +242,7 @@ def readonly(expected):
             )
         )
     )
+    # and the one the product makes
     actual = bytes(
         memoryview(
             dataset.render(
@@ -230,6 +250,7 @@ def readonly(expected):
             )
         )
     )
+    # must agree
     assert actual == tile
     # all done
     return
@@ -253,7 +274,9 @@ def offsets(expected):
             # write the embedded header, which is junk as far as the cells are concerned, and
             # the cells after it
             with open(f"{stem}.dat", "wb") as product:
+                # the embedded header
                 product.write(b"\xab" * offset)
+                # and the cells, in this order
                 product.write(struct.pack(f"{code}{cells}f", *VALUES))
             # and the ENVI header that says how long the embedded one is
             pyre.envi.writer().write(
@@ -279,6 +302,7 @@ def offsets(expected):
         cell="float32",
         offset=3,
     )
+    # make first contact
     flat.open()
     # add its dataset to the pile
     datasets.extend(flat.datasets)
@@ -287,6 +311,7 @@ def offsets(expected):
     for dataset in datasets:
         # cells read as their values
         assert dataset.data[3, 5] == VALUES[3 * SAMPLES + 5]
+        # all the way to the far corner
         assert dataset.data[LINES - 1, SAMPLES - 1] == VALUES[-1]
         # tiles render exactly like the reference, including footprints that stride
         for zoom, origin, shape in [((0, 0), (0, 0), (32, 32)), ((1, 1), (2, 3), (8, 8))]:
@@ -316,16 +341,20 @@ def offsets(expected):
             assert actual == tile
         # so do the statistics, samples, and profiles
         assert dataset.stats == expected.stats
+        # the samples
         assert dataset.sample(zoom=(1, 0), origin=(3, 4), shape=(10, 10)) == expected.sample(
             zoom=(1, 0), origin=(3, 4), shape=(10, 10)
         )
+        # and the profiles along a path
         points = [(1, 2), (10, 20), (30, 60)]
+        # agree
         assert dataset.profile(points=points) == expected.profile(points=points)
 
     # an offset that leaves the file too short for the declared shape is refused
     pyre.envi.writer().write(header=describe(order=0, headerOffset=64), uri="envi_offset_short.hdr")
     # by writing the cells without the embedded header in front of them
     with open("envi_offset_short.dat", "wb") as product:
+        # write them
         product.write(struct.pack(f"<{cells}f", *VALUES))
     # the complaint is expected, so send it to the trash
     journal.warning("qed.readers.native.flat").device = journal.trash()
@@ -355,22 +384,30 @@ def bands(offset=0):
     ]
     # the reference: each band on its own, in the host's order, through the flat reader
     references = []
+    # go through the bands
     for b, plane in enumerate(cube):
+        # write each one in its own file
         with open(f"envi_band{b}_{offset}.dat", "wb") as product:
+            # in the host's order
             product.write(struct.pack(f"={LINES * SAMPLES}f", *plane))
+        # make a reader for it
         reader = qed.readers.native.flat(
             name=f"envi.band{b}.{offset}",
             uri=f"envi_band{b}_{offset}.dat",
             shape=(LINES, SAMPLES),
             cell="float32",
         )
+        # make first contact
         reader.open()
+        # get its dataset
         (dataset,) = reader.datasets
+        # and add it to the pile
         references.append(dataset)
 
     # the interleaves, each with a byte order; the pixel interleaved product is in the order
     # the host lacks, so the swap is exercised on a strided plane as well
     layouts = [("bsq", 0 if host == "little" else 1), ("bil", 0 if host == "little" else 1)]
+    # while the pixel interleaved one is in the other order
     layouts.append(("bip", 1 if host == "little" else 0))
     # go through them
     for interleave, order in layouts:
@@ -378,23 +415,37 @@ def bands(offset=0):
         code = "<" if order == 0 else ">"
         # arrange the cells the way the interleave does
         cells = []
+        # band after band
         if interleave == "bsq":
+            # go through the bands
             for b in range(3):
+                # and add each one whole
                 cells.extend(cube[b])
+        # line after line, with the bands of each line in turn
         elif interleave == "bil":
+            # go through the lines
             for i in range(LINES):
+                # and the bands
                 for b in range(3):
+                    # and add the line of each band
                     cells.extend(cube[b][i * SAMPLES : (i + 1) * SAMPLES])
+        # or pixel after pixel, with the bands of each pixel in turn
         else:
+            # go through the lines
             for i in range(LINES):
+                # the pixels of each line
                 for j in range(SAMPLES):
+                    # and the bands
                     for b in range(3):
+                        # and add the cell of each band
                         cells.append(cube[b][i * SAMPLES + j])
         # the stem of the product
         stem = f"envi_{interleave}_{offset}"
         # write the product, past its embedded header
         with open(f"{stem}.dat", "wb") as product:
+            # the embedded header
             product.write(b"\xab" * offset)
+            # and the cells, in this order
             product.write(struct.pack(f"{code}{len(cells)}f", *cells))
         # and its header
         pyre.envi.writer().write(
@@ -415,18 +466,25 @@ def bands(offset=0):
         ]
         # the selector names the bands
         assert reader.selectors == {"band": tuple(names)}
+        # and all of them are available
         assert reader.available == {"band": set(names)}
         # each dataset knows its band and its plane
         for b, dataset in enumerate(reader.datasets):
+            # its band
             assert dataset.selector == {"band": names[b]}
+            # its shape
             assert dataset.shape == (LINES, SAMPLES)
+            # and its type
             assert dataset.cell.cell == "float32"
             # its cells read as the band's values
             assert dataset.data[3, 5] == cube[b][3 * SAMPLES + 5]
+            # all the way to the far corner
             assert dataset.data[LINES - 1, SAMPLES - 1] == cube[b][-1]
             # and it renders, samples, and profiles exactly like the band on its own
             expected = references[b]
+            # at a couple of zoom levels and origins
             for zoom, origin, shape in [((0, 0), (0, 0), (32, 32)), ((1, 1), (2, 3), (8, 8))]:
+                # render the band on its own
                 tile = bytes(
                     memoryview(
                         expected.render(
@@ -437,6 +495,7 @@ def bands(offset=0):
                         )
                     )
                 )
+                # and the dataset
                 actual = bytes(
                     memoryview(
                         dataset.render(
@@ -447,12 +506,17 @@ def bands(offset=0):
                         )
                     )
                 )
+                # must agree
                 assert actual == tile
+            # so do the statistics
             assert dataset.stats == expected.stats
+            # the samples
             assert dataset.sample(zoom=(1, 0), origin=(3, 4), shape=(10, 10)) == expected.sample(
                 zoom=(1, 0), origin=(3, 4), shape=(10, 10)
             )
+            # and the profiles along a path
             points = [(1, 2), (10, 20), (30, 60)]
+            # agree
             assert dataset.profile(points=points) == expected.profile(points=points)
 
     # all done

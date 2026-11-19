@@ -40,6 +40,7 @@ def ask(query: str) -> dict:
     )
     # feed it to a request
     request = Request()
+    # which takes all of it
     assert request.extract(server=server, chunk=head + body)
     # resolve it
     response = ux.gql.respond(store=ux.store, server=server, request=request)
@@ -84,9 +85,11 @@ assert suggest(uri="file:/data/raster.bin", module="qed.readers.native") == "ras
 
 # so does configuration filed under a name, even with no component behind it
 app.pyre_nameserver["settings.color"] = "blue"
+# is taken as well
 assert suggest(uri="file:/data/settings.bin", module="qed.readers.native") == "settings-2"
 # and the counter keeps going until it finds a free name
 app.pyre_nameserver["settings-2.color"] = "red"
+# and skips the name that is taken
 assert suggest(uri="file:/data/settings.bin", module="qed.readers.native") == "settings-3"
 
 # but a name that only starts like a held one is free
@@ -95,6 +98,7 @@ assert suggest(uri="file:/data/rast.bin", module="qed.readers.native") == "rast"
 # a family that is not there is a bug that trips a firewall, and the failed query is reported
 # too; silence both, so the reports do not end up in the output of the test
 journal.firewall("qed.gql.nickname").deactivate()
+# both of them
 journal.warning("qed.ux.graphql").deactivate()
 # ask on behalf of a family that does not exist
 document = ask(

@@ -61,6 +61,7 @@ response = ux.gql.respond(store=ux.store, server=server, request=request)
 document = json.loads(response.value)
 # that answers the query
 assert "errors" not in document, document
+# with the three parts of the version
 assert set(document["data"]["version"]) == {"major", "minor", "micro"}
 
 

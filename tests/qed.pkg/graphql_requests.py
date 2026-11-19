@@ -73,10 +73,12 @@ def ask(query):
 
 # the question
 query = "query { server { requests { waiting oldest zooms { vertical horizontal count } "
+# and how long the tiles took, by the path they took
 query += "tiles { via count median p95 } } } }"
 
 # before any tiles, there is nothing to report
 requests = ask(query)["server"]["requests"]
+# nothing waiting, no zoom levels, and no tiles
 assert requests == {"waiting": 0, "oldest": 0, "zooms": [], "tiles": []}, requests
 
 # three tiles at full resolution, and one at zoom one
@@ -101,6 +103,7 @@ assert requests["zooms"] == [
 ], requests["zooms"]
 # and were all rendered on the spot
 tiles = requests["tiles"]
+# four of them
 assert [tally["via"] for tally in tiles] == ["inline"] and tiles[0]["count"] == 4, tiles
 # each of them taking some time
 assert 0 < tiles[0]["median"] <= tiles[0]["p95"], tiles

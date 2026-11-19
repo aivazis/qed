@@ -35,30 +35,38 @@ channels = dataset.channels
 
 # the complex and amplitude channels share one amplitude controller
 amplitude = channels["complex"].amplitude
+# so the amplitude channel has the same one
 assert channels["amplitude"].amplitude is amplitude
 # which the dataset owns, under the name of the quantity
 assert amplitude.pyre_name == "d16.data.controllers.amplitude"
 # and which draws its configuration from there
 assert amplitude.auto is False
+# with the extent and picks of the configuration
 assert (amplitude.min, amplitude.low, amplitude.high, amplitude.max) == (-1.0, -0.5, 0.5, 1.0)
 # the complex and phase channels share the phase
 assert channels["phase"].phase is channels["complex"].phase
+# which the dataset owns under the name of its quantity
 assert channels["phase"].phase.pyre_name == "d16.data.controllers.phase"
 # and the saturation
 assert channels["phase"].saturation is channels["complex"].saturation
+# under the name of its own quantity
 assert channels["phase"].saturation.pyre_name == "d16.data.controllers.saturation"
 # while the real and imaginary parts keep ranges of their own
 assert channels["real"].range is not channels["imaginary"].range
+# the one of the real part under the name of its channel
 assert channels["real"].range.pyre_name == "d16.data.real.range"
 
 # get the view in the only viewport
 view = ux.store._viewports[0].view()
 # its complex and amplitude pipelines
 complex = view.pipeline(channel="d16.data.complex")
+# and its amplitude pipeline
 magnitude = view.pipeline(channel="d16.data.amplitude")
 # share an amplitude controller of their own, apart from the reference one
 shared = complex.amplitude
+# so the amplitude pipeline has the same one
 assert magnitude.amplitude is shared
+# which is not the controller of the dataset
 assert shared is not amplitude
 # named after the quantity under the namespace of the dataset in the view
 assert shared.pyre_name == f"{view.pyre_name}.d16.data.controllers.amplitude"
@@ -83,19 +91,22 @@ assert (amplitude.min, amplitude.low, amplitude.high, amplitude.max) == (-1.0, -
 ux.store.vizResetController(viewport=0, channel=magnitude.pyre_name, name="amplitude")
 # and the complex channel is back at the reference too
 assert (complex.amplitude.min, complex.amplitude.low) == (-1.0, -0.5)
+# both ends of it
 assert (complex.amplitude.high, complex.amplitude.max) == (0.5, 1.0)
 
 # a small wrapped interferogram, a raster of complex cells
 with open("coupled.int", "wb") as product:
     # all of them one
     product.write(struct.pack(f"{2 * 8 * 8}f", *([1.0, 0.0] * 8 * 8)))
-# open it
+# make a reader for it
 interferogram = qed.readers.isce2.int(name="coupled.int", uri="coupled.int", shape=(8, 8))
+# and open it without measuring it
 interferogram.open(measure=False)
 # get its dataset
 (wrapped,) = interferogram.datasets
 # its complex and phase channels share the phase
 phase = wrapped.channel(name="complex").phase
+# so the phase channel has the same one
 assert wrapped.channel(name="phase").phase is phase
 # which spans one cycle of the colors
 assert (phase.min, phase.low, phase.high, phase.max) == (0, 0, 1, 1)
@@ -104,13 +115,15 @@ assert (phase.min, phase.low, phase.high, phase.max) == (0, 0, 1, 1)
 product = qed.primitives.path(__file__).parent / ".." / "data" / "nisar" / "gcov.h5"
 # if it has been generated
 if product.exists():
-    # open the product
+    # make a reader for the product
     gcov = qed.readers.nisar.gcov(name="coupled", uri=f"file:{product}")
+    # and open it without measuring it
     gcov.open(measure=False)
     # pick a covariance term
     term = next(dataset for dataset in gcov.datasets if dataset.pyre_name.endswith("L.A.HHHH"))
     # its plain and masked channels share the amplitude
     covariance = term.channel(name="covariance").amplitude
+    # so the masked channel has the same one
     assert term.channel(name="covarianceMasked").amplitude is covariance
     # under the name of the quantity in the namespace of the term
     assert covariance.pyre_name == f"{term.pyre_name}.controllers.amplitude"

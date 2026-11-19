@@ -29,6 +29,7 @@ def test():
     assert clone.view().reader is None
     # and it is a viewport of its own, with a view of its own
     assert clone is not port
+    # and a view of its own
     assert clone.view() is not port.view()
     # all done
     return clone

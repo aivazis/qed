@@ -83,6 +83,7 @@ def ask(query):
     )
     # feed it to a request
     request = Request()
+    # which takes all of it
     assert request.extract(server=server, chunk=head + body)
     # resolve it
     response = ux.gql.respond(store=ux.store, server=server, request=request)
@@ -101,6 +102,7 @@ data = ask(
 )
 # there is one
 builds = data["server"]["builds"]
+# exactly one
 assert len(builds) == 1, builds
 # unpack it
 build = builds[0]
@@ -108,6 +110,7 @@ build = builds[0]
 assert build["dataset"] == "gcov.L.B.HHHH"
 # seeded, and not finished
 assert build["status"] == "seeded" and build["error"] is None
+# with a start before its seeding, and no finish yet
 assert build["started"] <= build["seeded"] and build["finished"] is None
 # as deep as its rasters, and available only as deep as the shallower of them
 assert build["depth"] == 5 and build["reach"] == 2
@@ -116,6 +119,7 @@ assert [raster["raster"] for raster in build["rasters"]] == [
     "gcov.L.B.HHHH",
     "gcov.L.B.HHHH.mask",
 ]
+# and the mask is described in full
 assert build["rasters"][1] == {
     "raster": "gcov.L.B.HHHH.mask",
     "depth": 5,
@@ -130,6 +134,7 @@ assert build["rasters"][1] == {
 record.succeed()
 # the build says so
 build = ask("query { server { builds { status finished } } }")["server"]["builds"][0]
+# and when
 assert build["status"] == "ready" and build["finished"] is not None
 
 

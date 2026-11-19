@@ -93,9 +93,11 @@ def deliver(label):
 
 # two identical requests from two different subscribers
 team.assign(task=build(), callback=deliver(label="first"))
+# and again
 team.assign(task=build(), callback=deliver(label="second"))
 # the second joined the first: one task queued, one ledger with two subscribers
 assert len(team.workplan) == 1
+# and one ledger
 assert len(team.pending) == 1
 
 # spin until both are served

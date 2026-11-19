@@ -41,6 +41,7 @@ def ask(query):
     )
     # feed it to a request
     request = Request()
+    # which takes all of it
     assert request.extract(server=server, chunk=head + body)
     # resolve it
     response = ux.gql.respond(store=ux.store, server=server, request=request)
@@ -65,7 +66,9 @@ query = (
 data = ask(query)["server"]
 # the process describes itself
 process = data["process"]
+# by its process id
 assert process["pid"] == os.getpid()
+# and the resources it has
 assert process["cores"] > 0 and process["memory"] > 0 and process["ceiling"] > 0
 # as a server that was never activated
 assert process["started"] is None and process["uptime"] == 0 and process["beats"] == 0
@@ -86,10 +89,13 @@ ux.store.fleet = fleet
 data = ask(query)["server"]
 # the cache is empty, within its budgets
 cache = data["cache"]
+# with nothing in it
 assert cache["entries"] == 0 and cache["bytes"] == 0 and cache["hits"] == 0
+# and the budgets of the cache of the fleet
 assert cache["capacity"] == fleet.cache.capacity and cache["slots"] == fleet.cache.limit
 # and the team of the reader is there, with nothing to do
 teams = data["fleet"]["teams"]
+# described in full
 assert teams == [
     {
         "name": team.pyre_name,

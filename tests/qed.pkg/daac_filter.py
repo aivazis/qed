@@ -44,7 +44,9 @@ assert not filter.match(
 
 # a filter that leaves every token open matches every granule of its type
 loose = daac.filter(product="gcov")
+# build its scanner
 loose.select()
+# which matches a granule of its type
 assert loose.match(
     "NISAR_L2_PR_GCOV_005_004_A_028_2005_DHDH_A_20250923T093702_20250923T093738_P00410_N_F_J_001"
 )

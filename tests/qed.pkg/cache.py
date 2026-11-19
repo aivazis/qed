@@ -58,39 +58,51 @@ cache.capacity = 300
 
 # a miss on an empty cache
 assert cache.lookup(task=Probe(tag="a")) is None
+# which is counted
 assert cache.misses == 1
 
 # insert three entries, filling the budget exactly
 a, b, c = Probe(tag="a"), Probe(tag="b"), Probe(tag="c")
+# go through them
 for probe in (a, b, c):
+    # and park each one with a payload of 100 bytes
     cache.insert(task=probe, spool=payload(size=100))
+# so the cache holds as much as it may
 assert cache.held == 300
 
 # all three are hits
 assert cache.lookup(task=a) is not None
+# the second
 assert cache.lookup(task=b) is not None
+# and the third
 assert cache.lookup(task=c) is not None
+# and they are counted
 assert cache.hits == 3
 
 # touch {a} so {b} becomes the least recently used
 cache.lookup(task=a)
 # a fourth entry exceeds the budget and evicts {b}
 d = Probe(tag="d")
+# park it
 cache.insert(task=d, spool=payload(size=100))
+# and the cache holds as much as it may, and no more
 assert cache.held == 300
 # {b} is gone
 missing = b not in cache.entries
+# make sure
 assert missing
 # and the others survived
 assert all(probe in cache.entries for probe in (a, c, d))
 
 # eviction released the payload; a fresh insert-then-evict pair makes that observable
 big = payload(size=250)
+# park it
 cache.insert(task=Probe(tag="big"), spool=big)
 # the big entry evicted the older ones but fits itself
 assert cache.held <= 300
 # push it out with another entry
 overflow = payload(size=200)
+# park it
 cache.insert(task=Probe(tag="overflow"), spool=overflow)
 # the big spool was closed on its way out
 assert big.file is None
@@ -99,19 +111,30 @@ assert overflow.file is not None
 
 # purge by data source: entries from a different reader survive
 cache.clear()
+# park an entry of one reader
 cache.insert(task=Probe(tag="x", reader="one"), spool=payload(size=10))
+# and one of another
 cache.insert(task=Probe(tag="y", reader="two"), spool=payload(size=10))
+# purge the first reader
 cache.purge(reader="one")
+# so its entry is gone
 assert Probe(tag="x") not in cache.entries
+# while the other survives
 assert Probe(tag="y") in cache.entries
+# and is all the cache holds
 assert cache.held == 10
 
 # a zero capacity disables the cache: the spool is released on arrival
 cache.clear()
+# set the capacity to zero
 cache.capacity = 0
+# make a payload
 declined = payload(size=10)
+# and offer it to the cache
 cache.insert(task=Probe(tag="z"), spool=declined)
+# which releases it
 assert declined.file is None
+# and holds nothing
 assert len(cache.entries) == 0
 
 

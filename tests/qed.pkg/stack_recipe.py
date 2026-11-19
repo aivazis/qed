@@ -21,6 +21,7 @@ import qed
 
 # two members, neither of which ever touches its product
 one = qed.readers.nisar.rslc(name="stack_recipe_one", uri="s3://bucket/one.h5")
+# and another
 two = qed.readers.nisar.rslc(name="stack_recipe_two", uri="s3://bucket/two.h5")
 # a stack over them
 stack = qed.stacks.stack(name="stack_recipe", readers=[one, two])

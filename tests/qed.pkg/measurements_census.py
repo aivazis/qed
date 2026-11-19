@@ -68,7 +68,9 @@ def row(granule, dataset, once, locality, written, empty, grid=100, stored=2**20
 
 # the scene both censuses measured, and the products of it
 scene = "031_001_A_004_2005_DHDH_A_20260918T060359_20260918T060423_P05023_N_P_J_001"
+# the slc of the scene
 rslc = f"NISAR_L1_PR_RSLC_{scene}"
+# and its geocoded version
 gslc = f"NISAR_L2_PR_GSLC_{scene}"
 
 # the first census: two rasters of the RSLC, with nothing empty
@@ -83,14 +85,18 @@ second = [
 
 # the derived measures
 assert census.value(row=second[0], name="empty") == 0.25
+# the share of chunks never written
 assert abs(census.value(row=second[0], name="unwritten") - 0.2) < 1e-12
+# the storage, in MiB
 assert census.value(row=second[0], name="stored_mib") == 1.0
+# and the read amplification
 assert census.value(row=second[0], name="once") == 1.4
 # a raster with no written chunks has no share of empty ones
 assert census.value(row=row(gslc, "L.B.HV", 1, 1, 0, 0), name="empty") is None
 
 # a census that predates the fill columns has no measures of them
 assert census.value(row=second[0], name="empty_mib") is None
+# and none of the time it takes to decode them
 assert census.value(row=second[0], name="decode_ms") is None
 # and blank fill settings
 assert census.settings(rows=second)["hdf5_fill"] == {"": 3}
@@ -119,13 +125,21 @@ honest = {**liar, "hdf5_fill_status": "user_defined", "hdf5_fill": "nan"}
 full = {**liar, "smallest_holds": "data"}
 # the derived measures of the fill
 assert census.value(row=liar, name="empty_mib") == 3.0
+# the share of the pages that hold nothing but nearly empty chunks
 assert census.value(row=liar, name="empty_page_share") == 0.05
+# the time to decode the smallest chunk
 assert abs(census.value(row=liar, name="decode_ms") - 1.5) < 1e-12
+# and to make it from its one value
 assert abs(census.value(row=liar, name="make_ms") - 0.02) < 1e-12
+# the time to decode the median chunk of data
 assert abs(census.value(row=liar, name="data_decode_ms") - 6) < 1e-12
+# the storage of the chunks of fill
 assert census.value(row=liar, name="fill_mib") == 2.0
+# how many there are
 assert census.value(row=liar, name="fill_chunks") == 512
+# the time to encode a chunk of nothing but the fill
 assert abs(census.value(row=liar, name="encode_ms") - 4) < 1e-12
+# and the level of deflation, by how many rasters use it
 assert census.settings(rows=[liar])["deflate_level"] == {"4": 1}
 # whether the fill agrees with what the empty chunks hold
 assert [census.agrees(row=r) for r in (liar, honest, full)] == ["no", "yes", ""]
@@ -184,6 +198,7 @@ os.makedirs(home)
 whole = gzip.compress(
     b"host,dataset,row,col,address,bytes,raw\n" + b"ods,product.L.A.HH,0,0,0,10,2000\n" * 100
 )
+# write it
 with open(os.path.join(home, "layout-pages.csv.gz"), "wb") as stream:
     # cut in the middle
     stream.write(whole[: len(whole) // 2])
@@ -194,33 +209,42 @@ assert census.waste(source=folder, rows=[])["L.A.HH"]["rasters"] == 1
 
 # the reference data of the second census: its product, its cycle, and its measures
 reference = census.reference(name="census-31-gslc", rows=[{**r, "kind": "gslc"} for r in second])
+# the product and the cycle
 assert (reference["product"], reference["cycle"]) == ("gslc", 31)
+# the number of rasters and granules
 assert (reference["rasters"], reference["granules"]) == (3, 1)
 # the read amplification of the three rasters, 1.4, 1.3, and 1.7
 once = reference["measures"]["once"]
+# with a median of 1.4, the largest at 1.7, and three of them
 assert abs(once["median"] - 1.4) < 1e-12 and once["max"] == 1.7 and once["count"] == 3
 # spread over bins from the smallest to the 90th percentile, which of three values is the largest
 assert (once["low"], once["high"]) == (1.3, 1.7)
+# three values in all, one in the first bin and one in the last
 assert sum(once["bins"]) == 3 and once["bins"][0] == 1 and once["bins"][-1] == 1
 # the rasters are also summarized by their kind, the last part of their name
 assert set(reference["groups"]) == {"HH", "HV"}
+# two of them are HH
 assert reference["groups"]["HH"]["rasters"] == 2
 # a measure no raster recorded is left out
 assert "decode_ms" not in reference["measures"]
 
 # the percentiles of ten numbers
 p10, median, p90, top = census.percentiles(numbers=[float(i) for i in range(10)])
+# the tenth percentile, the median, the 90th, and the largest
 assert (p10, median, p90, top) == (1.0, 4.5, 9.0, 9.0)
 # and of nothing
 assert census.percentiles(numbers=[]) is None
 
 # the names the analyses derive from a summary
 assert census.raster(row=second[2]) == "L.B.HH"
+# its frequency
 assert census.frequency(row=second[2]) == "B"
+# and its scene
 assert census.scene(row=second[0]) == scene
 
 # the groups by frequency
 byfrequency = census.groups(rows=second, key=census.frequency)
+# two rasters in frequency A and one in B
 assert {key: len(group) for key, group in byfrequency.items()} == {"A": 2, "B": 1}
 # and by the number of rasters in the product
 assert list(census.rasters(rows=second)) == [3]
@@ -229,6 +253,7 @@ assert close(census.medians(rows=byfrequency["A"], names=("once", "empty")), [1.
 
 # the pairs: the two rasters the censuses share, and not the one only the second has
 matched = census.pairs(first=first, second=second)
+# pair the rasters by name
 assert [(census.raster(row=a), census.raster(row=b)) for a, b in matched] == [
     ("L.A.HH", "L.A.HH"),
     ("L.A.HV", "L.A.HV"),

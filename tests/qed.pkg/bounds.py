@@ -46,6 +46,7 @@ assert ux._dataInBounds(dataset=dataset, zoom=(1, 1), origin=(0, 0), shape=(32, 
 assert not ux._dataInBounds(dataset=dataset, zoom=(1, 1), origin=(0, 0), shape=(33, 33))
 # an anisotropic zoom is checked per axis
 assert ux._dataInBounds(dataset=dataset, zoom=(1, 0), origin=(0, 0), shape=(32, 65))
+# and one cell more is not
 assert not ux._dataInBounds(dataset=dataset, zoom=(1, 0), origin=(0, 0), shape=(32, 66))
 
 # profile points: (line, sample) pairs that must name real cells of the 65x65 raster
@@ -55,6 +56,7 @@ assert ux._profileInBounds(dataset=dataset, points=((0, 0), (32, 32), (64, 64)))
 assert ux._profileInBounds(dataset=dataset, points=())
 # a point at the extent reads one past the last cell
 assert not ux._profileInBounds(dataset=dataset, points=((0, 0), (65, 64)))
+# and so does a point at the extent of the other axis
 assert not ux._profileInBounds(dataset=dataset, points=((64, 65),))
 # a point before the raster
 assert not ux._profileInBounds(dataset=dataset, points=((-1, 0),))

@@ -24,6 +24,7 @@ import qed
 # the firewall of the dispatcher reports each refusal; keep the reports out of the output, and
 # let the route answer the way it does in case firewalls aren't fatal, so the answers can be seen
 journal.firewall("qed.ux.dispatch").device = journal.trash()
+# and keep going after each one
 journal.firewall("qed.ux.dispatch").fatal = False
 
 # an RSLC reader, never opened here; the route only asks what kind of product it is
@@ -162,6 +163,7 @@ assert Store(reader=rslc).view(viewport=0).spectrumLimit() == limit
 assert Store(reader=gslc).view(viewport=0).spectrumLimit() is None
 # and neither does a view with nothing on display
 empty = types.SimpleNamespace(reader=rslc, dataset=None)
+# the stand-in for such a view has none
 assert qed.ux.view.spectrumLimit(empty) is None
 
 # a region inside the raster
@@ -187,6 +189,7 @@ assert ask(url="/spectrum/0/route_rslc.L.B.HH/100x200+64x48", fleet=Fleet()).cod
 
 # a request for new work
 fleet = Fleet()
+# the response to it
 response = ask(url=good + "?range=40", fleet=fleet)
 # is parked
 assert isinstance(response, Deferred), response
@@ -199,14 +202,18 @@ assert (task.origin, task.shape, task.range, task.taper) == ((100, 200), (64, 48
 
 # a request for a tapered region
 fleet = Fleet()
+# make the request
 ask(url=good + "?taper=hann", fleet=fleet)
 # hands the crews a task that tapers
 (tapered,) = fleet.rendered
+# so the task tapers
 assert tapered.taper is True
 
 # the same request, once its picture is on hand
 fleet = Fleet()
+# the picture parked in the cache
 fleet.cache[task] = qed.nexus.spool.stash(data=memoryview(b"a picture"))
+# the response to it
 response = ask(url=good + "?range=40", fleet=fleet)
 # is served on the spot
 assert response.code == 200, response.code
@@ -215,9 +222,11 @@ assert fleet.rendered == []
 
 # and a request whose work took a crew member down before
 fleet = Fleet()
+# the work is under suspicion
 fleet.suspects.add(task)
 # is refused before it reaches the crews
 assert ask(url=good + "?range=40", fleet=fleet).code == 404
+# so no new work was handed out
 assert fleet.rendered == []
 
 

@@ -65,6 +65,7 @@ assert crete.constrained
 query = crete.query()
 # the collection is named both ways
 assert query["short_name"] == "NISAR_L2_GCOV_PROVISIONAL_V1"
+# and by its concept id
 assert query["concept_id"] == "C1234-ASF"
 # the window is open at the end
 assert query["temporal"] == ("2026-01-01", None)
@@ -76,9 +77,13 @@ assert sorted(query) == ["concept_id", "polygon", "short_name", "temporal"]
 # the page the query answers: two granules of one stack on different dates, one of another
 # stack, and one whose id the grammar does not know
 g1 = "NISAR_L2_PR_GCOV_005_003_A_028_2005_DHDH_A_20250923T093702_20250923T093738_P00410_N_F_J_001"
+# the same stack on a later date
 g2 = "NISAR_L2_PR_GCOV_007_003_A_028_2005_DHDH_A_20251017T093704_20251017T093739_P00410_N_F_J_001"
+# another stack
 g3 = "NISAR_L2_PR_GCOV_005_004_D_012_2005_DHDH_A_20250924T210000_20250924T210030_P00410_N_F_J_001"
+# and an id the grammar does not know
 g4 = "not_a_nisar_granule"
+# on a page, out of order
 page = [granule(name=g2), granule(name=g1), granule(name=g3), granule(name=g4)]
 # the grammar reports the id it does not know on a warning channel; keep it quiet here
 journal.warning("qed.readers.nisar.daac").deactivate()
@@ -123,9 +128,11 @@ assert crete.contents(uri=qed.primitives.uri.parse("earth:crete/003_A_028/2025-1
 assert len(runs) == 1
 # a folder that is not on the page lists nothing
 journal.warning("qed.archives.earth.contents").deactivate()
+# so its listing is empty
 assert crete.contents(uri=qed.primitives.uri.parse("earth:crete/999_A_001")) == []
 # listing the root again refreshes the page
 crete.contents(uri=crete.uri)
+# which ran the query again
 assert len(runs) == 2
 
 

@@ -93,6 +93,7 @@ def subsetRender():
         # the result is irrelevant to this check
         return None
 
+    # dressed up as a channel
     channel = types.SimpleNamespace(tile=tile)
     # render with a mask that drops the middle member
     dataset.render(
@@ -119,12 +120,16 @@ def test():
     """
     # the package publishes the stack factory and its aggregate dataset
     assert qed.stacks.stack is not None
+    # both of them
     assert qed.stacks.dataset is not None
 
     # the two aggregate channels are published with the tags and category the system keys on
     assert channels.meanpower.tag == "meanpower"
+    # in the stack category
     assert channels.meanpower.category == "stack"
+    # and so is the coherence channel
     assert channels.stackCoherence.tag == "coherence"
+    # in the same category
     assert channels.stackCoherence.category == "stack"
 
     # build an aggregate dataset over a couple of stand-in members

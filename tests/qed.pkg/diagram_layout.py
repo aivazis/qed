@@ -39,6 +39,7 @@ def test():
     assert [entity.position for entity in factories] == [(0, 0, 0), (diagram.spacing, 0, 0)]
     # every slot has a place of its own
     positions = [slot.position for slot in diagram.slots]
+    # so no two of them coincide
     assert len(positions) == len(set(positions))
     # and so does every factory, away from all the slots
     assert not set(entity.position for entity in factories) & set(positions)
@@ -51,6 +52,7 @@ def test():
         (slot for slot in encoder.slots if slot.position[0] < encoder.position[0]),
         key=lambda slot: slot.position[1],
     )
+    # red, green, and blue
     assert [trait.name for slot in inputs for trait in slot.readers[encoder]] == [
         "red",
         "green",
@@ -61,8 +63,11 @@ def test():
     colormap = factories[0]
     # so each of them has one slot, written by the colormap and read by the encoder
     shared = [slot for slot in diagram.slots if slot.writers and slot.readers]
+    # there are three of them
     assert len(shared) == 3
+    # each written by the colormap
     assert all(set(slot.writers) == {colormap} for slot in shared)
+    # and read by the encoder
     assert all(set(slot.readers) == {encoder} for slot in shared)
     # it sits on the side of the colormap
     assert all(slot.position[0] == colormap.position[0] + 5 for slot in shared)
@@ -153,6 +158,7 @@ def covariance():
     assert len([s for s in shared if set(s.writers) == {gray} and set(s.readers) == {encoder}]) == 3
     # every slot has a place of its own
     positions = [slot.position for slot in diagram.slots]
+    # so no two of them coincide
     assert len(positions) == len(set(positions))
     # which leaves the input of the normalizer, the four shared products, and the image
     assert len(diagram.slots) == 6
@@ -164,7 +170,9 @@ def covariance():
 if __name__ == "__main__":
     # run the tests
     test()
+    # the diagram a view keeps across requests
     persistent()
+    # and the diagram of the covariance channel
     covariance()
 
 

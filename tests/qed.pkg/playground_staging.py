@@ -52,6 +52,7 @@ def test():
     assert int.from_bytes(image[2:6], "little") == len(image)
     # and has the shape of the tile
     assert int.from_bytes(image[18:22], "little", signed=True) == samples
+    # in both directions; the height is negative when the rows are stored top down
     assert abs(int.from_bytes(image[22:26], "little", signed=True)) == lines
     # all done
     return

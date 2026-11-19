@@ -53,6 +53,7 @@ recipe = dict(qed.nexus.survey(reader=full).config)
 assert type(recipe["credentials"]) is dict and recipe["credentials"] == {"profile": "st"}
 # its selections travel as a table with whatever the team side holds now
 assert type(recipe["selections"]) is dict
+# which are the ones the reader picked
 assert recipe["selections"] == {"frequency": "A", "polarization": "HH"}
 # the reader rebuilt from the recipe on the other side of the wire
 worker = qed.readers.nisar.gslc(name="maps_full_worker", **pickle.loads(pickle.dumps(recipe)))

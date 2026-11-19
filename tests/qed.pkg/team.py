@@ -58,6 +58,7 @@ def deliver(result, error):
     if result is not None:
         # take a private copy of the payload
         view = result.view()
+        # into the outcome
         outcome["payload"] = bytes(view)
         # and release the mapping
         view.close()

@@ -35,6 +35,7 @@ def census(tile, shape):
     """
     # the payload is the tail of the bitmap, three bytes per pixel
     raw = bytes(memoryview(tile))
+    # which takes up the end of it
     body = raw[len(raw) - shape[0] * shape[1] * 3 :]
     # gather them, remembering that a bitmap stores its channels in reverse
     tally = Counter((body[at + 2], body[at + 1], body[at]) for at in range(0, len(body), 3))
@@ -52,8 +53,9 @@ if not product.exists():
 # quiet the configuration chatter
 journal.warning("qed.cli").deactivate()
 
-# open the product
+# make a reader for the product
 reader = qed.readers.nisar.gcov(name="absence", uri=f"file:{product}")
+# and open it without measuring it
 reader.open(measure=False)
 # take a covariance term of the smaller frequency
 covariance = [
@@ -66,9 +68,11 @@ covariance.measure()
 
 # this is the product whose two answers disagree: it declares a fill of zero
 assert covariance.data.dataset.fillValue == 0.0
+# and so does the dataset
 assert covariance.fill == 0.0
 # while writing nans, which is why the corner of the raster holds no valid cell at all
 corner = {"origin": (0, 0), "shape": (64, 64)}
+# so a sample of it counts no cells
 assert (
     covariance.kernels.sample(
         source=covariance.data.dataset,
@@ -102,12 +106,15 @@ tile = qed.libqed.nisar.real.covariance(
 )
 # so that corner comes back in the color the masked channels use for their own margin
 tally = census(tile=tile, shape=corner["shape"])
+# all of them in one color
 assert len(tally) == 1
+# the color of the margin
 assert next(iter(tally)) == (25, 12, 12)
 
 # a channel whose kernel delegates to the shared {native} pipelines cannot be told what the
 # product declared, and must not be asked: it would be an argument the kernel cannot take
 assert qed.readers.nisar.products.channels.covariance.absence is True
+# while one that delegates to the shared pipelines does not
 assert qed.readers.nisar.products.channels.amplitude.absence is False
 
 

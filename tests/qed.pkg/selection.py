@@ -74,6 +74,7 @@ reader = store.source(name="solo")
 assert len(reader.selections) > 0
 # and the view adopted the picks during its refresh
 view = store.view(viewport=0)
+# so its selections match the reader's
 assert dict(view.selections) == dict(reader.selections)
 
 

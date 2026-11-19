@@ -35,12 +35,14 @@ def record(values):
 
 # two batches of values, deliberately lopsided
 first = [1.0, 2.0, 3.0, 4.0]
+# and a shorter one, of larger values
 second = [10.0, 20.0, 30.0]
 
 # an accumulator
 sample = qed.ux.sample()
 # fold in the two partial records
 sample.merge(record=record(first))
+# both of them
 sample.merge(record=record(second))
 
 # the reference: a single pass over the union
@@ -53,6 +55,7 @@ assert sample.min == low and sample.max == high
 assert abs(sample.mean - mean) < 1e-12
 # and so does the second moment, hence the variance
 assert abs(sample.m2 - m2) < 1e-9
+# and so does the variance
 assert abs(sample.variance - m2 / count) < 1e-9
 # two records were folded in
 assert sample.tiles == 2
@@ -64,12 +67,17 @@ assert sample.count == count and sample.tiles == 2
 
 # merge order must not matter: fold the batches the other way around
 mirror = qed.ux.sample()
+# the second batch first
 mirror.merge(record=record(second))
+# then the first
 mirror.merge(record=record(first))
 # and compare the running state
 assert mirror.count == sample.count
+# the extremes
 assert mirror.min == sample.min and mirror.max == sample.max
+# the mean
 assert abs(mirror.mean - sample.mean) < 1e-12
+# and the second moment
 assert abs(mirror.m2 - sample.m2) < 1e-9
 
 

@@ -37,14 +37,17 @@ ux = qed.ux.dispatcher(plexus=app, docroot=qed.filesystem.virtual(), pfs=app.pfs
 store = ux.store
 # the archive is connected
 archive = store.archive(uri=f"file:{here}")
+# so the store knows it
 assert archive is not None
 # with its root on display
 uri = str(archive.uri)
+# which is the only folder expanded
 assert archive.expanded == [uri]
 # but not listed yet, since boot touches nothing
 assert archive.listing(uri=uri) is None
 # first contact lists it
 store.stage()
+# so now it has a listing
 assert archive.listing(uri=uri) is not None
 # and this driver is among the entries
 assert "persist_reboot.py" in {item["name"] for item in archive.items()}
@@ -52,7 +55,9 @@ assert "persist_reboot.py" in {item["name"] for item in archive.items()}
 assert store.source(name="d16") is not None
 # and the view is bound to it
 views = [viewport.view() for viewport in store.viewports]
+# there is exactly one
 assert len(views) == 1
+# and it shows the reader
 assert views[0].reader.pyre_name == "d16"
 
 

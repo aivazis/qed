@@ -80,6 +80,7 @@ def independent():
     """
     # draw
     diagram, factory = gray_()
+    # and get hold of its store
     store = storeOf(diagram)
     # remember where the slots are
     before = {slot.eid: slot.position for slot in diagram.slots}
@@ -91,6 +92,7 @@ def independent():
     assert factory.position == (2, 4, 0)
     # its label followed, keeping its distance
     (label,) = [label for label in factory.labels if label.category == "factory"]
+    # at its new place
     assert label.position == (2, 1.5, 0)
     # its slots, which are its own and unbound, came along, keeping their places around it
     assert {slot.eid: slot.position for slot in diagram.slots} == {
@@ -100,11 +102,13 @@ def independent():
     assert diagram.layout[(2, 4, 0)] is factory
     # move the output slot for red
     red = slotOf(factory, "red")
+    # to a spot of its own
     move(store, red, (9, -6, 0))
     # it moved
     assert red.position == (9, -6, 0)
     # and the label of its connector followed it, to where the connector places it
     (connector,) = list(red.connections(factory=factory))
+    # at the place the connector picks for it
     assert tuple(connector.traitLabel.position) == tuple(connector.placeLabel())
     # which is next to the slot, in its plane
     assert connector.traitLabel.position[2] == red.position[2]
@@ -119,11 +123,13 @@ def group():
     """
     # draw the colormap at the origin
     diagram, gray = gray_()
+    # and get hold of its store
     store = storeOf(diagram)
     # and the encoder to its right
     bmp, *_ = diagram.addFactory(pin=qed.viz.encoders.bmp(), position=(15, 0, 0))
     # bind the two reds
     red = slotOf(gray, "red")
+    # onto the input of the encoder for red
     move(store, red, slotOf(bmp, "red").position)
     # the colormap's own slots, and where they are
     own = {slot.eid: slot.position for slot in diagram.followers(node=gray)}
@@ -148,11 +154,13 @@ def crowded():
     """
     # draw the colormap at the origin
     diagram, gray = gray_()
+    # and get hold of its store
     store = storeOf(diagram)
     # and the encoder to its right
     bmp, *_ = diagram.addFactory(pin=qed.viz.encoders.bmp(), position=(15, 0, 0))
     # the output of the colormap for green, and the input of the encoder for green
     green = slotOf(gray, "green")
+    # and the input of the encoder for green
     target = slotOf(bmp, "green")
     # the move that would put the one on the other
     delta = tuple(t - g for t, g in zip(target.position, green.position))
@@ -160,6 +168,7 @@ def crowded():
     move(store, gray, delta)
     # the colormap stayed home, and so did its slot
     assert gray.position == (0, 0, 0)
+    # at the place it started
     assert green.position == (5, 0, 0)
     # all done
     return
@@ -173,11 +182,13 @@ def selection():
     """
     # draw the colormap at the origin
     diagram, gray = gray_()
+    # and get hold of its store
     store = storeOf(diagram)
     # and the encoder to its right
     bmp, *_ = diagram.addFactory(pin=qed.viz.encoders.bmp(), position=(15, 0, 0))
     # bind the two reds
     red = slotOf(gray, "red")
+    # onto the input of the encoder for red
     move(store, red, slotOf(bmp, "red").position)
     # where everything is
     before = {node.eid: node.position for node in [*diagram.factories, *diagram.slots]}
@@ -192,6 +203,7 @@ def selection():
     )
     # everything moved by the same amount, the shared slot included
     after = {node.eid: node.position for node in [*diagram.factories, *diagram.slots]}
+    # by ten along the second axis
     assert after == {eid: (x, y + 10, z) for eid, (x, y, z) in before.items()}
     # a lone factory, placed where the group would land if it moved down by ten more
     lone, *_ = diagram.addFactory(pin=qed.viz.normalizers.parametric(), position=(0, 20, 0))
@@ -222,6 +234,7 @@ def blocked():
     """
     # draw
     diagram, factory = gray_()
+    # and get hold of its store
     store = storeOf(diagram)
     # the slot for green
     green = slotOf(factory, "green")
@@ -231,6 +244,7 @@ def blocked():
     assert factory.position == (0, 0, 0)
     # and both are still on the layout
     assert diagram.layout[(0, 0, 0)] is factory
+    # and so is the slot
     assert diagram.layout[green.position] is green
     # all done
     return
@@ -243,9 +257,11 @@ def merge():
     """
     # draw
     diagram, factory = gray_()
+    # and get hold of its store
     store = storeOf(diagram)
     # the two slots
     data = slotOf(factory, "data")
+    # and the output for red
     red = slotOf(factory, "red")
     # drop the input on the output
     move(store, data, red.position)
@@ -253,6 +269,7 @@ def merge():
     assert len(diagram.slots) == 3
     # the one that moved survives, and carries both connections
     assert data in diagram.slots and red not in diagram.slots
+    # both of them
     assert data.readers and data.writers
     # all done
     return
@@ -265,23 +282,29 @@ def steps():
     """
     # draw
     diagram, factory = gray_()
+    # and get hold of its store
     store = storeOf(diagram)
     # the slots
     data = slotOf(factory, "data")
+    # the output for red
     red = slotOf(factory, "red")
+    # and the output for blue
     blue = slotOf(factory, "blue")
     # a step onto the slot for red
     move(store, data, red.position, settled=False)
     # moves the node there, but merges nothing yet
     assert data.position == red.position
+    # so the four slots are still there
     assert len(diagram.slots) == 4
     # the node is on the move, out of the layout, which still knows the slot for red
     assert diagram.migrant is data
+    # where it sits
     assert diagram.layout[red.position] is red
     # the drop, onto the slot for blue
     move(store, data, blue.position)
     # merges with the slot for blue only
     assert len(diagram.slots) == 3
+    # so the slot for blue is gone, while the one for red survives
     assert blue not in diagram.slots and red in diagram.slots
     # and the drag is over
     assert diagram.migrant is None
@@ -296,6 +319,7 @@ def abandoned():
     """
     # draw
     diagram, factory = gray_()
+    # and get hold of its store
     store = storeOf(diagram)
     # a step of a drag of the factory that never ends
     move(store, factory, (3, 3, 0), settled=False)
@@ -303,9 +327,11 @@ def abandoned():
     assert diagram.migrant is factory
     # move a slot
     red = slotOf(factory, "red")
+    # far from where it was
     move(store, red, (11, 11, 0))
     # the factory landed where it was last seen, and is back on the layout
     assert factory.position == (3, 3, 0)
+    # on the layout
     assert diagram.layout[(3, 3, 0)] is factory
     # and the slot moved
     assert diagram.layout[(11, 11, 0)] is red
@@ -322,6 +348,7 @@ def stale():
     """
     # draw
     diagram, factory = gray_()
+    # and get hold of its store
     store = storeOf(diagram)
     # ask with an id that parses but names nothing here
     result = qed.ux.store.diagramMove(
@@ -332,6 +359,7 @@ def stale():
     )
     # the diagram comes back unchanged
     assert result is diagram
+    # and the factory stayed home
     assert factory.position == (0, 0, 0)
     # and so does one with an id that does not parse
     assert (
@@ -351,13 +379,17 @@ def test():
     independent()
     # into each other
     blocked()
+    # and merged
     merge()
     # in groups
     group()
+    # crowded by the nodes of another factory
     crowded()
+    # picked together
     selection()
     # in steps, and left half way
     steps()
+    # and abandoned half way
     abandoned()
     # and ones that are not there
     stale()

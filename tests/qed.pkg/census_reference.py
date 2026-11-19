@@ -67,9 +67,11 @@ shutil.rmtree(folder, ignore_errors=True)
 os.makedirs(folder)
 # two digests of the gcov of cycle 31, the one whose name sorts last written first
 write(folder, "digest-census-gcov-31.json", "gcov", 31, stamp=1_000)
+# and the one whose name sorts first written last
 write(folder, "digest-census-31-gcov.json", "gcov", 31, stamp=2_000)
-# an older cycle of the gslc, written last
+# the gslc of the same cycle
 write(folder, "digest-census-31-gslc.json", "gslc", 31, stamp=1_000)
+# and an older cycle of it, written last
 write(folder, "digest-census-29-gslc.json", "gslc", 29, stamp=3_000)
 # and a digest that cannot be read
 with open(os.path.join(folder, "digest-census-broken.json"), "w") as stream:

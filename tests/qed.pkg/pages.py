@@ -37,14 +37,17 @@ record = occupancy(tables=tables, name="a", pageSize=100, raw=50, tile=(2, 2), g
 
 # every chunk of the grid was written, and none of them is nearly empty
 assert record["written"] == 4
+# and none is nearly empty
 assert record["empty"] == 0
 # the chunks store 150 of the 200 bytes they hold
 assert record["stored"] == 150
+# a compression of 4:3
 assert abs(record["compression"] - 200 / 150) < 1e-12
 # their sizes, as shares of the raw size, fall in the bins of 60% and 90%
 assert record["sizes"] == [0, 0, 0, 0, 0, 0, 2, 0, 0, 2]
 # each chunk lies on one of two pages
 assert record["pages"] == 2
+# and each of the four lies on a single page
 assert record["spans"] == {1: 4}
 # reading the chunks one at a time fetches a page for each of them
 assert abs(record["alone"] - 400 / 150) < 1e-12
@@ -56,7 +59,9 @@ assert record["partners"] == {"b": 30}
 assert abs(record["joint"] - 200 / 180) < 1e-12
 # {a} fills 60% of the first page and 90% of the second
 assert abs(record["fillMedian"] - 0.75) < 1e-12
+# and so is its mean fill
 assert abs(record["fillMean"] - 0.75) < 1e-12
+# and half its pages are at least 90% full
 assert record["fillFull"] == 0.5
 # both datasets together fill 90% of each
 assert abs(record["totalMean"] - 0.9) < 1e-12
@@ -73,6 +78,7 @@ record = occupancy(tables=scattered, name="c", pageSize=100, raw=50, tile=(2, 2)
 assert record["locality"] == 0.0
 # and they have the page to themselves
 assert record["partners"] == {}
+# so reading them together costs as much as reading them one at a time
 assert abs(record["joint"] - record["once"]) < 1e-12
 
 # a chunk that stores next to nothing counts as nearly empty
@@ -88,6 +94,7 @@ lonely = {"e": [(0, 500, (0, 0)), (100, 5, (0, 2))]}
 record = occupancy(tables=lonely, name="e", pageSize=100, raw=1000, tile=(2, 2), grid=4)
 # one of its chunks is nearly empty, and stores five bytes
 assert record["empty"] == 1
+# with five bytes in it
 assert record["emptyStored"] == 5
 # the other spans pages 0 through 4, so the empty one has page 1 to share with it
 assert record["emptyPages"] == 0
@@ -106,9 +113,11 @@ shuffled = bytes(cells[k + 4 * i] for k in range(4) for i in range(4))
 stored = zlib.compress(shuffled)
 # decoding undoes both
 decoded = pages.decode(stored=stored, filters=["shuffle", "deflate"], mask=0, cell=4)
+# into the original cells
 assert decoded == cells
 # encoding shuffles and deflates, which reproduces the stored bytes at the level they were made
 assert pages.shuffle(data=cells, cell=4) == shuffled
+# and deflating reproduces the stored bytes
 assert pages.encode(data=cells, filters=["shuffle", "deflate"], cell=4, level=6) == stored
 # and a filter the encoder does not know stops it
 assert pages.encode(data=cells, filters=["szip"], cell=4, level=6) is None
@@ -118,6 +127,7 @@ assert pages.decode(stored=shuffled, filters=["shuffle", "deflate"], mask=0b10, 
 assert pages.decode(stored=stored, filters=["szip"], mask=0, cell=4) is None
 # the chunk repeats one cell
 cell = pages.uniform(data=decoded, cell=4)
+# the first one
 assert cell == cells[:4]
 # which is a nan
 assert math.isnan(pages.interpret(data=cell, cell="float32"))
@@ -161,6 +171,7 @@ assert described["pages"] == [0, 1]
 assert described["mine"] == [60, 90] and described["chunks"] == [2, 2]
 # {b} has 30 bytes on the first, and nobody else is on the second
 assert described["others"] == [30, 0]
+# whose partner on the first page is {b}, with its 30 bytes
 assert described["partner"] == ["b", ""] and described["partnerBytes"] == [30, 0]
 # a file without pages has no strip
 assert pages.strip(tables=tables, name="a", pageSize=0) is None

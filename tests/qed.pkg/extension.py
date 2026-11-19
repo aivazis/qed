@@ -40,7 +40,9 @@ assert dataset.kernels is not None
 # take the extension away, the way a failed import leaves things: the package and its
 # extension module both point at nothing, and the reason is on record
 libqed, reason = qed.libqed, qed.ext.libqed_error
+# point both at nothing
 qed.libqed = qed.ext.libqed = None
+# and record a reason
 qed.ext.libqed_error = "undefined symbol: planted"
 # carefully
 try:
@@ -52,6 +54,7 @@ try:
     except qed.exceptions.ExtensionError as error:
         # with a message complete on its own
         assert "undefined symbol: planted" in str(error)
+        # and naming the product
         assert "ext_gslc" in str(error)
     # anything else is a failure
     else:
@@ -61,6 +64,7 @@ try:
     # the server declines to come up; its error channel is fatal by default, and the refusal is
     # expected here, so keep it out of the output
     journal.error("qed.nexus.server").device = journal.trash()
+    # make one
     server = qed.nexus.server(name="ext_server")
     # attempt to
     try:
@@ -80,6 +84,7 @@ try:
 finally:
     # restore the extension
     qed.libqed = qed.ext.libqed = libqed
+    # and the reason on record
     qed.ext.libqed_error = reason
 
 # with the extension back, the kernels are there again
